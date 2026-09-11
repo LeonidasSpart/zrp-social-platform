@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { PlayChallengeType } from "@/lib/play/types";
+import { TYPE_LABEL_KEYS, type PlayChallengeType } from "@/lib/play/types";
+import { ALL_GAME_TYPES, AI_SUPPORTED_GAME_TYPES } from "@/lib/play/registry";
 
 interface TriviaQuestionDraft {
   q: string;
@@ -13,7 +14,7 @@ interface TriviaQuestionDraft {
   correctIndex: number;
 }
 
-const TYPES: PlayChallengeType[] = ["TRIVIA", "MEMORY", "LOGIC"];
+const TYPES = ALL_GAME_TYPES;
 const DIFFICULTIES = ["easy", "medium", "hard"] as const;
 
 export default function CreateChallengePage() {
@@ -35,6 +36,8 @@ export default function CreateChallengePage() {
   const [logicOptions, setLogicOptions] = useState<string[]>(["", ""]);
   const [logicCorrectIndex, setLogicCorrectIndex] = useState(0);
   const [logicAnswer, setLogicAnswer] = useState("");
+  const [reactionRounds, setReactionRounds] = useState(5);
+  const [sequenceItems, setSequenceItems] = useState<string[]>(["", "", "", ""]);
 
   const [aiTopic, setAiTopic] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -46,10 +49,14 @@ export default function CreateChallengePage() {
   const buildContent = (): unknown => {
     if (type === "TRIVIA") return { questions };
     if (type === "MEMORY") return { pairs: pairs.filter((p) => p.trim()) };
+    if (type === "REACTION") return { rounds: reactionRounds };
+    if (type === "SEQUENCE") return { sequence: sequenceItems.filter((s) => s.trim()) };
     return logicAnswerType === "choice"
       ? { prompt: logicPrompt, options: logicOptions, correctIndex: logicCorrectIndex }
       : { prompt: logicPrompt, answer: logicAnswer };
   };
+
+  const aiSupported = (AI_SUPPORTED_GAME_TYPES as readonly PlayChallengeType[]).includes(type);
 
   const generate = async () => {
     if (!aiTopic.trim()) return;
@@ -68,6 +75,7 @@ export default function CreateChallengePage() {
       setDescription(data.description || "");
       if (type === "TRIVIA") setQuestions(data.content.questions);
       if (type === "MEMORY") setPairs(data.content.pairs);
+      if (type === "SEQUENCE") setSequenceItems(data.content.sequence);
       if (type === "LOGIC") {
         setLogicPrompt(data.content.prompt);
         if (Array.isArray(data.content.options)) {
@@ -134,7 +142,8 @@ export default function CreateChallengePage() {
         <button
           type="button"
           onClick={() => setTab("ai")}
-          className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full font-semibold text-sm transition ${
+          disabled={!aiSupported}
+          className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-full font-semibold text-sm transition disabled:opacity-30 disabled:cursor-not-allowed ${
             tab === "ai" ? "bg-zrp-red text-white" : "border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300"
           }`}
         >
@@ -148,19 +157,22 @@ export default function CreateChallengePage() {
       <div className="flex flex-col gap-4 mb-6">
         <div>
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{t("play.challengeType")}</label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {TYPES.map((tp) => (
               <button
                 key={tp}
                 type="button"
-                onClick={() => setType(tp)}
-                className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition ${
+                onClick={() => {
+                  setType(tp);
+                  if (!(AI_SUPPORTED_GAME_TYPES as readonly PlayChallengeType[]).includes(tp)) setTab("manual");
+                }}
+                className={`flex-1 min-w-[6rem] py-2 rounded-xl text-sm font-semibold border transition ${
                   type === tp
                     ? "border-zrp-red bg-zrp-red/10 text-zrp-red"
                     : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300"
                 }`}
               >
-                {t(tp === "TRIVIA" ? "play.typeTrivia" : tp === "MEMORY" ? "play.typeMemory" : "play.typeLogic")}
+                {t(TYPE_LABEL_KEYS[tp])}
               </button>
             ))}
           </div>
@@ -337,6 +349,52 @@ export default function CreateChallengePage() {
                 >
                   <Plus className="w-4 h-4" />
                   {t("play.addPair")}
+                </button>
+              )}
+            </div>
+          )}
+
+          {type === "REACTION" && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{t("play.roundsLabel")}</label>
+              <input
+                type="number"
+                min={3}
+                max={10}
+                value={reactionRounds}
+                onChange={(e) => setReactionRounds(Math.max(3, Math.min(10, Number(e.target.value) || 3)))}
+                className="w-24 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">{t("play.reactionRoundsHint")}</p>
+            </div>
+          )}
+
+          {type === "SEQUENCE" && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">{t("play.sequenceItemsLabel")}</label>
+              <div className="grid grid-cols-2 gap-2">
+                {sequenceItems.map((item, itemIndex) => (
+                  <input
+                    key={itemIndex}
+                    value={item}
+                    onChange={(e) => {
+                      const next = [...sequenceItems];
+                      next[itemIndex] = e.target.value;
+                      setSequenceItems(next);
+                    }}
+                    placeholder={t("play.itemPlaceholder", { n: itemIndex + 1 })}
+                    className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
+                  />
+                ))}
+              </div>
+              {sequenceItems.length < 12 && (
+                <button
+                  type="button"
+                  onClick={() => setSequenceItems([...sequenceItems, ""])}
+                  className="inline-flex items-center gap-1.5 mt-2 text-sm font-semibold text-zrp-red hover:underline"
+                >
+                  <Plus className="w-4 h-4" />
+                  {t("play.addSequenceItem")}
                 </button>
               )}
             </div>

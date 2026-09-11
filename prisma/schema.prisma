@@ -161,6 +161,8 @@ enum PlayChallengeType {
   TRIVIA
   MEMORY
   LOGIC
+  REACTION
+  SEQUENCE
 }
 
 // Same live-immediately, reportable-after-the-fact model as Post
@@ -1928,10 +1930,14 @@ model PlayChallenge {
   description String?           @db.Text
   difficulty  String            @default("medium") // easy | medium | hard
 
-  // Shape depends on `type` instead of one table per mini-game:
-  // TRIVIA: { questions: [{ q, options: string[], correctIndex }] }
-  // MEMORY: { pairs: string[] } (each value appears twice, shuffled client-side)
-  // LOGIC:  { prompt, options: string[], correctIndex } or { prompt, answer } for free text
+  // Shape depends on `type` instead of one table per mini-game - see
+  // src/lib/play/scoring.ts (validate/strip/score) and src/lib/play/registry.ts
+  // (metadata + score dispatch) for the authoritative per-type contract:
+  // TRIVIA:   { questions: [{ q, options: string[], correctIndex }] }
+  // MEMORY:   { pairs: string[] } (each value appears twice, shuffled client-side)
+  // LOGIC:    { prompt, options: string[], correctIndex } or { prompt, answer } for free text
+  // REACTION: { rounds: number } - stimulus/tap round count, no other content
+  // SEQUENCE: { sequence: string[] } - ordered items the player reproduces (Simon-says)
   content Json
 
   maxScore      Int       @default(100)

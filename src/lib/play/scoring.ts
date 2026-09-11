@@ -24,7 +24,15 @@ export interface LogicContent {
   answer?: string; // free-text answer, matched case-insensitively
 }
 
-export type PlayContent = TriviaContent | MemoryContent | LogicContent;
+export interface ReactionContent {
+  rounds: number; // how many stimulus/tap rounds this challenge has
+}
+
+export interface SequenceContent {
+  sequence: string[]; // ordered items (words/emoji) the player must reproduce in order
+}
+
+export type PlayContent = TriviaContent | MemoryContent | LogicContent | ReactionContent | SequenceContent;
 
 // ─── Validation (on create) ─────────────────────────────────────────
 
@@ -83,6 +91,25 @@ export function validateChallengeContent(type: PlayChallengeType, content: unkno
     return null;
   }
 
+  if (type === "REACTION") {
+    const c = content as ReactionContent;
+    if (!Number.isInteger(c.rounds) || c.rounds < 3 || c.rounds > 10) {
+      return "A reaction challenge needs between 3 and 10 rounds.";
+    }
+    return null;
+  }
+
+  if (type === "SEQUENCE") {
+    const c = content as SequenceContent;
+    if (!Array.isArray(c.sequence) || c.sequence.length < 4 || c.sequence.length > 12) {
+      return "A sequence challenge needs between 4 and 12 items.";
+    }
+    if (c.sequence.some((item) => typeof item !== "string" || !item.trim())) {
+      return "Every sequence item needs a value.";
+    }
+    return null;
+  }
+
   return "Unknown challenge type.";
 }
 
@@ -101,6 +128,12 @@ export function stripAnswers(type: PlayChallengeType, content: PlayContent): unk
   if (type === "LOGIC") {
     const c = content as LogicContent;
     return { prompt: c.prompt, options: c.options };
+  }
+  if (type === "REACTION") {
+    return content; // no secret to strip - the whole "content" is just a round count
+  }
+  if (type === "SEQUENCE") {
+    return content; // the sequence itself isn't a secret - same rationale as MEMORY pairs
   }
   return content;
 }
@@ -146,4 +179,72 @@ export function scoreLogic(
     isCorrect = (submission.answerText || "").trim().toLowerCase() === content.answer.trim().toLowerCase();
   }
   return { score: isCorrect ? MAX_SCORE : 0, isCorrect };
+}
+
+// ─── Reaction scoring ────────────────────────────────────────────────
+// A reaction-time game is inherently client-measured (the server can't
+// observe a human's physical tap latency without a per-tap network
+// round trip, which would just add network jitter on top of the
+// measurement). So this is NOT full server-authoritative timing the
+// way trivia/logic/sequence answers are - it's bounded plausibility:
+// anything faster than humanly possible is rejected outright rather
+// than trusted, and the score curve rewards genuinely fast-but-plausible
+// times. Documented as a known limitation, not silently assumed away.
+const REACTION_MIN_PLAUSIBLE_MS = 80; // faster than this is not a human reaction, it's a false-start bot/macro
+const REACTION_MAX_COUNTED_MS = 3000; // anything slower just contributes no credit for that round
+const REACTION_FASTEST_FOR_MAX_SCORE = 150; // ms - roughly elite human visual reaction time
+const REACTION_SLOWEST_FOR_ANY_SCORE = 950; // ms - beyond this a round earns 0 even if "valid"
+
+export function scoreReaction(
+  content: ReactionContent,
+  submission: { reactionTimesMs?: unknown }
+): { score: number; validRounds: number; totalRounds: number; avgMs: number | null } {
+  const totalRounds = content.rounds;
+  const raw = Array.isArray(submission.reactionTimesMs) ? submission.reactionTimesMs : [];
+
+  // Only trust plausible entries; a false start, timeout, or an
+  // impossibly fast tap all count as a missed round rather than being
+  // silently coerced into something scoreable.
+  const validTimes = raw
+    .slice(0, totalRounds)
+    .filter(
+      (t): t is number =>
+        typeof t === "number" && Number.isFinite(t) && t >= REACTION_MIN_PLAUSIBLE_MS && t <= REACTION_MAX_COUNTED_MS
+    );
+
+  if (validTimes.length === 0) {
+    return { score: 0, validRounds: 0, totalRounds, avgMs: null };
+  }
+
+  const avgMs = validTimes.reduce((sum, t) => sum + t, 0) / validTimes.length;
+  const span = REACTION_SLOWEST_FOR_ANY_SCORE - REACTION_FASTEST_FOR_MAX_SCORE;
+  const speedRatio = Math.max(0, Math.min(1, (REACTION_SLOWEST_FOR_ANY_SCORE - avgMs) / span));
+  const completionRatio = validTimes.length / totalRounds;
+  const score = Math.round(speedRatio * MAX_SCORE * completionRatio);
+
+  return { score, validRounds: validTimes.length, totalRounds, avgMs: Math.round(avgMs) };
+}
+
+// ─── Sequence scoring ────────────────────────────────────────────────
+// Fully server-authoritative: the real sequence never left the server
+// in a form the client could tamper with (it's shown to the player to
+// memorize, same as MEMORY's pairs, then the client's reproduction is
+// checked byte-for-byte against the stored content).
+export function scoreSequence(
+  content: SequenceContent,
+  submission: { reproduced?: unknown }
+): { score: number; correctPrefix: number; total: number } {
+  const total = content.sequence.length;
+  const reproduced = Array.isArray(submission.reproduced) ? (submission.reproduced as unknown[]) : [];
+
+  let correctPrefix = 0;
+  for (let i = 0; i < total; i++) {
+    if (reproduced[i] === content.sequence[i]) {
+      correctPrefix += 1;
+    } else {
+      break; // one wrong step ends the chain, same as the real Simon-says mechanic
+    }
+  }
+
+  return { score: Math.round((correctPrefix / total) * MAX_SCORE), correctPrefix, total };
 }
