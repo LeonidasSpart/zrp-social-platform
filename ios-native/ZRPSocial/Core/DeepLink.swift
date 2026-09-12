@@ -154,11 +154,10 @@ enum DeepLink {
             return DeepLinkTarget(.home, .charityTransparency)
 
         case "transparency":
-            // /transparency on the web carries both the charity ledger
-            // and the moderation report. Only the charity half exists
-            // here, so the link lands on what this app can actually
-            // show rather than on nothing.
-            return DeepLinkTarget(.home, .charityTransparency)
+            // /transparency on the web carries both halves. Both now
+            // exist here too, and the moderation report is what the page
+            // is titled after, so that is where the bare link lands.
+            return DeepLinkTarget(.home, .moderationTransparency)
 
         case "creator":
             // Only /creator/dashboard exists on the web, and it opens on

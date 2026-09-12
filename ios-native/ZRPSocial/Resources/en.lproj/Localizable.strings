@@ -861,6 +861,34 @@
 "chat.uploadImage" = "Upload image";
 "chat.downloadImage" = "Download image";
 "shorts.upload.chooseVideo" = "Choose a video";
+"transparency.heroTitle" = "Moderation Transparency";
+"transparency.heroSubtitle" = "Real numbers on how ZRP moderates content: reports received, actions taken, and how long it takes.";
+"transparency.privacyNote" = "This page shows only aggregate counts. It never includes usernames, message or post content, or who reported what: moderation privacy is protected the same way it always has been.";
+"transparency.errLoad" = "Unable to load transparency data right now. Please try again later.";
+"transparency.totalReportsLabel" = "Total reports (all time)";
+"transparency.last30DaysLabel" = "Reports in the last 30 days";
+"transparency.actionsTakenLabel" = "Actions taken";
+"transparency.medianResolutionLabel" = "Median time to resolve";
+"transparency.hoursValue" = "{n}h";
+"transparency.daysValue" = "{n}d";
+"transparency.trendHeading" = "Reports over time";
+"transparency.reportsReceivedLegend" = "Received";
+"transparency.reportsActionedLegend" = "Actioned";
+"transparency.reasonHeading" = "Reports by reason";
+"transparency.statusHeading" = "Report status";
+"transparency.actionHeading" = "Actions taken";
+"transparency.generatedNote" = "Data generated {date}. Updated hourly.";
+"transparency.appealsHeading" = "Moderation Appeals";
+"transparency.appealsNote" = "When a user disagrees with a moderation decision, they can appeal it. These are the aggregate outcomes - never who appealed or what was said.";
+"adminReports.statusPending" = "Pending";
+"adminReports.statusReviewed" = "Reviewed";
+"adminReports.statusDismissed" = "Dismissed";
+"adminReports.statusActioned" = "Actioned";
+"adminReports.actionDeletePost" = "Delete Post";
+"adminReports.actionWarnUser" = "Warn User";
+"adminReports.actionBanUser" = "Ban User";
+"adminReports.actionMuteUser" = "Mute User";
+"adminReports.actionDeleteComment" = "Delete Comment";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

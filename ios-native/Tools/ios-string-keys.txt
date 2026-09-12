@@ -906,3 +906,35 @@ chat.downloadImage
 
 # Attachment picker.
 shorts.upload.chooseVideo
+
+# Moderation transparency. The status and action labels come from the
+# admin namespace because that is where the web transparency page itself
+# takes them from - the same taxonomy values, so the same wording.
+transparency.heroTitle
+transparency.heroSubtitle
+transparency.privacyNote
+transparency.errLoad
+transparency.totalReportsLabel
+transparency.last30DaysLabel
+transparency.actionsTakenLabel
+transparency.medianResolutionLabel
+transparency.hoursValue
+transparency.daysValue
+transparency.trendHeading
+transparency.reportsReceivedLegend
+transparency.reportsActionedLegend
+transparency.reasonHeading
+transparency.statusHeading
+transparency.actionHeading
+transparency.generatedNote
+transparency.appealsHeading
+transparency.appealsNote
+adminReports.statusPending
+adminReports.statusReviewed
+adminReports.statusDismissed
+adminReports.statusActioned
+adminReports.actionDeletePost
+adminReports.actionWarnUser
+adminReports.actionBanUser
+adminReports.actionMuteUser
+adminReports.actionDeleteComment

@@ -133,6 +133,8 @@ struct RouteDestinationView: View {
             CreatorStudioView()
         case .charityTransparency:
             CharityTransparencyView()
+        case .moderationTransparency:
+            ModerationTransparencyView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

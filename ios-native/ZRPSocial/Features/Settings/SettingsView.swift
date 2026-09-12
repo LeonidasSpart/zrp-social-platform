@@ -115,6 +115,17 @@ struct SettingsView: View {
                         Image(systemName: "heart.text.square")
                     }
                 }
+
+                // The other half of /transparency, and native for the
+                // same reason: the route is real JSON and takes no
+                // session.
+                Button { navigator.push(.moderationTransparency) } label: {
+                    Label {
+                        Text(.transparencyHeroTitle)
+                    } icon: {
+                        Image(systemName: "checkmark.shield")
+                    }
+                }
             }
 
             Section {

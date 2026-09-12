@@ -94,6 +94,8 @@ enum Route: Hashable {
     /// ZRP's public charity ledger. Public in the real sense: the route
     /// takes no session and the screen works signed out.
     case charityTransparency
+    /// The moderation half of `/transparency`, equally public.
+    case moderationTransparency
 }
 
 /// Owns the navigation stack's path.
