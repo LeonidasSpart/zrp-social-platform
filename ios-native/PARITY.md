@@ -557,6 +557,9 @@ not be until they exist in ZRP:
 | --- | --- |
 | **Communities** | `NOT APPLICABLE` — there is no communities feature anywhere in ZRP: no page under `src/app`, no route under `src/app/api`, no table in `schema.prisma`. Only `/community-code` exists, and that is a legal document. A Communities screen would have to invent membership, join state and member counts. |
 | **Lists** | `NOT APPLICABLE` — same: no page, no route, no model. |
+| **Messages filters** (All / Unread / Groups / Requests) | `NOT APPLICABLE` — the web inbox has no filters at all, and there is no message-request feature anywhere in ZRP: no `MessageRequest` model, no route, no page. Unread and group state do exist in the data, but a filter web does not have is new product design rather than parity, and this branch is a parity branch. |
+| **Explore chips** (For You / Trending / People / Communities) | `NOT APPLICABLE` as drawn — `/explore` on the web has no tabs, and `/search` has exactly two: users and posts. iOS `SearchView` has the same two. Communities does not exist. |
+| **Composer: Location** | `NOT APPLICABLE` — a plain post cannot carry one. `POST /api/posts` writes `location: type === "RECRUITMENT" ? location : null`, so the web composer's location field belongs to the recruitment form, not to posting generally. There is no check-in feature to be missing. |
 | **Premium** | Excluded by store policy, not by absence — `/pricing` is a purchase surface (`PricingCards.tsx` renders upgrade buttons and `CryptoPaymentModal`). Same rule as tips and premium posts. |
 
 ---
