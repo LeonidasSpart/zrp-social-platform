@@ -38,7 +38,13 @@ object IconSize {
  * (Accessibility Scanner / Material guidelines) - every tappable icon
  * control should size its IconButton/clickable area to at least this,
  * independent of how small the glyph inside it looks.
+ *
+ * `comfortable` (56dp) is not an accessibility minimum - it's the
+ * senior-friendly redesign's own target for a primary navigation row
+ * (a bottom-bar item, a drawer row, the "+" create action): a target
+ * clearly larger than the floor, not just at it.
  */
 object TouchTarget {
     val min = 48.dp
+    val comfortable = 56.dp
 }

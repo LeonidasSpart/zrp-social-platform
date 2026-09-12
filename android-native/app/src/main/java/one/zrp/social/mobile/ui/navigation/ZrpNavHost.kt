@@ -4,27 +4,44 @@ import android.net.Uri
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -72,6 +89,7 @@ import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.pricing.PricingScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
+import one.zrp.social.mobile.ui.communities.CommunitiesScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.followlist.FollowListMode
 import one.zrp.social.mobile.ui.followlist.FollowListScreen
@@ -157,7 +175,11 @@ import one.zrp.social.mobile.ui.settings.SettingsScreen
 import one.zrp.social.mobile.ui.settings.TeamScreen
 import one.zrp.social.mobile.ui.stories.CreateStoryScreen
 import one.zrp.social.mobile.ui.stories.StoryViewerScreen
+import one.zrp.social.mobile.ui.theme.IconSize
+import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.ui.theme.ZrpWhite
 
 /**
  * Real zrp.one URLs (see the deepLinks on the routes below and
@@ -239,6 +261,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     // "See all" destinations for Search's Discover state - the real
     // website's own /explore/trending and /explore/people pages.
     val goToTrending: () -> Unit = { navController.navigate("explore/trending") }
+    val goToCommunities: () -> Unit = { navController.navigate("communities") }
     val goToExplorePeople: () -> Unit = { navController.navigate("explore/people") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -371,13 +394,88 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
         factory = remember { MusicPlayerViewModelFactory(MusicRepository(), appContext) },
     )
 
+    // ── Left drawer (redesign) ──────────────────────────────────────
+    // A single ModalNavigationDrawer wraps the whole Scaffold, matching
+    // the standard Compose pattern - the drawer slides in over
+    // everything rather than being scoped to one screen. Content is
+    // gated (ZrpDrawerContent's own isStaff/isJournalist checks) exactly
+    // like Settings/the admin routes already gate their own rows, so
+    // the drawer can never offer a destination the signed-in user isn't
+    // actually allowed to reach.
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val coroutineScope = rememberCoroutineScope()
+    val openDrawer: () -> Unit = { coroutineScope.launch { drawerState.open() } }
+    val closeDrawer: () -> Unit = { coroutineScope.launch { drawerState.close() } }
+
+    val goToOwnTab: (ZrpDestination) -> Unit = { destination ->
+        navController.navigate(destination.route) {
+            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+            launchSingleTop = true
+        }
+    }
+    val goToNotificationsTab: () -> Unit = {
+        unreadBadgeViewModel.clear()
+        goToOwnTab(ZrpDestination.Notifications)
+    }
+
+    val topLevelBackStackEntry by navController.currentBackStackEntryAsState()
+    val topLevelRoute = topLevelBackStackEntry?.destination?.route
+    val showZrpTopBar = topLevelRoute in setOf(
+        ZrpDestination.Home.route,
+        ZrpDestination.Search.route,
+        ZrpDestination.Messages.route,
+        ZrpDestination.Profile.route,
+    )
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ZrpDrawerContent(
+                currentUser = currentUser,
+                unreadNotifications = unreadCount,
+                unreadMessages = unreadMessageCount,
+                actions = ZrpDrawerActions(
+                    goHome = { goToOwnTab(ZrpDestination.Home) },
+                    goExplore = { goToOwnTab(ZrpDestination.Search) },
+                    goNotifications = goToNotificationsTab,
+                    goMessages = { goToOwnTab(ZrpDestination.Messages) },
+                    goCommunities = goToCommunities,
+                    goPlay = goToPlay,
+                    goNews = goToNews,
+                    goShorts = goToShorts,
+                    goMusic = goToMusic,
+                    goMarketplace = goToMarketplace,
+                    goOpportunity = goToOpportunity,
+                    goAid = goToAid,
+                    goAmbassadors = goToAmbassadors,
+                    goAi = goToAi,
+                    goCreatorStudio = goToCreator,
+                    goJournalist = goToJournalist,
+                    goAdmin = goToAdmin,
+                    goBookmarks = goToBookmarks,
+                    goSettings = goToSettings,
+                    goHelpCenter = goToHelpCenter,
+                    goOwnProfile = { goToOwnTab(ZrpDestination.Profile) },
+                    onSignOut = onLogout,
+                ),
+                onItemSelected = closeDrawer,
+            )
+        },
+    ) {
     Scaffold(
+        topBar = {
+            if (showZrpTopBar) {
+                ZrpTopBar(
+                    unreadNotifications = unreadCount,
+                    onMenuClick = openDrawer,
+                    onNotificationsClick = goToNotificationsTab,
+                )
+            }
+        },
         bottomBar = {
             ZrpBottomBar(
                 navController = navController,
-                unreadCount = unreadCount,
                 unreadMessageCount = unreadMessageCount,
-                onNotificationsSelected = { unreadBadgeViewModel.clear() },
                 onOtherTabSelected = {
                     unreadBadgeViewModel.refresh()
                     unreadMessagesBadgeViewModel.refresh()
@@ -437,6 +535,12 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("explore/trending") {
                 ExploreTrendingScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenHashtag = goToHashtag,
+                )
+            }
+            composable("communities") {
+                CommunitiesScreen(
                     onBack = { navController.popBackStack() },
                     onOpenHashtag = goToHashtag,
                 )
@@ -1590,23 +1694,32 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
         }
     }
+    } // ModalNavigationDrawer
 }
 
 @Composable
 private fun ZrpBottomBar(
     navController: androidx.navigation.NavHostController,
-    unreadCount: Int,
     unreadMessageCount: Int,
-    onNotificationsSelected: () -> Unit,
     onOtherTabSelected: () -> Unit,
     onHomeReselected: () -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
+    // Redesign: exactly five primary destinations (Home, Explore, Create,
+    // Messages, Profile) - Notifications moved to the top app bar's bell
+    // plus the left drawer, per the approved architecture. Filtering on
+    // isBottomBarItem rather than listing five entries directly keeps
+    // ZrpDestination the single source of truth for the route string
+    // every other part of the nav graph (including Notifications' own
+    // composable() registration) already depends on.
+    val bottomBarDestinations = remember { ZrpDestination.entries.filter { it.isBottomBarItem } }
+
     NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest) {
-        ZrpDestination.entries.forEach { destination ->
+        bottomBarDestinations.forEach { destination ->
             val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
+            val isCreate = destination == ZrpDestination.Create
             val iconScale by animateFloatAsState(
                 targetValue = if (selected) 1f else 0.92f,
                 animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
@@ -1625,11 +1738,11 @@ private fun ZrpBottomBar(
                         onHomeReselected()
                         return@NavigationBarItem
                     }
-                    if (destination == ZrpDestination.Notifications) {
-                        onNotificationsSelected()
-                    } else {
-                        onOtherTabSelected()
-                    }
+                    // Notifications is no longer a bottom-bar destination
+                    // (bell icon + drawer instead - see ZrpTopBar/ZrpDrawerContent),
+                    // so every remaining item here refreshes badges the
+                    // same way onOtherTabSelected already did.
+                    onOtherTabSelected()
                     // No saveState/restoreState: the Google sample this
                     // pattern comes from assumes each bottom-tab
                     // destination is its own NESTED navigation graph, so
@@ -1661,17 +1774,39 @@ private fun ZrpBottomBar(
                 },
                 icon = {
                     val icon: @Composable () -> Unit = {
-                        Icon(
-                            imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
-                            contentDescription = stringResource(destination.labelRes),
-                            modifier = Modifier.scale(iconScale),
-                        )
+                        if (isCreate) {
+                            // The central "+" is a raised, always-filled
+                            // red action button, not a fifth peer tab -
+                            // visually distinct so it reads as "create
+                            // something now" rather than "navigate to a
+                            // Create section", matching the reference
+                            // design's prominent center button.
+                            Surface(
+                                shape = CircleShape,
+                                color = ZrpRed,
+                                shadowElevation = 4.dp,
+                                modifier = Modifier
+                                    .size(TouchTarget.comfortable)
+                                    .scale(iconScale),
+                            ) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                    Icon(
+                                        imageVector = destination.selectedIcon,
+                                        contentDescription = stringResource(destination.labelRes),
+                                        tint = ZrpWhite,
+                                        modifier = Modifier.size(IconSize.lg),
+                                    )
+                                }
+                            }
+                        } else {
+                            Icon(
+                                imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                                contentDescription = stringResource(destination.labelRes),
+                                modifier = Modifier.scale(iconScale),
+                            )
+                        }
                     }
-                    val badgeCount = when (destination) {
-                        ZrpDestination.Notifications -> unreadCount
-                        ZrpDestination.Messages -> unreadMessageCount
-                        else -> 0
-                    }
+                    val badgeCount = if (destination == ZrpDestination.Messages) unreadMessageCount else 0
                     if (badgeCount > 0) {
                         BadgedBox(
                             badge = {
@@ -1688,7 +1823,7 @@ private fun ZrpBottomBar(
                 alwaysShowLabel = false,
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = ZrpRed,
-                    indicatorColor = ZrpRed.copy(alpha = 0.14f),
+                    indicatorColor = if (isCreate) Color.Transparent else ZrpRed.copy(alpha = 0.14f),
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
             )
