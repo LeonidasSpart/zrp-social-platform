@@ -552,7 +552,6 @@ private struct GroupInfoSheet: View {
     let onLeave: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var navigator: Navigator
 
     var body: some View {
         NavigationStack {
