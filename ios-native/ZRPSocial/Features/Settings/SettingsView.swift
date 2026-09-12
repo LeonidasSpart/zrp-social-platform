@@ -94,7 +94,14 @@ struct SettingsView: View {
             }
 
             Section {
-                ForEach([WebPage.about, .help]) { page in
+                // The same set the website's own sidebar offers, in its
+                // order. Five of these had no path in this app at all -
+                // a user could read the Privacy Policy but not Contact,
+                // the FAQ, Careers, Investors or the Press Kit.
+                ForEach([
+                    WebPage.about, .help, .faq, .contact,
+                    .careers, .investors, .press,
+                ]) { page in
                     Button { openPage = page } label: {
                         Label {
                             Text(page.titleKey)

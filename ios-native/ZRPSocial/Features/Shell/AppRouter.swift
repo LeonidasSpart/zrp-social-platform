@@ -1,15 +1,22 @@
 import SwiftUI
 
-/// The five primary tabs, plus Create.
+/// The four primary tabs, with Create between them.
 ///
-/// The same information architecture the web header and the Android
-/// bottom bar already use, so a person moving between ZRP clients finds
-/// the same six controls in the same order.
+/// The same five controls, in the same order, as the ZRP design
+/// reference and the Android bottom bar: Home, Search, Create, Messages,
+/// Profile.
+///
+/// Notifications is deliberately not among them. It was the sixth tab,
+/// which left no room for Create to be anything but a peer icon, and
+/// meanwhile ten whole feature areas - Music, Marketplace, Play,
+/// Opportunity, Aid, News, Shorts, AI, Creator Studio, Bookmarks - were
+/// hidden behind an overflow menu in Home's toolbar. Notifications now
+/// has the bell on Home and its own row in the navigation menu, which is
+/// two obvious ways to reach it rather than one crowded one.
 enum MainTab: String, CaseIterable, Hashable {
     case home
     case search
     case create
-    case notifications
     case messages
     case profile
 
@@ -25,7 +32,6 @@ enum MainTab: String, CaseIterable, Hashable {
         // Android labels this tab with the same `action.post` string;
         // there is no separate "create" entry in the shared dictionary.
         case .create: return .actionPost
-        case .notifications: return .navNotifications
         case .messages: return .navMessages
         case .profile: return .navProfile
         }
@@ -35,10 +41,24 @@ enum MainTab: String, CaseIterable, Hashable {
         switch self {
         case .home: return "house"
         case .search: return "magnifyingglass"
-        case .create: return "plus.circle.fill"
-        case .notifications: return "bell"
-        case .messages: return "bubble.left.and.bubble.right"
+        case .create: return "plus"
+        case .messages: return "envelope"
         case .profile: return "person"
+        }
+    }
+
+    /// The filled counterpart, drawn for the tab you are on.
+    ///
+    /// Weight and colour alone carry the selected state at 20 points
+    /// about as well as a 1px hairline does - the filled glyph is what
+    /// makes it legible at a glance, and it is what iOS itself does.
+    var selectedSystemImage: String {
+        switch self {
+        case .home: return "house.fill"
+        case .search: return "magnifyingglass"
+        case .create: return "plus"
+        case .messages: return "envelope.fill"
+        case .profile: return "person.fill"
         }
     }
 }
@@ -111,6 +131,33 @@ final class AppRouter: ObservableObject {
     /// the top of that tab.
     func popToRoot(_ tab: MainTab) {
         navigator(for: tab).popToRoot()
+    }
+
+    /// What the navigation menu does when a row naming a *tab* is tapped.
+    ///
+    /// Selecting the tab you are already on returns to the top of it -
+    /// the same rule as tapping its icon in the bottom bar, so the two
+    /// controls never behave differently for the same destination.
+    func selectTab(_ tab: MainTab) {
+        if selectedTab == tab {
+            popToRoot(tab)
+        } else {
+            selectedTab = tab
+        }
+    }
+
+    /// What the navigation menu does when a row naming a *screen* is
+    /// tapped.
+    ///
+    /// Lands on Home's stack, cleared first. The clearing is the point:
+    /// the menu is a way of jumping across the app, and without it,
+    /// opening Music then News then Marketplace would bury three screens
+    /// behind each other and make Back a long walk home.
+    func openFromMenu(_ route: Route) {
+        selectedTab = .home
+        let navigator = navigator(for: .home)
+        navigator.popToRoot()
+        navigator.push(route)
     }
 
     func requestCompose() {

@@ -18,6 +18,7 @@
     "ios.a11y.undoRepost": "Undo repost",
     "ios.a11y.postOptions": "Post options",
     "ios.a11y.avatarOf": "Profile picture of {name}",
+    "ios.a11y.unreadCount": "{count} unread",
     "ios.a11y.imageCount": "Image {index} of {total}",
     "ios.a11y.refreshFeed": "Refresh feed",
     "ios.post.copyLink": "Copy link",
@@ -169,6 +170,7 @@
     "ios.group.suggested": "Suggested",
     "ios.group.removePhoto": "Remove group photo",
     "ios.action.done": "Done",
-    "ios.chat.micDenied": "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings."
+    "ios.chat.micDenied": "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings.",
+    "ios.post.applyNow": "Apply Now"
   }
 }

@@ -65,7 +65,10 @@ enum DeepLink {
         case "search":
             return DeepLinkTarget(.search)
         case "notifications":
-            return DeepLinkTarget(.notifications)
+            // Pushed onto Home rather than selecting a tab of its own:
+            // Notifications is reached from the bell and the navigation
+            // menu now, not from the bottom bar.
+            return DeepLinkTarget(.home, .notifications)
 
         case "messages":
             // `/messages/{username}` opens a thread on the web, but this

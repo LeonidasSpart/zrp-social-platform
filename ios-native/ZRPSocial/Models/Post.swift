@@ -66,6 +66,43 @@ struct QuotedPost: Decodable, Identifiable, Equatable, Hashable {
     }
 }
 
+/// `Post.type` on the backend - three shapes sharing one table.
+///
+/// `unknown` rather than a decoding failure: a type added to the web
+/// later must not make an entire feed page undecodable on an iOS build
+/// that predates it. Such a post renders as its text, which is the one
+/// thing every type has.
+enum PostType: String, Decodable, Equatable, Hashable {
+    case post = "POST"
+    case recruitment = "RECRUITMENT"
+    case article = "ARTICLE"
+    case unknown
+
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        self = PostType(rawValue: raw.uppercased()) ?? .unknown
+    }
+
+    /// The label on the pill beside a post's timestamp, or `nil` for the
+    /// types that get no pill - an ordinary post, and one whose type
+    /// this build has never heard of.
+    var badgeKey: L10nKey? {
+        switch self {
+        case .recruitment: return .composerRecruitment
+        case .article: return .composerArticle
+        case .post, .unknown: return nil
+        }
+    }
+
+    var badgeSymbol: String? {
+        switch self {
+        case .recruitment: return "briefcase"
+        case .article: return "doc.text"
+        case .post, .unknown: return nil
+        }
+    }
+}
+
 /// A ZRP post.
 ///
 /// The union of what the two feed routes return. `GET /api/posts?tab=following`
@@ -102,9 +139,30 @@ struct Post: Decodable, Identifiable, Equatable, Hashable {
     /// poll. Recorded in PARITY.md.
     let poll: Poll?
 
+    /// What kind of post this is.
+    ///
+    /// One `Post` model carries three shapes on the backend, each with
+    /// extra columns of its own, and every feed route selects all of
+    /// them. This app decoded none of it, so a job listing and an
+    /// article both arrived as a plain text post and everything that
+    /// made them one or the other was dropped on the floor.
+    let type: PostType?
+
+    /// Recruitment fields. Non-nil only on a `RECRUITMENT` post: the
+    /// create route explicitly writes `null` for all three on any other
+    /// type, so their presence is the post's own claim, not a guess.
+    let company: String?
+    let location: String?
+    let applyUrl: String?
+
+    /// An article's body. `content` holds the headline and teaser that
+    /// go in the timeline; this holds the piece itself.
+    let body: String?
+
     private enum CodingKeys: String, CodingKey {
         case id, content, createdAt, author, imageUrl, imageUrls, mediaType
         case views, quotePost, liked, commentsEnabled, linkUrl, poll
+        case type, company, location, applyUrl, body
         case counts = "_count"
     }
 

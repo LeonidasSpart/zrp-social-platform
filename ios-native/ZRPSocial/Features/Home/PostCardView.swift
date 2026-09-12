@@ -63,6 +63,8 @@ struct PostCardView: View {
                     onZrpLink: { navigator.push($0) }
                 )
             }
+            recruitmentCard
+            articleBody
             translation
             poll
             media
@@ -135,16 +137,41 @@ struct PostCardView: View {
                     Text(.iosA11yOpenProfile, ["name": post.author.displayName])
                 )
 
-                Text(verbatim: RelativeTime.compact(from: post.createdAt))
-                    .font(.caption)
-                    .foregroundStyle(ZrpColor.onSurfaceMuted)
-                    .accessibilityLabel(
-                        Text(verbatim: RelativeTime.accessible(from: post.createdAt))
-                    )
+                HStack(spacing: ZrpSpacing.sm) {
+                    Text(verbatim: RelativeTime.compact(from: post.createdAt))
+                        .font(.caption)
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                        .accessibilityLabel(
+                            Text(verbatim: RelativeTime.accessible(from: post.createdAt))
+                        )
+                    typeBadge
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
             overflowMenu
+        }
+    }
+
+    /// The small outlined pill the web card shows beside a post's
+    /// timestamp when it is a job listing or an article. Nothing at all
+    /// on an ordinary post, and nothing on a type this build does not
+    /// recognise - a badge reading "unknown" helps no one.
+    @ViewBuilder
+    private var typeBadge: some View {
+        if let key = post.type?.badgeKey, let symbol = post.type?.badgeSymbol {
+            Label {
+                Text(key)
+            } icon: {
+                Image(systemName: symbol)
+            }
+            .font(.caption2)
+            .foregroundStyle(ZrpColor.onSurfaceMuted)
+            .padding(.horizontal, ZrpSpacing.sm)
+            .padding(.vertical, 2)
+            .overlay(
+                Capsule().strokeBorder(ZrpColor.outline, lineWidth: 1)
+            )
         }
     }
 
@@ -227,6 +254,130 @@ struct PostCardView: View {
                 .contentShape(Rectangle())
         }
         .accessibilityLabel(Text(.iosA11yPostOptions))
+    }
+
+    // MARK: - Recruitment and articles
+
+    /// The job card on a `RECRUITMENT` post.
+    ///
+    /// The whole substance of a job listing lives in these three fields,
+    /// and this app decoded none of them until now: a recruitment post
+    /// arrived as its text alone, with the company, the location and the
+    /// way to apply silently dropped. Recruitment is a paid feature, so
+    /// what was missing was what somebody had paid to publish.
+    ///
+    /// Drawn only when the post says it is a recruitment post AND at
+    /// least one field has something in it - the create route writes all
+    /// three as `null` for every other type, so an empty card is not a
+    /// state worth having.
+    @ViewBuilder
+    private var recruitmentCard: some View {
+        if post.type == .recruitment,
+           post.company?.isEmpty == false
+            || post.location?.isEmpty == false
+            || post.applyUrl?.isEmpty == false {
+            VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+                if let company = post.company, !company.isEmpty {
+                    Text(verbatim: company)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(ZrpColor.onSurface)
+                }
+
+                if let location = post.location, !location.isEmpty {
+                    Label {
+                        Text(verbatim: location)
+                            .font(.footnote)
+                    } icon: {
+                        Image(systemName: "mappin.and.ellipse")
+                    }
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                }
+
+                if let apply = post.applyUrl,
+                   let url = URL(string: apply),
+                   url.scheme?.lowercased() == "https" {
+                    // https only, and opened by the system rather than
+                    // in-app: this is a link somebody else supplied, so
+                    // it goes to Safari where the address bar shows
+                    // where it actually leads.
+                    Link(destination: url) {
+                        Label {
+                            Text(.iosPostApplyNow)
+                                .font(.subheadline.weight(.semibold))
+                        } icon: {
+                            Image(systemName: "arrow.up.right.square")
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, ZrpSpacing.lg)
+                        .frame(minHeight: ZrpMetrics.minTouchTarget)
+                        .background(Capsule().fill(ZrpColor.red))
+                    }
+                    .padding(.top, ZrpSpacing.xs)
+                }
+            }
+            .padding(ZrpSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(ZrpColor.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous)
+                    .strokeBorder(ZrpColor.outline, lineWidth: 1)
+            )
+        }
+    }
+
+    /// An article's opening, under its headline.
+    ///
+    /// `content` carries the headline and teaser that go in a timeline;
+    /// `body` carries the piece, as sanitised HTML. Shown here as plain
+    /// text because that is exactly what the web card shows while
+    /// collapsed - the same tag strip, the same 300 characters - and
+    /// pretending to render HTML in a timeline row would be worse than
+    /// not doing it. The full formatted article is a web page; PARITY.md
+    /// records the gap.
+    @ViewBuilder
+    private var articleBody: some View {
+        if post.type == .article, let preview = articlePreview, !preview.isEmpty {
+            VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+                Label {
+                    Text(.composerArticle)
+                        .font(.footnote.weight(.semibold))
+                } icon: {
+                    Image(systemName: "doc.text")
+                }
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+
+                Text(verbatim: preview)
+                    .font(.subheadline)
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(ZrpSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(ZrpColor.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous)
+                    .strokeBorder(ZrpColor.outline, lineWidth: 1)
+            )
+        }
+    }
+
+    /// The article body with its tags stripped and whitespace collapsed,
+    /// truncated the way the web card truncates it. Stripping first is
+    /// the point: cutting the HTML at 300 characters could sever a tag.
+    private var articlePreview: String? {
+        guard let body = post.body, !body.isEmpty else { return nil }
+        let text = body
+            .replacingOccurrences(
+                of: "<[^>]*>", with: " ", options: .regularExpression
+            )
+            .replacingOccurrences(
+                of: "\\s+", with: " ", options: .regularExpression
+            )
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard text.count > 300 else { return text }
+        return String(text.prefix(300)) + "\u{2026}"
     }
 
     // MARK: - Body content

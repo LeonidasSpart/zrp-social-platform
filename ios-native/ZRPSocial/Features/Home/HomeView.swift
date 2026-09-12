@@ -10,7 +10,6 @@ struct HomeView: View {
 
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
-    @EnvironmentObject private var navigator: Navigator
     @EnvironmentObject private var router: AppRouter
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var stories = StoriesViewModel()
@@ -27,7 +26,6 @@ struct HomeView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.navHome))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar { toolbarContent }
         .sheet(isPresented: $router.isComposing) {
             ComposeView { post in
                 viewModel.insertCreated(post, interactions: interactions)
@@ -100,93 +98,6 @@ struct HomeView: View {
         }
     }
 
-    /// Home's toolbar carries only what has no tab of its own.
-    ///
-    /// Search, Notifications, Messages and Profile moved to the tab bar;
-    /// leaving duplicates here would give every one of them two controls
-    /// with different affordances. What remains is the ZRP mark and the
-    /// destinations the tab bar has no room for.
-    @ToolbarContentBuilder
-    private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            Image("ZrpLogo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 26, height: 26)
-                .accessibilityHidden(true)
-        }
-        ToolbarItem(placement: .topBarTrailing) {
-            Menu {
-                Button {
-                    navigator.push(.music)
-                } label: {
-                    Label { Text(.navMusic) } icon: { Image(systemName: "music.note") }
-                }
-                Button {
-                    navigator.push(.marketplace)
-                } label: {
-                    Label { Text(.navMarketplace) } icon: { Image(systemName: "bag") }
-                }
-                Button {
-                    navigator.push(.play)
-                } label: {
-                    Label { Text(.navPlay) } icon: { Image(systemName: "gamecontroller") }
-                }
-                Button {
-                    navigator.push(.opportunity)
-                } label: {
-                    Label { Text(.navOpportunity) } icon: { Image(systemName: "briefcase") }
-                }
-                Button {
-                    navigator.push(.aid)
-                } label: {
-                    Label { Text(.navHelp) } icon: { Image(systemName: "heart") }
-                }
-                Button {
-                    navigator.push(.aiChat)
-                } label: {
-                    Label { Text(.navAiAssistant) } icon: { Image(systemName: "sparkles") }
-                }
-                Button {
-                    navigator.push(.news)
-                } label: {
-                    Label { Text(.navNews) } icon: { Image(systemName: "newspaper") }
-                }
-                Button {
-                    navigator.push(.shorts(startId: nil))
-                } label: {
-                    Label { Text(.navShorts) } icon: { Image(systemName: "play.rectangle") }
-                }
-                Button {
-                    navigator.push(.bookmarks)
-                } label: {
-                    Label { Text(.navBookmarks) } icon: { Image(systemName: "bookmark") }
-                }
-                Button {
-                    navigator.push(.creatorStudio)
-                } label: {
-                    Label { Text(.navCreatorStudio) } icon: { Image(systemName: "chart.bar") }
-                }
-                Button {
-                    navigator.push(.settings)
-                } label: {
-                    Label { Text(.settingsTitle) } icon: { Image(systemName: "gearshape") }
-                }
-                Button(role: .destructive) {
-                    Task { await session.signOut() }
-                } label: {
-                    Label {
-                        Text(.navSignOut)
-                    } icon: {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                    }
-                }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-            }
-            .accessibilityLabel(Text(.navMore))
-        }
-    }
 
     // MARK: - Tabs
 

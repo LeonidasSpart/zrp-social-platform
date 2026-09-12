@@ -87,6 +87,10 @@ called and the real response being handled.
 | Post views | `POST /api/posts/{id}/view` → `{views}`; increments unconditionally, no server-side dedupe | ✅ | ⬜ | ✅ counted once per post per app run (the process-lifetime equivalent of the website's `sessionStorage` guard) and shown on the card | IMPLEMENTED |
 | Polls — vote | `POST /api/polls/{id}/vote` → `{success}` only; one vote per person, permanent (400 "Already voted"), refused after `expiresAt` (400 "Poll has ended") | ✅ | ⬜ | ✅ results revealed only after voting or after the poll closes, matching the web; the +1 the route just made is applied locally since it reports no tally | IMPLEMENTED |
 | Polls — create | `POST /api/posts` + `poll: {question, options, expiresAt?}` and `isPoll`; the route creates one whenever `options.length > 1` and does **no** plan check | ✅ | ⬜ | ✅ 2–6 options, question ≤200 and option ≤60 characters (the website's own defaults — its `canCreatePoll` gate reads feature keys that `getFeatureStatus` never sets, so it is on for everyone); a poll post with no text of its own carries the question as its content, as on the web | IMPLEMENTED |
+| Recruitment posts (reading) | `POST /api/posts` writes `company`/`location`/`applyUrl` only when `type === "RECRUITMENT"`; every feed route selects all three | ✅ job card with company, location and an Apply link | ⬜ | ✅ **fixed** — the `Post` model decoded none of these fields, so a job listing arrived as its text alone and everything a Pro subscriber had paid to publish was dropped silently. Now a card with the company, the location and an Apply button; the link is https-only and opens in Safari, where the address bar shows where it leads | IMPLEMENTED |
+| Article posts (reading) | same route, `body` column | ✅ a collapsed 300-character plain-text preview, expandable to sanitised HTML | ⬜ | 🔶 **fixed to web's collapsed state** — the badge and the same 300-character preview, from the same tag strip. The expanded, formatted HTML is not rendered natively; `content` (headline and teaser) was all iOS showed before | PARTIAL |
+| Post type badge | `type` on every post | ✅ outlined pill beside the timestamp | ⬜ | ✅ the same pill, same two labels, nothing at all on an ordinary post | IMPLEMENTED |
+| Create recruitment / article post | `POST /api/posts` + `type`, plan-gated (`canPostRecruitment`, `canPublishArticle`) | ✅ | ⬜ | ⬜ composing either is still web-only; reading them is not | MISSING |
 | Inline translation | `POST /api/translate` (session required, 30/min, 2000-char cap; MyMemory with `autodetect` as the source, and it reports no detected language) | ✅ | ✅ | ✅ posts and comments, target = the app's current language; offered from the post/comment menu rather than as a permanent line under every card as on the web, and not offered at all when signed out since the route answers 401 | IMPLEMENTED |
 | Link previews | `GET /api/link-preview?url=…` → a fully-null shape with a **200** for a link it could not read, not an error | ✅ | ⬜ | ✅ shown only when the post carries no image of its own and the route returned a title or an image, matching the web; the URL is `linkUrl` first then the first URL in the text, using a port of the website's own extractor so both platforms unfurl the same link | IMPLEMENTED |
 
@@ -505,13 +509,67 @@ Android has no journalist surface; iOS is ahead of it here too.
 
 Android has neither surface.
 
+### Informational pages (opened in-app via SFSafariViewController)
+
+| Page | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- |
+| Terms, Privacy, Guidelines, Community Code | ✅ | ✅ | ✅ Settings → Legal | IMPLEMENTED |
+| About, Help Center | ✅ | ✅ | ✅ Settings | IMPLEMENTED |
+| FAQ | ✅ sidebar | ⬜ | ✅ **added** — had no path into the app at all | IMPLEMENTED |
+| Contact | ✅ sidebar + footer | ⬜ | ✅ **added** — a support path that was missing entirely | IMPLEMENTED |
+| Careers | ✅ sidebar | ⬜ | ✅ **added** | IMPLEMENTED |
+| Investors | ✅ sidebar | ⬜ | ✅ **added** | IMPLEMENTED |
+| Press Kit | ✅ sidebar | ⬜ | ✅ **added** — labelled "Press Kit" as the website labels it, though the route is `/press` | IMPLEMENTED |
+
+All eleven are the same shape: public, static, long-form, already written and already translated into all eleven languages on zrp.one. They open in `SFSafariViewController` rather than being reimplemented natively, because a second copy of a Terms or Privacy page is a compliance risk the moment Legal edits a paragraph. Android reached the same conclusion for the six it has.
+
+**This corrects an earlier row in this file** that listed Careers, Investors and Press as deliberately web-only. They are in the website's own sidebar, so users genuinely had them and iOS did not; "no JSON route to read" was never the right test for a page that is read, not queried.
+
+### Navigation and information architecture
+
+The shell is three pieces of chrome around four navigation stacks, built
+to the ZRP design reference:
+
+| Surface | What it carries |
+| --- | --- |
+| **Bottom bar** (`ZrpTabBar`) | Home, Search, **Create** (raised red circle), Messages, Profile. Hand-drawn rather than a `TabView` bar, because Create is a button that opens the composer and hands the current screen back, not a tab with a stack of its own. |
+| **Top bar** (`zrpRootChrome`) | The menu button on all four roots; on Home also the ZRP mark and the notifications bell with its unread pip. |
+| **Navigation menu** (`ZrpMenuView`) | Every remaining destination, in four groups. A sliding drawer on iPhone, a permanent column on a regular-width iPad. |
+
+**This corrects the previous shell.** Notifications was a sixth tab, and
+ten whole feature areas — Music, Marketplace, Play, Opportunity, Aid,
+News, Shorts, AI, Creator Studio, Bookmarks — were reachable only through
+an `ellipsis.circle` overflow menu in Home's toolbar. Ambassadors,
+Journalist, Team, API keys, Music Studio, Charity and Transparency each
+had exactly one entry point, buried in Settings. Every one of them now
+has a labelled row in the menu. Notifications lost its tab and gained
+two ways in: the bell, and a menu row.
+
+Nothing was removed to make room. The overflow menu's ten destinations
+are all in the menu; Notifications' screen, route and deep link are
+unchanged (`/notifications` now pushes onto Home's stack rather than
+selecting a tab).
+
+Three destinations in the design reference are **not** built, and will
+not be until they exist in ZRP:
+
+| Reference item | Status |
+| --- | --- |
+| **Communities** | `NOT APPLICABLE` — there is no communities feature anywhere in ZRP: no page under `src/app`, no route under `src/app/api`, no table in `schema.prisma`. Only `/community-code` exists, and that is a legal document. A Communities screen would have to invent membership, join state and member counts. |
+| **Lists** | `NOT APPLICABLE` — same: no page, no route, no model. |
+| **Messages filters** (All / Unread / Groups / Requests) | `NOT APPLICABLE` — the web inbox has no filters at all, and there is no message-request feature anywhere in ZRP: no `MessageRequest` model, no route, no page. Unread and group state do exist in the data, but a filter web does not have is new product design rather than parity, and this branch is a parity branch. |
+| **Explore chips** (For You / Trending / People / Communities) | `NOT APPLICABLE` as drawn — `/explore` on the web has no tabs, and `/search` has exactly two: users and posts. iOS `SearchView` has the same two. Communities does not exist. |
+| **Composer: Location** | `NOT APPLICABLE` — a plain post cannot carry one. `POST /api/posts` writes `location: type === "RECRUITMENT" ? location : null`, so the web composer's location field belongs to the recruitment form, not to posting generally. There is no check-in feature to be missing. |
+| **Premium** | Excluded by store policy, not by absence — `/pricing` is a purchase surface (`PricingCards.tsx` renders upgrade buttons and `CryptoPaymentModal`). Same rule as tips and premium posts. |
+
+---
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
 | --- | --- |
 | **Admin console** (`/api/admin/**`, 40+ routes) | **Web-only for v1, by decision — not an oversight.** Android ships four admin screens; iOS ships none. Every admin route is independently role-gated server-side, so an iOS app without an admin surface loses no security and gains none: hiding a screen is not what protects those routes, and building one would not weaken them either. The reason to leave it out is product, not safety — a staff console is a desk-and-keyboard tool, and the four screens Android has cover a fraction of the twenty the website offers. Anyone doing moderation work should be on the web console that has all of it. Revisit only if staff genuinely need to act from a phone; if so, build it against the same server-role gate and never surface an admin control on a client check alone. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
-| Careers, Investors, Press | WEB-ONLY — Android has no surface for any of them either. Marketing and corporate pages with no JSON route to read. |
 | **Ads** — advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** — see the Ads section below. |
 | **Creator Studio** — earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |
 
