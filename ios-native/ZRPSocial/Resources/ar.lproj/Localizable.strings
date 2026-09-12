@@ -1084,3 +1084,15 @@
 "footer.careers" = "الوظائف";
 "footer.investors" = "المستثمرون";
 "footer.pressKit" = "حزمة إعلامية";
+"nav.platform" = "المنصة";
+"nav.account" = "الحساب";
+"nav.openMenu" = "فتح القائمة";
+"nav.closeMenu" = "إغلاق القائمة";
+"nav.journalistDashboard" = "لوحة تحكم الصحفي";
+"nav.teamManagement" = "إدارة الفريق";
+"nav.apiKeys" = "مفاتيح API";
+"footer.supportHeading" = "الدعم";
+"footer.myTickets" = "تذاكري";
+"footer.transparency" = "الشفافية";
+"footer.charity" = "الأعمال الخيرية";
+"about.subtitle" = "أول منصة تواصل اجتماعي سويسرية أوروبية";

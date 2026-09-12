@@ -18,6 +18,7 @@
     "ios.a11y.undoRepost": "Undo repost",
     "ios.a11y.postOptions": "Post options",
     "ios.a11y.avatarOf": "Profile picture of {name}",
+    "ios.a11y.unreadCount": "{count} unread",
     "ios.a11y.imageCount": "Image {index} of {total}",
     "ios.a11y.refreshFeed": "Refresh feed",
     "ios.post.copyLink": "Copy link",

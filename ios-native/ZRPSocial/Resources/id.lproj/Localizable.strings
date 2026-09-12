@@ -1084,3 +1084,15 @@
 "footer.careers" = "Karier";
 "footer.investors" = "Investor";
 "footer.pressKit" = "Kit Pers";
+"nav.platform" = "Platform";
+"nav.account" = "Akun";
+"nav.openMenu" = "Buka menu";
+"nav.closeMenu" = "Tutup menu";
+"nav.journalistDashboard" = "Dasbor Jurnalis";
+"nav.teamManagement" = "Manajemen Tim";
+"nav.apiKeys" = "Kunci API";
+"footer.supportHeading" = "Dukungan";
+"footer.myTickets" = "Tiket Saya";
+"footer.transparency" = "Transparansi";
+"footer.charity" = "Amal";
+"about.subtitle" = "Platform Media Sosial Swiss Eropa Pertama";

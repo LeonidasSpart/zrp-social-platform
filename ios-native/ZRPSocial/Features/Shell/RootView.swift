@@ -15,7 +15,11 @@ struct RootView: View {
             case .restoring:
                 launchState
             case .signedOut:
-                LoginView()
+                // The welcome screen, not the sign-in form. `LoginView`
+                // and `RegisterView` are unchanged and still do all the
+                // real work; this simply stops the app opening on an
+                // empty password field.
+                WelcomeView()
                     .transition(.opacity)
             case .signedIn:
                 // `onboardingCompleted` lives on the user row, so it

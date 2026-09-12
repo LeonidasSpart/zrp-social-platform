@@ -1084,3 +1084,15 @@
 "footer.careers" = "招聘";
 "footer.investors" = "投资者";
 "footer.pressKit" = "媒体资料包";
+"nav.platform" = "平台";
+"nav.account" = "账户";
+"nav.openMenu" = "打开菜单";
+"nav.closeMenu" = "关闭菜单";
+"nav.journalistDashboard" = "记者控制台";
+"nav.teamManagement" = "团队管理";
+"nav.apiKeys" = "API 密钥";
+"footer.supportHeading" = "支持";
+"footer.myTickets" = "我的工单";
+"footer.transparency" = "透明度";
+"footer.charity" = "慈善";
+"about.subtitle" = "首个瑞士欧洲社交媒体平台";

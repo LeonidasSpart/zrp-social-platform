@@ -1084,3 +1084,15 @@
 "footer.careers" = "Karriera";
 "footer.investors" = "Investitorët";
 "footer.pressKit" = "Kit i Shtypit";
+"nav.platform" = "Platforma";
+"nav.account" = "Llogaria";
+"nav.openMenu" = "Hap menynë";
+"nav.closeMenu" = "Mbyll menynë";
+"nav.journalistDashboard" = "Paneli i Gazetarit";
+"nav.teamManagement" = "Menaxhimi i Ekipit";
+"nav.apiKeys" = "Çelësat API";
+"footer.supportHeading" = "Mbështetje";
+"footer.myTickets" = "Biletat e Mia";
+"footer.transparency" = "Transparenca";
+"footer.charity" = "Bamirësi";
+"about.subtitle" = "Platforma e Parë Zvicerane Evropiane e Mediave Sociale";

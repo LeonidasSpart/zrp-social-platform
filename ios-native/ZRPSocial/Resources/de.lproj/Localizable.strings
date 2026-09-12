@@ -1084,3 +1084,15 @@
 "footer.careers" = "Karriere";
 "footer.investors" = "Investoren";
 "footer.pressKit" = "Presse-Kit";
+"nav.platform" = "Plattform";
+"nav.account" = "Konto";
+"nav.openMenu" = "Menü öffnen";
+"nav.closeMenu" = "Menü schließen";
+"nav.journalistDashboard" = "Journalisten-Dashboard";
+"nav.teamManagement" = "Teamverwaltung";
+"nav.apiKeys" = "API-Schlüssel";
+"footer.supportHeading" = "Support";
+"footer.myTickets" = "Meine Tickets";
+"footer.transparency" = "Transparenz";
+"footer.charity" = "Wohltätigkeit";
+"about.subtitle" = "Die erste schweizerisch-europäische Social-Media-Plattform";

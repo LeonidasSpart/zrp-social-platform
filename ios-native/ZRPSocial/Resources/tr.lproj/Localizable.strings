@@ -1084,3 +1084,15 @@
 "footer.careers" = "Kariyer";
 "footer.investors" = "Yatırımcılar";
 "footer.pressKit" = "Basın Kiti";
+"nav.platform" = "Platform";
+"nav.account" = "Hesap";
+"nav.openMenu" = "Menüyü aç";
+"nav.closeMenu" = "Menüyü kapat";
+"nav.journalistDashboard" = "Gazeteci Paneli";
+"nav.teamManagement" = "Ekip Yönetimi";
+"nav.apiKeys" = "API Anahtarları";
+"footer.supportHeading" = "Destek";
+"footer.myTickets" = "Taleplerim";
+"footer.transparency" = "Şeffaflık";
+"footer.charity" = "Hayır Kurumu";
+"about.subtitle" = "İlk İsviçre Avrupa Sosyal Medya Platformu";

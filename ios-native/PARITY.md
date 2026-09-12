@@ -521,6 +521,42 @@ All eleven are the same shape: public, static, long-form, already written and al
 
 **This corrects an earlier row in this file** that listed Careers, Investors and Press as deliberately web-only. They are in the website's own sidebar, so users genuinely had them and iOS did not; "no JSON route to read" was never the right test for a page that is read, not queried.
 
+### Navigation and information architecture
+
+The shell is three pieces of chrome around four navigation stacks, built
+to the ZRP design reference:
+
+| Surface | What it carries |
+| --- | --- |
+| **Bottom bar** (`ZrpTabBar`) | Home, Search, **Create** (raised red circle), Messages, Profile. Hand-drawn rather than a `TabView` bar, because Create is a button that opens the composer and hands the current screen back, not a tab with a stack of its own. |
+| **Top bar** (`zrpRootChrome`) | The menu button on all four roots; on Home also the ZRP mark and the notifications bell with its unread pip. |
+| **Navigation menu** (`ZrpMenuView`) | Every remaining destination, in four groups. A sliding drawer on iPhone, a permanent column on a regular-width iPad. |
+
+**This corrects the previous shell.** Notifications was a sixth tab, and
+ten whole feature areas — Music, Marketplace, Play, Opportunity, Aid,
+News, Shorts, AI, Creator Studio, Bookmarks — were reachable only through
+an `ellipsis.circle` overflow menu in Home's toolbar. Ambassadors,
+Journalist, Team, API keys, Music Studio, Charity and Transparency each
+had exactly one entry point, buried in Settings. Every one of them now
+has a labelled row in the menu. Notifications lost its tab and gained
+two ways in: the bell, and a menu row.
+
+Nothing was removed to make room. The overflow menu's ten destinations
+are all in the menu; Notifications' screen, route and deep link are
+unchanged (`/notifications` now pushes onto Home's stack rather than
+selecting a tab).
+
+Three destinations in the design reference are **not** built, and will
+not be until they exist in ZRP:
+
+| Reference item | Status |
+| --- | --- |
+| **Communities** | `NOT APPLICABLE` — there is no communities feature anywhere in ZRP: no page under `src/app`, no route under `src/app/api`, no table in `schema.prisma`. Only `/community-code` exists, and that is a legal document. A Communities screen would have to invent membership, join state and member counts. |
+| **Lists** | `NOT APPLICABLE` — same: no page, no route, no model. |
+| **Premium** | Excluded by store policy, not by absence — `/pricing` is a purchase surface (`PricingCards.tsx` renders upgrade buttons and `CryptoPaymentModal`). Same rule as tips and premium posts. |
+
+---
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |

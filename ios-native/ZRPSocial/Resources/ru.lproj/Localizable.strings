@@ -1084,3 +1084,15 @@
 "footer.careers" = "Карьера";
 "footer.investors" = "Инвесторам";
 "footer.pressKit" = "Пресс-кит";
+"nav.platform" = "Платформа";
+"nav.account" = "Аккаунт";
+"nav.openMenu" = "Открыть меню";
+"nav.closeMenu" = "Закрыть меню";
+"nav.journalistDashboard" = "Панель журналиста";
+"nav.teamManagement" = "Управление командой";
+"nav.apiKeys" = "Ключи API";
+"footer.supportHeading" = "Поддержка";
+"footer.myTickets" = "Мои обращения";
+"footer.transparency" = "Прозрачность";
+"footer.charity" = "Благотворительность";
+"about.subtitle" = "Первая швейцарская европейская социальная платформа";

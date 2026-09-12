@@ -1084,6 +1084,18 @@
 "footer.careers" = "Careers";
 "footer.investors" = "Investors";
 "footer.pressKit" = "Press Kit";
+"nav.platform" = "Platform";
+"nav.account" = "Account";
+"nav.openMenu" = "Open menu";
+"nav.closeMenu" = "Close menu";
+"nav.journalistDashboard" = "Journalist Dashboard";
+"nav.teamManagement" = "Team Management";
+"nav.apiKeys" = "API Keys";
+"footer.supportHeading" = "Support";
+"footer.myTickets" = "My Tickets";
+"footer.transparency" = "Transparency";
+"footer.charity" = "Charity";
+"about.subtitle" = "The First Swiss European Social Media Platform";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -1094,6 +1106,7 @@
 "ios.a11y.undoRepost" = "Undo repost";
 "ios.a11y.postOptions" = "Post options";
 "ios.a11y.avatarOf" = "Profile picture of {name}";
+"ios.a11y.unreadCount" = "{count} unread";
 "ios.a11y.imageCount" = "Image {index} of {total}";
 "ios.a11y.refreshFeed" = "Refresh feed";
 "ios.post.copyLink" = "Copy link";

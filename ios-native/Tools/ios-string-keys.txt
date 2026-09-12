@@ -1145,3 +1145,24 @@ footer.contact
 footer.careers
 footer.investors
 footer.pressKit
+
+# The navigation menu. Section headings and the destinations that had no
+# route of their own in this app - every one of them already existed in
+# the web dictionary in all eleven languages, because the web sidebar has
+# been offering them all along.
+nav.platform
+nav.account
+nav.openMenu
+nav.closeMenu
+nav.journalistDashboard
+nav.teamManagement
+nav.apiKeys
+footer.supportHeading
+footer.myTickets
+footer.transparency
+footer.charity
+
+# The brand line under the mark on the welcome screen. ZRP's own words
+# about itself, taken from the About page rather than written fresh, so
+# the first screen of the app says what the website says.
+about.subtitle
