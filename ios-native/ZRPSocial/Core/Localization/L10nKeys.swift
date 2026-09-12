@@ -1946,6 +1946,14 @@ enum L10nKey: String, CaseIterable {
     case iosAdsSponsored = "ios.ads.sponsored"
     /// en: "Sponsored post by {name}"
     case iosA11ySponsoredPost = "ios.a11y.sponsoredPost"
+    /// en: "Missed call"
+    case iosCallMissedTitle = "ios.call.missedTitle"
+    /// en: "{name} tried to call you. ZRP for iPhone can't take calls yet — you can answer on zrp.one."
+    case iosCallMissedBody = "ios.call.missedBody"
+    /// en: "OK"
+    case iosCallDismiss = "ios.call.dismiss"
+    /// en: "Someone"
+    case iosCallUnknownCaller = "ios.call.unknownCaller"
 }
 
 extension L10nKey {
