@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Home
@@ -85,6 +86,7 @@ data class ZrpDrawerActions(
     val goJournalist: () -> Unit,
     val goAdmin: () -> Unit,
     val goBookmarks: () -> Unit,
+    val goLists: () -> Unit,
     val goSettings: () -> Unit,
     val goHelpCenter: () -> Unit,
     val goOwnProfile: () -> Unit,
@@ -192,6 +194,7 @@ fun ZrpDrawerContent(
                 titleRes = R.string.drawer_section_account,
                 rows = listOf(
                     DrawerRow(Icons.Filled.BookmarkBorder, R.string.nav_bookmarks, onClick = select(actions.goBookmarks)),
+                    DrawerRow(Icons.Filled.FormatListBulleted, R.string.nav_lists, onClick = select(actions.goLists)),
                     DrawerRow(Icons.Filled.Settings, R.string.settings_title, onClick = select(actions.goSettings)),
                     DrawerRow(Icons.Filled.HelpOutline, R.string.nav_help_center, onClick = select(actions.goHelpCenter)),
                 ),

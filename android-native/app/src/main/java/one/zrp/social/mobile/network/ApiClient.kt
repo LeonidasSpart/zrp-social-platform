@@ -110,6 +110,8 @@ object ApiClient {
     val commentsApi: CommentsApi by lazy { retrofit.create(CommentsApi::class.java) }
     val reportsApi: ReportsApi by lazy { retrofit.create(ReportsApi::class.java) }
     val bookmarksApi: BookmarksApi by lazy { retrofit.create(BookmarksApi::class.java) }
+    val communitiesApi: CommunitiesApi by lazy { retrofit.create(CommunitiesApi::class.java) }
+    val listsApi: ListsApi by lazy { retrofit.create(ListsApi::class.java) }
     val translateApi: TranslateApi by lazy { retrofit.create(TranslateApi::class.java) }
     val settingsApi: SettingsApi by lazy { retrofit.create(SettingsApi::class.java) }
     val gifsApi: GifsApi by lazy { retrofit.create(GifsApi::class.java) }
