@@ -2,6 +2,7 @@ const { createServer } = require("http");
 const { parse } = require("url");
 const next = require("next");
 const { Server } = require("socket.io");
+const { createAdapter } = require("@socket.io/redis-adapter");
 const { PrismaClient } = require("@prisma/client");
 const { PrismaPg } = require("@prisma/adapter-pg");
 const { getToken } = require("next-auth/jwt");
@@ -21,7 +22,6 @@ const { runLegacyPasswordMigrationAtStartup } = require("./legacy-passwords");
 const {
   createPresenceTracker,
   createRedisPresenceStore,
-  createRedisPresenceBus,
 } = require("./presence");
 
 // Minimal cookie-header parser, written inline rather than requiring
@@ -163,34 +163,50 @@ app.prepare().then(async () => {
     maxHttpBufferSize: 1024 * 1024,
   });
 
-  // ─── Presence tracker (see the comment at the top of this file) ───
+  // ─── Socket.IO cross-instance adapter ──────────────────────────────
+  // Without this, io.to()/socket.to()/io.emit() only ever reach sockets
+  // connected to THIS process. That's invisible with one Railway
+  // replica (today's actual deployment - see the log line below) but
+  // would silently break the moment a second one exists: two users on
+  // different instances would never see each other's messages, typing
+  // indicators, reactions, or calls - the emit succeeds, it just never
+  // leaves the process it was called from. There was no
+  // @socket.io/redis-adapter (or any adapter) wired in at all before
+  // this. Reuses the exact same pub/sub pair presence already opens
+  // below - node-redis v4 clients support multiple concurrent
+  // subscriptions on one connection, so this doesn't need (and Railway
+  // Redis plans often cap) a second pair of connections.
   const presenceRedis = await connectPresenceRedis();
-  let presenceBus = null;
+  if (presenceRedis) {
+    io.adapter(createAdapter(presenceRedis.pub, presenceRedis.sub));
+    console.log(`🟢 Socket.IO adapter: Redis-backed (multi-instance safe)`);
+  } else {
+    console.log(
+      "🟡 Socket.IO adapter: in-memory only (io.to()/emit() will NOT reach other Railway replicas if this ever scales beyond one instance)"
+    );
+  }
+
+  // ─── Presence tracker (see the comment at the top of this file) ───
+  // The "online"/"offline" transition itself no longer needs its own
+  // manual pub/sub relay (createRedisPresenceBus, removed) - with the
+  // adapter above active, io.emit() already reaches every instance's
+  // sockets on its own. A separate relay that ALSO called io.emit() on
+  // the receiving instance would double-deliver every transition to
+  // every client once the adapter was added. The Redis-backed presence
+  // STORE (who's online right now, for get-status/isOnline) is a
+  // separate concern from that event relay and is unaffected.
   const presence = createPresenceTracker({
     instanceId: PRESENCE_INSTANCE_ID,
     store: presenceRedis ? createRedisPresenceStore(presenceRedis.pub) : null,
     onChange: (userId, status) => {
-      // Global transition: tell every socket on this instance, and every
-      // other instance (which tells its own sockets).
       io.emit("user-status", { userId, status });
-      if (presenceBus) presenceBus.publish(userId, status);
     },
   });
-  if (presenceRedis) {
-    try {
-      presenceBus = await createRedisPresenceBus(
-        presenceRedis.pub,
-        presenceRedis.sub,
-        PRESENCE_INSTANCE_ID,
-        (userId, status) => io.emit("user-status", { userId, status })
-      );
-      console.log(`🟢 Presence shared via Redis (instance ${PRESENCE_INSTANCE_ID})`);
-    } catch (err) {
-      console.error("presence bus unavailable (transitions stay local to this instance):", err && err.message);
-    }
-  } else {
-    console.log("🟡 Presence is local to this instance (no Redis)");
-  }
+  console.log(
+    presenceRedis
+      ? `🟢 Presence shared via Redis (instance ${PRESENCE_INSTANCE_ID})`
+      : "🟡 Presence is local to this instance (no Redis)"
+  );
   setInterval(() => {
     presence.heartbeat();
   }, PRESENCE_HEARTBEAT_MS).unref();
