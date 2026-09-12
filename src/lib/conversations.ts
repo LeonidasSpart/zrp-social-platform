@@ -163,6 +163,15 @@ export async function getConversationParticipant(conversationId: string, userId:
  * membership boundary, not a soft flag). unreadCount is computed from
  * lastReadAt rather than a per-message-per-user row - see
  * ConversationParticipant's own schema KDoc for why.
+ *
+ * ⚠️ PERFORMANCE: the previous implementation ran a `findFirst` +
+ * `count` pair per membership inside `.map()` - a user in N group
+ * chats issued 2N+1 database round trips on every call, and this is
+ * called from both the conversation-list route and the unread-badge
+ * poller. This batches both queries the same way getUserConversations
+ * above already batches the 1:1 case: one DISTINCT ON to find the
+ * latest message id per conversation, one grouped count, regardless of
+ * how many conversations the user is in.
  */
 export async function getUserGroupConversations(userId: string): Promise<GroupConversationSummary[]> {
   const memberships = await prisma.conversationParticipant.findMany({
@@ -183,31 +192,50 @@ export async function getUserGroupConversations(userId: string): Promise<GroupCo
 
   if (memberships.length === 0) return [];
 
-  return Promise.all(
-    memberships.map(async (m) => {
-      const [lastMessage, unreadCount] = await Promise.all([
-        prisma.message.findFirst({
-          where: { conversationId: m.conversationId },
-          orderBy: { createdAt: "desc" },
-          include: GROUP_MESSAGE_INCLUDE,
-        }),
-        prisma.message.count({
-          where: {
-            conversationId: m.conversationId,
-            senderId: { not: userId },
-            createdAt: m.lastReadAt ? { gt: m.lastReadAt } : undefined,
-          },
-        }),
-      ]);
+  const conversationIds = memberships.map((m) => m.conversationId);
 
-      return {
-        id: m.conversation.id,
-        name: m.conversation.name,
-        avatarUrl: m.conversation.avatarUrl,
-        participantCount: m.conversation._count.participants,
-        lastMessage,
-        unreadCount,
-      };
-    })
+  const latestPerConversation = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT DISTINCT ON (m."conversationId") m.id
+    FROM "Message" m
+    WHERE m."conversationId" = ANY(${conversationIds})
+    ORDER BY m."conversationId", m."createdAt" DESC, m.id DESC
+  `;
+
+  const lastMessages =
+    latestPerConversation.length === 0
+      ? []
+      : await prisma.message.findMany({
+          where: { id: { in: latestPerConversation.map((r) => r.id) } },
+          include: GROUP_MESSAGE_INCLUDE,
+        });
+  const lastMessageByConversation = new Map(lastMessages.map((m) => [m.conversationId as string, m]));
+
+  // lastReadAt is per (user, conversation) - from this user's own
+  // ConversationParticipant row, not a global value - so it has to
+  // travel into the query per conversation rather than as one shared
+  // cutoff. A VALUES list joined against Message is what lets a single
+  // query apply a different cutoff per conversation instead of one
+  // query per membership.
+  const cutoffs = memberships.map(
+    (m) => Prisma.sql`(${m.conversationId}::text, ${m.lastReadAt}::timestamptz)`
   );
+  const unreadCounts = await prisma.$queryRaw<{ conversationId: string; count: bigint }[]>`
+    SELECT m."conversationId" AS "conversationId", COUNT(*) AS count
+    FROM "Message" m
+    JOIN (VALUES ${Prisma.join(cutoffs)}) AS cutoff("conversationId", "lastReadAt")
+      ON cutoff."conversationId" = m."conversationId"
+    WHERE m."senderId" != ${userId}
+      AND (cutoff."lastReadAt" IS NULL OR m."createdAt" > cutoff."lastReadAt")
+    GROUP BY m."conversationId"
+  `;
+  const unreadByConversation = new Map(unreadCounts.map((u) => [u.conversationId, Number(u.count)]));
+
+  return memberships.map((m) => ({
+    id: m.conversation.id,
+    name: m.conversation.name,
+    avatarUrl: m.conversation.avatarUrl,
+    participantCount: m.conversation._count.participants,
+    lastMessage: lastMessageByConversation.get(m.conversationId) ?? null,
+    unreadCount: unreadByConversation.get(m.conversationId) ?? 0,
+  }));
 }

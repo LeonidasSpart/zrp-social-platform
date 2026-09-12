@@ -30,22 +30,33 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
   }
 
   if (action === "approve") {
-    // Update user's plan
-    await prisma.user.update({
-      where: { id: request.userId },
-      data: { plan: request.requestedPlan },
-    });
-    invalidateUserAuthState(request.userId);
-
-    // Mark request as approved
-    await prisma.upgradeRequest.update({
-      where: { id: requestId },
+    // ⚠️ Claim the request first via a conditional update, the same
+    // compare-and-swap pattern the withdrawal approval route uses -
+    // without it, two concurrent approvals (a double-click, two admin
+    // tabs) both pass the `status !== "pending"` check above, both
+    // apply the plan change and both write a duplicate audit-log entry
+    // for a single approval. Only one caller can win this update.
+    const claimed = await prisma.upgradeRequest.updateMany({
+      where: { id: requestId, status: "pending" },
       data: {
         status: "approved",
         approvedBy: session.user.id,
         approvedAt: new Date(),
       },
     });
+
+    if (claimed.count === 0) {
+      return NextResponse.json(
+        { error: "Request already processed" },
+        { status: 409 }
+      );
+    }
+
+    await prisma.user.update({
+      where: { id: request.userId },
+      data: { plan: request.requestedPlan },
+    });
+    invalidateUserAuthState(request.userId);
 
     // ─── Optionally send notification to user ──────────────────────
 
@@ -59,14 +70,21 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
     return NextResponse.json({ success: true, message: "Plan upgraded." });
   } else if (action === "deny") {
-    await prisma.upgradeRequest.update({
-      where: { id: requestId },
+    const claimed = await prisma.upgradeRequest.updateMany({
+      where: { id: requestId, status: "pending" },
       data: {
         status: "denied",
         approvedBy: session.user.id,
         approvedAt: new Date(),
       },
     });
+
+    if (claimed.count === 0) {
+      return NextResponse.json(
+        { error: "Request already processed" },
+        { status: 409 }
+      );
+    }
 
     await logAdminAction({
       actor: session,

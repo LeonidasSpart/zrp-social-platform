@@ -195,7 +195,6 @@ export async function GET(req: NextRequest) {
       blockedIds,
       blockedBy,
       muted,
-      following,
     ] = await Promise.all([
       userId
         ? prisma.blocked.findMany({
@@ -226,17 +225,6 @@ export async function GET(req: NextRequest) {
             },
             select: {
               mutedId: true,
-            },
-          })
-        : Promise.resolve([]),
-
-      needsFollowing
-        ? prisma.follow.findMany({
-            where: {
-              followerId: userId,
-            },
-            select: {
-              followingId: true,
             },
           })
         : Promise.resolve([]),
@@ -271,19 +259,22 @@ export async function GET(req: NextRequest) {
     }
 
     if (needsFollowing) {
-      const followingIds = following.map(
-        (f) => f.followingId
-      );
-
-      if (followingIds.length === 0) {
-        return NextResponse.json({
-          posts: [],
-          nextCursor: null,
-        });
-      }
-
-      where.authorId = {
-        in: followingIds,
+      // ⚠️ PERFORMANCE + CORRECTNESS: this used to fetch the user's
+      // entire follow list into a JS array and filter with
+      // `authorId: { in: followingIds } }` - which OVERWROTE the
+      // `where.authorId` set above for blocked/muted exclusion instead
+      // of combining with it, so a followed account the viewer had also
+      // blocked or muted still showed up on the Following tab. It also
+      // scaled with however many accounts the viewer follows, on every
+      // single page load of this feed. A relation filter expresses "the
+      // viewer follows this post's author" directly in SQL (an EXISTS
+      // against Follow), so it never materializes the follow list at
+      // all and composes with the authorId exclusion above instead of
+      // replacing it.
+      where.author = {
+        followers: {
+          some: { followerId: userId },
+        },
       };
     }
 
