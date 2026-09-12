@@ -110,6 +110,12 @@ enum Route: Hashable {
     /// with a 403 regardless.
     case journalistDashboard
     case journalistArticle(id: String?, canSubmit: Bool)
+    /// Business/Enterprise account surfaces. Both routes answer a JSON
+    /// 403 for any other plan - the middleware's plan redirect covers
+    /// the web pages only - so both screens are reachable and explain
+    /// themselves rather than being hidden on a client-side plan guess.
+    case team
+    case apiKeys
 }
 
 /// Owns the navigation stack's path.

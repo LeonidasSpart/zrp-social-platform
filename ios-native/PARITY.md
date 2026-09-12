@@ -487,6 +487,24 @@ Android has no ambassador surface at all; iOS is now ahead of it here.
 
 Android has no journalist surface; iOS is ahead of it here too.
 
+### Team and API keys (Business / Enterprise)
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Team roster | `GET /api/team` | ✅ | ⬜ | ✅ members plus the account owner. The owner is **not** a `TeamMember` row — the route synthesises them as `OWNER` — so they are their own type here and cannot be given a role or removed through a membership that does not exist | IMPLEMENTED |
+| Add a member | `POST /api/team` | ✅ | ⬜ | ✅ by email, with a role. The route can only add an **existing** ZRP account, not invite a stranger, so its own wording ("They need to sign up first") is shown rather than a generic failure — as are "already a member" and "you are the owner" | IMPLEMENTED |
+| Change a role | `PATCH /api/team/{memberId}` | ✅ | ⬜ | ✅ inline, offering only ADMIN / EDITOR / VIEWER — the three the route accepts. `OWNER` is synthesised, never stored, so it is not assignable | IMPLEMENTED |
+| Remove a member | `DELETE /api/team/{memberId}` | ✅ | ⬜ | ✅ swipe action with confirmation, and a VoiceOver rotor action since a swipe is invisible to it | IMPLEMENTED |
+| List API keys | `GET /api/api-keys` | ✅ | ⬜ | ✅ name, created, expires and last used. "Never" used is stated rather than left blank — a key nobody has ever called is a candidate for revoking | IMPLEMENTED |
+| Generate a key | `POST /api/api-keys` | ✅ | ⬜ | ✅ the plaintext key is shown **once**, copyable, and is never written to the Keychain, `UserDefaults`, a file or a log. The server stores a SHA-256 hash, so a key not copied there is gone | IMPLEMENTED |
+| Key lifetime | `apiKeyExpiryFor` | ✅ 4 options | ⬜ | ✅ **3 options.** Web still offers "Never expires" and it no longer does anything: the route was fixed so every key gets an expiry, and an omitted value means 365 days. Offering "never" would promise something the server quietly overrides, so iOS does not | IMPLEMENTED (deliberately narrower) |
+| Revoke a key | `DELETE /api/api-keys/{id}` | ✅ | ⬜ | ✅ a soft revoke, as the route performs it — the row stays and stops authenticating | IMPLEMENTED |
+| Plan gate | `canManageTeam` / `canAccessApi` | ✅ | ⬜ | ✅ both screens are reachable on **every** plan and show the route's own 403 sentence. The client never decides entitlement; each route checks independently. Verified that `src/middleware.ts` gates only the `/settings/*` **pages**, not `/api/team` or `/api/api-keys`, so a native client always gets JSON rather than a redirect to `/pricing` | IMPLEMENTED |
+
+**No upgrade button on either screen.** Web's says "Upgrade to Business or Enterprise" and leads to checkout. Buying a plan in-app is the same payment surface Apple's rules keep out (see [Store policy](#store-policy-constraint)) — so iOS states what is required and stops there.
+
+Android has neither surface.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |

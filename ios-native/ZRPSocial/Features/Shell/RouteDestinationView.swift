@@ -145,6 +145,10 @@ struct RouteDestinationView: View {
             JournalistDashboardView()
         case .journalistArticle(let id, let canSubmit):
             JournalistArticleEditorView(articleId: id, canSubmitForReview: canSubmit)
+        case .team:
+            TeamView()
+        case .apiKeys:
+            ApiKeysView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

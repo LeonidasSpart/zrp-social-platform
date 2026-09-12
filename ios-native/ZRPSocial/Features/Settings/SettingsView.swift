@@ -146,6 +146,27 @@ struct SettingsView: View {
                         Image(systemName: "newspaper")
                     }
                 }
+
+                // Both are Business/Enterprise features, and both are
+                // listed for every plan on purpose: the routes answer a
+                // JSON 403 with a sentence explaining what is needed,
+                // and reading that beats a menu entry that silently is
+                // not there. The client never decides entitlement.
+                Button { navigator.push(.team) } label: {
+                    Label {
+                        Text(.teamTitle)
+                    } icon: {
+                        Image(systemName: "person.3")
+                    }
+                }
+
+                Button { navigator.push(.apiKeys) } label: {
+                    Label {
+                        Text(.apiKeysTitle)
+                    } icon: {
+                        Image(systemName: "key")
+                    }
+                }
             }
 
             Section {

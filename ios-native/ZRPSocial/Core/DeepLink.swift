@@ -184,7 +184,14 @@ enum DeepLink {
             guard second == "dashboard" || second == nil else { return nil }
             return DeepLinkTarget(.profile, .creatorStudio)
         case "settings":
-            return DeepLinkTarget(.home, .settings)
+            // Team and API keys live under /settings on the web, not at
+            // the domain root. Anything else under /settings lands on
+            // the settings list rather than on nothing.
+            switch second {
+            case "team": return DeepLinkTarget(.home, .team)
+            case "api-keys": return DeepLinkTarget(.home, .apiKeys)
+            default: return DeepLinkTarget(.home, .settings)
+            }
 
         case "post":
             guard let id = second else { return nil }
