@@ -11,14 +11,20 @@ export interface CursorParams {
 /**
  * Reads ?cursor= and ?limit= off the request, clamping limit to a
  * sane range so a client can't force an oversized page.
+ *
+ * `defaultLimit` lets a route preserve its own pre-existing page size
+ * (e.g. notifications' long-standing 50) as the behavior a caller who
+ * never sends `?limit=` keeps seeing, while still accepting an explicit
+ * override up to MAX_PAGE_SIZE - every existing caller that doesn't
+ * pass this keeps today's DEFAULT_PAGE_SIZE unchanged.
  */
-export function parseCursorParams(req: NextRequest): CursorParams {
+export function parseCursorParams(req: NextRequest, defaultLimit: number = DEFAULT_PAGE_SIZE): CursorParams {
   const cursor = req.nextUrl.searchParams.get("cursor");
   const rawLimit = parseInt(req.nextUrl.searchParams.get("limit") || "", 10);
   const limit =
     Number.isFinite(rawLimit) && rawLimit > 0
       ? Math.min(rawLimit, MAX_PAGE_SIZE)
-      : DEFAULT_PAGE_SIZE;
+      : defaultLimit;
   return { cursor, limit };
 }
 

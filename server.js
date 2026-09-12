@@ -215,11 +215,33 @@ app.prepare().then(async () => {
   // Without this, one account could open unbounded sockets (a script,
   // a buggy client stuck in a reconnect loop) and hold that many
   // concurrent connections indefinitely.
+  //
+  // ⚠️ MULTI-INSTANCE: this counter, and the event rate limiter below,
+  // are process-local by deliberate choice, not oversight - re-audited
+  // in the final closure pass alongside the call registry (which WAS
+  // moved to Redis, see socket-authz.js) and found to warrant a
+  // different answer:
+  //   - both guards DEGRADE, they do not fail open, under N replicas -
+  //     a user who spreads connections/events across every replica gets
+  //     roughly N× the stated limit, never an unbounded one, since each
+  //     replica still enforces its own cap independently
+  //   - the higher-value target these guards exist for (spam sent
+  //     through the REST API, which is what actually persists a
+  //     message/post) is already rate-limited through Redis
+  //     (src/lib/rate-limit.ts) regardless of which replica a socket is
+  //     on - these two counters are defense-in-depth on the realtime
+  //     RELAY layer specifically, not the only gate
+  //   - moving them to Redis would add a round trip to the hottest
+  //     per-keystroke/per-event code path in this file for a guarantee
+  //     that degrades gracefully rather than breaks
+  // Revisit if this service is ever scaled to enough replicas that N×
+  // the stated limits stops being an acceptable ceiling.
   const MAX_CONNECTIONS_PER_USER = 8;
   const connectionCounts = new Map(); // userId -> count
 
   // ─── Simple in-memory sliding-window limiter for the most abuse-
-  // prone events (message send, call signaling) ─────────────────────
+  // prone events (message send, call signaling) - see the multi-instance
+  // note above; same reasoning applies here ─────────────────────────
   const eventBuckets = new Map(); // `${userId}:${event}` -> { count, resetAt }
   function checkEventRateLimit(userId, event, limit, windowMs) {
     const key = `${userId}:${event}`;
@@ -236,7 +258,18 @@ app.prepare().then(async () => {
   // Which calls are ringing/active between which two users - see
   // socket-authz.js. accept/reject/end are only relayed for a call
   // that was actually placed, and only by one of its two parties.
-  const calls = createCallRegistry();
+  //
+  // Passing presenceRedis's pub client (already connected, already
+  // reused for the Socket.IO adapter and the presence store - see
+  // socket-authz.js's own comment on why one more consumer is fine)
+  // makes call state authoritative in Redis instead of this process's
+  // memory, so accept/reject/end still work correctly regardless of
+  // which Railway replica the other party is connected to. Falls back
+  // to the original in-memory-only behavior, unchanged, when Redis is
+  // unavailable - correct for today's actual single-replica deployment.
+  const calls = createCallRegistry({
+    redisClient: presenceRedis ? presenceRedis.pub : null,
+  });
 
   // Periodic sweep so eventBuckets/connectionCounts can't grow
   // unbounded from users who connect once and never come back.
@@ -630,7 +663,7 @@ app.prepare().then(async () => {
           return;
         }
 
-        calls.start(userId, receiverId);
+        await calls.start(userId, receiverId);
         console.log(`📞 call-user from ${userId} to ${receiverId}`);
         io.to(receiverId).emit("incoming-call", {
           callerId: userId,
@@ -643,23 +676,38 @@ app.prepare().then(async () => {
       }
     });
 
-    socket.on("accept-call", ({ callerId, signal } = {}) => {
+    socket.on("accept-call", async ({ callerId, signal } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
-      if (!calls.accept(userId, callerId)) return;
+      try {
+        if (!(await calls.accept(userId, callerId))) return;
+      } catch (err) {
+        console.error("accept-call registry error:", err);
+        return;
+      }
       console.log(`✅ accept-call from ${userId} to ${callerId}`);
       io.to(callerId).emit("call-accepted", { signal });
     });
 
-    socket.on("reject-call", ({ callerId } = {}) => {
+    socket.on("reject-call", async ({ callerId } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
-      if (!calls.reject(userId, callerId)) return;
+      try {
+        if (!(await calls.reject(userId, callerId))) return;
+      } catch (err) {
+        console.error("reject-call registry error:", err);
+        return;
+      }
       console.log(`❌ reject-call from ${userId} to ${callerId}`);
       io.to(callerId).emit("call-rejected");
     });
 
-    socket.on("end-call", ({ callerId } = {}) => {
+    socket.on("end-call", async ({ callerId } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
-      if (!calls.end(userId, callerId)) return;
+      try {
+        if (!(await calls.end(userId, callerId))) return;
+      } catch (err) {
+        console.error("end-call registry error:", err);
+        return;
+      }
       console.log(`🔚 end-call from ${userId} to ${callerId}`);
       io.to(callerId).emit("call-ended");
     });
@@ -672,7 +720,9 @@ app.prepare().then(async () => {
         // to so the registry can't hold a stale entry forever. Only on
         // the LAST socket - a second tab closing must not wipe a call
         // that is still running in the first one.
-        calls.dropUser(userId);
+        Promise.resolve(calls.dropUser(userId)).catch((err) =>
+          console.error("dropUser registry error:", err)
+        );
         connectionCounts.delete(userId);
       } else {
         connectionCounts.set(userId, remaining);

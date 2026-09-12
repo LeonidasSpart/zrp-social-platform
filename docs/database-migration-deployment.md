@@ -67,12 +67,16 @@ change (see Section 6).
 ## 3. The migration history does not reproduce the schema — the core finding
 
 PROVEN FROM MIGRATION TEST. `prisma/schema.prisma` defines **82 models**.
-`prisma/migrations/` contains **9 migrations**, all added in commits dated
-2026-09-08 through 2026-09-11 (`git log --diff-filter=A -- 'prisma/migrations/*/migration.sql'`):
+`prisma/migrations/` contains **11 migrations** as of this update (2 added
+since this section was first written - `add_consumed_payment_transaction`
+and `add_conversation_clearance`, both audited in Section 4 below; the
+finding this section documents is unaffected by either, since neither
+creates `User` or `Post`):
 `zrp_music`, `music_album_track_order`, `add_fcm_token`,
 `zrp_news_network`, `add_group_chat_conversations`, `news_gaming_category`,
 `add_ambassador_program`, `play_reaction_sequence_types`,
-`ambassador_code_of_conduct_acceptance`. None of them contains `CREATE
+`add_consumed_payment_transaction`, `ambassador_code_of_conduct_acceptance`,
+`add_conversation_clearance`. None of them contains `CREATE
 TABLE "User"` or `CREATE TABLE "Post"` (checked directly — `grep -rl
 'CREATE TABLE "User"' prisma/migrations/` matches nothing), and the first
 migration's own SQL (`ALTER TABLE "MusicArtist" ADD CONSTRAINT ...
@@ -99,8 +103,8 @@ production actually looks like right now, and the repository gives no way
 to tell which one is true:
 
 - **Production's `_prisma_migrations` table was manually baselined** (an
-  operator ran `prisma migrate resolve --applied <name>` for each of the 9
-  migrations at some point, without that action being recorded anywhere in
+  operator ran `prisma migrate resolve --applied <name>` for each migration
+  at some point, without that action being recorded anywhere in
   git). In this case `prisma migrate deploy` works correctly going forward
   — reproduced below.
 - **Production has never had `_prisma_migrations` baselined**, and its
@@ -123,11 +127,11 @@ to tell which one is true:
   through the normal path.
 
 Baselining, once done correctly, does produce a healthy ongoing state —
-reproduced by resolving all 9 migrations as applied against the db-push-synced
+reproduced by resolving all migrations as applied against the db-push-synced
 database above:
 
 ```
-$ for m in <each of the 9 migration names>; do
+$ for m in <each migration name>; do
     npx prisma migrate resolve --applied "$m"
   done
 $ npx prisma migrate status
@@ -143,7 +147,7 @@ FROM "_prisma_migrations"
 ORDER BY started_at;
 ```
 
-- If the table doesn't exist, or exists but doesn't contain all 9 migration
+- If the table doesn't exist, or exists but doesn't contain every migration
   names each with a non-null `finished_at` and null `rolled_back_at`,
   production is **not** correctly baselined, and the pre-deploy migration
   step added in this change (Section 6) **will fail on the next deploy**
@@ -155,9 +159,9 @@ ORDER BY started_at;
 I do not have production database credentials from this sandbox, so this
 could not be checked directly, and it is not safe to guess.
 
-## 4. Auditing the 9 recent migrations individually
+## 4. Auditing the recent migrations individually
 
-None of the 9 migrations contains `DROP TABLE`, `DROP COLUMN`, a type
+None of the migrations audited here contains `DROP TABLE`, `DROP COLUMN`, a type
 narrowing, or a nullable→non-nullable transition on a column without a
 default. Specifically:
 
@@ -171,9 +175,11 @@ default. Specifically:
 | `news_gaming_category` | `ALTER TYPE ... ADD VALUE IF NOT EXISTS` on two enums, no use of the new value in the same migration (which Postgres would reject inside one transaction). `IF NOT EXISTS` makes it idempotent/safe to re-run. Safe. |
 | `add_ambassador_program` | New table + two FKs to `User`. Safe. |
 | `play_reaction_sequence_types` | Same `ADD VALUE IF NOT EXISTS` pattern as above. Safe. |
+| `add_consumed_payment_transaction` | New table only (`ConsumedPaymentTransaction`, no FKs). Safe. |
 | `ambassador_code_of_conduct_acceptance` | Two nullable `ADD COLUMN`s. Safe. |
+| `add_conversation_clearance` | New table + two FKs to `User`, plus one unique and one non-unique index. Safe. |
 
-**Conclusion: no destructive or unsafe operation exists in the 9 tracked
+**Conclusion: no destructive or unsafe operation exists in the tracked
 migrations themselves.** The entire P0 risk is in Section 3 — the
 migration *history* is incomplete relative to the schema, not that any
 individual migration is badly written.
@@ -256,7 +262,7 @@ merely because its migration attempt failed after the fact. Instead:
 
 3. **This document.**
 
-Nothing else was touched: `server.js`, `package.json` scripts, the 9
+Nothing else was touched: `server.js`, `package.json` scripts, the
 existing migration files, and `prisma/schema.prisma` are all unmodified.
 `docs/zrp-news-network.md`'s "`prisma migrate deploy` (or `db push`)" line
 is News Network documentation (out of this task's scope) but is flagged
@@ -278,8 +284,8 @@ $ npx prisma db push --skip-generate   # simulate db-push-managed prod
 $ npx prisma migrate deploy         # against the db-push-synced database
 Error: P3005 — the database schema is not empty   (Section 3)
 
-$ npx prisma migrate resolve --applied <each of the 9 migrations>
-Migration <name> marked as applied.   (x9)
+$ npx prisma migrate resolve --applied <each migration>
+Migration <name> marked as applied.   (one per migration)
 
 $ npx prisma migrate status         # after baselining
 Database schema is up to date!
@@ -316,3 +322,53 @@ connected to.
   done — if it turns out to be needed at all — by whoever performs the
   Railway verification in Section 3, using `prisma migrate diff` against
   the real production database once its state is known.
+
+## 9. Prisma connection pool footprint (final closure-pass addendum)
+
+PROVEN FROM CODE. Every process this application runs is `node server.js`
+(`npm start`/`npm run dev` both boot through it — see CLAUDE.md), and
+exactly two `PrismaClient` instances exist per such process, confirmed by
+`grep -rn "new PrismaClient" --include=*.js --include=*.ts .` outside
+`node_modules`:
+
+1. **`server.js`'s own client** (its `const prisma = new PrismaClient({
+   adapter: new PrismaPg({ connectionString: ..., connectionTimeoutMillis:
+   5000 }) })`) — used for socket-relay authorization queries and the
+   boot-time legacy-password migration. **No `max` is set on its `PrismaPg`
+   adapter**, so it takes `pg`'s own `Pool` default, which is **10**.
+2. **`src/lib/db.ts`'s singleton** (`globalForPrisma.prisma`) — used by
+   every Next.js API route (~220 handlers) via the same process, since
+   `server.js` hands API requests to Next's own request handler in-process
+   rather than spawning a separate server. Its adapter sets `max: 20`
+   explicitly.
+
+**Worst case per process (per Railway replica): 10 + 20 = 30 concurrent
+Postgres connections**, if both pools are simultaneously saturated. This
+is the number that matters — not "singleton", which is true of each
+client individually but says nothing about the combined footprint of the
+two that coexist in the same process.
+
+At today's confirmed single-replica deployment, that is the whole
+picture: **30 connections, worst case, total** against whatever
+`max_connections` the production Postgres instance is configured with
+(unmanaged from this repository - **REQUIRES RAILWAY VERIFICATION** to
+confirm the actual configured limit and how much of it other consumers,
+e.g. a human running `prisma studio` against the same database, already
+use). Standard PostgreSQL ships with `max_connections = 100`; 30 is 30%
+of that default, leaving real headroom, but this repository cannot
+confirm Railway's managed Postgres offering uses that same default rather
+than a lower per-plan cap.
+
+**If this service is ever scaled to N replicas**, the worst-case footprint
+scales linearly with it: `30 × N`. N=3 (90 connections) already consumes
+nearly the entire default 100-connection budget before any other consumer
+(an admin running Studio, a one-off script, a second service sharing the
+same database) is counted — at that point either the two pools' `max`
+values need to shrink, or the database's own `max_connections` needs to
+be confirmed to exceed the actual replica count's total. This is a real,
+quantifiable constraint on how far this service can scale horizontally
+without a database-side change, not merely a theoretical one - it should
+be re-checked before Railway's replica count is ever raised above 1, and
+is exactly the kind of fact the Socket.IO Redis adapter and the Redis-
+backed call registry (see the closure-pass report) were made
+multi-instance-safe in anticipation of.

@@ -19,6 +19,22 @@ name: Native iOS App Build
 # no trigger could reach. A gate that cannot observe its own input is not
 # a gate.
 #
+# Same reasoning for src/app/api/music/artists/route.ts: Tools/
+# verify-artist-contract.py hardcodes that route's exact per-field
+# request-body rule (see its own header comment - this is what previously
+# erased artists' bios) and is the one thing standing between a backend
+# change to that route and this app silently sending it a body shape the
+# route no longer expects. Without this path, the backend side of that
+# exact contract could drift with no red build anywhere - a change to
+# ios-native/** would still catch a client-side drift, but not a
+# server-side one, and the check exists precisely to catch either.
+# There is currently no equivalent static contract check - or backend
+# trigger - for any OTHER API route this app calls, and no such check at
+# all on the Android side (android-native-build.yml has no static-checks
+# job); widening this beyond the one route an actual check already
+# verifies would trigger the full macOS build on unrelated backend
+# changes without adding any real coverage - see the closure report.
+#
 # Runs on GitHub's macOS infrastructure because Xcode is the only thing
 # that can compile an iOS app, and it is not available in every
 # development environment. The static checks in the first job run
@@ -30,12 +46,14 @@ on:
     paths:
       - "ios-native/**"
       - "src/lib/translations.ts"
+      - "src/app/api/music/artists/route.ts"
       - ".github/workflows/ios-native-build.yml"
   push:
     branches: [main]
     paths:
       - "ios-native/**"
       - "src/lib/translations.ts"
+      - "src/app/api/music/artists/route.ts"
       - ".github/workflows/ios-native-build.yml"
 
 permissions:
