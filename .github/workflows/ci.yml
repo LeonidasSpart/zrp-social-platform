@@ -144,8 +144,13 @@ jobs:
       # NOT exercise the migration path, so this workflow must not be read
       # as evidence that migrations are healthy. They are a separate,
       # known, unresolved problem.
+      # --skip-generate was removed in Prisma 7 (db push no longer
+      # generates the client as a side effect at all, skippable or
+      # not - confirmed directly: its own file's mtime never changes
+      # across a `db push` run). The explicit "Generate Prisma client"
+      # step below still does the necessary work either way.
       - name: Create the test schema
-        run: npx prisma db push --skip-generate --accept-data-loss
+        run: npx prisma db push --accept-data-loss
 
       - name: Generate Prisma client
         run: npx prisma generate

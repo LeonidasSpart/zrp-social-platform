@@ -2,9 +2,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ⚠️ Prisma 7+: the connection URL no longer lives here - it moved to
+// prisma.config.ts (for the CLI: generate/migrate/studio) and to the
+// PrismaPg driver adapter passed into `new PrismaClient({ adapter })`
+// in src/lib/db.ts (for the running app). Prisma 7 rejects a `url` on
+// this block outright (P1012) - see https://pris.ly/d/config-datasource.
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
