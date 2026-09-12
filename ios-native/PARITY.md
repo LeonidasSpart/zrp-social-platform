@@ -420,6 +420,9 @@ what is, to them, the same slot. The website fetches once on mount too.
 | Add / remove members | `POST`/`DELETE .../participants` — OWNER only | ✅ | ✅ | ⬜ | MISSING |
 | Reactions / replies / edit in a group | — | ⬜ | ⬜ | ⬜ **no backend for it**: `GROUP_MESSAGE_INCLUDE` attaches only `sender`, and no route acts on a group message beyond deleting your own. Absent on every platform, not an iOS gap | n/a |
 
+| Presence (online dots) | `get-status` / `user-status` over the socket | ✅ | ✅ | ✅ shared `PresenceStore`; asks on open and re-asks on reconnect, because presence is per-connection server-side. An unreported user shows **no dot** rather than a grey one — absent is "not known", not "offline" | IMPLEMENTED |
+| Conversation deleted by the other party | `conversation-deleted` | ✅ | ✅ | ✅ the row disappears instead of sitting there until a manual refresh and then opening an empty thread | IMPLEMENTED |
+
 The Messages badge is fixed by the inbox, not by badge code.
 `GET /api/messages/unread` returns `directCount + groupCount`; iOS read
 that while its inbox showed only direct threads, so a group message

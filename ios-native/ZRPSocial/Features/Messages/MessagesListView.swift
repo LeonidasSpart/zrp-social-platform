@@ -31,13 +31,58 @@ final class MessagesListViewModel: ObservableObject {
 
     private let repository: MessagesRepositoryProtocol
     private let conversationsRepository: ConversationsRepositoryProtocol
+    private let socket: ZrpSocket
+    private var socketToken: UUID?
 
     init(
         repository: MessagesRepositoryProtocol = MessagesRepository(),
-        conversationsRepository: ConversationsRepositoryProtocol = ConversationsRepository()
+        conversationsRepository: ConversationsRepositoryProtocol = ConversationsRepository(),
+        socket: ZrpSocket? = nil
     ) {
         self.repository = repository
         self.conversationsRepository = conversationsRepository
+        // Not a default argument: a default is evaluated outside the
+        // actor, and `ZrpSocket.shared` is main-actor isolated.
+        self.socket = socket ?? .shared
+    }
+
+    private struct ConversationDeleted: Decodable {
+        let withUserId: String?
+    }
+
+    /// Watches for a conversation the other party deleted, and for
+    /// messages arriving in threads not currently open.
+    ///
+    /// Without this, a thread the other person deleted stayed on screen
+    /// until the next manual refresh - tapping it opened an empty
+    /// conversation with no explanation.
+    func startWatching() {
+        socket.connect()
+        guard socketToken == nil else { return }
+        socketToken = socket.subscribe { [weak self] event in
+            guard let self else { return }
+            switch event.name {
+            case "conversation-deleted":
+                guard let payload = try? JSONDecoder()
+                    .decode(ConversationDeleted.self, from: event.data),
+                      let partnerId = payload.withUserId
+                else { return }
+                self.conversations.removeAll { $0.partner.id == partnerId }
+
+            // A message in a thread that is not open still changes this
+            // list: its preview, its order, and its unread count.
+            case "receive-message", "receive-group-message":
+                Task { await self.load() }
+
+            default:
+                break
+            }
+        }
+    }
+
+    func stopWatching() {
+        if let socketToken { socket.unsubscribe(socketToken) }
+        socketToken = nil
     }
 
     func loadIfNeeded() async {
@@ -109,6 +154,7 @@ struct MessagesListView: View {
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var navigator: Navigator
     @EnvironmentObject private var unread: UnreadBadgeViewModel
+    @EnvironmentObject private var presence: PresenceStore
     @StateObject private var viewModel = MessagesListViewModel()
     @State private var pendingDelete: ConversationSummary?
 
@@ -136,7 +182,11 @@ struct MessagesListView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.messagesTitle))
         .navigationBarTitleDisplayMode(.inline)
-        .task { await viewModel.loadIfNeeded() }
+        .task {
+            viewModel.startWatching()
+            await viewModel.loadIfNeeded()
+        }
+        .onDisappear { viewModel.stopWatching() }
         // Reading a thread advances lastReadAt server-side, but the tab
         // badge is only refetched when the Messages tab is SELECTED -
         // and popping back from a thread does not change tabs. So the
@@ -144,6 +194,14 @@ struct MessagesListView: View {
         // and came back. Refreshing whenever this list appears is the
         // one place that covers both thread kinds.
         .onAppear { Task { await unread.refresh() } }
+        // Ask for each partner's current status. The broadcast only
+        // covers transitions that happen while watching; someone who
+        // came online before this screen opened would otherwise never
+        // be reported at all.
+        .onChange(of: viewModel.conversations) { _, list in
+            presence.watch(list.map(\.partner.id))
+        }
+        .task { presence.watch(viewModel.conversations.map(\.partner.id)) }
         .confirmationDialog(
             Text(.messagesDeleteConversation),
             isPresented: Binding(
@@ -294,6 +352,10 @@ struct MessagesListView: View {
                     displayName: summary.partner.displayName,
                     size: ZrpMetrics.avatarMedium
                 )
+                .overlay(alignment: .bottomTrailing) {
+                    PresenceDot(userId: summary.partner.id)
+                        .overlay(Circle().strokeBorder(ZrpColor.surface, lineWidth: 2))
+                }
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: ZrpSpacing.xs) {
