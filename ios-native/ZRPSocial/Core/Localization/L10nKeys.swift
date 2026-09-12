@@ -2204,6 +2204,10 @@ enum L10nKey: String, CaseIterable {
     case adminUsersStatusAll = "adminUsers.statusAll"
     /// en: "Verified"
     case adminUsersBadgeVerified = "adminUsers.badgeVerified"
+    /// en: "Recruitment"
+    case composerRecruitment = "composer.recruitment"
+    /// en: "Article"
+    case composerArticle = "composer.article"
     /// en: "Bookmark"
     case iosA11yBookmark = "ios.a11y.bookmark"
     /// en: "Remove bookmark"
@@ -2522,6 +2526,8 @@ enum L10nKey: String, CaseIterable {
     case iosActionDone = "ios.action.done"
     /// en: "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings."
     case iosChatMicDenied = "ios.chat.micDenied"
+    /// en: "Apply Now"
+    case iosPostApplyNow = "ios.post.applyNow"
 }
 
 extension L10nKey {

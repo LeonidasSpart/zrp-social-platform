@@ -1172,3 +1172,8 @@ about.subtitle
 # three words, already translated, taken from elsewhere in the dictionary.
 adminUsers.statusAll
 adminUsers.badgeVerified
+
+# The two post kinds that share the Post table with an ordinary post.
+# Both labels are the web post card's own, already translated.
+composer.recruitment
+composer.article

@@ -1098,3 +1098,5 @@
 "about.subtitle" = "Первая швейцарская европейская социальная платформа";
 "adminUsers.statusAll" = "Все";
 "adminUsers.badgeVerified" = "Подтверждённый";
+"composer.recruitment" = "Вакансия";
+"composer.article" = "Статья";
