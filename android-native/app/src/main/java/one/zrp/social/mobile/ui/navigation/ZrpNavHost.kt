@@ -68,6 +68,7 @@ import one.zrp.social.mobile.ui.ambassadors.AmbassadorsScreen
 import one.zrp.social.mobile.ui.charity.CharityLedgerSection
 import one.zrp.social.mobile.ui.transparency.TransparencyScreen
 import one.zrp.social.mobile.ui.legal.LegalScreen
+import one.zrp.social.mobile.ui.pricing.PricingScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
@@ -302,6 +303,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToTransparency: () -> Unit = { navController.navigate("transparency") }
     val goToFaq: () -> Unit = { navController.navigate("legal/faq") }
     val goToCommunityCode: () -> Unit = { navController.navigate("legal/communityCode") }
+    val goToPricing: () -> Unit = { navController.navigate("settings/pricing") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -1127,6 +1129,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenAmbassadors = goToAmbassadors,
                     onOpenFaq = goToFaq,
                     onOpenCommunityCode = goToCommunityCode,
+                    onOpenPricing = goToPricing,
                 )
             }
             composable("settings/team") {
@@ -1134,6 +1137,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("settings/api-keys") {
                 ApiKeysScreen(onBack = { navController.popBackStack() })
+            }
+            composable("settings/pricing") {
+                PricingScreen(currentPlan = currentUser?.plan, onBack = { navController.popBackStack() })
             }
             composable("legal/terms") {
                 LegalScreen(
