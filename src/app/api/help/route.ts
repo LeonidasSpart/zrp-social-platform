@@ -12,6 +12,7 @@ import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
 import { HELP_CATEGORIES, HELP_NEED_TYPES, type HelpCategory, type HelpNeedType } from "@/lib/help";
 import { Prisma } from "@prisma/client";
+import { validateMediaUrls } from "@/lib/media-url";
 
 const ORGANIZER_SELECT = {
   id: true,
@@ -128,6 +129,15 @@ export async function POST(req: NextRequest) {
     const cleanProofUrls = Array.isArray(proofUrls)
       ? proofUrls.filter((u): u is string => typeof u === "string" && u.trim().length > 0).slice(0, 10)
       : [];
+
+    // ⚠️ SECURITY: same allowlist every other media-accepting create route
+    // uses (UploadThing uploads, the GIPHY picker) - this route never
+    // validated either field at all, letting a HELP campaign point at any
+    // attacker-chosen URL.
+    const mediaCheck = validateMediaUrls([...cleanImageUrls, ...cleanProofUrls]);
+    if (!mediaCheck.ok) {
+      return NextResponse.json({ error: mediaCheck.error }, { status: 400 });
+    }
 
     const campaign = await prisma.helpCampaign.create({
       data: {

@@ -46,6 +46,7 @@ import one.zrp.social.mobile.ui.admin.AdminAuditLogScreen
 import one.zrp.social.mobile.ui.admin.AdminCharityDisbursementsScreen
 import one.zrp.social.mobile.ui.admin.AdminDashboardScreen
 import one.zrp.social.mobile.ui.admin.AdminHelpScreen
+import one.zrp.social.mobile.ui.admin.AdminHelpWithdrawalsScreen
 import one.zrp.social.mobile.ui.admin.AdminJournalistsScreen
 import one.zrp.social.mobile.ui.admin.AdminMarketplaceScreen
 import one.zrp.social.mobile.ui.admin.AdminMusicArtistsScreen
@@ -68,6 +69,7 @@ import one.zrp.social.mobile.ui.ambassadors.AmbassadorsScreen
 import one.zrp.social.mobile.ui.charity.CharityLedgerSection
 import one.zrp.social.mobile.ui.transparency.TransparencyScreen
 import one.zrp.social.mobile.ui.legal.LegalScreen
+import one.zrp.social.mobile.ui.pricing.PricingScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
@@ -287,6 +289,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToAdminSupportTicket: (String) -> Unit = { id -> navController.navigate("admin/support/$id") }
     val goToAdminPayments: () -> Unit = { navController.navigate("admin/payments") }
     val goToAdminWithdrawals: () -> Unit = { navController.navigate("admin/withdrawals") }
+    val goToAdminHelpWithdrawals: () -> Unit = { navController.navigate("admin/help-withdrawals") }
     val goToAdminUpgradeRequests: () -> Unit = { navController.navigate("admin/upgrade-requests") }
     val goToAdminNewsNetwork: () -> Unit = { navController.navigate("admin/news-network") }
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
@@ -302,6 +305,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToTransparency: () -> Unit = { navController.navigate("transparency") }
     val goToFaq: () -> Unit = { navController.navigate("legal/faq") }
     val goToCommunityCode: () -> Unit = { navController.navigate("legal/communityCode") }
+    val goToPricing: () -> Unit = { navController.navigate("settings/pricing") }
     val goToQuotePost: (String) -> Unit = { postId -> navController.navigate("post/$postId/quote") }
     val goToReposts: (String) -> Unit = { postId -> navController.navigate("post/$postId/reposts") }
     val goToQuotes: (String) -> Unit = { postId -> navController.navigate("post/$postId/quotes") }
@@ -1127,6 +1131,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenAmbassadors = goToAmbassadors,
                     onOpenFaq = goToFaq,
                     onOpenCommunityCode = goToCommunityCode,
+                    onOpenPricing = goToPricing,
                 )
             }
             composable("settings/team") {
@@ -1134,6 +1139,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("settings/api-keys") {
                 ApiKeysScreen(onBack = { navController.popBackStack() })
+            }
+            composable("settings/pricing") {
+                PricingScreen(currentPlan = currentUser?.plan, onBack = { navController.popBackStack() })
             }
             composable("legal/terms") {
                 LegalScreen(
@@ -1238,13 +1246,14 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenMusicArtists = goToAdminMusicArtists,
                     onOpenNews = goToAdminNews,
                     onOpenAmbassadors = goToAdminAmbassadors,
-                    // The support tools and the three financial queues
+                    // The support tools and the four financial queues
                     // are the admin sections the website itself gates
                     // on the real ADMIN role instead of staff (every
                     // /api/admin/support, /api/admin/payments,
-                    // /api/admin/withdrawals and /api/upgrade-requests
-                    // route is requireAdmin), so a MODERATOR never gets
-                    // their quick actions or the screens below.
+                    // /api/admin/withdrawals, /api/admin/help-withdrawals
+                    // and /api/upgrade-requests route is requireAdmin),
+                    // so a MODERATOR never gets their quick actions or
+                    // the screens below.
                     isAdmin = isAdminRole,
                     onOpenSupport = goToAdminSupport,
                     onOpenAnalytics = goToAdminAnalytics,
@@ -1253,6 +1262,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenCharityDisbursements = goToAdminCharityDisbursements,
                     onOpenPayments = goToAdminPayments,
                     onOpenWithdrawals = goToAdminWithdrawals,
+                    onOpenHelpWithdrawals = goToAdminHelpWithdrawals,
                     onOpenUpgradeRequests = goToAdminUpgradeRequests,
                     onOpenNewsNetwork = goToAdminNewsNetwork,
                 )
@@ -1352,15 +1362,19 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenTicket = goToAdminSupportTicket,
                 )
             }
-            // The three financial queues, all requireAdmin server-side
-            // (verifying a payment, paying a creator out and approving
-            // a plan upgrade all move real money), so each takes the
-            // same isAdmin flag the support tools do.
+            // The four financial queues, all requireAdmin server-side
+            // (verifying a payment, paying a creator or HELP-campaign
+            // organizer out, and approving a plan upgrade all move real
+            // money), so each takes the same isAdmin flag the support
+            // tools do.
             composable("admin/payments") {
                 AdminPaymentsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
             }
             composable("admin/withdrawals") {
                 AdminWithdrawalsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+            }
+            composable("admin/help-withdrawals") {
+                AdminHelpWithdrawalsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
             }
             composable("admin/upgrade-requests") {
                 AdminUpgradeRequestsScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })

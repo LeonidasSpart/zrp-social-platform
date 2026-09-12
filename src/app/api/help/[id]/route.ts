@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { isSessionAdmin } from "@/lib/admin";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { HELP_CATEGORIES, HELP_NEED_TYPES, type HelpCategory, type HelpNeedType } from "@/lib/help";
+import { validateMediaUrls } from "@/lib/media-url";
 
 const ORGANIZER_SELECT = {
   id: true,
@@ -93,6 +94,28 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Description is required (max 8000 characters)." }, { status: 400 });
     }
 
+    // ⚠️ SECURITY: same allowlist every other media-accepting route uses -
+    // this route never validated either field at all, letting an edit
+    // point the campaign at any attacker-chosen URL. Existing stored
+    // values are exempt so the edit form re-sending them (or a pre-
+    // hardening legacy value already on the campaign) still works.
+    const cleanImageUrls = Array.isArray(imageUrls)
+      ? imageUrls.filter((u): u is string => typeof u === "string" && u.trim().length > 0).slice(0, 15)
+      : undefined;
+    const cleanProofUrls = Array.isArray(proofUrls)
+      ? proofUrls.filter((u): u is string => typeof u === "string" && u.trim().length > 0).slice(0, 10)
+      : undefined;
+    const alreadyStored = new Set([...existing.imageUrls, ...existing.proofUrls]);
+    const newUrlsToValidate = [...(cleanImageUrls ?? []), ...(cleanProofUrls ?? [])].filter(
+      (u) => !alreadyStored.has(u)
+    );
+    if (newUrlsToValidate.length > 0) {
+      const mediaCheck = validateMediaUrls(newUrlsToValidate);
+      if (!mediaCheck.ok) {
+        return NextResponse.json({ error: mediaCheck.error }, { status: 400 });
+      }
+    }
+
     const substantiveChange =
       (category && category !== existing.category) ||
       (title && title.trim() !== existing.title) ||
@@ -113,12 +136,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(title ? { title: title.trim() } : {}),
         ...(description ? { description: description.trim() } : {}),
         ...(location !== undefined ? { location: typeof location === "string" ? location.trim().slice(0, 150) || null : null } : {}),
-        ...(Array.isArray(imageUrls)
-          ? { imageUrls: imageUrls.filter((u): u is string => typeof u === "string" && u.trim().length > 0).slice(0, 15) }
-          : {}),
-        ...(Array.isArray(proofUrls)
-          ? { proofUrls: proofUrls.filter((u): u is string => typeof u === "string" && u.trim().length > 0).slice(0, 10) }
-          : {}),
+        ...(cleanImageUrls !== undefined ? { imageUrls: cleanImageUrls } : {}),
+        ...(cleanProofUrls !== undefined ? { proofUrls: cleanProofUrls } : {}),
         status: nextStatus,
         ...(nextStatus === "PENDING_REVIEW" ? { rejectionReason: null, reviewedBy: null, reviewedAt: null } : {}),
       },

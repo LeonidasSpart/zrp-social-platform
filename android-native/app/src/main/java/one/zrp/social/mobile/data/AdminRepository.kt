@@ -8,6 +8,7 @@ import one.zrp.social.mobile.network.AdminAppealsResponse
 import one.zrp.social.mobile.network.AdminAuditLogResponse
 import one.zrp.social.mobile.network.AdminCharityDisbursementsResponse
 import one.zrp.social.mobile.network.AdminHelpResponse
+import one.zrp.social.mobile.network.AdminHelpWithdrawal
 import one.zrp.social.mobile.network.AdminJournalistsResponse
 import one.zrp.social.mobile.network.AdminMarketplaceResponse
 import one.zrp.social.mobile.network.AdminMusicArtistsResponse
@@ -471,6 +472,33 @@ class AdminRepository {
     suspend fun rejectWithdrawal(id: String): Result<Unit> {
         return try {
             ApiClient.adminApi.rejectWithdrawal(id)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to reject this withdrawal."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    // ─── HELP campaign withdrawals (ADMIN only, server-side) ─────────
+    suspend fun getHelpWithdrawals(status: String): Result<List<AdminHelpWithdrawal>> = runCatching {
+        ApiClient.adminApi.getHelpWithdrawals(status)
+    }
+
+    suspend fun approveHelpWithdrawal(id: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.approveHelpWithdrawal(id)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to approve this withdrawal."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
+    suspend fun rejectHelpWithdrawal(id: String): Result<Unit> {
+        return try {
+            ApiClient.adminApi.rejectHelpWithdrawal(id)
             Result.success(Unit)
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to reject this withdrawal."))
