@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- allowBackup="false": this WebView loads the live, authenticated
+         zrp.one session (see capacitor.config.ts - server.url), so its
+         cookie jar/local storage IS the session. android-native's own
+         manifest already made this exact fix (see its identical
+         comment) for the token it stores locally; this Capacitor shell
+         is the one actually published today, so a backup of its WebView
+         data would let a physically-accessible, unlocked device's
+         session be extracted via `adb backup` (or restored via Android's
+         Auto Backup to another device) without ever touching the
+         httpOnly cookie the browser itself protects. -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"

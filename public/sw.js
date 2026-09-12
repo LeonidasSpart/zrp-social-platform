@@ -132,19 +132,40 @@ self.addEventListener('fetch', (event) => {
 });
 
 // ─── Push Notification handling ──────────────────────────────────
+// ⚠️ Every push event MUST result in a shown notification. This used to
+// call event.data.json() directly, outside any try/catch and before
+// event.waitUntil() - a push whose body isn't valid JSON (malformed
+// delivery, a future payload shape this worker doesn't know about yet)
+// threw synchronously and skipped showNotification() entirely. Browsers
+// treat a silent push as a violation of the Push API contract: Chrome
+// injects its own generic "this site has been updated in the
+// background" notification, and iOS/Safari's web push implementation
+// can revoke the subscription outright after repeated events that never
+// show anything - silently breaking push forever for that user, with no
+// error surfaced anywhere the app could detect it. Parsing now happens
+// inside the same waitUntil'd async function, wrapped so a malformed
+// payload still produces a fallback notification instead of an
+// unhandled rejection.
 self.addEventListener('push', (event) => {
-  const data = event.data?.json() || {};
-  const options = {
-    body: data.body || 'You have a new notification.',
-    icon: '/logo.png',
-    badge: '/logo.png',
-    vibrate: [200, 100, 200],
-    data: {
-      url: data.url || '/',
-    },
-  };
   event.waitUntil(
-    self.registration.showNotification(data.title || 'ZRP Social', options)
+    (async () => {
+      let data = {};
+      try {
+        if (event.data) data = event.data.json();
+      } catch (e) {
+        console.warn('Push payload was not valid JSON, showing a fallback notification:', e);
+      }
+      const options = {
+        body: data.body || 'You have a new notification.',
+        icon: '/logo.png',
+        badge: '/logo.png',
+        vibrate: [200, 100, 200],
+        data: {
+          url: data.url || '/',
+        },
+      };
+      await self.registration.showNotification(data.title || 'ZRP Social', options);
+    })()
   );
 });
 
