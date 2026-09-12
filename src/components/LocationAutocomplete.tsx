@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import { MapPin, Loader2 } from "lucide-react";
 
 interface LocationAutocompleteProps {
@@ -27,6 +27,7 @@ export default function LocationAutocomplete({
   const [showDropdown, setShowDropdown] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputId = useId();
 
   // ─── Fetch suggestions from Nominatim ──────────────────────────
   useEffect(() => {
@@ -89,13 +90,17 @@ export default function LocationAutocomplete({
   return (
     <div className="relative w-full" ref={wrapperRef}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor={inputId}
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           {label}
         </label>
       )}
       <div className="relative">
         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
+          id={inputId}
           type="text"
           value={inputValue}
           onChange={handleInputChange}

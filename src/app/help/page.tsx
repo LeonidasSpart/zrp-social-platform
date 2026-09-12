@@ -1468,6 +1468,7 @@ export default function HelpPage() {
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder={t("help.hero.searchPlaceholder")}
+                  aria-label={t("help.hero.searchPlaceholder")}
                   className="w-full rounded-2xl border border-white/10 bg-white/10 backdrop-blur-xl pl-14 pr-5 py-4 text-white placeholder:text-white/40 outline-none focus:border-zrp-red/70 focus:ring-2 focus:ring-zrp-red/20 transition"
                 />
               </div>

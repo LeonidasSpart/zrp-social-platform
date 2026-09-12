@@ -217,6 +217,7 @@ export default function MusicShell() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t("music.shell.searchPlaceholder")}
+                aria-label={t("music.shell.searchPlaceholder")}
                 className="w-full h-11 pl-11 pr-4 rounded-full bg-gray-100 dark:bg-white/[0.07] border border-transparent focus:border-zrp-red/40 outline-none transition text-sm"
               />
             </div>

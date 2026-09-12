@@ -85,6 +85,7 @@ export default function SearchPage() {
         <input
           type="text"
           placeholder={t("search.placeholder")}
+          aria-label={t("search.placeholder")}
           value={query}
           onChange={(e) => {
             const newQuery = e.target.value;

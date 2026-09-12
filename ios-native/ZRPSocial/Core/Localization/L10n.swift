@@ -75,10 +75,33 @@ enum L10n {
 
     /// Look up `key` in the active language.
     static func string(_ key: L10nKey) -> String {
-        let bundle = overrideBundle ?? .main
-        // `value:` is the key itself so a genuinely missing key is
-        // visible in a screenshot rather than silently rendering empty.
-        return bundle.localizedString(forKey: key.rawValue, value: key.rawValue, table: nil)
+        guard let overrideBundle else {
+            // No explicit in-app language chosen: `Bundle.main` carries
+            // every shipped .lproj at once, so Foundation's own
+            // resolution already cascades a key missing from the
+            // system language to the app's development language (en)
+            // before ever falling back to the raw key - exactly the
+            // "honest fallback" Tools/ios-extra-strings.json documents
+            // for the ios.* keys that have no translation yet.
+            return Bundle.main.localizedString(forKey: key.rawValue, value: key.rawValue, table: nil)
+        }
+
+        // An explicit override (the in-app language picker) points this
+        // at ONE single-language Bundle(path:) - unlike Bundle.main, it
+        // has no other .lproj to fall back to, so a key missing from
+        // that language alone would otherwise surface as the literal
+        // dotted key string on screen (e.g. "ios.a11y.postOptions"),
+        // which is worse than English: it isn't even a real word. Look
+        // up with `value: nil` first (Foundation's own contract: returns
+        // the key itself when not found) so a genuine miss can be
+        // detected and retried against `Bundle.main`, restoring the same
+        // development-language fallback the no-override path gets for
+        // free.
+        let overridden = overrideBundle.localizedString(forKey: key.rawValue, value: nil, table: nil)
+        if overridden != key.rawValue {
+            return overridden
+        }
+        return Bundle.main.localizedString(forKey: key.rawValue, value: key.rawValue, table: nil)
     }
 
     /// Look up `key` and substitute `{token}` placeholders.

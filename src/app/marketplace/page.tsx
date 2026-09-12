@@ -44,6 +44,7 @@ export default function MarketplaceHomePage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("marketplace.searchPlaceholder")}
+              aria-label={t("marketplace.searchPlaceholder")}
               className="w-full pl-9 pr-3 py-2.5 rounded-full bg-white/95 text-gray-900 focus:outline-none focus:ring-2 focus:ring-zrp-red"
             />
           </div>
