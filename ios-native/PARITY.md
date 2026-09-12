@@ -176,6 +176,10 @@ called and the real response being handled.
 | Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`, 4 MB); the route accepts an empty `content` **only** alongside an image and refuses both-empty with a 400 | ✅ | ✅ | ✅ one picture per message (the row stores a single `imageUrl`), uploaded on send rather than on selection, and a failed upload stops the send rather than silently dropping the picture | IMPLEMENTED |
+| Voice messages | `POST /api/messages` / `POST /api/conversations/{id}/messages` + UploadThing `chatAudio` (8 MB) | ✅ | ✅ | ✅ records AAC/M4A so every other client can play it back, tap-to-start and tap-to-send (not hold-to-record, which is unusable with VoiceOver), a live level meter, and a shared player so a second note stops the first. Sent as `🎤 Voice message (m:ss)` — **that marker is the wire format**, not decoration: `Message` has no type column, so it is the only thing telling web and Android what the `imageUrl` is | IMPLEMENTED |
+| Video attachments in chat | UploadThing `chatVideo` (32 MB) | ✅ | ✅ | ✅ picked from the library, sent as `🎬 Video`, played inline with AVKit | IMPLEMENTED |
+| Document attachments | UploadThing `chatFile` (8 MB, `pdf`/`text`/`blob`) | ✅ | ✅ | ✅ picked from Files, sent as `📎 {filename}`, rendered as a file card that opens in whatever the device has. The picker allows any file type because the router's `blob` category does — narrowing it would hide files the server would accept | IMPLEMENTED |
+| Reading attachments sent from web/Android | the same four markers | ✅ | ✅ | ✅ `ChatAttachment.swift` decodes `🎬`/`🎤`/`📎`/none into video, voice, document and image. Both halves matter: sending without the marker renders as a broken image everywhere, and reading a `🎤` as an image does the same here. VoiceOver announces the real kind rather than "Photo" for all four | IMPLEMENTED |
 
 ### ZRP PLAY
 

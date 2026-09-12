@@ -860,3 +860,4 @@
 "chat.recordVoiceMessage" = "Sesli mesaj kaydet";
 "chat.uploadImage" = "Resim yükle";
 "chat.downloadImage" = "Resmi indir";
+"shorts.upload.chooseVideo" = "Bir video seçin";

@@ -903,3 +903,6 @@ chat.uploadDocument
 chat.recordVoiceMessage
 chat.uploadImage
 chat.downloadImage
+
+# Attachment picker.
+shorts.upload.chooseVideo

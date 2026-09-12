@@ -82,15 +82,25 @@
 	</array>
 
 	<!--
-	  Deliberately absent. Apple rejects permissions an app does not
-	  actually use, and every one of these would be exactly that:
+	  Voice messages in chat record audio, so the microphone permission
+	  is now genuinely used and is declared. This is not optional
+	  paperwork: iOS TERMINATES the process the moment an app asks for
+	  the microphone without this key - it is a crash, not a denial.
+	  Removing it while VoiceRecorder exists would take the app down the
+	  first time somebody tapped the mic button.
+	-->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>ZRP uses the microphone to record voice messages you send in chat.</string>
+
+	<!--
+	  Still deliberately absent. Apple rejects permissions an app does
+	  not actually use, and each of these would be exactly that:
 	    NSPhotoLibraryUsageDescription  PhotosPicker is out-of-process
 	                                    and needs no permission at all
 	    NSCameraUsageDescription        no ZRP client captures from the
 	                                    camera - not the web app, not
 	                                    Android - so there is no product
 	                                    reason to ask for it here
-	    NSMicrophoneUsageDescription    likewise: nothing records audio
 	    UIBackgroundModes remote-notification
 	                                    push, BLOCKED on B3
 	  See ios-native/PARITY.md.

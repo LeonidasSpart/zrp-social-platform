@@ -395,6 +395,69 @@ final class ConversationViewModel: ObservableObject {
         }
     }
 
+    /// Sends a video, a document or a voice note.
+    ///
+    /// Its own path rather than a branch inside `send()`, because these
+    /// three are **not** a caption plus a file: the marker IS the
+    /// message body (see `ChatAttachment.swift`), so the typed draft is
+    /// left untouched in the composer rather than being merged in and
+    /// pushing the marker off the front of the string - which would make
+    /// every client, this one included, render the attachment as a
+    /// broken image.
+    func send(attachment: PendingChatAttachment) async {
+        guard !isSending else { return }
+        isSending = true
+        uploadProgress = 0
+        defer {
+            isSending = false
+            uploadProgress = nil
+            // The temporary copy has served its purpose whether the
+            // upload succeeded or not; leaving it behind would keep a
+            // 32MB video in the container until iOS purged it.
+            attachment.discard()
+        }
+
+        let uploadedUrl: String
+        do {
+            let uploaded = try await uploads.upload(
+                attachment.asUploadCandidate(),
+                to: attachment.slug,
+                onProgress: { [weak self] progress in
+                    Task { @MainActor in self?.uploadProgress = progress }
+                }
+            )
+            uploadedUrl = uploaded.url
+        } catch UploadThingClient.UploadError.cancelled {
+            return
+        } catch {
+            // Each chat router has its own size cap - 32MB video, 8MB
+            // audio, 8MB document - and the refusal names it.
+            errorMessage = (error as? ApiError)?.userFacingMessage
+                ?? L10n.string(.composerErrUploadFailed)
+            return
+        }
+
+        do {
+            let sent = try await repository.send(
+                to: partner.id,
+                content: attachment.messageContent,
+                imageUrl: uploadedUrl,
+                replyToId: nil
+            )
+            if !messages.contains(where: { $0.id == sent.id }) {
+                messages.append(sent)
+            }
+            socket.emit(
+                "send-message",
+                ["receiverId": partner.id, "content": sent.content, "messageId": sent.id]
+            )
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
+        }
+    }
+
     func edit(_ message: Message, to content: String) async {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }

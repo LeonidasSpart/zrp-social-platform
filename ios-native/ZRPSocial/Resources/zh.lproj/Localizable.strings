@@ -860,3 +860,4 @@
 "chat.recordVoiceMessage" = "录制语音消息";
 "chat.uploadImage" = "上传 图片";
 "chat.downloadImage" = "下载 图片";
+"shorts.upload.chooseVideo" = "选择视频";

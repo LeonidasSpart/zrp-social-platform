@@ -860,3 +860,4 @@
 "chat.recordVoiceMessage" = "تسجيل رسالة صوتية";
 "chat.uploadImage" = "رفع صورة";
 "chat.downloadImage" = "تنزيل صورة";
+"shorts.upload.chooseVideo" = "اختر فيديو";

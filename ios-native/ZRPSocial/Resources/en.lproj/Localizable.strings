@@ -860,6 +860,7 @@
 "chat.recordVoiceMessage" = "Record a voice message";
 "chat.uploadImage" = "Upload image";
 "chat.downloadImage" = "Download image";
+"shorts.upload.chooseVideo" = "Choose a video";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -1021,3 +1022,4 @@
 "ios.group.suggested" = "Suggested";
 "ios.group.removePhoto" = "Remove group photo";
 "ios.action.done" = "Done";
+"ios.chat.micDenied" = "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings.";

@@ -10,6 +10,7 @@ struct ConversationView: View {
 
     @FocusState private var isComposerFocused: Bool
     @State private var pickerSelection: [PhotosPickerItem] = []
+    @StateObject private var voiceRecorder = VoiceRecorder()
     @State private var editing: Message?
     @State private var editDraft = ""
 
@@ -64,7 +65,15 @@ struct ConversationView: View {
                 ChatContactSheet(partner: viewModel.partner, messages: viewModel.messages)
             }
             .task { await viewModel.start() }
-            .onDisappear { viewModel.stop() }
+            .onDisappear {
+                viewModel.stop()
+                // A half-finished recording is deleted rather than
+                // left in temporary storage with the microphone
+                // indicator still lit, and a note playing in a thread
+                // nobody is looking at is stopped.
+                voiceRecorder.discardIfRecording()
+                VoiceNotePlayer.shared.stop()
+            }
             .sheet(item: $editing) { message in
                 editSheet(for: message)
             }
@@ -232,54 +241,90 @@ struct ConversationView: View {
                 pendingImageRow(pending)
             }
 
-            HStack(alignment: .bottom, spacing: ZrpSpacing.md) {
-                // One picture per message: the route stores a single
-                // `imageUrl`, so offering a multi-select would promise
-                // something it cannot keep.
-                PhotosPicker(
-                    selection: $pickerSelection,
-                    maxSelectionCount: 1,
-                    matching: .images
-                ) {
-                    Image(systemName: "photo")
-                        .font(.title3)
-                        .foregroundStyle(ZrpColor.onSurfaceMuted)
-                        .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                        .contentShape(Rectangle())
-                }
-                .disabled(viewModel.isSending)
-                .accessibilityLabel(Text(.iosA11yAddPhoto))
-
-                TextField(
-                    L10n.string(.iosChatMessagePlaceholder),
-                    text: $viewModel.draft,
-                    axis: .vertical
-                )
-                .focused($isComposerFocused)
-                .font(.subheadline)
-                .lineLimit(1...5)
-                .padding(ZrpSpacing.md)
-                .background(ZrpColor.surfaceElevated)
-                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous))
-
-                Button {
-                    Task { await viewModel.send() }
-                } label: {
-                    if viewModel.isSending {
-                        ProgressView()
-                            .tint(ZrpColor.red)
-                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                    } else {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.title2)
-                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                    }
-                }
-                .disabled(viewModel.isSending || !viewModel.canSend)
-                .accessibilityLabel(Text(.iosA11ySendMessage))
+            // The pending-image row shows its own progress; this is for
+            // the attachments that send immediately and so never get one.
+            if let progress = viewModel.uploadProgress, viewModel.pendingImage == nil {
+                ProgressView(value: progress)
+                    .tint(ZrpColor.red)
+                    .padding(.horizontal, ZrpSpacing.lg)
+                    .accessibilityLabel(Text(.composerUploading))
             }
-            .padding(.horizontal, ZrpSpacing.lg)
-            .padding(.vertical, ZrpSpacing.sm)
+
+            if voiceRecorder.isRecording {
+                VoiceNoteComposer(
+                    recorder: voiceRecorder,
+                    onRecorded: { attachment in
+                        Task { await viewModel.send(attachment: attachment) }
+                    },
+                    isBusy: viewModel.isSending
+                )
+                .padding(.horizontal, ZrpSpacing.lg)
+                .padding(.vertical, ZrpSpacing.sm)
+            } else {
+                HStack(alignment: .bottom, spacing: ZrpSpacing.md) {
+                    // One picture per message: the route stores a single
+                    // `imageUrl`, so offering a multi-select would promise
+                    // something it cannot keep.
+                    PhotosPicker(
+                        selection: $pickerSelection,
+                        maxSelectionCount: 1,
+                        matching: .images
+                    ) {
+                        Image(systemName: "photo")
+                            .font(.title3)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                            .contentShape(Rectangle())
+                    }
+                    .disabled(viewModel.isSending)
+                    .accessibilityLabel(Text(.iosA11yAddPhoto))
+
+                    ChatAttachmentMenu(
+                        onPick: { attachment in
+                            Task { await viewModel.send(attachment: attachment) }
+                        },
+                        isBusy: viewModel.isSending
+                    )
+
+                    VoiceNoteComposer(
+                        recorder: voiceRecorder,
+                        onRecorded: { attachment in
+                            Task { await viewModel.send(attachment: attachment) }
+                        },
+                        isBusy: viewModel.isSending
+                    )
+
+                    TextField(
+                        L10n.string(.iosChatMessagePlaceholder),
+                        text: $viewModel.draft,
+                        axis: .vertical
+                    )
+                    .focused($isComposerFocused)
+                    .font(.subheadline)
+                    .lineLimit(1...5)
+                    .padding(ZrpSpacing.md)
+                    .background(ZrpColor.surfaceElevated)
+                    .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous))
+
+                    Button {
+                        Task { await viewModel.send() }
+                    } label: {
+                        if viewModel.isSending {
+                            ProgressView()
+                                .tint(ZrpColor.red)
+                                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                        } else {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .font(.title2)
+                                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                        }
+                    }
+                    .disabled(viewModel.isSending || !viewModel.canSend)
+                    .accessibilityLabel(Text(.iosA11ySendMessage))
+                }
+                .padding(.horizontal, ZrpSpacing.lg)
+                .padding(.vertical, ZrpSpacing.sm)
+            }
         }
         .background(.bar)
     }
@@ -424,15 +469,14 @@ private struct MessageBubble: View {
             // text line is drawn only when there is text - otherwise a
             // picture-only message would carry an empty caption strip.
             if let imageUrl = message.imageUrl, !imageUrl.isEmpty {
-                RemoteImage(url: imageUrl, targetSize: 320) {
-                    Rectangle().fill(ZrpColor.surfaceHighest)
-                }
-                .aspectRatio(contentMode: .fit)
-                .frame(maxWidth: 240, maxHeight: 320)
-                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
-                .accessibilityLabel(Text(.iosA11yMessagePhoto))
+                ChatAttachmentView(url: imageUrl, content: message.content, isOwn: isOwn)
             }
-            if !message.content.isEmpty {
+            // A marker IS the attachment's own label, so echoing it as a
+            // caption underneath would print "📎 report.pdf" below the
+            // file card that already says so.
+            if !message.content.isEmpty,
+               ChatAttachmentKind.of(message.content) == .image
+                   || message.imageUrl?.isEmpty != false {
                 Text(verbatim: message.content)
                     .font(.subheadline)
                     .foregroundStyle(isOwn ? .white : ZrpColor.onSurface)
@@ -474,12 +518,28 @@ private struct MessageBubble: View {
     /// accepts a picture alone - and reading an empty string would leave
     /// the bubble silent.
     private var accessibleBody: String {
-        let hasImage = message.imageUrl?.isEmpty == false
-        if message.content.isEmpty {
-            return hasImage ? L10n.string(.iosA11yMessagePhoto) : ""
+        guard message.imageUrl?.isEmpty == false else { return message.content }
+
+        // Each attachment kind announces itself. Reading "Photo" for a
+        // voice note or a PDF is worse than saying nothing, because it
+        // describes something that is not there.
+        switch ChatAttachmentKind.of(message.content) {
+        case .voice:
+            let duration = ChatAttachmentMarker.voiceDuration(from: message.content)
+            return [L10n.string(.chatRecordVoiceMessage), duration]
+                .compactMap { $0 }
+                .joined(separator: ", ")
+        case .document:
+            let name = ChatAttachmentMarker.documentName(from: message.content)
+            return [L10n.string(.chatAttachment), name]
+                .compactMap { $0 }
+                .joined(separator: ", ")
+        case .video:
+            return L10n.string(.iosA11yPlayVideo)
+        case .image:
+            let photo = L10n.string(.iosA11yMessagePhoto)
+            return message.content.isEmpty ? photo : "\(photo). \(message.content)"
         }
-        guard hasImage else { return message.content }
-        return "\(L10n.string(.iosA11yMessagePhoto)). \(message.content)"
     }
 
     private func replyContext(_ replyTo: RepliedMessage) -> some View {

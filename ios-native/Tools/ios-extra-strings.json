@@ -168,6 +168,7 @@
     "ios.group.untitled": "Group",
     "ios.group.suggested": "Suggested",
     "ios.group.removePhoto": "Remove group photo",
-    "ios.action.done": "Done"
+    "ios.action.done": "Done",
+    "ios.chat.micDenied": "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings."
   }
 }

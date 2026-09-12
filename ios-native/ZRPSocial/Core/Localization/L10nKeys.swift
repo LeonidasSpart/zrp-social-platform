@@ -1728,6 +1728,8 @@ enum L10nKey: String, CaseIterable {
     case chatUploadImage = "chat.uploadImage"
     /// en: "Download image"
     case chatDownloadImage = "chat.downloadImage"
+    /// en: "Choose a video"
+    case shortsUploadChooseVideo = "shorts.upload.chooseVideo"
     /// en: "Bookmark"
     case iosA11yBookmark = "ios.a11y.bookmark"
     /// en: "Remove bookmark"
@@ -2042,6 +2044,8 @@ enum L10nKey: String, CaseIterable {
     case iosGroupRemovePhoto = "ios.group.removePhoto"
     /// en: "Done"
     case iosActionDone = "ios.action.done"
+    /// en: "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings."
+    case iosChatMicDenied = "ios.chat.micDenied"
 }
 
 extension L10nKey {

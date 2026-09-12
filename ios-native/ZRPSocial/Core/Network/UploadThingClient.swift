@@ -83,7 +83,16 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
         case avatar
         case banner
         case listingMedia
+
+        /// The four chat entries. Separate slugs rather than one,
+        /// because each carries its own server-side cap: an image is
+        /// 4MB, a video 32MB, audio 8MB, and a document 8MB with the
+        /// `pdf`, `text` and `blob` categories. Uploading through the
+        /// wrong one applies the wrong limit and is refused.
         case chatImage
+        case chatVideo
+        case chatAudio
+        case chatFile
 
         /// The Music Studio's uploader. Accepts one audio file (up to
         /// 512MB), one image (8MB), and - deliberately - `blob`, because

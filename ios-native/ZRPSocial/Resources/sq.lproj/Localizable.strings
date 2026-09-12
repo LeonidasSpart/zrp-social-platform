@@ -860,3 +860,4 @@
 "chat.recordVoiceMessage" = "Regjistro një mesazh zanor";
 "chat.uploadImage" = "Ngarko imazh";
 "chat.downloadImage" = "Shkarko imazhin";
+"shorts.upload.chooseVideo" = "Zgjidh një video";

@@ -14,6 +14,7 @@ final class GroupConversationViewModel: ObservableObject {
     @Published private(set) var phase: Phase = .loading
     @Published var draft: String = ""
     @Published private(set) var isSending = false
+    @Published private(set) var uploadProgress: Double?
     @Published var errorMessage: String?
 
     @Published private(set) var isLoadingOlder = false
@@ -28,6 +29,7 @@ final class GroupConversationViewModel: ObservableObject {
     let viewerId: String?
 
     private let repository: ConversationsRepositoryProtocol
+    private let uploads: UploadThingClient
     private let socket: ZrpSocket
     private var socketToken: UUID?
     private var pollTask: Task<Void, Never>?
@@ -55,11 +57,13 @@ final class GroupConversationViewModel: ObservableObject {
         conversationId: String,
         viewerId: String?,
         repository: ConversationsRepositoryProtocol = ConversationsRepository(),
+        uploads: UploadThingClient = UploadThingClient(),
         socket: ZrpSocket? = nil
     ) {
         self.conversationId = conversationId
         self.viewerId = viewerId
         self.repository = repository
+        self.uploads = uploads
         // Not a default argument: a default is evaluated outside the
         // actor, and `ZrpSocket.shared` is main-actor isolated.
         self.socket = socket ?? .shared
@@ -284,6 +288,61 @@ final class GroupConversationViewModel: ObservableObject {
         }
     }
 
+    /// Sends a video, a document or a voice note to the group.
+    ///
+    /// Same reasoning as the 1:1 thread: the marker is the message body,
+    /// so the typed draft stays in the composer. The group route takes
+    /// the same `{content, imageUrl}` shape and runs the same media
+    /// allowlist, so nothing here is group-specific except which
+    /// repository and which relay.
+    func send(attachment: PendingChatAttachment) async {
+        guard !isSending else { return }
+        isSending = true
+        uploadProgress = 0
+        defer {
+            isSending = false
+            uploadProgress = nil
+            attachment.discard()
+        }
+
+        let uploadedUrl: String
+        do {
+            let uploaded = try await uploads.upload(
+                attachment.asUploadCandidate(),
+                to: attachment.slug,
+                onProgress: { [weak self] progress in
+                    Task { @MainActor in self?.uploadProgress = progress }
+                }
+            )
+            uploadedUrl = uploaded.url
+        } catch UploadThingClient.UploadError.cancelled {
+            return
+        } catch {
+            errorMessage = (error as? ApiError)?.userFacingMessage
+                ?? L10n.string(.composerErrUploadFailed)
+            return
+        }
+
+        do {
+            let sent = try await repository.send(
+                id: conversationId,
+                content: attachment.messageContent,
+                imageUrl: uploadedUrl
+            )
+            if !messages.contains(where: { $0.id == sent.id }) {
+                messages.append(sent)
+            }
+            socket.emit(
+                "send-group-message",
+                ["conversationId": conversationId, "messageId": sent.id]
+            )
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
+        }
+    }
+
     /// Removing yourself. The same route removes another member, but
     /// only for an OWNER - see
     /// `ConversationsRepository.removeParticipant`.
@@ -418,6 +477,7 @@ struct GroupConversationView: View {
     @FocusState private var isComposerFocused: Bool
     @State private var showingInfo = false
     @State private var confirmingLeave = false
+    @StateObject private var voiceRecorder = VoiceRecorder()
 
     init(conversationId: String, viewerId: String?) {
         _viewModel = StateObject(
@@ -486,7 +546,15 @@ struct GroupConversationView: View {
             Text(verbatim: viewModel.errorMessage ?? "")
         }
         .task { await viewModel.start() }
-        .onDisappear { viewModel.stop() }
+        .onDisappear {
+            viewModel.stop()
+            // A half-finished recording is deleted rather than
+            // left in temporary storage with the microphone
+            // indicator still lit, and a note playing in a thread
+            // nobody is looking at is stopped.
+            voiceRecorder.discardIfRecording()
+            VoiceNotePlayer.shared.stop()
+        }
     }
 
     private var thread: some View {
@@ -556,8 +624,50 @@ struct GroupConversationView: View {
         }
     }
 
+    @ViewBuilder
     private var composer: some View {
+        // Uploading a 32MB video over a slow connection takes long
+        // enough that a composer with no feedback reads as frozen.
+        if let progress = viewModel.uploadProgress {
+            ProgressView(value: progress)
+                .tint(ZrpColor.red)
+                .padding(.horizontal, ZrpSpacing.md)
+                .accessibilityLabel(Text(.composerUploading))
+        }
+
+        if voiceRecorder.isRecording {
+            VoiceNoteComposer(
+                recorder: voiceRecorder,
+                onRecorded: { attachment in
+                    Task { await viewModel.send(attachment: attachment) }
+                },
+                isBusy: viewModel.isSending
+            )
+            .padding(.horizontal, ZrpSpacing.md)
+            .padding(.vertical, ZrpSpacing.sm)
+            .background(ZrpColor.surface)
+        } else {
+            textComposer
+        }
+    }
+
+    private var textComposer: some View {
         HStack(alignment: .bottom, spacing: ZrpSpacing.sm) {
+            ChatAttachmentMenu(
+                onPick: { attachment in
+                    Task { await viewModel.send(attachment: attachment) }
+                },
+                isBusy: viewModel.isSending
+            )
+
+            VoiceNoteComposer(
+                recorder: voiceRecorder,
+                onRecorded: { attachment in
+                    Task { await viewModel.send(attachment: attachment) }
+                },
+                isBusy: viewModel.isSending
+            )
+
             TextField(
                 text: $viewModel.draft,
                 prompt: Text(.iosChatMessagePlaceholder),
@@ -618,11 +728,19 @@ private struct GroupMessageBubble: View {
                 }
 
                 if let imageUrl = message.imageUrl, !imageUrl.isEmpty {
-                    MediaGalleryView(imageURLs: [imageUrl], isVideo: false)
-                        .frame(maxWidth: 240)
+                    ChatAttachmentView(
+                        url: imageUrl,
+                        content: message.content,
+                        isOwn: isOwn
+                    )
                 }
 
-                if !message.content.isEmpty {
+                // A marker IS the attachment's label, so repeating it as
+                // a text bubble underneath would print "🎤 Voice message
+                // (0:07)" below the player that already shows it.
+                if !message.content.isEmpty,
+                   ChatAttachmentKind.of(message.content) == .image
+                       || message.imageUrl?.isEmpty != false {
                     Text(verbatim: message.content)
                         .font(.subheadline)
                         .foregroundStyle(isOwn ? .white : ZrpColor.onSurface)
