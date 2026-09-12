@@ -727,17 +727,39 @@ export function extractUploadThingKey(
 // DELETE UPLOADTHING FILES
 // ─────────────────────────────────────────────────────────────
 //
-// UTApi.deleteFiles() does NOT throw when only some keys in a batch
-// actually get deleted - it resolves with { success, deletedCount }
-// even on a partial failure. The previous version of this function
-// awaited the call and never looked at that return value, so e.g.
-// deleting a 4-image post could silently delete only 1 of the 4 files
-// from UploadThing with zero error, zero log line, nothing - the
-// other 3 just sat there forever. This now checks deletedCount against
-// what was requested, retries once (a single retry is usually enough
-// for the transient batch hiccups that cause this), and - critically -
-// actually logs when files are still left over after that, so a
-// standing gap is visible instead of invisible.
+// A key could reach here more than once - e.g. Post.imageUrl is always
+// a copy of Post.imageUrls[0] (see POST /api/posts), so a caller that
+// naively collects `[post.imageUrl, ...post.imageUrls]` hands this
+// function the exact same key twice for any single-image post. Keys
+// are deduplicated (and null/empty entries dropped) up front so a
+// caller-side mistake like that can never reach UploadThing as a
+// double delete - this is defense-in-depth, not a substitute for
+// fixing that mistake at the source (see the Post-deletion routes,
+// which now dedupe at collection time too).
+//
+// UTApi.deleteFiles()'s response is `{ success, deletedCount }` for
+// the whole call - confirmed directly against the SDK's wire schema
+// (uploadthing/server's DeleteFileResponse), which carries no per-key
+// breakdown at all. That means a single batched call for N keys can
+// never tell us *which* of them failed, only how many did - so the
+// previous version of this function, which resent the entire
+// "remaining" batch on retry, was structurally unable to retry just
+// the failed ones. Worse, it compared deletedCount against a request
+// that could itself contain a duplicate key (see above): UploadThing
+// physically deletes one file, deletedCount reflects that one
+// deletion, and comparing it against a "remaining" list that (wrongly)
+// counted the same key twice made a fully successful deletion look
+// like a persistent partial failure forever - this is the exact
+// incident this function was rewritten for (Railway log: "0/2 deleted"
+// / "keys attempted" showing the same key twice).
+//
+// So deletion runs one key per UTApi call (bounded concurrency, so a
+// large batch - e.g. wiping a power user's whole account - doesn't
+// serialize one file at a time or fire an unbounded number of
+// simultaneous requests). That costs more HTTP round trips than one
+// batched call, but it's the only way this SDK exposes per-key
+// results, which is what makes "retry only the keys that actually
+// failed" possible at all instead of a guess.
 //
 // Exported (not just used internally by deleteUploadThingFiles below)
 // because the storage cleanup tool (/admin/storage,
@@ -745,76 +767,91 @@ export function extractUploadThingKey(
 // from utapi.listFiles() - it has no URLs to extract keys from, so it
 // needs to delete by key directly rather than going through the
 // URL-based wrapper.
+const DELETE_CONCURRENCY = 8;
+
+// UploadThing keys are opaque identifiers embedded in public file URLs,
+// not secrets - but logs are easier to scan, and safer by default,
+// when they don't spell out every full key. Truncated for diagnostics
+// only; full keys are still used for the actual delete calls.
+function truncateKeyForLogging(key: string): string {
+  return key.length > 12 ? `${key.slice(0, 8)}…(len ${key.length})` : key;
+}
+
+async function deleteKeysOneByOne(
+  utapi: InstanceType<typeof import("uploadthing/server").UTApi>,
+  targets: string[]
+): Promise<string[]> {
+  const failed: string[] = [];
+  let cursor = 0;
+
+  async function worker() {
+    while (cursor < targets.length) {
+      const key = targets[cursor++];
+      try {
+        const result = await utapi.deleteFiles([key]);
+        if (!result || result.deletedCount < 1) {
+          failed.push(key);
+        }
+      } catch (error) {
+        console.error(`UploadThing deleteFiles threw for key ${truncateKeyForLogging(key)}:`, error);
+        failed.push(key);
+      }
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(DELETE_CONCURRENCY, targets.length) }, worker)
+  );
+  return failed;
+}
+
 export async function deleteUploadThingKeys(
   keys: string[]
-): Promise<{ requested: number; deleted: number }> {
-  if (keys.length === 0) {
-    return { requested: 0, deleted: 0 };
+): Promise<{ requested: number; unique: number; deleted: number; failed: number; retried: number }> {
+  const unique = Array.from(
+    new Set(keys.filter((k): k is string => typeof k === "string" && k.length > 0))
+  );
+
+  if (unique.length === 0) {
+    return { requested: keys.length, unique: 0, deleted: 0, failed: 0, retried: 0 };
   }
 
   try {
-    const { UTApi } =
-      await import(
-        "uploadthing/server"
-      );
-
+    const { UTApi } = await import("uploadthing/server");
     const utapi = new UTApi();
 
-    let remaining = keys;
-    let deleted = 0;
+    const firstPassFailed = await deleteKeysOneByOne(utapi, unique);
 
-    for (let attempt = 1; attempt <= 2 && remaining.length > 0; attempt++) {
-      let result: { success: boolean; deletedCount: number } | undefined;
+    let finalFailed = firstPassFailed;
+    let retried = 0;
 
-      try {
-        result = await utapi.deleteFiles(remaining);
-      } catch (error) {
-        console.error(
-          `UploadThing deleteFiles threw on attempt ${attempt} (${remaining.length} key(s)):`,
-          error
-        );
-        if (attempt === 2) {
-          console.error(
-            "UploadThing cleanup incomplete after retry - these keys were never confirmed deleted:",
-            remaining
-          );
-        }
-        continue;
-      }
-
-      if (result.deletedCount >= remaining.length) {
-        deleted += remaining.length;
-        remaining = [];
-        break;
-      }
-
-      // Partial success: some number succeeded, but the SDK doesn't
-      // tell us *which* keys failed - only how many. Retrying the same
-      // full list is the only option available; UploadThing's delete
-      // is idempotent (deleting an already-deleted key is a no-op), so
-      // this is safe to repeat.
-      deleted += result.deletedCount;
-
+    if (firstPassFailed.length > 0) {
+      retried = firstPassFailed.length;
       console.error(
-        `UploadThing cleanup partial: ${result.deletedCount}/${remaining.length} deleted on attempt ${attempt}.` +
-          (attempt === 1 ? " Retrying once…" : "")
+        `UploadThing cleanup: ${firstPassFailed.length}/${unique.length} key(s) failed on attempt 1. Retrying only the failed key(s)…`
       );
-
-      if (attempt === 2) {
-        console.error(
-          "UploadThing cleanup still incomplete after retry - keys attempted:",
-          remaining
-        );
-      }
+      finalFailed = await deleteKeysOneByOne(utapi, firstPassFailed);
     }
 
-    return { requested: keys.length, deleted };
-  } catch (error) {
-    console.error(
-      "UploadThing cleanup failed (non-blocking):",
-      error
+    const deleted = unique.length - finalFailed.length;
+
+    if (finalFailed.length > 0) {
+      console.error(
+        "UploadThing cleanup still incomplete after retry - these key(s) were never confirmed deleted:",
+        finalFailed.map(truncateKeyForLogging)
+      );
+    }
+
+    const summary = { requested: keys.length, unique: unique.length, deleted, failed: finalFailed.length, retried };
+    const log = summary.failed > 0 ? console.error : console.log;
+    log(
+      `UploadThing cleanup: requested=${summary.requested} unique=${summary.unique} deleted=${summary.deleted} failed=${summary.failed} retried=${summary.retried}`
     );
-    return { requested: keys.length, deleted: 0 };
+
+    return summary;
+  } catch (error) {
+    console.error("UploadThing cleanup failed (non-blocking):", error);
+    return { requested: keys.length, unique: unique.length, deleted: 0, failed: unique.length, retried: 0 };
   }
 }
 
