@@ -997,6 +997,31 @@ export default function HomePage() {
 
   return (
     <div className="w-full">
+      {/* This WebPage entity used to live in the root layout's global
+          JSON-LD graph, which meant every single route on the site (a
+          profile, a pricing page, a legal page) emitted a WebPage
+          entity whose url/name/description described the homepage,
+          not the page a crawler was actually looking at. Scoping it
+          here means it only ever describes "/" - the root layout keeps
+          only the genuinely site-wide Organization/WebSite entities. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "@id": "https://zrp.one/#webpage",
+            url: "https://zrp.one",
+            name: "ZRP Social: The First Swiss-European Social Media Platform",
+            description:
+              "ZRP Social is a Swiss-European social media platform built in Switzerland around privacy, freedom of expression, security, and people-first communities.",
+            isPartOf: { "@id": "https://zrp.one/#website" },
+            about: { "@id": "https://zrp.one/#organization" },
+            inLanguage: "en",
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
+
       {/* The feed deliberately shows no visible page title - a social
           home does not need one - but the document still needs a
           heading, and this page had none at all, so a screen reader had
