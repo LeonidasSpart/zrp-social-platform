@@ -11,6 +11,7 @@ import { useConversationList } from "@/lib/useConversationList";
 import { buildMessagePreview } from "@/lib/conversationPreview";
 import { usePresence } from "@/contexts/PresenceContext";
 import { useSession } from "next-auth/react";
+import ConversationRowMenu from "@/components/ConversationRowMenu";
 
 const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
@@ -19,7 +20,7 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
   const pathname = usePathname();
   const router = useRouter();
   const { t, language } = useLanguage();
-  const { conversations, loading, refresh } = useConversationList();
+  const { conversations, loading, refresh, deleteConversation } = useConversationList();
   const [showNewGroup, setShowNewGroup] = useState(false);
   const { isOnline, requestStatus } = usePresence();
 
@@ -144,6 +145,11 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                         {conv.unreadCount > 9 ? "9+" : conv.unreadCount}
                       </span>
                     )}
+
+                    <ConversationRowMenu
+                      partnerName={partner.name || partner.username}
+                      onDelete={() => deleteConversation(partner.id)}
+                    />
                   </Link>
                 );
               }

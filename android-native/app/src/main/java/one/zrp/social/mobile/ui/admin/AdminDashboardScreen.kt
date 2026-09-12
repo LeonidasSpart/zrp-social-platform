@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Campaign
@@ -110,6 +111,7 @@ fun AdminDashboardScreen(
     onOpenCharityDisbursements: () -> Unit,
     onOpenPayments: () -> Unit,
     onOpenWithdrawals: () -> Unit,
+    onOpenHelpWithdrawals: () -> Unit,
     onOpenUpgradeRequests: () -> Unit,
     onOpenNewsNetwork: () -> Unit,
 ) {
@@ -331,6 +333,17 @@ fun AdminDashboardScreen(
                             modifier = Modifier.padding(end = Spacing.sm),
                         )
                         Text(stringResource(R.string.admin_dash_process_withdrawals))
+                    }
+                    OutlinedButton(
+                        onClick = onOpenHelpWithdrawals,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(
+                            Icons.Filled.AccountBalance,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = Spacing.sm),
+                        )
+                        Text(stringResource(R.string.admin_dash_process_help_withdrawals))
                     }
                     OutlinedButton(
                         onClick = onOpenUpgradeRequests,

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { checkPostLength } from "@/lib/limits";
 import { deleteUploadThingFiles } from "@/lib/uploadthing";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { validateMediaUrls } from "@/lib/media-url";
 
 // GET a single post (with all data for the post page)
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -150,9 +151,26 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     // every text-only edit. Checking "in body" lets a real image
     // change (or an explicit removal, sending imageUrl: null) still
     // work correctly, while a text-only edit leaves the image alone.
+    //
+    // ⚠️ SECURITY: creation (POST /api/posts) validates every image URL
+    // against the same allowlist as this route (UploadThing uploads,
+    // the GIPHY picker) before accepting it - this endpoint never did,
+    // so a direct API call (the official edit UI never sends imageUrl
+    // at all, but nothing server-side enforced that) could set a post's
+    // image to any URL, bypassing the allowlist entirely on edit. Only
+    // validated when a real, non-empty value is actually being set -
+    // an explicit removal (imageUrl: null/"") never needs to satisfy
+    // the allowlist.
     const updateData: { content: string; imageUrl?: string | null } = { content };
     if ("imageUrl" in body) {
-      updateData.imageUrl = body.imageUrl || null;
+      const nextImageUrl = body.imageUrl || null;
+      if (nextImageUrl) {
+        const mediaCheck = validateMediaUrls([nextImageUrl]);
+        if (!mediaCheck.ok) {
+          return NextResponse.json({ error: mediaCheck.error }, { status: 400 });
+        }
+      }
+      updateData.imageUrl = nextImageUrl;
     }
 
     const updatedPost = await prisma.post.update({

@@ -21,7 +21,8 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  return buildProfileMetadata(username, `/profile/${username}`);
+  const cleanUsername = username.replace(/^@/, "");
+  return buildProfileMetadata(cleanUsername, `/profile/${cleanUsername}`);
 }
 
 export default async function ProfileLayout({

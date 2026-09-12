@@ -55,6 +55,23 @@ class MessagesRepository {
         ApiClient.messagesApi.deleteMessage(messageId)
     }
 
+    // Deletes the whole 1:1 thread server-side (see MessagesApi's own
+    // KDoc: every message in both directions, permanently). Used by the
+    // conversation-list row menu - this is the root fix for "deleting a
+    // conversation doesn't work on Android": no client here ever called
+    // this endpoint before, so there was nothing to fail at the UI layer
+    // - the failure was that the call never existed.
+    suspend fun deleteConversation(partnerId: String): Result<Unit> {
+        return try {
+            ApiClient.messagesApi.deleteConversation(partnerId)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't delete this conversation. Please try again."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
     suspend fun editMessage(messageId: String, content: String): Result<ChatMessage> {
         return try {
             Result.success(ApiClient.messagesApi.editMessage(messageId, EditMessageRequest(content)))

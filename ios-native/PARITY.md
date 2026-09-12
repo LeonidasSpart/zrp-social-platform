@@ -170,11 +170,16 @@ called and the real response being handled.
 | Realtime | Socket.IO (`server.js`, path `/api/socket.io`, websocket transport, session-cookie handshake) | ✅ | ✅ (Socket.IO Java client) | ✅ Engine.IO v4 + Socket.IO framing written directly on `URLSessionWebSocketTask` — no dependency added. Live `receive-message`, `message-edited`, `message-deleted`, `reaction-updated`, `message-read`; polling stays as the fallback while the socket is down (30 s connected, 6 s not) | IMPLEMENTED |
 | Typing indicator | `typing` → `user-typing` relay | ✅ | ✅ | ✅ throttled to one event every 2 s; the indicator clears itself after 5 s in case the "stopped" event is lost with the connection | IMPLEMENTED |
 | Contact drawer (avatar, name, badge, handle, profile, block/mute, shared media) | `POST /api/users/{username}/block`, `POST /api/users/mute` | ✅ `ChatContactDrawer` | 🔶 | ✅ — **without Call and Video** | PARTIAL |
-| Voice / video calling | WebRTC signalling over the same socket (`call-user`, `accept-call`, …) | ✅ simple-peer | ⬜ | ❌ needs a WebRTC stack, which would be this app's first third-party dependency and a large one. Two permanently dead buttons would be worse than none — see the note in `ChatContactSheet.swift` | MISSING (reported) |
+| Voice / video calling — placing/answering | WebRTC signalling over the same socket (`call-user`, `accept-call`, …) | ✅ simple-peer | ✅ | ❌ needs a WebRTC stack, which would be this app's first third-party dependency and a large one. Two permanently dead buttons would be worse than none — see the note in `ChatContactSheet.swift` | MISSING (reported) |
+| Voice / video calling — **being called** | `incoming-call` → `reject-call` | ✅ | ✅ | ✅ declines immediately and tells the recipient who called, so the caller is released instead of ringing forever — see `IncomingCallResponder.swift` | IMPLEMENTED |
 | Read receipts | side effect of `GET /api/messages/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`, 4 MB); the route accepts an empty `content` **only** alongside an image and refuses both-empty with a 400 | ✅ | ✅ | ✅ one picture per message (the row stores a single `imageUrl`), uploaded on send rather than on selection, and a failed upload stops the send rather than silently dropping the picture | IMPLEMENTED |
+| Voice messages | `POST /api/messages` / `POST /api/conversations/{id}/messages` + UploadThing `chatAudio` (8 MB) | ✅ | ✅ | ✅ records AAC/M4A so every other client can play it back, tap-to-start and tap-to-send (not hold-to-record, which is unusable with VoiceOver), a live level meter, and a shared player so a second note stops the first. Sent as `🎤 Voice message (m:ss)` — **that marker is the wire format**, not decoration: `Message` has no type column, so it is the only thing telling web and Android what the `imageUrl` is | IMPLEMENTED |
+| Video attachments in chat | UploadThing `chatVideo` (32 MB) | ✅ | ✅ | ✅ picked from the library, sent as `🎬 Video`, played inline with AVKit | IMPLEMENTED |
+| Document attachments | UploadThing `chatFile` (8 MB, `pdf`/`text`/`blob`) | ✅ | ✅ | ✅ picked from Files, sent as `📎 {filename}`, rendered as a file card that opens in whatever the device has. The picker allows any file type because the router's `blob` category does — narrowing it would hide files the server would accept | IMPLEMENTED |
+| Reading attachments sent from web/Android | the same four markers | ✅ | ✅ | ✅ `ChatAttachment.swift` decodes `🎬`/`🎤`/`📎`/none into video, voice, document and image. Both halves matter: sending without the marker renders as a broken image everywhere, and reading a `🎤` as an image does the same here. VoiceOver announces the real kind rather than "Photo" for all four | IMPLEMENTED |
 
 ### ZRP PLAY
 
@@ -266,7 +271,7 @@ called and the real response being handled.
 | Notification tap-through | — | ✅ | ✅ | ✅ like/comment/repost → post, follow → profile, message → thread, appeal outcome → Appeals, listing decision → My listings (the payload carries no listing id, so it leads to where the outcome is visible rather than guessing at one) | IMPLEMENTED |
 | Unrecognised notification types | — | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
-| **Device push** | `POST/DELETE /api/push/fcm` now accepts `platform: "ios"` and includes a deep-link `data.url` in every push | n/a | ✅ FCM | ❌ backend no longer blocks it — needs an APNs key on the Firebase project and a `GoogleService-Info.plist`, both external/console actions | **BLOCKED — [B3](#b3-ios-device-push)** |
+| **Device push** | `POST/DELETE /api/push/fcm` accepts `platform: "ios"` and includes a deep-link `data.url`; delivery goes through `firebase-admin/messaging` | n/a | ✅ FCM | ❌ blocked on an APNs key, a `GoogleService-Info.plist`, **and an unresolved dependency decision** — an FCM token on iOS can only come from the Firebase iOS SDK, which this app's zero-dependency architecture excludes. The alternative is a direct APNs sender server-side, which does not exist | **BLOCKED — [B3](#b3-ios-device-push)** |
 
 ### Music
 
@@ -403,15 +408,111 @@ at random among eligible campaigns, so refetching on pull-to-refresh would
 swap the ad under a reader mid-scroll and bill a second impression for
 what is, to them, the same slot. The website fetches once on mount too.
 
+
+### Group conversations
+
+| Feature | Backend | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Group inbox | `GET /api/conversations` → `{id,name,avatarUrl,participantCount,lastMessage,unreadCount}[]` | ✅ | ✅ | ✅ merged with 1:1 into one list sorted by last activity — `GET /api/messages` filters on `conversationId IS NULL` and returns direct threads only, so an inbox that shows both must ask both routes | IMPLEMENTED |
+| Group thread | `GET /api/conversations/{id}/messages` (`{items,nextCursor}`, born paginated) | ✅ | ✅ | ✅ with "Load more", the same merge-not-assign refresh as the 1:1 thread | IMPLEMENTED |
+| Send to a group | `POST /api/conversations/{id}/messages` | ✅ | ✅ | ✅ the route's own refusals (empty, too long, media not from ZRP storage) shown as written | IMPLEMENTED |
+| Realtime group delivery | `join-conversation` → room `group:{id}` → `receive-group-message` | ✅ | ✅ | ✅ joins the room on open and leaves on close. **Joining is required** — group relays go to a room, not to a user's own room, so without it the thread would silently degrade to polling | IMPLEMENTED |
+| Group members | `GET /api/conversations/{id}` | ✅ | ✅ | ✅ member list with the OWNER marked | IMPLEMENTED |
+| Leave a group | `DELETE /api/conversations/{id}/participants/{userId}` | ✅ | ✅ | ✅ removing yourself. The same route removes **someone else**, but only for an OWNER — see below | IMPLEMENTED |
+| Create a group | `POST /api/conversations` | ✅ | ✅ | ✅ name + member picker, reusing `GET /api/users/suggested` for the starting list and `GET /api/search` (debounced, 2-char minimum, matching the route's own rule) for typing. The route's limits are mirrored — a name ≤100 and **at least 2 other members** — so the button says what is still needed instead of just being disabled | IMPLEMENTED |
+| Rename a group | `PATCH /api/conversations/{id}` — OWNER only (403 otherwise) | ✅ | ✅ | ✅ offered only to an owner, so the 403 is not how anyone learns the rule. The route's empty-name and 100-character limits are mirrored | IMPLEMENTED |
+| Set / clear a group photo | `PATCH /api/conversations/{id}` — OWNER only | ✅ | ✅ | ✅ uploads through the `chatImage` router, the same entry the website's group panel uses — the route runs `isAllowedMediaUrl` on whatever it is given, so a group picture must come from ZRP's own storage. Setting and clearing are distinguishable because the request encodes an **explicit JSON null** for "clear" rather than omitting the field | IMPLEMENTED |
+| Add members | `POST .../participants` — **any member**, not owner-only | ✅ | ✅ | ✅ reuses the same picker as group creation, with current members excluded and the remaining capacity as its cap. Corrects this file's own earlier claim that adding was OWNER-only: the route's comment says any current member may add, and matching that keeps iOS from being stricter than web and Android for no reason | IMPLEMENTED |
+| Remove another member | `DELETE .../participants/{userId}` — OWNER only | ✅ | ✅ | ✅ swipe action, offered only to an owner and never for an owner or for yourself — leaving is its own action with its own confirmation | IMPLEMENTED |
+| Reactions / replies / edit in a group | — | ⬜ | ⬜ | ⬜ **no backend for it**: `GROUP_MESSAGE_INCLUDE` attaches only `sender`, and no route acts on a group message beyond deleting your own. Absent on every platform, not an iOS gap | n/a |
+
+| Presence (online dots) | `get-status` / `user-status` over the socket | ✅ | ✅ | ✅ shared `PresenceStore`; asks on open and re-asks on reconnect, because presence is per-connection server-side. An unreported user shows **no dot** rather than a grey one — absent is "not known", not "offline" | IMPLEMENTED |
+| Conversation deleted by the other party | `conversation-deleted` | ✅ | ✅ | ✅ the row disappears instead of sitting there until a manual refresh and then opening an empty thread | IMPLEMENTED |
+
+The Messages badge is fixed by the inbox, not by badge code.
+`GET /api/messages/unread` returns `directCount + groupCount`; iOS read
+that while its inbox showed only direct threads, so a group message
+raised a badge the person could never clear. Opening a group thread
+advances their `lastReadAt` server-side, which is what makes the count
+fall — and the list refreshes the badge on appear, because the tab only
+refetched it when the Messages tab was *selected* and popping back from a
+thread does not change tabs.
+
+### Transparency
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Charity ledger | `GET /api/transparency/charity` — **public**, takes no session | ✅ | ✅ | ✅ native screen (not a web view): committed and disbursed kept apart as the route keeps them, per-cause breakdown, and the real disbursement records with proof links where they exist | IMPLEMENTED |
+| Moderation transparency | `GET /api/transparency/moderation` — **public**, takes no session, aggregate counts only | ✅ | ✅ | ✅ native screen, works signed out. Totals, a 12-month received-vs-actioned trend, breakdowns by reason, status and action type, and appeal outcomes. Both trend series share **one** scale — scaling them apart would make 3 actions out of 300 reports look like near-total enforcement. A null median renders as an em dash, never "0h": no report ever actioned is not instant moderation. Reuses the web page's own label maps, including the `adminReports.*` status and action wording that page borrows | IMPLEMENTED |
+
+`committed` and `disbursed` are never added together. The route computes
+the first from completed tips and premium purchases (what the commitment
+*owes*) and the second from real payment records staff entered (what has
+actually moved), and says so in its own `note`. Collapsing them into one
+total would claim ZRP had paid out money it may only have promised — on
+the one page whose whole purpose is being checkable.
+
+A disbursement whose `cause` this app does not recognise renders its raw
+value rather than being hidden. That is the opposite of the milestone-badge
+rule, deliberately: a badge is decoration, a disbursement is a financial
+record, and dropping one from a public ledger because of an unknown
+category would be worse than an untranslated word.
+
+### ZRP Global Ambassadors
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Movement page + stats | `GET /api/ambassadors/stats` — **public** | ✅ | ⬜ | ✅ the two figures the route actually publishes and no third. Its own comment says neither is estimated and that ZRP has no baseline for an honest growth number, so none is invented to fill the row | IMPLEMENTED |
+| Country explorer | `GET /api/ambassadors/countries?lang=` — **public**, all 250 territories | ✅ interactive world map | ⬜ | ✅ searchable, region-filterable list of the same dataset. **Not a map** — a pannable vector map needs either a dependency or a hand-rolled projection, and neither tells anyone something the list does not; it is never labelled "map" in the UI. Countries with **zero** ambassadors stay in the list, as the route returns them, so "be the first in Chad" is reachable instead of Chad being absent. `communities`/`activeMembers` are real zeros with no data behind them yet and are **not** displayed — a row of zeros labelled "Active Members" reads as a measurement, not an absence | IMPLEMENTED |
+| Apply | `POST /api/ambassadors/apply` | ✅ | ⬜ | ✅ country, city, languages, https-only community links, motivation, community description, audience size. Creates a **PENDING** row and nothing else — no badge, no level, no privilege; approval is an admin action on a separate route, and this screen never congratulates anyone on becoming something they have not become | IMPLEMENTED |
+| Code of Conduct gate | same route, server-stamped version + timestamp | ✅ | ⬜ | ✅ the toggle mirrors a rule `validateApplication` enforces server-side; the version and acceptance time are the server's own and are never sent by the client, so there is nothing here to forge. The Code itself opens on the web rather than being paraphrased in-app | IMPLEMENTED |
+| Dashboard | `GET /api/ambassadors/me` | ✅ | ⬜ | ✅ one screen, five server-decided states: never applied, pending, rejected (with the admin's reason, so a re-application can change something), suspended, approved. A null profile is the route's real answer and renders as an honest empty state, not a fabricated profile | IMPLEMENTED |
+| Invitation link | `invitationCode` on the profile | ✅ | ⬜ | ✅ `https://zrp.one/signup?ref=<code>`, copyable. **Nothing downstream credits a signup back to the referring ambassador yet** — there is no referral system in ZRP to hook into, and the web dashboard has the same gap. Shown because the code is real, not because it is wired | IMPLEMENTED |
+| Re-accept an updated Code | `POST /api/ambassadors/accept-code` | ✅ | ⬜ | ✅ prompts when the stored version differs from the current one. The route takes **no body at all** — version and timestamp are written server-side — so a stale constant in this app can prompt unnecessarily but can never record a false acceptance | IMPLEMENTED |
+
+Android has no ambassador surface at all; iOS is now ahead of it here.
+
+### ZRP Journalist
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Dashboard | `GET /api/journalist/profile` | ✅ | ⬜ | ✅ one screen for every state the route reports: not a journalist, pending, rejected (with the reviewer's reason), suspended, verified. `isJournalist` is read from the user's real role, not inferred from the profile's presence — the two can differ and the role is what the article routes check | IMPLEMENTED |
+| Apply | `POST /api/journalist/apply` | ✅ | ⬜ | ✅ outlet, portfolio and pitch. Grants the JOURNALIST **role** immediately but **not** verification and **not** a badge — that gap is the route's and is load-bearing: an unverified journalist may write drafts and may not submit them | IMPLEMENTED |
+| My articles | `GET /api/journalist/articles` | ✅ | ⬜ | ✅ counts by status plus the ten most recently touched, each with its state. A rejected article's `reviewNote` is shown **in the list** — it is the only feedback a journalist gets, and burying it a tap deep means opening each one to find out why | IMPLEMENTED |
+| Write / edit an article | `POST /api/journalist/articles`, `PATCH /api/journalist/articles/{id}` | ✅ | ⬜ | ✅ title, slug (auto-derived from the title until typed by hand, because the server requires one and generates none), category, excerpt, body, cover image, source. **Only DRAFT and REJECTED articles are editable** — PATCH answers 409 otherwise, so the form goes read-only and says which state locked it | IMPLEMENTED |
+| Submit for review | `submit: true` on PATCH, `status` on POST | ✅ | ⬜ | ✅ offered **only to a VERIFIED journalist**, which the route enforces with a 403. POST takes `status` and PATCH takes `submit`, and sending the wrong one is not cosmetic: PATCH ignores `status` entirely, so a submit sent that way would silently save a draft and nobody would know | IMPLEMENTED |
+| Delete an article | `DELETE /api/journalist/articles/{id}` | ✅ | ⬜ | ✅ **drafts only**. Anything ever submitted stays for the editorial record; the control is absent rather than refused | IMPLEMENTED |
+| Cover image upload | UploadThing `newsCoverImage` | ✅ | ⬜ | ✅ the same router entry the web editor uses, with its own server-side cap | IMPLEMENTED |
+| `GAMING` news category | `NewsArticleCategory.GAMING` | ✅ | ✅ | ✅ **fixed here** — the iOS enum never listed it, so a GAMING article decoded as `unknown` and rendered with no category label at all, and the editor could not select it. `newsCategory.gaming` was already translated in all eleven languages | IMPLEMENTED |
+
+Android has no journalist surface; iOS is ahead of it here too.
+
+### Team and API keys (Business / Enterprise)
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Team roster | `GET /api/team` | ✅ | ⬜ | ✅ members plus the account owner. The owner is **not** a `TeamMember` row — the route synthesises them as `OWNER` — so they are their own type here and cannot be given a role or removed through a membership that does not exist | IMPLEMENTED |
+| Add a member | `POST /api/team` | ✅ | ⬜ | ✅ by email, with a role. The route can only add an **existing** ZRP account, not invite a stranger, so its own wording ("They need to sign up first") is shown rather than a generic failure — as are "already a member" and "you are the owner" | IMPLEMENTED |
+| Change a role | `PATCH /api/team/{memberId}` | ✅ | ⬜ | ✅ inline, offering only ADMIN / EDITOR / VIEWER — the three the route accepts. `OWNER` is synthesised, never stored, so it is not assignable | IMPLEMENTED |
+| Remove a member | `DELETE /api/team/{memberId}` | ✅ | ⬜ | ✅ swipe action with confirmation, and a VoiceOver rotor action since a swipe is invisible to it | IMPLEMENTED |
+| List API keys | `GET /api/api-keys` | ✅ | ⬜ | ✅ name, created, expires and last used. "Never" used is stated rather than left blank — a key nobody has ever called is a candidate for revoking | IMPLEMENTED |
+| Generate a key | `POST /api/api-keys` | ✅ | ⬜ | ✅ the plaintext key is shown **once**, copyable, and is never written to the Keychain, `UserDefaults`, a file or a log. The server stores a SHA-256 hash, so a key not copied there is gone | IMPLEMENTED |
+| Key lifetime | `apiKeyExpiryFor` | ✅ 4 options | ⬜ | ✅ **3 options.** Web still offers "Never expires" and it no longer does anything: the route was fixed so every key gets an expiry, and an omitted value means 365 days. Offering "never" would promise something the server quietly overrides, so iOS does not | IMPLEMENTED (deliberately narrower) |
+| Revoke a key | `DELETE /api/api-keys/{id}` | ✅ | ⬜ | ✅ a soft revoke, as the route performs it — the row stays and stops authenticating | IMPLEMENTED |
+| Plan gate | `canManageTeam` / `canAccessApi` | ✅ | ⬜ | ✅ both screens are reachable on **every** plan and show the route's own 403 sentence. The client never decides entitlement; each route checks independently. Verified that `src/middleware.ts` gates only the `/settings/*` **pages**, not `/api/team` or `/api/api-keys`, so a native client always gets JSON rather than a redirect to `/pricing` | IMPLEMENTED |
+
+**No upgrade button on either screen.** Web's says "Upgrade to Business or Enterprise" and leads to checkout. Buying a plan in-app is the same payment surface Apple's rules keep out (see [Store policy](#store-policy-constraint)) — so iOS states what is required and stops there.
+
+Android has neither surface.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
 | --- | --- |
 | **Admin console** (`/api/admin/**`, 40+ routes) | **Web-only for v1, by decision — not an oversight.** Android ships four admin screens; iOS ships none. Every admin route is independently role-gated server-side, so an iOS app without an admin surface loses no security and gains none: hiding a screen is not what protects those routes, and building one would not weaken them either. The reason to leave it out is product, not safety — a staff console is a desk-and-keyboard tool, and the four screens Android has cover a fraction of the twenty the website offers. Anyone doing moderation work should be on the web console that has all of it. Revisit only if staff genuinely need to act from a phone; if so, build it against the same server-role gate and never surface an admin control on a client check alone. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
-| Careers, Investors, Press, Transparency, API keys, Team | WEB-ONLY — Android has no surface for any of them either. |
+| Careers, Investors, Press | WEB-ONLY — Android has no surface for any of them either. Marketing and corporate pages with no JSON route to read. |
 | **Ads** — advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** — see the Ads section below. |
-| **Journalist** (`/api/journalist/**`) | **Outstanding, and narrow.** Every route is behind `requireJournalistRole()`, so the only part most people could use is the application form. The rest is an article editor with a draft/review/publish workflow — a professional writing tool, and a poor fit for a phone. Worth building when journalists ask for it, not before. |
 | **Creator Studio** — earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |
 
 ---
@@ -1004,19 +1105,34 @@ right screen instead of just opening the app - this reaches Android today
 too, not only a future iOS client, since Android's `notification`-only
 payload never carried a destination either.
 
-Two things are still needed for delivery to iOS specifically, and remain
-external/unverifiable from this environment:
+Three things are still needed, and the third is a DECISION, not a
+credential. An earlier version of this note listed only the first two and
+said "an iOS client can register a token… with no further backend
+change". That was true about the backend and quietly skipped the hard
+part: **how an iOS client would obtain an FCM token at all.**
 
 1. An **APNs key uploaded to the Firebase project** — a console action, not
    a code change.
 2. A **`GoogleService-Info.plist`** for the iOS app. Only
    `android-native/app/google-services.json` exists in this repo; the iOS
    counterpart has never been generated.
+3. **A resolution to the dependency conflict.** `src/lib/fcm.ts` sends
+   through `firebase-admin/messaging`, so delivery to a device requires an
+   **FCM registration token**. On iOS that token is produced by the
+   Firebase iOS SDK — there is no way to obtain one from a raw APNs
+   device token on the client. So iOS push needs either:
+   - the **Firebase iOS SDK**, which would be this app's first
+     third-party dependency and a large one (the same objection that
+     keeps WebRTC out, see the calling row); or
+   - a **direct APNs sender added server-side**, letting iOS register its
+     raw APNs device token instead. `grep -rl "apns" src/lib src/app/api`
+     returns nothing today, so this path does not exist yet — it is real
+     backend work, not configuration.
 
-Once both exist, an iOS client can register a token via the same
-`POST /api/push/fcm` (with `platform: "ios"`) and receive real FCM-routed
-pushes with no further backend change. **No fake local notifications will
-stand in for this.**
+Until item 3 is decided, items 1 and 2 are not sufficient on their own.
+**No fake local notifications will stand in for this**, and no
+"registration" that cannot produce a deliverable token will be added to
+make the screen look finished.
 
 ---
 

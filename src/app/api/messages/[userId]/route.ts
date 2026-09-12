@@ -44,11 +44,22 @@ export async function GET(req: NextRequest, props: { params: Promise<{ userId: s
     const currentUserId = session.user.id;
     const otherUserId = params.userId;
 
+    // "Delete conversation" (DELETE /api/messages/conversation/[userId])
+    // only clears the caller's own view - see ConversationClearance's own
+    // KDoc - so anything at or before that marker must stay excluded from
+    // this account's history, even though the rows (and the other
+    // participant's own view of them) are untouched.
+    const clearance = await prisma.conversationClearance.findUnique({
+      where: { userId_otherUserId: { userId: currentUserId, otherUserId } },
+      select: { clearedBefore: true },
+    });
+
     const conversationFilter = {
       OR: [
         { senderId: currentUserId, receiverId: otherUserId },
         { senderId: otherUserId, receiverId: currentUserId },
       ],
+      ...(clearance ? { createdAt: { gt: clearance.clearedBefore } } : {}),
     };
 
     // Mark messages as read regardless of how much of the conversation

@@ -150,6 +150,33 @@ enum DeepLink {
         case "bookmarks":
             return DeepLinkTarget(.home, .bookmarks)
 
+        case "charity":
+            return DeepLinkTarget(.home, .charityTransparency)
+
+        case "transparency":
+            // /transparency on the web carries both halves. Both now
+            // exist here too, and the moderation report is what the page
+            // is titled after, so that is where the bare link lands.
+            return DeepLinkTarget(.home, .moderationTransparency)
+
+        case "ambassadors":
+            // /ambassadors, /ambassadors/apply and
+            // /ambassadors/dashboard all exist on the web and all three
+            // now exist here.
+            switch second {
+            case "apply": return DeepLinkTarget(.home, .ambassadorApply)
+            case "dashboard": return DeepLinkTarget(.home, .ambassadorDashboard)
+            case nil: return DeepLinkTarget(.home, .ambassadors)
+            default: return nil
+            }
+
+        case "journalist":
+            // /journalist and /journalist/dashboard both land on the
+            // one screen that serves every state. The web article
+            // editor's own URLs are not linked to: an article id is
+            // meaningless without knowing whether it is editable.
+            return DeepLinkTarget(.home, .journalistDashboard)
+
         case "creator":
             // Only /creator/dashboard exists on the web, and it opens on
             // the earnings tab this app does not have. The link lands on
@@ -157,7 +184,14 @@ enum DeepLink {
             guard second == "dashboard" || second == nil else { return nil }
             return DeepLinkTarget(.profile, .creatorStudio)
         case "settings":
-            return DeepLinkTarget(.home, .settings)
+            // Team and API keys live under /settings on the web, not at
+            // the domain root. Anything else under /settings lands on
+            // the settings list rather than on nothing.
+            switch second {
+            case "team": return DeepLinkTarget(.home, .team)
+            case "api-keys": return DeepLinkTarget(.home, .apiKeys)
+            default: return DeepLinkTarget(.home, .settings)
+            }
 
         case "post":
             guard let id = second else { return nil }

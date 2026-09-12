@@ -52,25 +52,20 @@ describe("editorial roster", () => {
   });
 
   /*
-   * The envelope moved deliberately, not accidentally: ZRP News is now
-   * a continuous hourly wire, and the previous floor of a 120-minute
-   * gap and a ceiling of 8 posts a day made an hourly category
-   * arithmetically impossible. What is still asserted is that the
-   * envelope exists and is sane in both directions - a feed may post
-   * at most a few times an hour, and never more than a wire's worth in
-   * a day.
+   * The envelope moved deliberately, not accidentally: an explicit
+   * product decision caps every category - uniformly, no exceptions -
+   * at one post every six hours, replacing the previous hourly cadence
+   * that let a single category post up to 24 times a day.
    */
   it("keeps every feed inside a sane posting envelope", () => {
     for (const feed of ROSTER) {
-      // Not a flood: several minutes between posts at the very least.
-      expect(feed.minMinutesBetweenPosts).toBeGreaterThanOrEqual(30);
-      // But fast enough that an hourly category is reachable.
-      expect(feed.minMinutesBetweenPosts).toBeLessThanOrEqual(60);
+      // Exactly the six-hour gap: a deliberate, uniform cap, not a
+      // per-desk judgement call.
+      expect(feed.minMinutesBetweenPosts).toBe(360);
 
-      // A real daily ceiling, high enough for 24 hourly slots and low
-      // enough that a bug cannot turn a feed into a firehose.
-      expect(feed.maxPostsPerDay).toBeGreaterThanOrEqual(24);
-      expect(feed.maxPostsPerDay).toBeLessThanOrEqual(48);
+      // A daily ceiling that matches what a six-hour gap can reach,
+      // and low enough that a bug cannot turn a feed into a firehose.
+      expect(feed.maxPostsPerDay).toBe(4);
     }
   });
 

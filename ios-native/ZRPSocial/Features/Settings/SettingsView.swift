@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
 
     @EnvironmentObject private var session: SessionController
+    @EnvironmentObject private var navigator: Navigator
 
     /// The legal page being read, or `nil`. `SFSafariViewController`
     /// cannot be pushed onto a navigation stack, so these are presented
@@ -100,6 +101,70 @@ struct SettingsView: View {
                         } icon: {
                             Image(systemName: page.systemImage)
                         }
+                    }
+                }
+
+                // A native screen rather than a web page, unlike its
+                // neighbours here: /api/transparency/charity is a real
+                // JSON route this app can read directly, so the ledger
+                // is rendered natively instead of framed in a browser.
+                Button { navigator.push(.charityTransparency) } label: {
+                    Label {
+                        Text(.charityTransparencyHeading)
+                    } icon: {
+                        Image(systemName: "heart.text.square")
+                    }
+                }
+
+                // The other half of /transparency, and native for the
+                // same reason: the route is real JSON and takes no
+                // session.
+                Button { navigator.push(.moderationTransparency) } label: {
+                    Label {
+                        Text(.transparencyHeroTitle)
+                    } icon: {
+                        Image(systemName: "checkmark.shield")
+                    }
+                }
+
+                Button { navigator.push(.ambassadors) } label: {
+                    Label {
+                        Text(.ambassadorsNavLabel)
+                    } icon: {
+                        Image(systemName: "globe")
+                    }
+                }
+
+                // Answers for any signed-in user, journalist or not -
+                // the same route serves the application form and the
+                // dashboard - so it is not hidden behind a role the
+                // client would have to guess at.
+                Button { navigator.push(.journalistDashboard) } label: {
+                    Label {
+                        Text(.journalistDashTitle)
+                    } icon: {
+                        Image(systemName: "newspaper")
+                    }
+                }
+
+                // Both are Business/Enterprise features, and both are
+                // listed for every plan on purpose: the routes answer a
+                // JSON 403 with a sentence explaining what is needed,
+                // and reading that beats a menu entry that silently is
+                // not there. The client never decides entitlement.
+                Button { navigator.push(.team) } label: {
+                    Label {
+                        Text(.teamTitle)
+                    } icon: {
+                        Image(systemName: "person.3")
+                    }
+                }
+
+                Button { navigator.push(.apiKeys) } label: {
+                    Label {
+                        Text(.apiKeysTitle)
+                    } icon: {
+                        Image(systemName: "key")
                     }
                 }
             }

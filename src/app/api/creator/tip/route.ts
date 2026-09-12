@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 // ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
@@ -115,30 +116,28 @@ export async function POST(req: NextRequest) {
 
     // ─────────────────────────────────────────────────────────────
     // Check duplicate transaction
+    //
+    // ⚠️ SECURITY: a signature is only ever allowed to credit one
+    // payment record, of any type, ever - checked here against the
+    // single shared ConsumedPaymentTransaction table (see schema.prisma)
+    // rather than against Tip/PremiumPurchase individually. Checking
+    // per-table used to miss reuse against HelpContribution entirely (a
+    // signature already spent as a HELP contribution could still be
+    // claimed here), and even a complete set of pairwise checks would
+    // still be a plain read-then-write race: two concurrent requests
+    // across two different payment types could both pass every check
+    // above before either had written its row. This pre-check is only
+    // the fast path; the actual, race-proof guard is
+    // ConsumedPaymentTransaction's own primary key, claimed atomically
+    // below inside the same $transaction as the Tip row.
     // ─────────────────────────────────────────────────────────────
 
-    const existingTip = await prisma.tip.findUnique({
-      where: {
-        transactionId,
-      },
-    });
-
-    if (existingTip) {
-      return NextResponse.json(
-        { error: "Transaction already processed." },
-        { status: 409 }
-      );
-    }
-
-    // Same signature reuse guard as premium purchases - a transactionId
-    // is only ever allowed to credit one payment record, tip or
-    // purchase, ever.
-    const reusedAsPurchase = await prisma.premiumPurchase.findUnique({
+    const existingClaim = await prisma.consumedPaymentTransaction.findUnique({
       where: { transactionId },
     });
-    if (reusedAsPurchase) {
+    if (existingClaim) {
       return NextResponse.json(
-        { error: "This transaction has already been used for a payment." },
+        { error: "Transaction already processed." },
         { status: 409 }
       );
     }
@@ -298,16 +297,30 @@ export async function POST(req: NextRequest) {
       decimalAmount.minus(platformFee);
 
     // ─────────────────────────────────────────────────────────────
-    // Create tip + credit creator balance atomically. The DB's unique
-    // constraint on transactionId is the race-proof guard against two
-    // concurrent requests both passing the earlier duplicate check.
+    // Create tip + credit creator balance atomically.
+    //
+    // ⚠️ SECURITY: claiming ConsumedPaymentTransaction is the FIRST
+    // statement in this transaction, not an afterthought - its primary
+    // key on transactionId is the actual race-proof guard (the pre-check
+    // above is only a fast path). Two concurrent requests for the same
+    // signature, even across two different payment types, can never both
+    // commit: whichever transaction reaches this insert first wins, and
+    // the loser's entire transaction - Tip row included - rolls back on
+    // the conflict. tipId is generated client-side so both rows can
+    // reference the same id without a second round trip.
     // ─────────────────────────────────────────────────────────────
+
+    const tipId = randomUUID();
 
     let tip;
     try {
-      [tip] = await prisma.$transaction([
+      [, tip] = await prisma.$transaction([
+        prisma.consumedPaymentTransaction.create({
+          data: { transactionId, paymentType: "tip", paymentId: tipId },
+        }),
         prisma.tip.create({
           data: {
+            id: tipId,
             senderId,
             recipientId,
             creatorProfileId: creatorProfile.id,

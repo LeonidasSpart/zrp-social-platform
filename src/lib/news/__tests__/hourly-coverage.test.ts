@@ -80,18 +80,25 @@ describe("hourly automation", () => {
   });
 });
 
-describe("per-feed cadence permits hourly publishing", () => {
+describe("per-feed cadence caps every category at once per six hours", () => {
   const ROSTER = buildFeedRoster();
 
-  it("lets every feed post at least once an hour", () => {
+  /*
+   * Explicit product decision: the pipeline cycle keeps polling and
+   * summarising hourly so a story is ready the moment a category's
+   * window opens, but no feed may actually publish more often than
+   * once every six hours - the previous hourly cap posted up to 24
+   * times a day per category, which was more than wanted.
+   */
+  it("never lets a feed post more often than once every six hours", () => {
     for (const feed of ROSTER) {
-      expect(feed.minMinutesBetweenPosts).toBeLessThanOrEqual(60);
+      expect(feed.minMinutesBetweenPosts).toBeGreaterThanOrEqual(360);
     }
   });
 
-  it("gives every feed a daily ceiling that a 24-hour wire can actually reach", () => {
+  it("caps every feed's daily ceiling at what a six-hour gap can actually reach", () => {
     for (const feed of ROSTER) {
-      expect(feed.maxPostsPerDay).toBeGreaterThanOrEqual(24);
+      expect(feed.maxPostsPerDay).toBeLessThanOrEqual(4);
     }
   });
 });

@@ -1,0 +1,194 @@
+name: CI
+
+# The JavaScript side of ZRP had no test gate at all. 1545 tests existed
+# across 126 files and no workflow ran a single one of them - the only
+# automated JS checks were `tsc --noEmit` and `next build`, and those ran
+# incidentally, inside android-release.yml, because the Capacitor wrapper
+# needs a built web app. Deleting a test, or breaking one, merged green.
+#
+# That mattered most for the tests with the most to lose from silent rot:
+# crypto-payment replay protection, socket relay authorization, ban
+# enforcement, SSRF guarding, rate limiting. Those are the ones nobody
+# notices are gone until they are needed.
+#
+# This workflow also runs the integration suites, which is the second half
+# of the same problem. 336 of the 1545 tests (22%) are gated on a real
+# Postgres - `describe.skipIf(!hasRealDatabaseUrl)` - and no workflow had
+# ever supplied one, so they had never executed in automation anywhere.
+# The service containers below give them a real database and a real Redis,
+# and the "assert integration tests actually ran" step makes the gating
+# visible: if the skip count climbs back to the hundreds, the run fails
+# rather than quietly passing on unit tests alone.
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - "src/**"
+      - "prisma/**"
+      - "server.js"
+      - "socket-authz.js"
+      - "presence.js"
+      - "package.json"
+      - "package-lock.json"
+      - "vitest.config.ts"
+      - "tsconfig.json"
+      - ".github/workflows/ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "prisma/**"
+      - "server.js"
+      - "socket-authz.js"
+      - "presence.js"
+      - "package.json"
+      - "package-lock.json"
+      - "vitest.config.ts"
+      - "tsconfig.json"
+      - ".github/workflows/ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Typecheck and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # `npm ci` runs postinstall -> prisma generate, but generate is what
+      # produces the typed client every one of these checks reads. Running
+      # it explicitly means a failure here is unambiguous rather than
+      # showing up as a thousand "Property does not exist" errors.
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      # Lint currently reports 0 errors and ~188 warnings (mostly
+      # no-img-element). Failing on warnings today would block every PR on
+      # pre-existing debt, so this gates on errors only - which is a real
+      # gate, not a no-op: `next lint` exits non-zero on any error.
+      - name: Lint
+        run: npx next lint
+
+  test:
+    name: Tests (with Postgres + Redis)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: zrp
+          POSTGRES_PASSWORD: zrp
+          POSTGRES_DB: zrp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U zrp"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://zrp:zrp@localhost:5432/zrp_test
+      REDIS_URL: redis://localhost:6379
+      # Tests that mint or verify sessions need these to exist; they are
+      # deliberately throwaway values with no production counterpart.
+      NEXTAUTH_SECRET: ci-test-secret-not-a-real-key
+      NEXTAUTH_URL: http://localhost:3000
+      CRON_SECRET: ci-test-cron-secret
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # `prisma migrate deploy` cannot build this schema from scratch:
+      # the migration history has no baseline, so its earliest migration
+      # already references "User" and fails with P3018 against an empty
+      # database (see docs/database-migration-deployment.md). `db push`
+      # creates the schema directly from schema.prisma, which is exactly
+      # what a disposable test database wants - and it deliberately does
+      # NOT exercise the migration path, so this workflow must not be read
+      # as evidence that migrations are healthy. They are a separate,
+      # known, unresolved problem.
+      - name: Create the test schema
+        run: npx prisma db push --skip-generate --accept-data-loss
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run tests
+        # NO_COLOR so the summary this step's assertion reads is plain
+        # text. vitest colourises even without a TTY when CI is set, and
+        # the escape codes are what broke the first real run of this
+        # workflow: the assertion's `^ *Tests` anchor never matched
+        # `\e[2m      Tests`, so it read zero and failed a green suite.
+        env:
+          NO_COLOR: "1"
+        run: npx vitest run --reporter=verbose 2>&1 | tee vitest-output.txt
+
+      # The point of the service containers above is that the integration
+      # suites stop being skipped. If a future change reintroduces the
+      # gating - a renamed env var, a moved helper - the suite would still
+      # report "all passed" while silently testing nothing. This asserts
+      # the opposite: that a substantial number of tests really ran, and
+      # that the skip count is small.
+      - name: Assert integration tests actually ran
+        run: |
+          # Strip ANSI escapes defensively as well as setting NO_COLOR
+          # above: one of the two is belt, the other braces, and a gate
+          # that cannot parse its own input fails the build for the one
+          # reason that has nothing to do with the code under test.
+          sed -e 's/\x1b\[[0-9;]*m//g' vitest-output.txt > vitest-plain.txt
+          line="$(grep -E '^ *Tests +[0-9]' vitest-plain.txt | tail -1)"
+          echo "summary: $line"
+          passed="$(printf '%s' "$line" | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' || echo 0)"
+          skipped="$(printf '%s' "$line" | grep -oE '[0-9]+ skipped' | grep -oE '[0-9]+' || echo 0)"
+          echo "passed=$passed skipped=$skipped"
+          # Measured, not guessed: the first real run of this workflow
+          # reported 1575 passed / 0 skipped across 130 files with
+          # Postgres 16 and Redis 7 present. Without a database the same
+          # suite reports ~1227 passed / ~348 skipped, so a floor of 1500
+          # sits well clear of the healthy number and well above the
+          # failure mode it exists to catch.
+          if [ "$passed" -lt 1500 ]; then
+            echo "::error::Only $passed tests ran. The integration suites are being skipped again - check DATABASE_URL/REDIS_URL reach the test process."
+            exit 1
+          fi
+          if [ "$skipped" -gt 20 ]; then
+            echo "::error::$skipped tests were skipped. With Postgres and Redis present this should be zero or close to it."
+            exit 1
+          fi

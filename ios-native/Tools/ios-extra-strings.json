@@ -160,6 +160,15 @@
     "ios.a11y.mute": "Mute",
     "ios.a11y.unmute": "Unmute",
     "ios.ads.sponsored": "Sponsored",
-    "ios.a11y.sponsoredPost": "Sponsored post by {name}"
+    "ios.a11y.sponsoredPost": "Sponsored post by {name}",
+    "ios.call.missedTitle": "Missed call",
+    "ios.call.missedBody": "{name} tried to call you. ZRP for iPhone can't take calls yet — you can answer on zrp.one.",
+    "ios.call.dismiss": "OK",
+    "ios.call.unknownCaller": "Someone",
+    "ios.group.untitled": "Group",
+    "ios.group.suggested": "Suggested",
+    "ios.group.removePhoto": "Remove group photo",
+    "ios.action.done": "Done",
+    "ios.chat.micDenied": "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings."
   }
 }

@@ -11,6 +11,7 @@ import NewGroupModal from "@/components/NewGroupModal";
 import { useConversationList } from "@/lib/useConversationList";
 import { buildMessagePreview } from "@/lib/conversationPreview";
 import { usePresence } from "@/contexts/PresenceContext";
+import ConversationRowMenu from "@/components/ConversationRowMenu";
 
 const localeMap: Record<string, string> = {
   en: "en-US",
@@ -23,7 +24,7 @@ export default function MessagesIndexPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const { t, language } = useLanguage();
-  const { conversations, loading, refresh } = useConversationList();
+  const { conversations, loading, refresh, deleteConversation } = useConversationList();
   const [showNewGroup, setShowNewGroup] = useState(false);
   const { isOnline, requestStatus } = usePresence();
 
@@ -297,6 +298,11 @@ export default function MessagesIndexPage() {
                           {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
                         </span>
                       )}
+
+                      <ConversationRowMenu
+                        partnerName={displayName}
+                        onDelete={() => deleteConversation(partner.id)}
+                      />
                     </Link>
                   );
                 }

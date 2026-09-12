@@ -35,6 +35,7 @@ struct ZRPSocialApp: App {
     /// to open it in - a link can arrive at launch, mid-restore, or with
     /// nobody signed in at all.
     @StateObject private var deepLinks = DeepLinkInbox()
+    @StateObject private var presence = PresenceStore()
 
     var body: some Scene {
         WindowGroup {
@@ -46,6 +47,7 @@ struct ZRPSocialApp: App {
                 .environmentObject(language)
                 .environmentObject(feedVideos)
                 .environmentObject(deepLinks)
+                .environmentObject(presence)
                 .onOpenURL { url in deepLinks.receive(url) }
                 // Rebuilt outright when the language changes. Strings
                 // resolve through L10n at call time, so SwiftUI has no

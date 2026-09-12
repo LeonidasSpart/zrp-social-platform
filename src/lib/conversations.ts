@@ -50,15 +50,26 @@ export async function getUserConversations(userId: string): Promise<Conversation
   // otherwise surface here as a bogus "conversation with partner_id
   // NULL" row. Group conversations get their own real listing
   // (getUserGroupConversations), not folded into this 1:1-only query.
+  //
+  // The LEFT JOIN against ConversationClearance excludes anything at or
+  // before this user's own "delete conversation" marker (see its KDoc) -
+  // a partner with no messages after that point simply doesn't surface
+  // here at all, exactly as if the conversation were new, while the
+  // other participant's own listing is entirely unaffected.
   const latestPerPartner = await prisma.$queryRaw<{ id: string }[]>`
     SELECT DISTINCT ON (partner_id) id
     FROM (
       SELECT
-        id,
-        "createdAt",
-        CASE WHEN "senderId" = ${userId} THEN "receiverId" ELSE "senderId" END AS partner_id
-      FROM "Message"
-      WHERE ("senderId" = ${userId} OR "receiverId" = ${userId}) AND "conversationId" IS NULL
+        m.id,
+        m."createdAt",
+        CASE WHEN m."senderId" = ${userId} THEN m."receiverId" ELSE m."senderId" END AS partner_id
+      FROM "Message" m
+      LEFT JOIN "ConversationClearance" cc
+        ON cc."userId" = ${userId}
+        AND cc."otherUserId" = (CASE WHEN m."senderId" = ${userId} THEN m."receiverId" ELSE m."senderId" END)
+      WHERE (m."senderId" = ${userId} OR m."receiverId" = ${userId})
+        AND m."conversationId" IS NULL
+        AND (cc.id IS NULL OR m."createdAt" > cc."clearedBefore")
     ) sub
     ORDER BY partner_id, "createdAt" DESC, id DESC
   `;
@@ -91,16 +102,23 @@ export async function getUserConversations(userId: string): Promise<Conversation
     }
   });
 
-  const unreadMessages = await prisma.message.groupBy({
-    by: ["senderId"],
-    where: { receiverId: userId, read: false },
-    _count: { senderId: true },
-  });
+  // Same clearance exclusion as above - an unread message from before
+  // this user cleared that conversation shouldn't inflate a badge for a
+  // conversation that (from their side) no longer shows that history.
+  const unreadMessages = await prisma.$queryRaw<{ senderId: string; count: bigint }[]>`
+    SELECT m."senderId" AS "senderId", COUNT(*) AS count
+    FROM "Message" m
+    LEFT JOIN "ConversationClearance" cc
+      ON cc."userId" = ${userId} AND cc."otherUserId" = m."senderId"
+    WHERE m."receiverId" = ${userId} AND m."read" = false
+      AND (cc.id IS NULL OR m."createdAt" > cc."clearedBefore")
+    GROUP BY m."senderId"
+  `;
 
   unreadMessages.forEach((u) => {
     const conv = conversationMap.get(u.senderId);
     if (conv) {
-      conv.unreadCount = u._count.senderId;
+      conv.unreadCount = Number(u.count);
     }
   });
 

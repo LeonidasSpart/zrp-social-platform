@@ -20,6 +20,17 @@ struct MainTabView: View {
     /// once for the whole shell.
     @StateObject private var unread = UnreadBadgeViewModel()
 
+    /// Also at shell level, and for the same reason: a call arrives
+    /// while you are anywhere in the app, so a responder owned by the
+    /// conversation view would only answer while you happened to be
+    /// reading that one thread.
+    @StateObject private var calls = IncomingCallResponder()
+
+    /// Presence is app-wide state, so the store is provided at the app
+    /// root; the shell only starts and stops listening with the signed-in
+    /// session.
+    @EnvironmentObject private var presence: PresenceStore
+
     var body: some View {
         TabView(selection: tabSelection) {
             ForEach(MainTab.allCases, id: \.self) { tab in
@@ -40,7 +51,10 @@ struct MainTabView: View {
         .fullScreenCover(isPresented: $player.isExpanded) {
             NowPlayingView()
         }
+        .incomingCallNotice(calls)
         .task {
+            calls.start()
+            presence.start()
             await unread.refresh()
             // A link that arrived before anyone was signed in has been
             // waiting; this is the first moment it has somewhere to go.
@@ -56,6 +70,10 @@ struct MainTabView: View {
         .onChange(of: router.selectedTab) { _, tab in
             guard tab == .messages || tab == .notifications else { return }
             Task { await unread.refresh() }
+        }
+        .onDisappear {
+            calls.stop()
+            presence.stop()
         }
     }
 

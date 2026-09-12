@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,17 +26,24 @@ import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -85,6 +93,16 @@ fun MessagesScreen(
         refreshing = state.isRefreshing,
         onRefresh = { viewModel.refresh() },
     )
+
+    // Delete-conversation flow, reachable from the list itself - this is
+    // the fix for "deleting a conversation doesn't work on Android": no
+    // client here ever called the real delete endpoint before (see
+    // MessagesRepository.deleteConversation's own KDoc). One dialog
+    // shared across rows, since only one can be open at a time.
+    var pendingDeletePartnerId by remember { mutableStateOf<String?>(null) }
+    var isDeletingConversation by remember { mutableStateOf(false) }
+    var deleteConversationError by remember { mutableStateOf<String?>(null) }
+    val fallbackDeleteError = stringResource(R.string.messages_err_delete_conversation)
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -145,6 +163,10 @@ fun MessagesScreen(
                                     isOnline = state.presence[item.summary.partner.id] == true,
                                     isSelected = selectedKey == item.key,
                                     onClick = { onOpenConversation(item.summary.partner.id, item.summary.partner.username) },
+                                    onDeleteRequested = {
+                                        pendingDeletePartnerId = item.summary.partner.id
+                                        deleteConversationError = null
+                                    },
                                 )
                                 is ConversationListItem.Group -> GroupConversationRow(
                                     conversation = item.summary,
@@ -164,6 +186,63 @@ fun MessagesScreen(
                 modifier = Modifier.align(Alignment.TopCenter),
             )
         }
+    }
+
+    val deletePartnerId = pendingDeletePartnerId
+    if (deletePartnerId != null) {
+        AlertDialog(
+            onDismissRequest = {
+                if (!isDeletingConversation) {
+                    pendingDeletePartnerId = null
+                    deleteConversationError = null
+                }
+            },
+            title = { Text(stringResource(R.string.messages_delete_conversation)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.messages_delete_conversation_confirm))
+                    val err = deleteConversationError
+                    if (err != null) {
+                        Spacer(modifier = Modifier.height(Spacing.sm))
+                        Text(
+                            text = err,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                if (isDeletingConversation) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                } else {
+                    TextButton(onClick = {
+                        isDeletingConversation = true
+                        deleteConversationError = null
+                        viewModel.deleteConversation(deletePartnerId) { result ->
+                            isDeletingConversation = false
+                            result.fold(
+                                onSuccess = { pendingDeletePartnerId = null },
+                                onFailure = { error -> deleteConversationError = error.message ?: fallbackDeleteError },
+                            )
+                        }
+                    }) {
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        pendingDeletePartnerId = null
+                        deleteConversationError = null
+                    },
+                    enabled = !isDeletingConversation,
+                ) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
     }
 }
 
@@ -186,6 +265,7 @@ private fun DirectConversationRow(
     isOnline: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
+    onDeleteRequested: () -> Unit,
 ) {
     val partner = conversation.partner
     val lastMessage = conversation.lastMessage
@@ -261,6 +341,32 @@ private fun DirectConversationRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             UnreadBadge(count = conversation.unreadCount)
+        }
+
+        // Reachable directly from the list, not only after opening the
+        // thread - the real UX fix this row exists for (see
+        // MessagesScreen's own KDoc on the shared confirm dialog above).
+        // Always visible rather than gated behind a swipe or long-press:
+        // senior-friendly discoverability was an explicit requirement,
+        // and an always-visible labeled button works identically with
+        // touch, a stylus, or TalkBack.
+        var menuOpen by remember { mutableStateOf(false) }
+        Box {
+            IconButton(onClick = { menuOpen = true }) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = stringResource(R.string.chat_contact_more),
+                )
+            }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.messages_delete_conversation)) },
+                    onClick = {
+                        menuOpen = false
+                        onDeleteRequested()
+                    },
+                )
+            }
         }
     }
 }
