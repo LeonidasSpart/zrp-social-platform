@@ -16,12 +16,18 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.ui.theme.ZrpWhite
 
 /**
  * The shared top bar for the four bottom-bar "home" screens (Home,
@@ -45,11 +51,24 @@ fun ZrpTopBar(
 ) {
     TopAppBar(
         title = {
+            // The reference design's top bar carries the compact "ZRP"
+            // wordmark (white "Z" + red "RP"), not the full "ZRP Social"
+            // install name - the same two-tone split the brand's own
+            // logo mark uses elsewhere. Screen readers still get the
+            // full app name via the row's own content description
+            // below, so nothing is lost for accessibility by shortening
+            // the visible text.
+            val appNameDescription = stringResource(R.string.app_name)
             Text(
-                text = stringResource(R.string.app_name),
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(color = ZrpWhite)) { append("Z") }
+                    withStyle(SpanStyle(color = ZrpRed)) { append("RP") }
+                },
                 fontWeight = FontWeight.Black,
                 fontSize = 20.sp,
-                color = ZrpRed,
+                modifier = Modifier.semantics {
+                    contentDescription = appNameDescription
+                },
             )
         },
         navigationIcon = {
