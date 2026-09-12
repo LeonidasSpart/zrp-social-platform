@@ -59,6 +59,7 @@ export default function OpponentSearch({ value, onChange, excludeUserId }: Oppon
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("play.searchUsers")}
+          aria-label={t("play.searchUsers")}
           className="w-full pl-9 pr-3 py-2.5 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
         />
       </div>

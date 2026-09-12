@@ -67,6 +67,7 @@ export default function CategoryPickerModal({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search categories"
+              aria-label="Search categories"
               autoFocus
               className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-full text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-zrp-red"
             />
