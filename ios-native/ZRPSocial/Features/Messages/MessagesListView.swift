@@ -188,7 +188,7 @@ struct MessagesListView: View {
                 Button { composingGroup = true } label: {
                     Image(systemName: "square.and.pencil")
                 }
-                .accessibilityLabel(Text(.iosGroupNew))
+                .accessibilityLabel(Text(.groupNew))
             }
         }
         .sheet(isPresented: $composingGroup) {
@@ -345,13 +345,14 @@ struct MessagesListView: View {
     /// is ambiguous in a way a 1:1 preview never is.
     private func groupPreview(for conversation: GroupConversation) -> String {
         guard let last = conversation.lastMessage else {
-            return L10n.string(.iosGroupNoMessages)
+            return L10n.string(.groupThreadNoMessagesYet)
         }
         let body = last.content.isEmpty
             ? L10n.string(.storiesImage)
             : last.content
         guard let name = last.sender?.displayName, !name.isEmpty else { return body }
-        return L10n.string(.iosGroupPreview, ["name": name, "message": body])
+        // The web key spells the placeholder `{msg}`, not `{message}`.
+        return L10n.string(.groupLastMessagePrefix, ["name": name, "msg": body])
     }
 
     private func row(_ summary: ConversationSummary) -> some View {

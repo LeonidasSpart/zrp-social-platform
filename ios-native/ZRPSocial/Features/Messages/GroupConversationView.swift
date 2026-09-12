@@ -285,11 +285,12 @@ final class GroupConversationViewModel: ObservableObject {
     }
 
     /// Removing yourself. The same route removes another member, but
-    /// only for an OWNER - see `ConversationsRepository.leave`.
+    /// only for an OWNER - see
+    /// `ConversationsRepository.removeParticipant`.
     func leave() async -> Bool {
         guard let viewerId else { return false }
         do {
-            try await repository.leave(id: conversationId, userId: viewerId)
+            try await repository.removeParticipant(id: conversationId, userId: viewerId)
             return true
         } catch let error as ApiError {
             errorMessage = error.userFacingMessage
@@ -299,6 +300,108 @@ final class GroupConversationViewModel: ObservableObject {
             return false
         }
     }
+
+    // MARK: - Managing the group
+
+    /// Replaces the held detail with what the route answered.
+    ///
+    /// Every management call returns the whole conversation with its
+    /// participants, so the screen re-renders from the server's copy
+    /// rather than from a guess about what the edit did. That is what
+    /// keeps the member list, the title and the avatar from drifting
+    /// apart after a partial failure.
+    private func apply(_ updated: GroupConversationDetail) {
+        detail = updated
+    }
+
+    /// Rename - OWNER only, refused with a 403 otherwise.
+    ///
+    /// The empty and over-long checks exist on the route too; mirroring
+    /// them here stops someone being told "no" after a round trip for a
+    /// rule the screen already knew.
+    func rename(to newName: String) async -> Bool {
+        let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed.count <= Self.maxNameLength else { return false }
+        guard viewerRole == .owner else { return false }
+
+        do {
+            apply(try await repository.update(id: conversationId, name: trimmed, avatarUrl: nil))
+            return true
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+            return false
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
+            return false
+        }
+    }
+
+    /// Sets or clears the group picture - OWNER only.
+    ///
+    /// `.some(url)` sets it and `.some(nil)` clears it; the repository's
+    /// double optional is what keeps those two distinguishable from
+    /// "don't touch the avatar". Passing a URL that did not come from
+    /// ZRP's own upload storage is refused server-side, which is why the
+    /// caller uploads first and sends back what the uploader returned.
+    func setAvatar(_ url: String?) async -> Bool {
+        guard viewerRole == .owner else { return false }
+        do {
+            apply(try await repository.update(id: conversationId, name: nil, avatarUrl: .some(url)))
+            return true
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+            return false
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
+            return false
+        }
+    }
+
+    /// Adds members. Available to **any** member, not just the owner -
+    /// that is the route's rule, not a relaxation of it.
+    func addMembers(_ userIds: [String]) async -> Bool {
+        guard !userIds.isEmpty else { return false }
+        do {
+            apply(try await repository.addParticipants(id: conversationId, participantIds: userIds))
+            return true
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+            return false
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
+            return false
+        }
+    }
+
+    /// Removes somebody else - OWNER only.
+    ///
+    /// Deliberately refuses to remove the viewer: leaving is its own
+    /// action with its own confirmation, and routing it through here
+    /// would drop someone out of a thread they are still looking at
+    /// without the navigation that leaving performs.
+    func removeMember(_ userId: String) async -> Bool {
+        guard viewerRole == .owner, userId != viewerId else { return false }
+        do {
+            try await repository.removeParticipant(id: conversationId, userId: userId)
+            await loadDetail()
+            return true
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+            return false
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
+            return false
+        }
+    }
+
+    /// Ids already in the group, so the member picker can exclude them
+    /// before the route has to.
+    var participantIds: Set<String> {
+        Set(detail?.participants.map(\.userId) ?? [])
+    }
+
+    static let maxNameLength = 100
+    static let maxParticipants = 100
 }
 
 /// A group thread.
@@ -345,18 +448,17 @@ struct GroupConversationView: View {
                 Button { showingInfo = true } label: {
                     Image(systemName: "info.circle")
                 }
-                .accessibilityLabel(Text(.iosGroupInfo))
+                .accessibilityLabel(Text(.groupThreadInfo))
             }
         }
         .sheet(isPresented: $showingInfo) {
-            GroupInfoSheet(
-                detail: viewModel.detail,
-                viewerRole: viewModel.viewerRole,
+            GroupManageSheet(
+                viewModel: viewModel,
                 onLeave: { confirmingLeave = true }
             )
         }
         .confirmationDialog(
-            Text(.iosGroupLeave),
+            Text(.groupInfoLeave),
             isPresented: $confirmingLeave,
             titleVisibility: .visible
         ) {
@@ -366,11 +468,11 @@ struct GroupConversationView: View {
                     if await viewModel.leave() { navigator.pop() }
                 }
             } label: {
-                Text(.iosGroupLeave)
+                Text(.groupInfoLeave)
             }
             Button(role: .cancel) {} label: { Text(.actionCancel) }
         } message: {
-            Text(.iosGroupLeaveConfirm)
+            Text(.groupInfoLeaveConfirm)
         }
         .alert(
             Text(.iosErrorGenericTitle),
@@ -540,68 +642,6 @@ private struct GroupMessageBubble: View {
             .accessibilityElement(children: .combine)
 
             if !isOwn { Spacer(minLength: ZrpSpacing.xxl) }
-        }
-    }
-}
-
-/// The member list, and the way out.
-private struct GroupInfoSheet: View {
-
-    let detail: GroupConversationDetail?
-    let viewerRole: GroupRole
-    let onLeave: () -> Void
-
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    ForEach(detail?.participants ?? []) { participant in
-                        HStack(spacing: ZrpSpacing.md) {
-                            AvatarView(
-                                url: participant.user?.avatarUrl,
-                                displayName: participant.user?.displayName ?? "",
-                                size: ZrpMetrics.avatarSmall
-                            )
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text(verbatim: participant.user?.displayName ?? "")
-                                    .font(.subheadline)
-                                    .foregroundStyle(ZrpColor.onSurface)
-                                if let username = participant.user?.username {
-                                    Text(verbatim: "@" + username)
-                                        .font(.caption)
-                                        .foregroundStyle(ZrpColor.onSurfaceMuted)
-                                }
-                            }
-                            Spacer(minLength: 0)
-                            if participant.role == .owner {
-                                Text(.iosGroupOwner)
-                                    .font(.caption2.weight(.semibold))
-                                    .foregroundStyle(ZrpColor.onSurfaceMuted)
-                            }
-                        }
-                    }
-                } header: {
-                    Text(.iosGroupMembers)
-                }
-
-                Section {
-                    Button(role: .destructive) {
-                        dismiss()
-                        onLeave()
-                    } label: {
-                        Text(.iosGroupLeave)
-                    }
-                }
-            }
-            .navigationTitle(Text(.iosGroupInfo))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { dismiss() } label: { Text(.actionCancel) }
-                }
-            }
         }
     }
 }

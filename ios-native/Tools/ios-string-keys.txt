@@ -868,3 +868,38 @@ charity.hospitalsLabel
 charity.climateProjectsLabel
 charity.viewProof
 charity.transparencyHeading
+
+# Group conversations. These come from the web dictionary rather than
+# ios-extra-strings.json because the web app already translates every one
+# of them into all eleven languages - an earlier pass on this branch
+# invented ios.group.* equivalents that were English-only, which was a
+# regression in reach for no gain.
+group.new
+group.lastMessagePrefix
+group.memberCount
+group.create.nameLabel
+group.create.namePlaceholder
+group.create.membersLabel
+group.create.searchPlaceholder
+group.create.selectedCount
+group.create.minMembers
+group.create.submit
+group.create.creating
+group.thread.noMessagesYet
+group.thread.info
+group.info.members
+group.info.addMembers
+group.info.owner
+group.info.remove
+group.info.removeConfirm
+group.info.leave
+group.info.leaveConfirm
+group.info.rename
+group.info.changePhoto
+
+# Chat attachments - voice notes and documents.
+chat.attachment
+chat.uploadDocument
+chat.recordVoiceMessage
+chat.uploadImage
+chat.downloadImage

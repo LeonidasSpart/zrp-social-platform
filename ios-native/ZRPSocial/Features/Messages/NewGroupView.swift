@@ -4,11 +4,6 @@ import SwiftUI
 final class NewGroupViewModel: ObservableObject {
 
     @Published var name: String = ""
-    @Published var query: String = ""
-    @Published private(set) var results: [PostAuthor] = []
-    @Published private(set) var suggested: [PostAuthor] = []
-    @Published private(set) var selected: [PostAuthor] = []
-    @Published private(set) var isSearching = false
     @Published private(set) var isCreating = false
     @Published var errorMessage: String?
 
@@ -19,74 +14,25 @@ final class NewGroupViewModel: ObservableObject {
     static let maxNameLength = 100
     static let maxParticipants = 100
 
-    private let conversations: ConversationsRepositoryProtocol
-    private let search: SearchRepositoryProtocol
-    private var searchTask: Task<Void, Never>?
+    /// The creator occupies one of the hundred places.
+    static let maxOtherMembers = maxParticipants - 1
 
-    init(
-        conversations: ConversationsRepositoryProtocol = ConversationsRepository(),
-        search: SearchRepositoryProtocol = SearchRepository()
-    ) {
+    private let conversations: ConversationsRepositoryProtocol
+
+    init(conversations: ConversationsRepositoryProtocol = ConversationsRepository()) {
         self.conversations = conversations
-        self.search = search
     }
 
     var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    var canCreate: Bool {
+    func canCreate(selectedCount: Int) -> Bool {
         !trimmedName.isEmpty
             && trimmedName.count <= Self.maxNameLength
-            && selected.count >= Self.minOtherMembers
-            && selected.count + 1 <= Self.maxParticipants
+            && selectedCount >= Self.minOtherMembers
+            && selectedCount + 1 <= Self.maxParticipants
             && !isCreating
-    }
-
-    /// People to offer before anyone has typed.
-    ///
-    /// Reuses `GET /api/users/suggested`, the same list onboarding shows,
-    /// rather than presenting an empty search box with no way forward.
-    func loadSuggested() async {
-        suggested = (try? await search.suggestedUsers(limit: 15)) ?? []
-    }
-
-    /// Debounced, because the search route is rate-limited and a request
-    /// per keystroke would spend that budget on queries nobody read.
-    func searchDebounced() {
-        searchTask?.cancel()
-        let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        guard term.count >= 2 else {
-            // The route itself requires two characters; below that there
-            // is nothing to ask for.
-            results = []
-            isSearching = false
-            return
-        }
-
-        searchTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(300))
-            guard !Task.isCancelled, let self else { return }
-            self.isSearching = true
-            defer { self.isSearching = false }
-            let found = try? await self.search.search(query: term)
-            guard !Task.isCancelled else { return }
-            self.results = found?.users ?? []
-        }
-    }
-
-    func toggle(_ user: PostAuthor) {
-        if let index = selected.firstIndex(where: { $0.id == user.id }) {
-            selected.remove(at: index)
-        } else {
-            guard selected.count + 1 < Self.maxParticipants else { return }
-            selected.append(user)
-        }
-    }
-
-    func isSelected(_ user: PostAuthor) -> Bool {
-        selected.contains { $0.id == user.id }
     }
 
     /// Creates the group and returns its id.
@@ -98,15 +44,15 @@ final class NewGroupViewModel: ObservableObject {
     /// they are shown as written rather than flattened into one generic
     /// failure; "Cannot add a user you've blocked or who has blocked
     /// you" tells someone what to do, and "Failed" does not.
-    func create() async -> String? {
-        guard canCreate else { return nil }
+    func create(participantIds: [String]) async -> String? {
+        guard canCreate(selectedCount: participantIds.count) else { return nil }
         isCreating = true
         defer { isCreating = false }
 
         do {
             return try await conversations.create(
                 name: trimmedName,
-                participantIds: selected.map(\.id),
+                participantIds: participantIds,
                 avatarUrl: nil
             )
         } catch let error as ApiError {
@@ -126,6 +72,9 @@ final class NewGroupViewModel: ObservableObject {
 struct NewGroupView: View {
 
     @StateObject private var viewModel = NewGroupViewModel()
+    @StateObject private var picker = PeoplePickerViewModel(
+        maxSelection: NewGroupViewModel.maxOtherMembers
+    )
     @EnvironmentObject private var navigator: Navigator
     @Environment(\.dismiss) private var dismiss
     @FocusState private var nameFocused: Bool
@@ -133,12 +82,11 @@ struct NewGroupView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                header
-                Divider().overlay(ZrpColor.outline)
-                people
+                nameField
+                PeoplePickerView(viewModel: picker)
             }
             .background(ZrpColor.background.ignoresSafeArea())
-            .navigationTitle(Text(.iosGroupNew))
+            .navigationTitle(Text(.groupNew))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -146,10 +94,10 @@ struct NewGroupView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { create() } label: {
-                        Text(viewModel.isCreating ? L10nKey.iosGroupCreating : .iosGroupCreate)
+                        Text(viewModel.isCreating ? L10nKey.groupCreateCreating : .groupCreateSubmit)
                             .font(.subheadline.weight(.semibold))
                     }
-                    .disabled(!viewModel.canCreate)
+                    .disabled(!viewModel.canCreate(selectedCount: picker.selected.count))
                 }
             }
             .alert(
@@ -165,22 +113,22 @@ struct NewGroupView: View {
             }
             .task {
                 nameFocused = true
-                await viewModel.loadSuggested()
+                await picker.loadSuggested()
             }
         }
     }
 
-    private var header: some View {
+    private var nameField: some View {
         VStack(alignment: .leading, spacing: ZrpSpacing.md) {
             VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
-                Text(.iosGroupNameLabel)
+                Text(.groupCreateNameLabel)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
 
                 TextField(
                     text: $viewModel.name,
-                    prompt: Text(.iosGroupNamePlaceholder),
-                    label: { Text(.iosGroupNameLabel) }
+                    prompt: Text(.groupCreateNamePlaceholder),
+                    label: { Text(.groupCreateNameLabel) }
                 )
                 .labelsHidden()
                 .focused($nameFocused)
@@ -192,131 +140,33 @@ struct NewGroupView: View {
 
             // Says what is still needed, rather than leaving a disabled
             // button with no explanation of why.
-            if viewModel.selected.count < NewGroupViewModel.minOtherMembers {
-                Text(.iosGroupMinMembers)
+            if picker.selected.count < NewGroupViewModel.minOtherMembers {
+                // The web string is "Add at least {count} more people",
+                // so the count is how many are still MISSING, not the
+                // minimum itself.
+                Text(
+                    .groupCreateMinMembers,
+                    ["count": CountFormatting.exact(
+                        NewGroupViewModel.minOtherMembers - picker.selected.count
+                    )]
+                )
                     .font(.caption)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
             } else {
-                Text(.iosGroupSelectedCount, ["count": CountFormatting.exact(viewModel.selected.count)])
+                Text(.groupCreateSelectedCount, ["count": CountFormatting.exact(picker.selected.count)])
                     .font(.caption)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
             }
-
-            if !viewModel.selected.isEmpty {
-                ScrollView(.horizontal) {
-                    HStack(spacing: ZrpSpacing.sm) {
-                        ForEach(viewModel.selected) { user in
-                            Button { viewModel.toggle(user) } label: {
-                                HStack(spacing: ZrpSpacing.xs) {
-                                    Text(verbatim: user.displayName)
-                                        .font(.caption)
-                                        .lineLimit(1)
-                                    Image(systemName: "xmark")
-                                        .font(.caption2)
-                                }
-                                .padding(.horizontal, ZrpSpacing.sm)
-                                .padding(.vertical, ZrpSpacing.xs)
-                                .background(ZrpColor.surfaceElevated)
-                                .clipShape(Capsule())
-                            }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(ZrpColor.onSurface)
-                        }
-                    }
-                }
-                .scrollIndicators(.hidden)
-            }
-
-            TextField(
-                text: $viewModel.query,
-                prompt: Text(.iosGroupSearchPeople),
-                label: { Text(.iosGroupSearchPeople) }
-            )
-            .labelsHidden()
-            .autocorrectionDisabled()
-            .textInputAutocapitalization(.never)
-            .padding(ZrpSpacing.md)
-            .background(ZrpColor.surfaceElevated)
-            .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md))
-            .onChange(of: viewModel.query) { _, _ in viewModel.searchDebounced() }
         }
-        .padding(ZrpSpacing.lg)
-    }
-
-    @ViewBuilder
-    private var people: some View {
-        let showingSuggestions = viewModel.query
-            .trimmingCharacters(in: .whitespacesAndNewlines).count < 2
-        let list = showingSuggestions ? viewModel.suggested : viewModel.results
-
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                if viewModel.isSearching {
-                    ProgressView()
-                        .tint(ZrpColor.red)
-                        .padding(ZrpSpacing.lg)
-                } else if list.isEmpty {
-                    Text(.searchNoUsers)
-                        .font(.subheadline)
-                        .foregroundStyle(ZrpColor.onSurfaceMuted)
-                        .padding(.vertical, ZrpSpacing.xxl)
-                } else {
-                    if showingSuggestions {
-                        Text(.iosGroupSuggested)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(ZrpColor.onSurfaceMuted)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, ZrpSpacing.lg)
-                            .padding(.top, ZrpSpacing.sm)
-                    }
-
-                    ForEach(list) { user in
-                        row(user)
-                    }
-                }
-            }
-            .frame(maxWidth: ZrpMetrics.contentMaxWidth)
-            .frame(maxWidth: .infinity)
-        }
-    }
-
-    private func row(_ user: PostAuthor) -> some View {
-        Button { viewModel.toggle(user) } label: {
-            HStack(spacing: ZrpSpacing.md) {
-                AvatarView(
-                    url: user.avatarUrl,
-                    displayName: user.displayName,
-                    size: ZrpMetrics.avatarSmall
-                )
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(verbatim: user.displayName)
-                        .font(.subheadline)
-                        .foregroundStyle(ZrpColor.onSurface)
-                    Text(verbatim: "@" + user.username)
-                        .font(.caption)
-                        .foregroundStyle(ZrpColor.onSurfaceMuted)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: viewModel.isSelected(user) ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(
-                        viewModel.isSelected(user) ? ZrpColor.red : ZrpColor.onSurfaceMuted
-                    )
-            }
-            .padding(.horizontal, ZrpSpacing.lg)
-            .padding(.vertical, ZrpSpacing.md)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        // One stop per person for VoiceOver, with the selected state as
-        // a trait rather than a separate element.
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(viewModel.isSelected(user) ? [.isButton, .isSelected] : .isButton)
+        .padding(.horizontal, ZrpSpacing.lg)
+        .padding(.top, ZrpSpacing.lg)
+        .padding(.bottom, ZrpSpacing.md)
     }
 
     private func create() {
         Task {
-            guard let id = await viewModel.create() else { return }
+            guard let id = await viewModel.create(participantIds: picker.selected.map(\.id))
+            else { return }
             dismiss()
             // Straight into the group that was just made - the reason
             // anyone opened this screen.

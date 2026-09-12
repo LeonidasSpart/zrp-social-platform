@@ -6,7 +6,9 @@ protocol ConversationsRepositoryProtocol: Sendable {
     func messages(id: String, before cursor: String?, limit: Int) async throws -> GroupMessagesPage
     func send(id: String, content: String, imageUrl: String?) async throws -> GroupMessage
     func create(name: String, participantIds: [String], avatarUrl: String?) async throws -> String
-    func leave(id: String, userId: String) async throws
+    func update(id: String, name: String?, avatarUrl: String??) async throws -> GroupConversationDetail
+    func addParticipants(id: String, participantIds: [String]) async throws -> GroupConversationDetail
+    func removeParticipant(id: String, userId: String) async throws
 }
 
 struct ConversationsRepository: ConversationsRepositoryProtocol {
@@ -100,13 +102,89 @@ struct ConversationsRepository: ConversationsRepositoryProtocol {
         return response.id
     }
 
+    /// The PATCH body.
+    ///
+    /// `avatarUrl` is a double optional for a reason the route cares
+    /// about: PATCH distinguishes **absent** (leave the avatar alone)
+    /// from **null** (clear it). A single optional cannot express that -
+    /// `nil` would encode as absent and "remove this group's picture"
+    /// would silently do nothing. The outer layer chooses which of the
+    /// two is meant; the inner one carries the value.
+    private struct UpdateRequest: Encodable {
+        let name: String?
+        let avatarUrl: String??
+
+        private enum CodingKeys: String, CodingKey {
+            case name, avatarUrl
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            if let name { try container.encode(name, forKey: .name) }
+            if let avatarUrl {
+                // Present. `.some(nil)` encodes an explicit JSON null,
+                // which is what the route reads as "clear it".
+                try container.encode(avatarUrl, forKey: .avatarUrl)
+            }
+        }
+    }
+
+    /// `PATCH /api/conversations/{id}` - rename a group or change its
+    /// picture. **OWNER only**, enforced server-side with a 403.
+    ///
+    /// The route also refuses an empty or whitespace-only name, a name
+    /// over 100 characters, and an `avatarUrl` that did not come from
+    /// ZRP's own upload storage - a group avatar is rendered for every
+    /// member, so it may not be an arbitrary remote URL.
+    func update(
+        id: String,
+        name: String?,
+        avatarUrl: String??
+    ) async throws -> GroupConversationDetail {
+        try await client.send(
+            try Endpoint.patch(
+                "conversations/\(Endpoint.segment(id))",
+                body: UpdateRequest(
+                    name: name?.trimmingCharacters(in: .whitespacesAndNewlines),
+                    avatarUrl: avatarUrl
+                )
+            )
+        )
+    }
+
+    private struct AddParticipantsRequest: Encodable {
+        let participantIds: [String]
+    }
+
+    /// `POST /api/conversations/{id}/participants`.
+    ///
+    /// **Any member may add someone** - only removal is owner-gated.
+    /// That asymmetry is the route's, documented in its own comment, and
+    /// is not this app's to tighten: hiding "add" from members would
+    /// make iOS behave differently from web and Android for no reason.
+    ///
+    /// Everything the client cannot know stays the server's: users must
+    /// exist, the 100-member cap, already-a-member, and the block check
+    /// in both directions. Each refusal has its own wording.
+    func addParticipants(
+        id: String,
+        participantIds: [String]
+    ) async throws -> GroupConversationDetail {
+        try await client.send(
+            try Endpoint.post(
+                "conversations/\(Endpoint.segment(id))/participants",
+                body: AddParticipantsRequest(participantIds: participantIds)
+            )
+        )
+    }
+
     /// `DELETE /api/conversations/{id}/participants/{userId}`.
     ///
     /// One route, two meanings, decided server-side by who is asking:
     /// removing yourself is leaving, and removing somebody else requires
     /// OWNER. The app offers the second only to an owner so the 403 is
     /// not how anyone learns the rule.
-    func leave(id: String, userId: String) async throws {
+    func removeParticipant(id: String, userId: String) async throws {
         try await client.sendIgnoringResponse(
             Endpoint.delete(
                 "conversations/\(Endpoint.segment(id))/participants/\(Endpoint.segment(userId))"

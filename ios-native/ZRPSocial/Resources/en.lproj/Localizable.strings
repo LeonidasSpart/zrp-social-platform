@@ -833,6 +833,33 @@
 "charity.climateProjectsLabel" = "Climate Projects";
 "charity.viewProof" = "View proof";
 "charity.transparencyHeading" = "Transparency & Impact";
+"group.new" = "New group";
+"group.lastMessagePrefix" = "{name}: {msg}";
+"group.memberCount" = "{count} members";
+"group.create.nameLabel" = "Group name";
+"group.create.namePlaceholder" = "Name your group";
+"group.create.membersLabel" = "Add members";
+"group.create.searchPlaceholder" = "Search people...";
+"group.create.selectedCount" = "{count} selected";
+"group.create.minMembers" = "Add at least {count} more people";
+"group.create.submit" = "Create group";
+"group.create.creating" = "Creating...";
+"group.thread.noMessagesYet" = "No messages yet";
+"group.thread.info" = "Group info";
+"group.info.members" = "Members";
+"group.info.addMembers" = "Add members";
+"group.info.owner" = "Owner";
+"group.info.remove" = "Remove";
+"group.info.removeConfirm" = "Remove {name} from the group?";
+"group.info.leave" = "Leave group";
+"group.info.leaveConfirm" = "Leave this group? You'll lose access to its messages unless someone adds you back.";
+"group.info.rename" = "Rename group";
+"group.info.changePhoto" = "Change group photo";
+"chat.attachment" = "Document";
+"chat.uploadDocument" = "Attach document";
+"chat.recordVoiceMessage" = "Record a voice message";
+"chat.uploadImage" = "Upload image";
+"chat.downloadImage" = "Download image";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
@@ -991,20 +1018,6 @@
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Someone";
 "ios.group.untitled" = "Group";
-"ios.group.noMessages" = "No messages yet";
-"ios.group.preview" = "{name}: {message}";
-"ios.group.members" = "Members";
-"ios.group.leave" = "Leave group";
-"ios.group.leaveConfirm" = "You'll stop receiving messages from this group.";
-"ios.group.owner" = "Owner";
-"ios.group.info" = "Group info";
-"ios.group.new" = "New group";
-"ios.group.nameLabel" = "Group name";
-"ios.group.namePlaceholder" = "Name this group";
-"ios.group.addPeople" = "Add people";
-"ios.group.searchPeople" = "Search for people";
-"ios.group.selectedCount" = "{count} selected";
-"ios.group.minMembers" = "Pick at least 2 other people.";
-"ios.group.create" = "Create group";
-"ios.group.creating" = "Creating…";
 "ios.group.suggested" = "Suggested";
+"ios.group.removePhoto" = "Remove group photo";
+"ios.action.done" = "Done";
