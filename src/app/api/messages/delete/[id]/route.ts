@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 import { rateLimit } from "@/lib/rate-limit";
 import { getConversationParticipant } from "@/lib/conversations";
 
@@ -53,7 +53,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
     // imageUrl doubles as the attachment field for images, documents, and
     // voice messages alike (Message has no separate fields per type), so
     // this one call covers all three attachment kinds a DM can carry.
-    await deleteUploadThingFiles([message.imageUrl]);
+    await deleteUploadsIfUnreferenced([message.imageUrl]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

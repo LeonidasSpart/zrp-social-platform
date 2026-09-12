@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { checkPostLength } from "@/lib/limits";
-import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 
 // ─── PREVENT STATIC GENERATION ─────────────────────────────────────
 export const dynamic = 'force-dynamic';
@@ -114,7 +114,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
       where: { id: params.id },
     });
 
-    await deleteUploadThingFiles([comment.imageUrl, ...replyImageUrls]);
+    await deleteUploadsIfUnreferenced([comment.imageUrl, ...replyImageUrls]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

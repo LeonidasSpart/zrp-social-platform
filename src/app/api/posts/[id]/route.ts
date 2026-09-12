@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { checkPostLength } from "@/lib/limits";
-import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 import { canViewPrivateContent } from "@/lib/permissions";
 import { validateMediaUrls } from "@/lib/media-url";
 
@@ -269,8 +269,12 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
 
     // Best-effort UploadThing cleanup - runs after the DB delete succeeds,
     // and never blocks or fails the request if it has trouble (see
-    // deleteUploadThingFiles for why).
-    await deleteUploadThingFiles([
+    // deleteUploadThingKeys for why). existingPost.imageUrl is always a
+    // copy of existingPost.imageUrls[0] (see POST /api/posts), so this
+    // list always contains that duplicate for any single-image post;
+    // deleteUploadsIfUnreferenced dedupes it (and skips anything still
+    // referenced by another row) before anything is actually deleted.
+    await deleteUploadsIfUnreferenced([
       existingPost.imageUrl,
       ...existingPost.imageUrls,
       ...commentsWithImages.map((c) => c.imageUrl),
