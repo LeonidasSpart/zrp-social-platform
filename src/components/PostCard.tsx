@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import {
   Heart,
   MessageCircle,
@@ -521,19 +522,7 @@ export default function PostCard({
   // LIGHTBOX SCROLL LOCK
   // ─────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    if (!lightboxOpen) return;
-
-    const previousOverflow =
-      document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow =
-        previousOverflow;
-    };
-  }, [lightboxOpen]);
+  useBodyScrollLock(lightboxOpen);
 
   // ─────────────────────────────────────────────────────────────
   // LIGHTBOX KEYBOARD

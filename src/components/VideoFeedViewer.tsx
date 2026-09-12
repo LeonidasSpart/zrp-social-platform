@@ -8,6 +8,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import {
   X,
   Heart,
@@ -470,18 +471,7 @@ export default function VideoFeedViewer({
   // LOCK BODY SCROLL
   // ─────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    const previousOverflow =
-      document.body.style.overflow;
-
-    document.body.style.overflow =
-      "hidden";
-
-    return () => {
-      document.body.style.overflow =
-        previousOverflow;
-    };
-  }, []);
+  useBodyScrollLock(true);
 
   // ─────────────────────────────────────────────────────────────
   // SCROLL TO INDEX
