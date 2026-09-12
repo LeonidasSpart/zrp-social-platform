@@ -1079,3 +1079,8 @@
 "team.title" = "团队管理";
 "team.upgradeBusinessDesc" = "使用团队管理功能需要 Business 或 Enterprise 套餐。";
 "team.upgradeRequired" = "升级 必填";
+"footer.faq" = "常见问题";
+"footer.contact" = "联系我们";
+"footer.careers" = "招聘";
+"footer.investors" = "投资者";
+"footer.pressKit" = "媒体资料包";

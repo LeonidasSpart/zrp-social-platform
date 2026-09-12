@@ -1136,3 +1136,12 @@ team.teamMembers
 team.title
 team.upgradeBusinessDesc
 team.upgradeRequired
+
+# Informational pages the website's sidebar links to. Five of these had
+# no route into the iOS app at all; every label already existed here in
+# all eleven languages.
+footer.faq
+footer.contact
+footer.careers
+footer.investors
+footer.pressKit

@@ -1079,3 +1079,8 @@
 "team.title" = "Gestione del team";
 "team.upgradeBusinessDesc" = "La gestione del team richiede un piano Business o Enterprise.";
 "team.upgradeRequired" = "Upgrade richiesto";
+"footer.faq" = "FAQ";
+"footer.contact" = "Contatti";
+"footer.careers" = "Lavora con noi";
+"footer.investors" = "Investitori";
+"footer.pressKit" = "Press Kit";

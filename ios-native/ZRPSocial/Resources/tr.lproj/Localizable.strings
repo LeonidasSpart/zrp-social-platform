@@ -1079,3 +1079,8 @@
 "team.title" = "Takım Yönetimi";
 "team.upgradeBusinessDesc" = "Takım yönetimi için Business veya Enterprise planı gereklidir.";
 "team.upgradeRequired" = "Yükseltme Gerekli";
+"footer.faq" = "SSS";
+"footer.contact" = "İletişim";
+"footer.careers" = "Kariyer";
+"footer.investors" = "Yatırımcılar";
+"footer.pressKit" = "Basın Kiti";

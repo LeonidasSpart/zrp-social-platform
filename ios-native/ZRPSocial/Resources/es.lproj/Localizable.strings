@@ -1079,3 +1079,8 @@
 "team.title" = "Gestión de equipo";
 "team.upgradeBusinessDesc" = "La gestión de equipos requiere un plan Business o Enterprise.";
 "team.upgradeRequired" = "Mejora requerida";
+"footer.faq" = "Preguntas frecuentes";
+"footer.contact" = "Contacto";
+"footer.careers" = "Empleo";
+"footer.investors" = "Inversores";
+"footer.pressKit" = "Kit de prensa";

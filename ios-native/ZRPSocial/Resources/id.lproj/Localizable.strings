@@ -1079,3 +1079,8 @@
 "team.title" = "Manajemen Tim";
 "team.upgradeBusinessDesc" = "Manajemen tim memerlukan paket Business atau Enterprise.";
 "team.upgradeRequired" = "Peningkatan Diperlukan";
+"footer.faq" = "FAQ";
+"footer.contact" = "Kontak";
+"footer.careers" = "Karier";
+"footer.investors" = "Investor";
+"footer.pressKit" = "Kit Pers";

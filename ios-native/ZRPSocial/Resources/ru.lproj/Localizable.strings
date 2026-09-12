@@ -1079,3 +1079,8 @@
 "team.title" = "Управление командой";
 "team.upgradeBusinessDesc" = "Для управления командой требуется тариф Business или Enterprise.";
 "team.upgradeRequired" = "обновить обязательно";
+"footer.faq" = "Частые вопросы";
+"footer.contact" = "Контакты";
+"footer.careers" = "Карьера";
+"footer.investors" = "Инвесторам";
+"footer.pressKit" = "Пресс-кит";

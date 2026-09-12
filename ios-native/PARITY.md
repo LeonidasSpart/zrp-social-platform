@@ -505,13 +505,28 @@ Android has no journalist surface; iOS is ahead of it here too.
 
 Android has neither surface.
 
+### Informational pages (opened in-app via SFSafariViewController)
+
+| Page | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- |
+| Terms, Privacy, Guidelines, Community Code | ✅ | ✅ | ✅ Settings → Legal | IMPLEMENTED |
+| About, Help Center | ✅ | ✅ | ✅ Settings | IMPLEMENTED |
+| FAQ | ✅ sidebar | ⬜ | ✅ **added** — had no path into the app at all | IMPLEMENTED |
+| Contact | ✅ sidebar + footer | ⬜ | ✅ **added** — a support path that was missing entirely | IMPLEMENTED |
+| Careers | ✅ sidebar | ⬜ | ✅ **added** | IMPLEMENTED |
+| Investors | ✅ sidebar | ⬜ | ✅ **added** | IMPLEMENTED |
+| Press Kit | ✅ sidebar | ⬜ | ✅ **added** — labelled "Press Kit" as the website labels it, though the route is `/press` | IMPLEMENTED |
+
+All eleven are the same shape: public, static, long-form, already written and already translated into all eleven languages on zrp.one. They open in `SFSafariViewController` rather than being reimplemented natively, because a second copy of a Terms or Privacy page is a compliance risk the moment Legal edits a paragraph. Android reached the same conclusion for the six it has.
+
+**This corrects an earlier row in this file** that listed Careers, Investors and Press as deliberately web-only. They are in the website's own sidebar, so users genuinely had them and iOS did not; "no JSON route to read" was never the right test for a page that is read, not queried.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
 | --- | --- |
 | **Admin console** (`/api/admin/**`, 40+ routes) | **Web-only for v1, by decision — not an oversight.** Android ships four admin screens; iOS ships none. Every admin route is independently role-gated server-side, so an iOS app without an admin surface loses no security and gains none: hiding a screen is not what protects those routes, and building one would not weaken them either. The reason to leave it out is product, not safety — a staff console is a desk-and-keyboard tool, and the four screens Android has cover a fraction of the twenty the website offers. Anyone doing moderation work should be on the web console that has all of it. Revisit only if staff genuinely need to act from a phone; if so, build it against the same server-role gate and never surface an admin control on a client check alone. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
-| Careers, Investors, Press | WEB-ONLY — Android has no surface for any of them either. Marketing and corporate pages with no JSON route to read. |
 | **Ads** — advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** — see the Ads section below. |
 | **Creator Studio** — earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |
 

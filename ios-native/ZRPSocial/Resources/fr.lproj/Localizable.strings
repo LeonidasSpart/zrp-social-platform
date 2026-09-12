@@ -1079,3 +1079,8 @@
 "team.title" = "Gestion de l'équipe";
 "team.upgradeBusinessDesc" = "La gestion d'équipe nécessite une offre Business ou Enterprise.";
 "team.upgradeRequired" = "Mise à niveau requise";
+"footer.faq" = "FAQ";
+"footer.contact" = "Contact";
+"footer.careers" = "Carrières";
+"footer.investors" = "Investisseurs";
+"footer.pressKit" = "Kit presse";

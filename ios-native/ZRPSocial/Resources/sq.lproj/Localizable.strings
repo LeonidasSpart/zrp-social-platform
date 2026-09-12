@@ -1079,3 +1079,8 @@
 "team.title" = "Menaxhimi i ekipit";
 "team.upgradeBusinessDesc" = "Menaxhimi i ekipit kërkon një plan Business ose Enterprise.";
 "team.upgradeRequired" = "Kërkohet përmirësim";
+"footer.faq" = "Pyetje të shpeshta";
+"footer.contact" = "Kontakt";
+"footer.careers" = "Karriera";
+"footer.investors" = "Investitorët";
+"footer.pressKit" = "Kit i Shtypit";

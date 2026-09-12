@@ -1079,3 +1079,8 @@
 "team.title" = "Teamverwaltung";
 "team.upgradeBusinessDesc" = "Team-Verwaltung erfordert einen Business- oder Enterprise-Plan.";
 "team.upgradeRequired" = "Upgrade erforderlich";
+"footer.faq" = "FAQ";
+"footer.contact" = "Kontakt";
+"footer.careers" = "Karriere";
+"footer.investors" = "Investoren";
+"footer.pressKit" = "Presse-Kit";

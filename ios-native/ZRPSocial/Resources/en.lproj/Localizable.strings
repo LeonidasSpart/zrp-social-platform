@@ -1079,6 +1079,11 @@
 "team.title" = "Team Management";
 "team.upgradeBusinessDesc" = "Team management requires a Business or Enterprise plan.";
 "team.upgradeRequired" = "Upgrade Required";
+"footer.faq" = "FAQ";
+"footer.contact" = "Contact";
+"footer.careers" = "Careers";
+"footer.investors" = "Investors";
+"footer.pressKit" = "Press Kit";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back
