@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -148,6 +149,7 @@ fun SettingsScreen(
     onOpenAmbassadors: () -> Unit,
     onOpenFaq: () -> Unit,
     onOpenCommunityCode: () -> Unit,
+    onOpenPricing: () -> Unit,
     isStaff: Boolean = false,
     onOpenAdmin: () -> Unit = {},
 ) {
@@ -185,6 +187,7 @@ fun SettingsScreen(
             SettingsRow(icon = Icons.Filled.Shield, label = stringResource(R.string.settings_privacy_safety), onClick = onOpenPrivacy)
             SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
             SettingsRow(icon = Icons.Filled.Notifications, label = stringResource(R.string.nav_notifications), onClick = onOpenNotifications)
+            SettingsRow(icon = Icons.Filled.WorkspacePremium, label = stringResource(R.string.pricing_choose_your_plan), onClick = onOpenPricing)
             // "Monetization" stays English-only - see this file's own KDoc.
             SettingsRow(icon = Icons.Filled.CreditCard, label = "Monetization", onClick = onOpenCreator)
             SettingsRow(icon = Icons.Filled.Newspaper, label = stringResource(R.string.nav_journalist), onClick = onOpenJournalist)
