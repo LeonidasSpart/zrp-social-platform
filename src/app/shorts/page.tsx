@@ -23,6 +23,7 @@ import {
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ShortUploadModal from "@/components/ShortUploadModal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getCaptionDisplayState } from "@/lib/shortsCaption";
 
 interface ShortPost {
   id: string;
@@ -1457,49 +1458,65 @@ export default function ShortsPage() {
                             outside the author Link above: tapping text
                             to read it must never open a profile. It is a
                             disclosure - tap to expand, tap again to
-                            collapse - so no second string had to be
-                            invented; "Show more" reuses the existing
-                            translated rightPanel.showMore and the state
-                            itself is announced by aria-expanded. */}
-                        {post.content && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleCaption(post.id);
-                            }}
-                            aria-expanded={
-                              !!captionExpanded[
-                                post.id
-                              ]
-                            }
-                            className="block w-full text-left"
-                          >
-                            <span
-                              className={`block text-sm whitespace-pre-wrap break-words ${
-                                captionExpanded[
-                                  post.id
-                                ]
-                                  ? "max-h-40 overflow-y-auto"
-                                  : "line-clamp-2"
-                              }`}
-                            >
-                              {
-                                post.content
-                              }
-                            </span>
+                            collapse - driven entirely by
+                            getCaptionDisplayState's real character-count
+                            truncation (see its own KDoc in
+                            shortsCaption.ts for the CSS line-clamp bug
+                            this replaced: a real user-reported "opens
+                            full, Show more shrinks it" inversion). The
+                            expanded view is bounded only by a generous
+                            45vh scroll area as a safety valve against a
+                            pathologically long caption breaking the
+                            viewer's layout, not to hide content. A
+                            caption at or under the threshold renders as
+                            plain text with no button at all - there is
+                            nothing to disclose. */}
+                        {post.content && (() => {
+                          const isExpanded = !!captionExpanded[post.id];
+                          const { isLong: isLongCaption, displayText } =
+                            getCaptionDisplayState(
+                              post.content,
+                              isExpanded
+                            );
 
-                            {!captionExpanded[
-                              post.id
-                            ] && (
+                          if (!isLongCaption) {
+                            return (
+                              <p className="block text-sm whitespace-pre-wrap break-words">
+                                {post.content}
+                              </p>
+                            );
+                          }
+
+                          return (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCaption(post.id);
+                              }}
+                              aria-expanded={isExpanded}
+                              className="block w-full text-left"
+                            >
+                              <span
+                                className={`block text-sm whitespace-pre-wrap break-words ${
+                                  isExpanded
+                                    ? "max-h-[45vh] overflow-y-auto"
+                                    : ""
+                                }`}
+                              >
+                                {displayText}
+                              </span>
+
                               <span className="mt-0.5 block text-sm font-semibold text-white/80">
                                 {t(
-                                  "rightPanel.showMore"
+                                  isExpanded
+                                    ? "rightPanel.showLess"
+                                    : "rightPanel.showMore"
                                 )}
                               </span>
-                            )}
-                          </button>
-                        )}
+                            </button>
+                          );
+                        })()}
 
                       </div>
 

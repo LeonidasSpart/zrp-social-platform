@@ -150,9 +150,16 @@ describe("shorts caption", () => {
     expect(block).not.toContain("router.push");
   });
 
-  it("announces the caption's expanded state", () => {
+  it("announces the caption's expanded state and offers a real way back", () => {
+    // See src/lib/__tests__/shortsCaption.test.ts for the full regression
+    // history: this used to be CSS line-clamp-2/max-h-40, which inverted
+    // itself for a real user on the PWA (opened full, "Show more" made
+    // it shorter) and never rendered a "Show less" at all once expanded.
     expect(src).toContain("aria-expanded={");
-    expect(src).toContain('t(\n                                  "rightPanel.showMore"');
+    expect(src).toContain('import { getCaptionDisplayState } from "@/lib/shortsCaption"');
+    expect(src).toContain('"rightPanel.showMore"');
+    expect(src).toContain('"rightPanel.showLess"');
+    expect(src).not.toMatch(/line-clamp-\d/);
   });
 
   it("reserves BottomNav's real footprint under the overlay", () => {
