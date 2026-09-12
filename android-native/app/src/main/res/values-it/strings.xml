@@ -1658,6 +1658,7 @@
     <string name="admin_ticket_delete_confirm">Eliminare questa richiesta e tutte le sue risposte? Questa azione non può essere annullata.</string>
     <string name="admin_dash_verify_payments">Verifica pagamenti</string>
     <string name="admin_dash_process_withdrawals">Gestisci prelievi</string>
+    <string name="admin_dash_process_help_withdrawals">Gestisci prelievi HELP</string>
     <string name="admin_dash_review_upgrade_requests">Esamina richieste di upgrade</string>
     <string name="admin_finance_requested">Richiesto il %1$s</string>
     <string name="admin_plan_free">Gratuito</string>
@@ -1682,6 +1683,11 @@
     <string name="admin_withdrawals_status_completed">Completato</string>
     <string name="admin_withdrawals_status_failed">Fallito</string>
     <string name="admin_withdrawals_status_rejected">Rifiutato</string>
+    <string name="admin_help_withdrawals_title">Prelievi HELP</string>
+    <string name="admin_help_withdrawals_none">Nessun prelievo di campagne HELP da mostrare.</string>
+    <string name="admin_help_withdrawals_campaign">Campagna: %1$s</string>
+    <string name="admin_help_withdrawals_approve_confirm">Inviare ora %1$s al wallet di @%2$s per \"%3$s\"? Il trasferimento avviene on-chain e non può essere annullato.</string>
+    <string name="admin_help_withdrawals_reject_confirm">Rifiutare questo prelievo di %1$s per \"%2$s\"? L\'importo torna sul saldo disponibile della campagna.</string>
     <string name="admin_upgrade_requests_title">Richieste di upgrade</string>
     <string name="admin_upgrade_requests_none">Nessuna richiesta di upgrade da mostrare.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>

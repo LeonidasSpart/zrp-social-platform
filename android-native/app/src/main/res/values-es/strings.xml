@@ -1658,6 +1658,7 @@
     <string name="admin_ticket_delete_confirm">¿Eliminar este ticket y todas sus respuestas? Esta acción no se puede deshacer.</string>
     <string name="admin_dash_verify_payments">Verificar pagos</string>
     <string name="admin_dash_process_withdrawals">Procesar retiros</string>
+    <string name="admin_dash_process_help_withdrawals">Procesar retiros de HELP</string>
     <string name="admin_dash_review_upgrade_requests">Revisar solicitudes de mejora</string>
     <string name="admin_finance_requested">Solicitado el %1$s</string>
     <string name="admin_plan_free">Gratis</string>
@@ -1682,6 +1683,11 @@
     <string name="admin_withdrawals_status_completed">Completado</string>
     <string name="admin_withdrawals_status_failed">Fallido</string>
     <string name="admin_withdrawals_status_rejected">Rechazado</string>
+    <string name="admin_help_withdrawals_title">Retiros de HELP</string>
+    <string name="admin_help_withdrawals_none">No hay retiros de campañas HELP que mostrar.</string>
+    <string name="admin_help_withdrawals_campaign">Campaña: %1$s</string>
+    <string name="admin_help_withdrawals_approve_confirm">¿Enviar %1$s al monedero de @%2$s ahora para \"%3$s\"? La transferencia se realiza on-chain y no se puede revertir.</string>
+    <string name="admin_help_withdrawals_reject_confirm">¿Rechazar este retiro de %1$s para \"%2$s\"? El importe vuelve al saldo disponible de la campaña.</string>
     <string name="admin_upgrade_requests_title">Solicitudes de mejora</string>
     <string name="admin_upgrade_requests_none">No hay solicitudes de mejora que mostrar.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>

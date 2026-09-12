@@ -1658,6 +1658,7 @@
     <string name="admin_ticket_delete_confirm">Удалить это обращение и все его ответы? Это действие нельзя отменить.</string>
     <string name="admin_dash_verify_payments">Проверить платежи</string>
     <string name="admin_dash_process_withdrawals">Обработать выплаты</string>
+    <string name="admin_dash_process_help_withdrawals">Обработать выплаты HELP</string>
     <string name="admin_dash_review_upgrade_requests">Проверить заявки на апгрейд</string>
     <string name="admin_finance_requested">Запрошено %1$s</string>
     <string name="admin_plan_free">Бесплатный</string>
@@ -1682,6 +1683,11 @@
     <string name="admin_withdrawals_status_completed">Завершена</string>
     <string name="admin_withdrawals_status_failed">Не удалась</string>
     <string name="admin_withdrawals_status_rejected">Отклонена</string>
+    <string name="admin_help_withdrawals_title">Выплаты HELP</string>
+    <string name="admin_help_withdrawals_none">Выплат по кампаниям HELP нет.</string>
+    <string name="admin_help_withdrawals_campaign">Кампания: %1$s</string>
+    <string name="admin_help_withdrawals_approve_confirm">Отправить %1$s на кошелёк @%2$s сейчас для «%3$s»? Перевод выполняется в блокчейне, и отменить его нельзя.</string>
+    <string name="admin_help_withdrawals_reject_confirm">Отклонить эту выплату на %1$s для «%2$s»? Сумма вернётся на доступный баланс кампании.</string>
     <string name="admin_upgrade_requests_title">Заявки на апгрейд</string>
     <string name="admin_upgrade_requests_none">Заявок на апгрейд нет.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>

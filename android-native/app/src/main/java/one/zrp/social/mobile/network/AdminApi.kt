@@ -691,6 +691,40 @@ data class AdminWithdrawal(
     val user: AdminWithdrawalUser,
 )
 
+// ─── HELP campaign withdrawals (/admin/help-withdrawals) ─────────────
+// The separate HELP-campaign fund release queue referenced in
+// AdminWithdrawal's own note above - NOT /admin/withdrawals. Same real
+// WithdrawalStatus enum and the same claim-then-transfer approve/reject
+// shape (funds were already reserved off the campaign's balance when the
+// organizer requested the withdrawal, so approving moves them on-chain
+// with no further balance change, and rejecting/failing releases the
+// reservation back), but the payee is a campaign organizer drawing down
+// a specific HelpCampaign's balance rather than a creator's own earnings.
+data class AdminHelpWithdrawalOrganizer(
+    val id: String,
+    val username: String,
+    val name: String? = null,
+    val email: String? = null,
+)
+
+data class AdminHelpWithdrawalCampaign(
+    val id: String,
+    val title: String,
+)
+
+data class AdminHelpWithdrawal(
+    val id: String,
+    val amount: Double,
+    val currency: String,
+    val walletAddress: String,
+    val status: String,
+    val transactionHash: String?,
+    val processedAt: String?,
+    val createdAt: String,
+    val organizer: AdminHelpWithdrawalOrganizer,
+    val campaign: AdminHelpWithdrawalCampaign,
+)
+
 // ─── Upgrade requests (/upgrade-requests) ────────────────────────────
 // Deliberately not under /admin: this is the same route a user POSTs
 // their own upgrade request to, whose GET (the queue) and PUT (the
@@ -1441,7 +1475,7 @@ interface AdminApi {
     @POST("admin/charity-disbursements")
     suspend fun recordCharityDisbursement(@Body request: RecordCharityDisbursementRequest)
 
-    // The four financial queues below answer with a bare JSON array
+    // The five financial queues below answer with a bare JSON array
     // rather than the {rows,total,page,totalPages} envelope the rest of
     // the admin API uses - the routes take no page parameter at all and
     // return the whole queue, so their screens have no pager either.
@@ -1463,6 +1497,17 @@ interface AdminApi {
 
     @POST("admin/withdrawals/{id}/reject")
     suspend fun rejectWithdrawal(@Path("id") id: String)
+
+    // status defaults to PENDING server-side, same as admin/withdrawals -
+    // the screen always sends one explicitly.
+    @GET("admin/help-withdrawals")
+    suspend fun getHelpWithdrawals(@Query("status") status: String): List<AdminHelpWithdrawal>
+
+    @POST("admin/help-withdrawals/{id}/approve")
+    suspend fun approveHelpWithdrawal(@Path("id") id: String)
+
+    @POST("admin/help-withdrawals/{id}/reject")
+    suspend fun rejectHelpWithdrawal(@Path("id") id: String)
 
     // Not "admin/upgrade-requests" - this route really does live at the
     // API root (see AdminUpgradeRequest's own note).
