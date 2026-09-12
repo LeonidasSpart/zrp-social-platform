@@ -95,6 +95,14 @@ struct RouteDestinationView: View {
             TrustPassportView(username: username)
         case .bookmarks:
             BookmarksView()
+        case .communities:
+            CommunitiesView()
+        case .communityDetail(let id):
+            CommunityDetailView(communityId: id)
+        case .lists:
+            ListsView()
+        case .listDetail(let id):
+            ListDetailView(listId: id)
         case .shorts(let startId):
             ShortsView(startId: startId)
         case .news:

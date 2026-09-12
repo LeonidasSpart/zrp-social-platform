@@ -163,6 +163,16 @@ struct HomeView: View {
                     Label { Text(.navBookmarks) } icon: { Image(systemName: "bookmark") }
                 }
                 Button {
+                    navigator.push(.communities)
+                } label: {
+                    Label { Text(.navCommunities) } icon: { Image(systemName: "person.3") }
+                }
+                Button {
+                    navigator.push(.lists)
+                } label: {
+                    Label { Text(.navLists) } icon: { Image(systemName: "list.bullet") }
+                }
+                Button {
                     navigator.push(.creatorStudio)
                 } label: {
                     Label { Text(.navCreatorStudio) } icon: { Image(systemName: "chart.bar") }
