@@ -98,7 +98,7 @@ enum ZrpMenu {
             // client would sometimes get wrong.
             MenuSection(headingKey: .navMore, entries: [
                 MenuEntry(.navCreatorStudio, systemImage: "chart.bar", route: .creatorStudio),
-                MenuEntry(.musicStudioTitle, systemImage: "waveform", route: .musicStudio),
+                MenuEntry(.musicShellStudioLabel, systemImage: "waveform", route: .musicStudio),
                 MenuEntry(.navAiAssistant, systemImage: "sparkles", route: .aiChat),
                 MenuEntry(.navJournalistDashboard, systemImage: "pencil.and.outline", route: .journalistDashboard),
                 MenuEntry(.navTeamManagement, systemImage: "person.2", route: .team),

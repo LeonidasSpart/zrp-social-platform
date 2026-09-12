@@ -1096,3 +1096,5 @@
 "footer.transparency" = "Transparenz";
 "footer.charity" = "Wohltätigkeit";
 "about.subtitle" = "Die erste schweizerisch-europäische Social-Media-Plattform";
+"adminUsers.statusAll" = "Alle";
+"adminUsers.badgeVerified" = "Verifiziert";

@@ -1096,3 +1096,5 @@
 "footer.transparency" = "Trasparenza";
 "footer.charity" = "Beneficenza";
 "about.subtitle" = "La prima piattaforma social svizzero-europea";
+"adminUsers.statusAll" = "Tutti";
+"adminUsers.badgeVerified" = "Verificato";

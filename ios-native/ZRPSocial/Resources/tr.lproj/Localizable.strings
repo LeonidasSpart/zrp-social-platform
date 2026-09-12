@@ -1096,3 +1096,5 @@
 "footer.transparency" = "Şeffaflık";
 "footer.charity" = "Hayır Kurumu";
 "about.subtitle" = "İlk İsviçre Avrupa Sosyal Medya Platformu";
+"adminUsers.statusAll" = "Tümü";
+"adminUsers.badgeVerified" = "Onaylı";

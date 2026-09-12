@@ -1096,3 +1096,5 @@
 "footer.transparency" = "الشفافية";
 "footer.charity" = "الأعمال الخيرية";
 "about.subtitle" = "أول منصة تواصل اجتماعي سويسرية أوروبية";
+"adminUsers.statusAll" = "الكل";
+"adminUsers.badgeVerified" = "موثّق";

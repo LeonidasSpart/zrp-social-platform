@@ -1096,3 +1096,5 @@
 "footer.transparency" = "透明度";
 "footer.charity" = "慈善";
 "about.subtitle" = "首个瑞士欧洲社交媒体平台";
+"adminUsers.statusAll" = "全部";
+"adminUsers.badgeVerified" = "已验证";

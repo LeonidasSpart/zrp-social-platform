@@ -1166,3 +1166,9 @@ footer.charity
 # about itself, taken from the About page rather than written fresh, so
 # the first screen of the app says what the website says.
 about.subtitle
+
+# The notification filter chips. The web page has had these three tabs
+# all along and hardcodes their labels in English; these are the same
+# three words, already translated, taken from elsewhere in the dictionary.
+adminUsers.statusAll
+adminUsers.badgeVerified

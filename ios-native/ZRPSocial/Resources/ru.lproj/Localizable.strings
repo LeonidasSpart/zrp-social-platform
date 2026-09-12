@@ -1096,3 +1096,5 @@
 "footer.transparency" = "Прозрачность";
 "footer.charity" = "Благотворительность";
 "about.subtitle" = "Первая швейцарская европейская социальная платформа";
+"adminUsers.statusAll" = "Все";
+"adminUsers.badgeVerified" = "Подтверждённый";

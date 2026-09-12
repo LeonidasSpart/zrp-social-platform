@@ -1096,6 +1096,8 @@
 "footer.transparency" = "Transparency";
 "footer.charity" = "Charity";
 "about.subtitle" = "The First Swiss European Social Media Platform";
+"adminUsers.statusAll" = "All";
+"adminUsers.badgeVerified" = "Verified";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

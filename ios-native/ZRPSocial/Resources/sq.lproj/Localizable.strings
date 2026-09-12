@@ -1096,3 +1096,5 @@
 "footer.transparency" = "Transparenca";
 "footer.charity" = "Bamirësi";
 "about.subtitle" = "Platforma e Parë Zvicerane Evropiane e Mediave Sociale";
+"adminUsers.statusAll" = "Të gjitha";
+"adminUsers.badgeVerified" = "Verifikuar";
