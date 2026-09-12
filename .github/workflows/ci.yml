@@ -25,6 +25,7 @@ on:
     paths:
       - "src/**"
       - "prisma/**"
+      - "prisma.config.ts"
       - "server.js"
       - "socket-authz.js"
       - "presence.js"
@@ -38,6 +39,7 @@ on:
     paths:
       - "src/**"
       - "prisma/**"
+      - "prisma.config.ts"
       - "server.js"
       - "socket-authz.js"
       - "presence.js"
