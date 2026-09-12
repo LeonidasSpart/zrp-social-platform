@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -215,7 +216,7 @@ private fun DrawerUserHeader(currentUser: MobileUser?, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick, role = Role.Button)
             .padding(horizontal = Spacing.lg, vertical = Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -278,7 +279,7 @@ private fun DrawerItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = TouchTarget.comfortable)
-            .clickable(onClick = row.onClick)
+            .clickable(onClick = row.onClick, role = Role.Button)
             .padding(horizontal = Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
     ) {
