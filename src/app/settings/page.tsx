@@ -991,7 +991,7 @@ export default function SettingsPage() {
                       <span className="text-sm text-gray-700 dark:text-gray-300">Category</span>
                       <span className="text-sm text-gray-400 dark:text-gray-500 flex items-center gap-1">
                         {category || "None"}
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 rtl:-scale-x-100" />
                       </span>
                     </button>
 
@@ -1171,7 +1171,7 @@ export default function SettingsPage() {
                       <BellOff className="w-5 h-5 text-gray-500" />
                       <span className="text-gray-900 dark:text-white">{t("settings.mutedUsers")}</span>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                    <ChevronRight className="w-5 h-5 text-gray-400 rtl:-scale-x-100" />
                   </Link>
                   <Link
                     href="/settings/blocked"
@@ -1181,7 +1181,7 @@ export default function SettingsPage() {
                       <Ban className="w-5 h-5 text-gray-500" />
                       <span className="text-gray-900 dark:text-white">{t("settings.blockedUsers")}</span>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                    <ChevronRight className="w-5 h-5 text-gray-400 rtl:-scale-x-100" />
                   </Link>
                 </div>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 pl-2">

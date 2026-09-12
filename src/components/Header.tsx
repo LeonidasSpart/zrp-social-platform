@@ -877,7 +877,7 @@ export default function Header() {
                     </p>
                   </div>
 
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
+                  <ChevronRight className="w-5 h-5 text-gray-400 rtl:-scale-x-100" />
                 </Link>
               </div>
             )}
@@ -946,7 +946,7 @@ export default function Header() {
                         </span>
                       )}
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
                   );
                 })}
@@ -973,7 +973,7 @@ export default function Header() {
                       {t("nav.admin")}
                     </span>
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
                 </div>
               )}
@@ -999,7 +999,7 @@ export default function Header() {
                       {t("nav.journalistDashboard")}
                     </span>
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
                 </div>
               )}
@@ -1025,7 +1025,7 @@ export default function Header() {
                       {t("nav.profile")}
                     </span>
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
 
                   <Link
@@ -1039,7 +1039,7 @@ export default function Header() {
                       {t("nav.premium")}
                     </span>
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
 
                   <Link
@@ -1053,7 +1053,7 @@ export default function Header() {
                       {t("nav.creatorStudio")}
                     </span>
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
 
                   <Link
@@ -1067,7 +1067,7 @@ export default function Header() {
                       {t("nav.settings")}
                     </span>
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
 
                   {features?.teamManagement && (
@@ -1082,7 +1082,7 @@ export default function Header() {
                         {t("nav.teamManagement")}
                       </span>
 
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                     </Link>
                   )}
 
@@ -1098,7 +1098,7 @@ export default function Header() {
                         {t("nav.apiKeys")}
                       </span>
 
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                     </Link>
                   )}
                 </div>
@@ -1125,7 +1125,7 @@ export default function Header() {
                       {t("nav.aiAssistant")}
                     </span>
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
 
                   <Link
@@ -1139,7 +1139,7 @@ export default function Header() {
                       {t("footer.helpCenter")}
                     </span>
 
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 rtl:-scale-x-100" />
                   </Link>
                 </div>
               )}

@@ -6,6 +6,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -241,6 +242,16 @@ fun StoryViewerScreen(
 
                 // ── Tap zones: left third = prev, middle third = hold-to-
                 // pause / double-tap-to-like, right third = next ──
+                // Deliberately NOT given `role = Role.Button` (unlike the
+                // author-tap row below): these are invisible full-screen
+                // gesture regions, not discrete controls - labeling them
+                // as buttons would misrepresent them to TalkBack without
+                // giving a screen-reader user any way to actually reach
+                // them (there's no visible target to explore-by-touch to).
+                // Real VoiceOver/TalkBack story navigation needs custom
+                // accessibility actions or an alternate control, which is
+                // a real gap - tracked as separate, larger scope than this
+                // surgical semantics pass.
                 val noRipple = remember { MutableInteractionSource() }
                 Row(modifier = Modifier.fillMaxSize()) {
                     Box(
@@ -331,6 +342,7 @@ fun StoryViewerScreen(
                                     interactionSource = noRipple,
                                     indication = null,
                                     enabled = author != null,
+                                    role = Role.Button,
                                 ) { author?.let { onOpenProfile(it.username) } },
                         ) {
                             Avatar(

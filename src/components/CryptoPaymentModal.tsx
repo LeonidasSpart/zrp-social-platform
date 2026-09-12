@@ -5,6 +5,7 @@ import { X, Copy, Check } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   plan: string;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }: Props) {
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const walletAddress = process.env.NEXT_PUBLIC_SOLANA_WALLET_ADDRESS || "4Ry8cedia14SSS7UK3CRdQRqKVawdqwL61RFBE1pGsKh";
   const [transactionId, setTransactionId] = useState("");
@@ -61,6 +63,7 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
       <div className="bg-white dark:bg-zrp-deepBlack rounded-xl shadow-xl max-w-md w-full p-6 relative">
         <button
           onClick={onClose}
+          aria-label={t("help.close")}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
         >
           <X className="w-5 h-5" />

@@ -68,9 +68,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Keeps <html lang> and dir in sync with the active language, the same
   // way ThemeContext already toggles the "dark" class there. layout.tsx
-  // can't know the language at server-render time (it's stored in a
-  // client-side cookie, not the URL), so it renders a static lang="en"
-  // and this corrects it immediately after mount/change - Arabic is the
+  // now renders the correct initial lang/dir from the zrp-lang cookie
+  // server-side (see RootLayout), so this effect is mostly a no-op
+  // confirmation on repeat visits; it still matters for a first-ever visit
+  // (no cookie yet) and for an in-session language change - Arabic is the
   // only RTL language here, everything else stays ltr.
   useEffect(() => {
     if (!mounted) return;

@@ -634,7 +634,7 @@ export default function MusicShell() {
                           </span>
                         )}
 
-                        <ChevronRight className="w-3 h-3 ml-auto opacity-40" />
+                        <ChevronRight className="w-3 h-3 ms-auto opacity-40 rtl:-scale-x-100" />
                       </div>
                     </div>
                   </article>

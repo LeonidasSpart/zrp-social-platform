@@ -26,8 +26,11 @@ export default function LocationAutocomplete({
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [inputValue, setInputValue] = useState(value);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputId = useId();
+  const listboxId = useId();
+  const optionId = (index: number) => `${listboxId}-option-${index}`;
 
   // ─── Fetch suggestions from Nominatim ──────────────────────────
   useEffect(() => {
@@ -75,6 +78,7 @@ export default function LocationAutocomplete({
     onChange(displayName);
     setShowDropdown(false);
     setSuggestions([]);
+    setHighlightedIndex(-1);
   };
 
   // ─── Handle input change ──────────────────────────────────────
@@ -82,8 +86,31 @@ export default function LocationAutocomplete({
     const val = e.target.value;
     setInputValue(val);
     setShowDropdown(true);
+    setHighlightedIndex(-1);
     if (val.length < 2) {
       setSuggestions([]);
+    }
+  };
+
+  // ─── Keyboard navigation of the suggestion list ────────────────
+  // The list was mouse/click-only (a plain <li onClick>) - a keyboard
+  // user typing an address had no way to select a suggestion at all.
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showDropdown || suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0) {
+        e.preventDefault();
+        handleSelect(suggestions[highlightedIndex].display_name);
+      }
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+      setHighlightedIndex(-1);
     }
   };
 
@@ -104,9 +131,16 @@ export default function LocationAutocomplete({
           type="text"
           value={inputValue}
           onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
           onFocus={() => inputValue.length >= 2 && setShowDropdown(true)}
           placeholder={placeholder}
           required={required}
+          role="combobox"
+          aria-expanded={showDropdown && suggestions.length > 0}
+          aria-controls={listboxId}
+          aria-autocomplete="list"
+          aria-activedescendant={highlightedIndex >= 0 ? optionId(highlightedIndex) : undefined}
+          autoComplete="off"
           className={`w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${className}`}
         />
         {loading && (
@@ -118,11 +152,23 @@ export default function LocationAutocomplete({
 
       {/* Dropdown */}
       {showDropdown && suggestions.length > 0 && (
-        <ul className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul
+          id={listboxId}
+          role="listbox"
+          className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+        >
           {suggestions.map((item, index) => (
             <li
               key={index}
-              className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-900 dark:text-white flex items-center gap-2"
+              id={optionId(index)}
+              role="option"
+              aria-selected={index === highlightedIndex}
+              className={`px-4 py-2 cursor-pointer text-sm text-gray-900 dark:text-white flex items-center gap-2 ${
+                index === highlightedIndex
+                  ? "bg-gray-100 dark:bg-gray-700"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
+              onMouseEnter={() => setHighlightedIndex(index)}
               onClick={() => handleSelect(item.display_name)}
             >
               <MapPin className="w-4 h-4 text-gray-400" />

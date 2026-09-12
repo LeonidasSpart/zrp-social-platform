@@ -2,6 +2,7 @@ package one.zrp.social.mobile.ui.settings
 
 import android.content.Intent
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -277,7 +278,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit, o
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(onClick = onOpenAppeals)
+                        .clickable(onClick = onOpenAppeals, role = Role.Button)
                         .padding(vertical = Spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -294,7 +295,7 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit, o
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(onClick = onOpenDeleteAccount)
+                        .clickable(onClick = onOpenDeleteAccount, role = Role.Button)
                         .padding(vertical = Spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

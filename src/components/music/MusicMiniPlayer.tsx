@@ -343,16 +343,11 @@ export default function MusicMiniPlayer() {
               {/* Progress line */}
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/10">
                 <div
-                  className="h-full bg-zrp-red transition-[width] duration-200"
+                  className="h-full w-full origin-left bg-zrp-red transition-transform duration-200"
                   style={{
-                    width: `${
-                      duration
-                        ? Math.min(
-                            100,
-                            (progress / duration) * 100
-                          )
-                        : 0
-                    }%`,
+                    transform: `scaleX(${
+                      duration ? Math.min(1, progress / duration) : 0
+                    })`,
                   }}
                 />
               </div>

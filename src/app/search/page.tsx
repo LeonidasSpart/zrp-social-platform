@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Search, Loader2, Users, FileText } from "lucide-react";
+import { Search, Loader2, Users, FileText, RefreshCw } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PostCard from "@/components/PostCard";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -46,24 +46,33 @@ export default function SearchPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
   const [activeTab, setActiveTab] = useState<"users" | "posts">("users");
 
   useEffect(() => {
     if (query.length < 2) {
       setUsers([]);
       setPosts([]);
+      setSearchError(false);
       return;
     }
 
     const fetchResults = async () => {
       setLoading(true);
+      setSearchError(false);
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        if (!res.ok) {
+          setSearchError(true);
+          return;
+        }
         const data = await res.json();
         setUsers(data.users || []);
         setPosts(data.posts || []);
       } catch (error) {
         console.error("Search error:", error);
+        setSearchError(true);
       } finally {
         setLoading(false);
       }
@@ -71,7 +80,7 @@ export default function SearchPage() {
 
     const timer = setTimeout(fetchResults, 300);
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, retryTick]);
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
@@ -102,7 +111,22 @@ export default function SearchPage() {
         </div>
       )}
 
-      {!loading && query.length >= 2 && (
+      {!loading && searchError && (
+        <div className="mt-4 rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-center">
+          <p className="text-red-700 dark:text-red-400 font-semibold">
+            {t("feed.tryAgain")}
+          </p>
+          <button
+            onClick={() => setRetryTick((n) => n + 1)}
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 text-sm font-semibold"
+          >
+            <RefreshCw className="w-4 h-4" />
+            {t("feed.retry")}
+          </button>
+        </div>
+      )}
+
+      {!loading && !searchError && query.length >= 2 && (
         <>
           <div className="flex border-b border-gray-200 dark:border-gray-700 mt-4">
             <button

@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -552,7 +553,7 @@ fun PostCard(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .padding(top = Spacing.xs)
-                            .clickable(enabled = !translating) { handleTranslate() },
+                            .clickable(enabled = !translating, role = Role.Button) { handleTranslate() },
                     ) {
                         if (translating) {
                             CircularProgressIndicator(
@@ -739,7 +740,7 @@ private fun GalleryTile(image: String, modifier: Modifier, onClick: () -> Unit) 
         model = image,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier.clickable(onClick = onClick, role = Role.Button),
     )
 }
 
@@ -821,7 +822,7 @@ private fun PostVideoPlayer(url: String, onOpenViewer: () -> Unit, modifier: Mod
             .aspectRatio(aspectRatio)
             .background(Color.Black)
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onOpenViewer),
+            .clickable(onClick = onOpenViewer, role = Role.Button),
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
@@ -965,7 +966,7 @@ private fun QuotedPostPreview(quotedPost: Post, onClick: () -> Unit) {
             .padding(top = Spacing.sm)
             .clip(MaterialTheme.shapes.medium)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick, role = Role.Button)
             .padding(Spacing.sm),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1123,7 +1124,7 @@ private fun PollOptionRow(
             .clip(MaterialTheme.shapes.small)
             .background(if (isSelected) ZrpBlue.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface)
             .border(if (isSelected) 2.dp else 1.dp, borderColor, MaterialTheme.shapes.small)
-            .then(if (canVote) Modifier.clickable(onClick = onClick) else Modifier),
+            .then(if (canVote) Modifier.clickable(onClick = onClick, role = Role.Button) else Modifier),
     ) {
         // Background proportion bar - matches Poll.tsx's own
         // unconditional absolute-positioned width:${percentage}% div,
@@ -1409,7 +1410,7 @@ private fun ReactionPill(emoji: String, count: Int, isOwn: Boolean, onClick: () 
             .clip(MaterialTheme.shapes.extraLarge)
             .background(if (isOwn) ZrpRed.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceContainerHigh)
             .border(1.dp, if (isOwn) ZrpRed else MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.extraLarge)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick, role = Role.Button)
             .padding(horizontal = Spacing.sm, vertical = 4.dp),
     ) {
         Text(text = emoji, style = MaterialTheme.typography.bodyMedium)

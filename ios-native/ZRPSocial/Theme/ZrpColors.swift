@@ -8,9 +8,13 @@ import UIKit
 /// iOS, kept in sync by hand with the web values rather than generated -
 /// there is no shared design-token pipeline between the frontends yet.
 ///
-/// ZRP ships dark-first (the web app defaults to a black/red dark theme),
-/// so the dark values are the "real" ones; light exists for system light
-/// mode rather than as the primary design target. Every semantic colour
+/// The dark values are the primary design target (ZRP's black/red brand
+/// identity); light exists for users who prefer or default to system
+/// light mode. Corrected from an earlier version of this comment that
+/// claimed the web app *defaults* to dark - it doesn't: `ThemeContext.tsx`
+/// defaults new visitors to light unless their OS reports
+/// `prefers-color-scheme: dark`, with no server-side override. Every
+/// semantic colour
 /// below resolves through `UIColor(dynamicProvider:)` so a single
 /// `Color` adapts to the trait collection - including inside sheets and
 /// `UIKit`-hosted contexts where a SwiftUI `@Environment(\.colorScheme)`

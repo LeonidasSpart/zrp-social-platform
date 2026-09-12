@@ -2,6 +2,7 @@ package one.zrp.social.mobile.ui.comments
 
 import android.content.Intent
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -373,7 +374,7 @@ private fun CommentRow(
             url = comment.author.avatarUrl,
             name = comment.author.name ?: comment.author.username,
             size = 36.dp,
-            modifier = Modifier.clickable(onClick = onAuthorClick),
+            modifier = Modifier.clickable(onClick = onAuthorClick, role = Role.Button),
         )
 
         Spacer(modifier = Modifier.width(10.dp))
@@ -381,7 +382,7 @@ private fun CommentRow(
         Column(modifier = Modifier.weight(1f)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable(onClick = onAuthorClick),
+                modifier = Modifier.clickable(onClick = onAuthorClick, role = Role.Button),
             ) {
                 Text(
                     text = comment.author.name ?: comment.author.username,

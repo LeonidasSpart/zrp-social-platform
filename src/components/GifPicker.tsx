@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Search, X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface GifPickerProps {
   onSelect: (url: string) => void;
@@ -9,6 +10,7 @@ interface GifPickerProps {
 }
 
 export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [gifs, setGifs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,6 +88,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Choose a GIF</h2>
           <button
             onClick={onClose}
+            aria-label={t("help.close")}
             className="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
           >
             <X className="w-5 h-5" />

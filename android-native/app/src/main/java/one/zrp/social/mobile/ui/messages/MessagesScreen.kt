@@ -2,6 +2,7 @@ package one.zrp.social.mobile.ui.messages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -252,7 +253,7 @@ private fun SelectableRow(isSelected: Boolean, onClick: () -> Unit, content: @Co
         modifier = Modifier
             .fillMaxWidth()
             .background(if (isSelected) MaterialTheme.colorScheme.surfaceContainerHigh else Color.Transparent)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick, role = Role.Button)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         content = content,

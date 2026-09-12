@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Orbitron } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
+
+import { SUPPORTED_LANGUAGES, RTL_LANGUAGES, type Language } from "@/lib/translations";
 
 import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
@@ -211,13 +214,31 @@ const structuredData = {
   ],
 };
 
-export default function RootLayout({
+const SUPPORTED_LANG_CODES = SUPPORTED_LANGUAGES.map((l) => l.code);
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // LanguageContext stores the chosen language in a plain (non-httpOnly)
+  // cookie so it survives across visits; that cookie rides along on every
+  // request after it's first set, so the server can read it here and
+  // render the correct <html lang>/dir from the start instead of always
+  // emitting "en"/ltr and waiting for LanguageContext's client-side effect
+  // to correct it after mount. That earlier client-only correction is what
+  // caused a visible LTR->RTL layout flash for Arabic users on every load;
+  // this removes it. Text content still renders in English until
+  // LanguageContext mounts (unchanged, pre-existing tradeoff) - only the
+  // attributes controlling reading direction and assistive-tech language
+  // are corrected up front.
+  const cookieLang = (await cookies()).get("zrp-lang")?.value as Language | undefined;
+  const initialLang: Language =
+    cookieLang && SUPPORTED_LANG_CODES.includes(cookieLang) ? cookieLang : "en";
+  const initialDir = RTL_LANGUAGES.includes(initialLang) ? "rtl" : "ltr";
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={initialLang} dir={initialDir} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
