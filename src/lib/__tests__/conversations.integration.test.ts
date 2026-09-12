@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { randomUUID } from "crypto";
 import { prisma } from "../db";
-import { getUserConversations } from "../conversations";
+import { getUserConversations, getUserGroupConversations } from "../conversations";
 
 // Integration tests against a real Postgres instance - skipped
 // automatically when DATABASE_URL is unset or still the repo's
@@ -303,6 +303,184 @@ describe.skipIf(!hasRealDatabaseUrl)(
     it("returns an empty array for a user with no messages at all", async () => {
       const lonely = await createUser("lonely");
       const result = await getUserConversations(lonely.id);
+      expect(result).toEqual([]);
+    });
+  }
+);
+
+// getUserGroupConversations was rewritten from a per-membership
+// findFirst+count loop (2N+1 queries) to two batched raw queries. These
+// tests exercise exactly the correctness properties that rewrite could
+// break: a different lastReadAt cutoff per conversation (including one
+// that has never been read at all - the NULL case the batched VALUES
+// join has to cast explicitly, see the function's own comment), correct
+// last-message selection per conversation under mixed message volumes,
+// and no cross-conversation bleed.
+describe.skipIf(!hasRealDatabaseUrl)(
+  "getUserGroupConversations (integration, real Postgres)",
+  () => {
+    const runId = randomUUID().slice(0, 8);
+    const testUserIds: string[] = [];
+    const testConversationIds: string[] = [];
+    const testMessageIds: string[] = [];
+
+    async function createUser(label: string) {
+      const user = await prisma.user.create({
+        data: {
+          email: `${label}-${runId}@grouptest.example`,
+          username: `${label}${runId}`.slice(0, 20),
+          password: "x",
+          role: "USER",
+        },
+      });
+      testUserIds.push(user.id);
+      return user;
+    }
+
+    async function createGroup(name: string, memberIds: string[], lastReadAt: Record<string, Date | null>) {
+      const conversation = await prisma.conversation.create({
+        data: { type: "GROUP", name },
+      });
+      testConversationIds.push(conversation.id);
+      for (const userId of memberIds) {
+        await prisma.conversationParticipant.create({
+          data: { conversationId: conversation.id, userId, lastReadAt: lastReadAt[userId] ?? null },
+        });
+      }
+      return conversation;
+    }
+
+    async function createGroupMessage(opts: { conversationId: string; senderId: string; createdAt: Date }) {
+      const id = randomUUID();
+      await prisma.message.create({
+        data: {
+          id,
+          content: "test group message",
+          senderId: opts.senderId,
+          conversationId: opts.conversationId,
+          createdAt: opts.createdAt,
+        },
+      });
+      testMessageIds.push(id);
+      return id;
+    }
+
+    let alice: { id: string };
+    let bob: { id: string };
+
+    let neverReadGroup: { id: string };
+    let neverReadLatestId: string;
+
+    let readSomeGroup: { id: string };
+    let readSomeCutoff: Date;
+    let readSomeLatestId: string;
+    let readSomeExpectedUnread: number;
+
+    let highVolumeGroup: { id: string };
+    let highVolumeLatestId: string;
+    let highVolumeMessageCount = 0;
+
+    beforeAll(async () => {
+      alice = await createUser("galice");
+      bob = await createUser("gbob");
+
+      const base = new Date("2021-01-01T00:00:00Z").getTime();
+      let clock = base;
+      const nextTime = () => new Date((clock += 60_000));
+
+      // Alice has NEVER read this group (lastReadAt: null) - every
+      // message from bob must count as unread. This is the exact case
+      // the raw VALUES join's explicit ::timestamptz cast exists for:
+      // a NULL alongside other rows' real timestamps in the same
+      // batched query.
+      neverReadGroup = await createGroup("never-read", [alice.id, bob.id], { [alice.id]: null });
+      for (let i = 0; i < 3; i++) {
+        neverReadLatestId = await createGroupMessage({ conversationId: neverReadGroup.id, senderId: bob.id, createdAt: nextTime() });
+      }
+
+      // Alice read up to a specific point; only messages after it count.
+      readSomeCutoff = nextTime();
+      readSomeGroup = await createGroup("read-some", [alice.id, bob.id], { [alice.id]: readSomeCutoff });
+      await createGroupMessage({ conversationId: readSomeGroup.id, senderId: bob.id, createdAt: readSomeCutoff }); // at cutoff: not unread (strictly after required)
+      await createGroupMessage({ conversationId: readSomeGroup.id, senderId: alice.id, createdAt: nextTime() }); // alice's own message never counts as her unread
+      const afterCutoffId1 = await createGroupMessage({ conversationId: readSomeGroup.id, senderId: bob.id, createdAt: nextTime() });
+      readSomeLatestId = await createGroupMessage({ conversationId: readSomeGroup.id, senderId: bob.id, createdAt: nextTime() });
+      readSomeExpectedUnread = 2; // the two bob messages strictly after the cutoff
+      void afterCutoffId1;
+
+      // High volume: proves the DISTINCT ON still finds the true latest
+      // message per conversation, and only one, regardless of how many
+      // rows exist for that conversation.
+      highVolumeGroup = await createGroup("high-volume", [alice.id, bob.id], { [alice.id]: null });
+      for (let i = 0; i < 250; i++) {
+        const senderId = i % 2 === 0 ? alice.id : bob.id;
+        highVolumeLatestId = await createGroupMessage({ conversationId: highVolumeGroup.id, senderId, createdAt: nextTime() });
+        highVolumeMessageCount++;
+      }
+    }, 60_000);
+
+    afterAll(async () => {
+      await prisma.message.deleteMany({ where: { id: { in: testMessageIds } } });
+      await prisma.conversationParticipant.deleteMany({ where: { conversationId: { in: testConversationIds } } });
+      await prisma.conversation.deleteMany({ where: { id: { in: testConversationIds } } });
+      await prisma.user.deleteMany({ where: { id: { in: testUserIds } } });
+    });
+
+    it("returns exactly one entry per group conversation the user belongs to", async () => {
+      const result = await getUserGroupConversations(alice.id);
+      const ids = result.map((c) => c.id);
+      expect(new Set(ids)).toEqual(new Set(testConversationIds));
+      expect(ids.length).toBe(new Set(ids).size);
+    });
+
+    it("treats a never-read conversation's messages as entirely unread (NULL lastReadAt)", async () => {
+      const result = await getUserGroupConversations(alice.id);
+      const conv = result.find((c) => c.id === neverReadGroup.id);
+      expect(conv).toBeDefined();
+      expect(conv!.lastMessage?.id).toBe(neverReadLatestId);
+      expect(conv!.unreadCount).toBe(3);
+    });
+
+    it("counts only messages strictly after this user's own lastReadAt for that conversation", async () => {
+      const result = await getUserGroupConversations(alice.id);
+      const conv = result.find((c) => c.id === readSomeGroup.id);
+      expect(conv).toBeDefined();
+      expect(conv!.lastMessage?.id).toBe(readSomeLatestId);
+      expect(conv!.unreadCount).toBe(readSomeExpectedUnread);
+    });
+
+    it("never counts the user's own messages as unread to themself", async () => {
+      const result = await getUserGroupConversations(alice.id);
+      const conv = result.find((c) => c.id === readSomeGroup.id);
+      // readSomeExpectedUnread (2) already excludes alice's own message;
+      // this assertion fails loudly if that message were ever counted.
+      expect(conv!.unreadCount).toBeLessThan(3);
+    });
+
+    it("finds the true latest message under high message volume (250 messages, still exactly 1 entry)", async () => {
+      const result = await getUserGroupConversations(alice.id);
+      const conv = result.find((c) => c.id === highVolumeGroup.id);
+      expect(conv).toBeDefined();
+      expect(conv!.lastMessage?.id).toBe(highVolumeLatestId);
+      expect(highVolumeMessageCount).toBe(250); // sanity check on the seed itself
+    });
+
+    it("does not bleed one conversation's unread cutoff into another's count", async () => {
+      // readSomeCutoff (this user's read point for readSomeGroup) is
+      // BEFORE several of neverReadGroup's messages. If the per-
+      // conversation cutoff join were broken (e.g. collapsed to one
+      // shared cutoff), neverReadGroup's unread count would come out
+      // wrong here too.
+      const result = await getUserGroupConversations(alice.id);
+      const neverRead = result.find((c) => c.id === neverReadGroup.id);
+      const readSome = result.find((c) => c.id === readSomeGroup.id);
+      expect(neverRead!.unreadCount).toBe(3);
+      expect(readSome!.unreadCount).toBe(readSomeExpectedUnread);
+    });
+
+    it("returns an empty array for a user in no group conversations", async () => {
+      const lonely = await createUser("glonely");
+      const result = await getUserGroupConversations(lonely.id);
       expect(result).toEqual([]);
     });
   }

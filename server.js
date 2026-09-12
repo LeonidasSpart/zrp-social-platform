@@ -702,4 +702,60 @@ app.prepare().then(async () => {
       runLegacyPasswordMigrationAtStartup(prisma);
     }
   });
+
+  // ─── Graceful shutdown ─────────────────────────────────────────────
+  // Railway sends SIGTERM to redeploy or reschedule an instance, then
+  // SIGKILL after a grace period if the process hasn't exited. Node has
+  // no default SIGTERM handler for an HTTP server - without one, the
+  // process dies immediately: every in-flight HTTP request and every
+  // open Socket.IO connection is severed mid-response instead of being
+  // allowed to finish, on every single deploy. Socket.IO clients handle
+  // an abrupt drop by reconnecting on their own, but that's a worse
+  // experience than a clean close, and an in-flight REST request (a
+  // message send, a payment verification) getting cut off mid-write is
+  // a real correctness risk, not just a UX one - see maybeCreateNewsArticle
+  // and the payment routes above for examples of multi-step writes that
+  // should finish, not be interrupted.
+  //
+  // server.close() stops accepting new connections and resolves once
+  // every in-flight request/response has completed - it does not itself
+  // touch already-open idle keep-alive sockets, which is why an explicit
+  // exit timeout still guards this against hanging forever.
+  let shuttingDown = false;
+  async function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`${signal} received: closing gracefully`);
+
+    // Belt-and-suspenders: if something above hangs (a stuck DB query,
+    // an idle keep-alive connection server.close() alone won't drop),
+    // force exit rather than becoming the hung process Railway has to
+    // SIGKILL anyway - but give in-flight work a real window first.
+    const forceExitTimer = setTimeout(() => {
+      console.error("Graceful shutdown timed out - forcing exit");
+      process.exit(1);
+    }, 10_000);
+    forceExitTimer.unref();
+
+    // io.close(fn) closes every open socket, stops the engine, and -
+    // since this Server instance was constructed from the existing http
+    // server rather than creating its own - forwards fn to that http
+    // server's own close(), which only actually fires once every
+    // in-flight HTTP request has finished. A bare `server.close()` here
+    // as well would be redundant: Socket.IO already owns closing the
+    // shared server.
+    await new Promise((resolve) => io.close(resolve));
+
+    if (presenceRedis) {
+      await Promise.allSettled([presenceRedis.pub.quit(), presenceRedis.sub.quit()]);
+    }
+    await prisma.$disconnect();
+
+    clearTimeout(forceExitTimer);
+    console.log("Graceful shutdown complete");
+    process.exit(0);
+  }
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
 });

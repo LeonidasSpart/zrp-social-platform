@@ -13,17 +13,16 @@ export async function GET(req: NextRequest) {
     const requestedLimit = parseInt(req.nextUrl.searchParams.get("limit") || "10", 10);
     const take = Math.min(Math.max(Number.isFinite(requestedLimit) ? requestedLimit : 10, 1), 50);
 
-    // Get users that the current user is not following, excluding themselves
-    const followed = await prisma.follow.findMany({
-      where: { followerId: session.user.id },
-      select: { followingId: true },
-    });
-    const followedIds = followed.map(f => f.followingId);
-
+    // ⚠️ PERFORMANCE: this used to fetch the user's entire follow list
+    // into a JS array just to build a `notIn` exclusion - scaling with
+    // however many accounts the viewer follows on every load of this
+    // widget. A relation filter expresses "not already followed by me"
+    // directly in SQL instead.
     const suggestions = await prisma.user.findMany({
       where: {
-        id: {
-          notIn: [session.user.id, ...followedIds],
+        id: { not: session.user.id },
+        followers: {
+          none: { followerId: session.user.id },
         },
       },
       select: {

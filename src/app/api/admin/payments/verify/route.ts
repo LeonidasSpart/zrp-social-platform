@@ -23,17 +23,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Payment already processed" }, { status: 400 });
   }
 
+  // ⚠️ Claim the payment first via a conditional update - the same
+  // compare-and-swap pattern the withdrawal approval route uses.
+  // Without it, two concurrent verifications of the same paymentId both
+  // pass the `status !== "pending"` check above and both apply the plan
+  // change and audit-log write. Only one caller can win this update.
+  const claimed = await prisma.paymentRequest.updateMany({
+    where: { id: paymentId, status: "pending" },
+    data: { status: "verified" },
+  });
+
+  if (claimed.count === 0) {
+    return NextResponse.json({ error: "Payment already processed" }, { status: 409 });
+  }
+
   // Upgrade the user's plan
   await prisma.user.update({
     where: { id: payment.userId },
     data: { plan: payment.plan },
   });
   invalidateUserAuthState(payment.userId);
-
-  await prisma.paymentRequest.update({
-    where: { id: paymentId },
-    data: { status: "verified" },
-  });
 
   await logAdminAction({
     actor: adminCheck.session,
