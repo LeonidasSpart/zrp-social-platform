@@ -170,6 +170,13 @@ enum DeepLink {
             default: return nil
             }
 
+        case "journalist":
+            // /journalist and /journalist/dashboard both land on the
+            // one screen that serves every state. The web article
+            // editor's own URLs are not linked to: an article id is
+            // meaningless without knowing whether it is editable.
+            return DeepLinkTarget(.home, .journalistDashboard)
+
         case "creator":
             // Only /creator/dashboard exists on the web, and it opens on
             // the earnings tab this app does not have. The link lands on

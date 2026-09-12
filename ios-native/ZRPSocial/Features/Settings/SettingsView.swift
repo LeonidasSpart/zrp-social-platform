@@ -134,6 +134,18 @@ struct SettingsView: View {
                         Image(systemName: "globe")
                     }
                 }
+
+                // Answers for any signed-in user, journalist or not -
+                // the same route serves the application form and the
+                // dashboard - so it is not hidden behind a role the
+                // client would have to guess at.
+                Button { navigator.push(.journalistDashboard) } label: {
+                    Label {
+                        Text(.journalistDashTitle)
+                    } icon: {
+                        Image(systemName: "newspaper")
+                    }
+                }
             }
 
             Section {

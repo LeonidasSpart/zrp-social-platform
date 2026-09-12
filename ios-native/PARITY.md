@@ -472,6 +472,21 @@ category would be worse than an untranslated word.
 
 Android has no ambassador surface at all; iOS is now ahead of it here.
 
+### ZRP Journalist
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Dashboard | `GET /api/journalist/profile` | ✅ | ⬜ | ✅ one screen for every state the route reports: not a journalist, pending, rejected (with the reviewer's reason), suspended, verified. `isJournalist` is read from the user's real role, not inferred from the profile's presence — the two can differ and the role is what the article routes check | IMPLEMENTED |
+| Apply | `POST /api/journalist/apply` | ✅ | ⬜ | ✅ outlet, portfolio and pitch. Grants the JOURNALIST **role** immediately but **not** verification and **not** a badge — that gap is the route's and is load-bearing: an unverified journalist may write drafts and may not submit them | IMPLEMENTED |
+| My articles | `GET /api/journalist/articles` | ✅ | ⬜ | ✅ counts by status plus the ten most recently touched, each with its state. A rejected article's `reviewNote` is shown **in the list** — it is the only feedback a journalist gets, and burying it a tap deep means opening each one to find out why | IMPLEMENTED |
+| Write / edit an article | `POST /api/journalist/articles`, `PATCH /api/journalist/articles/{id}` | ✅ | ⬜ | ✅ title, slug (auto-derived from the title until typed by hand, because the server requires one and generates none), category, excerpt, body, cover image, source. **Only DRAFT and REJECTED articles are editable** — PATCH answers 409 otherwise, so the form goes read-only and says which state locked it | IMPLEMENTED |
+| Submit for review | `submit: true` on PATCH, `status` on POST | ✅ | ⬜ | ✅ offered **only to a VERIFIED journalist**, which the route enforces with a 403. POST takes `status` and PATCH takes `submit`, and sending the wrong one is not cosmetic: PATCH ignores `status` entirely, so a submit sent that way would silently save a draft and nobody would know | IMPLEMENTED |
+| Delete an article | `DELETE /api/journalist/articles/{id}` | ✅ | ⬜ | ✅ **drafts only**. Anything ever submitted stays for the editorial record; the control is absent rather than refused | IMPLEMENTED |
+| Cover image upload | UploadThing `newsCoverImage` | ✅ | ⬜ | ✅ the same router entry the web editor uses, with its own server-side cap | IMPLEMENTED |
+| `GAMING` news category | `NewsArticleCategory.GAMING` | ✅ | ✅ | ✅ **fixed here** — the iOS enum never listed it, so a GAMING article decoded as `unknown` and rendered with no category label at all, and the editor could not select it. `newsCategory.gaming` was already translated in all eleven languages | IMPLEMENTED |
+
+Android has no journalist surface; iOS is ahead of it here too.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
@@ -480,7 +495,6 @@ Android has no ambassador surface at all; iOS is now ahead of it here.
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | Careers, Investors, Press | WEB-ONLY — Android has no surface for any of them either. Marketing and corporate pages with no JSON route to read. |
 | **Ads** — advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend* — money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** — see the Ads section below. |
-| **Journalist** (`/api/journalist/**`) | **Outstanding, and narrow.** Every route is behind `requireJournalistRole()`, so the only part most people could use is the application form. The rest is an article editor with a draft/review/publish workflow — a professional writing tool, and a poor fit for a phone. Worth building when journalists ask for it, not before. |
 | **Creator Studio** — earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |
 
 ---

@@ -80,6 +80,10 @@ final class UploadThingClient: NSObject, @unchecked Sendable {
     enum Slug: String {
         case postMedia
         case storyMedia
+
+        /// The news article cover, used by the journalist editor. Its
+        /// own router entry with its own size cap.
+        case newsCoverImage
         case avatar
         case banner
         case listingMedia

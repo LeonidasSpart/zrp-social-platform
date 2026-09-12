@@ -141,6 +141,10 @@ struct RouteDestinationView: View {
             AmbassadorApplyView()
         case .ambassadorDashboard:
             AmbassadorDashboardView()
+        case .journalistDashboard:
+            JournalistDashboardView()
+        case .journalistArticle(let id, let canSubmit):
+            JournalistArticleEditorView(articleId: id, canSubmitForReview: canSubmit)
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

@@ -101,6 +101,15 @@ enum Route: Hashable {
     case ambassadors
     case ambassadorApply
     case ambassadorDashboard
+    /// The Journalist dashboard, and the article editor.
+    ///
+    /// `canSubmit` travels with the route rather than being re-fetched
+    /// by the editor: whether somebody is a VERIFIED journalist is
+    /// already known where the route is pushed from, and asking again
+    /// would be a second round trip for an answer the server enforces
+    /// with a 403 regardless.
+    case journalistDashboard
+    case journalistArticle(id: String?, canSubmit: Bool)
 }
 
 /// Owns the navigation stack's path.
