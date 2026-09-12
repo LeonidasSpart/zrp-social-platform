@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { deleteUploadThingFiles } from "@/lib/uploadthing";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function DELETE(req: NextRequest, props: { params: Promise<{ userId: string }> }) {
@@ -20,27 +19,22 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ userId
   const currentUserId = session.user.id;
 
   try {
-    const conversationFilter = {
-      OR: [
-        { senderId: currentUserId, receiverId: otherUserId },
-        { senderId: otherUserId, receiverId: currentUserId },
-      ],
-    };
-
-    // Every image/voice-message/document attachment in the whole
-    // conversation needs its UploadThing file cleaned up too - the
-    // single-message DELETE route already does this per-message, but
-    // this route was doing a bare deleteMany with no cleanup at all,
-    // silently orphaning every attachment in the entire conversation
-    // (the same class of leak already fixed once for post deletion).
-    const messagesWithAttachments = await prisma.message.findMany({
-      where: { ...conversationFilter, imageUrl: { not: null } },
-      select: { imageUrl: true },
+    // ⚠️ SECURITY: this used to hard-delete every Message row shared
+    // with otherUserId via a bare deleteMany - permanently destroying
+    // the OTHER participant's copy of the conversation too, with no
+    // consent, no undo, and attachment files ripped out from under
+    // them, even though the confirmation UI only ever promised to
+    // delete "your conversation" (i.e. the caller's own view). Instead,
+    // record a per-user clearance marker: only this account's own view
+    // is hidden (see GET /api/messages/[userId] and
+    // getUserConversations, which both filter on it), the other
+    // participant's messages and attachments are untouched, and a new
+    // message sent afterward makes the conversation reappear normally.
+    await prisma.conversationClearance.upsert({
+      where: { userId_otherUserId: { userId: currentUserId, otherUserId } },
+      create: { userId: currentUserId, otherUserId, clearedBefore: new Date() },
+      update: { clearedBefore: new Date() },
     });
-
-    await prisma.message.deleteMany({ where: conversationFilter });
-
-    await deleteUploadThingFiles(messagesWithAttachments.map((m) => m.imageUrl));
 
     return NextResponse.json({ success: true });
   } catch (error) {
