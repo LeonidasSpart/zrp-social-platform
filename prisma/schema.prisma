@@ -553,6 +553,14 @@ model User {
 
   // ─── ZRP NEWS NETWORK ──────────────────────────────────────
   newsFeed NewsFeed? @relation("EditorialFeedUser")
+
+  // ─── ZRP Communities ─────────────────────────────────────────
+  communitiesCreated  Community[]       @relation("CommunityCreator")
+  communityMemberships CommunityMember[] @relation("CommunityMemberUser")
+
+  // ─── ZRP Lists ───────────────────────────────────────────────
+  ownedLists      List[]       @relation("ListOwner")
+  listMemberships ListMember[] @relation("ListMemberUser")
 }
 
 model JournalistProfile {
@@ -2859,4 +2867,103 @@ model NewsAutomationSetting {
   nextCycleAt DateTime?
 
   updatedAt DateTime @updatedAt
+}
+
+// ─── ZRP Communities ───────────────────────────────────────────
+// A real, database-backed community: membership, category and a
+// creator - not the trending-hashtag reskin the native apps shipped
+// before this. A community's "feed" is derived from its `hashtag`
+// field via the existing Post.hashtags array (no new post-tagging
+// system needed) rather than a separate community-post join table.
+enum CommunityCategory {
+  TRAVEL
+  PHOTOGRAPHY
+  NATURE
+  TECHNOLOGY
+  HEALTH_FITNESS
+  ART_DESIGN
+  GENERAL
+}
+
+enum CommunityRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Community {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  description String            @db.Text
+  category    CommunityCategory @default(GENERAL)
+  // The single hashtag whose posts make up this community's feed
+  // (e.g. "travel" for the Travel community). Stored without the
+  // leading "#", lowercase, matched against Post.hashtags.
+  hashtag     String
+  iconUrl     String?
+  memberCount Int               @default(0)
+
+  createdById String
+  createdBy   User   @relation("CommunityCreator", fields: [createdById], references: [id])
+
+  members CommunityMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([hashtag])
+}
+
+model CommunityMember {
+  id String @id @default(cuid())
+
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("CommunityMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  role     CommunityRole @default(MEMBER)
+  joinedAt DateTime      @default(now())
+
+  @@unique([communityId, userId])
+  @@index([userId])
+}
+
+// ─── ZRP Lists ─────────────────────────────────────────────────
+// Twitter/X-style curated lists of users, owned by one account.
+// A list's "feed" is the existing post feed filtered to the member
+// users' authorId - no new post-tagging system needed here either.
+model List {
+  id          String  @id @default(cuid())
+  name        String
+  description String? @db.Text
+  isPrivate   Boolean @default(false)
+
+  ownerId String
+  owner   User   @relation("ListOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  members ListMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model ListMember {
+  id String @id @default(cuid())
+
+  listId String
+  list   List   @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("ListMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  addedAt DateTime @default(now())
+
+  @@unique([listId, userId])
+  @@index([userId])
 }
