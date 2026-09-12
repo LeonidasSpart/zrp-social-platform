@@ -1658,6 +1658,7 @@
     <string name="admin_ticket_delete_confirm">Dieses Ticket und alle Antworten löschen? Dies kann nicht rückgängig gemacht werden.</string>
     <string name="admin_dash_verify_payments">Zahlungen verifizieren</string>
     <string name="admin_dash_process_withdrawals">Auszahlungen bearbeiten</string>
+    <string name="admin_dash_process_help_withdrawals">HELP-Auszahlungen bearbeiten</string>
     <string name="admin_dash_review_upgrade_requests">Upgrade-Anfragen prüfen</string>
     <string name="admin_finance_requested">Angefragt am %1$s</string>
     <string name="admin_plan_free">Kostenlos</string>
@@ -1682,6 +1683,11 @@
     <string name="admin_withdrawals_status_completed">Abgeschlossen</string>
     <string name="admin_withdrawals_status_failed">Fehlgeschlagen</string>
     <string name="admin_withdrawals_status_rejected">Abgelehnt</string>
+    <string name="admin_help_withdrawals_title">HELP-Auszahlungen</string>
+    <string name="admin_help_withdrawals_none">Keine HELP-Kampagnen-Auszahlungen vorhanden.</string>
+    <string name="admin_help_withdrawals_campaign">Kampagne: %1$s</string>
+    <string name="admin_help_withdrawals_approve_confirm">%1$s jetzt an die Wallet von @%2$s für \"%3$s\" senden? Die Überweisung läuft on-chain und kann nicht rückgängig gemacht werden.</string>
+    <string name="admin_help_withdrawals_reject_confirm">Diese Auszahlung über %1$s für \"%2$s\" ablehnen? Der Betrag geht zurück auf das verfügbare Guthaben der Kampagne.</string>
     <string name="admin_upgrade_requests_title">Upgrade-Anfragen</string>
     <string name="admin_upgrade_requests_none">Keine Upgrade-Anfragen vorhanden.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>
