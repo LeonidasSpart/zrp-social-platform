@@ -19,9 +19,13 @@
  */
 
 import { PrismaClient, type PlayChallengeType } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { validateChallengeContent } from "../src/lib/play/scoring";
 
-const prisma = new PrismaClient();
+// Prisma 7+ requires an explicit driver adapter - see src/lib/db.ts.
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5000 }),
+});
 const dryRun = process.argv.includes("--dry-run");
 
 interface SeedChallenge {

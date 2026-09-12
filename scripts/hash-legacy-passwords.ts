@@ -15,9 +15,13 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { migrateLegacyPasswords } from "../src/lib/legacy-password-migration";
 
-const prisma = new PrismaClient();
+// Prisma 7+ requires an explicit driver adapter - see src/lib/db.ts.
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5000 }),
+});
 const dryRun = process.argv.includes("--dry-run");
 
 migrateLegacyPasswords(prisma, { dryRun })

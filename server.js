@@ -3,6 +3,7 @@ const { parse } = require("url");
 const next = require("next");
 const { Server } = require("socket.io");
 const { PrismaClient } = require("@prisma/client");
+const { PrismaPg } = require("@prisma/adapter-pg");
 const { getToken } = require("next-auth/jwt");
 const {
   groupRoom,
@@ -50,7 +51,19 @@ function parseCookieHeader(header) {
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
-const prisma = new PrismaClient();
+// Prisma 7+ requires an explicit driver adapter - see src/lib/db.ts for
+// why connectionTimeoutMillis is set explicitly (the `pg` driver has no
+// default connection timeout). This is a separate PrismaClient instance
+// from src/lib/db.ts's, matching this file's existing pre-Prisma-7
+// architecture: server.js has always run its own client for socket
+// authorization and the boot-time password migration, independent of
+// the Next.js API routes' client.
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+    connectionTimeoutMillis: 5000,
+  }),
+});
 
 // ─── Online presence ─────────────────────────────────────────────────
 // Was a per-process `userStatus` Map, which is only correct with exactly
