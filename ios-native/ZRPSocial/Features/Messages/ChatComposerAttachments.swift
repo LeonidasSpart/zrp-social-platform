@@ -44,8 +44,8 @@ struct ChatAttachmentMenu: View {
             guard let item else { return }
             pickedVideo = nil
             Task {
-                guard let media = try? await item.loadTransferable(type: PickedMedia.self),
-                      let media
+                // `try?` already flattens `loadTransferable`'s optional.
+                guard let media = try? await item.loadTransferable(type: PickedMedia.self)
                 else {
                     importFailed = true
                     return

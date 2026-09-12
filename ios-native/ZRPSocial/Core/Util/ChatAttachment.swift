@@ -32,7 +32,7 @@ enum ChatAttachmentKind: Equatable {
     /// Only meaningful when the message actually has an `imageUrl`; a
     /// text message that happens to begin with a clapperboard emoji has
     /// no attachment to mis-render.
-    static func of(content: String?) -> ChatAttachmentKind {
+    static func of(_ content: String?) -> ChatAttachmentKind {
         guard let content else { return .image }
         if content.hasPrefix(ChatAttachmentMarker.video) { return .video }
         if content.hasPrefix(ChatAttachmentMarker.voice) { return .voice }

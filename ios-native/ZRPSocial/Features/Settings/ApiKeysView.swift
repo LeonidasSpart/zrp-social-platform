@@ -299,7 +299,7 @@ struct GenerateApiKeySheet: View {
 
                     Picker(selection: $days) {
                         ForEach(ApiKeyLimits.lifetimeChoices, id: \.self) { choice in
-                            Text(lifetimeLabel(choice)).tag(choice)
+                            lifetimeLabel(choice).tag(choice)
                         }
                     } label: {
                         Text(.apiKeysExpiresIn)

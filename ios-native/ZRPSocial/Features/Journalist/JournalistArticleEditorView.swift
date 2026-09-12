@@ -204,8 +204,9 @@ final class JournalistArticleEditorViewModel: ObservableObject {
         isUploadingCover = true
         defer { isUploadingCover = false }
 
-        guard let picked = try? await item.loadTransferable(type: PickedMedia.self),
-              let picked
+        // `try?` already flattens `loadTransferable`'s own optional, so
+        // this is one unwrap, not two.
+        guard let picked = try? await item.loadTransferable(type: PickedMedia.self)
         else {
             errorMessage = L10n.string(.composerErrUploadFailed)
             return
