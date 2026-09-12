@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 
 // The actual, permanent account wipe - shared between the user-triggered
 // "delete now" path (src/app/api/user/delete/confirm) and the cron sweep
@@ -46,7 +46,10 @@ export async function deleteUserAccountAndFiles(userId: string): Promise<void> {
 
   await prisma.user.delete({ where: { id: userId } });
 
-  await deleteUploadThingFiles([
+  // p.imageUrl is always a copy of p.imageUrls[0] (see POST /api/posts)
+  // - deleteUploadsIfUnreferenced dedupes that and skips anything still
+  // referenced by another row before deleting.
+  await deleteUploadsIfUnreferenced([
     user.avatarUrl,
     user.coverUrl,
     ...posts.flatMap((p) => [p.imageUrl, ...p.imageUrls]),

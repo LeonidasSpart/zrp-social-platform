@@ -2,8 +2,23 @@ import { describe, it, expect, vi, afterAll } from "vitest";
 import { randomUUID } from "crypto";
 import { prisma } from "../db";
 
-const { deleteUploadThingFiles } = vi.hoisted(() => ({ deleteUploadThingFiles: vi.fn() }));
-vi.mock("@/lib/uploadthing", () => ({ deleteUploadThingFiles }));
+// deleteUserAccountAndFiles goes through deleteUploadsIfUnreferenced (the
+// reference-safety-checking wrapper), which itself calls deleteUploadThingKeys
+// - that's the actual network boundary to mock so these tests never call
+// real UploadThing, and so the collected URLs can still be asserted on.
+const { deleteUploadThingKeys } = vi.hoisted(() => ({
+  deleteUploadThingKeys: vi.fn(async (keys: string[]) => ({
+    requested: keys.length,
+    unique: keys.length,
+    deleted: keys.length,
+    failed: 0,
+    retried: 0,
+  })),
+}));
+vi.mock("@/lib/uploadthing", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/uploadthing")>();
+  return { ...actual, deleteUploadThingKeys };
+});
 
 import { deleteUserAccountAndFiles } from "../account-deletion";
 
@@ -26,7 +41,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
     });
 
     it("deletes the user row and passes their own avatar/cover to UploadThing cleanup", async () => {
-      deleteUploadThingFiles.mockClear();
+      deleteUploadThingKeys.mockClear();
       const user = await prisma.user.create({
         data: {
           email: `del-${randomUUID().slice(0, 8)}@deltest.example`,
@@ -44,10 +59,10 @@ describe.skipIf(!hasRealDatabaseUrl)(
       const found = await prisma.user.findUnique({ where: { id: user.id } });
       expect(found).toBeNull();
 
-      expect(deleteUploadThingFiles).toHaveBeenCalledTimes(1);
-      const urls = deleteUploadThingFiles.mock.calls[0][0] as string[];
-      expect(urls).toContain("https://utfs.io/f/avatar-key");
-      expect(urls).toContain("https://utfs.io/f/cover-key");
+      expect(deleteUploadThingKeys).toHaveBeenCalledTimes(1);
+      const keys = deleteUploadThingKeys.mock.calls[0][0] as string[];
+      expect(keys).toContain("avatar-key");
+      expect(keys).toContain("cover-key");
     });
 
     it("cascades away the user's own posts along with the user row", async () => {
@@ -72,9 +87,9 @@ describe.skipIf(!hasRealDatabaseUrl)(
     });
 
     it("is a no-op when the user no longer exists", async () => {
-      deleteUploadThingFiles.mockClear();
+      deleteUploadThingKeys.mockClear();
       await expect(deleteUserAccountAndFiles(randomUUID())).resolves.toBeUndefined();
-      expect(deleteUploadThingFiles).not.toHaveBeenCalled();
+      expect(deleteUploadThingKeys).not.toHaveBeenCalled();
     });
   }
 );
