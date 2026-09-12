@@ -129,6 +129,35 @@ describe.skipIf(!hasRedis)("Redis integration (real server)", () => {
 
     await winners[0]!.release();
   });
+
+  it("a delayed release from an expired lock never deletes a DIFFERENT cycle's active lock", async () => {
+    // The exact race this guards against: cycle A's lock lapses (it ran
+    // past its own TTL), cycle B legitimately acquires a fresh lock in
+    // that window, and A - only now getting around to cleaning up -
+    // calls release(). A's release must be a no-op here: it holds a
+    // stale token that no longer matches what's in Redis, so it must
+    // NOT delete B's still-active lock. An unconditional DEL would let
+    // a third cycle acquire immediately, running concurrently with B -
+    // the double-publish failure mode this lock exists to prevent.
+    const a = await acquirePipelineLock(1);
+    expect(a).not.toBeNull();
+
+    await new Promise((resolve) => setTimeout(resolve, 1200)); // A's TTL lapses
+
+    const b = await acquirePipelineLock(60);
+    expect(b).not.toBeNull(); // B legitimately acquired the now-free key
+
+    await a!.release(); // A's late cleanup - must not touch B's lock
+
+    const redis = await getRedisClient();
+    expect(await redis?.exists("news:pipeline:lock")).toBe(1); // B's lock is still there
+
+    const thirdWhileBHolds = await acquirePipelineLock(60);
+    expect(thirdWhileBHolds).toBeNull(); // nobody else can acquire while B holds it
+
+    await b!.release();
+    expect(await redis?.exists("news:pipeline:lock")).toBe(0); // B's own release DOES work
+  });
 });
 
 /*
