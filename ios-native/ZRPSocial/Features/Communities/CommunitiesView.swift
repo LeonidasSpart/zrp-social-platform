@@ -215,7 +215,7 @@ private struct CommunityRow: View {
                 Spacer()
 
                 Button(action: onToggleMembership) {
-                    Text(community.isMember ? Text(.communitiesJoined) : Text(.communitiesJoin))
+                    (community.isMember ? Text(.communitiesJoined) : Text(.communitiesJoin))
                         .font(.footnote.weight(.semibold))
                         .padding(.horizontal, ZrpSpacing.lg)
                         .frame(minHeight: ZrpMetrics.minTouchTarget)

@@ -165,7 +165,7 @@ struct CommunityDetailView: View {
                         L10n.string(.communitiesMemberCount, ["n": "\(community.memberCount)"]),
                         systemImage: "person.2"
                     )
-                    Label(verbatim: community.hashtag, systemImage: "number")
+                    Label(community.hashtag, systemImage: "number")
 
                     if viewModel.myRole == "OWNER" {
                         Text(.communitiesDetailOwnerBadge)
@@ -180,7 +180,7 @@ struct CommunityDetailView: View {
                     Spacer()
 
                     Button(action: { viewModel.toggleMembership() }) {
-                        Text(community.isMember ? Text(.communitiesJoined) : Text(.communitiesJoin))
+                        (community.isMember ? Text(.communitiesJoined) : Text(.communitiesJoin))
                             .font(.footnote.weight(.semibold))
                             .padding(.horizontal, ZrpSpacing.lg)
                             .frame(minHeight: ZrpMetrics.minTouchTarget)
