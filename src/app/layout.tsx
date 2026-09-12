@@ -170,6 +170,13 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+// Organization and WebSite are genuinely site-wide entities, correct to
+// emit on every route. A WebPage entity does NOT belong here - it used
+// to live in this graph hardcoded to the homepage's own url/name/
+// description, which meant every other route (a profile, pricing, a
+// legal page) emitted a WebPage entity that falsely described itself as
+// the homepage. The homepage now emits its own WebPage entity directly
+// (src/app/page.tsx), scoped to the one route it actually describes.
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
@@ -201,23 +208,6 @@ const structuredData = {
       },
       inLanguage: "en",
     },
-
-    {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/#webpage`,
-      url: SITE_URL,
-      name:
-        "ZRP Social: The First Swiss-European Social Media Platform",
-      description:
-        "ZRP Social is a Swiss-European social media platform built in Switzerland around privacy, freedom of expression, security, and people-first communities.",
-      isPartOf: {
-        "@id": `${SITE_URL}/#website`,
-      },
-      about: {
-        "@id": `${SITE_URL}/#organization`,
-      },
-      inLanguage: "en",
-    },
   ],
 };
 
@@ -232,7 +222,7 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData),
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
           }}
         />
 

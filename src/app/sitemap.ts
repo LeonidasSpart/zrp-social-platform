@@ -40,6 +40,14 @@ const STATIC_PAGES: Array<{
   { path: "/press", changeFrequency: "monthly", priority: 0.4 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
+  // Real, public, UI-linked pages (Footer.tsx links /guidelines and
+  // /community-code directly; Header.tsx/Sidebar.tsx link /ambassadors)
+  // that were missing here entirely - all three are also allowed in
+  // robots.ts and in middleware's PUBLIC_PATHS, so there's no reason a
+  // crawler shouldn't be told about them explicitly.
+  { path: "/guidelines", changeFrequency: "yearly", priority: 0.4 },
+  { path: "/community-code", changeFrequency: "yearly", priority: 0.4 },
+  { path: "/ambassadors", changeFrequency: "monthly", priority: 0.5 },
   { path: "/login", changeFrequency: "yearly", priority: 0.3 },
   { path: "/signup", changeFrequency: "yearly", priority: 0.4 },
 ];
