@@ -91,6 +91,9 @@ enum Route: Hashable {
     /// Creator Studio - the analytics half only. The website's earnings
     /// tab is excluded by store policy; see `CreatorStudioView`.
     case creatorStudio
+    /// ZRP's public charity ledger. Public in the real sense: the route
+    /// takes no session and the screen works signed out.
+    case charityTransparency
 }
 
 /// Owns the navigation stack's path.

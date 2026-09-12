@@ -820,3 +820,16 @@
 "profile.milestonePosts10" = "10+ publicaciones";
 "profile.milestoneFollowers1k" = "1K+ seguidores";
 "profile.milestoneFollowers100" = "100+ seguidores";
+"charity.committedLabel" = "Comprometido con la caridad";
+"charity.committedNote" = "Calculado automáticamente a partir de propinas y compras de contenido premium completadas: el 35% de la comisión de plataforma de ZRP en cada una.";
+"charity.disbursedLabel" = "Desembolsado hasta ahora";
+"charity.disbursedNote" = "Pagos reales que ZRP ha realizado a beneficiarios, registrados por nuestro equipo a medida que ocurren.";
+"charity.ledgerHeading" = "Registro de desembolsos";
+"charity.noDisbursementsYet" = "Aún no se ha registrado ningún desembolso. Este registro es real y en vivo: la primera entrada aparecerá aquí en cuanto se realice un pago.";
+"charity.errLoad" = "No se pueden cargar los datos de caridad en este momento. Inténtalo de nuevo más tarde.";
+"charity.orphanagesLabel" = "Orfanatos";
+"charity.schoolsLabel" = "Escuelas";
+"charity.hospitalsLabel" = "Hospitales";
+"charity.climateProjectsLabel" = "Proyectos climáticos";
+"charity.viewProof" = "Ver comprobante";
+"charity.transparencyHeading" = "Transparencia e impacto";

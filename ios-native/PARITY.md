@@ -432,6 +432,26 @@ fall — and the list refreshes the badge on appear, because the tab only
 refetched it when the Messages tab was *selected* and popping back from a
 thread does not change tabs.
 
+### Transparency
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Charity ledger | `GET /api/transparency/charity` — **public**, takes no session | ✅ | ✅ | ✅ native screen (not a web view): committed and disbursed kept apart as the route keeps them, per-cause breakdown, and the real disbursement records with proof links where they exist | IMPLEMENTED |
+| Moderation transparency | `GET /api/transparency/moderation` | ✅ | ✅ | ⬜ report counts by reason, status, action and appeal outcome — its own screen, not built here | MISSING |
+
+`committed` and `disbursed` are never added together. The route computes
+the first from completed tips and premium purchases (what the commitment
+*owes*) and the second from real payment records staff entered (what has
+actually moved), and says so in its own `note`. Collapsing them into one
+total would claim ZRP had paid out money it may only have promised — on
+the one page whose whole purpose is being checkable.
+
+A disbursement whose `cause` this app does not recognise renders its raw
+value rather than being hidden. That is the opposite of the milestone-badge
+rule, deliberately: a badge is decoration, a disbursement is a financial
+record, and dropping one from a public ledger because of an unknown
+category would be worse than an untranslated word.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |

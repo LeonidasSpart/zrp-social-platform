@@ -820,3 +820,16 @@
 "profile.milestonePosts10" = "10+ gönderi";
 "profile.milestoneFollowers1k" = "1K+ takipçi";
 "profile.milestoneFollowers100" = "100+ takipçi";
+"charity.committedLabel" = "Bağış için ayrılan tutar";
+"charity.committedNote" = "Tamamlanan bahşişler ve premium içerik satın alımlarından otomatik olarak hesaplanır: her birinde ZRP platform ücretinin %35'i.";
+"charity.disbursedLabel" = "Şu ana kadar ödenen";
+"charity.disbursedNote" = "ZRP'nin yararlanıcılara yaptığı gerçek ödemeler, gerçekleştikçe ekibimiz tarafından kaydedilir.";
+"charity.ledgerHeading" = "Ödeme kayıt defteri";
+"charity.noDisbursementsYet" = "Henüz herhangi bir ödeme kaydedilmedi. Bu kayıt defteri gerçek ve canlıdır: bir ödeme yapılır yapılmaz ilk kayıt burada görünecektir.";
+"charity.errLoad" = "Bağış verileri şu anda yüklenemiyor. Lütfen daha sonra tekrar deneyin.";
+"charity.orphanagesLabel" = "Yetimhaneler";
+"charity.schoolsLabel" = "Okullar";
+"charity.hospitalsLabel" = "Hastaneler";
+"charity.climateProjectsLabel" = "İklim Projeleri";
+"charity.viewProof" = "Kanıtı görüntüle";
+"charity.transparencyHeading" = "Şeffaflık ve Etki";

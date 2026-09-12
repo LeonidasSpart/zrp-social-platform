@@ -820,3 +820,16 @@
 "profile.milestonePosts10" = "10+ منشورات";
 "profile.milestoneFollowers1k" = "1K+ متابع";
 "profile.milestoneFollowers100" = "100+ متابع";
+"charity.committedLabel" = "المخصص للأعمال الخيرية";
+"charity.committedNote" = "يُحسب تلقائيًا من الإكراميات وعمليات شراء المحتوى المميز المكتملة: 35% من رسوم منصة ZRP على كل عملية.";
+"charity.disbursedLabel" = "المصروف حتى الآن";
+"charity.disbursedNote" = "مدفوعات حقيقية قامت ZRP بتحويلها إلى الجهات المستفيدة، يسجلها فريقنا أولاً بأول.";
+"charity.ledgerHeading" = "سجل المدفوعات";
+"charity.noDisbursementsYet" = "لم يتم تسجيل أي مدفوعات بعد. هذا السجل حقيقي ومباشر: سيظهر أول إدخال هنا بمجرد إجراء أي دفعة.";
+"charity.errLoad" = "تعذّر تحميل بيانات الأعمال الخيرية حاليًا. يرجى المحاولة لاحقًا.";
+"charity.orphanagesLabel" = "دور الأيتام";
+"charity.schoolsLabel" = "المدارس";
+"charity.hospitalsLabel" = "المستشفيات";
+"charity.climateProjectsLabel" = "مشاريع المناخ";
+"charity.viewProof" = "عرض الإثبات";
+"charity.transparencyHeading" = "الشفافية والأثر";

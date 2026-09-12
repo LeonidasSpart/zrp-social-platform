@@ -150,6 +150,16 @@ enum DeepLink {
         case "bookmarks":
             return DeepLinkTarget(.home, .bookmarks)
 
+        case "charity":
+            return DeepLinkTarget(.home, .charityTransparency)
+
+        case "transparency":
+            // /transparency on the web carries both the charity ledger
+            // and the moderation report. Only the charity half exists
+            // here, so the link lands on what this app can actually
+            // show rather than on nothing.
+            return DeepLinkTarget(.home, .charityTransparency)
+
         case "creator":
             // Only /creator/dashboard exists on the web, and it opens on
             // the earnings tab this app does not have. The link lands on

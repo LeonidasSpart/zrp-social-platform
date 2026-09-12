@@ -820,3 +820,16 @@
 "profile.milestonePosts10" = "10+ postime";
 "profile.milestoneFollowers1k" = "1K+ ndjekës";
 "profile.milestoneFollowers100" = "100+ ndjekës";
+"charity.committedLabel" = "Angazhuar për bamirësi";
+"charity.committedNote" = "Llogaritur automatikisht nga bakshishet dhe blerjet e përmbajtjes premium të përfunduara: 35% e tarifës së platformës së ZRP për secilën.";
+"charity.disbursedLabel" = "Shpërndarë deri tani";
+"charity.disbursedNote" = "Pagesa reale që ZRP i ka bërë përfituesve, të regjistruara nga ekipi ynë ndërsa ndodhin.";
+"charity.ledgerHeading" = "Regjistri i shpërndarjeve";
+"charity.noDisbursementsYet" = "Ende nuk është regjistruar asnjë shpërndarje. Ky regjistër është real dhe i drejtpërdrejtë: hyrja e parë do të shfaqet këtu sapo të bëhet një pagesë.";
+"charity.errLoad" = "Nuk mund të ngarkohen të dhënat e bamirësisë tani. Ju lutemi provoni më vonë.";
+"charity.orphanagesLabel" = "Jetimore";
+"charity.schoolsLabel" = "Shkolla";
+"charity.hospitalsLabel" = "Spitale";
+"charity.climateProjectsLabel" = "Projekte Klimatike";
+"charity.viewProof" = "Shiko provën";
+"charity.transparencyHeading" = "Transparenca dhe Ndikimi";

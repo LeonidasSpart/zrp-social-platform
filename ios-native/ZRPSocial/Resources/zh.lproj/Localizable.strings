@@ -820,3 +820,16 @@
 "profile.milestonePosts10" = "10+ 帖子";
 "profile.milestoneFollowers1k" = "1K+ 关注者";
 "profile.milestoneFollowers100" = "100+ 关注者";
+"charity.committedLabel" = "已承诺捐赠";
+"charity.committedNote" = "根据已完成的打赏和付费内容购买自动计算，为 ZRP 平台手续费的 35%。";
+"charity.disbursedLabel" = "已发放金额";
+"charity.disbursedNote" = "ZRP 实际向受益方支付的款项，由我们的团队实时记录。";
+"charity.ledgerHeading" = "发放记录";
+"charity.noDisbursementsYet" = "目前尚无发放记录。此记录真实且实时更新，一旦完成付款，第一条记录将显示在此处。";
+"charity.errLoad" = "目前无法加载慈善数据，请稍后重试。";
+"charity.orphanagesLabel" = "孤儿院";
+"charity.schoolsLabel" = "学校";
+"charity.hospitalsLabel" = "医院";
+"charity.climateProjectsLabel" = "气候项目";
+"charity.viewProof" = "查看凭证";
+"charity.transparencyHeading" = "透明度与影响";

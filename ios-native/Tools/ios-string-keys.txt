@@ -855,3 +855,16 @@ profile.milestonePosts100
 profile.milestonePosts10
 profile.milestoneFollowers1k
 profile.milestoneFollowers100
+charity.committedLabel
+charity.committedNote
+charity.disbursedLabel
+charity.disbursedNote
+charity.ledgerHeading
+charity.noDisbursementsYet
+charity.errLoad
+charity.orphanagesLabel
+charity.schoolsLabel
+charity.hospitalsLabel
+charity.climateProjectsLabel
+charity.viewProof
+charity.transparencyHeading

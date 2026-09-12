@@ -820,3 +820,16 @@
 "profile.milestonePosts10" = "10+ Beiträge";
 "profile.milestoneFollowers1k" = "1K+ Follower";
 "profile.milestoneFollowers100" = "100+ Follower";
+"charity.committedLabel" = "Für wohltätige Zwecke zugesagt";
+"charity.committedNote" = "Automatisch berechnet aus abgeschlossenen Trinkgeldern und Premium-Inhaltskäufen: 35 % der ZRP-Plattformgebühr auf jeden Betrag.";
+"charity.disbursedLabel" = "Bisher ausgezahlt";
+"charity.disbursedNote" = "Tatsächliche Zahlungen, die ZRP an Begünstigte geleistet hat, von unserem Team laufend erfasst.";
+"charity.ledgerHeading" = "Auszahlungsprotokoll";
+"charity.noDisbursementsYet" = "Es wurden noch keine Auszahlungen erfasst. Dieses Protokoll ist echt und live: der erste Eintrag erscheint hier, sobald eine Zahlung erfolgt.";
+"charity.errLoad" = "Wohltätigkeitsdaten können derzeit nicht geladen werden. Bitte später erneut versuchen.";
+"charity.orphanagesLabel" = "Waisenhäuser";
+"charity.schoolsLabel" = "Schulen";
+"charity.hospitalsLabel" = "Krankenhäuser";
+"charity.climateProjectsLabel" = "Klimaprojekte";
+"charity.viewProof" = "Nachweis ansehen";
+"charity.transparencyHeading" = "Transparenz & Wirkung";

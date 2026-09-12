@@ -820,3 +820,16 @@
 "profile.milestonePosts10" = "10+ публикаций";
 "profile.milestoneFollowers1k" = "1K+ подписчиков";
 "profile.milestoneFollowers100" = "100+ подписчиков";
+"charity.committedLabel" = "Направлено на благотворительность";
+"charity.committedNote" = "Рассчитывается автоматически на основе завершённых чаевых и покупок премиум-контента: 35% от комиссии платформы ZRP с каждой операции.";
+"charity.disbursedLabel" = "Выплачено на данный момент";
+"charity.disbursedNote" = "Реальные платежи, которые ZRP перечислила получателям, фиксируются нашей командой по мере их совершения.";
+"charity.ledgerHeading" = "Реестр выплат";
+"charity.noDisbursementsYet" = "Выплат пока не зафиксировано. Этот реестр реальный и обновляется в реальном времени: первая запись появится здесь сразу после выплаты.";
+"charity.errLoad" = "Не удалось загрузить данные о благотворительности. Попробуйте позже.";
+"charity.orphanagesLabel" = "Детские дома";
+"charity.schoolsLabel" = "Школы";
+"charity.hospitalsLabel" = "Больницы";
+"charity.climateProjectsLabel" = "Климатические проекты";
+"charity.viewProof" = "Посмотреть подтверждение";
+"charity.transparencyHeading" = "Прозрачность и влияние";

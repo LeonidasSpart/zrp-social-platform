@@ -820,6 +820,19 @@
 "profile.milestonePosts10" = "10+ posts";
 "profile.milestoneFollowers1k" = "1K+ followers";
 "profile.milestoneFollowers100" = "100+ followers";
+"charity.committedLabel" = "Committed to charity";
+"charity.committedNote" = "Calculated automatically from completed tips and premium content purchases: 35% of ZRP's platform fee on each.";
+"charity.disbursedLabel" = "Disbursed so far";
+"charity.disbursedNote" = "Real payments ZRP has made to beneficiaries, recorded by our team as they happen.";
+"charity.ledgerHeading" = "Disbursement ledger";
+"charity.noDisbursementsYet" = "No disbursements have been recorded yet. This ledger is real and live: the first entry will appear here as soon as a payment is made.";
+"charity.errLoad" = "Unable to load charity data right now. Please try again later.";
+"charity.orphanagesLabel" = "Orphanages";
+"charity.schoolsLabel" = "Schools";
+"charity.hospitalsLabel" = "Hospitals";
+"charity.climateProjectsLabel" = "Climate Projects";
+"charity.viewProof" = "View proof";
+"charity.transparencyHeading" = "Transparency & Impact";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
    into the development language only - other languages fall back

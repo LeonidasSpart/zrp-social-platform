@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
 
     @EnvironmentObject private var session: SessionController
+    @EnvironmentObject private var navigator: Navigator
 
     /// The legal page being read, or `nil`. `SFSafariViewController`
     /// cannot be pushed onto a navigation stack, so these are presented
@@ -100,6 +101,18 @@ struct SettingsView: View {
                         } icon: {
                             Image(systemName: page.systemImage)
                         }
+                    }
+                }
+
+                // A native screen rather than a web page, unlike its
+                // neighbours here: /api/transparency/charity is a real
+                // JSON route this app can read directly, so the ledger
+                // is rendered natively instead of framed in a browser.
+                Button { navigator.push(.charityTransparency) } label: {
+                    Label {
+                        Text(.charityTransparencyHeading)
+                    } icon: {
+                        Image(systemName: "heart.text.square")
                     }
                 }
             }

@@ -820,3 +820,16 @@
 "profile.milestonePosts10" = "10+ postingan";
 "profile.milestoneFollowers1k" = "1K+ pengikut";
 "profile.milestoneFollowers100" = "100+ pengikut";
+"charity.committedLabel" = "Dikomitmenkan untuk amal";
+"charity.committedNote" = "Dihitung secara otomatis dari tip dan pembelian konten premium yang selesai: 35% dari biaya platform ZRP pada masing-masing transaksi.";
+"charity.disbursedLabel" = "Telah disalurkan";
+"charity.disbursedNote" = "Pembayaran nyata yang telah dilakukan ZRP kepada penerima manfaat, dicatat oleh tim kami saat terjadi.";
+"charity.ledgerHeading" = "Buku besar penyaluran dana";
+"charity.noDisbursementsYet" = "Belum ada penyaluran dana yang tercatat. Buku besar ini nyata dan langsung: entri pertama akan muncul di sini segera setelah pembayaran dilakukan.";
+"charity.errLoad" = "Data amal tidak dapat dimuat saat ini. Silakan coba lagi nanti.";
+"charity.orphanagesLabel" = "Panti Asuhan";
+"charity.schoolsLabel" = "Sekolah";
+"charity.hospitalsLabel" = "Rumah Sakit";
+"charity.climateProjectsLabel" = "Proyek Iklim";
+"charity.viewProof" = "Lihat bukti";
+"charity.transparencyHeading" = "Transparansi & Dampak";
