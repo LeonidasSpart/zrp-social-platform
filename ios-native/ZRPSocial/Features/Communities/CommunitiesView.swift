@@ -208,7 +208,10 @@ private struct CommunityRow: View {
                 Image(systemName: "person.2")
                     .font(.caption)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
-                Text(.communitiesMemberCount, ["n": "\(community.memberCount)"])
+                Text(
+                    community.memberCount == 1 ? .communitiesMemberCountOne : .communitiesMemberCountOther,
+                    ["n": "\(community.memberCount)"]
+                )
                     .font(.caption)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
 

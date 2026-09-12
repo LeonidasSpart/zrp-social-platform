@@ -2197,7 +2197,10 @@
     <string name="communities_join">Вступить</string>
     <string name="communities_joined">Вы вступили</string>
     <string name="communities_leave">Покинуть</string>
-    <string name="communities_member_count">Участников: %1$d</string>
+    <plurals name="communities_member_count">
+        <item quantity="one">Участник: %1$d</item>
+        <item quantity="other">Участников: %1$d</item>
+    </plurals>
     <string name="communities_create_title">Создать сообщество</string>
     <string name="communities_create_name_label">Название</string>
     <string name="communities_create_name_placeholder">например, Любители путешествий</string>

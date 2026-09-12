@@ -121,7 +121,7 @@ export default function CommunityDetailPage() {
         <div className="mt-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-white/50">
             <span className="flex items-center gap-1.5">
-              <Users className="w-4 h-4" /> {t("communities.memberCount", { n: community.memberCount })}
+              <Users className="w-4 h-4" /> {t(community.memberCount === 1 ? "communities.memberCountOne" : "communities.memberCountOther", { n: community.memberCount })}
             </span>
             <span className="flex items-center gap-1">
               <Hash className="w-4 h-4" /> {community.hashtag}

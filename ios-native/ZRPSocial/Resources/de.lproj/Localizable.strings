@@ -1098,7 +1098,8 @@
 "communities.join" = "Beitreten";
 "communities.joined" = "Beigetreten";
 "communities.leave" = "Verlassen";
-"communities.memberCount" = "{n} Mitglieder";
+"communities.memberCountOne" = "{n} Mitglied";
+"communities.memberCountOther" = "{n} Mitglieder";
 "communities.create.title" = "Community erstellen";
 "communities.create.nameLabel" = "Name";
 "communities.create.namePlaceholder" = "z. B. Reiseliebhaber";

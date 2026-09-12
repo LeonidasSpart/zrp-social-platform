@@ -2197,7 +2197,10 @@
     <string name="communities_join">Bashkohu</string>
     <string name="communities_joined">U bashkuat</string>
     <string name="communities_leave">Largohu</string>
-    <string name="communities_member_count">%1$d anëtarë</string>
+    <plurals name="communities_member_count">
+        <item quantity="one">%1$d anëtar</item>
+        <item quantity="other">%1$d anëtarë</item>
+    </plurals>
     <string name="communities_create_title">Krijo një komunitet</string>
     <string name="communities_create_name_label">Emri</string>
     <string name="communities_create_name_placeholder">p.sh. Dashamirët e udhëtimeve</string>

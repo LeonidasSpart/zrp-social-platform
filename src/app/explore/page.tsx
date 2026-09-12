@@ -241,7 +241,7 @@ export default function ExplorePage() {
                     <div className="text-xs text-gray-500 dark:text-white/40 truncate">{c.description}</div>
                   </div>
                   <span className="text-xs text-gray-500 dark:text-white/40 shrink-0">
-                    {t("communities.memberCount", { n: c.memberCount })}
+                    {t(c.memberCount === 1 ? "communities.memberCountOne" : "communities.memberCountOther", { n: c.memberCount })}
                   </span>
                 </Link>
               ))}

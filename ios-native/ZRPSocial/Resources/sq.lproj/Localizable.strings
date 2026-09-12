@@ -1098,7 +1098,8 @@
 "communities.join" = "Bashkohu";
 "communities.joined" = "U bashkuat";
 "communities.leave" = "Largohu";
-"communities.memberCount" = "{n} anëtarë";
+"communities.memberCountOne" = "{n} anëtar";
+"communities.memberCountOther" = "{n} anëtarë";
 "communities.create.title" = "Krijo një komunitet";
 "communities.create.nameLabel" = "Emri";
 "communities.create.namePlaceholder" = "p.sh. Dashamirët e udhëtimeve";

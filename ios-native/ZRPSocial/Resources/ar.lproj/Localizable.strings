@@ -1098,7 +1098,8 @@
 "communities.join" = "انضمام";
 "communities.joined" = "منضم";
 "communities.leave" = "مغادرة";
-"communities.memberCount" = "{n} عضو";
+"communities.memberCountOne" = "عضو واحد";
+"communities.memberCountOther" = "{n} عضو";
 "communities.create.title" = "إنشاء مجتمع";
 "communities.create.nameLabel" = "الاسم";
 "communities.create.namePlaceholder" = "مثال: عشاق السفر";

@@ -1098,7 +1098,8 @@
 "communities.join" = "加入";
 "communities.joined" = "已加入";
 "communities.leave" = "退出";
-"communities.memberCount" = "{n} 位成员";
+"communities.memberCountOne" = "{n} 位成员";
+"communities.memberCountOther" = "{n} 位成员";
 "communities.create.title" = "创建社区";
 "communities.create.nameLabel" = "名称";
 "communities.create.namePlaceholder" = "例如：旅行爱好者";

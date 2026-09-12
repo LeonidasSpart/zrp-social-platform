@@ -2197,7 +2197,10 @@
     <string name="communities_join">Rejoindre</string>
     <string name="communities_joined">Rejoint</string>
     <string name="communities_leave">Quitter</string>
-    <string name="communities_member_count">%1$d membres</string>
+    <plurals name="communities_member_count">
+        <item quantity="one">%1$d membre</item>
+        <item quantity="other">%1$d membres</item>
+    </plurals>
     <string name="communities_create_title">Créer une communauté</string>
     <string name="communities_create_name_label">Nom</string>
     <string name="communities_create_name_placeholder">ex. Amoureux du voyage</string>

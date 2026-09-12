@@ -1098,7 +1098,8 @@
 "communities.join" = "Gabung";
 "communities.joined" = "Bergabung";
 "communities.leave" = "Keluar";
-"communities.memberCount" = "{n} anggota";
+"communities.memberCountOne" = "{n} anggota";
+"communities.memberCountOther" = "{n} anggota";
 "communities.create.title" = "Buat komunitas";
 "communities.create.nameLabel" = "Nama";
 "communities.create.namePlaceholder" = "mis. Pecinta Perjalanan";

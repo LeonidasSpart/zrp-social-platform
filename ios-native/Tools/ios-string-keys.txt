@@ -1159,7 +1159,8 @@ communities.category.general
 communities.join
 communities.joined
 communities.leave
-communities.memberCount
+communities.memberCountOne
+communities.memberCountOther
 communities.create.title
 communities.create.nameLabel
 communities.create.namePlaceholder

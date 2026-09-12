@@ -162,7 +162,10 @@ struct CommunityDetailView: View {
 
                 HStack(spacing: ZrpSpacing.md) {
                     Label(
-                        L10n.string(.communitiesMemberCount, ["n": "\(community.memberCount)"]),
+                        L10n.string(
+                            community.memberCount == 1 ? .communitiesMemberCountOne : .communitiesMemberCountOther,
+                            ["n": "\(community.memberCount)"]
+                        ),
                         systemImage: "person.2"
                     )
                     Label(community.hashtag, systemImage: "number")

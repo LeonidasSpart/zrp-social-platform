@@ -1098,7 +1098,8 @@
 "communities.join" = "Katıl";
 "communities.joined" = "Katıldın";
 "communities.leave" = "Ayrıl";
-"communities.memberCount" = "{n} üye";
+"communities.memberCountOne" = "{n} üye";
+"communities.memberCountOther" = "{n} üye";
 "communities.create.title" = "Bir topluluk oluştur";
 "communities.create.nameLabel" = "Ad";
 "communities.create.namePlaceholder" = "ör. Seyahat Severler";

@@ -1098,7 +1098,8 @@
 "communities.join" = "Вступить";
 "communities.joined" = "Вы вступили";
 "communities.leave" = "Покинуть";
-"communities.memberCount" = "Участников: {n}";
+"communities.memberCountOne" = "Участник: {n}";
+"communities.memberCountOther" = "Участников: {n}";
 "communities.create.title" = "Создать сообщество";
 "communities.create.nameLabel" = "Название";
 "communities.create.namePlaceholder" = "например, Любители путешествий";

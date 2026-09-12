@@ -182,7 +182,7 @@ export default function ListsPage() {
                 </div>
                 {l.description && <p className="text-sm text-gray-600 dark:text-white/60 mt-1.5 line-clamp-2">{l.description}</p>}
                 <div className="text-xs text-gray-500 dark:text-white/40 mt-3">
-                  {t("communities.memberCount", { n: l.memberCount })}
+                  {t(l.memberCount === 1 ? "communities.memberCountOne" : "communities.memberCountOther", { n: l.memberCount })}
                 </div>
               </Link>
             ))}

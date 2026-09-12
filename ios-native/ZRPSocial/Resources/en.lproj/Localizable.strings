@@ -1098,7 +1098,8 @@
 "communities.join" = "Join";
 "communities.joined" = "Joined";
 "communities.leave" = "Leave";
-"communities.memberCount" = "{n} members";
+"communities.memberCountOne" = "{n} member";
+"communities.memberCountOther" = "{n} members";
 "communities.create.title" = "Create a community";
 "communities.create.nameLabel" = "Name";
 "communities.create.namePlaceholder" = "e.g. Travel Lovers";

@@ -119,7 +119,10 @@ private struct ListRow: View {
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
                     .lineLimit(2)
             }
-            Text(.communitiesMemberCount, ["n": "\(list.memberCount)"])
+            Text(
+                list.memberCount == 1 ? .communitiesMemberCountOne : .communitiesMemberCountOther,
+                ["n": "\(list.memberCount)"]
+            )
                 .font(.caption)
                 .foregroundStyle(ZrpColor.onSurfaceMuted)
         }

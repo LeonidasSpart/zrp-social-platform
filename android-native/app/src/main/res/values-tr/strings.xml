@@ -2197,7 +2197,10 @@
     <string name="communities_join">Katıl</string>
     <string name="communities_joined">Katıldın</string>
     <string name="communities_leave">Ayrıl</string>
-    <string name="communities_member_count">%1$d üye</string>
+    <plurals name="communities_member_count">
+        <item quantity="one">%1$d üye</item>
+        <item quantity="other">%1$d üye</item>
+    </plurals>
     <string name="communities_create_title">Bir topluluk oluştur</string>
     <string name="communities_create_name_label">Ad</string>
     <string name="communities_create_name_placeholder">ör. Seyahat Severler</string>

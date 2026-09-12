@@ -298,7 +298,7 @@ export default function CommunitiesPage() {
                 </Link>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <span className="text-xs text-gray-500 dark:text-white/40 shrink-0">
-                    {t("communities.memberCount", { n: c.memberCount })}
+                    {t(c.memberCount === 1 ? "communities.memberCountOne" : "communities.memberCountOther", { n: c.memberCount })}
                   </span>
                   <button
                     type="button"

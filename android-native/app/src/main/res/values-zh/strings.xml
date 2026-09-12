@@ -2197,7 +2197,10 @@
     <string name="communities_join">加入</string>
     <string name="communities_joined">已加入</string>
     <string name="communities_leave">退出</string>
-    <string name="communities_member_count">%1$d 位成员</string>
+    <plurals name="communities_member_count">
+        <item quantity="one">%1$d 位成员</item>
+        <item quantity="other">%1$d 位成员</item>
+    </plurals>
     <string name="communities_create_title">创建社区</string>
     <string name="communities_create_name_label">名称</string>
     <string name="communities_create_name_placeholder">例如：旅行爱好者</string>

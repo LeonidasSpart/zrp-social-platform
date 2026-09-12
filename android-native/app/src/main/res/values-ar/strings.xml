@@ -2197,7 +2197,10 @@
     <string name="communities_join">انضمام</string>
     <string name="communities_joined">منضم</string>
     <string name="communities_leave">مغادرة</string>
-    <string name="communities_member_count">%1$d عضو</string>
+    <plurals name="communities_member_count">
+        <item quantity="one">عضو واحد</item>
+        <item quantity="other">%1$d عضو</item>
+    </plurals>
     <string name="communities_create_title">إنشاء مجتمع</string>
     <string name="communities_create_name_label">الاسم</string>
     <string name="communities_create_name_placeholder">مثال: عشاق السفر</string>

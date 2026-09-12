@@ -2197,7 +2197,10 @@
     <string name="communities_join">Gabung</string>
     <string name="communities_joined">Bergabung</string>
     <string name="communities_leave">Keluar</string>
-    <string name="communities_member_count">%1$d anggota</string>
+    <plurals name="communities_member_count">
+        <item quantity="one">%1$d anggota</item>
+        <item quantity="other">%1$d anggota</item>
+    </plurals>
     <string name="communities_create_title">Buat komunitas</string>
     <string name="communities_create_name_label">Nama</string>
     <string name="communities_create_name_placeholder">mis. Pecinta Perjalanan</string>
