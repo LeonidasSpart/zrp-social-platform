@@ -2049,7 +2049,7 @@ export default function ProfilePage(
             </span>
 
             <ChevronRight
-              className="w-4 h-4 shrink-0 text-gray-400"
+              className="w-4 h-4 shrink-0 text-gray-400 rtl:-scale-x-100"
               aria-hidden="true"
             />
           </Link>
