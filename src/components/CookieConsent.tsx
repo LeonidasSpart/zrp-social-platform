@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CookieConsent() {
+  const { t } = useLanguage();
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
@@ -33,14 +35,14 @@ export default function CookieConsent() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zrp-deepBlack border-t border-gray-200 dark:border-gray-800 shadow-lg p-4 md:p-6">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="text-sm text-gray-700 dark:text-gray-300 text-center md:text-left">
+        <div className="text-sm text-gray-700 dark:text-gray-300 text-center md:text-start">
           <p>
-            We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.{" "}
+            {t("cookieConsent.message")}{" "}
             <Link
               href="/privacy"
               className="text-zrp-darkRed dark:text-zrp-red hover:underline"
             >
-              Learn more about our privacy policy
+              {t("cookieConsent.learnMore")}
             </Link>
             .
           </p>
@@ -50,13 +52,13 @@ export default function CookieConsent() {
             onClick={rejectCookies}
             className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
           >
-            Reject
+            {t("cookieConsent.reject")}
           </button>
           <button
             onClick={acceptCookies}
             className="px-4 py-2 text-sm bg-zrp-darkRed text-white rounded-lg hover:bg-zrp-red transition"
           >
-            Accept All
+            {t("cookieConsent.accept")}
           </button>
         </div>
       </div>
