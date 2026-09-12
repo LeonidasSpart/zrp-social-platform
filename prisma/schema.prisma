@@ -460,6 +460,9 @@ model User {
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
 
+  conversationClearances       ConversationClearance[] @relation("ConversationClearanceUser")
+  conversationClearancesOfMe   ConversationClearance[] @relation("ConversationClearanceOtherUser")
+
   reports          Report[] @relation("Reporter")
   reportsAgainstMe Report[] @relation("ReportTarget")
   appeals          Appeal[]
@@ -1083,6 +1086,30 @@ model Blocked {
   @@unique([blockerId, blockedId])
   @@index([blockerId])
   @@index([blockedId])
+}
+
+// "Delete conversation" on a 1:1 DM (DELETE /api/messages/conversation/
+// [userId]) used to hard-delete every Message row between the two users -
+// destroying the OTHER participant's copy of the conversation too, with
+// no consent, no undo, and UI copy ("Delete your conversation with
+// {name}") that only ever promised to affect the caller's own view. This
+// row makes that promise real: it marks everything up to clearedBefore as
+// hidden from userId's own view only. otherUserId's messages, and the
+// underlying Message rows themselves, are never touched - a message sent
+// after clearedBefore makes the conversation reappear normally.
+model ConversationClearance {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation("ConversationClearanceUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  otherUserId String
+  otherUser   User   @relation("ConversationClearanceOtherUser", fields: [otherUserId], references: [id], onDelete: Cascade)
+
+  clearedBefore DateTime @default(now())
+
+  @@unique([userId, otherUserId])
+  @@index([otherUserId])
 }
 
 model Report {
