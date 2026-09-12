@@ -1658,6 +1658,7 @@
     <string name="admin_ticket_delete_confirm">هل تريد حذف هذه التذكرة وجميع ردودها؟ لا يمكن التراجع عن هذا الإجراء.</string>
     <string name="admin_dash_verify_payments">التحقق من المدفوعات</string>
     <string name="admin_dash_process_withdrawals">معالجة عمليات السحب</string>
+    <string name="admin_dash_process_help_withdrawals">معالجة سحوبات HELP</string>
     <string name="admin_dash_review_upgrade_requests">مراجعة طلبات الترقية</string>
     <string name="admin_finance_requested">طُلب في %1$s</string>
     <string name="admin_plan_free">مجاني</string>
@@ -1682,6 +1683,11 @@
     <string name="admin_withdrawals_status_completed">مكتملة</string>
     <string name="admin_withdrawals_status_failed">فاشلة</string>
     <string name="admin_withdrawals_status_rejected">مرفوضة</string>
+    <string name="admin_help_withdrawals_title">سحوبات HELP</string>
+    <string name="admin_help_withdrawals_none">لا توجد سحوبات لحملات HELP لعرضها.</string>
+    <string name="admin_help_withdrawals_campaign">الحملة: %1$s</string>
+    <string name="admin_help_withdrawals_approve_confirm">هل تريد إرسال %1$s إلى محفظة @%2$s الآن من أجل \"%3$s\"؟ يتم التحويل على السلسلة ولا يمكن الرجوع عنه.</string>
+    <string name="admin_help_withdrawals_reject_confirm">هل تريد رفض عملية السحب هذه البالغة %1$s الخاصة بـ \"%2$s\"؟ سيعود المبلغ إلى الرصيد المتاح للحملة.</string>
     <string name="admin_upgrade_requests_title">طلبات الترقية</string>
     <string name="admin_upgrade_requests_none">لا توجد طلبات ترقية لعرضها.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>

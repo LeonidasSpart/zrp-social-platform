@@ -1658,6 +1658,7 @@
     <string name="admin_ticket_delete_confirm">Të fshihet kjo kërkesë dhe të gjitha përgjigjet e saj? Ky veprim nuk mund të zhbëhet.</string>
     <string name="admin_dash_verify_payments">Verifiko pagesat</string>
     <string name="admin_dash_process_withdrawals">Përpuno tërheqjet</string>
+    <string name="admin_dash_process_help_withdrawals">Përpuno tërheqjet HELP</string>
     <string name="admin_dash_review_upgrade_requests">Shqyrto kërkesat për përmirësim</string>
     <string name="admin_finance_requested">Kërkuar më %1$s</string>
     <string name="admin_plan_free">Falas</string>
@@ -1682,6 +1683,11 @@
     <string name="admin_withdrawals_status_completed">E përfunduar</string>
     <string name="admin_withdrawals_status_failed">E dështuar</string>
     <string name="admin_withdrawals_status_rejected">E refuzuar</string>
+    <string name="admin_help_withdrawals_title">Tërheqjet HELP</string>
+    <string name="admin_help_withdrawals_none">Nuk ka tërheqje fushatash HELP për të shfaqur.</string>
+    <string name="admin_help_withdrawals_campaign">Fushata: %1$s</string>
+    <string name="admin_help_withdrawals_approve_confirm">Të dërgohen %1$s në portofolin e @%2$s tani për \"%3$s\"? Transferta kryhet në blockchain dhe nuk mund të kthehet.</string>
+    <string name="admin_help_withdrawals_reject_confirm">Ta refuzosh këtë tërheqje prej %1$s për \"%2$s\"? Shuma i kthehet bilancit të disponueshëm të fushatës.</string>
     <string name="admin_upgrade_requests_title">Kërkesat për përmirësim</string>
     <string name="admin_upgrade_requests_none">Nuk ka kërkesa për përmirësim për të shfaqur.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>

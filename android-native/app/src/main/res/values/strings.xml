@@ -1674,6 +1674,7 @@
     <!-- Admin: the three financial queues (src/app/admin/payments, src/app/admin/upgrade-requests, plus the creator withdrawal routes the web admin has no page for yet) and per-user plan management. All full-ADMIN-only server-side (requireAdmin), same bar as Support Tickets above - each of these either moves real money or grants paid access, so every one of them confirms first. -->
     <string name="admin_dash_verify_payments">Verify Payments</string>
     <string name="admin_dash_process_withdrawals">Process Withdrawals</string>
+    <string name="admin_dash_process_help_withdrawals">Process HELP Withdrawals</string>
     <string name="admin_dash_review_upgrade_requests">Review Upgrade Requests</string>
     <string name="admin_finance_requested">Requested %1$s</string>
     <string name="admin_plan_free">Free</string>
@@ -1698,6 +1699,11 @@
     <string name="admin_withdrawals_status_completed">Completed</string>
     <string name="admin_withdrawals_status_failed">Failed</string>
     <string name="admin_withdrawals_status_rejected">Rejected</string>
+    <string name="admin_help_withdrawals_title">HELP Withdrawals</string>
+    <string name="admin_help_withdrawals_none">No HELP campaign withdrawals to show.</string>
+    <string name="admin_help_withdrawals_campaign">Campaign: %1$s</string>
+    <string name="admin_help_withdrawals_approve_confirm">Send %1$s to @%2$s\'s wallet now for \"%3$s\"? The transfer goes on-chain and can\'t be reversed.</string>
+    <string name="admin_help_withdrawals_reject_confirm">Reject this %1$s withdrawal for \"%2$s\"? The amount goes back to the campaign\'s available balance.</string>
     <string name="admin_upgrade_requests_title">Upgrade Requests</string>
     <string name="admin_upgrade_requests_none">No upgrade requests to show.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>

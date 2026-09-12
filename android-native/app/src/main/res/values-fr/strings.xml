@@ -1658,6 +1658,7 @@
     <string name="admin_ticket_delete_confirm">Supprimer cette demande et toutes ses réponses ? Cette action est irréversible.</string>
     <string name="admin_dash_verify_payments">Vérifier les paiements</string>
     <string name="admin_dash_process_withdrawals">Traiter les retraits</string>
+    <string name="admin_dash_process_help_withdrawals">Traiter les retraits HELP</string>
     <string name="admin_dash_review_upgrade_requests">Examiner les demandes de mise à niveau</string>
     <string name="admin_finance_requested">Demandé le %1$s</string>
     <string name="admin_plan_free">Gratuit</string>
@@ -1682,6 +1683,11 @@
     <string name="admin_withdrawals_status_completed">Terminé</string>
     <string name="admin_withdrawals_status_failed">Échoué</string>
     <string name="admin_withdrawals_status_rejected">Refusé</string>
+    <string name="admin_help_withdrawals_title">Retraits HELP</string>
+    <string name="admin_help_withdrawals_none">Aucun retrait de campagne HELP à afficher.</string>
+    <string name="admin_help_withdrawals_campaign">Campagne : %1$s</string>
+    <string name="admin_help_withdrawals_approve_confirm">Envoyer %1$s au portefeuille de @%2$s maintenant pour « %3$s »\u00a0? Le transfert est effectué on-chain et ne peut pas être annulé.</string>
+    <string name="admin_help_withdrawals_reject_confirm">Refuser ce retrait de %1$s pour « %2$s »\u00a0? Le montant est recrédité sur le solde disponible de la campagne.</string>
     <string name="admin_upgrade_requests_title">Demandes de mise à niveau</string>
     <string name="admin_upgrade_requests_none">Aucune demande de mise à niveau à afficher.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>
