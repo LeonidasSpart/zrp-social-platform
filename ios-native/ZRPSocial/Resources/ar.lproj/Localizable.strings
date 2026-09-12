@@ -235,9 +235,9 @@
 "messages.noMessagesYet" = "لا رسائل بعد.";
 "messages.startConversation" = "ابدأ محادثة مع شخص ما!";
 "messages.you" = "أنت: {msg}";
-"messages.deleteConversation" = "حذف محادثة";
+"messages.deleteConversation" = "حذف المحادثة";
 "messages.deleteConfirm" = "حذف هذه المحادثة؟ سيتم حذف جميع الرسائل.";
-"messages.errDeleteFailed" = "تعذر to حذف محادثة";
+"messages.errDeleteFailed" = "تعذر حذف المحادثة";
 "chat.typing" = "يكتب...";
 "chat.contactProfile" = "الملف الشخصي";
 "chat.contactMore" = "المزيد";

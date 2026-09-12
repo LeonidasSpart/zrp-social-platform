@@ -235,9 +235,9 @@
 "messages.noMessagesYet" = "Нет сообщения пока.";
 "messages.startConversation" = "Начните разговор с кем-нибудь!";
 "messages.you" = "вы: {msg}";
-"messages.deleteConversation" = "удалить диалог";
+"messages.deleteConversation" = "Удалить переписку";
 "messages.deleteConfirm" = "Удалить этот диалог? Все сообщения будут удалены.";
-"messages.errDeleteFailed" = "Не удалось в удалить диалог";
+"messages.errDeleteFailed" = "Не удалось удалить переписку";
 "chat.typing" = "Печатает...";
 "chat.contactProfile" = "Профиль";
 "chat.contactMore" = "ещё";

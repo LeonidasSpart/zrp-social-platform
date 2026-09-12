@@ -235,9 +235,9 @@
 "messages.noMessagesYet" = "无 消息 还.";
 "messages.startConversation" = "开始和某人聊天吧！";
 "messages.you" = "你: {msg}";
-"messages.deleteConversation" = "删除 对话";
+"messages.deleteConversation" = "删除对话";
 "messages.deleteConfirm" = "删除此对话？所有消息都将被删除。";
-"messages.errDeleteFailed" = "失败 to 删除 对话";
+"messages.errDeleteFailed" = "删除对话失败";
 "chat.typing" = "正在输入...";
 "chat.contactProfile" = "个人资料";
 "chat.contactMore" = "更多";

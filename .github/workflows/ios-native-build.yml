@@ -11,6 +11,14 @@ name: Native iOS App Build
 # android-release.yml - a change here can never affect an Android build,
 # and an Android change never triggers this.
 #
+# The filters DO include src/lib/translations.ts, which is not iOS code
+# but is the source this app's .strings files are generated from. Without
+# it the localization gate below could never fire on the only change that
+# can break it: main carried stale ru/ar/zh strings - including a literal
+# English "to" inside an Arabic sentence - for days, with a red gate that
+# no trigger could reach. A gate that cannot observe its own input is not
+# a gate.
+#
 # Runs on GitHub's macOS infrastructure because Xcode is the only thing
 # that can compile an iOS app, and it is not available in every
 # development environment. The static checks in the first job run
@@ -21,11 +29,13 @@ on:
   pull_request:
     paths:
       - "ios-native/**"
+      - "src/lib/translations.ts"
       - ".github/workflows/ios-native-build.yml"
   push:
     branches: [main]
     paths:
       - "ios-native/**"
+      - "src/lib/translations.ts"
       - ".github/workflows/ios-native-build.yml"
 
 permissions:
