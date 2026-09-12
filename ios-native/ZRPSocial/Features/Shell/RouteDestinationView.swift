@@ -27,6 +27,8 @@ struct RouteDestinationView: View {
             MessagesListView()
         case .conversation(let partner):
             ConversationView(partner: partner, viewerId: session.currentUser?.id)
+        case .groupConversation(let id):
+            GroupConversationView(conversationId: id, viewerId: session.currentUser?.id)
         case .notifications:
             NotificationsView()
         case .search:
@@ -129,6 +131,24 @@ struct RouteDestinationView: View {
             PlayLeaderboardView()
         case .creatorStudio:
             CreatorStudioView()
+        case .charityTransparency:
+            CharityTransparencyView()
+        case .moderationTransparency:
+            ModerationTransparencyView()
+        case .ambassadors:
+            AmbassadorsView()
+        case .ambassadorApply:
+            AmbassadorApplyView()
+        case .ambassadorDashboard:
+            AmbassadorDashboardView()
+        case .journalistDashboard:
+            JournalistDashboardView()
+        case .journalistArticle(let id, let canSubmit):
+            JournalistArticleEditorView(articleId: id, canSubmitForReview: canSubmit)
+        case .team:
+            TeamView()
+        case .apiKeys:
+            ApiKeysView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

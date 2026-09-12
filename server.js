@@ -566,6 +566,41 @@ app.prepare().then(async () => {
           select: { name: true, username: true },
         });
         if (!caller) return;
+
+        // Nobody is listening: tell the caller now instead of leaving
+        // them ringing.
+        //
+        // `io.to(receiverId).emit(...)` into an empty room succeeds
+        // silently - the event goes nowhere and nothing ever answers.
+        // The caller's UI sets state "calling" and has no timeout of any
+        // kind (src/app/messages/[username]/page.tsx), so before this it
+        // rang until the person gave up and reloaded. That was true for
+        // ANY unreachable recipient - a logged-out user, a backgrounded
+        // app, a dropped connection - not only for clients that cannot
+        // answer.
+        //
+        // `call-rejected` is the existing event every current client
+        // already handles, so this releases them with no client change.
+        // `reason` is additive: today's clients ignore it, and a client
+        // that wants to distinguish "declined" from "never reachable"
+        // can read it without a protocol change. The web string still
+        // says "Call was rejected", which is imprecise for this case -
+        // wording that needs a real translation pass across 11 locales,
+        // deliberately not machine-invented here.
+        let receiverOnline = true;
+        try {
+          receiverOnline = await presence.isOnline(receiverId);
+        } catch (err) {
+          // Presence is a convenience, not authority. If its store is
+          // unreachable, fall through and ring: a call that might work
+          // beats refusing one that would have.
+          console.error("call-user presence check failed:", err);
+        }
+        if (!receiverOnline) {
+          socket.emit("call-rejected", { reason: "unavailable" });
+          return;
+        }
+
         calls.start(userId, receiverId);
         console.log(`📞 call-user from ${userId} to ${receiverId}`);
         io.to(receiverId).emit("incoming-call", {

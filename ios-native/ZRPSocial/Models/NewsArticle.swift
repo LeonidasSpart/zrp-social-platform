@@ -41,6 +41,10 @@ enum NewsCategory: String, Decodable, CaseIterable, Identifiable {
     case sports = "SPORTS"
     case culture = "CULTURE"
     case community = "COMMUNITY"
+    /// Present in the Prisma enum from the start; this app simply
+    /// never listed it, so a GAMING article decoded as `unknown` and
+    /// rendered with no category label at all.
+    case gaming = "GAMING"
     /// Anything this build does not know about. Never sent as a filter.
     case unknown
 
@@ -65,6 +69,7 @@ enum NewsCategory: String, Decodable, CaseIterable, Identifiable {
         case .sports: return .newsCategorySports
         case .culture: return .newsCategoryCulture
         case .community: return .newsCategoryCommunity
+        case .gaming: return .newsCategoryGaming
         case .unknown: return nil
         }
     }
