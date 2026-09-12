@@ -458,6 +458,20 @@ rule, deliberately: a badge is decoration, a disbursement is a financial
 record, and dropping one from a public ledger because of an unknown
 category would be worse than an untranslated word.
 
+### ZRP Global Ambassadors
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Movement page + stats | `GET /api/ambassadors/stats` — **public** | ✅ | ⬜ | ✅ the two figures the route actually publishes and no third. Its own comment says neither is estimated and that ZRP has no baseline for an honest growth number, so none is invented to fill the row | IMPLEMENTED |
+| Country explorer | `GET /api/ambassadors/countries?lang=` — **public**, all 250 territories | ✅ interactive world map | ⬜ | ✅ searchable, region-filterable list of the same dataset. **Not a map** — a pannable vector map needs either a dependency or a hand-rolled projection, and neither tells anyone something the list does not; it is never labelled "map" in the UI. Countries with **zero** ambassadors stay in the list, as the route returns them, so "be the first in Chad" is reachable instead of Chad being absent. `communities`/`activeMembers` are real zeros with no data behind them yet and are **not** displayed — a row of zeros labelled "Active Members" reads as a measurement, not an absence | IMPLEMENTED |
+| Apply | `POST /api/ambassadors/apply` | ✅ | ⬜ | ✅ country, city, languages, https-only community links, motivation, community description, audience size. Creates a **PENDING** row and nothing else — no badge, no level, no privilege; approval is an admin action on a separate route, and this screen never congratulates anyone on becoming something they have not become | IMPLEMENTED |
+| Code of Conduct gate | same route, server-stamped version + timestamp | ✅ | ⬜ | ✅ the toggle mirrors a rule `validateApplication` enforces server-side; the version and acceptance time are the server's own and are never sent by the client, so there is nothing here to forge. The Code itself opens on the web rather than being paraphrased in-app | IMPLEMENTED |
+| Dashboard | `GET /api/ambassadors/me` | ✅ | ⬜ | ✅ one screen, five server-decided states: never applied, pending, rejected (with the admin's reason, so a re-application can change something), suspended, approved. A null profile is the route's real answer and renders as an honest empty state, not a fabricated profile | IMPLEMENTED |
+| Invitation link | `invitationCode` on the profile | ✅ | ⬜ | ✅ `https://zrp.one/signup?ref=<code>`, copyable. **Nothing downstream credits a signup back to the referring ambassador yet** — there is no referral system in ZRP to hook into, and the web dashboard has the same gap. Shown because the code is real, not because it is wired | IMPLEMENTED |
+| Re-accept an updated Code | `POST /api/ambassadors/accept-code` | ✅ | ⬜ | ✅ prompts when the stored version differs from the current one. The route takes **no body at all** — version and timestamp are written server-side — so a stale constant in this app can prompt unnecessarily but can never record a false acceptance | IMPLEMENTED |
+
+Android has no ambassador surface at all; iOS is now ahead of it here.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |

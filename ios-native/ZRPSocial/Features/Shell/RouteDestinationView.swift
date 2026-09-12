@@ -135,6 +135,12 @@ struct RouteDestinationView: View {
             CharityTransparencyView()
         case .moderationTransparency:
             ModerationTransparencyView()
+        case .ambassadors:
+            AmbassadorsView()
+        case .ambassadorApply:
+            AmbassadorApplyView()
+        case .ambassadorDashboard:
+            AmbassadorDashboardView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

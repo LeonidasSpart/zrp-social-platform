@@ -96,6 +96,11 @@ enum Route: Hashable {
     case charityTransparency
     /// The moderation half of `/transparency`, equally public.
     case moderationTransparency
+    /// ZRP Global Ambassadors: the movement page, the application form,
+    /// and the holder's own dashboard.
+    case ambassadors
+    case ambassadorApply
+    case ambassadorDashboard
 }
 
 /// Owns the navigation stack's path.

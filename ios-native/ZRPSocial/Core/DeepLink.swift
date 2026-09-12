@@ -159,6 +159,17 @@ enum DeepLink {
             // is titled after, so that is where the bare link lands.
             return DeepLinkTarget(.home, .moderationTransparency)
 
+        case "ambassadors":
+            // /ambassadors, /ambassadors/apply and
+            // /ambassadors/dashboard all exist on the web and all three
+            // now exist here.
+            switch second {
+            case "apply": return DeepLinkTarget(.home, .ambassadorApply)
+            case "dashboard": return DeepLinkTarget(.home, .ambassadorDashboard)
+            case nil: return DeepLinkTarget(.home, .ambassadors)
+            default: return nil
+            }
+
         case "creator":
             // Only /creator/dashboard exists on the web, and it opens on
             // the earnings tab this app does not have. The link lands on

@@ -126,6 +126,14 @@ struct SettingsView: View {
                         Image(systemName: "checkmark.shield")
                     }
                 }
+
+                Button { navigator.push(.ambassadors) } label: {
+                    Label {
+                        Text(.ambassadorsNavLabel)
+                    } icon: {
+                        Image(systemName: "globe")
+                    }
+                }
             }
 
             Section {
