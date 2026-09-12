@@ -267,7 +267,7 @@ called and the real response being handled.
 | Notification tap-through | — | ✅ | ✅ | ✅ like/comment/repost → post, follow → profile, message → thread, appeal outcome → Appeals, listing decision → My listings (the payload carries no listing id, so it leads to where the outcome is visible rather than guessing at one) | IMPLEMENTED |
 | Unrecognised notification types | — | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
-| **Device push** | `POST/DELETE /api/push/fcm` now accepts `platform: "ios"` and includes a deep-link `data.url` in every push | n/a | ✅ FCM | ❌ backend no longer blocks it — needs an APNs key on the Firebase project and a `GoogleService-Info.plist`, both external/console actions | **BLOCKED — [B3](#b3-ios-device-push)** |
+| **Device push** | `POST/DELETE /api/push/fcm` accepts `platform: "ios"` and includes a deep-link `data.url`; delivery goes through `firebase-admin/messaging` | n/a | ✅ FCM | ❌ blocked on an APNs key, a `GoogleService-Info.plist`, **and an unresolved dependency decision** — an FCM token on iOS can only come from the Firebase iOS SDK, which this app's zero-dependency architecture excludes. The alternative is a direct APNs sender server-side, which does not exist | **BLOCKED — [B3](#b3-ios-device-push)** |
 
 ### Music
 
@@ -1033,19 +1033,34 @@ right screen instead of just opening the app - this reaches Android today
 too, not only a future iOS client, since Android's `notification`-only
 payload never carried a destination either.
 
-Two things are still needed for delivery to iOS specifically, and remain
-external/unverifiable from this environment:
+Three things are still needed, and the third is a DECISION, not a
+credential. An earlier version of this note listed only the first two and
+said "an iOS client can register a token… with no further backend
+change". That was true about the backend and quietly skipped the hard
+part: **how an iOS client would obtain an FCM token at all.**
 
 1. An **APNs key uploaded to the Firebase project** — a console action, not
    a code change.
 2. A **`GoogleService-Info.plist`** for the iOS app. Only
    `android-native/app/google-services.json` exists in this repo; the iOS
    counterpart has never been generated.
+3. **A resolution to the dependency conflict.** `src/lib/fcm.ts` sends
+   through `firebase-admin/messaging`, so delivery to a device requires an
+   **FCM registration token**. On iOS that token is produced by the
+   Firebase iOS SDK — there is no way to obtain one from a raw APNs
+   device token on the client. So iOS push needs either:
+   - the **Firebase iOS SDK**, which would be this app's first
+     third-party dependency and a large one (the same objection that
+     keeps WebRTC out, see the calling row); or
+   - a **direct APNs sender added server-side**, letting iOS register its
+     raw APNs device token instead. `grep -rl "apns" src/lib src/app/api`
+     returns nothing today, so this path does not exist yet — it is real
+     backend work, not configuration.
 
-Once both exist, an iOS client can register a token via the same
-`POST /api/push/fcm` (with `platform: "ios"`) and receive real FCM-routed
-pushes with no further backend change. **No fake local notifications will
-stand in for this.**
+Until item 3 is decided, items 1 and 2 are not sufficient on their own.
+**No fake local notifications will stand in for this**, and no
+"registration" that cannot produce a deliverable token will be added to
+make the screen look finished.
 
 ---
 
