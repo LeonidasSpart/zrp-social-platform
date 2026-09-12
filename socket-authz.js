@@ -265,78 +265,219 @@ async function authorizeConversationDeleteRelay(prisma, userId, payload) {
  * (call-user) before anyone can accept, reject or end it, and only the
  * two parties to that call can do so.
  *
- * In-memory and per-instance, like the rest of server.js's socket
- * state - see the multi-instance note in the security report.
+ * ⚠️ MULTI-INSTANCE: the Socket.IO Redis adapter (server.js) distributes
+ * *events* across Railway replicas - it does not distribute this
+ * registry's application state. Without a shared store, a call started
+ * on the replica the caller is connected to is invisible to the
+ * accept/reject/end handler running on whichever replica the OTHER
+ * party is connected to - `incoming-call` would still arrive (the
+ * adapter delivers that fine), but tapping Accept would silently no-op,
+ * because that replica's own in-memory Map never saw `start()`. This is
+ * invisible on a single replica (today's actual deployment - the two
+ * parties are always handled by the same process) and would only
+ * surface the moment a second replica exists.
+ *
+ * Passing `redisClient` (a connected node-redis v4 client, reused from
+ * presence's own connection - see server.js) makes call state
+ * authoritative in Redis instead of process memory, so any replica can
+ * correctly accept/reject/end a call regardless of which replica placed
+ * it. Without one, this falls back to the original in-memory Map
+ * unchanged - same behavior as before, correct for the single-replica
+ * deployment that exists today, and what every existing synchronous
+ * unit test below still exercises.
+ *
+ * Redis design:
+ *  - key: `call:<sorted userId pair>` (deterministic from the two
+ *    parties, exactly like the in-memory Map's own key(a,b))
+ *  - value: JSON `{callerId, receiverId, state, updatedAt}`
+ *  - TTL: PX on every write (pendingTtlMs while ringing, activeTtlMs
+ *    once accepted) - Redis expires stale entries on its own, so there
+ *    is no separate sweep() to run (sweep() is kept as a no-op so
+ *    server.js's periodic call doesn't need to know which mode is active)
+ *  - atomicity: accept/reject read-check-write as one Lua script, so two
+ *    concurrent accept calls (or an accept racing a reject) can't both
+ *    win - only one caller ever gets `true` back, exactly like the
+ *    in-memory version's single-threaded Map access already guaranteed
+ *  - end: a plain DEL - idempotent by construction (a second end() on an
+ *    already-deleted key correctly reports false, no different from the
+ *    in-memory version)
+ *  - dropUser (on disconnect): SCAN (never KEYS - see src/lib/redis.ts's
+ *    own comment on why) over the small `call:*` keyspace, since there
+ *    is no live-call volume where that's expensive, and a secondary
+ *    per-user index would itself go stale the moment a key expires via
+ *    TTL without an explicit end()
  */
 function createCallRegistry(options) {
-  const pendingTtlMs = (options && options.pendingTtlMs) || 2 * 60 * 1000;
-  const activeTtlMs = (options && options.activeTtlMs) || 6 * 60 * 60 * 1000;
-  const calls = new Map(); // key -> { callerId, receiverId, state, updatedAt }
+  const opts = options || {};
+  const pendingTtlMs = opts.pendingTtlMs || 2 * 60 * 1000;
+  const activeTtlMs = opts.activeTtlMs || 6 * 60 * 60 * 1000;
+  const redis = opts.redisClient || null;
 
   function key(a, b) {
     return a < b ? `${a}|${b}` : `${b}|${a}`;
   }
 
-  function get(a, b) {
-    const entry = calls.get(key(a, b));
-    if (!entry) return null;
-    const ttl = entry.state === "pending" ? pendingTtlMs : activeTtlMs;
-    if (Date.now() - entry.updatedAt > ttl) {
-      calls.delete(key(a, b));
-      return null;
+  if (!redis) {
+    const calls = new Map(); // key -> { callerId, receiverId, state, updatedAt }
+
+    function get(a, b) {
+      const entry = calls.get(key(a, b));
+      if (!entry) return null;
+      const ttl = entry.state === "pending" ? pendingTtlMs : activeTtlMs;
+      if (Date.now() - entry.updatedAt > ttl) {
+        calls.delete(key(a, b));
+        return null;
+      }
+      return entry;
     }
-    return entry;
+
+    return {
+      /** call-user: record that callerId is ringing receiverId. */
+      start(callerId, receiverId) {
+        calls.set(key(callerId, receiverId), {
+          callerId,
+          receiverId,
+          state: "pending",
+          updatedAt: Date.now(),
+        });
+      },
+      /** accept-call by `userId` of a call from `callerId`. */
+      accept(userId, callerId) {
+        const entry = get(userId, callerId);
+        if (!entry || entry.state !== "pending") return false;
+        if (entry.callerId !== callerId || entry.receiverId !== userId) return false;
+        entry.state = "active";
+        entry.updatedAt = Date.now();
+        return true;
+      },
+      /** reject-call by `userId` of a pending call from `callerId`. */
+      reject(userId, callerId) {
+        const entry = get(userId, callerId);
+        if (!entry || entry.state !== "pending") return false;
+        if (entry.callerId !== callerId || entry.receiverId !== userId) return false;
+        calls.delete(key(userId, callerId));
+        return true;
+      },
+      /** end-call by either party of a pending or active call. */
+      end(userId, otherId) {
+        const entry = get(userId, otherId);
+        if (!entry) return false;
+        calls.delete(key(userId, otherId));
+        return true;
+      },
+      /** Drop every call involving a user (on disconnect). */
+      dropUser(userId) {
+        calls.forEach((entry, k) => {
+          if (entry.callerId === userId || entry.receiverId === userId) calls.delete(k);
+        });
+      },
+      sweep() {
+        const now = Date.now();
+        calls.forEach((entry, k) => {
+          const ttl = entry.state === "pending" ? pendingTtlMs : activeTtlMs;
+          if (now - entry.updatedAt > ttl) calls.delete(k);
+        });
+      },
+      size() {
+        return calls.size;
+      },
+    };
+  }
+
+  // ─── Redis-backed (multi-instance safe) ──────────────────────────
+  const KEY_PREFIX = "call:";
+  const redisKey = (a, b) => KEY_PREFIX + key(a, b);
+
+  // Compare-and-swap: only transitions a call that is still pending AND
+  // belongs to the exact caller/receiver pair named. Without this being
+  // one atomic script, a GET-then-SET from this client has the same
+  // race two concurrent callers of accept() would hit against a plain
+  // Map - one Lua eval is how Redis gives that back.
+  const ACCEPT_SCRIPT = `
+local raw = redis.call("get", KEYS[1])
+if not raw then return 0 end
+local entry = cjson.decode(raw)
+if entry.state ~= "pending" then return 0 end
+if entry.callerId ~= ARGV[1] or entry.receiverId ~= ARGV[2] then return 0 end
+entry.state = "active"
+entry.updatedAt = tonumber(ARGV[3])
+redis.call("set", KEYS[1], cjson.encode(entry), "PX", ARGV[4])
+return 1
+`;
+  const REJECT_SCRIPT = `
+local raw = redis.call("get", KEYS[1])
+if not raw then return 0 end
+local entry = cjson.decode(raw)
+if entry.state ~= "pending" then return 0 end
+if entry.callerId ~= ARGV[1] or entry.receiverId ~= ARGV[2] then return 0 end
+redis.call("del", KEYS[1])
+return 1
+`;
+
+  async function scanCallKeys() {
+    const keys = [];
+    let cursor = "0";
+    do {
+      const res = await redis.scan(cursor, { MATCH: `${KEY_PREFIX}*`, COUNT: 100 });
+      // node-redis v4 returns `cursor` as a NUMBER, not the string this
+      // loop starts from - comparing `0 !== "0"` is always true, which
+      // made this loop forever. Normalizing to a string on every
+      // iteration is what actually lets the loop terminate.
+      cursor = String(res.cursor);
+      keys.push(...res.keys);
+    } while (cursor !== "0");
+    return keys;
   }
 
   return {
-    /** call-user: record that callerId is ringing receiverId. */
-    start(callerId, receiverId) {
-      calls.set(key(callerId, receiverId), {
+    async start(callerId, receiverId) {
+      const entry = JSON.stringify({
         callerId,
         receiverId,
         state: "pending",
         updatedAt: Date.now(),
       });
+      await redis.set(redisKey(callerId, receiverId), entry, { PX: pendingTtlMs });
     },
-    /** accept-call by `userId` of a call from `callerId`. */
-    accept(userId, callerId) {
-      const entry = get(userId, callerId);
-      if (!entry || entry.state !== "pending") return false;
-      if (entry.callerId !== callerId || entry.receiverId !== userId) return false;
-      entry.state = "active";
-      entry.updatedAt = Date.now();
-      return true;
-    },
-    /** reject-call by `userId` of a pending call from `callerId`. */
-    reject(userId, callerId) {
-      const entry = get(userId, callerId);
-      if (!entry || entry.state !== "pending") return false;
-      if (entry.callerId !== callerId || entry.receiverId !== userId) return false;
-      calls.delete(key(userId, callerId));
-      return true;
-    },
-    /** end-call by either party of a pending or active call. */
-    end(userId, otherId) {
-      const entry = get(userId, otherId);
-      if (!entry) return false;
-      calls.delete(key(userId, otherId));
-      return true;
-    },
-    /** Drop every call involving a user (on disconnect). */
-    dropUser(userId) {
-      calls.forEach((entry, k) => {
-        if (entry.callerId === userId || entry.receiverId === userId) calls.delete(k);
+    async accept(userId, callerId) {
+      const result = await redis.eval(ACCEPT_SCRIPT, {
+        keys: [redisKey(userId, callerId)],
+        arguments: [callerId, userId, String(Date.now()), String(activeTtlMs)],
       });
+      return result === 1;
     },
-    sweep() {
-      const now = Date.now();
-      calls.forEach((entry, k) => {
-        const ttl = entry.state === "pending" ? pendingTtlMs : activeTtlMs;
-        if (now - entry.updatedAt > ttl) calls.delete(k);
+    async reject(userId, callerId) {
+      const result = await redis.eval(REJECT_SCRIPT, {
+        keys: [redisKey(userId, callerId)],
+        arguments: [callerId, userId],
       });
+      return result === 1;
     },
-    size() {
-      return calls.size;
+    async end(userId, otherId) {
+      const deleted = await redis.del(redisKey(userId, otherId));
+      return deleted > 0;
+    },
+    async dropUser(userId) {
+      const keys = await scanCallKeys();
+      if (keys.length === 0) return;
+      const toDelete = [];
+      for (const k of keys) {
+        const raw = await redis.get(k);
+        if (!raw) continue;
+        try {
+          const entry = JSON.parse(raw);
+          if (entry.callerId === userId || entry.receiverId === userId) toDelete.push(k);
+        } catch {
+          // Malformed entry - not this registry's own data; leave it alone.
+        }
+      }
+      if (toDelete.length > 0) await redis.del(toDelete);
+    },
+    // No-op: every write above carries its own PX TTL, so Redis expires
+    // a stale call on its own without a periodic sweep.
+    sweep() {},
+    async size() {
+      return (await scanCallKeys()).length;
     },
   };
 }

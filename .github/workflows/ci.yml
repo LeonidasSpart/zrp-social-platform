@@ -163,9 +163,23 @@ jobs:
         # the escape codes are what broke the first real run of this
         # workflow: the assertion's `^ *Tests` anchor never matched
         # `\e[2m      Tests`, so it read zero and failed a green suite.
+        #
+        # `set -o pipefail` is made explicit here rather than relied on
+        # as GitHub Actions' bash default: it IS the documented default
+        # for the `run:` shell today, but this step's own exit code is
+        # what stands between a real vitest crash and a false green, so
+        # that guarantee belongs in this file, not in an external
+        # platform default this workflow doesn't control. Without it,
+        # `vitest run | tee ...` would take `tee`'s exit code (almost
+        # always 0) instead of vitest's, so a vitest crash (a config
+        # error, an unhandled rejection, a segfault - not just a normal
+        # test failure, which vitest's own exit code already covers
+        # either way) would still show a green step.
         env:
           NO_COLOR: "1"
-        run: npx vitest run --reporter=verbose 2>&1 | tee vitest-output.txt
+        run: |
+          set -o pipefail
+          npx vitest run --reporter=verbose 2>&1 | tee vitest-output.txt
 
       # The point of the service containers above is that the integration
       # suites stop being skipped. If a future change reintroduces the
