@@ -1954,6 +1954,22 @@ enum L10nKey: String, CaseIterable {
     case iosCallDismiss = "ios.call.dismiss"
     /// en: "Someone"
     case iosCallUnknownCaller = "ios.call.unknownCaller"
+    /// en: "Group"
+    case iosGroupUntitled = "ios.group.untitled"
+    /// en: "No messages yet"
+    case iosGroupNoMessages = "ios.group.noMessages"
+    /// en: "{name}: {message}"
+    case iosGroupPreview = "ios.group.preview"
+    /// en: "Members"
+    case iosGroupMembers = "ios.group.members"
+    /// en: "Leave group"
+    case iosGroupLeave = "ios.group.leave"
+    /// en: "You'll stop receiving messages from this group."
+    case iosGroupLeaveConfirm = "ios.group.leaveConfirm"
+    /// en: "Owner"
+    case iosGroupOwner = "ios.group.owner"
+    /// en: "Group info"
+    case iosGroupInfo = "ios.group.info"
 }
 
 extension L10nKey {

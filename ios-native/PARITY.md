@@ -404,6 +404,31 @@ at random among eligible campaigns, so refetching on pull-to-refresh would
 swap the ad under a reader mid-scroll and bill a second impression for
 what is, to them, the same slot. The website fetches once on mount too.
 
+
+### Group conversations
+
+| Feature | Backend | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Group inbox | `GET /api/conversations` → `{id,name,avatarUrl,participantCount,lastMessage,unreadCount}[]` | ✅ | ✅ | ✅ merged with 1:1 into one list sorted by last activity — `GET /api/messages` filters on `conversationId IS NULL` and returns direct threads only, so an inbox that shows both must ask both routes | IMPLEMENTED |
+| Group thread | `GET /api/conversations/{id}/messages` (`{items,nextCursor}`, born paginated) | ✅ | ✅ | ✅ with "Load more", the same merge-not-assign refresh as the 1:1 thread | IMPLEMENTED |
+| Send to a group | `POST /api/conversations/{id}/messages` | ✅ | ✅ | ✅ the route's own refusals (empty, too long, media not from ZRP storage) shown as written | IMPLEMENTED |
+| Realtime group delivery | `join-conversation` → room `group:{id}` → `receive-group-message` | ✅ | ✅ | ✅ joins the room on open and leaves on close. **Joining is required** — group relays go to a room, not to a user's own room, so without it the thread would silently degrade to polling | IMPLEMENTED |
+| Group members | `GET /api/conversations/{id}` | ✅ | ✅ | ✅ member list with the OWNER marked | IMPLEMENTED |
+| Leave a group | `DELETE /api/conversations/{id}/participants/{userId}` | ✅ | ✅ | ✅ removing yourself. Removing **someone else** is the same route but OWNER-only, and is not offered — see below | IMPLEMENTED |
+| Create a group | `POST /api/conversations` | ✅ | ✅ | ⬜ the repository method exists and is exercised by nothing yet; a composer needs member search, which is its own screen | MISSING |
+| Rename / re-avatar a group | `PATCH /api/conversations/{id}` — OWNER only | ✅ | ✅ | ⬜ | MISSING |
+| Add / remove members | `POST`/`DELETE .../participants` — OWNER only | ✅ | ✅ | ⬜ | MISSING |
+| Reactions / replies / edit in a group | — | ⬜ | ⬜ | ⬜ **no backend for it**: `GROUP_MESSAGE_INCLUDE` attaches only `sender`, and no route acts on a group message beyond deleting your own. Absent on every platform, not an iOS gap | n/a |
+
+The Messages badge is fixed by the inbox, not by badge code.
+`GET /api/messages/unread` returns `directCount + groupCount`; iOS read
+that while its inbox showed only direct threads, so a group message
+raised a badge the person could never clear. Opening a group thread
+advances their `lastReadAt` server-side, which is what makes the count
+fall — and the list refreshes the badge on appear, because the tab only
+refetched it when the Messages tab was *selected* and popping back from a
+thread does not change tabs.
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |

@@ -23,6 +23,10 @@ enum Route: Hashable {
     case postQuotes(postId: String)
     case messages
     case conversation(partner: PostAuthor)
+    /// A group thread. Carries only the id: unlike a 1:1 conversation,
+    /// which is identified by a partner the caller already holds, a
+    /// group's name and members come from the route.
+    case groupConversation(id: String)
     case notifications
     case search
     case music

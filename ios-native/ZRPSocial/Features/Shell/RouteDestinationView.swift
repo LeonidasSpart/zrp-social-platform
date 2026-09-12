@@ -27,6 +27,8 @@ struct RouteDestinationView: View {
             MessagesListView()
         case .conversation(let partner):
             ConversationView(partner: partner, viewerId: session.currentUser?.id)
+        case .groupConversation(let id):
+            GroupConversationView(conversationId: id, viewerId: session.currentUser?.id)
         case .notifications:
             NotificationsView()
         case .search:

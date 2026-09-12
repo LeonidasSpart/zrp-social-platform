@@ -977,3 +977,11 @@
 "ios.call.missedBody" = "{name} tried to call you. ZRP for iPhone can't take calls yet — you can answer on zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Someone";
+"ios.group.untitled" = "Group";
+"ios.group.noMessages" = "No messages yet";
+"ios.group.preview" = "{name}: {message}";
+"ios.group.members" = "Members";
+"ios.group.leave" = "Leave group";
+"ios.group.leaveConfirm" = "You'll stop receiving messages from this group.";
+"ios.group.owner" = "Owner";
+"ios.group.info" = "Group info";

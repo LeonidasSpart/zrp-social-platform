@@ -288,6 +288,26 @@ final class ZrpSocket: ObservableObject {
         send(raw: "42\(json)")
     }
 
+    /// Emits an event whose argument is a bare value rather than an
+    /// object.
+    ///
+    /// Socket.IO's wire format is `42["name", ...args]` - the argument
+    /// is positional and need not be a dictionary. `join-conversation`
+    /// and `leave-conversation` both take a plain conversation id
+    /// string, so wrapping them in an object would send
+    /// `{"conversationId": "..."}` to a handler reading a string, and
+    /// the join would be silently ignored.
+    func emit(_ name: String, _ argument: String) {
+        guard isConnected else { return }
+        guard
+            let data = try? JSONSerialization.data(
+                withJSONObject: [name, argument] as [Any]
+            ),
+            let json = String(data: data, encoding: .utf8)
+        else { return }
+        send(raw: "42\(json)")
+    }
+
     private func send(raw frame: String) {
         task?.send(.string(frame)) { _ in
             // A send failure surfaces on the receive side as a
