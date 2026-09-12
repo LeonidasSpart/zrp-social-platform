@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getFeatureStatus } from "@/lib/permissions";
+// Imported from feature-status.ts directly, NOT @/lib/permissions -
+// permissions.ts also re-exports the DB-backed team-membership helpers,
+// which import the Prisma client; that would pull @prisma/adapter-pg's
+// Node `crypto` dependency into this file's Edge runtime bundle (see
+// the "Do NOT import Redis" note below for the same underlying
+// constraint) and break every request in production.
+import { getFeatureStatus } from "@/lib/feature-status";
 
 // ─── Helper: Check feature from token ─────────────────────────────
 function hasFeature(

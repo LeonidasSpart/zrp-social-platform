@@ -1,6 +1,16 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
 
+// ⚠️ Prisma 7+: neither the CLI nor the generated client auto-loads
+// .env anymore (previously true of Prisma 6's client, which is what
+// silently made DATABASE_URL/REDIS_URL available to every integration
+// test's `hasRealDatabaseUrl` check without this). CI is unaffected -
+// ci.yml sets these as real environment variables directly - but any
+// local `npm test` run needs this explicit load or every DB/Redis-gated
+// integration test silently (and misleadingly) reports as "skipped"
+// rather than failing loudly.
+import "dotenv/config";
+
 export default defineConfig({
   test: {
     environment: "node",

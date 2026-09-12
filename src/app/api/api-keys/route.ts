@@ -24,6 +24,35 @@ const MAX_KEYS_MESSAGE = `You can have at most ${MAX_ACTIVE_KEYS_PER_USER} activ
 
 class MaxActiveKeysError extends Error {}
 
+// ⚠️ Prisma 7+ driver-adapter architecture: a Postgres serialization
+// failure (SQLSTATE 40001) detected DURING a query inside the
+// transaction still surfaces the same way as before - a
+// PrismaClientKnownRequestError with code P2034. But this route's own
+// conflict is a write-skew between a SELECT count() and a concurrent
+// INSERT, which Postgres's serializable snapshot isolation frequently
+// only detects at COMMIT time - and a commit-time conflict surfaces
+// instead as a raw, unwrapped DriverAdapterError (kind
+// "TransactionWriteConflict") from @prisma/adapter-pg, never reaching
+// the P2034 wrapping at all. Reproduced directly: identical concurrent
+// load that reliably retried-then-succeeded under Prisma 6 instead hit
+// unhandled 500s under Prisma 7 until this second check was added.
+// Checked structurally (not `instanceof` against
+// @prisma/driver-adapter-utils, a transitive dependency this app
+// doesn't declare directly) and against the raw Postgres SQLSTATE
+// rather than a Prisma-internal shape, so this keeps working even if
+// Prisma's own wrapping changes again.
+function isSerializationConflict(err: unknown): boolean {
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2034") {
+    return true;
+  }
+  const cause = (err as { name?: string; cause?: { originalCode?: string } } | null)?.cause;
+  return (
+    err instanceof Error &&
+    err.name === "DriverAdapterError" &&
+    cause?.originalCode === "40001"
+  );
+}
+
 // ⚠️ SECURITY: count-then-create was a check-then-act race - two
 // concurrent POSTs could both read a count under the limit and both
 // insert, letting an account exceed MAX_ACTIVE_KEYS_PER_USER. Serializable
@@ -144,11 +173,11 @@ export async function POST(req: NextRequest) {
     // touched by this (see api-auth.ts for how existing keys are read).
     const expiresAt = apiKeyExpiryFor(expiresInDays);
 
-    // P2034: Postgres detected a serialization conflict against another
-    // concurrent request to the same account. Each retry re-reads the
-    // real, now-current count, so a handful of attempts is enough for
-    // even a burst of concurrent requests to converge on the correct
-    // outcome (some succeed up to the cap, the rest are correctly
+    // isSerializationConflict: Postgres detected a serialization conflict
+    // against another concurrent request to the same account. Each retry
+    // re-reads the real, now-current count, so a handful of attempts is
+    // enough for even a burst of concurrent requests to converge on the
+    // correct outcome (some succeed up to the cap, the rest are correctly
     // rejected) instead of surfacing as a 500.
     const MAX_SERIALIZATION_RETRIES = 5;
     let result: Awaited<ReturnType<typeof createApiKeyAtomic>> | undefined;
@@ -160,10 +189,9 @@ export async function POST(req: NextRequest) {
         if (err instanceof MaxActiveKeysError) {
           return NextResponse.json({ error: MAX_KEYS_MESSAGE }, { status: 400 });
         }
-        const isSerializationConflict =
-          err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2034";
-        if (!isSerializationConflict || attempt === MAX_SERIALIZATION_RETRIES) {
-          if (isSerializationConflict) {
+        const conflict = isSerializationConflict(err);
+        if (!conflict || attempt === MAX_SERIALIZATION_RETRIES) {
+          if (conflict) {
             return NextResponse.json(
               { error: "Too many concurrent requests. Please try again." },
               { status: 409 }

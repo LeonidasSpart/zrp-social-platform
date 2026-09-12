@@ -1,86 +1,9 @@
-import { hasFeature, getUserPlan, Plan } from './limits';
-
-export type UserWithPlan = { plan?: string } | null;
-
-// ─── Feature Checks ──────────────────────────────────────────────
-
-/**
- * Check if a user can use a custom profile URL
- */
-export function canUseCustomUrl(user: UserWithPlan): boolean {
-  if (!user) return false;
-  const plan = getUserPlan(user);
-  return hasFeature(plan, 'customProfileUrl');
-}
-
-/**
- * Check if a user can post recruitment profiles
- */
-export function canPostRecruitment(user: UserWithPlan): boolean {
-  if (!user) return false;
-  const plan = getUserPlan(user);
-  return hasFeature(plan, 'recruitmentProfiles');
-}
-
-/**
- * Check if a user can publish articles
- */
-export function canPublishArticle(user: UserWithPlan): boolean {
-  if (!user) return false;
-  const plan = getUserPlan(user);
-  return hasFeature(plan, 'articlePublishing');
-}
-
-/**
- * Check if a user can manage a team (Business/Enterprise only)
- */
-export function canManageTeam(user: UserWithPlan): boolean {
-  if (!user) return false;
-  const plan = getUserPlan(user);
-  return hasFeature(plan, 'teamManagement');
-}
-
-/**
- * Check if a user can access the API
- */
-export function canAccessApi(user: UserWithPlan): boolean {
-  if (!user) return false;
-  const plan = getUserPlan(user);
-  return hasFeature(plan, 'apiAccess');
-}
-
-// ─── Bulk Feature Status ─────────────────────────────────────────
-
-export interface FeatureStatus {
-  customProfileUrl: boolean;
-  recruitmentProfiles: boolean;
-  articlePublishing: boolean;
-  teamManagement: boolean;
-  apiAccess: boolean;
-}
-
-/**
- * Get all feature flags for a user in one object
- */
-export function getFeatureStatus(user: UserWithPlan): FeatureStatus {
-  if (!user) {
-    return {
-      customProfileUrl: false,
-      recruitmentProfiles: false,
-      articlePublishing: false,
-      teamManagement: false,
-      apiAccess: false,
-    };
-  }
-  const plan = getUserPlan(user);
-  return {
-    customProfileUrl: hasFeature(plan, 'customProfileUrl'),
-    recruitmentProfiles: hasFeature(plan, 'recruitmentProfiles'),
-    articlePublishing: hasFeature(plan, 'articlePublishing'),
-    teamManagement: hasFeature(plan, 'teamManagement'),
-    apiAccess: hasFeature(plan, 'apiAccess'),
-  };
-}
+// The DB-free feature-check helpers used to live here directly. They
+// moved to ./feature-status so src/middleware.ts can import
+// getFeatureStatus without pulling in Prisma (see that file's own
+// comment for why) - re-exported so every other existing call site
+// (~25 files) keeps working unchanged.
+export * from './feature-status';
 
 // ─── Team Membership Helpers ─────────────────────────────────────
 // (These require database queries: call them from API routes or server components)
