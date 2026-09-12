@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale, Store, Bell } from "lucide-react";
+import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale, Store, Bell, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import EmptyState from "@/components/ui/EmptyState";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
@@ -97,6 +97,7 @@ export default function NotificationsPage() {
   const { refreshUnreadCount } = useUnreadCount();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
   const [followingBack, setFollowingBack] = useState<Record<string, "idle" | "loading" | "done">>({});
 
@@ -113,17 +114,18 @@ export default function NotificationsPage() {
   }, [status]);
 
   const fetchNotifications = async () => {
+    setFetchError(false);
     try {
       const res = await fetch("/api/notifications");
       if (!res.ok) {
-        setNotifications([]);
+        setFetchError(true);
         return;
       }
       const data = await res.json();
       setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      setNotifications([]);
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
@@ -287,7 +289,23 @@ export default function NotificationsPage() {
         ))}
       </div>
 
-      {grouped.length === 0 ? (
+      {fetchError ? (
+        <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-center">
+          <p className="text-red-700 dark:text-red-400 font-semibold">
+            {t("feed.tryAgain")}
+          </p>
+          <button
+            onClick={() => {
+              setLoading(true);
+              fetchNotifications();
+            }}
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 text-sm font-semibold"
+          >
+            <RefreshCw className="w-4 h-4" />
+            {t("feed.retry")}
+          </button>
+        </div>
+      ) : grouped.length === 0 ? (
         <EmptyState
           icon={Bell}
           title={t("notifications.empty")}

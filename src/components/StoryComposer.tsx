@@ -103,6 +103,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 relative">
         <button
           onClick={onClose}
+          aria-label={t("help.close")}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
         >
           <X className="w-5 h-5" />

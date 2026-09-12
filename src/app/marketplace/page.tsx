@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Plus, Heart, LayoutList, Search as SearchIcon } from "lucide-react";
+import { Plus, Heart, LayoutList, Search as SearchIcon, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ListingCard from "@/components/ListingCard";
 import { CATEGORY_META, LISTING_CATEGORIES, type ListingSummary } from "@/lib/marketplace";
@@ -13,15 +13,25 @@ export default function MarketplaceHomePage() {
   const { data: session } = useSession();
   const [listings, setListings] = useState<ListingSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [listingsError, setListingsError] = useState(false);
   const [search, setSearch] = useState("");
+  const [retryTick, setRetryTick] = useState(0);
 
   useEffect(() => {
+    setLoading(true);
+    setListingsError(false);
     fetch("/api/listings?limit=12")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load listings");
+        return res.json();
+      })
       .then((data) => setListings(data.listings || []))
-      .catch((err) => console.error("Error loading marketplace listings:", err))
+      .catch((err) => {
+        console.error("Error loading marketplace listings:", err);
+        setListingsError(true);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [retryTick]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
@@ -118,6 +128,19 @@ export default function MarketplaceHomePage() {
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="w-8 h-8 border-4 border-zrp-red border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : listingsError ? (
+          <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-6 text-center">
+            <p className="text-red-700 dark:text-red-400 font-semibold">
+              {t("feed.tryAgain")}
+            </p>
+            <button
+              onClick={() => setRetryTick((n) => n + 1)}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 text-sm font-semibold"
+            >
+              <RefreshCw className="w-4 h-4" />
+              {t("feed.retry")}
+            </button>
           </div>
         ) : listings.length === 0 ? (
           <p className="text-center py-16 text-gray-500 dark:text-gray-400">

@@ -125,6 +125,7 @@ export default function ChatContactDrawer({
         <div className="flex justify-end p-3">
           <button
             onClick={onClose}
+            aria-label={t("help.close")}
             className="p-1.5 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <X className="w-5 h-5" />

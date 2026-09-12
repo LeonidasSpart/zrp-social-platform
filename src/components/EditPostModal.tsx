@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { X } from "lucide-react";
 import { getPlanLimits } from "@/lib/limits";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface EditPostModalProps {
   post: {
@@ -17,6 +18,7 @@ interface EditPostModalProps {
 }
 
 export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditPostModalProps) {
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const plan = (session?.user?.plan as any) || "free";
   const limits = getPlanLimits(plan);
@@ -65,6 +67,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Edit Post</h2>
           <button
             onClick={onClose}
+            aria-label={t("help.close")}
             className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition"
           >
             <X className="w-5 h-5" />

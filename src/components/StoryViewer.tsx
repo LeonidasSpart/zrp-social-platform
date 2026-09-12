@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { X, Eye, Heart } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   group: {
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
+  const { t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -143,12 +145,38 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
     <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
       <button
         onClick={onClose}
+        aria-label={t("help.close")}
         className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
       >
         <X className="w-8 h-8" />
       </button>
 
-      <div className="relative w-full max-w-md h-[80vh] bg-gray-900 rounded-lg overflow-hidden">
+      <div
+        className="relative w-full max-w-md h-[80vh] bg-gray-900 rounded-lg overflow-hidden outline-none"
+        role="group"
+        tabIndex={0}
+        autoFocus
+        onKeyDown={(e) => {
+          // The prev/pause/next zones below are pointer-only (tap/click
+          // hit areas with no visible affordance, matching the
+          // Instagram/TikTok-style story UX this mirrors) - without this,
+          // a keyboard-only user had no way to move through stories at
+          // all. Mirrors what the tap zones already do, just via keys.
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            prev();
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            next();
+          } else if (e.key === " " || e.key === "Spacebar") {
+            e.preventDefault();
+            setPaused((p) => !p);
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            onClose();
+          }
+        }}
+      >
         {/* Progress bar */}
         <div className="absolute top-0 left-0 right-0 flex gap-1 p-2 z-10">
           {group.stories.map((_, idx) => (
@@ -157,9 +185,11 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
               className="h-1 flex-1 bg-gray-600 rounded-full overflow-hidden"
             >
               <div
-                className="h-full bg-white transition-all"
+                className="h-full w-full origin-left bg-white transition-transform"
                 style={{
-                  width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? "100%" : "0%",
+                  transform: `scaleX(${
+                    idx === currentIndex ? progress / 100 : idx < currentIndex ? 1 : 0
+                  })`,
                 }}
               />
             </div>

@@ -50,6 +50,7 @@ export default function ReportModal({ isOpen, onClose, onSubmit }: ReportModalPr
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("report.modalTitle")}</h2>
           <button
             onClick={onClose}
+            aria-label={t("help.close")}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
           >
             <X className="w-5 h-5" />

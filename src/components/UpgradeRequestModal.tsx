@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Loader2, Building, CreditCard, Wallet } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   plan: string;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }: Props) {
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const [paymentMethod, setPaymentMethod] = useState<"bank" | "paypal" | "crypto">("bank");
   const [note, setNote] = useState("");
@@ -57,6 +59,7 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
+          aria-label={t("help.close")}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
         >
           <X className="w-5 h-5" />

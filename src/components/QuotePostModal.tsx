@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   post: {
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) {
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,6 +63,7 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
       <div className="bg-white dark:bg-zrp-deepBlack rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
         <button
           onClick={onClose}
+          aria-label={t("help.close")}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
         >
           <X className="w-5 h-5" />
