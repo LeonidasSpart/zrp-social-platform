@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
 import { Role } from "@prisma/client";
-import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 import { logAdminAction } from "@/lib/audit-log";
 
 const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", "journalist", null];
@@ -120,7 +120,10 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
       targetId: params.id,
     });
 
-    await deleteUploadThingFiles([
+    // p.imageUrl is always a copy of p.imageUrls[0] (see POST /api/posts)
+    // - deleteUploadsIfUnreferenced dedupes that and skips anything
+    // still referenced by another row before deleting.
+    await deleteUploadsIfUnreferenced([
       user?.avatarUrl,
       user?.coverUrl,
       ...posts.flatMap((p) => [p.imageUrl, ...p.imageUrls]),

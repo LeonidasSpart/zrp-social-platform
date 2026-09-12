@@ -1,5 +1,25 @@
 import SwiftUI
 
+/// The notification filters, matching the website's own three tabs.
+enum NotificationFilter: String, CaseIterable, Identifiable {
+    case all
+    case verified
+    case follows
+
+    var id: String { rawValue }
+
+    var titleKey: L10nKey {
+        switch self {
+        case .all: return .adminUsersStatusAll
+        case .verified: return .adminUsersBadgeVerified
+        // The web tab is labelled "Follows", which has no translated
+        // counterpart anywhere in the dictionary; "Followers" does, and
+        // means the same thing about the same rows.
+        case .follows: return .profileFollowers
+        }
+    }
+}
+
 @MainActor
 final class NotificationsViewModel: ObservableObject {
 
@@ -12,6 +32,28 @@ final class NotificationsViewModel: ObservableObject {
 
     @Published private(set) var notifications: [AppNotification] = []
     @Published private(set) var phase: Phase = .idle
+    @Published var filter: NotificationFilter = .all
+
+    /// What the list actually shows.
+    ///
+    /// Filtered here rather than refetched: the route returns the whole
+    /// list and takes no filter parameter, so a chip is a view over data
+    /// the app is already holding. Switching chips costs nothing and
+    /// works offline.
+    var visible: [AppNotification] {
+        switch filter {
+        case .all:
+            return notifications
+        case .verified:
+            // Any badge at all, which is exactly the test the web page
+            // applies - not one particular badge type.
+            return notifications.filter { $0.fromUser?.badgeType?.isEmpty == false }
+        case .follows:
+            return notifications.filter {
+                $0.kind == .follow || $0.kind == .followRequest
+            }
+        }
+    }
 
     private let repository: NotificationsRepositoryProtocol
 
@@ -80,7 +122,23 @@ struct NotificationsView: View {
                         subtitle: .notificationsEmptyDesc
                     )
                 } else {
-                    list
+                    VStack(spacing: 0) {
+                        filterChips
+                        Divider().overlay(ZrpColor.outline)
+                        if viewModel.visible.isEmpty {
+                            // The inbox has notifications; this filter
+                            // has none. Saying "no notifications yet"
+                            // here would be untrue and would look like
+                            // the list had failed to load.
+                            TimelineStateView.empty(
+                                systemImage: "line.3.horizontal.decrease.circle",
+                                title: .notificationsEmpty,
+                                subtitle: .notificationsEmptyDesc
+                            )
+                        } else {
+                            list
+                        }
+                    }
                 }
             }
         }
@@ -94,10 +152,49 @@ struct NotificationsView: View {
         }
     }
 
+    /// The same three filters the website's own notifications page
+    /// offers. It has had them all along; this app showed one
+    /// undifferentiated list.
+    private var filterChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: ZrpSpacing.sm) {
+                ForEach(NotificationFilter.allCases) { option in
+                    let selected = viewModel.filter == option
+
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            viewModel.filter = option
+                        }
+                    } label: {
+                        Text(option.titleKey)
+                            .font(.subheadline.weight(selected ? .semibold : .regular))
+                            .foregroundStyle(selected ? .white : ZrpColor.onSurfaceMuted)
+                            .padding(.horizontal, ZrpSpacing.lg)
+                            .padding(.vertical, ZrpSpacing.sm)
+                            .frame(minHeight: ZrpMetrics.minTouchTarget)
+                            .background(
+                                Capsule().fill(
+                                    selected ? ZrpColor.red : ZrpColor.surfaceElevated
+                                )
+                            )
+                            .contentShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(
+                        selected ? [.isButton, .isSelected] : .isButton
+                    )
+                }
+            }
+            .padding(.horizontal, ZrpSpacing.lg)
+            .padding(.vertical, ZrpSpacing.sm)
+        }
+        .background(ZrpColor.background)
+    }
+
     private var list: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(viewModel.notifications) { notification in
+                ForEach(viewModel.visible) { notification in
                     row(notification)
                 }
             }

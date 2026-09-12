@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // stay on requireAdmin.
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
-import { deleteUploadThingFiles } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 import { logAdminAction } from "@/lib/audit-log";
 
 export async function DELETE(
@@ -39,7 +39,10 @@ export async function DELETE(
       targetId: id,
     });
 
-    await deleteUploadThingFiles([
+    // post.imageUrl is always a copy of post.imageUrls[0] (see
+    // POST /api/posts) - deleteUploadsIfUnreferenced dedupes that and
+    // skips anything still referenced by another row before deleting.
+    await deleteUploadsIfUnreferenced([
       post?.imageUrl,
       ...(post?.imageUrls || []),
       ...commentsWithImages.map((c) => c.imageUrl),

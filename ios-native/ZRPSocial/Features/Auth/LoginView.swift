@@ -209,11 +209,6 @@ struct LoginView: View {
                 Text(.authNoAccount)
                     .font(.footnote)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
-                // Sign in with Apple is still deliberately absent rather
-                // than present-and-inert: it is blocked on a backend
-                // route that does not exist yet (PARITY.md, B2), and a
-                // button that cannot complete its flow is worse than no
-                // button. Registration and password reset are real now.
                 Button { isRegistering = true } label: {
                     Text(.authSignUp)
                         .font(.footnote.weight(.semibold))

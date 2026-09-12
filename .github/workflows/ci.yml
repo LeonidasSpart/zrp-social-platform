@@ -25,6 +25,7 @@ on:
     paths:
       - "src/**"
       - "prisma/**"
+      - "prisma.config.ts"
       - "server.js"
       - "socket-authz.js"
       - "presence.js"
@@ -38,6 +39,7 @@ on:
     paths:
       - "src/**"
       - "prisma/**"
+      - "prisma.config.ts"
       - "server.js"
       - "socket-authz.js"
       - "presence.js"
@@ -63,7 +65,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
 
       - name: Install
@@ -129,7 +131,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
 
       - name: Install

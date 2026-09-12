@@ -23,6 +23,17 @@ enum WebPage: String, Hashable, Identifiable, CaseIterable {
     case help
     case communityCode = "community-code"
 
+    // The five below were reachable from the website's sidebar and from
+    // nowhere in this app. Same shape as their neighbours - public,
+    // static, long-form, already translated - so they arrive the same
+    // way rather than as five native screens that would have to be
+    // maintained in parallel with Legal's and Comms' copy.
+    case faq
+    case contact
+    case careers
+    case investors
+    case press
+
     var id: String { rawValue }
 
     var titleKey: L10nKey {
@@ -33,6 +44,13 @@ enum WebPage: String, Hashable, Identifiable, CaseIterable {
         case .about: return .navAboutZrp
         case .help: return .footerHelpCenter
         case .communityCode: return .communityCodeNavLabel
+        case .faq: return .footerFaq
+        case .contact: return .footerContact
+        case .careers: return .footerCareers
+        case .investors: return .footerInvestors
+        // The website labels this one "Press Kit" while the route is
+        // /press. The label follows the website, not the path.
+        case .press: return .footerPressKit
         }
     }
 
@@ -44,6 +62,11 @@ enum WebPage: String, Hashable, Identifiable, CaseIterable {
         case .about: return "info.circle"
         case .help: return "questionmark.circle"
         case .communityCode: return "checkmark.shield"
+        case .faq: return "questionmark.bubble"
+        case .contact: return "envelope"
+        case .careers: return "briefcase"
+        case .investors: return "chart.line.uptrend.xyaxis"
+        case .press: return "newspaper"
         }
     }
 

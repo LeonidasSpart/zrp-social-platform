@@ -3,8 +3,22 @@ import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/db";
 
-const { deleteUploadThingFiles } = vi.hoisted(() => ({ deleteUploadThingFiles: vi.fn() }));
-vi.mock("@/lib/uploadthing", () => ({ deleteUploadThingFiles }));
+// deleteUserAccountAndFiles goes through deleteUploadsIfUnreferenced, which
+// itself calls deleteUploadThingKeys - mock that boundary so this test never
+// calls real UploadThing.
+const { deleteUploadThingKeys } = vi.hoisted(() => ({
+  deleteUploadThingKeys: vi.fn(async (keys: string[]) => ({
+    requested: keys.length,
+    unique: keys.length,
+    deleted: keys.length,
+    failed: 0,
+    retried: 0,
+  })),
+}));
+vi.mock("@/lib/uploadthing", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/uploadthing")>();
+  return { ...actual, deleteUploadThingKeys };
+});
 
 import { GET } from "../route";
 
@@ -32,7 +46,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
     beforeEach(() => {
       originalSecret = process.env.CRON_SECRET;
       process.env.CRON_SECRET = "test-secret";
-      deleteUploadThingFiles.mockClear();
+      deleteUploadThingKeys.mockClear();
     });
 
     afterEach(() => {

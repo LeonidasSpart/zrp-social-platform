@@ -1,13 +1,19 @@
 import SwiftUI
 
-/// The signed-in app's root: a real tab bar over six independent
-/// navigation stacks.
+/// The signed-in app.
 ///
-/// Before this existed the app rendered Home and nothing else, and every
-/// other screen was reachable only through a toolbar overflow menu -
-/// forty routes behind one avatar button. The tab bar is the primary
-/// navigation now; the Home toolbar keeps only what has no tab of its own
-/// (Music, Marketplace, Bookmarks, Settings).
+/// Three pieces of chrome around four independent navigation stacks:
+/// the navigation menu on the leading edge, a menu button and (on Home)
+/// the ZRP mark and notifications bell along the top, and the five-item
+/// bar along the bottom.
+///
+/// The bottom bar is drawn by `ZrpTabBar` rather than by `TabView`,
+/// because Create is a button and not a tab - it opens the composer and
+/// hands the current screen straight back - and the reference design
+/// raises it into a red circle that a `tabItem` cannot produce. The
+/// `TabView` underneath is kept for everything it is genuinely good at:
+/// mounting each tab lazily, keeping four scroll positions and four back
+/// stacks alive, and restoring them instantly.
 struct MainTabView: View {
 
     @EnvironmentObject private var player: MusicPlayer
@@ -15,9 +21,9 @@ struct MainTabView: View {
     @Environment(\.openURL) private var openURL
 
     @StateObject private var router = AppRouter()
-    /// Lives here rather than in Home so the Notifications and Messages
-    /// badges are the same two numbers wherever they are shown, refreshed
-    /// once for the whole shell.
+    /// Lives here rather than in Home so the notifications and messages
+    /// badges are the same two numbers wherever they are shown - the
+    /// bell, the menu, the bar - refreshed once for the whole shell.
     @StateObject private var unread = UnreadBadgeViewModel()
 
     /// Also at shell level, and for the same reason: a call arrives
@@ -26,28 +32,31 @@ struct MainTabView: View {
     /// reading that one thread.
     @StateObject private var calls = IncomingCallResponder()
 
+    @StateObject private var drawer = DrawerState()
+
     /// Presence is app-wide state, so the store is provided at the app
     /// root; the shell only starts and stops listening with the signed-in
     /// session.
     @EnvironmentObject private var presence: PresenceStore
 
     var body: some View {
-        TabView(selection: tabSelection) {
-            ForEach(MainTab.allCases, id: \.self) { tab in
-                content(for: tab)
-                    .tabItem {
-                        Label {
-                            Text(tab.titleKey)
-                        } icon: {
-                            Image(systemName: tab.systemImage)
-                        }
+        DrawerContainer {
+            tabs
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    VStack(spacing: 0) {
+                        // Above the bar, below the content, and drawing
+                        // nothing at all until something is playing. One
+                        // instance for the whole shell rather than one
+                        // per tab, so the controls do not rebuild on
+                        // every tab change.
+                        MiniPlayerView()
+                        ZrpTabBar()
                     }
-                    .badge(badgeCount(for: tab))
-                    .tag(tab)
-            }
+                }
         }
         .environmentObject(router)
         .environmentObject(unread)
+        .environmentObject(drawer)
         .fullScreenCover(isPresented: $player.isExpanded) {
             NowPlayingView()
         }
@@ -64,16 +73,29 @@ struct MainTabView: View {
             guard url != nil else { return }
             consumePendingLink()
         }
-        // Coming back to Messages or Notifications is the moment the
-        // badge is most likely to be wrong, so the counts are refetched
-        // then rather than only at launch.
+        // Coming back to Messages is the moment its badge is most likely
+        // to be wrong, so the counts are refetched then rather than only
+        // at launch. Notifications does the same from its own screen.
         .onChange(of: router.selectedTab) { _, tab in
-            guard tab == .messages || tab == .notifications else { return }
+            guard tab == .messages else { return }
             Task { await unread.refresh() }
         }
         .onDisappear {
             calls.stop()
             presence.stop()
+        }
+    }
+
+    private var tabs: some View {
+        TabView(selection: $router.selectedTab) {
+            ForEach(MainTab.allCases, id: \.self) { tab in
+                content(for: tab)
+                    // The system bar is replaced, not decorated: hiding
+                    // it is what leaves room for `ZrpTabBar` and stops
+                    // the two of them stacking.
+                    .toolbar(.hidden, for: .tabBar)
+                    .tag(tab)
+            }
         }
     }
 
@@ -91,53 +113,25 @@ struct MainTabView: View {
         }
     }
 
-    /// Intercepts selection so Create can act as a button, and so tapping
-    /// the current tab returns to the top of it - both standard iOS
-    /// behaviours a plain `$selection` binding does not give.
-    private var tabSelection: Binding<MainTab> {
-        Binding(
-            get: { router.selectedTab },
-            set: { tapped in
-                if tapped == .create {
-                    router.requestCompose()
-                } else if tapped == router.selectedTab {
-                    router.popToRoot(tapped)
-                } else {
-                    router.selectedTab = tapped
-                }
-            }
-        )
-    }
-
-    /// `0` renders no badge at all, which is what the tabs without counts
-    /// want and what an all-read inbox wants too.
-    private func badgeCount(for tab: MainTab) -> Int {
-        switch tab {
-        case .notifications: return unread.notificationCount
-        case .messages: return unread.messageCount
-        default: return 0
-        }
-    }
-
     @ViewBuilder
     private func content(for tab: MainTab) -> some View {
         switch tab {
         case .home:
-            tabStack(tab) { HomeView() }
+            tabStack(tab) {
+                HomeView().zrpRootChrome(wordmark: true, bell: true)
+            }
         case .search:
-            tabStack(tab) { SearchView() }
+            tabStack(tab) { SearchView().zrpRootChrome() }
         case .create:
-            // Never displayed: the selection binding turns a tap on
-            // Create into a compose request and keeps the current tab.
-            // Deliberately empty rather than a second copy of Home,
-            // which would put two navigation stacks on one path.
+            // Never displayed: `ZrpTabBar` turns a tap on Create into a
+            // compose request and never selects this tag. Deliberately
+            // empty rather than a second copy of Home, which would put
+            // two navigation stacks on one path.
             Color.clear
-        case .notifications:
-            tabStack(tab) { NotificationsView() }
         case .messages:
-            tabStack(tab) { MessagesListView() }
+            tabStack(tab) { MessagesListView().zrpRootChrome() }
         case .profile:
-            tabStack(tab) { CurrentUserProfileView() }
+            tabStack(tab) { CurrentUserProfileView().zrpRootChrome() }
         }
     }
 
@@ -165,13 +159,6 @@ private struct TabNavigationStack<Content: View>: View {
                 .navigationDestination(for: Route.self) { route in
                     RouteDestinationView(route: route)
                 }
-        }
-        // Inside the stack, above the tab bar: the mini-player then
-        // persists across every push within the tab, and sits clear of
-        // both the tab bar and the home indicator. It draws nothing at
-        // all until something is playing.
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            MiniPlayerView()
         }
         .environmentObject(navigator)
     }

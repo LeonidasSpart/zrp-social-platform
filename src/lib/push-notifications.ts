@@ -89,6 +89,26 @@ function getWebPush() {
   );
   return webpush;
 }
+// A subscription can never be delivered to again once it fails with
+// either of these - the push service itself has discarded it (404/410),
+// or (FCM-specific) it was created against a VAPID public key that no
+// longer matches this server's current key pair. The browser bakes the
+// applicationServerKey into the subscription at creation time, so a key
+// rotation permanently breaks every subscription created under the old
+// key - no retry with the correct key is possible server-side; the
+// client has to call pushManager.subscribe() again. Matched on the
+// FCM-documented message text rather than the bare statusCode, since a
+// 403 can have other causes (a malformed request, a bad claim) that
+// aren't permanent and shouldn't delete a user's subscription.
+function isPermanentlyInvalidSubscription(err: any): boolean {
+  if (err?.statusCode === 404 || err?.statusCode === 410) return true;
+  return (
+    err?.statusCode === 403 &&
+    typeof err?.body === "string" &&
+    err.body.includes("do not correspond to the credentials used to create the subscriptions")
+  );
+}
+
 export async function sendPushNotification(
   userId: string,
   title: string,
@@ -127,7 +147,7 @@ export async function sendPushNotification(
           payload
         );
       } catch (err: any) {
-        if (err?.statusCode === 404 || err?.statusCode === 410) {
+        if (isPermanentlyInvalidSubscription(err)) {
           try {
             await prisma.pushSubscription.delete({
               where: {
