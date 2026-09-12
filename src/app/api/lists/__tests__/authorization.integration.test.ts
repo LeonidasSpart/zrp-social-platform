@@ -6,8 +6,8 @@ import { prisma } from "@/lib/db";
 const { getServerSession } = vi.hoisted(() => ({ getServerSession: vi.fn() }));
 vi.mock("next-auth", () => ({ getServerSession }));
 
-import { POST as createList, PATCH as patchList, DELETE as deleteList } from "../[id]/route";
-import { GET as getList } from "../[id]/route";
+import { POST as createList } from "../route";
+import { PATCH as patchList, DELETE as deleteList, GET as getList } from "../[id]/route";
 import { POST as addMember } from "../[id]/members/route";
 import { DELETE as removeMember } from "../[id]/members/[userId]/route";
 
