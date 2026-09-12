@@ -172,6 +172,16 @@
     "ios.group.leave": "Leave group",
     "ios.group.leaveConfirm": "You'll stop receiving messages from this group.",
     "ios.group.owner": "Owner",
-    "ios.group.info": "Group info"
+    "ios.group.info": "Group info",
+    "ios.group.new": "New group",
+    "ios.group.nameLabel": "Group name",
+    "ios.group.namePlaceholder": "Name this group",
+    "ios.group.addPeople": "Add people",
+    "ios.group.searchPeople": "Search for people",
+    "ios.group.selectedCount": "{count} selected",
+    "ios.group.minMembers": "Pick at least 2 other people.",
+    "ios.group.create": "Create group",
+    "ios.group.creating": "Creating…",
+    "ios.group.suggested": "Suggested"
   }
 }

@@ -157,6 +157,7 @@ struct MessagesListView: View {
     @EnvironmentObject private var presence: PresenceStore
     @StateObject private var viewModel = MessagesListViewModel()
     @State private var pendingDelete: ConversationSummary?
+    @State private var composingGroup = false
 
     var body: some View {
         Group {
@@ -182,6 +183,17 @@ struct MessagesListView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.messagesTitle))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { composingGroup = true } label: {
+                    Image(systemName: "square.and.pencil")
+                }
+                .accessibilityLabel(Text(.iosGroupNew))
+            }
+        }
+        .sheet(isPresented: $composingGroup) {
+            NewGroupView()
+        }
         .task {
             viewModel.startWatching()
             await viewModel.loadIfNeeded()

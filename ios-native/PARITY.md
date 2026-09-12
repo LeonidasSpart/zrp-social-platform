@@ -415,7 +415,7 @@ what is, to them, the same slot. The website fetches once on mount too.
 | Realtime group delivery | `join-conversation` → room `group:{id}` → `receive-group-message` | ✅ | ✅ | ✅ joins the room on open and leaves on close. **Joining is required** — group relays go to a room, not to a user's own room, so without it the thread would silently degrade to polling | IMPLEMENTED |
 | Group members | `GET /api/conversations/{id}` | ✅ | ✅ | ✅ member list with the OWNER marked | IMPLEMENTED |
 | Leave a group | `DELETE /api/conversations/{id}/participants/{userId}` | ✅ | ✅ | ✅ removing yourself. Removing **someone else** is the same route but OWNER-only, and is not offered — see below | IMPLEMENTED |
-| Create a group | `POST /api/conversations` | ✅ | ✅ | ⬜ the repository method exists and is exercised by nothing yet; a composer needs member search, which is its own screen | MISSING |
+| Create a group | `POST /api/conversations` | ✅ | ✅ | ✅ name + member picker, reusing `GET /api/users/suggested` for the starting list and `GET /api/search` (debounced, 2-char minimum, matching the route's own rule) for typing. The route's limits are mirrored — a name ≤100 and **at least 2 other members** — so the button says what is still needed instead of just being disabled | IMPLEMENTED |
 | Rename / re-avatar a group | `PATCH /api/conversations/{id}` — OWNER only | ✅ | ✅ | ⬜ | MISSING |
 | Add / remove members | `POST`/`DELETE .../participants` — OWNER only | ✅ | ✅ | ⬜ | MISSING |
 | Reactions / replies / edit in a group | — | ⬜ | ⬜ | ⬜ **no backend for it**: `GROUP_MESSAGE_INCLUDE` attaches only `sender`, and no route acts on a group message beyond deleting your own. Absent on every platform, not an iOS gap | n/a |
