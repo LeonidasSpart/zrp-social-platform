@@ -179,6 +179,10 @@ struct DrawerContainer<Content: View>: View {
 
             ZStack(alignment: .leading) {
                 content()
+                    // Behind an open drawer, and out of VoiceOver's
+                    // reach while it is: a swipe must not wander into
+                    // the app underneath a modal menu.
+                    .accessibilityHidden(drawer.isOpen)
 
                 if drawer.isOpen {
                     Color.black.opacity(0.55)
@@ -209,6 +213,10 @@ struct DrawerContainer<Content: View>: View {
             // underneath - the Shorts feed, the media pager, a carousel
             // all live in here.
             .simultaneousGesture(openDrag())
+            // `GeometryReader` sizes its child to the child's own ideal
+            // size and pins it top-leading, so the stack is given the
+            // full reading explicitly rather than left to fill by luck.
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
     }
 

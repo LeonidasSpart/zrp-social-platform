@@ -58,7 +58,7 @@ struct MenuSection: Identifiable {
 ///   be a dead end dressed as a feature, so there isn't one.
 enum ZrpMenu {
 
-    static var sections: [MenuSection] {
+    static let sections: [MenuSection] = {
         [
             // The five places the bottom bar and the bell already reach.
             // Repeated here on purpose: the menu is meant to be a map of
@@ -112,7 +112,7 @@ enum ZrpMenu {
                 MenuEntry(.footerMyTickets, systemImage: "lifepreserver", route: .supportTickets),
             ]),
         ]
-    }
+    }()
 }
 
 /// The navigation menu's contents.
