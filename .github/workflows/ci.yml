@@ -151,6 +151,13 @@ jobs:
         run: npx prisma generate
 
       - name: Run tests
+        # NO_COLOR so the summary this step's assertion reads is plain
+        # text. vitest colourises even without a TTY when CI is set, and
+        # the escape codes are what broke the first real run of this
+        # workflow: the assertion's `^ *Tests` anchor never matched
+        # `\e[2m      Tests`, so it read zero and failed a green suite.
+        env:
+          NO_COLOR: "1"
         run: npx vitest run --reporter=verbose 2>&1 | tee vitest-output.txt
 
       # The point of the service containers above is that the integration
@@ -161,16 +168,27 @@ jobs:
       # that the skip count is small.
       - name: Assert integration tests actually ran
         run: |
-          line="$(grep -E '^ *Tests +[0-9]' vitest-output.txt | tail -1)"
+          # Strip ANSI escapes defensively as well as setting NO_COLOR
+          # above: one of the two is belt, the other braces, and a gate
+          # that cannot parse its own input fails the build for the one
+          # reason that has nothing to do with the code under test.
+          sed -e 's/\x1b\[[0-9;]*m//g' vitest-output.txt > vitest-plain.txt
+          line="$(grep -E '^ *Tests +[0-9]' vitest-plain.txt | tail -1)"
           echo "summary: $line"
           passed="$(printf '%s' "$line" | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' || echo 0)"
           skipped="$(printf '%s' "$line" | grep -oE '[0-9]+ skipped' | grep -oE '[0-9]+' || echo 0)"
           echo "passed=$passed skipped=$skipped"
-          if [ "$passed" -lt 1300 ]; then
+          # Measured, not guessed: the first real run of this workflow
+          # reported 1575 passed / 0 skipped across 130 files with
+          # Postgres 16 and Redis 7 present. Without a database the same
+          # suite reports ~1227 passed / ~348 skipped, so a floor of 1500
+          # sits well clear of the healthy number and well above the
+          # failure mode it exists to catch.
+          if [ "$passed" -lt 1500 ]; then
             echo "::error::Only $passed tests ran. The integration suites are being skipped again - check DATABASE_URL/REDIS_URL reach the test process."
             exit 1
           fi
-          if [ "$skipped" -gt 60 ]; then
-            echo "::error::$skipped tests were skipped. With Postgres and Redis present this should be a handful, not hundreds."
+          if [ "$skipped" -gt 20 ]; then
+            echo "::error::$skipped tests were skipped. With Postgres and Redis present this should be zero or close to it."
             exit 1
           fi
