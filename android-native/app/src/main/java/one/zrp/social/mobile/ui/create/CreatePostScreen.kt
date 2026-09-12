@@ -8,6 +8,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -716,7 +717,7 @@ private fun PollBuilder(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.small)
-                            .clickable(enabled = enabled, onClick = onExpiryClick)
+                            .clickable(enabled = enabled, onClick = onExpiryClick, role = Role.Button)
                             .padding(4.dp),
                     )
                     IconButton(onClick = onClearExpiry, enabled = enabled, modifier = Modifier.size(TouchTarget.min)) {

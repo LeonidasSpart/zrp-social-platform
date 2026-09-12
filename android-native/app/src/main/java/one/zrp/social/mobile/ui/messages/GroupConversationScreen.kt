@@ -5,6 +5,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -153,7 +154,7 @@ fun GroupConversationScreen(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 4.dp)
-                    .clickable(onClick = onOpenInfo),
+                    .clickable(onClick = onOpenInfo, role = Role.Button),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (conversation?.avatarUrl != null) {
@@ -487,7 +488,7 @@ private fun GroupMessageBubble(
         if (!isOwnMessage) {
             Box(modifier = Modifier.width(36.dp).padding(end = 6.dp)) {
                 if (showSenderHeader) {
-                    Box(modifier = Modifier.clickable(onClick = onAvatarClick)) {
+                    Box(modifier = Modifier.clickable(onClick = onAvatarClick, role = Role.Button)) {
                         Avatar(url = sender?.avatarUrl, name = senderName, size = 32.dp)
                         if (isOnline) {
                             Box(

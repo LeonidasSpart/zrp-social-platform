@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -191,7 +192,7 @@ fun ShortsUploadDialog(onDismiss: () -> Unit, onPosted: (Post) -> Unit) {
                                 .aspectRatio(9f / 16f)
                                 .clip(MaterialTheme.shapes.medium)
                                 .border(2.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)
-                                .clickable(enabled = !state.uploading) {
+                                .clickable(enabled = !state.uploading, role = Role.Button) {
                                     pickerLauncher.launch(
                                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly),
                                     )

@@ -2,6 +2,7 @@ package one.zrp.social.mobile.ui.ambassadors
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -393,7 +394,7 @@ private fun CountryCard(country: AmbassadorCountry, onClick: () -> Unit) {
         tonalElevation = 1.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick, role = Role.Button),
     ) {
         Row(
             modifier = Modifier.padding(Spacing.md),

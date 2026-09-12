@@ -6,6 +6,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -667,7 +668,7 @@ private fun FeedRow(
             text = "@${feed.user.username}",
             style = MaterialTheme.typography.labelSmall,
             color = ZrpRed,
-            modifier = Modifier.padding(top = 2.dp).clickable(onClick = onOpenProfile),
+            modifier = Modifier.padding(top = 2.dp).clickable(onClick = onOpenProfile, role = Role.Button),
         )
 
         if (feed.user.banned) {

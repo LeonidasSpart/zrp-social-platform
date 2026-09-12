@@ -2,6 +2,7 @@ package one.zrp.social.mobile.ui.stories
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -109,7 +110,7 @@ private fun StoryTile(
     Column(
         modifier = Modifier
             .width(72.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick, role = Role.Button),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(modifier = Modifier.size(64.dp)) {
@@ -134,7 +135,7 @@ private fun StoryTile(
                         .align(Alignment.BottomEnd)
                         .size(20.dp)
                         .clip(CircleShape)
-                        .clickable(onClick = onAddClick),
+                        .clickable(onClick = onAddClick, role = Role.Button),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.AddCircle,
