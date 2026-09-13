@@ -256,6 +256,19 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 8.dp),
             )
+        } else if (googleForm is LoginFormState.GoogleInterrupted) {
+            // Same gap this screen's own comment above already calls out for
+            // Error - a Google sign-in started from Signup can be interrupted
+            // by process death (GoogleSignInAttemptMarker) exactly as one
+            // started from Login or Welcome can, and loggedOutScreen's
+            // rememberSaveable means the user lands back on THIS screen, not
+            // Login, on the cold start that detects it.
+            Text(
+                text = stringResource(R.string.auth_err_google_interrupted),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
 
         Row(modifier = Modifier.padding(top = 16.dp)) {

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -65,15 +66,31 @@ import one.zrp.social.mobile.ui.theme.ZrpWhite
  * app has no Sign in with Apple implementation at all (web supports it;
  * Android never has) - a real, pre-existing gap, documented rather than
  * faked with a dead button. See the redesign's feature-parity report.
+ *
+ * `formState` is the real root cause of a distinct "select an account,
+ * then nothing happens" report from this specific screen: every prior
+ * fix for that symptom (configChanges, viewModelScope,
+ * GoogleSignInAttemptMarker) targeted the request itself actually
+ * completing, but this screen never rendered the LoginFormState that
+ * request's outcome lands in - LoginScreen already shows a spinner via
+ * GoogleSignInButton(loading=...) and an error/GoogleInterrupted Text
+ * for the exact same states, but a user who taps the Google icon here
+ * (the first screen shown, before ever visiting LoginScreen) saw no
+ * spinner while the request was in flight and no message at all if it
+ * failed - success was the only outcome with any visible effect
+ * (AuthUiState flips and MainActivity navigates away). Wired the same
+ * way LoginScreen already does, not a new pattern.
  */
 @Composable
 fun WelcomeScreen(
+    formState: LoginFormState,
     onSignIn: () -> Unit,
     onCreateAccount: () -> Unit,
     onGoogleSignIn: (Context) -> Unit,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    val googleSubmitting = formState is LoginFormState.SubmittingGoogle
 
     Box(
         modifier = Modifier
@@ -164,14 +181,22 @@ fun WelcomeScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.lg)) {
                 WelcomeMethodIcon(
                     contentDescription = stringResource(R.string.auth_continue_with_google),
-                    onClick = { onGoogleSignIn(context) },
+                    onClick = { if (!googleSubmitting) onGoogleSignIn(context) },
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_google),
-                        contentDescription = null,
-                        tint = Color.Unspecified,
-                        modifier = Modifier.size(IconSize.md),
-                    )
+                    if (googleSubmitting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(IconSize.md),
+                            color = ZrpWhite,
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_google),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(IconSize.md),
+                        )
+                    }
                 }
                 WelcomeMethodIcon(
                     contentDescription = stringResource(R.string.auth_continue_with_email),
@@ -184,6 +209,33 @@ fun WelcomeScreen(
                         modifier = Modifier.size(IconSize.md),
                     )
                 }
+            }
+
+            // The exact feedback LoginScreen already renders for these
+            // same LoginFormState values (see that screen's own Error/
+            // SessionExpired/GoogleInterrupted Text blocks) - without
+            // this, any Google sign-in failure triggered from this
+            // screen (cancelled, no matching credential, backend
+            // rejection, network error, or an interrupted prior attempt
+            // detected on cold start) was invisible here: the request
+            // still completed and updated this exact state, nothing ever
+            // displayed it.
+            if (formState is LoginFormState.Error) {
+                Text(
+                    text = formState.message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = Spacing.md),
+                )
+            } else if (formState is LoginFormState.GoogleInterrupted) {
+                Text(
+                    text = stringResource(R.string.auth_err_google_interrupted),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = Spacing.md),
+                )
             }
 
             Spacer(Modifier.height(Spacing.xxl))
