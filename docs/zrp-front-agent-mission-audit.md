@@ -24,6 +24,7 @@ assumed.
 | 4 | Team Management / API Keys discoverability | **DONE** (prior PR #313) | Web |
 | 5 | Android release candidate (versionCode 22 / 4.0.16, signed) | **UNCHANGED, per explicit instruction** | Android |
 | 6 | This audit report | **DONE** | — |
+| 7 | ZRP Web v1.0.0 release (separate, later directive — see Addendum) | **DONE** | Web |
 
 ## 1. Report-on-profile
 
@@ -229,3 +230,36 @@ documented at every prior bump in `android-native/app/build.gradle`.
   nav), PR #316 (Android versionCode 22), PR #313 (Team/API Keys
   discoverability + hardcoded strings), PR #299 (Communities/Lists,
   which introduced `targetUserId`'s sibling fields on `Report`).
+
+## Addendum: ZRP Web v1.0.0 release — COMPLETE
+
+Out of this mission's original scope (documentation/versioning work
+authorized separately, after this report's own items above were
+already merged), recorded here because this is the one durable,
+committed audit document in the repository.
+
+**Status: DONE.** Verified directly against the GitHub API, not
+restated from memory:
+
+| Item | Value |
+|---|---|
+| Release commit | `cf4f61ca69c8608ec8ea0f5119de997933c35b38` (PR #320, merged to `main`) |
+| Git tag | [`v1.0.0`](https://github.com/LeonidasSpart/zrp-social-platform/releases/tag/v1.0.0) — annotated, points at the commit above |
+| GitHub Release | [`ZRP Web v1.0.0`](https://github.com/LeonidasSpart/zrp-social-platform/releases/tag/v1.0.0) — `draft: false`, `prerelease: false`, marked **Latest**, published `2026-09-13T17:19:30Z` |
+| `package.json` version | `1.0.0` |
+| Release notes | the [`CHANGELOG.md` §1.0.0](../CHANGELOG.md#100--2026-09-13) section, pasted verbatim as the release body |
+
+**How it was completed:** the tag could not be pushed from this
+sandbox's git credentials (`git push origin v1.0.0` returned a clean
+`HTTP 403` directly from `github.com`, and no available GitHub API
+tool in this environment's toolset exposes tag or release creation as
+an alternative — confirmed by exhausting the tool search rather than
+assumed). The repository owner pushed the tag from their own
+authenticated environment and published the GitHub Release through the
+GitHub web UI using the exact body above; both were then verified
+independently via the GitHub API (`get_tag`, `get_release_by_tag`)
+before being recorded as complete here.
+
+Android and iOS are **not** implied to be released by this — see
+[README.md's Versioning and releases section](../README.md#versioning-and-releases)
+for why the three platforms version independently.
