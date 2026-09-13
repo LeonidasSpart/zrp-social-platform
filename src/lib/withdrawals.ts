@@ -161,6 +161,42 @@ export async function failAndRefundWithdrawal(withdrawalId: string, reason: stri
   });
 }
 
+/**
+ * When sendUsdc() throws, this decides whether the on-chain outcome is
+ * KNOWN-SAFE-TO-REFUND (nothing was ever broadcast) or AMBIGUOUS (a
+ * transaction was broadcast and its outcome is uncertain to us right
+ * now, even though the call itself threw).
+ *
+ * @solana/web3.js's own sendAndConfirmTransaction() - which
+ * @solana/spl-token's transfer() (used by sendUsdc()) calls under the
+ * hood, verified directly in both packages' installed source - sends
+ * the transaction FIRST, then separately awaits confirmation. If
+ * confirmation itself fails (a timeout, an expired blockhash, an RPC
+ * hiccup while polling), the SDK throws one of
+ * TransactionExpiredTimeoutError / TransactionExpiredBlockheightExceededError /
+ * TransactionExpiredNonceInvalidError - EVERY one of which the SDK
+ * itself attaches the broadcast signature to (`error.signature`), and
+ * TransactionExpiredTimeoutError's own message says outright: "It is
+ * unknown if it succeeded or failed." A definitive on-chain failure
+ * (the transaction landed but its instructions failed) throws
+ * SendTransactionError, which also carries `.signature` - landed and
+ * failed is not ambiguous, but recording the signature lets
+ * reconciliation confirm that on-chain fact directly instead of a route
+ * handler guessing from the error message.
+ *
+ * Only when NO signature is attached (the transfer failed before ever
+ * being broadcast - an invalid recipient address, a local signing
+ * error, a preflight rejection) is it actually safe to refund
+ * immediately: nothing was ever sent, so nothing can have moved.
+ */
+export function extractBroadcastSignature(error: unknown): string | null {
+  if (error && typeof error === "object" && "signature" in error) {
+    const signature = (error as { signature?: unknown }).signature;
+    if (typeof signature === "string" && signature.length > 0) return signature;
+  }
+  return null;
+}
+
 type OnChainOutcome = "success" | "failed" | "not_found";
 
 /** Asks Solana directly whether a given signature landed, and whether it
