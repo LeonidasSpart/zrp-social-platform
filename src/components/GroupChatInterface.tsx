@@ -1053,7 +1053,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                                 setReactionPickerFor(reactionPickerFor === message.id ? null : message.id);
                               }}
                               className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                              aria-label="React"
+                              aria-label={t("chat.reactAria")}
                             >
                               <Smile className="h-4 w-4" />
                             </button>
@@ -1083,7 +1083,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                           <>
                             <button
                               type="button"
-                              aria-label="Close reaction picker"
+                              aria-label={t("chat.closeReactionPickerAria")}
                               className="fixed inset-0 z-10 cursor-default"
                               onClick={(event) => {
                                 event.stopPropagation();
@@ -1321,8 +1321,8 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
               onClick={() => videoInputRef.current?.click()}
               disabled={uploadingImage}
               className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 sm:flex"
-              title="Upload video"
-              aria-label="Upload video"
+              title={t("chat.uploadVideoAria")}
+              aria-label={t("chat.uploadVideoAria")}
             >
               <Video className="h-5 w-5" />
             </button>
@@ -1369,7 +1369,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                 type="submit"
                 disabled={sending}
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zrp-red text-white shadow-sm transition hover:bg-zrp-darkRed disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Send message"
+                aria-label={t("chat.sendMessageAria")}
               >
                 {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
               </button>
@@ -1406,7 +1406,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                 type="button"
                 onClick={() => setShowEmojiPicker(false)}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                aria-label="Close emoji picker"
+                aria-label={t("chat.closeEmojiPickerAria")}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1431,7 +1431,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
               type="button"
               onClick={closeLightbox}
               className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 sm:right-2 sm:top-2"
-              aria-label="Close image"
+              aria-label={t("chat.closeImageAria")}
             >
               <X className="h-6 w-6" />
             </button>

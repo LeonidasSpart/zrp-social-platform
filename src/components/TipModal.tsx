@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, X, Copy, Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 
@@ -48,6 +49,7 @@ export default function TipModal({
   recipientWallet,
   onTipSent,
 }: TipModalProps) {
+  const { t } = useLanguage();
   const [amount, setAmount] = useState("5");
   const [message, setMessage] = useState("");
   const [transactionId, setTransactionId] = useState("");
@@ -76,15 +78,15 @@ export default function TipModal({
 
     const parsedAmount = Number.parseFloat(amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
-      setError("Please enter a valid USDC amount.");
+      setError(t("tipModal.errInvalidAmount"));
       return;
     }
     if (parsedAmount > 1_000_000) {
-      setError("The maximum tip amount is 1,000,000 USDC.");
+      setError(t("tipModal.errMaxAmount"));
       return;
     }
     if (!transactionId.trim()) {
-      setError("Enter the transaction ID from your wallet after sending.");
+      setError(t("tipModal.errTransactionIdRequired"));
       return;
     }
 
@@ -112,7 +114,7 @@ export default function TipModal({
       }
 
       if (!response.ok) {
-        throw new Error(data?.error || "Couldn't verify or record this tip.");
+        throw new Error(data?.error || t("tipModal.errSubmitFailed"));
       }
 
       setSuccess(true);
@@ -127,7 +129,7 @@ export default function TipModal({
       }, 1500);
     } catch (err: unknown) {
       console.error("Tip submission error:", err);
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      setError(err instanceof Error ? err.message : t("tipModal.errGeneric"));
     } finally {
       setLoading(false);
     }
@@ -138,14 +140,14 @@ export default function TipModal({
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Send Tip to {recipientName}
+            {t("tipModal.title", { name: recipientName })}
           </h2>
           <button
             type="button"
             onClick={onClose}
             disabled={loading}
             className="rounded p-1 hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-700"
-            aria-label="Close"
+            aria-label={t("tipModal.close")}
           >
             <X className="h-5 w-5" />
           </button>
@@ -155,23 +157,23 @@ export default function TipModal({
           <div className="py-8 text-center">
             <div className="mb-2 text-4xl text-green-500">✓</div>
             <p className="font-medium text-gray-800 dark:text-gray-200">
-              Tip submitted!
+              {t("tipModal.submitted")}
             </p>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              We're verifying it on-chain now. Thank you for supporting {recipientName}.
+              {t("tipModal.verifyingOnChain", { name: recipientName })}
             </p>
           </div>
         ) : !recipientWallet ? (
           <div className="py-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {recipientName} hasn't set up a wallet to receive tips yet.
+              {t("tipModal.noWallet", { name: recipientName })}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                1. Send USDC to this address
+                {t("tipModal.step1SendTo")}
               </label>
               <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
                 <span className="flex-1 truncate font-mono text-xs text-gray-700 dark:text-gray-300">
@@ -181,19 +183,19 @@ export default function TipModal({
                   type="button"
                   onClick={handleCopyAddress}
                   className="flex-shrink-0 text-gray-500 hover:text-zrp-red transition"
-                  title="Copy address"
+                  title={t("tipModal.copyAddress")}
                 >
                   {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                 </button>
               </div>
               <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                Use your own wallet app (Phantom, Solflare, etc.) to send from outside ZRP.
+                {t("tipModal.walletHint")}
               </p>
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Amount (USDC)
+                {t("tipModal.amountLabel")}
               </label>
               <input
                 type="number"
@@ -201,7 +203,7 @@ export default function TipModal({
                 min="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount"
+                placeholder={t("tipModal.amountPlaceholder")}
                 disabled={loading}
                 className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
@@ -209,35 +211,35 @@ export default function TipModal({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                2. Transaction ID
+                {t("tipModal.step2TransactionId")}
               </label>
               <input
                 type="text"
                 value={transactionId}
                 onChange={(e) => setTransactionId(e.target.value)}
-                placeholder="Paste the signature from your wallet"
+                placeholder={t("tipModal.transactionIdPlaceholder")}
                 disabled={loading}
                 className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
               <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                We verify this on-chain before crediting the tip.
+                {t("tipModal.transactionIdHint")}
               </p>
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Message (optional)
+                {t("tipModal.messageLabel")}
               </label>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Supportive message..."
+                placeholder={t("tipModal.messagePlaceholder")}
                 disabled={loading}
                 maxLength={1000}
                 className="flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
               <p className="mt-1 text-right text-xs text-gray-400 dark:text-gray-500">
-                {message.length}/1000
+                {t("tipModal.charCount", { count: message.length })}
               </p>
             </div>
 
@@ -254,7 +256,7 @@ export default function TipModal({
                 disabled={loading}
                 className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-transparent px-4 py-2 text-sm font-medium hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-800"
               >
-                Cancel
+                {t("tipModal.cancel")}
               </button>
               <button
                 type="submit"
@@ -264,16 +266,16 @@ export default function TipModal({
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Verifying...
+                    {t("tipModal.verifying")}
                   </>
                 ) : (
-                  "Confirm Tip"
+                  t("tipModal.confirmTip")
                 )}
               </button>
             </div>
 
             <p className="text-center text-xs text-gray-400 dark:text-gray-500">
-              10% platform fee · 35% of platform fees go to charity
+              {t("tipModal.feeNote")}
             </p>
           </form>
         )}

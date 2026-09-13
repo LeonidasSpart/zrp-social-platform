@@ -87,7 +87,7 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
             <button
               onClick={copyAddress}
               className="flex-shrink-0 ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400"
-              title="Copy address"
+              title={t("help.copyAddress")}
             >
               {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
             </button>
@@ -95,17 +95,17 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Transaction Signature (after you send)
+              {t("cryptoPayment.transactionSignatureLabel")}
             </label>
             <input
               type="text"
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="Paste your transaction signature here"
+              placeholder={t("cryptoPayment.transactionSignaturePlaceholder")}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Paste the transaction signature from your wallet to help us verify.
+              {t("cryptoPayment.transactionSignatureHelp")}
             </p>
           </div>
 

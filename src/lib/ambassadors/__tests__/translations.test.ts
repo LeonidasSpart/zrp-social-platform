@@ -1,15 +1,18 @@
 import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
+import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 
 /*
  * Every Ambassadors-related translation key used anywhere in the
- * feature (public pages, admin, components) must exist in all 11 ZRP
- * language blocks - same completeness bar as the country dataset
+ * feature (public pages, admin, components) must exist in every ZRP
+ * language block - same completeness bar as the country dataset
  * itself. This scans the actual source files for `t("ambassadors...")`
  * / `t("adminAmbassadors...")` calls rather than hand-maintaining a
  * list, so a new key added later is covered automatically and a typo'd
- * key is caught immediately.
+ * key is caught immediately. The expected occurrence count is derived
+ * from SUPPORTED_LANGUAGES rather than hardcoded, so adding a new
+ * language doesn't require touching this test.
  */
 const root = process.cwd();
 const read = (p: string) => fs.readFileSync(path.join(root, p), "utf8");
@@ -66,11 +69,12 @@ describe("Ambassadors translation keys", () => {
   });
 
   const dict = read("src/lib/translations.ts");
+  const languageCount = SUPPORTED_LANGUAGES.length;
   it.each(Array.from(allKeys).sort().map((k) => [k] as [string]))(
-    "%s is defined in all 11 language blocks",
+    `%s is defined in all ${languageCount} language blocks`,
     (key) => {
       const occurrences = dict.split(`"${key}":`).length - 1;
-      expect(occurrences).toBe(11);
+      expect(occurrences).toBe(languageCount);
     },
   );
 

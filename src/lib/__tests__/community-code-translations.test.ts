@@ -1,16 +1,18 @@
 import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
+import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 
 /*
  * Every ZRP Community & Leadership Code translation key used anywhere in
  * the feature (the /community-code hub page, the Ambassador apply/
- * dashboard acceptance flow, and its nav links) must exist in all 11 ZRP
- * language blocks - same completeness bar as the Ambassadors feature
+ * dashboard acceptance flow, and its nav links) must exist in every ZRP
+ * language block - same completeness bar as the Ambassadors feature
  * itself (see src/lib/ambassadors/__tests__/translations.test.ts, which
  * this mirrors). Scans source files for t("communityCode...")/
  * t("ambassadors.apply.codeOfConduct...")/t("ambassadors.dashboard.code...")
- * calls rather than hand-maintaining a list.
+ * calls rather than hand-maintaining a list. The expected occurrence
+ * count is derived from SUPPORTED_LANGUAGES rather than hardcoded.
  */
 const root = process.cwd();
 const read = (p: string) => fs.readFileSync(path.join(root, p), "utf8");
@@ -61,11 +63,12 @@ describe("Community & Leadership Code translation keys", () => {
   });
 
   const dict = read("src/lib/translations.ts");
+  const languageCount = SUPPORTED_LANGUAGES.length;
   it.each(Array.from(allKeys).sort().map((k) => [k] as [string]))(
-    "%s is defined in all 11 language blocks",
+    `%s is defined in all ${languageCount} language blocks`,
     (key) => {
       const occurrences = dict.split(`"${key}":`).length - 1;
-      expect(occurrences).toBe(11);
+      expect(occurrences).toBe(languageCount);
     },
   );
 
@@ -85,7 +88,7 @@ describe("Community & Leadership Code translation keys", () => {
     // avoid needing them (see legal-content.ts's COMMUNITY_CODE_CONFIG
     // comment). A stray {version}/{date} literal would render verbatim.
     const versionBodyOccurrences = dict.match(/"communityCode\.i\.versionBody":\s*"((?:[^"\\]|\\.)*)"/g) ?? [];
-    expect(versionBodyOccurrences.length).toBe(11);
+    expect(versionBodyOccurrences.length).toBe(languageCount);
     for (const occurrence of versionBodyOccurrences) {
       expect(occurrence).not.toMatch(/\{version\}|\{date\}/);
     }

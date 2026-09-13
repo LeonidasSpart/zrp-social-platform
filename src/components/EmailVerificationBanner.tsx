@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { Mail, X, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function EmailVerificationBanner() {
+  const { t } = useLanguage();
   const { data: session, update } = useSession();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -23,13 +25,13 @@ export default function EmailVerificationBanner() {
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage({ type: "success", text: "Verification email sent! Check your inbox." });
+        setMessage({ type: "success", text: t("emailVerification.success") });
         await update();
       } else {
-        setMessage({ type: "error", text: data.error || "Failed to send email." });
+        setMessage({ type: "error", text: data.error || t("emailVerification.errorGeneric") });
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+      setMessage({ type: "error", text: t("emailVerification.errorCatch") });
     } finally {
       setLoading(false);
     }
@@ -41,16 +43,16 @@ export default function EmailVerificationBanner() {
         <Mail className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-            Verify your email address
+            {t("emailVerification.title")}
           </p>
           <p className="text-sm text-yellow-700 dark:text-yellow-400">
-            Please verify your email to unlock all features.{" "}
+            {t("emailVerification.body")}{" "}
             <button
               onClick={handleResend}
               disabled={loading}
               className="underline font-medium hover:text-yellow-900 dark:hover:text-yellow-200 disabled:opacity-50"
             >
-              {loading ? "Sending..." : "Resend verification email"}
+              {loading ? t("emailVerification.sending") : t("emailVerification.resend")}
             </button>
           </p>
           {message && (
@@ -65,7 +67,7 @@ export default function EmailVerificationBanner() {
       <button
         onClick={() => setDismissed(true)}
         className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-200 transition"
-        title="Dismiss"
+        title={t("emailVerification.dismiss")}
       >
         <X className="w-5 h-5" />
       </button>

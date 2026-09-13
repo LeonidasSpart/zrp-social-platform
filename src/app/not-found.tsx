@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { Home, ArrowLeft, Search } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function NotFound() {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-zrp-deepBlack px-4 text-center">
       {/* ─── ZRP Branding ─── */}
@@ -14,10 +16,10 @@ export default function NotFound() {
 
       {/* ─── Message ─── */}
       <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-        Oops! Page not found.
+        {t("notFound.heading")}
       </h2>
       <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-md">
-        The page you're looking for doesn't exist or has been moved.
+        {t("notFound.body")}
       </p>
 
       {/* ─── Illustration ─── */}
@@ -30,24 +32,24 @@ export default function NotFound() {
           className="inline-flex items-center gap-2 px-6 py-2.5 bg-zrp-red text-white rounded-full font-medium hover:bg-zrp-darkRed transition"
         >
           <Home className="w-4 h-4" />
-          Go Home
+          {t("notFound.goHome")}
         </Link>
         <button
           onClick={() => window.history.back()}
           className="inline-flex items-center gap-2 px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-full font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
         >
           <ArrowLeft className="w-4 h-4" />
-          Go Back
+          {t("notFound.goBack")}
         </button>
       </div>
 
       {/* ─── Footer Links ─── */}
       <div className="mt-12 flex flex-wrap justify-center gap-4 text-sm text-gray-400 dark:text-gray-500">
-        <Link href="/about" className="hover:text-zrp-red transition">About</Link>
-        <Link href="/privacy" className="hover:text-zrp-red transition">Privacy</Link>
-        <Link href="/terms" className="hover:text-zrp-red transition">Terms</Link>
-        <Link href="/contact" className="hover:text-zrp-red transition">Contact</Link>
-        <Link href="/charity" className="hover:text-zrp-red transition">Charity</Link>
+        <Link href="/about" className="hover:text-zrp-red transition">{t("nav.aboutZrp")}</Link>
+        <Link href="/privacy" className="hover:text-zrp-red transition">{t("footer.privacyPolicy")}</Link>
+        <Link href="/terms" className="hover:text-zrp-red transition">{t("footer.termsOfService")}</Link>
+        <Link href="/contact" className="hover:text-zrp-red transition">{t("footer.contact")}</Link>
+        <Link href="/charity" className="hover:text-zrp-red transition">{t("footer.charity")}</Link>
       </div>
 
       {/* ─── Search Box (optional) ─── */}
@@ -56,7 +58,7 @@ export default function NotFound() {
           <input
             type="text"
             name="q"
-            placeholder="Search ZRP..."
+            placeholder={t("notFound.searchPlaceholder")}
             className="flex-1 px-4 py-2 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
           />
           <button

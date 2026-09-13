@@ -1777,7 +1777,7 @@ export default function ChatInterface({
                 dark:text-gray-400
                 dark:hover:bg-gray-700
               "
-              aria-label="Voice call"
+              aria-label={t("chat.voiceCallAria")}
             >
               <Phone className="h-5 w-5" />
             </button>
@@ -1801,7 +1801,7 @@ export default function ChatInterface({
                 dark:text-gray-400
                 dark:hover:bg-gray-700
               "
-              aria-label="Video call"
+              aria-label={t("chat.videoCallAria")}
             >
               <Video className="h-5 w-5" />
             </button>
@@ -2056,7 +2056,7 @@ export default function ChatInterface({
                                 dark:text-gray-300
                                 dark:hover:bg-gray-700
                               "
-                              aria-label="React"
+                              aria-label={t("chat.reactAria")}
                             >
                               <Smile className="h-4 w-4" />
                             </button>
@@ -2092,7 +2092,7 @@ export default function ChatInterface({
                                 dark:text-gray-300
                                 dark:hover:bg-gray-700
                               "
-                              aria-label="Reply"
+                              aria-label={t("action.reply")}
                             >
                               <Reply className="h-4 w-4" />
                             </button>
@@ -2123,7 +2123,7 @@ export default function ChatInterface({
                                     dark:text-gray-300
                                     dark:hover:bg-gray-700
                                   "
-                                  aria-label="Edit"
+                                  aria-label={t("action.edit")}
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </button>
@@ -2183,7 +2183,7 @@ export default function ChatInterface({
                           <>
                             <button
                               type="button"
-                              aria-label="Close reaction picker"
+                              aria-label={t("chat.closeReactionPickerAria")}
                               className="
                                 fixed
                                 inset-0
@@ -2913,7 +2913,7 @@ export default function ChatInterface({
               dark:hover:bg-gray-700
               dark:hover:text-white
             "
-            aria-label="Cancel reply"
+            aria-label={t("chat.cancelReplyAria")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -3194,8 +3194,8 @@ export default function ChatInterface({
                 dark:hover:bg-gray-700
                 sm:flex
               "
-              title="Upload video"
-              aria-label="Upload video"
+              title={t("chat.uploadVideoAria")}
+              aria-label={t("chat.uploadVideoAria")}
             >
               <Video className="h-5 w-5" />
             </button>
@@ -3321,7 +3321,7 @@ export default function ChatInterface({
                   disabled:cursor-not-allowed
                   disabled:opacity-50
                 "
-                aria-label="Send message"
+                aria-label={t("chat.sendMessageAria")}
               >
                 {sending ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -3442,7 +3442,7 @@ export default function ChatInterface({
                   hover:bg-gray-100
                   dark:hover:bg-gray-700
                 "
-                aria-label="Close emoji picker"
+                aria-label={t("chat.closeEmojiPickerAria")}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -3526,7 +3526,7 @@ export default function ChatInterface({
                 sm:right-2
                 sm:top-2
               "
-              aria-label="Close image"
+              aria-label={t("chat.closeImageAria")}
             >
               <X className="h-6 w-6" />
             </button>

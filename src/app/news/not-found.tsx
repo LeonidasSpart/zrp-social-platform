@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function NewsNotFound() {
+  const { t } = useLanguage();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md text-center">
@@ -9,19 +13,18 @@ export default function NewsNotFound() {
         </div>
 
         <h1 className="text-3xl font-bold">
-          News article not found
+          {t("newsNotFound.heading")}
         </h1>
 
         <p className="mt-3 text-muted-foreground">
-          This ZRP News article may have been removed,
-          unpublished, or the link may be incorrect.
+          {t("newsNotFound.body")}
         </p>
 
         <Link
           href="/news"
           className="mt-7 inline-flex rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
         >
-          Back to ZRP News
+          {t("newsNotFound.backToNews")}
         </Link>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
+import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 
 /**
  * Guards for the site footer.
@@ -15,10 +16,10 @@ import path from "path";
  *    nobody complains about a footer - they just quietly find out the
  *    company page is broken.
  *
- *  - Every label must exist in all 11 languages. The footer was built
- *    entirely out of strings that already existed (footer.*, nav.* and
- *    help.footer.*), so this is also what stops someone "fixing" a
- *    label later by inventing a key with ten English fallbacks.
+ *  - Every label must exist in every supported language. The footer was
+ *    built entirely out of strings that already existed (footer.*, nav.*
+ *    and help.footer.*), so this is also what stops someone "fixing" a
+ *    label later by inventing a key with English-only fallbacks.
  *
  * vitest runs with environment: "node" (see vitest.config.ts), so there
  * is no DOM to mount into; these assert on the source, matching the
@@ -124,11 +125,12 @@ describe("Footer labels exist in every language", () => {
     expect(keys.length).toBeGreaterThanOrEqual(hrefs.length);
   });
 
+  const languageCount = SUPPORTED_LANGUAGES.length;
   it.each(unique(keys).map((k) => [k] as [string]))(
-    "%s is defined in all 11 language blocks",
+    `%s is defined in all ${languageCount} language blocks`,
     (key) => {
       const occurrences = dict.split(`"${key}":`).length - 1;
-      expect(occurrences).toBe(11);
+      expect(occurrences).toBe(languageCount);
     },
   );
 });

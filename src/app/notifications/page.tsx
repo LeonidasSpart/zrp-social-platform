@@ -251,9 +251,9 @@ export default function NotificationsPage() {
   const grouped = useMemo(() => groupNotifications(filtered), [filtered]);
 
   const tabs: { id: FilterTab; label: string }[] = [
-    { id: "all", label: "All" },
-    { id: "verified", label: "Verified" },
-    { id: "follows", label: "Follows" },
+    { id: "all", label: t("notifications.tabAll") },
+    { id: "verified", label: t("notifications.tabVerified") },
+    { id: "follows", label: t("notifications.tabFollows") },
   ];
 
   if (status === "loading" || loading) {

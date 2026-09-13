@@ -1709,21 +1709,16 @@ export default function PostCard({
                           ? "text-blue-500 hover:text-blue-600"
                           : "text-gray-500 hover:text-blue-500"
                       }`}
-                      // Still English: there is no translated pin
-                      // string anywhere in the dictionary to reuse, and
-                      // machine-translating one into 11 languages is
-                      // not something to do silently. aria-label at
-                      // least gives the button a name instead of none.
                       aria-label={
                         isPinned
-                          ? "Unpin from profile"
-                          : "Pin to profile"
+                          ? t("post.unpinFromProfile")
+                          : t("post.pinToProfile")
                       }
                       aria-pressed={isPinned}
                       title={
                         isPinned
-                          ? "Unpin from profile"
-                          : "Pin to profile"
+                          ? t("post.unpinFromProfile")
+                          : t("post.pinToProfile")
                       }
                     >
                       {isPinned ? (
@@ -2078,14 +2073,13 @@ export default function PostCard({
                     )}
 
                     {showTranslation
-                      ? "Show original"
-                      : "Show translation"}
+                      ? t("comment.showOriginal")
+                      : t("comment.showTranslation")}
                   </button>
 
                   {translateError && (
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                      Translation unavailable
-                      right now.
+                      {t("comment.translationUnavailable")}
                     </p>
                   )}
 
@@ -2864,7 +2858,7 @@ export default function PostCard({
             className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center"
             role="dialog"
             aria-modal="true"
-            aria-label="Image gallery"
+            aria-label={t("post.imageGalleryAria")}
             onClick={closeLightbox}
             onTouchStart={
               handleLightboxTouchStart
@@ -2898,7 +2892,7 @@ export default function PostCard({
               <button
                 type="button"
                 onClick={closeLightbox}
-                aria-label="Close image"
+                aria-label={t("post.closeImageAria")}
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-black/50 hover:bg-white/20 text-white transition"
               >
                 <X className="w-6 h-6" />
@@ -2912,7 +2906,7 @@ export default function PostCard({
                   e.stopPropagation();
                   showPreviousLightboxImage();
                 }}
-                aria-label="Previous image"
+                aria-label={t("marketplace.previousImage")}
                 className="hidden sm:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-black/50 hover:bg-white/20 text-white transition"
               >
                 <ChevronLeft className="w-7 h-7" />
@@ -2959,7 +2953,7 @@ export default function PostCard({
                   e.stopPropagation();
                   showNextLightboxImage();
                 }}
-                aria-label="Next image"
+                aria-label={t("marketplace.nextImage")}
                 className="hidden sm:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-black/50 hover:bg-white/20 text-white transition"
               >
                 <ChevronRight className="w-7 h-7" />

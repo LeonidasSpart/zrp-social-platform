@@ -104,13 +104,13 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Additional Note (optional)
+              {t("upgradeRequest.noteLabel")}
             </label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
-              placeholder="Any special requests or comments..."
+              placeholder={t("upgradeRequest.notePlaceholder")}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none focus:ring-2 focus:ring-zrp-red focus:border-transparent"
             />
           </div>

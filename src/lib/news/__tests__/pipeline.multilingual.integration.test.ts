@@ -484,8 +484,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
     });
 
     it("refuses to enable a language the news system does not support", async () => {
-      // ZRP itself supports 11 languages; ZRP News deliberately supports
-      // four, and the guard is a real one rather than a convention.
+      // ZRP itself supports many more languages; ZRP News deliberately
+      // supports four, and the guard is a real one rather than a convention.
       expect(isNewsLanguage("es")).toBe(false);
       expect(isNewsLanguage("ar")).toBe(false);
       expect(TRAVEL_LANGUAGES.every(isNewsLanguage)).toBe(true);

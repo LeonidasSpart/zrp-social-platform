@@ -16,6 +16,7 @@ import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { getPlanLimits } from "@/lib/limits";
 import CustomUrlSettings from "@/components/CustomUrlSettings";
 import CategoryPickerModal from "@/components/CategoryPickerModal";
+import { categoryToTranslationKey } from "@/lib/professionalCategories";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
 import { buttonClasses } from "@/components/ui/styles";
@@ -1009,7 +1010,7 @@ export default function SettingsPage() {
                     >
                       <span className="text-sm text-gray-700 dark:text-gray-300">Category</span>
                       <span className="text-sm text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                        {category || "None"}
+                        {category ? t(categoryToTranslationKey(category)) : "None"}
                         <ChevronRight className="w-4 h-4 rtl:-scale-x-100" />
                       </span>
                     </button>

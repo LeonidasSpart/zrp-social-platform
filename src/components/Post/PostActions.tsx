@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Heart, MessageCircle, Repeat2, Bookmark, Share2, Pin, PinOff, Quote } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
 interface PostActionsProps {
@@ -43,6 +44,7 @@ export function PostActions({
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
   const [isPending, startTransition] = useTransition();
   const { data: session } = useSession();
+  const { t } = useLanguage();
 
   const handleLike = async () => {
     if (!session) return;
@@ -165,7 +167,7 @@ export function PostActions({
         <button
           onClick={handleQuote}
           className="flex items-center gap-1 text-sm hover:text-blue-400 transition-colors"
-          title="Quote this post"
+          title={t("post.quoteThisPost")}
         >
           <Quote className="w-5 h-5" />
         </button>
@@ -199,7 +201,7 @@ export function PostActions({
               ? "text-blue-600"
               : "text-zinc-400 hover:text-blue-600"
           )}
-          title={isPinned ? "Unpin from profile" : "Pin to profile"}
+          title={isPinned ? t("post.unpinFromProfile") : t("post.pinToProfile")}
         >
           {isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
         </button>

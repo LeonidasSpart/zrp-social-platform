@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ExternalLink, Play } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LinkPreview {
   url: string;
@@ -20,6 +21,7 @@ interface LinkPreviewCardProps {
 }
 
 export default function LinkPreviewCard({ url, compact = false, onRemove, onLoaded }: LinkPreviewCardProps) {
+  const { t } = useLanguage();
   const [preview, setPreview] = useState<LinkPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -114,7 +116,7 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
             onRemove();
           }}
           className="absolute top-2 right-2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
-          title="Remove link preview"
+          title={t("linkPreview.remove")}
         >
           ✕
         </button>

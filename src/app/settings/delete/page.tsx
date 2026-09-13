@@ -98,8 +98,11 @@ export default function DeleteAccountPage() {
   };
 
   const handleConfirmDeletion = async () => {
-    if (confirmationText !== "DELETE") {
-      setMessage({ type: "error", text: t("deleteAccount.errTypeDeleteConfirm") });
+    if (confirmationText !== t("deleteAccount.confirmWord")) {
+      setMessage({
+        type: "error",
+        text: t("deleteAccount.errTypeDeleteConfirm", { word: t("deleteAccount.confirmWord") }),
+      });
       return;
     }
 
@@ -169,13 +172,13 @@ export default function DeleteAccountPage() {
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t("deleteAccount.confirmDeletionTitle")}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              {t("deleteAccount.confirmDeletionInstructionPre")} <strong className="text-red-600">DELETE</strong> {t("deleteAccount.confirmDeletionInstructionPost")}
+              {t("deleteAccount.confirmDeletionInstructionPre")} <strong className="text-red-600">{t("deleteAccount.confirmWord")}</strong> {t("deleteAccount.confirmDeletionInstructionPost")}
             </p>
             <input
               type="text"
               value={confirmationText}
               onChange={(e) => setConfirmationText(e.target.value)}
-              placeholder={t("deleteAccount.typeDeleteToConfirm")}
+              placeholder={t("deleteAccount.typeDeleteToConfirm", { word: t("deleteAccount.confirmWord") })}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
             <div className="flex gap-3 mt-4">

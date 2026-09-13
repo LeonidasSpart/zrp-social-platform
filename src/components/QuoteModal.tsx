@@ -119,7 +119,7 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Add your thoughts..."
+            placeholder={t("quote.thoughtsPlaceholder")}
             className="w-full resize-none border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
             rows={4}
             maxLength={limits.postLength}
