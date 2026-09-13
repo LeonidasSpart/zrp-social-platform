@@ -125,6 +125,14 @@ class LocalizationCompletenessTest {
         "Powered by DeepSeek",
         "https://...", "https://…", "https://your-site.com", "https://your-website.com",
         "user@example.com", "article-slug",
+        // The music explicit-content badge: an industry-standard single-
+        // letter symbol (Spotify/Apple Music show it untranslated in every
+        // locale), already reviewed and shipped this way on web
+        // (src/lib/translations.ts music.studio.explicitBadge). Web's own
+        // dictionary genuinely localizes it in only two languages -
+        // Japanese ("露") and Korean ("19", the local content-rating
+        // convention) - both of which already diverge from "E" here too.
+        "E",
     )
 
     /**

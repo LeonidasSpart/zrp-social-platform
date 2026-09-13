@@ -719,7 +719,7 @@
     <string name="music_studio_discard_upload">破棄してやり直す</string>
     <string name="music_studio_my_tracks">マイ楽曲</string>
     <string name="music_studio_no_tracks_yet">まだ楽曲を公開していません。</string>
-    <string name="music_studio_explicit_badge">E</string>
+    <string name="music_studio_explicit_badge">露</string>
     <string name="music_studio_no_album">アルバムなし</string>
     <string name="music_studio_edit_track">楽曲を編集</string>
     <string name="music_studio_delete_track">楽曲を削除</string>
