@@ -39,7 +39,7 @@ import org.w3c.dom.Element
  *      quantity item's placeholder doesn't match the English source.
  *
  * This is a plain JVM test (no Android framework / Robolectric needed)
- * - it reads the actual `res/values*/strings.xml` files straight off
+ * - it reads the actual res/values-.../strings.xml files straight off
  * disk with the standard JDK DOM parser, the same way a human auditing
  * the repo would.
  */
