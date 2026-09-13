@@ -1582,6 +1582,21 @@
     <string name="admin_ads_no_campaigns">समीक्षा के लिए कोई अभियान नहीं है।</string>
     <string name="admin_ads_budget">%1$s %2$s · बजट %3$s</string>
     <string name="admin_ads_rejection_placeholder">विज्ञापनदाता को बताएं कि इसे क्यों अस्वीकार किया गया...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">भुगतान लंबित</string>
+    <string name="admin_ads_status_payment_failed">भुगतान विफल</string>
+    <string name="admin_ads_status_suspended">निलंबित</string>
+    <string name="admin_ads_status_cancelled">रद्द</string>
+    <string name="admin_ads_suspend">निलंबित करें</string>
+    <string name="admin_ads_resume">फिर से शुरू करें</string>
+    <string name="admin_ads_cancel">अभियान रद्द करें</string>
+    <string name="admin_ads_confirm_suspend">निलंबन की पुष्टि करें</string>
+    <string name="admin_ads_confirm_cancel">रद्द करने की पुष्टि करें</string>
+    <string name="admin_ads_suspend_placeholder">निलंबन का कारण (विज्ञापनदाता को दिखाया जाएगा)</string>
+    <string name="admin_ads_admin_note_label">आंतरिक नोट (केवल स्टाफ़ के लिए)</string>
+    <string name="admin_ads_admin_note_placeholder">विज्ञापनदाता को नहीं दिखाया जाएगा</string>
+    <string name="admin_ads_paid_label">$%1$s भुगतान किया गया · %2$s</string>
+    <string name="admin_ads_not_paid_label">भुगतान की प्रतीक्षा में</string>
     <string name="admin_marketplace_title">मार्केटप्लेस समीक्षा</string>
     <string name="admin_marketplace_no_listings">समीक्षा के लिए कोई लिस्टिंग नहीं है।</string>
     <string name="admin_marketplace_price_on_request">मांगने पर मूल्य</string>

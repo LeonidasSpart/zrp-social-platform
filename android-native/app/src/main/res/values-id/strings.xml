@@ -1612,6 +1612,21 @@
     <string name="admin_ads_no_campaigns">Tidak ada kampanye untuk ditinjau.</string>
     <string name="admin_ads_budget">%1$s %2$s · Anggaran %3$s</string>
     <string name="admin_ads_rejection_placeholder">Jelaskan alasan penolakan kepada pengiklan...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">Menunggu pembayaran</string>
+    <string name="admin_ads_status_payment_failed">Pembayaran gagal</string>
+    <string name="admin_ads_status_suspended">Ditangguhkan</string>
+    <string name="admin_ads_status_cancelled">Dibatalkan</string>
+    <string name="admin_ads_suspend">Tangguhkan</string>
+    <string name="admin_ads_resume">Lanjutkan</string>
+    <string name="admin_ads_cancel">Batalkan kampanye</string>
+    <string name="admin_ads_confirm_suspend">Konfirmasi penangguhan</string>
+    <string name="admin_ads_confirm_cancel">Konfirmasi pembatalan</string>
+    <string name="admin_ads_suspend_placeholder">Alasan penangguhan (terlihat oleh pengiklan)</string>
+    <string name="admin_ads_admin_note_label">Catatan internal (khusus staf)</string>
+    <string name="admin_ads_admin_note_placeholder">Tidak terlihat oleh pengiklan</string>
+    <string name="admin_ads_paid_label">Dibayar $%1$s · %2$s</string>
+    <string name="admin_ads_not_paid_label">Menunggu pembayaran</string>
     <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
     <string name="admin_marketplace_title">Tinjauan Marketplace</string>
     <string name="admin_marketplace_no_listings">Tidak ada listing untuk ditinjau.</string>

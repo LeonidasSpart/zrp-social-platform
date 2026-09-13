@@ -1612,6 +1612,21 @@
     <string name="admin_ads_no_campaigns">لا توجد حملات للمراجعة.</string>
     <string name="admin_ads_budget">%1$s %2$s · الميزانية %3$s</string>
     <string name="admin_ads_rejection_placeholder">اشرح للمعلن سبب الرفض...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">بانتظار الدفع</string>
+    <string name="admin_ads_status_payment_failed">فشل الدفع</string>
+    <string name="admin_ads_status_suspended">موقوفة</string>
+    <string name="admin_ads_status_cancelled">ملغاة</string>
+    <string name="admin_ads_suspend">إيقاف</string>
+    <string name="admin_ads_resume">استئناف</string>
+    <string name="admin_ads_cancel">إلغاء الحملة</string>
+    <string name="admin_ads_confirm_suspend">تأكيد الإيقاف</string>
+    <string name="admin_ads_confirm_cancel">تأكيد الإلغاء</string>
+    <string name="admin_ads_suspend_placeholder">سبب الإيقاف (يظهر للمعلن)</string>
+    <string name="admin_ads_admin_note_label">ملاحظة داخلية (للموظفين فقط)</string>
+    <string name="admin_ads_admin_note_placeholder">لا تظهر للمعلن</string>
+    <string name="admin_ads_paid_label">تم دفع %1$s$ · %2$s</string>
+    <string name="admin_ads_not_paid_label">بانتظار الدفع</string>
     <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
     <string name="admin_marketplace_title">مراجعة المتجر</string>
     <string name="admin_marketplace_no_listings">لا توجد إعلانات للمراجعة.</string>

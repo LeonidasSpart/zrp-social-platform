@@ -1582,6 +1582,21 @@
     <string name="admin_ads_no_campaigns">審査対象のキャンペーンはありません。</string>
     <string name="admin_ads_budget">%1$s %2$s・予算 %3$s</string>
     <string name="admin_ads_rejection_placeholder">却下理由を広告主に伝えてください...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">支払い待ち</string>
+    <string name="admin_ads_status_payment_failed">支払いに失敗しました</string>
+    <string name="admin_ads_status_suspended">強制停止</string>
+    <string name="admin_ads_status_cancelled">キャンセル済み</string>
+    <string name="admin_ads_suspend">強制停止</string>
+    <string name="admin_ads_resume">再開</string>
+    <string name="admin_ads_cancel">キャンペーンをキャンセル</string>
+    <string name="admin_ads_confirm_suspend">強制停止を確認</string>
+    <string name="admin_ads_confirm_cancel">キャンセルを確認</string>
+    <string name="admin_ads_suspend_placeholder">停止理由(広告主に表示されます)</string>
+    <string name="admin_ads_admin_note_label">内部メモ(スタッフ限定)</string>
+    <string name="admin_ads_admin_note_placeholder">広告主には表示されません</string>
+    <string name="admin_ads_paid_label">%1$sドル支払い済み · %2$s</string>
+    <string name="admin_ads_not_paid_label">支払い待ち</string>
     <string name="admin_marketplace_title">マーケットプレイス審査</string>
     <string name="admin_marketplace_no_listings">審査対象の出品はありません。</string>
     <string name="admin_marketplace_price_on_request">価格応相談</string>

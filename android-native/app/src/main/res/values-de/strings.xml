@@ -1612,6 +1612,21 @@
     <string name="admin_ads_no_campaigns">Keine Kampagnen zu prüfen.</string>
     <string name="admin_ads_budget">%1$s %2$s · Budget %3$s</string>
     <string name="admin_ads_rejection_placeholder">Erkläre dem Werbetreibenden die Ablehnung...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">Zahlung ausstehend</string>
+    <string name="admin_ads_status_payment_failed">Zahlung fehlgeschlagen</string>
+    <string name="admin_ads_status_suspended">Ausgesetzt</string>
+    <string name="admin_ads_status_cancelled">Abgebrochen</string>
+    <string name="admin_ads_suspend">Aussetzen</string>
+    <string name="admin_ads_resume">Fortsetzen</string>
+    <string name="admin_ads_cancel">Kampagne abbrechen</string>
+    <string name="admin_ads_confirm_suspend">Aussetzung bestätigen</string>
+    <string name="admin_ads_confirm_cancel">Abbruch bestätigen</string>
+    <string name="admin_ads_suspend_placeholder">Grund für die Aussetzung (für den Werbetreibenden sichtbar)</string>
+    <string name="admin_ads_admin_note_label">Interne Notiz (nur für Mitarbeitende)</string>
+    <string name="admin_ads_admin_note_placeholder">Für den Werbetreibenden nicht sichtbar</string>
+    <string name="admin_ads_paid_label">%1$s $ bezahlt · %2$s</string>
+    <string name="admin_ads_not_paid_label">Zahlung ausstehend</string>
     <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
     <string name="admin_marketplace_title">Marktplatz-Prüfung</string>
     <string name="admin_marketplace_no_listings">Keine Inserate zu prüfen.</string>

@@ -1612,6 +1612,21 @@
     <string name="admin_ads_no_campaigns">İncelenecek kampanya yok.</string>
     <string name="admin_ads_budget">%1$s %2$s · Bütçe %3$s</string>
     <string name="admin_ads_rejection_placeholder">Reklamverene ret sebebini açıkla...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">Ödeme bekleniyor</string>
+    <string name="admin_ads_status_payment_failed">Ödeme başarısız</string>
+    <string name="admin_ads_status_suspended">Askıya alındı</string>
+    <string name="admin_ads_status_cancelled">İptal edildi</string>
+    <string name="admin_ads_suspend">Askıya al</string>
+    <string name="admin_ads_resume">Devam ettir</string>
+    <string name="admin_ads_cancel">Kampanyayı iptal et</string>
+    <string name="admin_ads_confirm_suspend">Askıya almayı onayla</string>
+    <string name="admin_ads_confirm_cancel">İptali onayla</string>
+    <string name="admin_ads_suspend_placeholder">Askıya alma nedeni (reklamverene gösterilir)</string>
+    <string name="admin_ads_admin_note_label">Dahili not (yalnızca ekip için)</string>
+    <string name="admin_ads_admin_note_placeholder">Reklamverene gösterilmez</string>
+    <string name="admin_ads_paid_label">%1$s$ ödendi · %2$s</string>
+    <string name="admin_ads_not_paid_label">Ödeme bekleniyor</string>
     <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
     <string name="admin_marketplace_title">Marketplace incelemesi</string>
     <string name="admin_marketplace_no_listings">İncelenecek ilan yok.</string>

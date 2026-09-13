@@ -18,22 +18,34 @@ data class AdminAdsUiState(
     val page: Int = 1,
     val totalPages: Int = 1,
     val updatingId: String? = null,
-    val rejectModalCampaignId: String? = null,
+    // Backs the reason-prompt used by reject/suspend/cancel alike - only
+    // the confirm label/placeholder/action string differ per action, the
+    // same way src/app/admin/ads/page.tsx's single reasonPromptId/
+    // reasonPromptAction pair drives all three.
+    val reasonPromptCampaignId: String? = null,
+    val reasonPromptAction: String? = null,
+    // Per-campaign admin-note drafts, keyed by campaign id - unset (no
+    // key) means "no edit in progress, show the saved adminNote".
+    val noteDrafts: Map<String, String> = emptyMap(),
     val error: String? = null,
 )
 
 /**
  * Ported from src/app/admin/ads/page.tsx - the review queue for real
  * paid ad campaigns (the same AdCampaign rows AdsApi serves into the
- * feed once they're ACTIVE). Approving one puts a real, budgeted
- * campaign live, so the route only accepts approve/reject on a
- * campaign that is still PENDING_REVIEW and 400s otherwise; this
- * screen only offers those two actions on a pending row for the same
- * reason.
+ * feed once they're ACTIVE). Approving one now moves a campaign to
+ * PAYMENT_PENDING rather than straight to ACTIVE (a real on-chain
+ * payment step - see lib/ads/lifecycle.ts), and staff can also
+ * suspend/resume/cancel a campaign post-launch and save a staff-only
+ * note independent of any status change. The route re-validates every
+ * transition server-side against that same lifecycle map, so this
+ * screen only needs to show the right buttons for the right statuses
+ * and call the route with the right action - never its own copy of the
+ * transition rules.
  *
  * The PUT returns the bare updated campaign without its
  * advertiser/post relations, so a reviewed campaign is reloaded rather
- * than patched in place.
+ * than patched in place - same as before.
  */
 class AdminAdsViewModel(private val repository: AdminRepository) : ViewModel() {
     private val _state = MutableStateFlow(AdminAdsUiState())
@@ -66,23 +78,43 @@ class AdminAdsViewModel(private val repository: AdminRepository) : ViewModel() {
         load()
     }
 
-    fun approve(id: String) = review(id, "approve", null)
+    fun approve(id: String) = review(id, "approve", null, null)
 
-    fun openRejectModal(id: String) = _state.update { it.copy(rejectModalCampaignId = id) }
-    fun closeRejectModal() = _state.update { it.copy(rejectModalCampaignId = null) }
+    fun resume(id: String) = review(id, "resume", null, null)
 
-    fun submitReject(reason: String) {
-        val id = _state.value.rejectModalCampaignId ?: return
-        _state.update { it.copy(rejectModalCampaignId = null) }
-        review(id, "reject", reason.ifBlank { null })
+    fun openReasonPrompt(id: String, action: String) =
+        _state.update { it.copy(reasonPromptCampaignId = id, reasonPromptAction = action) }
+
+    fun closeReasonPrompt() =
+        _state.update { it.copy(reasonPromptCampaignId = null, reasonPromptAction = null) }
+
+    fun submitReasonPrompt(reason: String) {
+        val id = _state.value.reasonPromptCampaignId ?: return
+        val action = _state.value.reasonPromptAction ?: return
+        _state.update { it.copy(reasonPromptCampaignId = null, reasonPromptAction = null) }
+        review(id, action, reason.ifBlank { null }, null)
     }
 
-    private fun review(id: String, action: String, rejectionReason: String?) {
+    fun updateNoteDraft(id: String, text: String) =
+        _state.update { it.copy(noteDrafts = it.noteDrafts + (id to text)) }
+
+    fun saveNote(id: String) {
+        val note = _state.value.noteDrafts[id] ?: return
+        review(id, "note", null, note)
+    }
+
+    private fun review(id: String, action: String, rejectionReason: String?, adminNote: String?) {
         _state.update { it.copy(updatingId = id, error = null) }
         viewModelScope.launch {
-            repository.reviewAdCampaign(id, action, rejectionReason)
+            repository.reviewAdCampaign(id, action, rejectionReason, adminNote)
                 .onSuccess {
-                    _state.update { it.copy(updatingId = null) }
+                    _state.update {
+                        // A plain note-save leaves the note draft consumed;
+                        // every other action already leaves the row behind
+                        // via the reload below (or keeps it, under "all"),
+                        // matching web's handleReview.
+                        it.copy(updatingId = null, noteDrafts = it.noteDrafts - id)
+                    }
                     load()
                 }
                 .onFailure { error -> _state.update { it.copy(updatingId = null, error = error.message) } }

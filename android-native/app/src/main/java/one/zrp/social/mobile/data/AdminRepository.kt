@@ -172,9 +172,14 @@ class AdminRepository {
         ApiClient.adminApi.getAdCampaigns(status, page)
     }
 
-    suspend fun reviewAdCampaign(campaignId: String, action: String, rejectionReason: String?): Result<Unit> {
+    suspend fun reviewAdCampaign(
+        campaignId: String,
+        action: String,
+        rejectionReason: String? = null,
+        adminNote: String? = null,
+    ): Result<Unit> {
         return try {
-            ApiClient.adminApi.reviewAdCampaign(campaignId, ReviewAdRequest(action, rejectionReason))
+            ApiClient.adminApi.reviewAdCampaign(campaignId, ReviewAdRequest(action, rejectionReason, adminNote))
             Result.success(Unit)
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to review this campaign."))
