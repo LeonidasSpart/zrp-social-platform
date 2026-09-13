@@ -46,6 +46,7 @@ visible but **not open source** — see [Licence and intellectual property](#lic
 - [Security principles](#security-principles)
 - [Roadmap](#roadmap)
 - [Repository status](#repository-status)
+- [Versioning and releases](#versioning-and-releases)
 - [Licence and intellectual property](#licence-and-intellectual-property)
 
 ---
@@ -128,6 +129,16 @@ real platform data; there is no seeded or placeholder catalogue.
 
 A challenge and duel experience with challenges, attempts, leaderboards,
 achievements and player profiles.
+
+### Communities and Lists
+
+**Communities** are hashtag-driven topic feeds (Travel, Photography,
+Nature, Technology, Health & Fitness, Art & Design, General) with
+OWNER/ADMIN/MEMBER roles — a community's feed is the existing post feed
+filtered to its own hashtag, not a parallel content system. **Lists**
+are X-style curated lists of people, public or private, whose "feed" is
+likewise the existing post feed filtered to the list's member accounts.
+Both are available on Web, Android and iOS.
 
 ---
 
@@ -324,17 +335,26 @@ onboarding gating and plan-gated routes.
 
 ## Internationalization
 
-The interface ships human translations for **11 languages**:
+The interface ships human translations for **15 languages**, verified in
+source (`src/lib/translations.ts`) and present with full key parity
+across Web, `android-native/` (`values-*/strings.xml`) and `ios-native/`
+(`*.lproj`):
 
 English, French, German, Italian, Albanian, Spanish, Russian, Arabic,
-Chinese, Turkish and Bahasa Indonesia.
+Chinese, Turkish, Bahasa Indonesia, Portuguese (European Portuguese
+usage), Japanese, Korean and Hindi.
 
 Arabic is rendered right-to-left. The web dictionary in
 `src/lib/translations.ts` is the single source of truth: the iOS
-`.strings` bundles and localization key enum are generated from it, so a
-native string cannot drift from the web copy. Where a native-only string
-has no web counterpart (mostly accessibility labels), it falls back to
-English rather than being machine-translated.
+`.strings` bundles and localization key enum are generated from it
+(`ios-native/Tools/generate-localizations.py`, checked in CI with
+`--check`), so a native string cannot drift from the web copy. Android's
+`values*/strings.xml` are maintained directly, checked for key parity,
+empty values and untranslated English leftovers by a dedicated JVM test
+(`LocalizationCompletenessTest.kt`) and an equivalent web test
+(`translations-completeness.test.ts`), both run in CI. Where a
+native-only string has no web counterpart (mostly accessibility labels),
+it falls back to English rather than being machine-translated.
 
 ---
 
@@ -639,7 +659,10 @@ Direction, not a delivery commitment. Dates are not promised.
 - Broaden ZRP Music, Creator Studio and Opportunities.
 - Add Content-Security-Policy and Permissions-Policy after a
   domain-by-domain audit.
-- Expand localization coverage beyond the current 11 languages.
+- Continue expanding localization coverage beyond the current 15
+  languages as new markets are prioritized.
+- Establish a formal release/versioning process — see
+  [Versioning and releases](#versioning-and-releases).
 
 ---
 
@@ -655,6 +678,59 @@ Direction, not a delivery commitment. Dates are not promised.
 - This repository is publicly readable for transparency. It does not
   accept unsolicited external contributions — see
   [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
+## Versioning and releases
+
+**Verified current state (not aspirational):**
+
+- The repository has **no GitHub Releases** and effectively **no release
+  tags** — the only tag present, `before-nextjs-upgrade`, is a one-off
+  pre-migration checkpoint, not a version marker.
+- `package.json`'s `"version"` field is `0.1.0`, the default Next.js
+  scaffold value. It has never been bumped and does not track a real
+  release of the web application.
+- The web application does not follow a tagged-release model at all: it
+  is deployed continuously from `main` to Railway (see
+  [CHANGELOG.md](CHANGELOG.md) and this repository's own merge history
+  for what has actually shipped, since there is no version number to
+  point to instead).
+- The native applications **do** version themselves, independently of
+  the web app and of each other:
+  - `android-native/` increments `versionCode`/`versionName` in
+    `app/build.gradle` on every change destined for a real upload,
+    documented inline at each bump — currently versionCode 22,
+    versionName 4.0.16. It has an Internal Testing listing, not a public
+    Play Store release.
+  - `android/` (the Capacitor shell being superseded) is still at its
+    original placeholder `versionCode 1` / `versionName "1.0"`.
+  - `ios-native/` is at its Xcode project's default
+    `MARKETING_VERSION 1.0.0` / `CURRENT_PROJECT_VERSION 1`, never
+    bumped, because it has no App Store listing yet — see
+    [Native applications](#native-applications).
+
+**Gap:** there is no single version number that identifies "what ZRP is
+today" across web, Android and iOS, and no GitHub Release marks a point
+in history as shipped. This is a real gap, not a stylistic choice, and it
+is called out here rather than implied away.
+
+**Proposed convention** (not yet adopted — documenting a path forward,
+not inventing a release to fill the gap):
+
+1. Tag the web application's deployed `main` with an annotated Git tag
+   following [SemVer](https://semver.org/) (`vMAJOR.MINOR.PATCH`) at each
+   meaningful deployment, and back it with a GitHub Release whose body is
+   the corresponding [CHANGELOG.md](CHANGELOG.md) section.
+2. Keep `package.json`'s `"version"` in sync with that tag, so the two
+   can never silently disagree.
+3. Leave Android's and iOS's own version numbers independent (they
+   already follow a working, documented convention suited to their
+   store review cycles) but cross-reference the web tag they shipped
+   alongside in each release's notes, so "what shipped together" stays
+   answerable.
+4. Only cut the first tag/release once there is a deliberate decision to
+   start one — not as a byproduct of this documentation pass.
 
 ---
 
@@ -681,6 +757,11 @@ Full terms: [LICENSE](LICENSE).
 - [SECURITY.md](SECURITY.md) — vulnerability reporting
 - [CONTRIBUTING.md](CONTRIBUTING.md) — development workflow
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — participation standards
+- [CHANGELOG.md](CHANGELOG.md) — notable changes over time
+- [`docs/zrp-news-network.md`](docs/zrp-news-network.md) — ZRP News
+  Network architecture and operations
+- [`docs/database-migration-deployment.md`](docs/database-migration-deployment.md) —
+  database migration/deployment procedure
 - [`ios-native/README.md`](ios-native/README.md) — native iOS module
 - [`ios-native/PARITY.md`](ios-native/PARITY.md) — cross-platform parity
   matrix

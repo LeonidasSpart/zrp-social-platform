@@ -116,10 +116,22 @@ Every mutating action is recorded through the existing `AuditLog`.
 
 ### Schedule
 
-`.github/workflows/cron-news-pipeline.yml` calls the cron route every two
-hours. That is the *cycle* cadence, not a per-feed one: each cycle spreads
-its publications across the following ~150 minutes, and every feed still
-has its own gap and cap.
+The primary trigger is an in-process hourly timer (`src/lib/news/
+hourly-runner.ts`, started from `src/instrumentation.ts`): the app runs
+24/7, so it is the one thing in the system guaranteed to be awake every
+hour, and its distributed lock plus per-publication idempotency keys make
+an overlapping run a no-op rather than a double post. This replaced an
+earlier design where `.github/workflows/cron-news-pipeline.yml` alone
+drove the cycle — measured against that workflow's own run history it
+delivered roughly 43% of its scheduled runs (one every ~4.7 hours against
+a nominal schedule, with gaps up to 6.6 hours).
+
+The GitHub Actions workflow still exists and now fires twice an hour
+(`0 * * * *` and `30 * * * *`) as a backup, safe for the same
+lock/idempotency reasons. Either trigger calls the same cron route; that
+is the *cycle* cadence, not a per-feed one — each cycle spreads its
+publications across the following interval, and every feed still has its
+own gap and cap.
 
 ### Deployment requirements
 
