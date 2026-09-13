@@ -231,6 +231,14 @@ export async function GET(req: NextRequest) {
     ]);
 
     if (userId) {
+      // ⚠️ CORRECTNESS: these two exclusion lists were previously applied
+      // as two separate assignments to `where.authorId`, each replacing
+      // the whole object rather than combining with it - the muted-list
+      // assignment's `notIn` key silently overwrote the blocked-list
+      // one, so a viewer who had both blocked someone AND muted someone
+      // (regardless of who) saw the blocked account's posts reappear.
+      // One combined array closes that gap for every future exclusion
+      // added here too.
       const excludedUserIds = [
         ...blockedIds.map(
           (b) => b.blockedId
@@ -238,22 +246,14 @@ export async function GET(req: NextRequest) {
         ...blockedBy.map(
           (b) => b.blockerId
         ),
+        ...muted.map(
+          (m) => m.mutedId
+        ),
       ];
 
       if (excludedUserIds.length > 0) {
         where.authorId = {
           notIn: excludedUserIds,
-        };
-      }
-
-      const mutedIds = muted.map(
-        (m) => m.mutedId
-      );
-
-      if (mutedIds.length > 0) {
-        where.authorId = {
-          ...(where.authorId || {}),
-          notIn: mutedIds,
         };
       }
     }

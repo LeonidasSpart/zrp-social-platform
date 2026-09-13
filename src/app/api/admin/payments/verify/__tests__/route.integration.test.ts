@@ -2,14 +2,12 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
 
-const { requireAdmin, logAdminAction, invalidateUserAuthState } = vi.hoisted(() => ({
+const { requireAdmin, invalidateUserAuthState } = vi.hoisted(() => ({
   requireAdmin: vi.fn(),
-  logAdminAction: vi.fn(),
   invalidateUserAuthState: vi.fn(),
 }));
 
 vi.mock("@/lib/admin", () => ({ requireAdmin }));
-vi.mock("@/lib/audit-log", () => ({ logAdminAction }));
 vi.mock("@/lib/auth-state", () => ({ invalidateUserAuthState }));
 
 import { prisma } from "@/lib/db";
@@ -22,6 +20,13 @@ import { POST } from "../route";
  * only then wrote "verified" - two concurrent verifications of the same
  * paymentId both passed the check and both upgraded the plan / logged
  * the action. Now claimed first via a conditional updateMany.
+ *
+ * Also regression coverage for a forensic-audit finding: the claim, the
+ * plan update, and the audit-log write now run inside one
+ * `prisma.$transaction` rather than as separate sequential awaits after
+ * the claim committed - closing a window where a crash between them
+ * left the payment permanently "verified" with the plan never actually
+ * granted. Verified below against the real `auditLog` table, not a mock.
  */
 const hasRealDatabaseUrl =
   !!process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("...");
@@ -69,6 +74,7 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/admin/payments/verify (integrati
   });
 
   afterAll(async () => {
+    await prisma.auditLog.deleteMany({ where: { targetId: { in: paymentIds } } });
     await prisma.paymentRequest.deleteMany({ where: { id: { in: paymentIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   });
@@ -87,8 +93,12 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/admin/payments/verify (integrati
     const finalPayment = await prisma.paymentRequest.findUnique({ where: { id: payment.id } });
     expect(finalPayment?.status).toBe("verified");
 
-    // Exactly one audit-log write, not two, for one verification.
-    expect(logAdminAction).toHaveBeenCalledTimes(1);
+    // Exactly one audit-log write, not two, for one verification - and it
+    // exists in the real table, proving it committed in the same
+    // transaction as the plan change.
+    const auditRows = await prisma.auditLog.findMany({ where: { targetId: payment.id } });
+    expect(auditRows).toHaveLength(1);
+    expect(auditRows[0].action).toBe("payment.verify");
   });
 
   it("rejects verifying a payment that was already verified", async () => {
@@ -98,9 +108,11 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/admin/payments/verify (integrati
     const first = await call(payment.id);
     expect(first.status).toBe(200);
 
-    logAdminAction.mockClear();
     const second = await call(payment.id);
     expect(second.status).toBe(400);
-    expect(logAdminAction).not.toHaveBeenCalled();
+
+    // Still exactly the one audit-log write from the first, successful call.
+    const auditRows = await prisma.auditLog.findMany({ where: { targetId: payment.id } });
+    expect(auditRows).toHaveLength(1);
   });
 });
