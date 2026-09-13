@@ -23,6 +23,7 @@ const {
   createPresenceTracker,
   createRedisPresenceStore,
 } = require("./presence");
+const { isRedisBackedCallsAllowed } = require("./redis-readiness");
 
 // Minimal cookie-header parser, written inline rather than requiring
 // the "cookie" package - this file is the process entrypoint, so a
@@ -176,14 +177,95 @@ app.prepare().then(async () => {
   // below - node-redis v4 clients support multiple concurrent
   // subscriptions on one connection, so this doesn't need (and Railway
   // Redis plans often cap) a second pair of connections.
-  const presenceRedis = await connectPresenceRedis();
+  //
+  // ⚠️ MIXED-FLEET SPLIT BRAIN: `connectPresenceRedis()` used to run
+  // exactly once, here, at boot. If THIS process's specific attempt
+  // failed (a Redis restart landing on this replica's boot window
+  // during a rolling deploy, a transient network blip) while sibling
+  // replicas booted successfully moments before/after, this replica was
+  // stuck local-only for its entire lifetime with no way to recover
+  // short of a restart - while REDIS_URL being set at all means the
+  // OPERATOR'S intent was a Redis-backed, multi-instance-safe fleet.
+  // That mismatch is exactly the split-brain risk: this replica's
+  // WebRTC call registry (below) would silently disagree with its
+  // siblings about which calls exist.
+  //
+  // Fixed two ways together:
+  //  1. The background retry timer below keeps trying to connect and
+  //     hot-swaps the adapter/call registry into Redis-backed mode the
+  //     moment a connection succeeds - a replica that starts degraded
+  //     can still self-heal without a restart.
+  //  2. While REDIS_URL/REDIS_PUBLIC_URL is configured (the operator
+  //     wants a Redis-backed fleet) but THIS process currently has no
+  //     working connection, `callUserAllowed()` (used by the
+  //     "call-user" handler below) fails closed: new calls are refused
+  //     outright rather than silently placed into a local Map that
+  //     could disagree with whichever replica the other party is on.
+  //     A deployment that never configures Redis at all (REDIS_URL
+  //     unset) is a different, already-documented case: EVERY replica
+  //     is uniformly local-only from boot, which is a real functionality
+  //     ceiling (calls only work between two users the load balancer
+  //     happens to put on the same replica) but not a state
+  //     *inconsistency* - so it is not gated here.
+  const REDIS_CONFIGURED = Boolean(process.env.REDIS_URL || process.env.REDIS_PUBLIC_URL);
+  let presenceRedis = await connectPresenceRedis();
+  // Safe default so `calls` is always defined below - replaced with a
+  // Redis-backed registry by wireRedisBackedState() wherever that's
+  // possible, immediately or after the background retry succeeds.
+  let calls = createCallRegistry({ redisClient: null });
+
+  function wireRedisBackedState(redis) {
+    io.adapter(createAdapter(redis.pub, redis.sub));
+    calls = createCallRegistry({ redisClient: redis.pub });
+  }
+
   if (presenceRedis) {
-    io.adapter(createAdapter(presenceRedis.pub, presenceRedis.sub));
+    wireRedisBackedState(presenceRedis);
     console.log(`🟢 Socket.IO adapter: Redis-backed (multi-instance safe)`);
+  } else if (REDIS_CONFIGURED) {
+    console.error(
+      "🔴 Socket.IO adapter: Redis configured but unreachable at boot - calls are refused until it connects (retrying in the background)"
+    );
   } else {
     console.log(
-      "🟡 Socket.IO adapter: in-memory only (io.to()/emit() will NOT reach other Railway replicas if this ever scales beyond one instance)"
+      "🟡 Socket.IO adapter: in-memory only, REDIS_URL not set (io.to()/emit() will NOT reach other Railway replicas if this ever scales beyond one instance)"
     );
+  }
+
+  /**
+   * Background self-heal: while Redis is configured but this process
+   * has no working connection, keep trying. On success, hot-swap the
+   * Socket.IO adapter (Socket.IO supports re-initializing every
+   * namespace's adapter on a live server - this is the documented way
+   * to change it after construction) and the call registry to
+   * Redis-backed mode. Any call that was placed and is still only in
+   * THIS replica's in-memory registry at the moment of the swap is not
+   * migrated into Redis - an acceptable loss for what is, by
+   * construction, at most a few minutes-old, short-lived signaling
+   * entry, versus the alternative of staying permanently degraded.
+   */
+  const REDIS_RETRY_INTERVAL_MS = 15_000;
+  let redisRetryTimer = null;
+  if (REDIS_CONFIGURED && !presenceRedis) {
+    redisRetryTimer = setInterval(async () => {
+      if (presenceRedis) return;
+      const reconnected = await connectPresenceRedis();
+      if (!reconnected) return;
+      presenceRedis = reconnected;
+      wireRedisBackedState(presenceRedis);
+      console.log("🟢 Socket.IO adapter: recovered - now Redis-backed (multi-instance safe)");
+      if (redisRetryTimer) {
+        clearInterval(redisRetryTimer);
+        redisRetryTimer = null;
+      }
+    }, REDIS_RETRY_INTERVAL_MS);
+    redisRetryTimer.unref();
+  }
+
+  /** Whether a NEW call is safe to place right now - see redis-readiness.js
+   * and the split-brain comment above for the full reasoning. */
+  function callUserAllowed() {
+    return isRedisBackedCallsAllowed(REDIS_CONFIGURED, presenceRedis);
   }
 
   // ─── Presence tracker (see the comment at the top of this file) ───
@@ -259,17 +341,11 @@ app.prepare().then(async () => {
   // socket-authz.js. accept/reject/end are only relayed for a call
   // that was actually placed, and only by one of its two parties.
   //
-  // Passing presenceRedis's pub client (already connected, already
-  // reused for the Socket.IO adapter and the presence store - see
-  // socket-authz.js's own comment on why one more consumer is fine)
-  // makes call state authoritative in Redis instead of this process's
-  // memory, so accept/reject/end still work correctly regardless of
-  // which Railway replica the other party is connected to. Falls back
-  // to the original in-memory-only behavior, unchanged, when Redis is
-  // unavailable - correct for today's actual single-replica deployment.
-  const calls = createCallRegistry({
-    redisClient: presenceRedis ? presenceRedis.pub : null,
-  });
+  // `calls` was already created above (see wireRedisBackedState() and
+  // the split-brain comment by the adapter setup) - Redis-backed from
+  // boot if presenceRedis connected immediately, upgraded from the
+  // in-memory fallback the moment the background retry succeeds
+  // otherwise. Nothing left to do here.
 
   // Periodic sweep so eventBuckets/connectionCounts can't grow
   // unbounded from users who connect once and never come back.
@@ -628,9 +704,22 @@ app.prepare().then(async () => {
     // user who has blocked the caller (or vice versa) either. The
     // callerName shown to the callee is the caller's real name from
     // the database, not whatever the payload claimed.
-    socket.on("call-user", async ({ receiverId, signal, isVideo } = {}) => {
+    socket.on("call-user", async ({ receiverId, signal, isVideo } = {}, ack) => {
       if (!receiverId || typeof receiverId !== "string" || receiverId === userId) return;
       if (!checkEventRateLimit(userId, "call-user", 10, 30_000)) return;
+      // ⚠️ SPLIT-BRAIN GUARD: Redis is configured (the fleet is meant to
+      // be multi-instance-safe) but this replica currently has no
+      // working connection - see the comment by wireRedisBackedState()
+      // above. Placing this call into an in-memory Map right now could
+      // create a call this replica believes exists that the callee's
+      // replica (Redis-backed, or a different local Map entirely) can
+      // never agree on. Refusing it outright, with a reason the client
+      // can distinguish from a normal decline, is safer than a call
+      // that looks placed but can never be answered.
+      if (!callUserAllowed()) {
+        socket.emit("call-rejected", { reason: "service-unavailable" });
+        return;
+      }
       try {
         if (await isBlockedCached(socket, receiverId)) return;
         const caller = await prisma.user.findUnique({
@@ -673,35 +762,46 @@ app.prepare().then(async () => {
           return;
         }
 
-        await calls.start(userId, receiverId);
+        // callId: a fresh generation token for THIS specific call (see
+        // socket-authz.js's GENERATION RACE comment on createCallRegistry).
+        // Handed back to the caller via `ack` and forwarded to the callee
+        // in `incoming-call` so a client that understands it can echo it
+        // back on accept-call/reject-call/end-call - see PARITY note in
+        // src/app/messages/[username]/page.tsx for the client-side half
+        // of this contract, which is additive: a client that never learns
+        // about callId keeps working exactly as before (calls.* treat a
+        // missing callId as "no check", their pre-fix behavior).
+        const callId = await calls.start(userId, receiverId);
+        if (typeof ack === "function") ack({ callId });
         console.log(`📞 call-user from ${userId} to ${receiverId}`);
         io.to(receiverId).emit("incoming-call", {
           callerId: userId,
           callerName: caller.name || caller.username,
           signal,
           isVideo: isVideo === true,
+          callId,
         });
       } catch (err) {
         console.error("call-user relay error:", err);
       }
     });
 
-    socket.on("accept-call", async ({ callerId, signal } = {}) => {
+    socket.on("accept-call", async ({ callerId, signal, callId } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
       try {
-        if (!(await calls.accept(userId, callerId))) return;
+        if (!(await calls.accept(userId, callerId, callId))) return;
       } catch (err) {
         console.error("accept-call registry error:", err);
         return;
       }
       console.log(`✅ accept-call from ${userId} to ${callerId}`);
-      io.to(callerId).emit("call-accepted", { signal });
+      io.to(callerId).emit("call-accepted", { signal, callId });
     });
 
-    socket.on("reject-call", async ({ callerId } = {}) => {
+    socket.on("reject-call", async ({ callerId, callId } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
       try {
-        if (!(await calls.reject(userId, callerId))) return;
+        if (!(await calls.reject(userId, callerId, callId))) return;
       } catch (err) {
         console.error("reject-call registry error:", err);
         return;
@@ -710,10 +810,10 @@ app.prepare().then(async () => {
       io.to(callerId).emit("call-rejected");
     });
 
-    socket.on("end-call", async ({ callerId } = {}) => {
+    socket.on("end-call", async ({ callerId, callId } = {}) => {
       if (!callerId || typeof callerId !== "string") return;
       try {
-        if (!(await calls.end(userId, callerId))) return;
+        if (!(await calls.end(userId, callerId, callId))) return;
       } catch (err) {
         console.error("end-call registry error:", err);
         return;
@@ -797,6 +897,11 @@ app.prepare().then(async () => {
     if (shuttingDown) return;
     shuttingDown = true;
     console.log(`${signal} received: closing gracefully`);
+
+    if (redisRetryTimer) {
+      clearInterval(redisRetryTimer);
+      redisRetryTimer = null;
+    }
 
     // Belt-and-suspenders: if something above hangs (a stuck DB query,
     // an idle keep-alive connection server.close() alone won't drop),

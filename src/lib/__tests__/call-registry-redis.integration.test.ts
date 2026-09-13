@@ -147,6 +147,30 @@ describe("WebRTC call registry - multi-instance (real Redis, two connections)", 
     expect(await replicaB.accept(bob, alice)).toBe(true);
   });
 
+  it("REGRESSION: a stale end() (old callId) from replica A must not delete a NEW call already started on replica B between the same two users", async () => {
+    if (!available) return;
+    const { replicaA, replicaB } = registries();
+    const alice = `alice-gen-${Date.now()}`;
+    const bob = `bob-gen-${Date.now()}`;
+
+    // Call 1: placed and ended normally, from replica A.
+    const staleCallId = await replicaA.start(alice, bob);
+    expect(await replicaA.end(alice, bob, staleCallId)).toBe(true);
+
+    // Call 2: a brand-new call between the exact same pair, this time
+    // placed via replica B (as if the caller reconnected to a different
+    // instance for the retry).
+    const currentCallId = await replicaB.start(alice, bob);
+
+    // A network-delayed end-call for call 1 finally arrives, handled on
+    // replica A - it must not touch call 2, which lives in the same
+    // Redis key.
+    expect(await replicaA.end(alice, bob, staleCallId)).toBe(false);
+
+    // Call 2 must still be fully intact, from either replica's view.
+    expect(await replicaB.accept(bob, alice, currentCallId)).toBe(true);
+  });
+
   it("an expired pending call (short TTL) cannot be accepted from either replica", async () => {
     if (!available) return;
     const replicaA = authz.createCallRegistry({ redisClient: replicaAClient, pendingTtlMs: 50 });

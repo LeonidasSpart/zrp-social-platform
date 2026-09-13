@@ -68,7 +68,10 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
       if (mediaFile) {
         const uploadResult = await startUpload([mediaFile]);
         if (uploadResult && uploadResult.length > 0) {
-          mediaUrl = uploadResult[0].url;
+          // .url is deprecated (removed in uploadthing v9) - every other
+          // upload call site in the codebase already uses .ufsUrl; this
+          // one was missed by the earlier sweep that fixed ListingForm.tsx.
+          mediaUrl = uploadResult[0].ufsUrl;
           finalMediaType = mediaType;
         } else {
           throw new Error("Upload failed");

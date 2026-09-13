@@ -1,0 +1,57 @@
+name: iOS Parity Matrix Audit
+
+# CI TRIGGER GAP FIX: ios-native-build.yml's own "static-checks" job
+# already runs Tools/audit-parity.py, but that workflow only triggers on
+# ios-native/** plus a single hardcoded backend file
+# (src/app/api/music/artists/route.ts) - deliberately narrow, per that
+# workflow's own comment, because widening ITS trigger would mean every
+# unrelated backend PR pays for the full macOS Xcode build in the `build`
+# job that follows `static-checks` there.
+#
+# The problem: audit-parity.py's "every route named in PARITY.md really
+# exists" check spans EVERY backend route the matrix references - about
+# 120 of them today, not just the one artist route. Renaming, moving, or
+# deleting ANY of the other ~119 on the backend silently turns PARITY.md
+# into fiction with no red build anywhere, because nothing else runs
+# audit-parity.py and nothing triggers ios-native-build.yml for a change
+# under, say, src/app/api/creator/withdraw/ or src/app/api/messages/.
+#
+# Fix: run the exact same script here, standalone, on ubuntu (no Xcode,
+# no macOS minutes, no `needs:` on any build job), triggered by ANY
+# src/app/api/** change plus the matrix and the script itself. This
+# closes the coverage gap without adding a single minute to the macOS
+# build's own trigger set - the two workflows are independent and this
+# one is deliberately cheap enough to run on every backend PR.
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - "src/app/api/**"
+      - "ios-native/PARITY.md"
+      - "ios-native/Tools/audit-parity.py"
+  push:
+    branches: [main]
+    paths:
+      - "src/app/api/**"
+      - "ios-native/PARITY.md"
+      - "ios-native/Tools/audit-parity.py"
+
+permissions:
+  contents: read
+
+jobs:
+  audit-parity:
+    name: Audit iOS parity matrix against backend routes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Audit the parity matrix against the code
+        working-directory: ios-native
+        run: python3 Tools/audit-parity.py

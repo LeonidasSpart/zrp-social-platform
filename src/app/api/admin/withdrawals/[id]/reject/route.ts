@@ -26,22 +26,34 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     );
   }
 
-  const claimed = await prisma.withdrawalRequest.updateMany({
-    where: { id, status: "PENDING" },
-    data: { status: "REJECTED" },
+  // ⚠️ The claim and the balance refund run in ONE transaction. They
+  // used to be two separate sequential awaits - a crash between them
+  // left the withdrawal permanently REJECTED (the pending-status guard
+  // makes it un-retriable) with the reserved amount never credited back,
+  // a silent, unrecoverable loss of the creator's own funds. Wrapping
+  // both in prisma.$transaction makes a crash here roll the claim back
+  // too, so the identical request can simply be retried and will refund
+  // correctly.
+  const refunded = await prisma.$transaction(async (tx) => {
+    const claimed = await tx.withdrawalRequest.updateMany({
+      where: { id, status: "PENDING" },
+      data: { status: "REJECTED" },
+    });
+    if (claimed.count === 0) return false;
+
+    await tx.creatorProfile.update({
+      where: { id: withdrawal.creatorProfileId },
+      data: { balance: { increment: withdrawal.amount } },
+    });
+    return true;
   });
 
-  if (claimed.count === 0) {
+  if (!refunded) {
     return NextResponse.json(
       { error: "Withdrawal is already being processed." },
       { status: 409 }
     );
   }
-
-  await prisma.creatorProfile.update({
-    where: { id: withdrawal.creatorProfileId },
-    data: { balance: { increment: withdrawal.amount } },
-  });
 
   await logAdminAction({
     actor: adminCheck.session,

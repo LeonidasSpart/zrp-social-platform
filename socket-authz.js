@@ -22,6 +22,8 @@
  * `prisma` is injected so these are unit-testable without a database.
  */
 
+const { randomUUID } = require("crypto");
+
 const USER_SELECT = { id: true, username: true, name: true, avatarUrl: true, badgeType: true };
 const REACTION_USER_SELECT = { id: true, username: true, name: true, avatarUrl: true };
 
@@ -306,6 +308,34 @@ async function authorizeConversationDeleteRelay(prisma, userId, payload) {
  *    is no live-call volume where that's expensive, and a secondary
  *    per-user index would itself go stale the moment a key expires via
  *    TTL without an explicit end()
+ *
+ * ⚠️ GENERATION RACE (start/end): the key is the sorted (callerId,
+ * receiverId) pair - it does not distinguish call N between A and B from
+ * call N+1 between the SAME two people. accept()/reject() were already
+ * safe because their Lua/JS check the entry's OWN stored callerId against
+ * the value the caller of accept/reject supplied - but end() used to
+ * delete the key unconditionally the moment either party's userId matched,
+ * with no check that it was ending the call it thought it was ending.
+ * A network-delayed end-call for a call that already finished (accepted,
+ * hung up, or timed out) could arrive AFTER a brand-new call between the
+ * same two users has started, and silently delete the wrong (new) call
+ * out from under it - the callee's client would still show it as ringing
+ * or connected while the registry (and thus every other replica) already
+ * considers it gone.
+ *
+ * Fix: start() now mints a random `callId` per call and returns it. Every
+ * subsequent operation (accept/reject/end) accepts an OPTIONAL `callId`
+ * argument. When the caller supplies one, it is validated as a
+ * compare-and-swap against the entry's own stored callId - a stale
+ * end/accept/reject for a since-replaced call now safely no-ops instead
+ * of touching the new call. When no callId is supplied (an unpatched
+ * client using the pre-existing protocol), behavior is UNCHANGED from
+ * before this fix - so this is purely additive and backward compatible.
+ * See server.js's call-user/accept-call/reject-call/end-call handlers for
+ * how the callId is threaded through the socket protocol, and
+ * src/app/messages/[username]/page.tsx for the minimal client patch this
+ * enables (not yet applied there - see PARITY note in that file's own
+ * call-signaling section).
  */
 function createCallRegistry(options) {
   const opts = options || {};
@@ -318,7 +348,7 @@ function createCallRegistry(options) {
   }
 
   if (!redis) {
-    const calls = new Map(); // key -> { callerId, receiverId, state, updatedAt }
+    const calls = new Map(); // key -> { callerId, receiverId, callId, state, updatedAt }
 
     function get(a, b) {
       const entry = calls.get(key(a, b));
@@ -332,36 +362,42 @@ function createCallRegistry(options) {
     }
 
     return {
-      /** call-user: record that callerId is ringing receiverId. */
+      /** call-user: record that callerId is ringing receiverId. Returns the new call's generation id. */
       start(callerId, receiverId) {
+        const callId = randomUUID();
         calls.set(key(callerId, receiverId), {
           callerId,
           receiverId,
+          callId,
           state: "pending",
           updatedAt: Date.now(),
         });
+        return callId;
       },
-      /** accept-call by `userId` of a call from `callerId`. */
-      accept(userId, callerId) {
+      /** accept-call by `userId` of a call from `callerId`. `callId`, if supplied, must match the call being accepted. */
+      accept(userId, callerId, callId) {
         const entry = get(userId, callerId);
         if (!entry || entry.state !== "pending") return false;
         if (entry.callerId !== callerId || entry.receiverId !== userId) return false;
+        if (callId && entry.callId !== callId) return false;
         entry.state = "active";
         entry.updatedAt = Date.now();
         return true;
       },
-      /** reject-call by `userId` of a pending call from `callerId`. */
-      reject(userId, callerId) {
+      /** reject-call by `userId` of a pending call from `callerId`. `callId`, if supplied, must match the call being rejected. */
+      reject(userId, callerId, callId) {
         const entry = get(userId, callerId);
         if (!entry || entry.state !== "pending") return false;
         if (entry.callerId !== callerId || entry.receiverId !== userId) return false;
+        if (callId && entry.callId !== callId) return false;
         calls.delete(key(userId, callerId));
         return true;
       },
-      /** end-call by either party of a pending or active call. */
-      end(userId, otherId) {
+      /** end-call by either party of a pending or active call. `callId`, if supplied, must match the call being ended - see the GENERATION RACE comment above. */
+      end(userId, otherId, callId) {
         const entry = get(userId, otherId);
         if (!entry) return false;
+        if (callId && entry.callId !== callId) return false;
         calls.delete(key(userId, otherId));
         return true;
       },
@@ -393,12 +429,18 @@ function createCallRegistry(options) {
   // one atomic script, a GET-then-SET from this client has the same
   // race two concurrent callers of accept() would hit against a plain
   // Map - one Lua eval is how Redis gives that back.
+  //
+  // ARGV[5] is the optional generation callId: an empty string means "no
+  // callId supplied, skip this check" (an unpatched client) - anything
+  // else must match the entry's own stored callId or the script no-ops,
+  // exactly the CAS the GENERATION RACE comment above describes.
   const ACCEPT_SCRIPT = `
 local raw = redis.call("get", KEYS[1])
 if not raw then return 0 end
 local entry = cjson.decode(raw)
 if entry.state ~= "pending" then return 0 end
 if entry.callerId ~= ARGV[1] or entry.receiverId ~= ARGV[2] then return 0 end
+if ARGV[5] ~= "" and entry.callId ~= ARGV[5] then return 0 end
 entry.state = "active"
 entry.updatedAt = tonumber(ARGV[3])
 redis.call("set", KEYS[1], cjson.encode(entry), "PX", ARGV[4])
@@ -410,6 +452,19 @@ if not raw then return 0 end
 local entry = cjson.decode(raw)
 if entry.state ~= "pending" then return 0 end
 if entry.callerId ~= ARGV[1] or entry.receiverId ~= ARGV[2] then return 0 end
+if ARGV[3] ~= "" and entry.callId ~= ARGV[3] then return 0 end
+redis.call("del", KEYS[1])
+return 1
+`;
+  // Plain DEL is no longer unconditional: when a callId is supplied this
+  // must be a CAS (get -> compare -> del) so a delayed end() for a call
+  // that has since been replaced by a new one between the same two users
+  // can't delete the new call - see the GENERATION RACE comment above.
+  const END_SCRIPT = `
+local raw = redis.call("get", KEYS[1])
+if not raw then return 0 end
+local entry = cjson.decode(raw)
+if entry.callId ~= ARGV[1] then return 0 end
 redis.call("del", KEYS[1])
 return 1
 `;
@@ -430,32 +485,45 @@ return 1
   }
 
   return {
+    /** call-user: record that callerId is ringing receiverId. Returns the new call's generation id. */
     async start(callerId, receiverId) {
+      const callId = randomUUID();
       const entry = JSON.stringify({
         callerId,
         receiverId,
+        callId,
         state: "pending",
         updatedAt: Date.now(),
       });
       await redis.set(redisKey(callerId, receiverId), entry, { PX: pendingTtlMs });
+      return callId;
     },
-    async accept(userId, callerId) {
+    async accept(userId, callerId, callId) {
       const result = await redis.eval(ACCEPT_SCRIPT, {
         keys: [redisKey(userId, callerId)],
-        arguments: [callerId, userId, String(Date.now()), String(activeTtlMs)],
+        arguments: [callerId, userId, String(Date.now()), String(activeTtlMs), callId || ""],
       });
       return result === 1;
     },
-    async reject(userId, callerId) {
+    async reject(userId, callerId, callId) {
       const result = await redis.eval(REJECT_SCRIPT, {
         keys: [redisKey(userId, callerId)],
-        arguments: [callerId, userId],
+        arguments: [callerId, userId, callId || ""],
       });
       return result === 1;
     },
-    async end(userId, otherId) {
-      const deleted = await redis.del(redisKey(userId, otherId));
-      return deleted > 0;
+    async end(userId, otherId, callId) {
+      if (!callId) {
+        // Unpatched client: no generation id to check against - preserve
+        // the exact pre-fix behavior (unconditional delete).
+        const deleted = await redis.del(redisKey(userId, otherId));
+        return deleted > 0;
+      }
+      const result = await redis.eval(END_SCRIPT, {
+        keys: [redisKey(userId, otherId)],
+        arguments: [callId],
+      });
+      return result === 1;
     },
     async dropUser(userId) {
       const keys = await scanCallKeys();

@@ -234,4 +234,53 @@ describe("call registry (call signaling spoofing)", () => {
     expect(live.size()).toBe(1);
     expect(live.accept("dave", "carol")).toBe(true);
   });
+
+  describe("generation race: a delayed end() for an old call must not delete a new one", () => {
+    it("start() returns a distinct callId per call between the same two users", () => {
+      const calls = authz.createCallRegistry();
+      const id1 = calls.start("alice", "bob");
+      calls.end("alice", "bob", id1);
+      const id2 = calls.start("alice", "bob");
+      expect(id1).toEqual(expect.any(String));
+      expect(id2).toEqual(expect.any(String));
+      expect(id1).not.toBe(id2);
+    });
+
+    it("REGRESSION: a stale end() carrying the OLD callId must not delete a call placed after it (proves the fix - see git history for the pre-fix behavior)", () => {
+      const calls = authz.createCallRegistry();
+      const staleCallId = calls.start("alice", "bob");
+      calls.end("alice", "bob", staleCallId); // call 1 finishes normally
+
+      const currentCallId = calls.start("alice", "bob"); // call 2 begins
+      // A network-delayed end-call from call 1 arrives late, after call 2
+      // has already started between the exact same two users.
+      expect(calls.end("alice", "bob", staleCallId)).toBe(false);
+      // Call 2 must still be fully intact and acceptable.
+      expect(calls.accept("bob", "alice", currentCallId)).toBe(true);
+    });
+
+    it("end() with the CURRENT callId still works normally", () => {
+      const calls = authz.createCallRegistry();
+      const callId = calls.start("alice", "bob");
+      expect(calls.end("alice", "bob", callId)).toBe(true);
+      expect(calls.size()).toBe(0);
+    });
+
+    it("accept()/reject() also reject a stale callId for a call that has since been replaced", () => {
+      const calls = authz.createCallRegistry();
+      const staleCallId = calls.start("alice", "bob");
+      calls.end("alice", "bob", staleCallId);
+      calls.start("alice", "bob"); // new call, new generation
+
+      expect(calls.accept("bob", "alice", staleCallId)).toBe(false);
+      expect(calls.reject("bob", "alice", staleCallId)).toBe(false);
+    });
+
+    it("backward compatible: end()/accept()/reject() with NO callId behave exactly as before (unpatched client)", () => {
+      const calls = authz.createCallRegistry();
+      calls.start("alice", "bob");
+      expect(calls.accept("bob", "alice")).toBe(true);
+      expect(calls.end("alice", "bob")).toBe(true);
+    });
+  });
 });

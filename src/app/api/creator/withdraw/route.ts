@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 // ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
@@ -37,6 +38,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Creator profile not found." }, { status: 404 });
     }
 
+    // ⚠️ CORRECTNESS: convert once, at the boundary, to a Prisma.Decimal
+    // and use that same value everywhere below - the balance comparison,
+    // the decrement, the stored WithdrawalRequest.amount, and any
+    // refund. `amount` arrives as a plain JS number (JSON has no
+    // separate decimal type); comparing and arithmetic-ing a float
+    // against a `Decimal(18,6)` column at three different call sites
+    // (as this route used to) risks each one coercing it slightly
+    // differently. A single Prisma.Decimal built from the validated
+    // input removes that ambiguity entirely.
+    const amountDecimal = new Prisma.Decimal(amount);
+
     // ⚠️ SECURITY: reserve the withdrawal amount atomically. The old
     // code checked `profile.balance < amount` and then created the
     // withdrawal request as a separate step - two concurrent requests
@@ -48,8 +60,8 @@ export async function POST(req: NextRequest) {
     // still has at least `amount` available *at the moment the DB
     // executes it*, so only one of two racing requests can win.
     const reservation = await prisma.creatorProfile.updateMany({
-      where: { id: profile.id, balance: { gte: amount } },
-      data: { balance: { decrement: amount } },
+      where: { id: profile.id, balance: { gte: amountDecimal } },
+      data: { balance: { decrement: amountDecimal } },
     });
 
     if (reservation.count === 0) {
@@ -62,7 +74,7 @@ export async function POST(req: NextRequest) {
         data: {
           creatorProfileId: profile.id,
           userId,
-          amount,
+          amount: amountDecimal,
           walletAddress,
           status: "PENDING",
         },
@@ -72,7 +84,7 @@ export async function POST(req: NextRequest) {
       // release the funds back rather than leaving them stuck in limbo.
       await prisma.creatorProfile.update({
         where: { id: profile.id },
-        data: { balance: { increment: amount } },
+        data: { balance: { increment: amountDecimal } },
       });
       throw err;
     }

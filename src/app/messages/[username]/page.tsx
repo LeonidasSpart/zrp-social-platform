@@ -119,6 +119,15 @@ export default function ChatPage(
   const peerRef = useRef<Peer.Instance | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const callerIdRef = useRef<string | null>(null);
+  // The current call's server-minted generation id (see socket-authz.js's
+  // createCallRegistry GENERATION RACE comment). Echoed back on
+  // accept-call/reject-call/end-call so a network-delayed event from a
+  // call that has already ended can't be mistaken by the server for an
+  // action on a brand-new call placed afterward between the same two
+  // users. Optional by design: the server still accepts every one of
+  // these events with no callId (falls back to its pre-fix behavior), so
+  // this is purely an additive hardening, not a required protocol bump.
+  const callIdRef = useRef<string | null>(null);
 
   const [incomingSignal, setIncomingSignal] =
     useState<any>(null);
@@ -326,6 +335,7 @@ export default function ChatPage(
         signal,
         callerName,
         isVideo,
+        callId,
       }) => {
         console.log(
           "📞 Incoming call from",
@@ -335,6 +345,7 @@ export default function ChatPage(
         setCallerName(callerName);
         setCallerId(callerId);
         callerIdRef.current = callerId;
+        callIdRef.current = callId ?? null;
         setIsVideoCall(isVideo);
         setIncomingSignal(signal);
         setCallState("incoming");
@@ -425,6 +436,15 @@ export default function ChatPage(
                 "User",
               isVideo,
               callerId: userId,
+            },
+            (response?: { callId?: string }) => {
+              // Server ack carrying this call's generation id - stored so
+              // a later end-call from this side of the call can prove
+              // it's ending the call it thinks it is (see callIdRef's
+              // own comment above). An older server that doesn't send an
+              // ack at all simply never invokes this - callIdRef stays
+              // null and end-call falls back to the pre-fix protocol.
+              callIdRef.current = response?.callId ?? null;
             }
           );
         }
@@ -565,6 +585,7 @@ export default function ChatPage(
               {
                 callerId,
                 signal,
+                callId: callIdRef.current ?? undefined,
               }
             );
           } else {
@@ -679,6 +700,7 @@ export default function ChatPage(
         "reject-call",
         {
           callerId: callerIdRef.current,
+          callId: callIdRef.current ?? undefined,
         }
       );
     }
@@ -687,6 +709,7 @@ export default function ChatPage(
     setIncomingSignal(null);
     setCallerId(null);
     callerIdRef.current = null;
+    callIdRef.current = null;
   };
 
   const endCall = () => {
@@ -718,12 +741,14 @@ export default function ChatPage(
         "end-call",
         {
           callerId: callerIdRef.current,
+          callId: callIdRef.current ?? undefined,
         }
       );
     }
 
     setCallerId(null);
     callerIdRef.current = null;
+    callIdRef.current = null;
     setCallerName("");
   };
 
