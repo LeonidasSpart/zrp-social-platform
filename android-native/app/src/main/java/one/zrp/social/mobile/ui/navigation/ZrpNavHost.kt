@@ -90,6 +90,9 @@ import one.zrp.social.mobile.ui.pricing.PricingScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
 import one.zrp.social.mobile.ui.communities.CommunitiesScreen
+import one.zrp.social.mobile.ui.communities.CommunityDetailScreen
+import one.zrp.social.mobile.ui.lists.ListDetailScreen
+import one.zrp.social.mobile.ui.lists.ListsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.followlist.FollowListMode
 import one.zrp.social.mobile.ui.followlist.FollowListScreen
@@ -262,6 +265,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     // website's own /explore/trending and /explore/people pages.
     val goToTrending: () -> Unit = { navController.navigate("explore/trending") }
     val goToCommunities: () -> Unit = { navController.navigate("communities") }
+    val goToCommunityDetail: (String) -> Unit = { id -> navController.navigate("communities/$id") }
+    val goToLists: () -> Unit = { navController.navigate("lists") }
+    val goToListDetail: (String) -> Unit = { id -> navController.navigate("lists/$id") }
     val goToExplorePeople: () -> Unit = { navController.navigate("explore/people") }
     val goToFollowers: (String) -> Unit = { username -> navController.navigate("profile/$username/followers") }
     val goToFollowing: (String) -> Unit = { username -> navController.navigate("profile/$username/following") }
@@ -453,6 +459,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     goJournalist = goToJournalist,
                     goAdmin = goToAdmin,
                     goBookmarks = goToBookmarks,
+                    goLists = goToLists,
                     goSettings = goToSettings,
                     goHelpCenter = goToHelpCenter,
                     goOwnProfile = { goToOwnTab(ZrpDestination.Profile) },
@@ -542,7 +549,47 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             composable("communities") {
                 CommunitiesScreen(
                     onBack = { navController.popBackStack() },
+                    onOpenCommunity = goToCommunityDetail,
+                )
+            }
+            composable(
+                "communities/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id") ?: return@composable
+                CommunityDetailScreen(
+                    communityId = id,
+                    onBack = { navController.popBackStack() },
+                    onAuthorClick = goToProfile,
+                    onOpenComments = goToComments,
                     onOpenHashtag = goToHashtag,
+                    onOpenQuotePost = goToQuotePost,
+                    onOpenReposts = goToReposts,
+                    onOpenQuotes = goToQuotes,
+                    onOpenVideoViewer = goToVideoViewer,
+                )
+            }
+            composable("lists") {
+                ListsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenList = goToListDetail,
+                )
+            }
+            composable(
+                "lists/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id") ?: return@composable
+                ListDetailScreen(
+                    listId = id,
+                    onBack = { navController.popBackStack() },
+                    onAuthorClick = goToProfile,
+                    onOpenComments = goToComments,
+                    onOpenHashtag = goToHashtag,
+                    onOpenQuotePost = goToQuotePost,
+                    onOpenReposts = goToReposts,
+                    onOpenQuotes = goToQuotes,
+                    onOpenVideoViewer = goToVideoViewer,
                 )
             }
             composable("explore/people") {

@@ -24,12 +24,28 @@ function calculateScore(post: any) {
   return engagement / ageHours;
 }
 
+// "Trending" (the Explore tab of that name) is a genuinely different
+// ranking from "For You", not the same feed relabeled: raw engagement
+// over a fixed recent window, no age decay. A post that is a day old
+// with heavy engagement stays trending even though the age-decayed
+// "For You" score would have buried it under everything posted in the
+// last hour. Same 200-candidate pool and post shape either way.
+const TRENDING_WINDOW_HOURS = 48;
+
+function calculateTrendingScore(post: any) {
+  const likes = post._count?.likes || 0;
+  const comments = post._count?.comments || 0;
+  const reposts = post._count?.reposts || 0;
+  return likes + comments * 2 + reposts * 3;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
     const { searchParams } = new URL(req.url);
+    const sort = searchParams.get("sort") === "trending" ? "trending" : "forYou";
     const cursorParam = searchParams.get("cursor");
     // Cursor here is a numeric offset into the ranked list, since ranking
     // is score-based (engagement/age), not something a DB cursor can walk
@@ -78,7 +94,7 @@ export async function GET(req: NextRequest) {
     // deliberately excluding votes_user for the same reason `liked`
     // above isn't cached: the viewer's own vote must never wait out the
     // 5-minute cache window to show up.
-    const cacheKey = `explore:${userId || 'anon'}:v7`;
+    const cacheKey = `explore:${userId || 'anon'}:${sort}:v7`;
     let ranked: any[] | null = await getCached(cacheKey);
 
     if (!ranked) {
@@ -91,6 +107,9 @@ export async function GET(req: NextRequest) {
           status: "published",
           scheduledAt: null,
           author: viewablePostAuthorFilter(userId),
+          ...(sort === "trending"
+            ? { createdAt: { gte: new Date(Date.now() - TRENDING_WINDOW_HOURS * 60 * 60 * 1000) } }
+            : {}),
         },
         select: {
           id: true,
@@ -167,10 +186,11 @@ export async function GET(req: NextRequest) {
       });
 
       // ─── Compute scores and sort ─────────────────────────────────────
+      const scoreFn = sort === "trending" ? calculateTrendingScore : calculateScore;
       ranked = posts
         .map((post) => ({
           ...post,
-          score: calculateScore(post),
+          score: scoreFn(post),
         }))
         .sort((a, b) => b.score - a.score);
 

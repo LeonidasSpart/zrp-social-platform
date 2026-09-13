@@ -310,7 +310,16 @@ android {
         // attempt at versionCode 19 ("Le code de version 19 a déjà été
         // utilisé") since it had already accepted one AAB carrying that
         // versionCode. No feature change here - version numbers only.
-        versionCode 20
+        //
+        // Bumps to versionCode 21 (versionName unchanged - still the
+        // 4.0.15 milestone, this branch's real Communities + Lists work
+        // is the feature content, not a version-number change) because
+        // versionCode 20 was already uploaded to Play Console's Internal
+        // Testing track before this branch's AAB was built, so a build
+        // of this branch carrying the inherited 20 would collide with it
+        // ("Le code de version 20 a déjà été utilisé" - same failure
+        // mode as the versionCode 2/7/19 collisions documented above).
+        versionCode 21
         versionName "4.0.15"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

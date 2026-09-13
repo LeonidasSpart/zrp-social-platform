@@ -52,10 +52,6 @@ struct MenuSection: Identifiable {
 ///   upgrade buttons and a crypto payment modal, which App Store policy
 ///   does not allow in an app that takes payment outside it. The same
 ///   rule already keeps tips and premium posts off iOS.
-/// - **Communities** and **Lists** - both appear in the design reference
-///   and neither exists anywhere in ZRP: there is no page, no route, no
-///   table and no API. A menu row leading to invented membership would
-///   be a dead end dressed as a feature, so there isn't one.
 enum ZrpMenu {
 
     static let sections: [MenuSection] = {
@@ -75,6 +71,7 @@ enum ZrpMenu {
                 MenuEntry(.navNotifications, systemImage: "bell", route: .notifications),
                 MenuEntry(.navMessages, systemImage: "envelope", tab: .messages),
                 MenuEntry(.navBookmarks, systemImage: "bookmark", route: .bookmarks),
+                MenuEntry(.navLists, systemImage: "list.bullet", route: .lists),
                 MenuEntry(.navProfile, systemImage: "person", tab: .profile),
             ]),
 
@@ -84,6 +81,7 @@ enum ZrpMenu {
                 MenuEntry(.navShorts, systemImage: "play.rectangle", route: .shorts(startId: nil)),
                 MenuEntry(.navNews, systemImage: "newspaper", route: .news),
                 MenuEntry(.navMusic, systemImage: "music.note", route: .music),
+                MenuEntry(.navCommunities, systemImage: "person.3", route: .communities),
                 MenuEntry(.navPlay, systemImage: "gamecontroller", route: .play),
                 MenuEntry(.navMarketplace, systemImage: "bag", route: .marketplace),
                 MenuEntry(.navOpportunity, systemImage: "briefcase", route: .opportunity),

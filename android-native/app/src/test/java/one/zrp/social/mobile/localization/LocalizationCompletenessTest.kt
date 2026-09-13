@@ -153,6 +153,10 @@ class LocalizationCompletenessTest {
      */
     private val perLanguageAllowlist: Map<String, Set<String>> = mapOf(
         "fr" to setOf(
+            "communities_category_nature",
+            "communities_create_description_label",
+            "communities_create_hashtag_label",
+            "lists_create_description_label",
             "action_message",
             "admin_ads_budget",
             "admin_analytics_daily_range",
@@ -258,6 +262,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "de" to setOf(
+            "communities_create_name_label",
+            "communities_create_hashtag_label",
+            "lists_create_name_label",
             "action_repost",
             "admin_ads_budget",
             "admin_analytics_daily_range",
@@ -359,6 +366,7 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "it" to setOf(
+            "communities_create_hashtag_label",
             "admin_ads_budget",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
@@ -432,6 +440,7 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "sq" to setOf(
+            "communities_create_hashtag_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_news_feedback_prefix",
@@ -483,6 +492,8 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "es" to setOf(
+            "communities_category_general",
+            "communities_create_hashtag_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_nav_label",
@@ -619,6 +630,7 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "tr" to setOf(
+            "communities_create_hashtag_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_news_network_pilot",
@@ -734,6 +746,7 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "pt" to setOf(
+            "communities_create_hashtag_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_nav_label",
