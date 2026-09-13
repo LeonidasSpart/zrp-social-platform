@@ -1119,7 +1119,7 @@
 "communities.join" = "انضمام";
 "communities.joined" = "منضم";
 "communities.leave" = "مغادرة";
-"communities.memberCountOne" = "عضو واحد";
+"communities.memberCountOne" = "{n} عضو";
 "communities.memberCountOther" = "{n} عضو";
 "communities.create.title" = "إنشاء مجتمع";
 "communities.create.nameLabel" = "الاسم";

@@ -1164,7 +1164,7 @@
 "lists.detail.emptyMembers" = "Belum ada anggota.";
 "lists.detail.feedEmptyTitle" = "Belum ada postingan";
 "lists.detail.feedEmptyBody" = "Postingan dari anggota daftar ini akan muncul di sini.";
-"lists.detail.editButton" = "Edit";
+"lists.detail.editButton" = "Ubah";
 "lists.detail.deleteButton" = "Hapus daftar";
 "lists.detail.deleteConfirm" = "Hapus daftar ini? Tindakan ini tidak dapat dibatalkan.";
 "lists.errorLoad" = "Gagal memuat daftar.";
