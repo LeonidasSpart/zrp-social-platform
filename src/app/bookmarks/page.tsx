@@ -44,6 +44,7 @@ interface Comment {
     username: string;
     name: string;
     avatarUrl?: string;
+    badgeType?: string | null;
   };
   post: {
     id: string;
@@ -201,6 +202,7 @@ export default function BookmarksPage() {
                         <span className="font-semibold text-gray-900 dark:text-white text-sm">
                           {comment.author.name || comment.author.username}
                         </span>
+                        <VerifiedBadge badgeType={comment.author.badgeType} />
                         <span className="text-xs text-gray-500">@{comment.author.username}</span>
                         <span className="text-xs text-gray-400">·</span>
                         <span className="text-xs text-gray-400">

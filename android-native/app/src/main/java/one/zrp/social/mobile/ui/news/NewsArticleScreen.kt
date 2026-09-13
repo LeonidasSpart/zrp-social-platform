@@ -49,7 +49,12 @@ import one.zrp.social.mobile.util.formatCount
 
 /** ZRP News article - ported from news/[slug]/page.tsx. */
 @Composable
-fun NewsArticleScreen(slug: String, onBack: () -> Unit, onOpenNewsList: () -> Unit = onBack) {
+fun NewsArticleScreen(
+    slug: String,
+    onBack: () -> Unit,
+    onAuthorClick: (String) -> Unit,
+    onOpenNewsList: () -> Unit = onBack,
+) {
     val viewModel: NewsArticleViewModel = viewModel(
         factory = remember { NewsArticleViewModelFactory(slug, NewsRepository()) },
     )
@@ -132,7 +137,12 @@ fun NewsArticleScreen(slug: String, onBack: () -> Unit, onOpenNewsList: () -> Un
                         )
                     }
 
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .clickable(onClick = { onAuthorClick(article.author.username) }, role = Role.Button),
+                    ) {
                         Avatar(url = article.author.avatarUrl, name = article.author.username, size = 36.dp)
                         Column(modifier = Modifier.padding(start = 8.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {

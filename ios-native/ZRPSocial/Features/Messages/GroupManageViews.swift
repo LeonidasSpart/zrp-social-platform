@@ -13,6 +13,7 @@ struct GroupManageSheet: View {
     @ObservedObject var viewModel: GroupConversationViewModel
     let onLeave: () -> Void
 
+    @EnvironmentObject private var navigator: Navigator
     @Environment(\.dismiss) private var dismiss
 
     @State private var isEditingName = false
@@ -205,9 +206,12 @@ struct GroupManageSheet: View {
                 size: ZrpMetrics.avatarSmall
             )
             VStack(alignment: .leading, spacing: 0) {
-                Text(verbatim: participant.user?.displayName ?? "")
-                    .font(.subheadline)
-                    .foregroundStyle(ZrpColor.onSurface)
+                HStack(spacing: 2) {
+                    Text(verbatim: participant.user?.displayName ?? "")
+                        .font(.subheadline)
+                        .foregroundStyle(ZrpColor.onSurface)
+                    VerifiedBadge(badgeType: participant.user?.badgeType, size: 12)
+                }
                 if let username = participant.user?.username {
                     Text(verbatim: "@" + username)
                         .font(.caption)
@@ -220,6 +224,12 @@ struct GroupManageSheet: View {
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
             }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard let username = participant.user?.username else { return }
+            dismiss()
+            navigator.push(.profile(username: username))
         }
         .swipeActions(edge: .trailing) {
             if isRemovable {

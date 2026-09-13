@@ -1242,9 +1242,13 @@ export default function ProfilePage(
                 />
               </Link>
 
-              <span className="text-sm text-gray-500">
+              <Link
+                href={`/profile/${reply.author.username}`}
+                className="text-sm text-gray-500 hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
                 @{reply.author.username}
-              </span>
+              </Link>
 
               <span className="text-sm text-gray-400">
                 ·

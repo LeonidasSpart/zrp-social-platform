@@ -2,6 +2,7 @@ package one.zrp.social.mobile.ui.admin
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,6 +52,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.AdminRepository
 import one.zrp.social.mobile.network.AdminJournalistProfile
+import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.BadgeSize
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
@@ -59,7 +64,7 @@ private val STATUS_FILTERS = listOf("PENDING", "VERIFIED", "SUSPENDED", "REJECTE
 
 /** Ported from src/app/admin/journalists/page.tsx - see AdminApi's own KDoc. */
 @Composable
-fun AdminJournalistsScreen(onBack: () -> Unit) {
+fun AdminJournalistsScreen(onBack: () -> Unit, onOpenProfile: (String) -> Unit) {
     val viewModel: AdminJournalistsViewModel = viewModel(
         factory = remember { AdminJournalistsViewModelFactory(AdminRepository()) },
     )
@@ -150,6 +155,7 @@ fun AdminJournalistsScreen(onBack: () -> Unit) {
                         profile = profile,
                         isBusy = state.busyUserId == profile.user.id,
                         onAction = { action -> viewModel.requestAction(profile.user.id, action) },
+                        onOpenProfile = onOpenProfile,
                     )
                 }
             }
@@ -285,6 +291,7 @@ private fun JournalistRow(
     profile: AdminJournalistProfile,
     isBusy: Boolean,
     onAction: (String) -> Unit,
+    onOpenProfile: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -294,13 +301,30 @@ private fun JournalistRow(
             .padding(Spacing.md),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = profile.user.name ?: profile.user.username, fontWeight = FontWeight.Bold)
-                Text(
-                    text = "@${profile.user.username}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = { onOpenProfile(profile.user.username) }, role = Role.Button),
+            ) {
+                Avatar(url = profile.user.avatarUrl, name = profile.user.name ?: profile.user.username, size = 36.dp)
+                Column(modifier = Modifier.padding(start = Spacing.sm)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = profile.user.name ?: profile.user.username,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        VerifiedBadge(badgeType = profile.user.badgeType, size = BadgeSize.small)
+                    }
+                    Text(
+                        text = "@${profile.user.username}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             Text(
                 text = journalistStatusLabel(profile.status),

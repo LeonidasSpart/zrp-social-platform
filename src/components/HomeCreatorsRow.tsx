@@ -124,9 +124,12 @@ export default function HomeCreatorsRow() {
                 {user.badgeType && <VerifiedBadge badgeType={user.badgeType} />}
               </Link>
 
-              <span className="text-xs text-gray-500 dark:text-gray-400 truncate w-full">
+              <Link
+                href={`/profile/${user.username}`}
+                className="text-xs text-gray-500 dark:text-gray-400 truncate w-full hover:underline"
+              >
                 @{user.username}
-              </span>
+              </Link>
 
               <button
                 type="button"

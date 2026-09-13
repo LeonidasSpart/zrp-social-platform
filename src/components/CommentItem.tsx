@@ -201,7 +201,12 @@ export default function CommentItem({
               {comment.author.name || comment.author.username}
               {comment.author.badgeType && <VerifiedBadge badgeType={comment.author.badgeType} />}
             </Link>
-            <span className="text-xs text-gray-500">@{comment.author.username}</span>
+            <Link
+              href={`/profile/${comment.author.username}`}
+              className="text-xs text-gray-500 hover:underline"
+            >
+              @{comment.author.username}
+            </Link>
             <span className="text-xs text-gray-400">·</span>
             <span className="text-xs text-gray-400">
               {new Date(comment.createdAt).toLocaleDateString(getDateLocale(language))}

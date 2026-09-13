@@ -314,10 +314,18 @@ export default function AdminJournalistsPage() {
                 <li key={profile.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <Link
+                        href={`/profile/${profile.user.username}`}
+                        className="font-medium text-gray-900 hover:underline dark:text-white"
+                      >
                         {profile.user.name || profile.user.username}
-                      </p>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">@{profile.user.username}</span>
+                      </Link>
+                      <Link
+                        href={`/profile/${profile.user.username}`}
+                        className="text-sm text-gray-500 hover:underline dark:text-gray-400"
+                      >
+                        @{profile.user.username}
+                      </Link>
                       {profile.user.badgeType && <VerifiedBadge badgeType={profile.user.badgeType} />}
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[profile.status]}`}>
                         {t(STATUS_LABEL_KEYS[profile.status])}

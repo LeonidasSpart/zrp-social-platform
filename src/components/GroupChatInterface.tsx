@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
   Send,
@@ -1008,13 +1009,17 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                     {!isOwn && (
                       <div className="w-7 flex-shrink-0 self-end">
                         {isFirstOfCluster && (
-                          <div className="h-7 w-7 overflow-hidden rounded-full bg-gray-200 text-[11px] font-bold text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center">
+                          <Link
+                            href={`/profile/${message.sender.username}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="block h-7 w-7 overflow-hidden rounded-full bg-gray-200 text-[11px] font-bold text-gray-600 dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center"
+                          >
                             {message.sender.avatarUrl ? (
                               <img src={message.sender.avatarUrl} alt="" className="h-full w-full object-cover" />
                             ) : (
                               senderName[0]?.toUpperCase()
                             )}
-                          </div>
+                          </Link>
                         )}
                       </div>
                     )}
@@ -1025,10 +1030,14 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                       }`}
                     >
                       {!isOwn && isFirstOfCluster && (
-                        <p className="mb-0.5 flex items-center gap-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        <Link
+                          href={`/profile/${message.sender.username}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="mb-0.5 flex items-center gap-1 px-1 text-xs font-semibold text-gray-500 hover:underline dark:text-gray-400"
+                        >
                           {senderName}
                           <VerifiedBadge badgeType={message.sender.badgeType} className="flex-shrink-0" />
-                        </p>
+                        </Link>
                       )}
 
                       <div

@@ -1157,6 +1157,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                         duelId = id,
                         onBack = { navController.popBackStack() },
                         onPlay = { challengeId, playDuelId -> navController.navigate("play/challenge/$challengeId?duelId=${Uri.encode(playDuelId)}") },
+                        onOpenProfile = goToProfile,
                     )
                 }
             }
@@ -1172,7 +1173,11 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             ) { backStackEntry ->
                 val slug = backStackEntry.arguments?.getString("slug")
                 if (slug != null) {
-                    NewsArticleScreen(slug = slug, onBack = { navController.popBackStack() })
+                    NewsArticleScreen(
+                        slug = slug,
+                        onBack = { navController.popBackStack() },
+                        onAuthorClick = goToProfile,
+                    )
                 }
             }
             composable("shorts") {
@@ -1286,7 +1291,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                 )
             }
             composable("settings/team") {
-                TeamScreen(onBack = { navController.popBackStack() })
+                TeamScreen(onBack = { navController.popBackStack() }, onOpenProfile = goToProfile)
             }
             composable("settings/api-keys") {
                 ApiKeysScreen(onBack = { navController.popBackStack() })
@@ -1422,7 +1427,11 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                 AdminReportsScreen(onBack = { navController.popBackStack() })
             }
             composable("admin/users") {
-                AdminUsersScreen(isAdmin = isAdminRole, onBack = { navController.popBackStack() })
+                AdminUsersScreen(
+                    isAdmin = isAdminRole,
+                    onBack = { navController.popBackStack() },
+                    onOpenProfile = goToProfile,
+                )
             }
             composable("admin/posts") {
                 AdminPostsScreen(onBack = { navController.popBackStack() })
@@ -1448,7 +1457,10 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                 AdminHelpScreen(onBack = { navController.popBackStack() })
             }
             composable("admin/journalists") {
-                AdminJournalistsScreen(onBack = { navController.popBackStack() })
+                AdminJournalistsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenProfile = goToProfile,
+                )
             }
             composable("admin/ambassadors") {
                 AdminAmbassadorsScreen(onBack = { navController.popBackStack() })
@@ -1564,6 +1576,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                 CreatorScreen(
                     onBack = { navController.popBackStack() },
                     onOpenPost = goToComments,
+                    onOpenProfile = goToProfile,
                 )
             }
             composable("journalist") {

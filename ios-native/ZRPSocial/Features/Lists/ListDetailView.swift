@@ -264,15 +264,25 @@ struct ListDetailView: View {
                 } else {
                     ForEach(list.members) { entry in
                         HStack(spacing: ZrpSpacing.sm) {
-                            AvatarView(
-                                url: entry.user.avatarUrl,
-                                displayName: entry.user.name ?? entry.user.username,
-                                size: ZrpMetrics.avatarSmall
-                            )
-                            Text(verbatim: entry.user.name ?? entry.user.username)
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(ZrpColor.onSurface)
-                                .lineLimit(1)
+                            Button {
+                                navigator.push(.profile(username: entry.user.username))
+                            } label: {
+                                HStack(spacing: ZrpSpacing.sm) {
+                                    AvatarView(
+                                        url: entry.user.avatarUrl,
+                                        displayName: entry.user.name ?? entry.user.username,
+                                        size: ZrpMetrics.avatarSmall
+                                    )
+                                    HStack(spacing: 2) {
+                                        Text(verbatim: entry.user.name ?? entry.user.username)
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(ZrpColor.onSurface)
+                                            .lineLimit(1)
+                                        VerifiedBadge(badgeType: entry.user.badgeType, size: 12)
+                                    }
+                                }
+                            }
+                            .buttonStyle(.plain)
                             Spacer()
                             if viewModel.isOwner {
                                 Button(action: { viewModel.removeMember(userId: entry.user.id) }) {

@@ -263,9 +263,31 @@ struct PlayChallengeCard: View {
 /// One leaderboard row.
 struct PlayLeaderboardRow: View {
 
+    @EnvironmentObject private var navigator: Navigator
+
     let entry: PlayLeaderboardEntry
 
     var body: some View {
+        content
+            .padding(.vertical, ZrpSpacing.xs)
+            .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if let user = entry.user {
+            Button {
+                navigator.push(.profile(username: user.username))
+            } label: {
+                row(user: user)
+            }
+            .buttonStyle(.plain)
+        } else {
+            row(user: nil)
+        }
+    }
+
+    private func row(user: PostAuthor?) -> some View {
         HStack(spacing: ZrpSpacing.md) {
             if let rank = entry.rank {
                 Text(verbatim: CountFormatting.exact(rank))
@@ -273,7 +295,7 @@ struct PlayLeaderboardRow: View {
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
                     .frame(minWidth: 24, alignment: .trailing)
             }
-            if let user = entry.user {
+            if let user {
                 AvatarView(
                     url: user.avatarUrl,
                     displayName: user.displayName,
@@ -290,8 +312,6 @@ struct PlayLeaderboardRow: View {
                 .font(.caption)
                 .foregroundStyle(ZrpColor.onSurfaceMuted)
         }
-        .padding(.vertical, ZrpSpacing.xs)
-        .accessibilityElement(children: .combine)
     }
 }
 
