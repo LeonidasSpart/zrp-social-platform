@@ -70,6 +70,17 @@ class CommunitiesRepository {
         }
     }
 
+    suspend fun deleteCommunity(id: String): Result<Unit> {
+        return try {
+            ApiClient.communitiesApi.deleteCommunity(id)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't delete this community. Try again."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
     suspend fun getCommunityFeed(id: String, cursor: String?): Result<PostsPage> {
         return try {
             Result.success(ApiClient.communitiesApi.getCommunityFeed(id, cursor))

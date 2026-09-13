@@ -2225,6 +2225,11 @@
     <string name="communities_detail_feed_empty_body">ستظهر هنا المنشورات الموسومة بـ #%1$s.</string>
     <string name="communities_detail_not_found">المجتمع غير موجود</string>
     <string name="communities_detail_owner_badge">المالك</string>
+    <string name="communities_detail_delete_button">حذف المجتمع</string>
+    <string name="communities_detail_delete_confirm_title">هل تريد حذف هذا المجتمع؟</string>
+    <string name="communities_detail_delete_confirm_body">سيؤدي هذا إلى إزالة %1$s للجميع ولا يمكن التراجع عنه. لن يتم حذف المنشورات التي تحمل وسم #%2$s.</string>
+    <string name="communities_detail_delete_confirm_action">حذف</string>
+    <string name="communities_detail_delete_error">تعذر حذف هذا المجتمع. حاول مرة أخرى.</string>
     <string name="communities_error_load">فشل تحميل المجتمعات.</string>
     <string name="communities_error_create">فشل إنشاء المجتمع.</string>
     <string name="communities_error_join">فشل الانضمام إلى المجتمع.</string>

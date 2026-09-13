@@ -2225,6 +2225,11 @@
     <string name="communities_detail_feed_empty_body">#%1$s etiketli gönderiler burada görünür.</string>
     <string name="communities_detail_not_found">Topluluk bulunamadı</string>
     <string name="communities_detail_owner_badge">Sahibi</string>
+    <string name="communities_detail_delete_button">Topluluğu sil</string>
+    <string name="communities_detail_delete_confirm_title">Bu topluluk silinsin mi?</string>
+    <string name="communities_detail_delete_confirm_body">Bu, %1$s topluluğunu herkes için kaldırır ve geri alınamaz. #%2$s etiketli gönderiler silinmez.</string>
+    <string name="communities_detail_delete_confirm_action">Sil</string>
+    <string name="communities_detail_delete_error">Topluluk silinemedi. Tekrar deneyin.</string>
     <string name="communities_error_load">Topluluklar yüklenemedi.</string>
     <string name="communities_error_create">Topluluk oluşturulamadı.</string>
     <string name="communities_error_join">Topluluğa katılınamadı.</string>

@@ -2225,6 +2225,11 @@
     <string name="communities_detail_feed_empty_body">Postingan bertagar #%1$s akan muncul di sini.</string>
     <string name="communities_detail_not_found">Komunitas tidak ditemukan</string>
     <string name="communities_detail_owner_badge">Pemilik</string>
+    <string name="communities_detail_delete_button">Hapus komunitas</string>
+    <string name="communities_detail_delete_confirm_title">Hapus komunitas ini?</string>
+    <string name="communities_detail_delete_confirm_body">Ini akan menghapus %1$s untuk semua orang dan tidak dapat dibatalkan. Postingan dengan tag #%2$s tidak akan dihapus.</string>
+    <string name="communities_detail_delete_confirm_action">Hapus</string>
+    <string name="communities_detail_delete_error">Tidak dapat menghapus komunitas ini. Coba lagi.</string>
     <string name="communities_error_load">Gagal memuat komunitas.</string>
     <string name="communities_error_create">Gagal membuat komunitas.</string>
     <string name="communities_error_join">Gagal bergabung dengan komunitas.</string>

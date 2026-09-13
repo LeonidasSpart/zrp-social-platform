@@ -2167,6 +2167,11 @@
     <string name="communities_detail_feed_empty_body">#%1$s が付いた投稿がここに表示されます。</string>
     <string name="communities_detail_not_found">コミュニティが見つかりません</string>
     <string name="communities_detail_owner_badge">オーナー</string>
+    <string name="communities_detail_delete_button">コミュニティを削除</string>
+    <string name="communities_detail_delete_confirm_title">このコミュニティを削除しますか？</string>
+    <string name="communities_detail_delete_confirm_body">これにより、%1$sが全員から削除され、元に戻すことはできません。#%2$s のタグが付いた投稿は削除されません。</string>
+    <string name="communities_detail_delete_confirm_action">削除</string>
+    <string name="communities_detail_delete_error">コミュニティを削除できませんでした。もう一度お試しください。</string>
     <string name="communities_error_load">コミュニティの読み込みに失敗しました。</string>
     <string name="communities_error_create">コミュニティの作成に失敗しました。</string>
     <string name="communities_error_join">コミュニティへの参加に失敗しました。</string>

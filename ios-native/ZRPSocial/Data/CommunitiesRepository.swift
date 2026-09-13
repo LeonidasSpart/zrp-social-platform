@@ -6,6 +6,7 @@ protocol CommunitiesRepositoryProtocol: Sendable {
     func createCommunity(_ request: CreateCommunityRequest) async throws -> Community
     func join(id: String) async throws -> Bool
     func leave(id: String) async throws -> Bool
+    func delete(id: String) async throws
     func feed(id: String, cursor: String?) async throws -> PostsPage
 }
 
@@ -53,6 +54,14 @@ struct CommunitiesRepository: CommunitiesRepositoryProtocol {
             Endpoint.post("communities/\(Endpoint.segment(id))/leave")
         )
         return response.isMember
+    }
+
+    /// Server-authorized to the community's creator (or a site admin) -
+    /// see the web route's own comment. Cascades to every membership row.
+    func delete(id: String) async throws {
+        try await client.sendIgnoringResponse(
+            Endpoint.delete("communities/\(Endpoint.segment(id))")
+        )
     }
 
     func feed(id: String, cursor: String?) async throws -> PostsPage {

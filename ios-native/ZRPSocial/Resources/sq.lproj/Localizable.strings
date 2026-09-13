@@ -1137,6 +1137,11 @@
 "communities.detail.feedEmptyBody" = "Postimet me #{hashtag} do të shfaqen këtu.";
 "communities.detail.notFound" = "Komuniteti nuk u gjet";
 "communities.detail.ownerBadge" = "Pronari";
+"communities.detail.deleteButton" = "Fshi komunitetin";
+"communities.detail.deleteConfirmTitle" = "Të fshihet ky komunitet?";
+"communities.detail.deleteConfirmBody" = "Kjo heq {name} për të gjithë dhe nuk mund të zhbëhet. Postimet me #{hashtag} nuk fshihen.";
+"communities.detail.deleteConfirmAction" = "Fshi";
+"communities.detail.deleteError" = "Komuniteti nuk mund të fshihej. Provo përsëri.";
 "communities.errorLoad" = "Dështoi ngarkimi i komuniteteve.";
 "communities.errorCreate" = "Dështoi krijimi i komunitetit.";
 "communities.errorJoin" = "Dështoi bashkimi me komunitetin.";

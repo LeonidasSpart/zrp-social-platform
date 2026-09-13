@@ -1137,6 +1137,11 @@
 "communities.detail.feedEmptyBody" = "ستظهر هنا المنشورات الموسومة بـ #{hashtag}.";
 "communities.detail.notFound" = "المجتمع غير موجود";
 "communities.detail.ownerBadge" = "المالك";
+"communities.detail.deleteButton" = "حذف المجتمع";
+"communities.detail.deleteConfirmTitle" = "هل تريد حذف هذا المجتمع؟";
+"communities.detail.deleteConfirmBody" = "سيؤدي هذا إلى إزالة {name} للجميع ولا يمكن التراجع عنه. لن يتم حذف المنشورات التي تحمل وسم #{hashtag}.";
+"communities.detail.deleteConfirmAction" = "حذف";
+"communities.detail.deleteError" = "تعذر حذف هذا المجتمع. حاول مرة أخرى.";
 "communities.errorLoad" = "فشل تحميل المجتمعات.";
 "communities.errorCreate" = "فشل إنشاء المجتمع.";
 "communities.errorJoin" = "فشل الانضمام إلى المجتمع.";

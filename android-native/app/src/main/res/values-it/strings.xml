@@ -2225,6 +2225,11 @@
     <string name="communities_detail_feed_empty_body">I post con #%1$s appariranno qui.</string>
     <string name="communities_detail_not_found">Community non trovata</string>
     <string name="communities_detail_owner_badge">Proprietario</string>
+    <string name="communities_detail_delete_button">Elimina community</string>
+    <string name="communities_detail_delete_confirm_title">Eliminare questa community?</string>
+    <string name="communities_detail_delete_confirm_body">Questo rimuove %1$s per tutti e non può essere annullato. I post con #%2$s non vengono eliminati.</string>
+    <string name="communities_detail_delete_confirm_action">Elimina</string>
+    <string name="communities_detail_delete_error">Impossibile eliminare questa community. Riprova.</string>
     <string name="communities_error_load">Impossibile caricare le community.</string>
     <string name="communities_error_create">Impossibile creare la community.</string>
     <string name="communities_error_join">Impossibile partecipare alla community.</string>

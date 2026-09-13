@@ -1137,6 +1137,11 @@
 "communities.detail.feedEmptyBody" = "Здесь появятся публикации с тегом #{hashtag}.";
 "communities.detail.notFound" = "Сообщество не найдено";
 "communities.detail.ownerBadge" = "Владелец";
+"communities.detail.deleteButton" = "Удалить сообщество";
+"communities.detail.deleteConfirmTitle" = "Удалить это сообщество?";
+"communities.detail.deleteConfirmBody" = "Это удалит {name} для всех, и действие нельзя отменить. Публикации с #{hashtag} не удаляются.";
+"communities.detail.deleteConfirmAction" = "Удалить";
+"communities.detail.deleteError" = "Не удалось удалить сообщество. Попробуйте снова.";
 "communities.errorLoad" = "Не удалось загрузить сообщества.";
 "communities.errorCreate" = "Не удалось создать сообщество.";
 "communities.errorJoin" = "Не удалось вступить в сообщество.";

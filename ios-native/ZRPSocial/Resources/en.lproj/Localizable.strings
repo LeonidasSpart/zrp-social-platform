@@ -1137,6 +1137,11 @@
 "communities.detail.feedEmptyBody" = "Posts tagged #{hashtag} will show up here.";
 "communities.detail.notFound" = "Community not found";
 "communities.detail.ownerBadge" = "Owner";
+"communities.detail.deleteButton" = "Delete community";
+"communities.detail.deleteConfirmTitle" = "Delete this community?";
+"communities.detail.deleteConfirmBody" = "This removes {name} for everyone and can't be undone. Posts tagged #{hashtag} are not deleted.";
+"communities.detail.deleteConfirmAction" = "Delete";
+"communities.detail.deleteError" = "Couldn't delete this community. Try again.";
 "communities.errorLoad" = "Failed to load communities.";
 "communities.errorCreate" = "Failed to create community.";
 "communities.errorJoin" = "Failed to join community.";

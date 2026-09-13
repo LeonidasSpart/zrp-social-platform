@@ -1137,6 +1137,11 @@
 "communities.detail.feedEmptyBody" = "#{hashtag} etiketli gönderiler burada görünür.";
 "communities.detail.notFound" = "Topluluk bulunamadı";
 "communities.detail.ownerBadge" = "Sahibi";
+"communities.detail.deleteButton" = "Topluluğu sil";
+"communities.detail.deleteConfirmTitle" = "Bu topluluk silinsin mi?";
+"communities.detail.deleteConfirmBody" = "Bu, {name} topluluğunu herkes için kaldırır ve geri alınamaz. #{hashtag} etiketli gönderiler silinmez.";
+"communities.detail.deleteConfirmAction" = "Sil";
+"communities.detail.deleteError" = "Topluluk silinemedi. Tekrar deneyin.";
 "communities.errorLoad" = "Topluluklar yüklenemedi.";
 "communities.errorCreate" = "Topluluk oluşturulamadı.";
 "communities.errorJoin" = "Topluluğa katılınamadı.";
