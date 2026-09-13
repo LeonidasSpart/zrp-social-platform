@@ -12,13 +12,7 @@ import { useConversationList } from "@/lib/useConversationList";
 import { buildMessagePreview } from "@/lib/conversationPreview";
 import { usePresence } from "@/contexts/PresenceContext";
 import ConversationRowMenu from "@/components/ConversationRowMenu";
-
-const localeMap: Record<string, string> = {
-  en: "en-US",
-  fr: "fr-FR",
-  de: "de-DE",
-  it: "it-IT",
-};
+import { getDateLocale } from "@/lib/dateLocale";
 
 export default function MessagesIndexPage() {
   const { data: session } = useSession();
@@ -56,7 +50,7 @@ export default function MessagesIndexPage() {
 
       if (sameDay) {
         return messageDate.toLocaleTimeString(
-          localeMap[language] || "en-US",
+          getDateLocale(language),
           {
             hour: "2-digit",
             minute: "2-digit",
@@ -65,7 +59,7 @@ export default function MessagesIndexPage() {
       }
 
       return messageDate.toLocaleDateString(
-        localeMap[language] || "en-US",
+        getDateLocale(language),
         {
           month: "short",
           day: "numeric",

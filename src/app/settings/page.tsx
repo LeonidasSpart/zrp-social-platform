@@ -20,6 +20,7 @@ import { categoryToTranslationKey } from "@/lib/professionalCategories";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
 import { buttonClasses } from "@/components/ui/styles";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface UserData {
   id: string;
@@ -559,9 +560,8 @@ export default function SettingsPage() {
     );
   }
 
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString(localeMap[language] || "en-US", {
+    return new Date(date).toLocaleDateString(getDateLocale(language), {
       month: "long",
       day: "numeric",
       year: "numeric",

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ChevronLeft, Loader2, Ban, Calendar } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface BlockedUser {
   id: string;
@@ -29,8 +30,6 @@ export default function BlockedUsersPage() {
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [unblocking, setUnblocking] = useState<string | null>(null);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -175,7 +174,7 @@ export default function BlockedUsersPage() {
                   <span>·</span>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {t("blocked.blockedOn", { date: new Date(user.blockedAt).toLocaleDateString(localeMap[language] || "en-US") })}
+                    {t("blocked.blockedOn", { date: new Date(user.blockedAt).toLocaleDateString(getDateLocale(language)) })}
                   </span>
                 </div>
               </div>

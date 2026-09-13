@@ -47,6 +47,7 @@ import { SkeletonProfileHeader } from "@/components/skeletons/SkeletonProfileHea
 import { SkeletonFeed } from "@/components/skeletons/SkeletonFeed";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { getDateLocale } from "@/lib/dateLocale";
 import { categoryToTranslationKey } from "@/lib/professionalCategories";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { isNativeStoreRestrictedPayment } from "@/lib/native-payment-policy";
@@ -347,11 +348,6 @@ export default function ProfilePage(
 
   const isOwnProfile =
     session?.user?.id === profile?.id;
-
-  const localeMap: Record<string, string> = {
-    en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-    es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-  };
 
   // ─── Click outside to close dropdown ───────────────────────────
 
@@ -1004,8 +1000,7 @@ export default function ProfilePage(
 
   const formattedJoinDate =
     joinDate.toLocaleDateString(
-      localeMap[language] ||
-        "en-US",
+      getDateLocale(language),
       {
         month: "long",
         year: "numeric",
@@ -1194,9 +1189,7 @@ export default function ProfilePage(
                 {new Date(
                   reply.createdAt
                 ).toLocaleDateString(
-                  localeMap[
-                    language
-                  ] || "en-US"
+                  getDateLocale(language)
                 )}
               </span>
             </div>

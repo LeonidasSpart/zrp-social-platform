@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import type { TranslationKey } from "@/lib/translations";
 
 interface CharityData {
@@ -37,11 +38,7 @@ export default function CharityLedger() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const localeMap: Record<string, string> = {
-    en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", es: "es-ES",
-    ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID", sq: "sq-AL",
-  };
-  const locale = localeMap[language] || "en-US";
+  const locale = getDateLocale(language);
 
   useEffect(() => {
     fetch("/api/transparency/charity")

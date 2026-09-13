@@ -10,6 +10,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface Post {
   id: string;
@@ -77,8 +78,6 @@ export default function BookmarksPage() {
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -205,7 +204,7 @@ export default function BookmarksPage() {
                         <span className="text-xs text-gray-500">@{comment.author.username}</span>
                         <span className="text-xs text-gray-400">·</span>
                         <span className="text-xs text-gray-400">
-                          {new Date(comment.createdAt).toLocaleDateString(localeMap[language] || "en-US")}
+                          {new Date(comment.createdAt).toLocaleDateString(getDateLocale(language))}
                         </span>
                       </div>
                       <p className="mt-0.5 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { TranslationKey } from '@/lib/translations';
+import { getDateLocale } from '@/lib/dateLocale';
 
 interface Ticket {
   id: string;
@@ -29,7 +30,7 @@ const statusColors: Record<string, string> = {
 export default function MyTicketsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -147,7 +148,7 @@ export default function MyTicketsPage() {
                       </h3>
                       <p className="text-sm text-zrp-charcoal/60 dark:text-white/60">
                         {t('support.tickets.categoryPrefix')} {categoryLabel(ticket.category)} · {t('support.tickets.createdPrefix')}{' '}
-                        {new Date(ticket.createdAt).toLocaleDateString()}
+                        {new Date(ticket.createdAt).toLocaleDateString(getDateLocale(language))}
                       </p>
                     </Link>
                     <div className="flex flex-col items-end gap-1">

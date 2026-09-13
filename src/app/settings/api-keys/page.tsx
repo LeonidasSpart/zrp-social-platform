@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Key, Plus, Trash2, Copy, Check, Loader2, X, ExternalLink, Code } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 // ─── Types ────────────────────────────────────────────────────────────
 interface ApiKey {
@@ -98,8 +99,6 @@ export default function ApiKeysPage() {
   const [newKey, setNewKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [notification, setNotification] = useState<Notification | null>(null);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   const showToast = (notif: Notification) => {
     setNotification(notif);
@@ -273,12 +272,12 @@ export default function ApiKeysPage() {
                 {keys.map((key) => (
                   <tr key={key.id} className="border-t">
                     <td className="p-3 font-medium">{key.name}</td>
-                    <td className="p-3">{new Date(key.createdAt).toLocaleDateString(localeMap[language] || "en-US")}</td>
-                    <td className="p-3">{key.lastUsed ? new Date(key.lastUsed).toLocaleDateString(localeMap[language] || "en-US") : t("apiKeys.never")}</td>
+                    <td className="p-3">{new Date(key.createdAt).toLocaleDateString(getDateLocale(language))}</td>
+                    <td className="p-3">{key.lastUsed ? new Date(key.lastUsed).toLocaleDateString(getDateLocale(language)) : t("apiKeys.never")}</td>
                     <td className="p-3">
                       {key.expiresAt ? (
                         <Badge className={new Date(key.expiresAt) < new Date() ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}>
-                          {new Date(key.expiresAt).toLocaleDateString(localeMap[language] || "en-US")}
+                          {new Date(key.expiresAt).toLocaleDateString(getDateLocale(language))}
                         </Badge>
                       ) : (
                         <Badge className="bg-gray-100 text-gray-800">{t("apiKeys.never")}</Badge>

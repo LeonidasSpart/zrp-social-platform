@@ -17,6 +17,7 @@ import {
   Newspaper,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import type { TranslationKey } from "@/lib/translations";
 
 const ROLE_LABEL_KEYS: Record<string, TranslationKey> = {
@@ -57,13 +58,6 @@ export default function AdminDashboard() {
     resolved: 0,
     total: 0,
   });
-
-  const localeMap: Record<string, string> = {
-    en: "en-US",
-    fr: "fr-FR",
-    de: "de-DE",
-    it: "it-IT",
-  };
 
   useEffect(() => {
     // Fetch main stats
@@ -183,7 +177,7 @@ export default function AdminDashboard() {
           <span>
             {t("adminDash.updated", {
               time: new Date().toLocaleTimeString(
-                localeMap[language] || "en-US"
+                getDateLocale(language)
               ),
             })}
           </span>

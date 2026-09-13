@@ -752,7 +752,7 @@ export default function ShortsPage() {
       if (
         minutes < 60
       ) {
-        return `${minutes}m`;
+        return t("time.minutesShort", { n: minutes });
       }
 
       const hours =
@@ -763,12 +763,10 @@ export default function ShortsPage() {
       if (
         hours < 24
       ) {
-        return `${hours}h`;
+        return t("time.hoursShort", { n: hours });
       }
 
-      return `${Math.floor(
-        hours / 24
-      )}d`;
+      return t("time.daysShort", { n: Math.floor(hours / 24) });
     };
 
   // ─────────────────────────────────────────────────────────────

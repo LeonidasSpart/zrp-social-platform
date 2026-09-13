@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { getDateLocale } from "@/lib/dateLocale";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import { usePresence } from "@/contexts/PresenceContext";
@@ -1530,16 +1531,6 @@ export default function ChatInterface({
     }));
   };
 
-  const localeMap: Record<
-    string,
-    string
-  > = {
-    en: "en-US",
-    fr: "fr-FR",
-    de: "de-DE",
-    it: "it-IT",
-  };
-
   // ---------------------------------------------------------------------------
   // Loading
   // ---------------------------------------------------------------------------
@@ -2705,10 +2696,7 @@ export default function ChatInterface({
                             {new Date(
                               message.createdAt
                             ).toLocaleTimeString(
-                              localeMap[
-                                language
-                              ] ||
-                                "en-US",
+                              getDateLocale(language),
                               {
                                 hour: "2-digit",
                                 minute:

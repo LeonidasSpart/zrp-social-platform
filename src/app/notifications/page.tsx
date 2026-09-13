@@ -204,15 +204,15 @@ export default function NotificationsPage() {
     const plural = count > 1;
     switch (type) {
       case "like":
-        return plural ? "liked your post" : t("notifications.likedPostSuffix");
+        return plural ? t("notifications.likedPostSuffixPlural") : t("notifications.likedPostSuffix");
       case "comment":
         return t("notifications.commentedPostSuffix");
       case "follow":
-        return plural ? "started following you" : t("notifications.startedFollowingSuffix");
+        return plural ? t("notifications.startedFollowingSuffixPlural") : t("notifications.startedFollowingSuffix");
       case "repost":
-        return plural ? "reposted your post" : t("notifications.repostedPostSuffix");
+        return plural ? t("notifications.repostedPostSuffixPlural") : t("notifications.repostedPostSuffix");
       case "message":
-        return "sent you a message";
+        return t("notifications.sentMessageSuffix");
       case "appeal_resolved":
         return t("notifications.appealResolvedSuffix");
       case "listing_approved":
@@ -230,11 +230,11 @@ export default function NotificationsPage() {
     const diff = Date.now() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return t("notifications.justNow");
-    if (minutes < 60) return `${minutes}m`;
+    if (minutes < 60) return t("time.minutesShort", { n: minutes });
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
+    if (hours < 24) return t("time.hoursShort", { n: hours });
     const days = Math.floor(hours / 24);
-    return `${days}d`;
+    return t("time.daysShort", { n: days });
   };
 
   // ─── Filter first (on the flat list), then group the filtered set ────

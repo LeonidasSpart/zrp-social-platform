@@ -7,6 +7,7 @@ import { ArrowLeft, Play, Shuffle, Disc3 } from "lucide-react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import { sumDurationSec, formatTotalDuration } from "@/lib/music/duration";
 
 type AlbumDetail = {
@@ -20,7 +21,7 @@ type AlbumDetail = {
 };
 
 export default function MusicAlbumPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const params = useParams<{ id: string }>();
   const [album, setAlbum] = useState<AlbumDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,7 +108,7 @@ export default function MusicAlbumPage() {
 
             <div className="text-xs text-gray-400 mt-2">
               {album.releaseDate &&
-                `${t("music.albumDetail.releasedLabel")} ${new Date(album.releaseDate).toLocaleDateString(undefined, {
+                `${t("music.albumDetail.releasedLabel")} ${new Date(album.releaseDate).toLocaleDateString(getDateLocale(language), {
                   year: "numeric",
                   month: "long",
                   day: "numeric",

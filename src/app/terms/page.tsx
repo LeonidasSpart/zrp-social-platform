@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 export default function TermsPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const SECTIONS = [
     { id: "introduction", number: "01", title: t("terms.nav.introduction") },
@@ -25,7 +26,7 @@ export default function TermsPage() {
     { id: "contact", number: "15", title: t("terms.nav.contact") },
   ];
 
-  const lastUpdated = new Date().toLocaleDateString("en-US", {
+  const lastUpdated = new Date().toLocaleDateString(getDateLocale(language), {
     year: "numeric",
     month: "long",
     day: "numeric",

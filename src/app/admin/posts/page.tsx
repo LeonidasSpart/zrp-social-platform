@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface Post {
   id: string;
@@ -26,8 +27,6 @@ export default function AdminPosts() {
   // /api/admin/posts already returns the full content, author and
   // counts, which is everything the list itself displays.
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -88,7 +87,7 @@ export default function AdminPosts() {
             <span>{t("adminPosts.by", { name: selectedPost.author.name || selectedPost.author.username })}</span>
             <span>❤️ {selectedPost._count.likes}</span>
             <span>💬 {selectedPost._count.comments}</span>
-            <span>{new Date(selectedPost.createdAt).toLocaleString(localeMap[language] || "en-US")}</span>
+            <span>{new Date(selectedPost.createdAt).toLocaleString(getDateLocale(language))}</span>
           </div>
 
           {/* Moderation stays available from here, so inspecting a post
@@ -166,7 +165,7 @@ export default function AdminPosts() {
                   <span>{t("adminPosts.by", { name: post.author.name || post.author.username })}</span>
                   <span>❤️ {post._count.likes}</span>
                   <span>💬 {post._count.comments}</span>
-                  <span>{new Date(post.createdAt).toLocaleString(localeMap[language] || "en-US")}</span>
+                  <span>{new Date(post.createdAt).toLocaleString(getDateLocale(language))}</span>
                 </div>
               </button>
               <button

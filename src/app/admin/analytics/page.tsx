@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import { Users, FileText, MessageCircle, Heart, Repeat, TrendingUp, Award } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface AnalyticsData {
   summary: {
@@ -60,8 +61,6 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
-
   useEffect(() => {
     fetch("/api/admin/analytics")
       .then((res) => res.json())
@@ -96,7 +95,7 @@ export default function AnalyticsPage() {
 
   // Prepare daily data for charts
   const chartData = daily.map((d) => ({
-    date: new Date(d.date).toLocaleDateString(localeMap[language] || "en-US", { month: "short", day: "numeric" }),
+    date: new Date(d.date).toLocaleDateString(getDateLocale(language), { month: "short", day: "numeric" }),
     signups: d.users,
     posts: d.posts,
     comments: d.comments,

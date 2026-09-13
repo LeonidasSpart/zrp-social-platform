@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ChevronLeft, User, Loader2, BellOff, Calendar } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface MutedUser {
   id: string;
@@ -29,8 +30,6 @@ export default function MutedUsersPage() {
   const [mutedUsers, setMutedUsers] = useState<MutedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [unmuting, setUnmuting] = useState<string | null>(null);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   // ─── Redirect if not authenticated ──────────────────────────────────
   useEffect(() => {
@@ -177,7 +176,7 @@ export default function MutedUsersPage() {
                   <span>·</span>
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {t("muted.mutedOn", { date: new Date(user.mutedAt).toLocaleDateString(localeMap[language] || "en-US") })}
+                    {t("muted.mutedOn", { date: new Date(user.mutedAt).toLocaleDateString(getDateLocale(language)) })}
                   </span>
                 </div>
               </div>

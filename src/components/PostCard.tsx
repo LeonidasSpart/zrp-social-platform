@@ -49,6 +49,7 @@ import LinkPreviewCard from "./LinkPreviewCard";
 import Poll from "./Poll";
 import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface PostCardProps {
   post: {
@@ -1528,10 +1529,10 @@ export default function PostCard({
         );
 
       if (minutes < 1)
-        return "Just now";
+        return t("notifications.justNow");
 
       if (minutes < 60)
-        return `${minutes}m`;
+        return t("time.minutesShort", { n: minutes });
 
       const hours =
         Math.floor(
@@ -1539,14 +1540,14 @@ export default function PostCard({
         );
 
       if (hours < 24)
-        return `${hours}h`;
+        return t("time.hoursShort", { n: hours });
 
       const days =
         Math.floor(
           hours / 24
         );
 
-      return `${days}d`;
+      return t("time.daysShort", { n: days });
     };
 
   const getInitial =
@@ -1659,9 +1660,7 @@ export default function PostCard({
                   dateTime={new Date(
                     post.createdAt
                   ).toISOString()}
-                  title={new Date(
-                    post.createdAt
-                  ).toLocaleString()}
+                  title={new Date(post.createdAt).toLocaleString(getDateLocale(uiLanguage))}
                   className="shrink-0 text-gray-500 dark:text-gray-400 text-sm"
                 >
                   {timeAgo(
@@ -1930,8 +1929,8 @@ export default function PostCard({
                   className="text-sm text-zrp-red hover:underline mt-0.5"
                 >
                   {contentExpanded
-                    ? "Show less"
-                    : "Show more"}
+                    ? t("rightPanel.showLess")
+                    : t("rightPanel.showMore")}
                 </button>
               )}
 
