@@ -374,10 +374,19 @@ app.prepare().then(async () => {
         select: { banned: true },
       });
       if (!account || account.banned || token.banned) {
+        console.warn(`Socket auth rejected: account banned or deleted (user ${userId})`);
         return next(new Error("Account banned"));
       }
       const currentCount = connectionCounts.get(userId) || 0;
       if (currentCount >= MAX_CONNECTIONS_PER_USER) {
+        // Previously silent - a user pinned at the cap (many tabs/devices,
+        // or a client stuck retrying) produced zero log output here, so a
+        // sustained run of rejected handshakes for one user was invisible
+        // in production logs and indistinguishable from any other cause
+        // of socket churn without reading the source.
+        console.warn(
+          `Socket auth rejected: too many active connections for user ${userId} (${currentCount}/${MAX_CONNECTIONS_PER_USER})`
+        );
         return next(new Error("Too many active connections"));
       }
 
@@ -391,8 +400,9 @@ app.prepare().then(async () => {
 
   io.on("connection", (socket) => {
     const userId = socket.data.userId;
-    connectionCounts.set(userId, (connectionCounts.get(userId) || 0) + 1);
-    console.log(`🔌 Socket connected: ${socket.id} (user ${userId})`);
+    const activeCount = (connectionCounts.get(userId) || 0) + 1;
+    connectionCounts.set(userId, activeCount);
+    console.log(`🔌 Socket connected: ${socket.id} (user ${userId}, ${activeCount} active)`);
 
     // ─── Join own room automatically ───────────────────────────────
     // No longer accepts a client-supplied userId - the room a socket
@@ -713,7 +723,18 @@ app.prepare().then(async () => {
     });
 
     // ─── Disconnect ──────────────────────────────────────────────
-    socket.on("disconnect", () => {
+    // `reason` distinguishes a client navigating away or closing a tab
+    // ("client namespace disconnect" / "transport close"), a missed
+    // heartbeat ("ping timeout"), an actual network drop ("transport
+    // error"), and this server itself forcing the socket off - via
+    // io.close() during graceful shutdown ("server shutdown", the only
+    // reason under the io.close() promise below) or, in principle, an
+    // explicit socket.disconnect() call ("server namespace disconnect",
+    // never actually invoked in this codebase today - see the closure
+    // pass's socket-churn investigation). Previously discarded entirely,
+    // so a run of connect/disconnect activity for one user was visible
+    // as *that it happened* but never *why*.
+    socket.on("disconnect", (reason) => {
       const remaining = (connectionCounts.get(userId) || 1) - 1;
       if (remaining <= 0) {
         // Last connection gone: forget any call this user was party
@@ -731,7 +752,7 @@ app.prepare().then(async () => {
       // socket on EVERY instance - a second tab or device elsewhere
       // keeps them online.
       presence.disconnect(userId).catch((err) => console.error("presence disconnect error:", err));
-      console.log(`🔌 User ${userId} disconnected (socket ${socket.id})`);
+      console.log(`🔌 User ${userId} disconnected (socket ${socket.id}, reason: ${reason})`);
     });
   });
 

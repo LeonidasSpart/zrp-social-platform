@@ -53,7 +53,7 @@ export default function ListingForm({
 
   const { startUpload: startImageUpload } = useUploadThing("listingMedia", {
     onClientUploadComplete: (files) => {
-      setImageUrls((prev) => [...prev, ...(files?.map((f) => f.url) || [])]);
+      setImageUrls((prev) => [...prev, ...(files?.map((f) => f.ufsUrl) || [])]);
       setUploadingImages(false);
     },
     onUploadError: (err) => {
@@ -64,7 +64,7 @@ export default function ListingForm({
 
   const { startUpload: startVideoUpload } = useUploadThing("listingMedia", {
     onClientUploadComplete: (files) => {
-      if (files?.[0]) setVideoUrl(files[0].url);
+      if (files?.[0]) setVideoUrl(files[0].ufsUrl);
       setUploadingVideo(false);
     },
     onUploadError: (err) => {

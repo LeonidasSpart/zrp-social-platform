@@ -128,22 +128,36 @@ export default function Header() {
 
   /*
    * Socket listener for block updates.
+   *
+   * Dependency is `session?.user?.id`, not the whole `session` object -
+   * next-auth's SessionProvider re-fetches (and hands back a brand-new
+   * object reference, even when nothing actually changed) on every
+   * window focus/visibility change. Depending on the whole object
+   * re-ran this effect - tearing down and re-adding the "block-updated"
+   * listener - on every such background refetch, not just an actual
+   * sign-in/sign-out. Found while investigating reported Socket.IO
+   * connection churn: this alone does not create new socket
+   * connections (getSocket() with the same userId reuses the existing
+   * one), just needless listener add/remove churn on the shared socket.
    */
   useEffect(() => {
-    if (!session?.user?.id) return;
+    const userId = session?.user?.id;
+    if (!userId) return;
 
-    const socket = getSocket(session.user.id);
+    const socket = getSocket(userId);
 
-    socket.on("block-updated", ({ blockerId }) => {
-      if (blockerId === session.user.id) {
+    const handleBlockUpdated = ({ blockerId }: { blockerId: string }) => {
+      if (blockerId === userId) {
         window.location.reload();
       }
-    });
+    };
+
+    socket.on("block-updated", handleBlockUpdated);
 
     return () => {
-      socket.off("block-updated");
+      socket.off("block-updated", handleBlockUpdated);
     };
-  }, [session]);
+  }, [session?.user?.id]);
 
   /*
    * Public navigation.
