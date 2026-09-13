@@ -106,6 +106,17 @@ object GoogleAuth {
             Log.d("GoogleAuth", "ID token obtained via GetGoogleIdOption (quiet), length=${token.length}")
             Result.success(token)
         } catch (e: GetCredentialCancellationException) {
+            // Silent by design ONLY for a genuine user-initiated dismissal
+            // (back button, tap outside the picker) - Android's own
+            // contract for this exception type. Logged here (previously
+            // not logged at all, unlike every other branch below) so a
+            // real-device Logcat capture can actually confirm which one
+            // occurred: if this line appears immediately after an account
+            // was visibly selected (not backed out of), that is proof the
+            // platform is reporting a real failure as a cancellation, not
+            // that the user cancelled - the two are indistinguishable from
+            // the screen alone, but not from Logcat.
+            Log.d("GoogleAuth", "GetCredentialCancellationException from quiet (GetGoogleIdOption) request")
             Result.failure(GoogleSignInCancelledException())
         } catch (e: NoCredentialException) {
             Log.w(
@@ -119,6 +130,11 @@ object GoogleAuth {
                 Log.d("GoogleAuth", "ID token obtained via GetSignInWithGoogleOption (explicit), length=${token.length}")
                 Result.success(token)
             } catch (retry: GetCredentialCancellationException) {
+                // See the identical catch above (quiet request) for why
+                // this is now logged - this is the explicit "Sign in with
+                // Google" chooser retry path specifically, so distinguish
+                // it in Logcat from the quiet-path cancellation above.
+                Log.d("GoogleAuth", "GetCredentialCancellationException from explicit (GetSignInWithGoogleOption) request")
                 Result.failure(GoogleSignInCancelledException())
             } catch (retry: GoogleIdTokenParsingException) {
                 Result.failure(Exception("Couldn't verify that Google account. Please try again."))

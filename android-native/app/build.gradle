@@ -354,8 +354,39 @@ android {
         // GoogleAuth.kt, the Credential Manager flow, signing, package
         // identity, deep links, or the backend's audience validation -
         // those were already correct.
-        versionCode 23
-        versionName "4.0.17"
+        //
+        // Bumps to versionCode 24 / versionName "4.0.18" after 23's
+        // real-device Play Internal Testing retest still reproduced
+        // "select an account, then nothing happens" - this time from
+        // LoginScreen (not WelcomeScreen, which 23 fixed and which
+        // already rendered every LoginFormState correctly before 23).
+        // AuthViewModel.loginWithGoogle's own onFailure branch already
+        // logs failure::class.simpleName, so a GoogleSignInCancelledException
+        // (the ONE outcome that is silent-by-design - Idle, no error
+        // text, matching Android's own contract that this exception
+        // means the user backed out of the picker) was already visible
+        // in Logcat as "GoogleSignInCancelledException" if it fired -
+        // but GoogleAuth.kt's own two catches for it were the only
+        // catches in that whole function that logged nothing at all,
+        // so there was no way to tell, from Logcat alone, whether it
+        // came from the quiet GetGoogleIdOption request or the explicit
+        // GetSignInWithGoogleOption chooser retry - only that it
+        // happened. Re-audited AuthViewModel/GoogleAuth for a state-
+        // clobbering race (something resetting loginForm back to Idle
+        // right after Error/GoogleInterrupted) and found none - login(),
+        // hydrateSessionUser(), and loginWithGoogle() do not step on
+        // each other. Added logging to both previously-silent catches.
+        // This does not change behavior (still Idle, still no error
+        // text, since that is Android's own documented contract for
+        // this exception) - it exists so the NEXT real-device
+        // reproduction's Logcat can confirm whether Android is
+        // genuinely reporting a user-initiated cancellation (in which
+        // case the bug is that a real failure looks identical to a
+        // cancellation from the account picker itself - a platform/
+        // Play-Services-level condition, not a ZRP code defect) or
+        // something else entirely that this pass has not yet found.
+        versionCode 24
+        versionName "4.0.18"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
