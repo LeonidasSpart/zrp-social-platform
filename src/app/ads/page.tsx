@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Megaphone, Plus, Pause, Play } from "lucide-react";
+import { Megaphone, Plus, Pause, Play, CreditCard, Ban } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import ConfirmModal from "@/components/ConfirmModal";
+import AdCampaignPaymentModal from "@/components/ads/AdCampaignPaymentModal";
 
 interface Campaign {
   id: string;
@@ -16,6 +18,8 @@ interface Campaign {
   budgetTotal: number;
   budgetSpent: number;
   rejectionReason: string | null;
+  paymentFailureReason: string | null;
+  paidAt: string | null;
   post: { content: string; imageUrl: string | null; imageUrls: string[] };
   _count: { impressions: number; clicks: number };
 }
@@ -23,8 +27,12 @@ interface Campaign {
 const STATUS_STYLES: Record<string, string> = {
   DRAFT: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300",
   PENDING_REVIEW: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+  PAYMENT_PENDING: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+  PAYMENT_FAILED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
   ACTIVE: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   PAUSED: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300",
+  SUSPENDED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+  CANCELLED: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300",
   COMPLETED: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   REJECTED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
@@ -32,11 +40,17 @@ const STATUS_STYLES: Record<string, string> = {
 const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
   DRAFT: "ads.status.draft",
   PENDING_REVIEW: "ads.status.pendingReview",
+  PAYMENT_PENDING: "ads.status.paymentPending",
+  PAYMENT_FAILED: "ads.status.paymentFailed",
   ACTIVE: "ads.status.active",
   PAUSED: "ads.status.paused",
+  SUSPENDED: "ads.status.suspended",
+  CANCELLED: "ads.status.cancelled",
   COMPLETED: "ads.status.completed",
   REJECTED: "ads.status.rejected",
 };
+
+const CANCELLABLE_STATUSES = new Set(["PENDING_REVIEW", "PAYMENT_PENDING", "PAYMENT_FAILED", "ACTIVE", "PAUSED"]);
 
 export default function AdsDashboard() {
   const { data: session, status } = useSession();
@@ -44,6 +58,9 @@ export default function AdsDashboard() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [payingCampaign, setPayingCampaign] = useState<Campaign | null>(null);
+  const [cancellingCampaign, setCancellingCampaign] = useState<Campaign | null>(null);
+  const [cancelBusy, setCancelBusy] = useState(false);
 
   const fetchCampaigns = async () => {
     try {
@@ -81,6 +98,28 @@ export default function AdsDashboard() {
       console.error("Error toggling campaign:", error);
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const confirmCancel = async () => {
+    if (!cancellingCampaign) return;
+    setCancelBusy(true);
+    try {
+      const res = await fetch(`/api/ads/campaigns/${cancellingCampaign.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+      if (res.ok) {
+        setCampaigns((prev) =>
+          prev.map((c) => (c.id === cancellingCampaign.id ? { ...c, status: "CANCELLED" } : c))
+        );
+      }
+    } catch (error) {
+      console.error("Error cancelling campaign:", error);
+    } finally {
+      setCancelBusy(false);
+      setCancellingCampaign(null);
     }
   };
 
@@ -147,6 +186,21 @@ export default function AdsDashboard() {
                     {t("ads.dashboard.rejectedPrefix", { reason: c.rejectionReason })}
                   </p>
                 )}
+                {c.status === "SUSPENDED" && c.rejectionReason && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                    {t("ads.dashboard.suspendedPrefix", { reason: c.rejectionReason })}
+                  </p>
+                )}
+                {c.status === "PAYMENT_FAILED" && c.paymentFailureReason && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                    {t("ads.dashboard.paymentFailedPrefix", { reason: c.paymentFailureReason })}
+                  </p>
+                )}
+                {c.paidAt && (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                    {t("ads.dashboard.paidBadge", { amount: c.budgetTotal })}
+                  </p>
+                )}
 
                 <div className="grid grid-cols-4 gap-2 mt-3 text-center text-xs">
                   <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
@@ -171,27 +225,74 @@ export default function AdsDashboard() {
                   </div>
                 </div>
 
-                {(c.status === "ACTIVE" || c.status === "PAUSED") && (
-                  <button
-                    onClick={() => togglePause(c)}
-                    disabled={togglingId === c.id}
-                    className="mt-3 inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-zrp-red transition disabled:opacity-50"
-                  >
-                    {c.status === "ACTIVE" ? (
-                      <>
-                        <Pause className="w-3.5 h-3.5" /> {t("ads.dashboard.pauseCampaign")}
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-3.5 h-3.5" /> {t("ads.dashboard.resumeCampaign")}
-                      </>
-                    )}
-                  </button>
-                )}
+                <div className="flex flex-wrap items-center gap-3 mt-3">
+                  {(c.status === "ACTIVE" || c.status === "PAUSED") && (
+                    <button
+                      onClick={() => togglePause(c)}
+                      disabled={togglingId === c.id}
+                      className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-zrp-red transition disabled:opacity-50"
+                    >
+                      {c.status === "ACTIVE" ? (
+                        <>
+                          <Pause className="w-3.5 h-3.5" /> {t("ads.dashboard.pauseCampaign")}
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-3.5 h-3.5" /> {t("ads.dashboard.resumeCampaign")}
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {(c.status === "PAYMENT_PENDING" || c.status === "PAYMENT_FAILED") && (
+                    <button
+                      onClick={() => setPayingCampaign(c)}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-zrp-red hover:text-zrp-darkRed transition"
+                    >
+                      <CreditCard className="w-3.5 h-3.5" /> {t("ads.dashboard.payNow")}
+                    </button>
+                  )}
+
+                  {CANCELLABLE_STATUSES.has(c.status) && (
+                    <button
+                      onClick={() => setCancellingCampaign(c)}
+                      className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition"
+                    >
+                      <Ban className="w-3.5 h-3.5" /> {t("ads.dashboard.cancelCampaign")}
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {payingCampaign && (
+        <AdCampaignPaymentModal
+          campaignId={payingCampaign.id}
+          campaignName={payingCampaign.name}
+          budgetTotal={payingCampaign.budgetTotal}
+          onClose={() => setPayingCampaign(null)}
+          onPaid={() => {
+            setCampaigns((prev) =>
+              prev.map((c) => (c.id === payingCampaign.id ? { ...c, status: "ACTIVE" } : c))
+            );
+          }}
+        />
+      )}
+
+      {cancellingCampaign && (
+        <ConfirmModal
+          title={t("ads.dashboard.cancelConfirmTitle")}
+          body={t("ads.dashboard.cancelConfirmBody", { name: cancellingCampaign.name })}
+          confirmLabel={t("ads.dashboard.cancelConfirmAction")}
+          cancelLabel={t("action.cancel")}
+          destructive
+          busy={cancelBusy}
+          onConfirm={confirmCancel}
+          onCancel={() => setCancellingCampaign(null)}
+        />
       )}
     </div>
   );

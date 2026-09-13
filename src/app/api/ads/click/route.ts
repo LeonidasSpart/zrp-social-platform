@@ -30,13 +30,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ logged: false, redirectUrl: null });
     }
 
-    await prisma.adClick.create({
-      data: { campaignId, userId: viewerId || null },
-    });
+    // ⚠️ ABUSE: same reasoning as the impression route's dedupe - without
+    // this, a signed-in viewer could script repeated click POSTs against
+    // a rival's CPC campaign to burn through its full budget for free.
+    // Still redirect the real click through either way; only the billed
+    // log entry is deduped.
+    let alreadyClickedRecently = false;
+    if (viewerId) {
+      const recent = await prisma.adClick.findFirst({
+        where: { campaignId, userId: viewerId, createdAt: { gte: new Date(Date.now() - 60_000) } },
+        select: { id: true },
+      });
+      alreadyClickedRecently = !!recent;
+    }
+
+    if (!alreadyClickedRecently) {
+      await prisma.adClick.create({
+        data: { campaignId, userId: viewerId || null },
+      });
+    }
 
     // Same check-then-update-in-a-transaction approach as the impression
-    // route, and the same accepted tradeoff - see the comment there.
-    if (campaign.bidType === "CPC") {
+    // route, and the same accepted tradeoff - see the comment there. Only
+    // bill a click that was actually newly logged above.
+    if (campaign.bidType === "CPC" && !alreadyClickedRecently) {
       const cost = campaign.bidAmount;
       await prisma.$transaction(async (tx) => {
         const fresh = await tx.adCampaign.findUnique({
