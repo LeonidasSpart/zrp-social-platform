@@ -15,16 +15,31 @@ that introduced them (`#NNN`) so any claim here can be checked against
 the actual diff and discussion on GitHub.
 
 **On versioning:** as documented in [README.md](README.md#versioning-and-releases),
-ZRP does not currently tag releases or publish GitHub Releases — the web
-application deploys continuously from `main`. Everything below is
-therefore grouped under **[Unreleased]** rather than a version number,
-because no version number currently exists to attach it to. Android and
-iOS version their own native builds independently (see the same README
-section) and are called out explicitly where a change shipped there.
+the Web application now follows [SemVer](https://semver.org/) and is
+tracked with Git tags and GitHub Releases, starting with **v1.0.0**
+below. Android and iOS version their own native builds independently
+(see the same README section) and are called out explicitly where a
+change shipped there; neither is implied to be released just because
+Web is.
 
 ---
 
 ## [Unreleased]
+
+Nothing yet.
+
+---
+
+## [1.0.0] — 2026-09-13
+
+First tagged, released version of the ZRP Web application. This marks
+the point where ZRP adopted SemVer + GitHub Releases going forward — it
+is not a claim that the platform went live on this date; the web
+application has been in continuous production deployment from `main`
+before this changelog or any release process existed (see
+[README.md](README.md#versioning-and-releases) for that history and the
+gap it documents). Everything below was verified against the actual
+merged GitHub history at the time of this release.
 
 ### Added
 
@@ -160,9 +175,9 @@ section) and are called out explicitly where a change shipped there.
 
 ## Earlier history
 
-Everything before this changelog's introduction is fully preserved in
-this repository's Git history (`git log`) and in the merged pull
-requests on GitHub, including the initial build-out of every native
+Everything before the [1.0.0](#100--2026-09-13) entry above is fully
+preserved in this repository's Git history (`git log`) and in the merged
+pull requests on GitHub, including the initial build-out of every native
 (Android and iOS) product module, the original ZRP News Network
 architecture, the initial 11-language localization pass, and the core
 web platform itself. It is not reproduced here.

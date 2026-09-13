@@ -661,8 +661,8 @@ Direction, not a delivery commitment. Dates are not promised.
   domain-by-domain audit.
 - Continue expanding localization coverage beyond the current 15
   languages as new markets are prioritized.
-- Establish a formal release/versioning process — see
-  [Versioning and releases](#versioning-and-releases).
+- Keep tagging Web releases and publishing GitHub Releases going
+  forward — see [Versioning and releases](#versioning-and-releases).
 
 ---
 
@@ -683,54 +683,61 @@ Direction, not a delivery commitment. Dates are not promised.
 
 ## Versioning and releases
 
-**Verified current state (not aspirational):**
+### Current Web release
 
-- The repository has **no GitHub Releases** and effectively **no release
-  tags** — the only tag present, `before-nextjs-upgrade`, is a one-off
-  pre-migration checkpoint, not a version marker.
-- `package.json`'s `"version"` field is `0.1.0`, the default Next.js
-  scaffold value. It has never been bumped and does not track a real
-  release of the web application.
-- The web application does not follow a tagged-release model at all: it
-  is deployed continuously from `main` to Railway (see
-  [CHANGELOG.md](CHANGELOG.md) and this repository's own merge history
-  for what has actually shipped, since there is no version number to
-  point to instead).
-- The native applications **do** version themselves, independently of
-  the web app and of each other:
-  - `android-native/` increments `versionCode`/`versionName` in
-    `app/build.gradle` on every change destined for a real upload,
-    documented inline at each bump — currently versionCode 22,
-    versionName 4.0.16. It has an Internal Testing listing, not a public
-    Play Store release.
-  - `android/` (the Capacitor shell being superseded) is still at its
-    original placeholder `versionCode 1` / `versionName "1.0"`.
-  - `ios-native/` is at its Xcode project's default
-    `MARKETING_VERSION 1.0.0` / `CURRENT_PROJECT_VERSION 1`, never
-    bumped, because it has no App Store listing yet — see
-    [Native applications](#native-applications).
+**ZRP Web v1.0.0**, released **2026-09-13**.
 
-**Gap:** there is no single version number that identifies "what ZRP is
-today" across web, Android and iOS, and no GitHub Release marks a point
-in history as shipped. This is a real gap, not a stylistic choice, and it
-is called out here rather than implied away.
+- Git tag: [`v1.0.0`](https://github.com/LeonidasSpart/zrp-social-platform/releases/tag/v1.0.0)
+- GitHub Release: see the tag above for the published release notes
+- `package.json`'s `"version"` field matches: `1.0.0`
+- Full contents: [CHANGELOG.md](CHANGELOG.md#100--2026-09-13)
 
-**Proposed convention** (not yet adopted — documenting a path forward,
-not inventing a release to fill the gap):
+This is the **first** tagged, released version of the Web application —
+it marks the point ZRP adopted SemVer + GitHub Releases, not a claim
+that the platform went live on this date. The web application was
+already in continuous production deployment from `main` before this
+release existed; see **Prior state**, below, for that history.
 
-1. Tag the web application's deployed `main` with an annotated Git tag
-   following [SemVer](https://semver.org/) (`vMAJOR.MINOR.PATCH`) at each
-   meaningful deployment, and back it with a GitHub Release whose body is
-   the corresponding [CHANGELOG.md](CHANGELOG.md) section.
-2. Keep `package.json`'s `"version"` in sync with that tag, so the two
-   can never silently disagree.
-3. Leave Android's and iOS's own version numbers independent (they
-   already follow a working, documented convention suited to their
-   store review cycles) but cross-reference the web tag they shipped
-   alongside in each release's notes, so "what shipped together" stays
-   answerable.
-4. Only cut the first tag/release once there is a deliberate decision to
-   start one — not as a byproduct of this documentation pass.
+The Web application follows [SemVer](https://semver.org/)
+(`vMAJOR.MINOR.PATCH`) from this release forward. Each meaningful
+deployment going forward should be tagged the same way and backed by a
+GitHub Release whose body is the corresponding
+[CHANGELOG.md](CHANGELOG.md) section, with `package.json`'s `"version"`
+kept in sync with the tag so the two can never silently disagree.
+
+### Android and iOS versioning (independent of Web)
+
+**Android and iOS are not implied to be released just because Web is.**
+Each platform keeps its own, independent version number, on its own
+release cadence:
+
+- `android-native/` increments `versionCode`/`versionName` in
+  `app/build.gradle` on every change destined for a real upload,
+  documented inline at each bump — currently versionCode 22,
+  versionName 4.0.16. It has an **Internal Testing** listing on Google
+  Play, not a public release.
+- `android/` (the Capacitor shell being superseded) is still at its
+  original placeholder `versionCode 1` / `versionName "1.0"`.
+- `ios-native/` is at its Xcode project's default
+  `MARKETING_VERSION 1.0.0` / `CURRENT_PROJECT_VERSION 1`, never bumped,
+  because it has **no App Store listing** yet — see
+  [Native applications](#native-applications).
+
+A future release's notes should cross-reference the Android/iOS version
+that shipped alongside it where relevant, so "what shipped together"
+stays answerable, without pretending the three platforms share one
+version number.
+
+### Prior state (before this release)
+
+Before `v1.0.0`, the repository had **no GitHub Releases** and
+effectively **no release tags** — the only tag that existed,
+`before-nextjs-upgrade`, was a one-off pre-migration checkpoint, not a
+version marker — and `package.json`'s `"version"` field was still
+`0.1.0`, the default Next.js scaffold value, never bumped. That gap is
+what this release closes for the Web application specifically; it does
+not retroactively make any past commit "version 1.0.0" — only the
+commit this tag actually points to.
 
 ---
 
