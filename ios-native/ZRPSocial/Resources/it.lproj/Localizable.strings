@@ -3,19 +3,19 @@
    web app's own dictionary (src/lib/translations.ts), which is the
    single source of truth for ZRP copy. Language: it. */
 
-"nav.home" = "Home";
+"nav.home" = "Pagina iniziale";
 "nav.search" = "Cerca";
 "nav.notifications" = "Notifiche";
 "nav.messages" = "Messaggi";
 "nav.profile" = "Profilo";
 "nav.bookmarks" = "Preferiti";
-"nav.creatorStudio" = "Creator Studio";
-"nav.shorts" = "Shorts";
+"nav.creatorStudio" = "Studio Creator";
+"nav.shorts" = "Video brevi";
 "nav.news" = "Notizie";
 "nav.aiAssistant" = "IA ZRP";
-"nav.help" = "Help";
-"nav.opportunity" = "Opportunity";
-"nav.play" = "Play";
+"nav.help" = "Aiuto";
+"nav.opportunity" = "Opportunità";
+"nav.play" = "Giochi";
 "play.todaysChallenge" = "Sfida di oggi";
 "play.trending" = "Sfide di tendenza";
 "play.noTrendingYet" = "Nessuna sfida di tendenza ancora. Sii il primo a crearne una!";
@@ -60,8 +60,8 @@
 "opportunity.typeInternship" = "Stage";
 "opportunity.typeScholarship" = "Borsa di studio";
 "opportunity.typeMentorship" = "Mentoring";
-"opportunity.typeFreelance" = "Freelance";
-"opportunity.typePartnership" = "Partnership";
+"opportunity.typeFreelance" = "Autonomo";
+"opportunity.typePartnership" = "Collaborazione";
 "opportunity.typeSponsorship" = "Sponsorizzazione";
 "opportunity.typeHackathon" = "Hackathon";
 "opportunity.typeTraining" = "Formazione";
@@ -130,7 +130,7 @@
 "newsCategory.community" = "Comunità";
 "shorts.noShortsYet" = "Ancora nessuno Short. Sii il primo a pubblicarne uno.";
 "shorts.like" = "Mi piace";
-"shorts.repost" = "Repost";
+"shorts.repost" = "Ripubblica";
 "shorts.share" = "Condividi";
 "shorts.mute" = "Disattiva audio";
 "shorts.unmute" = "Attiva audio";
@@ -145,14 +145,14 @@
 "footer.helpCenter" = "Centro assistenza";
 "help.footer.guidelines" = "Linee guida della community";
 "communityCode.navLabel" = "Codice della community e della leadership";
-"nav.marketplace" = "Marketplace";
+"nav.marketplace" = "Mercato";
 "nav.settings" = "Impostazioni";
 "nav.signOut" = "Esci";
 "auth.welcomeTitle" = "ZRP Social";
 "auth.signInSubtitle" = "Accedi per entrare a far parte della community";
 "auth.emailOrUsername" = "Email o nome utente";
 "auth.emailOrUsernamePlaceholder" = "tu@esempio.com o nome utente";
-"auth.password" = "Password";
+"auth.password" = "Parola chiave";
 "auth.signIn" = "Accedi";
 "auth.signingIn" = "Accesso...";
 "auth.forgotPassword" = "Password dimenticata?";
@@ -177,7 +177,7 @@
 "home.emptyFollowingTitle" = "Il tuo feed Following ti aspetta.";
 "home.emptyFollowingSubtitle" = "Scopri persone, musica e argomenti da seguire.";
 "action.like" = "Mi piace";
-"action.repost" = "Repost";
+"action.repost" = "Ripubblica";
 "action.reply" = "Rispondi";
 "action.delete" = "Elimina";
 "action.cancel" = "Annulla";
@@ -272,13 +272,13 @@
 "support.subjectPlaceholder" = "Breve riepilogo del tuo problema";
 "support.categoryLabel" = "Categoria";
 "support.categoryGeneral" = "Generale";
-"support.categoryAccount" = "Account";
-"support.categoryPrivacy" = "Privacy";
+"support.categoryAccount" = "Profilo";
+"support.categoryPrivacy" = "Riservatezza";
 "support.categoryContent" = "Contenuto";
 "support.categoryModeration" = "Moderazione";
 "support.categoryPayment" = "Pagamento";
 "support.categoryMonetisation" = "Monetizzazione";
-"support.categoryBug" = "Bug";
+"support.categoryBug" = "Problema tecnico";
 "support.categoryFeatureRequest" = "Richiesta funzionalità";
 "support.categorySecurity" = "Sicurezza";
 "support.categoryOther" = "Altro";
@@ -372,7 +372,7 @@
 "music.queue.upNext" = "In arrivo ({count})";
 "music.nav.queueTitle" = "La tua coda";
 "music.shell.seeAll" = "Vedi tutti";
-"music.shell.studioLabel" = "Music Studio";
+"music.shell.studioLabel" = "Studio Musicale";
 "music.shell.studioEyebrow" = "Strumenti per creator";
 "music.shell.studioDescription" = "Pubblica la tua musica direttamente su ZRP.";
 "music.shell.uploadMusic" = "Carica musica";
@@ -524,7 +524,7 @@
 "settings.title" = "Impostazioni";
 "settings.subtitle" = "Gestisci le impostazioni del tuo account";
 "settings.privacySettings" = "Impostazioni privacy";
-"settings.privacyTitle" = "Privacy";
+"settings.privacyTitle" = "Riservatezza";
 "settings.publicLikes" = "Mi piace pubblici";
 "settings.publicLikesDesc" = "Permetti agli altri di vedere cosa ti piace";
 "settings.publicFollowing" = "Seguiti pubblici";
@@ -589,11 +589,11 @@
 "deleteAccount.cancelDeletionRequest" = "Annulla richiesta di eliminazione";
 "deleteAccount.cancelAnytimeHint" = "Puoi annullare questa richiesta in qualsiasi momento prima della data di eliminazione.";
 "deleteAccount.confirmDeletionTitle" = "Conferma eliminazione";
-"deleteAccount.typeDeleteToConfirm" = "Digita \"DELETE\" per confermare";
+"deleteAccount.typeDeleteToConfirm" = "Digita \"{word}\" per confermare";
 "deleteAccount.deleteNow" = "Elimina ora";
 "deleteAccount.deleting" = "Eliminazione in corso...";
 "deleteAccount.permanentlyDeleteAccount" = "Elimina definitivamente l'account";
-"deleteAccount.errTypeDeleteConfirm" = "Digita \"DELETE\" per confermare.";
+"deleteAccount.errTypeDeleteConfirm" = "Digita \"{word}\" per confermare.";
 "deleteAccount.errFailedDelete" = "Impossibile eliminare l'account";
 "deleteAccount.errFailedSchedule" = "Impossibile programmare l'eliminazione";
 "deleteAccount.errFailedCancel" = "Impossibile annullare l'eliminazione";
@@ -619,7 +619,7 @@
 "auth.joinCommunity" = "Unisciti alla community";
 "auth.fullName" = "Nome completo";
 "auth.username" = "Nome utente";
-"auth.email" = "Email";
+"auth.email" = "E-mail";
 "auth.createPassword" = "Crea una password";
 "auth.passwordMinLength" = "Deve contenere almeno 6 caratteri";
 "auth.alreadyHaveAccount" = "Hai già un account?";
@@ -636,7 +636,7 @@
 "onboarding.setupSubtitle" = "Configura il tuo profilo per iniziare.";
 "onboarding.displayName" = "Nome visualizzato";
 "onboarding.displayNamePlaceholder" = "Il tuo nome";
-"onboarding.bio" = "Bio";
+"onboarding.bio" = "Biografia";
 "onboarding.bioPlaceholder" = "Raccontaci di te...";
 "onboarding.locationLabel" = "Posizione";
 "onboarding.website" = "Sito web";
@@ -665,7 +665,7 @@
 "settings.profile" = "Profilo";
 "settings.updateProfile" = "Aggiorna profilo";
 "settings.displayName" = "Nome visualizzato";
-"settings.bio" = "Bio";
+"settings.bio" = "Biografia";
 "settings.bioPlaceholder" = "Raccontaci di te...";
 "settings.website" = "Sito web";
 "settings.websitePlaceholder" = "https://il-tuo-sito.com";
@@ -703,7 +703,7 @@
 "quotes.empty" = "Ancora nessuna citazione.";
 "quotes.count" = "{n} citazioni";
 "profile.replies" = "Risposte";
-"profile.media" = "Media";
+"profile.media" = "Multimedia";
 "profile.likes" = "Mi piace";
 "profile.reposts" = "Repost";
 "profile.noReplies" = "Ancora nessuna risposta.";
@@ -749,7 +749,7 @@
 "trust.unavailableTitle" = "Passaporto di fiducia non disponibile";
 "trust.notFoundFallback" = "Questo account non è stato trovato.";
 "trust.errUnableToLoad" = "Impossibile caricare questo passaporto di fiducia.";
-"creatorDash.studioTitle" = "Creator Studio";
+"creatorDash.studioTitle" = "Studio Creator";
 "creatorDash.tabContent" = "Contenuti";
 "creatorDash.tabAudience" = "Pubblico";
 "contentPerf.views" = "Visualizzazioni";
@@ -1067,9 +1067,9 @@
 "team.removeConfirm" = "Sei sicuro di voler rimuovere {email} dal tuo team? Questa azione non può essere annullata.";
 "team.removeDialogTitle" = "Rimuovi membro del team";
 "team.role" = "Ruolo";
-"team.roleAdmin" = "Admin";
+"team.roleAdmin" = "Amministratore";
 "team.roleAdminDesc" = "Admin: può aggiungere/rimuovere membri e modificare i ruoli (tranne il proprietario).";
-"team.roleEditor" = "Editor";
+"team.roleEditor" = "Redattore";
 "team.roleEditorDesc" = "Editor: può creare e gestire i contenuti del team.";
 "team.roleOwner" = "Proprietario";
 "team.roleOwnerDesc" = "Proprietario: controllo completo. Può aggiungere, rimuovere e modificare i ruoli.";
@@ -1083,9 +1083,9 @@
 "footer.contact" = "Contatti";
 "footer.careers" = "Lavora con noi";
 "footer.investors" = "Investitori";
-"footer.pressKit" = "Press Kit";
+"footer.pressKit" = "Cartella stampa";
 "nav.platform" = "Piattaforma";
-"nav.account" = "Account";
+"nav.account" = "Profilo";
 "nav.openMenu" = "Apri il menu";
 "nav.closeMenu" = "Chiudi il menu";
 "nav.journalistDashboard" = "Dashboard giornalista";

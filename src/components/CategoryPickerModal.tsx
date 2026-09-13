@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { X, Search, Check } from "lucide-react";
-import { PROFESSIONAL_CATEGORIES } from "@/lib/professionalCategories";
+import { PROFESSIONAL_CATEGORIES, categoryToTranslationKey } from "@/lib/professionalCategories";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CategoryPickerModalProps {
@@ -54,14 +54,14 @@ export default function CategoryPickerModal({
             <X className="w-5 h-5" />
           </button>
           <span className="font-semibold text-gray-900 dark:text-white">
-            Select a category
+            {t("categoryPicker.selectTitle")}
           </span>
           <div className="w-5" />
         </div>
 
         <div className="px-4 pt-4 pb-2 flex-shrink-0">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-            Choose the category to display on your profile. Pick the one that best describes your account.
+            {t("categoryPicker.subtitle")}
           </p>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -69,8 +69,8 @@ export default function CategoryPickerModal({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search categories"
-              aria-label="Search categories"
+              placeholder={t("categoryPicker.searchPlaceholder")}
+              aria-label={t("categoryPicker.searchPlaceholder")}
               autoFocus
               className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-full text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-zrp-red"
             />
@@ -81,7 +81,7 @@ export default function CategoryPickerModal({
         <div className="flex-1 overflow-y-auto px-4">
           {filtered.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">
-              No categories match "{query}".
+              {t("categoryPicker.emptyState", { query })}
             </p>
           ) : (
             filtered.map((category) => (
@@ -97,7 +97,7 @@ export default function CategoryPickerModal({
                       : "text-gray-700 dark:text-gray-300"
                   }`}
                 >
-                  {category}
+                  {t(categoryToTranslationKey(category))}
                 </span>
                 <span
                   className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
@@ -120,7 +120,7 @@ export default function CategoryPickerModal({
             disabled={!selected}
             className="w-full bg-zrp-red text-white font-semibold py-3 rounded-full hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            Save
+            {t("categoryPicker.save")}
           </button>
         </div>
       </div>

@@ -85,7 +85,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none min-h-[120px] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-            placeholder="What's happening?"
+            placeholder={t("editPost.contentPlaceholder")}
             maxLength={limits.postLength}
           />
           <div className="flex items-center justify-between mt-3">

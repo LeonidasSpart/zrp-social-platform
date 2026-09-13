@@ -16,7 +16,9 @@ import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { getPlanLimits } from "@/lib/limits";
 import CustomUrlSettings from "@/components/CustomUrlSettings";
 import CategoryPickerModal from "@/components/CategoryPickerModal";
+import { categoryToTranslationKey } from "@/lib/professionalCategories";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 import { buttonClasses } from "@/components/ui/styles";
 
 interface UserData {
@@ -53,15 +55,33 @@ interface CreatorProfile {
 // ─── Settings categories, X-style ────────────────────────────────────
 type Category = "account" | "profile" | "security" | "privacy" | "notifications" | "monetization" | "support";
 
-const CATEGORIES: { id: Category; label: string; icon: React.ElementType }[] = [
-  { id: "account", label: "Account", icon: UserCircle },
-  { id: "profile", label: "Profile", icon: User },
-  { id: "security", label: "Security", icon: Key },
-  { id: "privacy", label: "Privacy & Safety", icon: Shield },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "monetization", label: "Monetization", icon: CreditCard },
-  { id: "support", label: "Support", icon: LifeBuoy },
+// Labels were hardcoded English literals here, so this array never went
+// through the translation system at all - a non-English visitor saw
+// "Account", "Security", etc. regardless of their selected language, even
+// though every other string on this page was correctly translated. The
+// icon/order stay a module-level constant; the label is now resolved at
+// render time via the id -> TranslationKey map below, reusing existing
+// keys (nav.account, settings.profile, nav.notifications) where an exact
+// match already existed instead of introducing duplicate ones.
+const CATEGORIES: { id: Category; icon: React.ElementType }[] = [
+  { id: "account", icon: UserCircle },
+  { id: "profile", icon: User },
+  { id: "security", icon: Key },
+  { id: "privacy", icon: Shield },
+  { id: "notifications", icon: Bell },
+  { id: "monetization", icon: CreditCard },
+  { id: "support", icon: LifeBuoy },
 ];
+
+const CATEGORY_LABEL_KEYS: Record<Category, TranslationKey> = {
+  account: "nav.account",
+  profile: "settings.profile",
+  security: "settings.tabSecurity",
+  privacy: "settings.tabPrivacy",
+  notifications: "nav.notifications",
+  monetization: "settings.tabMonetization",
+  support: "settings.tabSupport",
+};
 
 // Backward compatibility: old #anchor deep-links still land on the right category
 const HASH_TO_CATEGORY: Record<string, Category> = {
@@ -600,7 +620,7 @@ export default function SettingsPage() {
             }`}
           >
             <cat.icon className="w-4 h-4" />
-            {cat.label}
+            {t(CATEGORY_LABEL_KEYS[cat.id])}
 
             {activeCategory === cat.id && (
               <span
@@ -643,7 +663,7 @@ export default function SettingsPage() {
                   activeCategory === cat.id ? "text-zrp-red" : ""
                 }`}
               />
-              {cat.label}
+              {t(CATEGORY_LABEL_KEYS[cat.id])}
             </button>
           ))}
         </nav>
@@ -990,7 +1010,7 @@ export default function SettingsPage() {
                     >
                       <span className="text-sm text-gray-700 dark:text-gray-300">Category</span>
                       <span className="text-sm text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                        {category || "None"}
+                        {category ? t(categoryToTranslationKey(category)) : "None"}
                         <ChevronRight className="w-4 h-4 rtl:-scale-x-100" />
                       </span>
                     </button>

@@ -130,7 +130,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   // ─── Translation (per-comment, since many render at once here unlike
   // PostCard's single post - keyed by comment id) ────────────────────
-  const { language: uiLanguage } = useLanguage();
+  const { language: uiLanguage, t } = useLanguage();
   const [translatedMap, setTranslatedMap] = useState<Record<string, string>>({});
   const [showTranslationMap, setShowTranslationMap] = useState<Record<string, boolean>>({});
   const [translatingId, setTranslatingId] = useState<string | null>(null);
@@ -291,7 +291,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       }
     } catch (error) {
       console.error("Error editing comment:", error);
-      alert("Failed to update comment");
+      alert(t("comment.errUpdateFailed"));
     } finally {
       setEditing(false);
     }
@@ -329,7 +329,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
-      alert("Failed to delete comment");
+      alert(t("comment.errDeleteFailed"));
     }
   };
 
@@ -348,12 +348,12 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         body: JSON.stringify({ commentId: reportingCommentId, reason, details }),
       });
       if (res.ok) {
-        alert("Report submitted. Thank you for helping keep the community safe.");
+        alert(t("comment.reportSubmitted"));
         setShowReportModal(false);
         setReportingCommentId(null);
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || "Failed to submit report. Please try again.");
+        alert(err.error || t("comment.errReportFailed"));
         // A 409 means it's already reported and pending - close the
         // modal rather than inviting a retry that would just repeat it.
         if (res.status === 409) {
@@ -363,7 +363,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       }
     } catch (error) {
       console.error("Error reporting comment:", error);
-      alert("Failed to submit report. Please try again.");
+      alert(t("comment.errReportFailed"));
     }
   };
 
@@ -487,7 +487,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         <div className="flex-1 min-w-0">
           {depth > 1 && parentAuthorUsername && (
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">
-              Replying to{" "}
+              {t("profile.replyingTo")}{" "}
               <span className="text-zrp-red">@{parentAuthorUsername}</span>
             </p>
           )}
@@ -514,14 +514,14 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 <button
                   onClick={() => startEdit(comment)}
                   className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1"
-                  title="Edit comment"
+                  title={t("action.edit")}
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => confirmDelete(comment.id)}
                   className="text-gray-400 hover:text-red-500 p-1"
-                  title="Delete comment"
+                  title={t("action.delete")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -532,7 +532,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 <button
                   onClick={() => openReportModal(comment.id)}
                   className="text-gray-400 hover:text-red-500 p-1"
-                  title="Report comment"
+                  title={t("report.modalTitle")}
                 >
                   <Flag className="w-3.5 h-3.5" />
                 </button>
@@ -563,14 +563,14 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 onClick={() => saveEdit(comment.id)}
                 disabled={!editContent.trim() || editing}
                 className="flex-shrink-0 text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
-                title="Save"
+                title={t("action.save")}
               >
                 <Check className="w-4 h-4" />
               </button>
               <button
                 onClick={cancelEdit}
                 className="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1"
-                title="Cancel"
+                title={t("action.cancel")}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -626,11 +626,11 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 ) : (
                   <Globe className="w-3 h-3" />
                 )}
-                {showTranslationMap[comment.id] ? "Show original" : "Show translation"}
+                {showTranslationMap[comment.id] ? t("comment.showOriginal") : t("comment.showTranslation")}
               </button>
               {translateErrorMap[comment.id] && (
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                  Translation unavailable right now.
+                  {t("comment.translationUnavailable")}
                 </p>
               )}
               {showTranslationMap[comment.id] && translatedMap[comment.id] && (
@@ -662,7 +662,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                     ? "text-green-500"
                     : "text-gray-400 hover:text-green-500"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
-                title="Repost"
+                title={t("action.repost")}
               >
                 <Repeat className="w-3.5 h-3.5" />
                 {comment._count?.reposts ? comment._count.reposts : ""}
@@ -676,7 +676,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                     ? "text-red-500"
                     : "text-gray-400 hover:text-red-500"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
-                title="Like"
+                title={t("action.like")}
               >
                 <Heart className={`w-3.5 h-3.5 ${comment.liked ? "fill-red-500" : ""}`} />
                 {comment._count?.likes ? comment._count.likes : ""}
@@ -690,7 +690,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                     ? "text-zrp-red"
                     : "text-gray-400 hover:text-zrp-red"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
-                title="Bookmark"
+                title={t("nav.bookmarks")}
               >
                 <Bookmark className={`w-3.5 h-3.5 ${comment.bookmarked ? "fill-zrp-red" : ""}`} />
               </button>
@@ -706,7 +706,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                   e.target.style.height = "auto";
                   e.target.style.height = `${e.target.scrollHeight}px`;
                 }}
-                placeholder={`Reply to ${comment.author.name || comment.author.username}...`}
+                placeholder={t("comment.replyToPlaceholder", { name: comment.author.name || comment.author.username })}
                 rows={1}
                 className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-hidden max-h-40"
                 maxLength={limits.postLength}
@@ -723,7 +723,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 disabled={!replyContent.trim()}
                 className="flex-shrink-0 whitespace-nowrap px-3 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
               >
-                Reply
+                {t("action.reply")}
               </button>
               <button
                 onClick={() => {
@@ -732,7 +732,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 }}
                 className="flex-shrink-0 whitespace-nowrap text-gray-400 hover:text-gray-600 text-sm"
               >
-                Cancel
+                {t("action.cancel")}
               </button>
             </div>
           )}
@@ -760,7 +760,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   return (
     <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
       {comments.length === 0 ? (
-        <p className="text-sm text-gray-400 dark:text-gray-500">No comments yet.</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">{t("comment.noneYet")}</p>
       ) : (
         <div className="divide-y divide-gray-100 dark:divide-gray-800">
           {comments.map((comment) => (
@@ -775,7 +775,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 disabled={loadingMore}
                 className="text-sm text-zrp-red hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loadingMore ? "Loading..." : "Show more comments"}
+                {loadingMore ? t("action.loading") : t("comment.loadMore")}
               </button>
             </div>
           )}
@@ -797,7 +797,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 handleSubmit();
               }
             }}
-            placeholder="Write a comment..."
+            placeholder={t("postDetail.commentPlaceholder")}
             rows={1}
             className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-hidden max-h-40"
             maxLength={limits.postLength}
@@ -808,7 +808,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             className="flex-shrink-0 whitespace-nowrap bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
           >
             <Send className="w-4 h-4" />
-            Reply
+            {t("action.reply")}
           </button>
         </form>
       )}
@@ -817,10 +817,10 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Delete Comment?
+              {t("comment.deleteTitle")}
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-              This action cannot be undone. Are you sure you want to delete this comment?
+              {t("comment.deleteBody")}
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -830,13 +830,13 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 }}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               >
-                Cancel
+                {t("action.cancel")}
               </button>
               <button
                 onClick={handleDelete}
                 className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-red-700 transition"
               >
-                Delete
+                {t("action.delete")}
               </button>
             </div>
           </div>

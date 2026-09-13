@@ -10,12 +10,12 @@
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Favoris";
 "nav.creatorStudio" = "Studio Créateur";
-"nav.shorts" = "Shorts";
+"nav.shorts" = "Vidéos courtes";
 "nav.news" = "Actualités";
 "nav.aiAssistant" = "IA ZRP";
-"nav.help" = "Help";
-"nav.opportunity" = "Opportunity";
-"nav.play" = "Play";
+"nav.help" = "Aide";
+"nav.opportunity" = "Opportunités";
+"nav.play" = "Jeux";
 "play.todaysChallenge" = "Défi du jour";
 "play.trending" = "Défis tendance";
 "play.noTrendingYet" = "Aucun défi tendance pour le moment. Soyez le premier à en créer un !";
@@ -145,7 +145,7 @@
 "footer.helpCenter" = "Centre d'aide";
 "help.footer.guidelines" = "Règles de la communauté";
 "communityCode.navLabel" = "Code de communauté et de direction";
-"nav.marketplace" = "Marketplace";
+"nav.marketplace" = "Place de marché";
 "nav.settings" = "Paramètres";
 "nav.signOut" = "Déconnexion";
 "auth.welcomeTitle" = "ZRP Social";
@@ -308,7 +308,7 @@
 "support.ticketDetail.priorityNormal" = "Normale";
 "support.ticketDetail.priorityHigh" = "Élevée";
 "support.ticketDetail.priorityUrgent" = "Urgente";
-"support.ticketDetail.supportBadge" = "Support";
+"support.ticketDetail.supportBadge" = "Assistance";
 "support.ticketDetail.internalNote" = "Note interne";
 "support.ticketDetail.replyPlaceholder" = "Saisissez votre réponse...";
 "support.ticketDetail.sendReply" = "Envoyer la réponse";
@@ -589,11 +589,11 @@
 "deleteAccount.cancelDeletionRequest" = "Annuler la demande de suppression";
 "deleteAccount.cancelAnytimeHint" = "Vous pouvez annuler cette demande à tout moment avant la date de suppression.";
 "deleteAccount.confirmDeletionTitle" = "Confirmer la suppression";
-"deleteAccount.typeDeleteToConfirm" = "Tapez « DELETE » pour confirmer";
+"deleteAccount.typeDeleteToConfirm" = "Tapez « {word} » pour confirmer";
 "deleteAccount.deleteNow" = "Supprimer maintenant";
 "deleteAccount.deleting" = "Suppression en cours...";
 "deleteAccount.permanentlyDeleteAccount" = "Supprimer définitivement le compte";
-"deleteAccount.errTypeDeleteConfirm" = "Veuillez taper « DELETE » pour confirmer.";
+"deleteAccount.errTypeDeleteConfirm" = "Veuillez taper « {word} » pour confirmer.";
 "deleteAccount.errFailedDelete" = "Échec de la suppression du compte";
 "deleteAccount.errFailedSchedule" = "Échec de la programmation de la suppression";
 "deleteAccount.errFailedCancel" = "Échec de l'annulation de la suppression";
@@ -636,7 +636,7 @@
 "onboarding.setupSubtitle" = "Configurez votre profil pour commencer.";
 "onboarding.displayName" = "Nom affiché";
 "onboarding.displayNamePlaceholder" = "Votre nom";
-"onboarding.bio" = "Bio";
+"onboarding.bio" = "Biographie";
 "onboarding.bioPlaceholder" = "Parlez-nous de vous...";
 "onboarding.locationLabel" = "Lieu";
 "onboarding.website" = "Site web";
@@ -665,7 +665,7 @@
 "settings.profile" = "Profil";
 "settings.updateProfile" = "Mettre à jour le profil";
 "settings.displayName" = "Nom affiché";
-"settings.bio" = "Bio";
+"settings.bio" = "Biographie";
 "settings.bioPlaceholder" = "Parlez-nous de vous...";
 "settings.website" = "Site web";
 "settings.websitePlaceholder" = "https://votre-site.com";
@@ -755,7 +755,7 @@
 "contentPerf.views" = "Vues";
 "contentPerf.likes" = "J'aime";
 "contentPerf.comments" = "Commentaires";
-"contentPerf.reposts" = "Reposts";
+"contentPerf.reposts" = "Republications";
 "contentPerf.engagementTitle" = "Engagement, 30 derniers jours";
 "contentPerf.engagementSubtitle" = "J'aime, commentaires et reposts sur l'ensemble de vos publications.";
 "contentPerf.topPostsTitle" = "Meilleures publications";
@@ -982,7 +982,7 @@
 "journalist.editor.rejectedTitle" = "Cet article a été rejeté";
 "journalist.editor.resubmitForReview" = "Soumettre à nouveau pour relecture";
 "journalist.editor.saveDraft" = "Enregistrer le brouillon";
-"journalist.editor.slug" = "Slug";
+"journalist.editor.slug" = "Identifiant URL";
 "journalist.editor.slugPlaceholder" = "slug-de-larticle";
 "journalist.editor.sourceName" = "Nom de la source (facultatif)";
 "journalist.editor.sourceUrl" = "URL de la source (facultatif)";
@@ -1067,7 +1067,7 @@
 "team.removeConfirm" = "Voulez-vous vraiment retirer {email} de votre équipe ? Cette action est irréversible.";
 "team.removeDialogTitle" = "Retirer un membre d'équipe";
 "team.role" = "Rôle";
-"team.roleAdmin" = "Admin";
+"team.roleAdmin" = "Administrateur";
 "team.roleAdminDesc" = "Admin : peut ajouter/retirer des membres et modifier les rôles (sauf le propriétaire).";
 "team.roleEditor" = "Éditeur";
 "team.roleEditorDesc" = "Éditeur : peut créer et gérer le contenu de l'équipe.";
@@ -1091,7 +1091,7 @@
 "nav.journalistDashboard" = "Tableau de bord journaliste";
 "nav.teamManagement" = "Gestion d'équipe";
 "nav.apiKeys" = "Clés API";
-"footer.supportHeading" = "Support";
+"footer.supportHeading" = "Assistance";
 "footer.myTickets" = "Mes tickets";
 "footer.transparency" = "Transparence";
 "footer.charity" = "Charité";

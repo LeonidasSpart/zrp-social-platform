@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge"; // ✅ import
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Comment {
   id: string;
@@ -55,6 +56,7 @@ export default function CommentItem({
   isReply = false,
 }: CommentItemProps) {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [liked, setLiked] = useState(comment.liked || false);
   const [likesCount, setLikesCount] = useState(comment._count?.likes || 0);
   const [reposted, setReposted] = useState(comment.reposted || false);
@@ -124,7 +126,7 @@ export default function CommentItem({
     if (navigator.share) {
       navigator.share({ title: "Comment on ZRP", text: comment.content, url });
     } else {
-      navigator.clipboard.writeText(url).then(() => alert("Link copied!"));
+      navigator.clipboard.writeText(url).then(() => alert(t("comment.linkCopied")));
     }
   };
 
@@ -141,23 +143,23 @@ export default function CommentItem({
         setIsEditing(false);
         onUpdate();
       } else {
-        alert("Failed to edit comment");
+        alert(t("comment.errEditFailed"));
       }
-    } catch (error) { console.error(error); alert("Failed to edit comment"); }
+    } catch (error) { console.error(error); alert(t("comment.errEditFailed")); }
     finally { setSavingEdit(false); }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Delete this comment?")) return;
+    if (!confirm(t("comment.deleteConfirmPrompt"))) return;
     setLoading({ ...loading, delete: true });
     try {
       const res = await fetch(`/api/comments/${comment.id}`, { method: "DELETE" });
       if (res.ok) {
         onUpdate();
       } else {
-        alert("Failed to delete comment");
+        alert(t("comment.errDeleteFailed"));
       }
-    } catch (error) { console.error(error); alert("Failed to delete comment"); }
+    } catch (error) { console.error(error); alert(t("comment.errDeleteFailed")); }
     finally { setLoading({ ...loading, delete: false }); }
   };
 
@@ -304,7 +306,7 @@ export default function CommentItem({
                 <button
                   onClick={() => setIsEditing(true)}
                   className="text-gray-400 hover:text-gray-600 transition"
-                  title="Edit"
+                  title={t("action.edit")}
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
@@ -312,7 +314,7 @@ export default function CommentItem({
                   onClick={handleDelete}
                   disabled={loading.delete}
                   className="text-gray-400 hover:text-red-500 transition"
-                  title="Delete"
+                  title={t("action.delete")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>

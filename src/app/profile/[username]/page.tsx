@@ -47,6 +47,7 @@ import { SkeletonProfileHeader } from "@/components/skeletons/SkeletonProfileHea
 import { SkeletonFeed } from "@/components/skeletons/SkeletonFeed";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { categoryToTranslationKey } from "@/lib/professionalCategories";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { isNativeStoreRestrictedPayment } from "@/lib/native-payment-policy";
 
@@ -1759,7 +1760,7 @@ export default function ProfilePage(
           {profile.category &&
             profile.showCategory && (
               <p className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                {profile.category}
+                {t(categoryToTranslationKey(profile.category))}
               </p>
             )}
 

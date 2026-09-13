@@ -10,6 +10,18 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // Deliberately not i18n'd: global-error.tsx replaces the ENTIRE root
+  // layout (including <html>/<body>) when it renders, which means
+  // RootLayout (src/app/layout.tsx) itself never mounts - LanguageProvider,
+  // ThemeProvider, etc. all live inside that layout's <body> and are gone
+  // along with it. useLanguage() would throw here (called outside its
+  // provider) rather than degrade gracefully, and there's no safe
+  // provider-free fallback (the language cookie is only meant to be read
+  // server-side in layout.tsx, and this component intentionally stays a
+  // plain client component with no server-side language lookup of its
+  // own) - so this stays plain English rather than crashing the last-resort
+  // error boundary itself.
+  //
   // This top-level boundary isn't covered by Next.js's request-lifecycle
   // hooks that Sentry normally auto-instruments, so it has to report
   // itself - without this, a root render crash never reached Sentry at all.

@@ -192,7 +192,7 @@ describe("image lightbox", () => {
     // The close X sat right at/under the status bar on mobile web/PWA
     // (notch/dynamic-island devices, PWA standalone mode) because the
     // header only had a flat py-4 with no safe-area awareness.
-    const idx = src.indexOf("aria-label=\"Image gallery\"");
+    const idx = src.indexOf('aria-label={t("post.imageGalleryAria")}');
     expect(idx).toBeGreaterThan(-1);
     const header = src.slice(idx, idx + 1500);
     expect(header).toContain("pt-[calc(1rem+env(safe-area-inset-top))]");
@@ -206,7 +206,7 @@ describe("image lightbox", () => {
     // has two "Post image" alt templates (the feed gallery thumbnail,
     // and this lightbox) - search from the dialog's own start so this
     // checks the lightbox's <img>, not the thumbnail's.
-    const dialogIdx = src.indexOf("aria-label=\"Image gallery\"");
+    const dialogIdx = src.indexOf('aria-label={t("post.imageGalleryAria")}');
     expect(dialogIdx).toBeGreaterThan(-1);
     const imgIdx = src.indexOf('alt={`Post image ${', dialogIdx);
     expect(imgIdx).toBeGreaterThan(dialogIdx);
@@ -217,8 +217,8 @@ describe("image lightbox", () => {
   it("still lets the prev/next arrows and header controls swallow their own clicks", () => {
     // Those must keep stopPropagation so pressing them doesn't also
     // close the lightbox out from under the user.
-    expect(src).toContain('aria-label="Previous image"');
-    const prevIdx = src.indexOf('aria-label="Previous image"');
+    expect(src).toContain('aria-label={t("marketplace.previousImage")}');
+    const prevIdx = src.indexOf('aria-label={t("marketplace.previousImage")}');
     expect(src.slice(Math.max(0, prevIdx - 200), prevIdx)).toContain("stopPropagation");
   });
 });

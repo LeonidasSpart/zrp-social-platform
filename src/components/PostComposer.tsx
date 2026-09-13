@@ -2823,7 +2823,7 @@ export default function PostComposer({
                           hover:bg-black/80
                           transition
                         "
-                        aria-label="Remove video"
+                        aria-label={t("shorts.upload.removeVideo")}
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -3274,7 +3274,7 @@ export default function PostComposer({
                   hover:bg-gray-100
                   dark:hover:bg-gray-700
                 "
-                aria-label="Close emoji picker"
+                aria-label={t("chat.closeEmojiPickerAria")}
               >
                 <X className="w-5 h-5" />
               </button>
