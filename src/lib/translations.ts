@@ -1263,6 +1263,7 @@ type TranslationKey = "nav.home" | "nav.explore" | "nav.search" | "nav.messages"
   | "time.minutesShort" | "time.hoursShort" | "time.daysShort"
   | "notifications.likedPostSuffixPlural" | "notifications.startedFollowingSuffixPlural" | "notifications.repostedPostSuffixPlural" | "notifications.sentMessageSuffix"
   | "news.publishedAtFormat"
+  | "postCard.quotedPostAria"
 ;
 
 type TranslationDict = Record<TranslationKey, string>;
@@ -5375,6 +5376,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "reposted your post",
     "notifications.sentMessageSuffix": "sent you a message",
     "news.publishedAtFormat": "{date} at {time}",
+    "postCard.quotedPostAria": "Quoted post by @{username}",
   },
   fr: {
     "nav.home": "Accueil",
@@ -9483,6 +9485,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "ont repartagé votre publication",
     "notifications.sentMessageSuffix": "vous a envoyé un message",
     "news.publishedAtFormat": "{date} à {time}",
+    "postCard.quotedPostAria": "Publication citée de @{username}",
   },
   de: {
     "nav.home": "Startseite",
@@ -13591,6 +13594,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "haben deinen Beitrag repostet",
     "notifications.sentMessageSuffix": "hat dir eine Nachricht geschickt",
     "news.publishedAtFormat": "{date} um {time}",
+    "postCard.quotedPostAria": "Zitierter Beitrag von @{username}",
   },
   it: {
     "nav.home": "Pagina iniziale",
@@ -17699,6 +17703,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "hanno ripubblicato il tuo post",
     "notifications.sentMessageSuffix": "ti ha inviato un messaggio",
     "news.publishedAtFormat": "{date} alle {time}",
+    "postCard.quotedPostAria": "Post citato di @{username}",
   },
   sq: {
     "nav.home": "Kreu",
@@ -21807,6 +21812,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "ripublikuan postimin tuaj",
     "notifications.sentMessageSuffix": "ju dërgoi një mesazh",
     "news.publishedAtFormat": "{date} në orën {time}",
+    "postCard.quotedPostAria": "Postim i cituar nga @{username}",
   },
   es: {
     "nav.home": "Inicio",
@@ -25915,6 +25921,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "republicaron tu publicación",
     "notifications.sentMessageSuffix": "te envió un mensaje",
     "news.publishedAtFormat": "{date} a las {time}",
+    "postCard.quotedPostAria": "Publicación citada de @{username}",
   },
   ru: {
     "nav.home": "Главная",
@@ -30023,6 +30030,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "сделали репост вашей публикации",
     "notifications.sentMessageSuffix": "отправил(а) вам сообщение",
     "news.publishedAtFormat": "{date} в {time}",
+    "postCard.quotedPostAria": "Цитируемый пост от @{username}",
   },
   ar: {
     "nav.home": "الرئيسية",
@@ -34131,6 +34139,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "أعادوا نشر منشورك",
     "notifications.sentMessageSuffix": "أرسل لك رسالة",
     "news.publishedAtFormat": "{date} في {time}",
+    "postCard.quotedPostAria": "منشور مقتبس من @{username}",
   },
   zh: {
     "nav.home": "首页",
@@ -38239,6 +38248,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "转发了你的帖子",
     "notifications.sentMessageSuffix": "给你发了一条消息",
     "news.publishedAtFormat": "{date} {time}",
+    "postCard.quotedPostAria": "由 @{username} 引用的帖子",
   },
   tr: {
     "nav.home": "Ana Sayfa",
@@ -42347,6 +42357,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "gönderinizi yeniden paylaştılar",
     "notifications.sentMessageSuffix": "size bir mesaj gönderdi",
     "news.publishedAtFormat": "{date} saat {time}",
+    "postCard.quotedPostAria": "@{username} tarafından alıntılanan gönderi",
   },
   id: {
     "nav.home": "Beranda",
@@ -46455,6 +46466,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "membagikan ulang postingan Anda",
     "notifications.sentMessageSuffix": "mengirimi Anda pesan",
     "news.publishedAtFormat": "{date} pukul {time}",
+    "postCard.quotedPostAria": "Kiriman yang dikutip oleh @{username}",
   },
   pt: {
     "nav.home": "Início",
@@ -50563,6 +50575,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "republicaram a sua publicação",
     "notifications.sentMessageSuffix": "enviou-lhe uma mensagem",
     "news.publishedAtFormat": "{date} às {time}",
+    "postCard.quotedPostAria": "Publicação citada de @{username}",
   },
   ja: {
     "nav.home": "ホーム",
@@ -54671,6 +54684,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "があなたの投稿をリポストしました",
     "notifications.sentMessageSuffix": "からメッセージが届きました",
     "news.publishedAtFormat": "{date} {time}",
+    "postCard.quotedPostAria": "@{username}の引用投稿",
   },
   ko: {
     "nav.home": "홈",
@@ -58779,6 +58793,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "님이 회원님의 게시물을 리포스트했습니다",
     "notifications.sentMessageSuffix": "님이 메시지를 보냈습니다",
     "news.publishedAtFormat": "{date} {time}",
+    "postCard.quotedPostAria": "@{username}님의 인용 게시물",
   },
   hi: {
     "nav.home": "होम",
@@ -62887,6 +62902,7 @@ export const translations: Record<Language, TranslationDict> = {
     "notifications.repostedPostSuffixPlural": "ने आपकी पोस्ट रीपोस्ट की",
     "notifications.sentMessageSuffix": "ने आपको संदेश भेजा",
     "news.publishedAtFormat": "{date} को {time} बजे",
+    "postCard.quotedPostAria": "@{username} की उद्धृत पोस्ट",
   },
 };
 

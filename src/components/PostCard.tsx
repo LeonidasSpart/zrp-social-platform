@@ -1951,7 +1951,7 @@ export default function PostCard({
                     }
                   }}
                   className="mt-3 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50/80 dark:bg-white/[0.035] p-3 sm:p-4 cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/[0.06] transition-colors focus:outline-none focus:ring-2 focus:ring-zrp-red/60"
-                  aria-label={`Quoted post by @${post.quotePost.author.username}`}
+                  aria-label={t("postCard.quotedPostAria", { username: post.quotePost.author.username })}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <Quote className="w-4 h-4 text-zrp-red flex-shrink-0" />
@@ -2206,8 +2206,8 @@ export default function PostCard({
                           className="text-sm text-zrp-red hover:underline mt-2 font-medium"
                         >
                           {articleExpanded
-                            ? "Show less"
-                            : "Read more"}
+                            ? t("rightPanel.showLess")
+                            : t("rightPanel.showMore")}
                         </button>
                       )}
                     </div>
