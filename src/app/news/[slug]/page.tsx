@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import T from "@/components/i18n/T";
 import LocaleDateTime from "@/components/i18n/LocaleDateTime";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import type { TranslationKey } from "@/lib/translations";
 
 const SITE_URL = "https://zrp.one";
@@ -202,30 +203,40 @@ export default async function NewsArticlePage({
           )}
 
           <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              {article.author.avatarUrl ? (
-                <img
-                  src={article.author.avatarUrl}
-                  alt=""
-                  className="h-9 w-9 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted font-semibold">
-                  {(article.author.name ||
-                    article.author.username ||
-                    "Z")[0].toUpperCase()}
-                </div>
-              )}
+            <div className="flex items-center gap-2 min-w-0">
+              <Link href={`/profile/${article.author.username}`}>
+                {article.author.avatarUrl ? (
+                  <img
+                    src={article.author.avatarUrl}
+                    alt=""
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted font-semibold">
+                    {(article.author.name ||
+                      article.author.username ||
+                      "Z")[0].toUpperCase()}
+                  </div>
+                )}
+              </Link>
 
-              <div>
-                <div className="font-medium text-foreground">
-                  {article.author.name || article.author.username}
-                  {article.author.badgeType && (
-                    <span className="ml-1 text-red-600">✓</span>
-                  )}
-                </div>
+              <div className="min-w-0">
+                <Link
+                  href={`/profile/${article.author.username}`}
+                  className="font-medium text-foreground hover:underline flex items-center gap-1 min-w-0"
+                >
+                  <span className="truncate">
+                    {article.author.name || article.author.username}
+                  </span>
+                  <VerifiedBadge badgeType={article.author.badgeType} />
+                </Link>
 
-                <div>@{article.author.username}</div>
+                <Link
+                  href={`/profile/${article.author.username}`}
+                  className="hover:underline truncate block"
+                >
+                  @{article.author.username}
+                </Link>
               </div>
             </div>
 

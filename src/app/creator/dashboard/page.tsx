@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import ContentPerformanceTab from "@/components/ContentPerformanceTab";
 import AudienceGrowthTab from "@/components/AudienceGrowthTab";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
 
@@ -401,19 +402,25 @@ export default function CreatorDashboard() {
               <tbody>
                 {recentTips.map((tip) => (
                   <tr key={tip.id} className="border-t border-gray-200 dark:border-gray-700">
-                    <td className="p-3 flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                        {tip.sender.avatarUrl ? (
-                          <img src={tip.sender.avatarUrl} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-600">
-                            {(tip.sender.name || tip.sender.username)[0].toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {tip.sender.name || tip.sender.username}
-                      </span>
+                    <td className="p-3">
+                      <Link
+                        href={`/profile/${tip.sender.username}`}
+                        className="flex items-center gap-2 min-w-0 hover:underline"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                          {tip.sender.avatarUrl ? (
+                            <img src={tip.sender.avatarUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-600">
+                              {(tip.sender.name || tip.sender.username)[0].toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <span className="font-medium text-gray-900 dark:text-white truncate min-w-0 flex items-center gap-1">
+                          <span className="truncate">{tip.sender.name || tip.sender.username}</span>
+                          <VerifiedBadge badgeType={tip.sender.badgeType} />
+                        </span>
+                      </Link>
                     </td>
                     <td className="p-3 font-semibold text-green-600 dark:text-green-400">${tip.amount.toFixed(2)}</td>
                     <td className="p-3 text-gray-600 dark:text-gray-400">{tip.message || "-"}</td>
