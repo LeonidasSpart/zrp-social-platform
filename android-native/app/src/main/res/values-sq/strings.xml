@@ -179,17 +179,17 @@
     <string name="nav_search">Kërko</string>
     <string name="nav_explore">Eksploro</string>
     <string name="nav_communities">Komunitete</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">Lojëra</string>
     <string name="nav_news">Lajme</string>
     <string name="nav_music">Muzikë</string>
     <string name="nav_marketplace">Marketplace</string>
-    <string name="nav_opportunity">Opportunity</string>
-    <string name="nav_aid">Help</string>
+    <string name="nav_opportunity">Mundësi</string>
+    <string name="nav_aid">Ndihma</string>
     <string name="nav_ambassadors">Ambasadorët Globalë</string>
     <string name="nav_ai">IA e ZRP</string>
     <string name="nav_creator_studio">Studio i Krijuesit</string>
     <string name="nav_admin">Admin</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Video të shkurtra</string>
     <string name="nav_help_center">Qendra e Ndihmës</string>
     <string name="drawer_section_core">Kryesore</string>
     <string name="drawer_section_discover">Zbulo</string>
@@ -1172,7 +1172,7 @@
     <string name="shorts_share">Shpërndaj</string>
     <string name="shorts_share_post_by">Postim nga %1$s</string>
     <string name="shorts_comment">Komente</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Video të shkurtra</string>
     <string name="shorts_discover_entry">Zbulo Shorts</string>
     <string name="shorts_upload_close">Mbyll</string>
     <string name="shorts_upload_remove_video">Hiq videon</string>
@@ -1202,7 +1202,7 @@
     <string name="caption_view_less">Shiko më pak</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Shuma (USDC)</string>
-    <string name="creator_available_balance">Bilanci i disponueshëm: {amount} $</string>
+    <string name="creator_available_balance">Bilanci i disponueshëm: %1$s</string>
     <string name="creator_enter_amount_placeholder">Shkruaj shumën</string>
     <string name="creator_enter_wallet_placeholder">Shkruaj adresën e portofolit tënd Solana</string>
     <string name="creator_err_failed_load_dashboard">Ngarkimi i panelit dështoi</string>
@@ -2183,4 +2183,12 @@
     <string name="pricing_support_priority">Prioritare</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Përmirësimet e planit aktualisht menaxhohen në ZRP Web.</string>
+
+    <!-- Localization audit fixes (2026-09) -->
+    <string name="bookmarks_empty">Ende nuk ka të preferuar. Postimet që ruani do të shfaqen këtu.</string>
+    <string name="comments_empty">Ende nuk ka komente. Bëhu i pari që përgjigjet.</string>
+    <string name="createpost_char_count">%1$d karaktere</string>
+    <string name="comments_share_title">Shpërndaj komentin</string>
+    <string name="messages_replying_to">Duke iu përgjigjur %1$s</string>
+    <string name="messages_replying_to_self">vetes</string>
 </resources>

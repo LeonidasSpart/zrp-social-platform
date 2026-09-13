@@ -96,7 +96,7 @@ fun CommentsScreen(
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, url)
         }
-        context.startActivity(Intent.createChooser(intent, "Share comment"))
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.comments_share_title)))
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -127,7 +127,7 @@ fun CommentsScreen(
                 state.comments.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = state.error ?: "No comments yet. Be the first to reply.",
+                            text = state.error ?: stringResource(R.string.comments_empty),
                             color = if (state.error != null) {
                                 MaterialTheme.colorScheme.error
                             } else {
