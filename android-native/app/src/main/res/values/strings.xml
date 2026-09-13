@@ -398,6 +398,7 @@
     <string name="profile_unmute">Unmute</string>
     <string name="profile_block">Block</string>
     <string name="profile_unblock">Unblock</string>
+    <string name="profile_report_user">Report</string>
     <string name="profile_replies">Replies</string>
     <string name="profile_media">Media</string>
     <string name="profile_likes">Likes</string>

@@ -388,6 +388,7 @@
     <string name="profile_unmute">Batalkan bisukan</string>
     <string name="profile_block">Blokir</string>
     <string name="profile_unblock">Batalkan blokir</string>
+    <string name="profile_report_user">Laporkan</string>
     <string name="profile_replies">Balasan</string>
     <string name="profile_media">Media</string>
     <string name="profile_likes">Suka</string>

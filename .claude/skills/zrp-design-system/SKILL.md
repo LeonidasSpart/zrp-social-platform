@@ -214,10 +214,14 @@ Respect `env(safe-area-inset-*)` on web the way `layout.tsx`,
 
 - Web `Header` renders on **every** route including signed-out, and always
   shows the logo. A page rendering `/logo.png` near the top shows it twice.
-- Web `Sidebar`/`RightPanel` are `lg:`+ only; `BottomNav` is `lg:hidden`
-  and returns `null` when signed out — but the app shell pads for it
-  **unconditionally**, so public/auth pages carry dead bottom space on
-  mobile. Don't stack `min-h-screen` on top of that.
+- Web `Sidebar` renders from `md:`+ (compact icon-only rail from `md` to
+  `lg`, full labeled rail from `lg` up); `RightPanel` renders from
+  `lg:`+ (a narrower `w-72` rail from `lg` to `xl`, full `w-80` from
+  `xl` up) so there's no dead zone between the two breakpoints.
+  `BottomNav` is `md:hidden` and returns `null` when signed out — but
+  the app shell pads for it **unconditionally**, so public/auth pages
+  carry dead bottom space on mobile. Don't stack `min-h-screen` on top
+  of that.
 - Native `ZrpBottomBar` has no route gating — it renders on every route,
   Shorts included.
 

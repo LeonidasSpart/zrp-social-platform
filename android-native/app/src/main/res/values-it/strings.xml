@@ -388,6 +388,7 @@
     <string name="profile_unmute">Riattiva</string>
     <string name="profile_block">Blocca</string>
     <string name="profile_unblock">Sblocca</string>
+    <string name="profile_report_user">Segnala</string>
     <string name="profile_replies">Risposte</string>
     <string name="profile_media">Media</string>
     <string name="profile_likes">Mi piace</string>

@@ -22,6 +22,7 @@ interface Report {
   challenge: { id: string; title: string; creator: { username: string } | null } | null;
   opportunity: { id: string; title: string; poster: { username: string } } | null;
   campaign: { id: string; title: string; organizer: { username: string } } | null;
+  reportedUser: { username: string; name: string } | null;
 }
 
 export default function AdminReports() {
@@ -260,7 +261,11 @@ export default function AdminReports() {
               report.listing?.seller ||
               report.challenge?.creator ||
               report.opportunity?.poster ||
-              report.campaign?.organizer;
+              report.campaign?.organizer ||
+              report.reportedUser;
+            // A bare profile report (no post/comment/listing/etc.) has no
+            // content to preview - only a reported account to link to.
+            const isProfileReport = !content && !!report.reportedUser;
             // Comments deep-link to their parent post + scroll into view
             // via #comment-<id> (already supported by the post detail
             // page) - previously this was never actually constructed for
@@ -290,7 +295,9 @@ export default function AdminReports() {
                     ? t("adminReports.viewChallenge")
                     : report.opportunity
                       ? t("adminReports.viewOpportunity")
-                      : t("adminReports.viewCampaign");
+                      : report.campaign
+                        ? t("adminReports.viewCampaign")
+                        : null;
 
             return (
               <div
@@ -309,19 +316,28 @@ export default function AdminReports() {
                           {report.actionType.replace("_", " ")}
                         </span>
                       )}
+                      {isProfileReport && (
+                        <span className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-0.5 rounded">
+                          {t("adminReports.profileReportLabel")}
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                       {t("adminReports.reportedBy", { username: report.reporter.username })}
                     </p>
 
-                    {/* Content preview + navigation links */}
-                    {content && (
+                    {/* Content preview + navigation links - also shown for
+                        a bare profile report, which has no content but
+                        still needs a way to reach the reported account. */}
+                    {(content || author) && (
                       <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-zrp-red">
-                        <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                          {"content" in content ? content.content : content.title}
-                        </p>
+                        {content && (
+                          <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                            {"content" in content ? content.content : content.title}
+                          </p>
+                        )}
                         <div className="flex flex-wrap items-center gap-3 mt-2">
-                          {viewContentLink && (
+                          {viewContentLink && contentLabel && (
                             <Link
                               href={viewContentLink}
                               target="_blank"
@@ -340,7 +356,7 @@ export default function AdminReports() {
                               className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition"
                             >
                               <User className="w-3 h-3" />
-                              {t("adminReports.viewAuthor")}
+                              {isProfileReport ? t("adminReports.viewReportedProfile") : t("adminReports.viewAuthor")}
                             </Link>
                           )}
                         </div>

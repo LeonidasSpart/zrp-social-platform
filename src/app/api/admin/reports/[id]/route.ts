@@ -31,8 +31,9 @@ export async function PUT(
       // still be able to identify its target afterward (for the appeals
       // flow and for the moderation transparency dashboard). Covers
       // every polymorphic report target, not just post/comment - a
-      // listing/challenge/opportunity/campaign report actioned before
-      // this was previously left with no identifiable target at all.
+      // listing/challenge/opportunity/campaign/bare-profile report
+      // actioned before this was previously left with no identifiable
+      // target at all.
       const current = await prisma.report.findUnique({
         where: { id },
         select: {
@@ -42,6 +43,7 @@ export async function PUT(
           challenge: { select: { creatorId: true } },
           opportunity: { select: { posterId: true } },
           campaign: { select: { organizerId: true } },
+          reportedUserId: true,
         },
       });
       data.targetUserId =
@@ -51,6 +53,7 @@ export async function PUT(
         current?.challenge?.creatorId ??
         current?.opportunity?.posterId ??
         current?.campaign?.organizerId ??
+        current?.reportedUserId ??
         null;
     } else {
       // Optionally clear action fields when status changes away from actioned

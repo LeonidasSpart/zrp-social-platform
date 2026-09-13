@@ -23,6 +23,7 @@ import {
   Bell,
   BellOff,
   Ban,
+  Flag,
   CheckCircle,
   ShieldCheck,
   MoreHorizontal,
@@ -42,6 +43,7 @@ import ActivityHeatmap from "@/components/ActivityHeatmap";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import AnalyticsTab from "@/components/AnalyticsTab";
 import TipModal from "@/components/TipModal";
+import ReportModal from "@/components/ReportModal";
 import NativePaymentNotice from "@/components/NativePaymentNotice";
 import { SkeletonProfileHeader } from "@/components/skeletons/SkeletonProfileHeader";
 import { SkeletonFeed } from "@/components/skeletons/SkeletonFeed";
@@ -322,6 +324,11 @@ export default function ProfilePage(
     useState(false);
 
   const [blockLoading, setBlockLoading] =
+    useState(false);
+
+  // ─── REPORT STATE ──────────────────────────────────────────────
+
+  const [showReportModal, setShowReportModal] =
     useState(false);
 
   // ─── MORE DROPDOWN ─────────────────────────────────────────────
@@ -763,6 +770,64 @@ export default function ProfilePage(
       );
     } finally {
       setBlockLoading(false);
+    }
+  };
+
+  // ─── Report ────────────────────────────────────────────────────
+
+  const handleReport = async (
+    reason: string,
+    details?: string
+  ) => {
+    if (!profile) return;
+
+    try {
+      const res = await fetch(
+        "/api/reports",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            userId: profile.id,
+            reason,
+            details,
+          }),
+        }
+      );
+
+      if (res.ok) {
+        alert(
+          "Report submitted. Thank you for helping keep the community safe."
+        );
+
+        setShowReportModal(false);
+      } else {
+        const err =
+          await res
+            .json()
+            .catch(() => ({}));
+
+        alert(
+          err.error ||
+            "Failed to submit report. Please try again."
+        );
+
+        if (res.status === 409) {
+          setShowReportModal(false);
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Report error:",
+        error
+      );
+
+      alert(
+        "Failed to submit report. Please try again."
+      );
     }
   };
 
@@ -1693,6 +1758,27 @@ export default function ProfilePage(
                           </>
                         )}
                       </button>
+
+                      {/* Report */}
+
+                      <button
+                        onClick={() => {
+                          setShowReportModal(
+                            true
+                          );
+
+                          setMoreMenuOpen(
+                            false
+                          );
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition border-t border-gray-200 dark:border-gray-700"
+                      >
+                        <Flag className="w-4 h-4" />
+
+                        {t(
+                          "profile.reportUser"
+                        )}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1700,6 +1786,22 @@ export default function ProfilePage(
             )}
           </div>
         </div>
+
+        {!isOwnProfile && (
+          <ReportModal
+            isOpen={
+              showReportModal
+            }
+            onClose={() =>
+              setShowReportModal(
+                false
+              )
+            }
+            onSubmit={
+              handleReport
+            }
+          />
+        )}
 
         {/* ─────────────────────────────────────────────────────────
             NAME / BIO

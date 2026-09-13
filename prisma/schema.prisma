@@ -464,12 +464,13 @@ model User {
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
 
-  conversationClearances       ConversationClearance[] @relation("ConversationClearanceUser")
-  conversationClearancesOfMe   ConversationClearance[] @relation("ConversationClearanceOtherUser")
+  conversationClearances     ConversationClearance[] @relation("ConversationClearanceUser")
+  conversationClearancesOfMe ConversationClearance[] @relation("ConversationClearanceOtherUser")
 
-  reports          Report[] @relation("Reporter")
-  reportsAgainstMe Report[] @relation("ReportTarget")
-  appeals          Appeal[]
+  reports                 Report[] @relation("Reporter")
+  reportsAgainstMe        Report[] @relation("ReportTarget")
+  profileReportsAgainstMe Report[] @relation("ReportedUser")
+  appeals                 Appeal[]
 
   listings         Listing[]         @relation("ListingSeller")
   listingFavorites ListingFavorite[]
@@ -555,7 +556,7 @@ model User {
   newsFeed NewsFeed? @relation("EditorialFeedUser")
 
   // ─── ZRP Communities ─────────────────────────────────────────
-  communitiesCreated  Community[]       @relation("CommunityCreator")
+  communitiesCreated   Community[]       @relation("CommunityCreator")
   communityMemberships CommunityMember[] @relation("CommunityMemberUser")
 
   // ─── ZRP Lists ───────────────────────────────────────────────
@@ -642,7 +643,7 @@ model AmbassadorProfile {
   // (src/lib/ambassadors/codeOfConduct.ts) changes. Never trust a
   // client-only "accepted" flag: acceptedAt is stamped server-side by
   // the API route at the moment of acceptance, not supplied by the client.
-  codeOfConductVersion   String?
+  codeOfConductVersion    String?
   codeOfConductAcceptedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -1180,6 +1181,19 @@ model Report {
   campaignId String?
   campaign   HelpCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
 
+  // Seventh polymorphic target - a bare profile/account report (e.g.
+  // harassment, impersonation, fake account, ban evasion) that isn't
+  // about any single post/comment/listing. Distinct from targetUserId
+  // above: that field is only populated once an admin takes action and
+  // a post/comment's own author has become unreachable, whereas
+  // reportedUserId is the report's actual subject from the moment it's
+  // filed - set whenever every other polymorphic target above is null.
+  // SetNull (not Cascade) for the same audit-trail reason as postId/
+  // commentId: deleting the reported account must not erase the record
+  // of why they were reported.
+  reportedUserId String?
+  reportedUser   User?   @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+
   appeals Appeal[]
 
   @@index([postId])
@@ -1188,6 +1202,7 @@ model Report {
   @@index([challengeId])
   @@index([opportunityId])
   @@index([campaignId])
+  @@index([reportedUserId])
   @@index([status])
   @@index([reporterId])
   @@index([targetUserId])

@@ -388,6 +388,7 @@
     <string name="profile_unmute">Dejar de silenciar</string>
     <string name="profile_block">Bloquear</string>
     <string name="profile_unblock">Desbloquear</string>
+    <string name="profile_report_user">Reportar</string>
     <string name="profile_replies">Respuestas</string>
     <string name="profile_media">Multimedia</string>
     <string name="profile_likes">Me gusta</string>

@@ -385,6 +385,7 @@
     <string name="profile_unmute">अनम्यूट करें</string>
     <string name="profile_block">ब्लॉक करें</string>
     <string name="profile_unblock">अनब्लॉक करें</string>
+    <string name="profile_report_user">रिपोर्ट करें</string>
     <string name="profile_replies">जवाब</string>
     <string name="profile_media">मीडिया</string>
     <string name="profile_likes">लाइक</string>

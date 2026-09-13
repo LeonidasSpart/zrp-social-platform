@@ -388,6 +388,7 @@
     <string name="profile_unmute">取消静音</string>
     <string name="profile_block">屏蔽</string>
     <string name="profile_unblock">取消屏蔽</string>
+    <string name="profile_report_user">举报</string>
     <string name="profile_replies">回复</string>
     <string name="profile_media">媒体</string>
     <string name="profile_likes">点赞</string>

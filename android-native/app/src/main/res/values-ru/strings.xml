@@ -388,6 +388,7 @@
     <string name="profile_unmute">Включить уведомления</string>
     <string name="profile_block">Заблокировать</string>
     <string name="profile_unblock">Разблокировать</string>
+    <string name="profile_report_user">Пожаловаться</string>
     <string name="profile_replies">Ответы</string>
     <string name="profile_media">Медиа</string>
     <string name="profile_likes">Отметки «Нравится»</string>

@@ -388,6 +388,7 @@
     <string name="profile_unmute">Susturmayı kaldır</string>
     <string name="profile_block">Engelle</string>
     <string name="profile_unblock">Engeli kaldır</string>
+    <string name="profile_report_user">Bildir</string>
     <string name="profile_replies">Yanıtlar</string>
     <string name="profile_media">Medya</string>
     <string name="profile_likes">Beğeniler</string>

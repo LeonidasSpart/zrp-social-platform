@@ -385,6 +385,7 @@
     <string name="profile_unmute">Remover silêncio</string>
     <string name="profile_block">Bloquear</string>
     <string name="profile_unblock">Desbloquear</string>
+    <string name="profile_report_user">Denunciar</string>
     <string name="profile_replies">Respostas</string>
     <string name="profile_media">Multimédia</string>
     <string name="profile_likes">Gostos</string>

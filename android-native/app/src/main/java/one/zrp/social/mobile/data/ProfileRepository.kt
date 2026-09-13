@@ -130,6 +130,20 @@ class ProfileRepository {
         }
     }
 
+    // Bare profile report (no post/comment attached) - harassment,
+    // impersonation, fake account, ban evasion. Same moderation pipeline
+    // as reportPost above, just a different polymorphic target.
+    suspend fun reportUser(userId: String, reason: String, details: String?): Result<Unit> {
+        return try {
+            ApiClient.reportsApi.createReport(CreateReportRequest(userId = userId, reason = reason, details = details))
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't submit this report. Please try again."))
+        } catch (e: Exception) {
+            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+        }
+    }
+
     suspend fun toggleBlock(username: String): Result<BlockToggleResponse> = runCatching {
         ApiClient.usersApi.toggleBlock(username)
     }

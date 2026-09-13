@@ -7,6 +7,7 @@ struct ProfileView: View {
     @EnvironmentObject private var interactions: PostInteractionStore
     @EnvironmentObject private var navigator: Navigator
     @State private var moderationNotice: String?
+    @State private var isReportingProfile = false
     @StateObject private var viewModel: ProfileViewModel
 
     init(username: String) {
@@ -66,12 +67,24 @@ struct ProfileView: View {
                                         Image(systemName: "speaker.slash")
                                     }
                                 }
+                                Button { isReportingProfile = true } label: {
+                                    Label {
+                                        Text(.reportModalTitle)
+                                    } icon: {
+                                        Image(systemName: "flag")
+                                    }
+                                }
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")
                         }
                         .accessibilityLabel(Text(.iosA11yPostOptions))
                     }
+                }
+            }
+            .sheet(isPresented: $isReportingProfile) {
+                if let profile = viewModel.profile {
+                    ReportSheet(target: .user(profile.id))
                 }
             }
             .task {

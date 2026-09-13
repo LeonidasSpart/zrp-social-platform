@@ -229,6 +229,10 @@ struct ReportRequest: Encodable {
         case post(String)
         case comment(String)
         case listing(String)
+        // A bare profile report (harassment, impersonation, fake
+        // account) with no single post/comment/listing attached - see
+        // the backend's reportedUserId field in prisma/schema.prisma.
+        case user(String)
     }
 
     let target: Target
@@ -241,13 +245,14 @@ struct ReportRequest: Encodable {
         case .post(let id): try container.encode(id, forKey: .postId)
         case .comment(let id): try container.encode(id, forKey: .commentId)
         case .listing(let id): try container.encode(id, forKey: .listingId)
+        case .user(let id): try container.encode(id, forKey: .userId)
         }
         try container.encode(reason.rawValue, forKey: .reason)
         try container.encodeIfPresent(details, forKey: .details)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case postId, commentId, listingId, reason, details
+        case postId, commentId, listingId, userId, reason, details
     }
 }
 
