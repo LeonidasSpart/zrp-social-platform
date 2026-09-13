@@ -320,114 +320,6 @@ export default function ChatInterface({
   // Socket listeners
   // ---------------------------------------------------------------------------
 
-  const setupSocketListeners = () => {
-    const socket = socketRef.current;
-
-    if (!socket) {
-      return;
-    }
-
-    socket.on("receive-message", (message: Message) => {
-      if (message.senderId !== receiverId) {
-        return;
-      }
-
-      setMessages((prev) => {
-        if (prev.some((item) => item.id === message.id)) {
-          return prev;
-        }
-
-        return [...prev, message];
-      });
-
-      socket.emit("mark-read", {
-        messageId: message.id,
-        senderId: receiverId,
-      });
-
-      refreshUnreadMessageCount();
-    });
-
-    socket.on("message-sent", (message: Message) => {
-      setMessages((prev) =>
-        prev.map((item) =>
-          item.id === message.id ? message : item
-        )
-      );
-    });
-
-    socket.on(
-      "user-typing",
-      ({
-        userId: typingUserId,
-        isTyping: typing,
-      }: {
-        userId: string;
-        isTyping: boolean;
-      }) => {
-        if (typingUserId === receiverId) {
-          setReceiverTyping(typing);
-        }
-      }
-    );
-
-    socket.on(
-      "message-read",
-      ({ messageId }: { messageId: string }) => {
-        setMessages((prev) =>
-          prev.map((item) =>
-            item.id === messageId
-              ? { ...item, read: true }
-              : item
-          )
-        );
-      }
-    );
-
-    socket.on(
-      "message-deleted",
-      ({ messageId }: { messageId: string }) => {
-        setMessages((prev) =>
-          prev.filter((item) => item.id !== messageId)
-        );
-
-        setActiveMessageActions((current) =>
-          current === messageId ? null : current
-        );
-      }
-    );
-
-    socket.on(
-      "message-edited",
-      ({ message }: { message: Message }) => {
-        setMessages((prev) =>
-          prev.map((item) =>
-            item.id === message.id ? message : item
-          )
-        );
-      }
-    );
-
-    socket.on(
-      "reaction-updated",
-      ({
-        messageId,
-        reactions,
-      }: {
-        messageId: string;
-        reactions: Reaction[];
-      }) => {
-        setMessages((prev) =>
-          prev.map((item) =>
-            item.id === messageId
-              ? { ...item, reactions }
-              : item
-          )
-        );
-      }
-    );
-  };
-
   // ---------------------------------------------------------------------------
   // Socket connection
   // ---------------------------------------------------------------------------
@@ -453,16 +345,121 @@ export default function ChatInterface({
       console.error("Socket error:", err);
     };
 
+    // ⚠️ Every handler below is a named function passed to BOTH `.on()`
+    // and `.off()` (see cleanup below). This socket is a shared
+    // singleton (src/lib/socket-client.ts) - other components
+    // (useConversationList, UnreadCountContext) register their own
+    // listeners for these same event names ("receive-message",
+    // "message-sent") on it at the same time. `socket.off("receive-message")`
+    // with no handler argument removes EVERY listener for that event,
+    // not just this component's - closing one chat thread would have
+    // silently killed the conversation list's and unread-count's live
+    // updates for the rest of the page's life, until something else
+    // reconnected the socket. Found while investigating reported
+    // Socket.IO connection churn: not itself the cause of new
+    // connections, but the same "socket.off(event) without a handler"
+    // footgun the churn investigation was specifically looking for.
+    const handleReceiveMessage = (message: Message) => {
+      if (message.senderId !== receiverId) {
+        return;
+      }
+
+      setMessages((prev) => {
+        if (prev.some((item) => item.id === message.id)) {
+          return prev;
+        }
+
+        return [...prev, message];
+      });
+
+      socket.emit("mark-read", {
+        messageId: message.id,
+        senderId: receiverId,
+      });
+
+      refreshUnreadMessageCount();
+    };
+
+    const handleMessageSent = (message: Message) => {
+      setMessages((prev) =>
+        prev.map((item) =>
+          item.id === message.id ? message : item
+        )
+      );
+    };
+
+    const handleUserTyping = ({
+      userId: typingUserId,
+      isTyping: typing,
+    }: {
+      userId: string;
+      isTyping: boolean;
+    }) => {
+      if (typingUserId === receiverId) {
+        setReceiverTyping(typing);
+      }
+    };
+
+    const handleMessageRead = ({ messageId }: { messageId: string }) => {
+      setMessages((prev) =>
+        prev.map((item) =>
+          item.id === messageId
+            ? { ...item, read: true }
+            : item
+        )
+      );
+    };
+
+    const handleMessageDeleted = ({ messageId }: { messageId: string }) => {
+      setMessages((prev) =>
+        prev.filter((item) => item.id !== messageId)
+      );
+
+      setActiveMessageActions((current) =>
+        current === messageId ? null : current
+      );
+    };
+
+    const handleMessageEdited = ({ message }: { message: Message }) => {
+      setMessages((prev) =>
+        prev.map((item) =>
+          item.id === message.id ? message : item
+        )
+      );
+    };
+
+    const handleReactionUpdated = ({
+      messageId,
+      reactions,
+    }: {
+      messageId: string;
+      reactions: Reaction[];
+    }) => {
+      setMessages((prev) =>
+        prev.map((item) =>
+          item.id === messageId
+            ? { ...item, reactions }
+            : item
+        )
+      );
+    };
+
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("connect_error", handleConnectError);
+    socket.on("receive-message", handleReceiveMessage);
+    socket.on("message-sent", handleMessageSent);
+    socket.on("user-typing", handleUserTyping);
+    socket.on("message-read", handleMessageRead);
+    socket.on("message-deleted", handleMessageDeleted);
+    socket.on("message-edited", handleMessageEdited);
+    socket.on("reaction-updated", handleReactionUpdated);
 
     // Real presence for the person in this specific thread - see
     // PresenceContext's own KDoc; this is the same one-time backfill
     // request the conversation list uses, just for a single receiverId.
     requestStatus(receiverId);
 
-    setupSocketListeners();
     fetchMessages();
 
     const interval = setInterval(() => {
@@ -475,15 +472,20 @@ export default function ChatInterface({
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("connect_error", handleConnectError);
-
-      socket.off("receive-message");
-      socket.off("message-sent");
-      socket.off("user-typing");
-      socket.off("message-read");
-      socket.off("message-deleted");
-      socket.off("message-edited");
-      socket.off("reaction-updated");
+      socket.off("receive-message", handleReceiveMessage);
+      socket.off("message-sent", handleMessageSent);
+      socket.off("user-typing", handleUserTyping);
+      socket.off("message-read", handleMessageRead);
+      socket.off("message-deleted", handleMessageDeleted);
+      socket.off("message-edited", handleMessageEdited);
+      socket.off("reaction-updated", handleReactionUpdated);
     };
+    // fetchMessages is intentionally omitted - it's redefined every
+    // render (closes over `messages` via setState updater form, so it
+    // doesn't need to be current) and including it would re-run this
+    // whole effect (re-subscribing the socket, restarting the 5s poll)
+    // on every render instead of only when userId/receiverId change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, receiverId, requestStatus]);
 
   // ---------------------------------------------------------------------------
