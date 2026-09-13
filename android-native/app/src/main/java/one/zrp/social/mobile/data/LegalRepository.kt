@@ -33,7 +33,7 @@ class LegalRepository {
          * already render through). Falls back to the device locale, then
          * "en", if no per-app override was ever set - matching
          * LanguageContext.tsx's own detectBrowserLanguage() -> "en"
-         * fallback on web. Only ever returns one of the 11 real
+         * fallback on web. Only ever returns one of the 15 real
          * SUPPORTED_LANGUAGES codes the API actually accepts; anything
          * else (an unsupported device locale) also falls back to "en".
          */

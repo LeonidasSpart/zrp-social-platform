@@ -179,17 +179,17 @@
     <string name="nav_search">Поиск</string>
     <string name="nav_explore">Обзор</string>
     <string name="nav_communities">Сообщества</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">Игры</string>
     <string name="nav_news">Новости</string>
     <string name="nav_music">Музыка</string>
     <string name="nav_marketplace">Маркетплейс</string>
-    <string name="nav_opportunity">Opportunity</string>
-    <string name="nav_aid">Help</string>
+    <string name="nav_opportunity">Возможности</string>
+    <string name="nav_aid">Помощь</string>
     <string name="nav_ambassadors">Глобальные послы</string>
     <string name="nav_ai">ИИ ZRP</string>
     <string name="nav_creator_studio">Студия для авторов</string>
     <string name="nav_admin">Админ</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Короткие видео</string>
     <string name="nav_help_center">Центр помощи</string>
     <string name="drawer_section_core">Основное</string>
     <string name="drawer_section_discover">Обзор</string>
@@ -1172,7 +1172,7 @@
     <string name="shorts_share">Поделиться</string>
     <string name="shorts_share_post_by">Публикация от %1$s</string>
     <string name="shorts_comment">Комментарии</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Короткие видео</string>
     <string name="shorts_discover_entry">Открыть Shorts</string>
     <string name="shorts_upload_close">Закрыть</string>
     <string name="shorts_upload_remove_video">Удалить видео</string>
@@ -1202,7 +1202,7 @@
     <string name="caption_view_less">Показать меньше</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Сумма (USDC)</string>
-    <string name="creator_available_balance">Доступный баланс: {amount} $</string>
+    <string name="creator_available_balance">Доступный баланс: %1$s</string>
     <string name="creator_enter_amount_placeholder">Введите сумму</string>
     <string name="creator_enter_wallet_placeholder">Введите адрес вашего кошелька Solana</string>
     <string name="creator_err_failed_load_dashboard">Не удалось загрузить панель</string>
@@ -2183,4 +2183,12 @@
     <string name="pricing_support_priority">Приоритетная</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Обновление тарифного плана пока доступно только в веб-версии ZRP.</string>
+
+    <!-- Localization audit fixes (2026-09) -->
+    <string name="bookmarks_empty">Пока нет закладок. Сохранённые публикации появятся здесь.</string>
+    <string name="comments_empty">Пока нет комментариев. Будьте первым, кто ответит.</string>
+    <string name="createpost_char_count">%1$d симв.</string>
+    <string name="comments_share_title">Поделиться комментарием</string>
+    <string name="messages_replying_to">Ответ пользователю %1$s</string>
+    <string name="messages_replying_to_self">себе</string>
 </resources>

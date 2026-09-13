@@ -179,17 +179,17 @@
     <string name="nav_search">Cari</string>
     <string name="nav_explore">Jelajahi</string>
     <string name="nav_communities">Komunitas</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">Permainan</string>
     <string name="nav_news">Berita</string>
     <string name="nav_music">Musik</string>
     <string name="nav_marketplace">Marketplace</string>
-    <string name="nav_opportunity">Opportunity</string>
-    <string name="nav_aid">Help</string>
+    <string name="nav_opportunity">Peluang</string>
+    <string name="nav_aid">Bantuan</string>
     <string name="nav_ambassadors">Duta Global</string>
     <string name="nav_ai">AI ZRP</string>
     <string name="nav_creator_studio">Studio Kreator</string>
     <string name="nav_admin">Admin</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Video Pendek</string>
     <string name="nav_help_center">Pusat Bantuan</string>
     <string name="drawer_section_core">Utama</string>
     <string name="drawer_section_discover">Jelajahi</string>
@@ -1172,7 +1172,7 @@
     <string name="shorts_share">Bagikan</string>
     <string name="shorts_share_post_by">Postingan oleh %1$s</string>
     <string name="shorts_comment">Komentar</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Video Pendek</string>
     <string name="shorts_discover_entry">Temukan Shorts</string>
     <string name="shorts_upload_close">Tutup</string>
     <string name="shorts_upload_remove_video">Hapus video</string>
@@ -2183,4 +2183,12 @@
     <string name="pricing_support_priority">Prioritas</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Peningkatan paket saat ini dikelola melalui ZRP Web.</string>
+
+    <!-- Localization audit fixes (2026-09) -->
+    <string name="bookmarks_empty">Belum ada bookmark. Postingan yang Anda simpan akan muncul di sini.</string>
+    <string name="comments_empty">Belum ada komentar. Jadilah yang pertama membalas.</string>
+    <string name="createpost_char_count">%1$d karakter</string>
+    <string name="comments_share_title">Bagikan komentar</string>
+    <string name="messages_replying_to">Membalas kepada %1$s</string>
+    <string name="messages_replying_to_self">diri sendiri</string>
 </resources>

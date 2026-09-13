@@ -571,7 +571,10 @@ fun ConversationScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Replying to ${if (replyingTo.senderId == partnerId) "@$partnerUsername" else "yourself"}",
+                        text = stringResource(
+                            R.string.messages_replying_to,
+                            if (replyingTo.senderId == partnerId) "@$partnerUsername" else stringResource(R.string.messages_replying_to_self),
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
