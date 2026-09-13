@@ -169,7 +169,7 @@ fun CreatorScreen(onBack: () -> Unit, onOpenPost: (String) -> Unit, onOpenProfil
                 }
 
                 when (state.activeTab) {
-                    CreatorTab.OVERVIEW -> OverviewTab(state = state, viewModel = viewModel)
+                    CreatorTab.OVERVIEW -> OverviewTab(state = state, viewModel = viewModel, onOpenProfile = onOpenProfile)
                     CreatorTab.CONTENT -> ContentTab(state = state, onOpenPost = onOpenPost)
                     CreatorTab.AUDIENCE -> AudienceTab(state = state)
                 }
@@ -205,7 +205,7 @@ private fun IneligibleBody(message: String?) {
 }
 
 @Composable
-private fun OverviewTab(state: CreatorUiState, viewModel: CreatorViewModel) {
+private fun OverviewTab(state: CreatorUiState, viewModel: CreatorViewModel, onOpenProfile: (String) -> Unit) {
     val profile = state.profile ?: return
     val stats = state.stats
 

@@ -111,7 +111,7 @@ fun TeamScreen(onBack: () -> Unit, onOpenProfile: (String) -> Unit) {
                     textAlign = TextAlign.Center,
                 )
             }
-            else -> TeamBody(state = state, viewModel = viewModel)
+            else -> TeamBody(state = state, viewModel = viewModel, onOpenProfile = onOpenProfile)
         }
     }
 
@@ -187,7 +187,7 @@ private fun IneligibleBody(message: String?) {
 }
 
 @Composable
-private fun TeamBody(state: TeamUiState, viewModel: TeamViewModel) {
+private fun TeamBody(state: TeamUiState, viewModel: TeamViewModel, onOpenProfile: (String) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(Spacing.md)) {
         item {
             Row(
