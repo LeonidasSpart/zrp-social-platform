@@ -465,6 +465,7 @@
     <string name="music_verified_artist">सत्यापित कलाकार</string>
     <string name="music_like">लाइक करें</string>
     <string name="music_pause">रोकें</string>
+    <string name="music_dismiss_player">प्लेयर छुपाएं</string>
     <string name="music_play">प्ले करें</string>
     <string name="music_unlike">लाइक हटाएं</string>
     <string name="composer_placeholder_default">क्या हो रहा है? #हैशटैग और @मेंशन का इस्तेमाल करें</string>

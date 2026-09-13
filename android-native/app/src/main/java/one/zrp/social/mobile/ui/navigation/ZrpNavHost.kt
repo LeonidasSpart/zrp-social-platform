@@ -1120,6 +1120,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                         username = username,
                         onBack = { navController.popBackStack() },
                         onOpenChallenge = goToPlayChallenge,
+                        onOpenProfile = goToProfile,
                     )
                 }
             }

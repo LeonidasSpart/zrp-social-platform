@@ -44,6 +44,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 import { getSocket } from "@/lib/socket-client";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 type NavItem = {
   href: string;
@@ -649,10 +650,13 @@ export default function Header() {
                           </div>
 
                           <div className="min-w-0">
-                            <p className="font-semibold text-gray-900 dark:text-white truncate">
-                              {session?.user?.name ||
-                                session?.user
-                                  ?.username}
+                            <p className="font-semibold text-gray-900 dark:text-white truncate flex items-center gap-1">
+                              <span className="truncate">
+                                {session?.user?.name ||
+                                  session?.user
+                                    ?.username}
+                              </span>
+                              <VerifiedBadge badgeType={session?.user?.badgeType} />
                             </p>
 
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
@@ -882,9 +886,12 @@ export default function Header() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-gray-900 dark:text-white truncate">
-                      {session.user.name ||
-                        session.user.username}
+                    <p className="font-semibold text-gray-900 dark:text-white truncate flex items-center gap-1">
+                      <span className="truncate">
+                        {session.user.name ||
+                          session.user.username}
+                      </span>
+                      <VerifiedBadge badgeType={session.user.badgeType} />
                     </p>
 
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate">

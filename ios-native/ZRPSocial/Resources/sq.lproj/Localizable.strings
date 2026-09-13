@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "Duke luajtur tani";
 "music.player.expandAria" = "Zgjero luajtësin";
 "music.player.closeAria" = "Mbyll luajtësin";
+"music.player.dismissAria" = "Fshih luajtësin";
 "music.player.openNowPlayingAria" = "Hap luajtjen aktuale";
 "music.player.upNextLabel" = "Në vijim";
 "music.queue.title" = "Radha jote";

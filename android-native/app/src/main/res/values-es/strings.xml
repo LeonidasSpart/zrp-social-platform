@@ -468,6 +468,7 @@
     <string name="music_verified_artist">Artista verificado</string>
     <string name="music_like">Me gusta</string>
     <string name="music_pause">Pausa</string>
+    <string name="music_dismiss_player">Ocultar reproductor</string>
     <string name="music_play">Reproducir</string>
     <string name="music_unlike">Ya no me gusta</string>
     <string name="composer_placeholder_default">¿Qué está pasando? Usa #hashtags y @menciones</string>

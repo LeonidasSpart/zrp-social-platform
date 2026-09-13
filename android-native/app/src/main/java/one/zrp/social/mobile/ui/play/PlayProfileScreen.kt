@@ -39,7 +39,12 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
 
 /** A player's public PLAY profile - ported from PlayProfilePage.tsx. */
 @Composable
-fun PlayProfileScreen(username: String, onBack: () -> Unit, onOpenChallenge: (String) -> Unit) {
+fun PlayProfileScreen(
+    username: String,
+    onBack: () -> Unit,
+    onOpenChallenge: (String) -> Unit,
+    onOpenProfile: (String) -> Unit,
+) {
     val viewModel: PlayProfileViewModel = viewModel(
         factory = remember { PlayProfileViewModelFactory(username, PlayRepository()) },
     )
@@ -88,17 +93,25 @@ fun PlayProfileScreen(username: String, onBack: () -> Unit, onOpenChallenge: (St
                             .padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Avatar(url = data.user.avatarUrl, name = data.user.username, size = 64.dp)
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
-                            Text(
-                                text = "@${data.user.username}",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f, fill = false),
-                            )
-                            VerifiedBadge(badgeType = data.user.badgeType)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable(
+                                onClick = { onOpenProfile(data.user.username) },
+                                role = Role.Button,
+                            ),
+                        ) {
+                            Avatar(url = data.user.avatarUrl, name = data.user.username, size = 64.dp)
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                                Text(
+                                    text = "@${data.user.username}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
+                                VerifiedBadge(badgeType = data.user.badgeType)
+                            }
                         }
                         PlayXpBarView(
                             level = data.profile.level,

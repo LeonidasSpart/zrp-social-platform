@@ -468,6 +468,7 @@
     <string name="music_verified_artist">Подтвержденный артист</string>
     <string name="music_like">Нравится</string>
     <string name="music_pause">Пауза</string>
+    <string name="music_dismiss_player">Скрыть плеер</string>
     <string name="music_play">Воспроизвести</string>
     <string name="music_unlike">Убрать из понравившихся</string>
     <string name="composer_placeholder_default">Что происходит? Используйте #хэштеги и @упоминания</string>

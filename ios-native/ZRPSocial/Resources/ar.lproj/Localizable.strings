@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "قيد التشغيل الآن";
 "music.player.expandAria" = "توسيع المشغل";
 "music.player.closeAria" = "إغلاق المشغل";
+"music.player.dismissAria" = "إخفاء المشغل";
 "music.player.openNowPlayingAria" = "فتح التشغيل الحالي";
 "music.player.upNextLabel" = "التالي";
 "music.queue.title" = "قائمة انتظارك";

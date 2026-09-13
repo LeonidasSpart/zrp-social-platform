@@ -670,6 +670,8 @@ enum L10nKey: String, CaseIterable {
     case musicPlayerExpandAria = "music.player.expandAria"
     /// en: "Close player"
     case musicPlayerCloseAria = "music.player.closeAria"
+    /// en: "Hide player"
+    case musicPlayerDismissAria = "music.player.dismissAria"
     /// en: "Open now playing"
     case musicPlayerOpenNowPlayingAria = "music.player.openNowPlayingAria"
     /// en: "Up Next"

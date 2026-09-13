@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "Now Playing";
 "music.player.expandAria" = "Expand player";
 "music.player.closeAria" = "Close player";
+"music.player.dismissAria" = "Hide player";
 "music.player.openNowPlayingAria" = "Open now playing";
 "music.player.upNextLabel" = "Up Next";
 "music.queue.title" = "Your Queue";

@@ -68,15 +68,20 @@ export default function PlayProfilePage() {
       </Link>
 
       <div className="bg-white dark:bg-zrp-deepBlack rounded-2xl border border-gray-200 dark:border-gray-700 p-6 text-center">
-        <img
-          src={data.user.avatarUrl || "/default-avatar.png"}
-          alt={data.user.username}
-          className="w-16 h-16 rounded-full object-cover mx-auto"
-        />
-        <div className="flex items-center justify-center gap-1 mt-2">
+        <Link href={`/profile/${data.user.username}`} className="inline-block">
+          <img
+            src={data.user.avatarUrl || "/default-avatar.png"}
+            alt={data.user.username}
+            className="w-16 h-16 rounded-full object-cover mx-auto"
+          />
+        </Link>
+        <Link
+          href={`/profile/${data.user.username}`}
+          className="flex items-center justify-center gap-1 mt-2 hover:underline"
+        >
           <h1 className="text-lg font-bold text-gray-900 dark:text-white">@{data.user.username}</h1>
           <VerifiedBadge badgeType={data.user.badgeType} />
-        </div>
+        </Link>
         <div className="mt-4 flex justify-center">
           <PlayXpBar
             level={data.profile.level}

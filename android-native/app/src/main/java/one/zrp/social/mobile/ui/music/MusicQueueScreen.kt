@@ -93,7 +93,7 @@ fun MusicQueueScreen(player: MusicPlayerViewModel, onBack: () -> Unit) {
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    if (currentTrack != null) {
+                    if (currentTrack != null && !state.dismissed) {
                         item {
                             Text(
                                 text = stringResource(R.string.music_queue_now_playing),
@@ -115,6 +115,7 @@ fun MusicQueueScreen(player: MusicPlayerViewModel, onBack: () -> Unit) {
                                                   page either - only its persistent player bar
                                                   (not shown on native's own Queue screen) has a
                                                   like button there. */ },
+                                onDismiss = { player.dismissPlayer() },
                             )
                         }
                         item { HorizontalDivider() }

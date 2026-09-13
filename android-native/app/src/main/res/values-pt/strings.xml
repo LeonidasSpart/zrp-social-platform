@@ -465,6 +465,7 @@
     <string name="music_verified_artist">Artista verificado</string>
     <string name="music_like">Gosto</string>
     <string name="music_pause">Pausar</string>
+    <string name="music_dismiss_player">Ocultar reprodutor</string>
     <string name="music_play">Reproduzir</string>
     <string name="music_unlike">Retirar gosto</string>
     <string name="composer_placeholder_default">O que estás a pensar? Usa #hashtags e @menções</string>

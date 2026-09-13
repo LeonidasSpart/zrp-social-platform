@@ -37,6 +37,13 @@ data class MusicPlayerUiState(
     val positionMs: Long = 0L,
     val durationMs: Long = 0L,
     val error: String? = null,
+    // Whether the mini-player bar is hidden from view. Independent of
+    // playback: dismissing hides the bar only - it does not pause, does
+    // not clear currentTrack, and does not touch the queue. The real
+    // ExoPlayer/MediaController session (and its lock-screen/notification
+    // controls) keeps running untouched. Matches the website's own
+    // MusicPlayerProvider `dismissed` flag exactly.
+    val dismissed: Boolean = false,
 )
 
 /**
@@ -179,6 +186,12 @@ class MusicPlayerViewModel(
         _state.update { it.copy(queue = emptyList()) }
     }
 
+    // Hides the mini-player bar. See MusicPlayerUiState.dismissed's own
+    // KDoc for why this is deliberately not a pause/stop/clear.
+    fun dismissPlayer() {
+        _state.update { it.copy(dismissed = true) }
+    }
+
     fun playFromQueue(track: MusicTrack) {
         _state.update { it.copy(queue = it.queue.filterNot { q -> q.id == track.id }) }
         switchTo(track)
@@ -219,6 +232,12 @@ class MusicPlayerViewModel(
     private fun switchTo(track: MusicTrack) {
         val previous = _state.value.currentTrack
         if (previous != null && previous.id != track.id) reportProgress(previous, completed = false)
+        // A deliberate "play this" action always brings the bar back,
+        // even if it was previously dismissed - matching switchTo's own
+        // callers (playFromList/playAll/shuffleAll/playFromQueue), which
+        // are all genuine user picks, unlike advanceToNext()'s natural
+        // queue progression, which leaves a dismissed bar dismissed.
+        _state.update { it.copy(dismissed = false) }
         play(track)
     }
 

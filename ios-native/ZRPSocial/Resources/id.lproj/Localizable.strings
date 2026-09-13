@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "Sedang Diputar";
 "music.player.expandAria" = "Perluas pemutar";
 "music.player.closeAria" = "Tutup pemutar";
+"music.player.dismissAria" = "Sembunyikan pemutar";
 "music.player.openNowPlayingAria" = "Buka yang sedang diputar";
 "music.player.upNextLabel" = "Berikutnya";
 "music.queue.title" = "Antreanmu";

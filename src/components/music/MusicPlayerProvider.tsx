@@ -46,6 +46,14 @@ type MusicContextType = {
   buffering: boolean;
   error: string | null;
 
+  // Whether the persistent player bar is dismissed from view. This is
+  // independent of playback: dismissing hides the bar (and its lock
+  // screen / Media Session controls remain unaffected) but does not
+  // pause, does not clear `current`, and does not touch the queue -
+  // "close the bar" and "stop the music" are two different actions.
+  dismissed: boolean;
+  dismiss: () => void;
+
   play: (track?: MusicTrack) => void;
   pause: () => void;
   togglePlay: () => void;
@@ -78,6 +86,7 @@ export function MusicPlayerProvider({
   const [current, setCurrent] = useState<MusicTrack | null>(null);
   const [queue, setQueue] = useState<MusicTrack[]>([]);
   const [history, setHistory] = useState<MusicTrack[]>([]);
+  const [dismissed, setDismissed] = useState(false);
 
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -400,6 +409,11 @@ export function MusicPlayerProvider({
 
   const play = useCallback(
     (track?: MusicTrack) => {
+      // A deliberate "play this" action always brings the bar back,
+      // even if it was previously dismissed - the user just asked to
+      // listen to something, so hiding that from them would look broken.
+      setDismissed(false);
+
       if (track && track.id !== current?.id) {
         if (current) {
           setHistory((previous) =>
@@ -419,6 +433,15 @@ export function MusicPlayerProvider({
 
   const pause = useCallback(() => {
     setPlaying(false);
+  }, []);
+
+  // Hides the persistent player bar without stopping playback, clearing
+  // `current`, or touching the queue - a minimize, not a stop. Playback
+  // (and the OS-level Media Session / lock-screen controls) keeps
+  // working exactly as before; only the in-app bar disappears until the
+  // next deliberate `play()` call brings it back.
+  const dismiss = useCallback(() => {
+    setDismissed(true);
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -597,6 +620,9 @@ export function MusicPlayerProvider({
         repeat,
         buffering,
         error,
+
+        dismissed,
+        dismiss,
 
         play,
         pause,

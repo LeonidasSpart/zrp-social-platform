@@ -468,6 +468,7 @@
     <string name="music_verified_artist">Artist i verifikuar</string>
     <string name="music_like">Pëlqej</string>
     <string name="music_pause">Pauzë</string>
+    <string name="music_dismiss_player">Fshih luajtësin</string>
     <string name="music_play">Luaj</string>
     <string name="music_unlike">Hiq pëlqimin</string>
     <string name="composer_placeholder_default">Çfarë po ndodh? Përdorni #hashtags dhe @mentions</string>

@@ -468,6 +468,7 @@
     <string name="music_verified_artist">فنان موثّق</string>
     <string name="music_like">إعجاب</string>
     <string name="music_pause">إيقاف مؤقت</string>
+    <string name="music_dismiss_player">إخفاء المشغل</string>
     <string name="music_play">تشغيل</string>
     <string name="music_unlike">إلغاء الإعجاب</string>
     <string name="composer_placeholder_default">ما الجديد؟ استخدم #هاشتاغات و@إشارات</string>

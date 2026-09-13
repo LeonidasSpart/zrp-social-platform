@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "Şimdi çalıyor";
 "music.player.expandAria" = "Oynatıcıyı genişlet";
 "music.player.closeAria" = "Oynatıcıyı kapat";
+"music.player.dismissAria" = "Oynatıcıyı gizle";
 "music.player.openNowPlayingAria" = "Şimdi çalınanı aç";
 "music.player.upNextLabel" = "Sırada";
 "music.queue.title" = "Sıran";

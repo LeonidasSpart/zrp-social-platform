@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "Wird gerade abgespielt";
 "music.player.expandAria" = "Player erweitern";
 "music.player.closeAria" = "Player schließen";
+"music.player.dismissAria" = "Player ausblenden";
 "music.player.openNowPlayingAria" = "Aktuelle Wiedergabe öffnen";
 "music.player.upNextLabel" = "Als Nächstes";
 "music.queue.title" = "Deine Warteschlange";

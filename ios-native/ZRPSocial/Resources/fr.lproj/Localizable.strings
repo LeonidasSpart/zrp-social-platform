@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "En cours de lecture";
 "music.player.expandAria" = "Agrandir le lecteur";
 "music.player.closeAria" = "Fermer le lecteur";
+"music.player.dismissAria" = "Masquer le lecteur";
 "music.player.openNowPlayingAria" = "Ouvrir la lecture en cours";
 "music.player.upNextLabel" = "À suivre";
 "music.queue.title" = "Votre file d'attente";

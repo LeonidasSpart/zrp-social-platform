@@ -468,6 +468,7 @@
     <string name="music_verified_artist">已认证艺人</string>
     <string name="music_like">喜欢</string>
     <string name="music_pause">暂停</string>
+    <string name="music_dismiss_player">隐藏播放器</string>
     <string name="music_play">播放</string>
     <string name="music_unlike">取消喜欢</string>
     <string name="composer_placeholder_default">有什么新鲜事？使用 #话题标签 和 @提及</string>
