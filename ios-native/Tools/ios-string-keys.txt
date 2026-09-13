@@ -1218,6 +1218,11 @@ communities.detail.feedEmptyTitle
 communities.detail.feedEmptyBody
 communities.detail.notFound
 communities.detail.ownerBadge
+communities.detail.deleteButton
+communities.detail.deleteConfirmTitle
+communities.detail.deleteConfirmBody
+communities.detail.deleteConfirmAction
+communities.detail.deleteError
 communities.errorLoad
 communities.errorCreate
 communities.errorJoin

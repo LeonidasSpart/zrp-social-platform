@@ -16,6 +16,8 @@ final class CommunityDetailViewModel: ObservableObject {
     @Published private(set) var phase: Phase = .idle
     @Published private(set) var posts: [Post] = []
     @Published private(set) var isLoadingMore = false
+    @Published private(set) var isDeleting = false
+    @Published var deleteErrorMessage: String?
 
     let communityId: String
     private var cursor: String?
@@ -106,12 +108,29 @@ final class CommunityDetailViewModel: ObservableObject {
             }
         }
     }
+
+    /// Server-authorized to the creator/an admin regardless of what the
+    /// UI shows - see CommunitiesRepository's own doc comment. Returns
+    /// whether deletion succeeded, so the view knows when to pop back.
+    func delete() async -> Bool {
+        isDeleting = true
+        defer { isDeleting = false }
+        do {
+            try await repository.delete(id: communityId)
+            return true
+        } catch {
+            deleteErrorMessage = (error as? ApiError)?.serverMessage ?? L10n.string(.communitiesDetailDeleteError)
+            return false
+        }
+    }
 }
 
 struct CommunityDetailView: View {
 
     @StateObject private var viewModel: CommunityDetailViewModel
     @EnvironmentObject private var interactions: PostInteractionStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var showDeleteConfirm = false
 
     init(communityId: String) {
         _viewModel = StateObject(wrappedValue: CommunityDetailViewModel(communityId: communityId))
@@ -150,6 +169,37 @@ struct CommunityDetailView: View {
             viewModel.attach(interactions: interactions)
             await viewModel.loadIfNeeded()
         }
+        .confirmationDialog(
+            Text(.communitiesDetailDeleteConfirmTitle),
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                Task {
+                    if await viewModel.delete() { dismiss() }
+                }
+            } label: {
+                Text(.communitiesDetailDeleteConfirmAction)
+            }
+        } message: {
+            if let community = viewModel.community {
+                Text(
+                    .communitiesDetailDeleteConfirmBody,
+                    ["name": community.name, "hashtag": community.hashtag]
+                )
+            }
+        }
+        .alert(
+            Text(.iosErrorGenericTitle),
+            isPresented: Binding(
+                get: { viewModel.deleteErrorMessage != nil },
+                set: { if !$0 { viewModel.deleteErrorMessage = nil } }
+            )
+        ) {
+            Button { viewModel.deleteErrorMessage = nil } label: { Text(.actionCancel) }
+        } message: {
+            Text(verbatim: viewModel.deleteErrorMessage ?? "")
+        }
     }
 
     @ViewBuilder
@@ -181,6 +231,18 @@ struct CommunityDetailView: View {
                     }
 
                     Spacer()
+
+                    if viewModel.myRole == "OWNER" {
+                        Button {
+                            showDeleteConfirm = true
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundStyle(ZrpColor.onSurfaceMuted)
+                                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                                .contentShape(Rectangle())
+                        }
+                        .accessibilityLabel(Text(.communitiesDetailDeleteButton))
+                    }
 
                     Button(action: { viewModel.toggleMembership() }) {
                         (community.isMember ? Text(.communitiesJoined) : Text(.communitiesJoin))

@@ -1138,6 +1138,11 @@
 "communities.detail.feedEmptyBody" = "#{hashtag} が付いた投稿がここに表示されます。";
 "communities.detail.notFound" = "コミュニティが見つかりません";
 "communities.detail.ownerBadge" = "オーナー";
+"communities.detail.deleteButton" = "コミュニティを削除";
+"communities.detail.deleteConfirmTitle" = "このコミュニティを削除しますか？";
+"communities.detail.deleteConfirmBody" = "これにより、{name}が全員から削除され、元に戻すことはできません。#{hashtag} のタグが付いた投稿は削除されません。";
+"communities.detail.deleteConfirmAction" = "削除";
+"communities.detail.deleteError" = "コミュニティを削除できませんでした。もう一度お試しください。";
 "communities.errorLoad" = "コミュニティの読み込みに失敗しました。";
 "communities.errorCreate" = "コミュニティの作成に失敗しました。";
 "communities.errorJoin" = "コミュニティへの参加に失敗しました。";

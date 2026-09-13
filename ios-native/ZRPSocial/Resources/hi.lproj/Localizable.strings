@@ -1138,6 +1138,11 @@
 "communities.detail.feedEmptyBody" = "#{hashtag} टैग वाले पोस्ट यहां दिखाई देंगे।";
 "communities.detail.notFound" = "कम्युनिटी नहीं मिली";
 "communities.detail.ownerBadge" = "ओनर";
+"communities.detail.deleteButton" = "समुदाय हटाएं";
+"communities.detail.deleteConfirmTitle" = "क्या इस समुदाय को हटाना है?";
+"communities.detail.deleteConfirmBody" = "इससे {name} सभी के लिए हट जाएगा और इसे वापस नहीं लाया जा सकता। #{hashtag} टैग वाली पोस्ट हटाई नहीं जाएंगी।";
+"communities.detail.deleteConfirmAction" = "हटाएं";
+"communities.detail.deleteError" = "समुदाय हटाया नहीं जा सका। फिर से प्रयास करें।";
 "communities.errorLoad" = "कम्युनिटी लोड करने में विफल रहा।";
 "communities.errorCreate" = "कम्युनिटी बनाने में विफल रहा।";
 "communities.errorJoin" = "कम्युनिटी जॉइन करने में विफल रहा।";

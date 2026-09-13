@@ -1138,6 +1138,11 @@
 "communities.detail.feedEmptyBody" = "Postingan bertagar #{hashtag} akan muncul di sini.";
 "communities.detail.notFound" = "Komunitas tidak ditemukan";
 "communities.detail.ownerBadge" = "Pemilik";
+"communities.detail.deleteButton" = "Hapus komunitas";
+"communities.detail.deleteConfirmTitle" = "Hapus komunitas ini?";
+"communities.detail.deleteConfirmBody" = "Ini akan menghapus {name} untuk semua orang dan tidak dapat dibatalkan. Postingan dengan tag #{hashtag} tidak akan dihapus.";
+"communities.detail.deleteConfirmAction" = "Hapus";
+"communities.detail.deleteError" = "Tidak dapat menghapus komunitas ini. Coba lagi.";
 "communities.errorLoad" = "Gagal memuat komunitas.";
 "communities.errorCreate" = "Gagal membuat komunitas.";
 "communities.errorJoin" = "Gagal bergabung dengan komunitas.";

@@ -2226,6 +2226,11 @@
     <string name="communities_detail_feed_empty_body">Здесь появятся публикации с тегом #%1$s.</string>
     <string name="communities_detail_not_found">Сообщество не найдено</string>
     <string name="communities_detail_owner_badge">Владелец</string>
+    <string name="communities_detail_delete_button">Удалить сообщество</string>
+    <string name="communities_detail_delete_confirm_title">Удалить это сообщество?</string>
+    <string name="communities_detail_delete_confirm_body">Это удалит %1$s для всех, и действие нельзя отменить. Публикации с #%2$s не удаляются.</string>
+    <string name="communities_detail_delete_confirm_action">Удалить</string>
+    <string name="communities_detail_delete_error">Не удалось удалить сообщество. Попробуйте снова.</string>
     <string name="communities_error_load">Не удалось загрузить сообщества.</string>
     <string name="communities_error_create">Не удалось создать сообщество.</string>
     <string name="communities_error_join">Не удалось вступить в сообщество.</string>

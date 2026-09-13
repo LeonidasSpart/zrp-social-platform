@@ -2226,6 +2226,11 @@
     <string name="communities_detail_feed_empty_body">Las publicaciones con #%1$s aparecerán aquí.</string>
     <string name="communities_detail_not_found">Comunidad no encontrada</string>
     <string name="communities_detail_owner_badge">Propietario</string>
+    <string name="communities_detail_delete_button">Eliminar comunidad</string>
+    <string name="communities_detail_delete_confirm_title">¿Eliminar esta comunidad?</string>
+    <string name="communities_detail_delete_confirm_body">Esto elimina %1$s para todos y no se puede deshacer. Las publicaciones con #%2$s no se eliminan.</string>
+    <string name="communities_detail_delete_confirm_action">Eliminar</string>
+    <string name="communities_detail_delete_error">No se pudo eliminar la comunidad. Inténtalo de nuevo.</string>
     <string name="communities_error_load">No se pudieron cargar las comunidades.</string>
     <string name="communities_error_create">No se pudo crear la comunidad.</string>
     <string name="communities_error_join">No se pudo unir a la comunidad.</string>

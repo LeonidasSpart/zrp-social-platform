@@ -2241,6 +2241,11 @@
     <string name="communities_detail_feed_empty_body">Posts tagged #%1$s will show up here.</string>
     <string name="communities_detail_not_found">Community not found</string>
     <string name="communities_detail_owner_badge">Owner</string>
+    <string name="communities_detail_delete_button">Delete community</string>
+    <string name="communities_detail_delete_confirm_title">Delete this community?</string>
+    <string name="communities_detail_delete_confirm_body">This removes %1$s for everyone and can\'t be undone. Posts tagged #%2$s are not deleted.</string>
+    <string name="communities_detail_delete_confirm_action">Delete</string>
+    <string name="communities_detail_delete_error">Couldn\'t delete this community. Try again.</string>
     <string name="communities_error_load">Failed to load communities.</string>
     <string name="communities_error_create">Failed to create community.</string>
     <string name="communities_error_join">Failed to join community.</string>

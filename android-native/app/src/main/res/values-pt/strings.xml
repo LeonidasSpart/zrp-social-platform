@@ -2168,6 +2168,11 @@
     <string name="communities_detail_feed_empty_body">As publicações com a hashtag #%1$s vão aparecer aqui.</string>
     <string name="communities_detail_not_found">Comunidade não encontrada</string>
     <string name="communities_detail_owner_badge">Proprietário</string>
+    <string name="communities_detail_delete_button">Eliminar comunidade</string>
+    <string name="communities_detail_delete_confirm_title">Eliminar esta comunidade?</string>
+    <string name="communities_detail_delete_confirm_body">Isto remove %1$s para todos e não pode ser anulado. As publicações com #%2$s não são eliminadas.</string>
+    <string name="communities_detail_delete_confirm_action">Eliminar</string>
+    <string name="communities_detail_delete_error">Não foi possível eliminar a comunidade. Tente novamente.</string>
     <string name="communities_error_load">Não foi possível carregar as comunidades.</string>
     <string name="communities_error_create">Não foi possível criar a comunidade.</string>
     <string name="communities_error_join">Não foi possível participar na comunidade.</string>

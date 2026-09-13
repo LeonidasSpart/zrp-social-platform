@@ -12,8 +12,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -23,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,6 +68,8 @@ fun CommunityDetailScreen(
     var reportingPostId by remember { mutableStateOf<String?>(null) }
     var isSubmittingReport by remember { mutableStateOf(false) }
     var reportError by remember { mutableStateOf<String?>(null) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var deleteError by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -135,7 +140,20 @@ fun CommunityDetailScreen(
                                         )
                                     }
                                 }
-                                Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    if (state.myRole == "OWNER") {
+                                        IconButton(onClick = { showDeleteConfirm = true }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Delete,
+                                                contentDescription = stringResource(R.string.communities_detail_delete_button),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                    }
                                     if (state.isMember) {
                                         OutlinedButton(onClick = viewModel::toggleMembership) {
                                             Text(stringResource(R.string.communities_joined))
@@ -146,6 +164,14 @@ fun CommunityDetailScreen(
                                         }
                                     }
                                 }
+                            }
+                            if (deleteError != null) {
+                                Text(
+                                    text = deleteError!!,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(top = Spacing.sm),
+                                )
                             }
                         }
                         HorizontalDivider()
@@ -212,6 +238,49 @@ fun CommunityDetailScreen(
                 viewModel.reportPost(postId, reason, details) { result ->
                     isSubmittingReport = false
                     result.onSuccess { reportingPostId = null }.onFailure { reportError = it.message }
+                }
+            },
+        )
+    }
+
+    if (showDeleteConfirm) {
+        val community = state.community
+        val genericDeleteError = stringResource(R.string.communities_detail_delete_error)
+        AlertDialog(
+            onDismissRequest = { if (!state.isDeleting) showDeleteConfirm = false },
+            title = { Text(stringResource(R.string.communities_detail_delete_confirm_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.communities_detail_delete_confirm_body,
+                        community?.name ?: "",
+                        community?.hashtag ?: "",
+                    ),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteCommunity { result ->
+                            result
+                                .onSuccess {
+                                    showDeleteConfirm = false
+                                    onBack()
+                                }
+                                .onFailure {
+                                    showDeleteConfirm = false
+                                    deleteError = it.message ?: genericDeleteError
+                                }
+                        }
+                    },
+                    enabled = !state.isDeleting,
+                ) {
+                    Text(stringResource(R.string.communities_detail_delete_confirm_action), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }, enabled = !state.isDeleting) {
+                    Text(stringResource(R.string.action_cancel))
                 }
             },
         )

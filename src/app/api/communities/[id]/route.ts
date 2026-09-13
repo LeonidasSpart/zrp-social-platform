@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { isSessionAdmin } from "@/lib/admin";
+import { logAdminAction } from "@/lib/audit-log";
 
 async function findCommunity(idOrSlug: string) {
   return prisma.community.findFirst({
@@ -47,5 +49,51 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
   } catch (error) {
     console.error("Error fetching community:", error);
     return NextResponse.json({ error: "Failed to fetch community" }, { status: 500 });
+  }
+}
+
+// Only the community's creator, or a site admin, may delete it. Deleting
+// cascades to every CommunityMember row (see the schema's own
+// onDelete: Cascade on that relation) - a community's feed is
+// hashtag-derived, not a separate content table, so no posts are
+// deleted by this: the hashtag simply stops being a browsable community.
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const community = await prisma.community.findFirst({
+      where: { OR: [{ id }, { slug: id }] },
+      select: { id: true, name: true, createdById: true },
+    });
+    if (!community) {
+      return NextResponse.json({ error: "Community not found" }, { status: 404 });
+    }
+
+    const isCreator = community.createdById === session.user.id;
+    const isAdmin = !isCreator && (await isSessionAdmin(session));
+    if (!isCreator && !isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    await prisma.community.delete({ where: { id: community.id } });
+
+    if (isAdmin) {
+      await logAdminAction({
+        actor: session,
+        action: "community.delete",
+        targetType: "Community",
+        targetId: community.id,
+        metadata: { name: community.name, createdById: community.createdById },
+      });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting community:", error);
+    return NextResponse.json({ error: "Failed to delete community" }, { status: 500 });
   }
 }

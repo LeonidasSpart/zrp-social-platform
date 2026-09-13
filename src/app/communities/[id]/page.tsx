@@ -4,10 +4,11 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, Users, Hash } from "lucide-react";
+import { ArrowLeft, Users, Hash, Trash2 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import EmptyState from "@/components/ui/EmptyState";
+import ConfirmModal from "@/components/ConfirmModal";
 
 const CATEGORY_KEY: Record<string, string> = {
   TRAVEL: "communities.category.travel",
@@ -21,7 +22,7 @@ const CATEGORY_KEY: Record<string, string> = {
 
 export default function CommunityDetailPage() {
   const { t } = useLanguage();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams<{ id: string }>();
 
@@ -32,6 +33,9 @@ export default function CommunityDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(true);
   const [feedLoading, setFeedLoading] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -84,6 +88,21 @@ export default function CommunityDetailPage() {
     }
   };
 
+  const deleteCommunity = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/communities/${params.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      router.push("/communities");
+    } catch {
+      setDeleteError(t("communities.detail.deleteError"));
+      setDeleting(false);
+    }
+  };
+
+  const isCreator = !!session?.user?.id && community?.createdBy?.id === session.user.id;
+
   if (status === "loading" || loading) {
     return <div className="flex items-center justify-center min-h-screen">{t("action.loading")}</div>;
   }
@@ -132,18 +151,36 @@ export default function CommunityDetailPage() {
               </span>
             )}
           </div>
-          <button
-            type="button"
-            onClick={toggleMembership}
-            className={`shrink-0 h-9 px-4 rounded-full text-sm font-bold ${
-              isMember
-                ? "border border-gray-300 dark:border-white/15 text-gray-700 dark:text-white/70"
-                : "bg-zrp-red text-white"
-            }`}
-          >
-            {isMember ? t("communities.joined") : t("communities.join")}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {isCreator && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                aria-label={t("communities.detail.deleteButton")}
+                className="h-9 w-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-zrp-red dark:text-white/50 dark:hover:bg-white/10"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={toggleMembership}
+              className={`h-9 px-4 rounded-full text-sm font-bold ${
+                isMember
+                  ? "border border-gray-300 dark:border-white/15 text-gray-700 dark:text-white/70"
+                  : "bg-zrp-red text-white"
+              }`}
+            >
+              {isMember ? t("communities.joined") : t("communities.join")}
+            </button>
+          </div>
         </div>
+
+        {deleteError && (
+          <p role="alert" className="mt-3 text-sm text-zrp-red">
+            {deleteError}
+          </p>
+        )}
 
         <div className="mt-8 border-t border-gray-200 dark:border-white/10 pt-6">
           {feedLoading ? (
@@ -165,6 +202,19 @@ export default function CommunityDetailPage() {
           )}
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title={t("communities.detail.deleteConfirmTitle")}
+          body={t("communities.detail.deleteConfirmBody", { name: community.name, hashtag: community.hashtag })}
+          confirmLabel={t("communities.detail.deleteConfirmAction")}
+          cancelLabel={t("action.cancel")}
+          destructive
+          busy={deleting}
+          onConfirm={deleteCommunity}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </div>
   );
 }

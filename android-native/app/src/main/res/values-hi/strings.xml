@@ -2168,6 +2168,11 @@
     <string name="communities_detail_feed_empty_body">#%1$s टैग वाले पोस्ट यहां दिखाई देंगे।</string>
     <string name="communities_detail_not_found">कम्युनिटी नहीं मिली</string>
     <string name="communities_detail_owner_badge">ओनर</string>
+    <string name="communities_detail_delete_button">समुदाय हटाएं</string>
+    <string name="communities_detail_delete_confirm_title">क्या इस समुदाय को हटाना है?</string>
+    <string name="communities_detail_delete_confirm_body">इससे %1$s सभी के लिए हट जाएगा और इसे वापस नहीं लाया जा सकता। #%2$s टैग वाली पोस्ट हटाई नहीं जाएंगी।</string>
+    <string name="communities_detail_delete_confirm_action">हटाएं</string>
+    <string name="communities_detail_delete_error">समुदाय हटाया नहीं जा सका। फिर से प्रयास करें।</string>
     <string name="communities_error_load">कम्युनिटी लोड करने में विफल रहा।</string>
     <string name="communities_error_create">कम्युनिटी बनाने में विफल रहा।</string>
     <string name="communities_error_join">कम्युनिटी जॉइन करने में विफल रहा।</string>

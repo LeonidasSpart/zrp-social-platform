@@ -2226,6 +2226,11 @@
     <string name="communities_detail_feed_empty_body">带有 #%1$s 标签的帖子将显示在此处。</string>
     <string name="communities_detail_not_found">未找到该社区</string>
     <string name="communities_detail_owner_badge">创建者</string>
+    <string name="communities_detail_delete_button">删除社区</string>
+    <string name="communities_detail_delete_confirm_title">删除此社区？</string>
+    <string name="communities_detail_delete_confirm_body">这会为所有人移除「%1$s」,且无法撤销。带有 #%2$s 标签的帖子不会被删除。</string>
+    <string name="communities_detail_delete_confirm_action">删除</string>
+    <string name="communities_detail_delete_error">无法删除该社区,请重试。</string>
     <string name="communities_error_load">加载社区失败。</string>
     <string name="communities_error_create">创建社区失败。</string>
     <string name="communities_error_join">加入社区失败。</string>

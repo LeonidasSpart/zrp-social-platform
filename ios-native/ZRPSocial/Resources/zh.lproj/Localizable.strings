@@ -1138,6 +1138,11 @@
 "communities.detail.feedEmptyBody" = "带有 #{hashtag} 标签的帖子将显示在此处。";
 "communities.detail.notFound" = "未找到该社区";
 "communities.detail.ownerBadge" = "创建者";
+"communities.detail.deleteButton" = "删除社区";
+"communities.detail.deleteConfirmTitle" = "删除此社区？";
+"communities.detail.deleteConfirmBody" = "这会为所有人移除「{name}」,且无法撤销。带有 #{hashtag} 标签的帖子不会被删除。";
+"communities.detail.deleteConfirmAction" = "删除";
+"communities.detail.deleteError" = "无法删除该社区,请重试。";
 "communities.errorLoad" = "加载社区失败。";
 "communities.errorCreate" = "创建社区失败。";
 "communities.errorJoin" = "加入社区失败。";

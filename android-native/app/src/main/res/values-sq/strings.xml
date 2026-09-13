@@ -2226,6 +2226,11 @@
     <string name="communities_detail_feed_empty_body">Postimet me #%1$s do të shfaqen këtu.</string>
     <string name="communities_detail_not_found">Komuniteti nuk u gjet</string>
     <string name="communities_detail_owner_badge">Pronari</string>
+    <string name="communities_detail_delete_button">Fshi komunitetin</string>
+    <string name="communities_detail_delete_confirm_title">Të fshihet ky komunitet?</string>
+    <string name="communities_detail_delete_confirm_body">Kjo heq %1$s për të gjithë dhe nuk mund të zhbëhet. Postimet me #%2$s nuk fshihen.</string>
+    <string name="communities_detail_delete_confirm_action">Fshi</string>
+    <string name="communities_detail_delete_error">Komuniteti nuk mund të fshihej. Provo përsëri.</string>
     <string name="communities_error_load">Dështoi ngarkimi i komuniteteve.</string>
     <string name="communities_error_create">Dështoi krijimi i komunitetit.</string>
     <string name="communities_error_join">Dështoi bashkimi me komunitetin.</string>

@@ -23,6 +23,7 @@ data class CommunityDetailUiState(
     val isFeedLoading: Boolean = true,
     val nextCursor: String? = null,
     val endReached: Boolean = false,
+    val isDeleting: Boolean = false,
 )
 
 class CommunityDetailViewModel(
@@ -123,6 +124,17 @@ class CommunityDetailViewModel(
 
     fun reportPost(postId: String, reason: String, details: String?, onResult: (Result<Unit>) -> Unit) {
         viewModelScope.launch { onResult(repository.reportPost(postId, reason, details)) }
+    }
+
+    // Server-authorized to the creator/an admin regardless of what the
+    // UI shows - see CommunitiesApi's own KDoc on the DELETE endpoint.
+    fun deleteCommunity(onResult: (Result<Unit>) -> Unit) {
+        _state.update { it.copy(isDeleting = true) }
+        viewModelScope.launch {
+            val result = repository.deleteCommunity(communityId)
+            _state.update { it.copy(isDeleting = false) }
+            onResult(result)
+        }
     }
 
     private fun applyOptimisticLike(post: Post): Post {

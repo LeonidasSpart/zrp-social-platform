@@ -1138,6 +1138,11 @@
 "communities.detail.feedEmptyBody" = "I post con #{hashtag} appariranno qui.";
 "communities.detail.notFound" = "Community non trovata";
 "communities.detail.ownerBadge" = "Proprietario";
+"communities.detail.deleteButton" = "Elimina community";
+"communities.detail.deleteConfirmTitle" = "Eliminare questa community?";
+"communities.detail.deleteConfirmBody" = "Questo rimuove {name} per tutti e non può essere annullato. I post con #{hashtag} non vengono eliminati.";
+"communities.detail.deleteConfirmAction" = "Elimina";
+"communities.detail.deleteError" = "Impossibile eliminare questa community. Riprova.";
 "communities.errorLoad" = "Impossibile caricare le community.";
 "communities.errorCreate" = "Impossibile creare la community.";
 "communities.errorJoin" = "Impossibile partecipare alla community.";

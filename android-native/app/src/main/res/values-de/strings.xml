@@ -2226,6 +2226,11 @@
     <string name="communities_detail_feed_empty_body">Beiträge mit #%1$s erscheinen hier.</string>
     <string name="communities_detail_not_found">Community nicht gefunden</string>
     <string name="communities_detail_owner_badge">Inhaber</string>
+    <string name="communities_detail_delete_button">Community löschen</string>
+    <string name="communities_detail_delete_confirm_title">Diese Community löschen?</string>
+    <string name="communities_detail_delete_confirm_body">Dadurch wird %1$s für alle entfernt und kann nicht rückgängig gemacht werden. Beiträge mit #%2$s werden nicht gelöscht.</string>
+    <string name="communities_detail_delete_confirm_action">Löschen</string>
+    <string name="communities_detail_delete_error">Community konnte nicht gelöscht werden. Bitte erneut versuchen.</string>
     <string name="communities_error_load">Communities konnten nicht geladen werden.</string>
     <string name="communities_error_create">Community konnte nicht erstellt werden.</string>
     <string name="communities_error_join">Beitritt zur Community fehlgeschlagen.</string>

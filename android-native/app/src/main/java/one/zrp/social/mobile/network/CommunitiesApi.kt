@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.network
 
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -78,6 +79,11 @@ interface CommunitiesApi {
 
     @POST("communities/{id}/leave")
     suspend fun leaveCommunity(@Path("id") id: String): CommunityMembershipResponse
+
+    // Server-authorized to the community's creator (or a site admin) -
+    // see the web route's own KDoc. Cascades to every membership row.
+    @DELETE("communities/{id}")
+    suspend fun deleteCommunity(@Path("id") id: String)
 
     @GET("communities/{id}/feed")
     suspend fun getCommunityFeed(@Path("id") id: String, @Query("cursor") cursor: String?): PostsPage
