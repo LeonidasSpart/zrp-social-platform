@@ -1612,6 +1612,21 @@
     <string name="admin_ads_no_campaigns">暂无待审核的活动。</string>
     <string name="admin_ads_budget">%1$s %2$s · 预算 %3$s</string>
     <string name="admin_ads_rejection_placeholder">向广告主说明拒绝原因……</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">待付款</string>
+    <string name="admin_ads_status_payment_failed">支付失败</string>
+    <string name="admin_ads_status_suspended">已停用</string>
+    <string name="admin_ads_status_cancelled">已取消</string>
+    <string name="admin_ads_suspend">停用</string>
+    <string name="admin_ads_resume">恢复</string>
+    <string name="admin_ads_cancel">取消广告系列</string>
+    <string name="admin_ads_confirm_suspend">确认停用</string>
+    <string name="admin_ads_confirm_cancel">确认取消</string>
+    <string name="admin_ads_suspend_placeholder">停用原因(广告主可见)</string>
+    <string name="admin_ads_admin_note_label">内部备注(仅限工作人员)</string>
+    <string name="admin_ads_admin_note_placeholder">广告主不可见</string>
+    <string name="admin_ads_paid_label">已支付 $%1$s · %2$s</string>
+    <string name="admin_ads_not_paid_label">等待付款</string>
     <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
     <string name="admin_marketplace_title">商城审核</string>
     <string name="admin_marketplace_no_listings">暂无待审核的商品。</string>

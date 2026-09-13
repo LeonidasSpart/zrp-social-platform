@@ -18,6 +18,16 @@ export async function GET(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const viewerId = token?.id as string | undefined;
 
+    // Minimal targeting: an untargeted campaign (targetCountries: [])
+    // shows to everyone; a targeted one only shows to a signed-in viewer
+    // whose own User.country - already collected for the world map and
+    // country stats, not new data collection - is in the list. A
+    // logged-out viewer only ever sees untargeted campaigns, since their
+    // country isn't known without asking for it.
+    const viewerCountry = viewerId
+      ? (await prisma.user.findUnique({ where: { id: viewerId }, select: { country: true } }))?.country
+      : null;
+
     const now = new Date();
     const eligible = await prisma.adCampaign.findMany({
       where: {
@@ -30,6 +40,12 @@ export async function GET(req: NextRequest) {
         AND: [
           { OR: [{ startDate: null }, { startDate: { lte: now } }] },
           { OR: [{ endDate: null }, { endDate: { gte: now } }] },
+          {
+            OR: [
+              { targetCountries: { isEmpty: true } },
+              ...(viewerCountry ? [{ targetCountries: { has: viewerCountry } }] : []),
+            ],
+          },
         ],
         // Don't show someone their own ad - wastes their budget for no
         // real marketing benefit.

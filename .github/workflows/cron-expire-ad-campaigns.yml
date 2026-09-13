@@ -1,0 +1,40 @@
+name: Cron - expire ad campaigns
+
+# Calls GET /api/cron/expire-ad-campaigns on a schedule so an AdCampaign
+# whose endDate has passed actually stops being reported as live
+# (ACTIVE/PAUSED/SUSPENDED/PAYMENT_PENDING/PAYMENT_FAILED -> COMPLETED)
+# instead of sitting there forever until an admin notices. The
+# serve/impression/click routes already independently exclude a
+# campaign whose endDate is in the past regardless of its `status`
+# column, so this route is about keeping that column - and therefore
+# the advertiser dashboard and admin queue - honest, not about safety.
+#
+# Same pattern as cron-delete-scheduled-accounts.yml: this repo has no
+# in-repo declaration of how the two oldest CRON_SECRET-gated routes are
+# invoked in production (presumably a Railway-dashboard cron, invisible
+# and off-limits to change from here), so every newer cron route gets
+# its own independent, code-reviewable GitHub Actions schedule instead.
+#
+# Requires the same CRON_SECRET repository secret the other cron
+# workflows already use.
+on:
+  schedule:
+    # Hourly is frequent enough that a campaign never appears live for
+    # more than ~an hour past its real end time.
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the expire-ad-campaigns cron route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://zrp.one/api/cron/expire-ad-campaigns"

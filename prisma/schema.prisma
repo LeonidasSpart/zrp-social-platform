@@ -101,8 +101,21 @@ enum TicketStatus {
 enum AdCampaignStatus {
   DRAFT
   PENDING_REVIEW
+  // Content approved by staff, awaiting the advertiser's budget payment -
+  // a campaign never goes straight from review to serving without one.
+  PAYMENT_PENDING
+  // The submitted transaction failed verification; the advertiser can
+  // retry payment from this state (see POST /api/ads/campaigns/[id]/pay).
+  PAYMENT_FAILED
   ACTIVE
   PAUSED
+  // Staff-forced stop on an otherwise-active campaign (policy violation
+  // found after going live) - distinct from the advertiser's own PAUSED,
+  // which only staff can lift again via resume.
+  SUSPENDED
+  // Advertiser- or staff-initiated permanent stop, distinct from
+  // COMPLETED (which means the campaign ran its course/exhausted budget).
+  CANCELLED
   COMPLETED
   REJECTED
 }
@@ -1725,6 +1738,24 @@ model AdCampaign {
 
   reviewedBy String?
   reviewedAt DateTime?
+
+  // Verified on-chain USDC payment that funded budgetTotal - set once,
+  // by POST /api/ads/campaigns/[id]/pay, the same verifyUsdcTransaction +
+  // ConsumedPaymentTransaction pattern src/app/api/creator/tip already
+  // uses. Never trust a client-claimed "paid" state without this.
+  paymentTransactionId String? @unique
+  paidAt               DateTime?
+  paymentFailureReason String?   @db.Text
+
+  // Staff-only, never returned on advertiser-facing routes - separate
+  // from rejectionReason, which IS shown to the advertiser.
+  adminNote String? @db.Text
+
+  // Minimal, privacy-respecting targeting: ISO-3166-1 alpha-2 codes,
+  // matched against User.country (already collected for the world map/
+  // country stats - not new data collection). Empty means untargeted/all
+  // countries.
+  targetCountries String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

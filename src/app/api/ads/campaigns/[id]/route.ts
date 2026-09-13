@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
+import { canTransition } from "@/lib/ads/lifecycle";
 
 // ─── GET: full details + stats for one campaign (owner only) ────────
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -72,24 +73,28 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
     const { status, budgetTotal, endDate } = body;
     const data: any = {};
 
-    // Advertisers can only ever pause or resume their own campaign, never
-    // set it directly to ACTIVE/REJECTED/COMPLETED themselves - ACTIVE
-    // is granted by moderator approval, REJECTED by a moderator, and
-    // COMPLETED happens automatically once the budget is exhausted (see
-    // the impression/click routes). This matches how a real ad platform
-    // keeps the advertiser and the platform's own state transitions
-    // separate from each other.
+    // Advertisers can only ever pause/resume/cancel their own campaign,
+    // never set it directly to ACTIVE from anywhere but PAUSED, and never
+    // set REJECTED/PAYMENT_PENDING/COMPLETED themselves - those are
+    // granted by moderator approval, the payment route, or automatic
+    // budget/date exhaustion respectively. The lifecycle map in
+    // @/lib/ads/lifecycle is the single source of truth for which of
+    // these moves is legal from the campaign's current status - this
+    // route never re-derives that logic inline.
     if (status !== undefined) {
-      if (status === "PAUSED" && existing.status === "ACTIVE") {
-        data.status = "PAUSED";
-      } else if (status === "ACTIVE" && existing.status === "PAUSED") {
-        data.status = "ACTIVE";
-      } else {
+      if (status !== "PAUSED" && status !== "ACTIVE" && status !== "CANCELLED") {
         return NextResponse.json(
-          { error: "You can only pause an active campaign or resume a paused one." },
+          { error: "status must be PAUSED, ACTIVE, or CANCELLED." },
           { status: 400 }
         );
       }
+      if (!canTransition("advertiser", existing.status, status)) {
+        return NextResponse.json(
+          { error: `Cannot set status to ${status} from ${existing.status}.` },
+          { status: 400 }
+        );
+      }
+      data.status = status;
     }
 
     if (budgetTotal !== undefined) {

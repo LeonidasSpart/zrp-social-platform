@@ -161,6 +161,17 @@ data class AdminAdCampaign(
     val status: String,
     val rejectionReason: String?,
     val createdAt: String,
+    // On-chain payment step added alongside PAYMENT_PENDING/PAYMENT_FAILED
+    // (see lib/ads/lifecycle.ts): paidAt/paymentTransactionId are set once
+    // the "system" actor moves a campaign PAYMENT_PENDING -> ACTIVE;
+    // paymentFailureReason is set on PAYMENT_PENDING -> PAYMENT_FAILED
+    // instead. adminNote is staff-only free text, never shown to the
+    // advertiser, settable independent of any status transition via the
+    // "note" action below.
+    val paymentTransactionId: String? = null,
+    val paidAt: String? = null,
+    val paymentFailureReason: String? = null,
+    val adminNote: String? = null,
     val advertiser: AdminAdAdvertiser,
     val post: AdminAdPost?,
 )
@@ -171,10 +182,14 @@ data class AdminAdsResponse(
     val totalPages: Int,
 )
 
-// action is "approve" | "reject"; rejectionReason is only stored on a
-// reject (the route nulls it on approve). Only a PENDING_REVIEW
-// campaign can be reviewed - anything else 400s.
-data class ReviewAdRequest(val action: String, val rejectionReason: String? = null)
+// action is one of "approve" | "reject" | "suspend" | "resume" | "cancel"
+// | "note" (see lib/ads/lifecycle.ts for the full from/to transition
+// map - the route re-validates every one of them server-side, so this
+// client only needs to send the right action for the button the staffer
+// pressed). rejectionReason is only stored on a reject/suspend/cancel;
+// adminNote is saved independent of any status change, including by the
+// dedicated "note" action which changes no status at all.
+data class ReviewAdRequest(val action: String, val rejectionReason: String? = null, val adminNote: String? = null)
 
 // ─── Marketplace review (GET/PUT /admin/marketplace) ─────────────────
 data class AdminListingSeller(

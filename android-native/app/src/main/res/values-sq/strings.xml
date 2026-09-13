@@ -1612,6 +1612,21 @@
     <string name="admin_ads_no_campaigns">Nuk ka fushata për shqyrtim.</string>
     <string name="admin_ads_budget">%1$s %2$s · Buxheti %3$s</string>
     <string name="admin_ads_rejection_placeholder">Shpjegoji reklamuesit arsyen e refuzimit...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">Pagesë në pritje</string>
+    <string name="admin_ads_status_payment_failed">Pagesa dështoi</string>
+    <string name="admin_ads_status_suspended">E pezulluar</string>
+    <string name="admin_ads_status_cancelled">E anulluar</string>
+    <string name="admin_ads_suspend">Pezullo</string>
+    <string name="admin_ads_resume">Rifillo</string>
+    <string name="admin_ads_cancel">Anulo fushatën</string>
+    <string name="admin_ads_confirm_suspend">Konfirmo pezullimin</string>
+    <string name="admin_ads_confirm_cancel">Konfirmo anulimin</string>
+    <string name="admin_ads_suspend_placeholder">Arsyeja e pezullimit (i dukshëm për reklamuesin)</string>
+    <string name="admin_ads_admin_note_label">Shënim i brendshëm (vetëm për stafin)</string>
+    <string name="admin_ads_admin_note_placeholder">Nuk i dukshëm për reklamuesin</string>
+    <string name="admin_ads_paid_label">Paguar %1$s $ · %2$s</string>
+    <string name="admin_ads_not_paid_label">Në pritje të pagesës</string>
     <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
     <string name="admin_marketplace_title">Shqyrtimi i Marketplace</string>
     <string name="admin_marketplace_no_listings">Nuk ka shpallje për shqyrtim.</string>

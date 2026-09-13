@@ -1612,6 +1612,21 @@
     <string name="admin_ads_no_campaigns">Нет кампаний для проверки.</string>
     <string name="admin_ads_budget">%1$s %2$s · Бюджет %3$s</string>
     <string name="admin_ads_rejection_placeholder">Объясните рекламодателю причину отказа...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">Ожидает оплаты</string>
+    <string name="admin_ads_status_payment_failed">Оплата не прошла</string>
+    <string name="admin_ads_status_suspended">Заблокирована</string>
+    <string name="admin_ads_status_cancelled">Отменена</string>
+    <string name="admin_ads_suspend">Приостановить</string>
+    <string name="admin_ads_resume">Возобновить</string>
+    <string name="admin_ads_cancel">Отменить кампанию</string>
+    <string name="admin_ads_confirm_suspend">Подтвердить приостановку</string>
+    <string name="admin_ads_confirm_cancel">Подтвердить отмену</string>
+    <string name="admin_ads_suspend_placeholder">Причина приостановки (видна рекламодателю)</string>
+    <string name="admin_ads_admin_note_label">Внутренняя заметка (только для персонала)</string>
+    <string name="admin_ads_admin_note_placeholder">Не отображается рекламодателю</string>
+    <string name="admin_ads_paid_label">Оплачено $%1$s · %2$s</string>
+    <string name="admin_ads_not_paid_label">Ожидает оплаты</string>
     <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
     <string name="admin_marketplace_title">Проверка Marketplace</string>
     <string name="admin_marketplace_no_listings">Нет объявлений для проверки.</string>

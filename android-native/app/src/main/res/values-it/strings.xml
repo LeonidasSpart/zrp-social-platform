@@ -1612,6 +1612,21 @@
     <string name="admin_ads_no_campaigns">Nessuna campagna da esaminare.</string>
     <string name="admin_ads_budget">%1$s %2$s · Budget %3$s</string>
     <string name="admin_ads_rejection_placeholder">Spiega all\'inserzionista il motivo del rifiuto...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">Pagamento in attesa</string>
+    <string name="admin_ads_status_payment_failed">Pagamento non riuscito</string>
+    <string name="admin_ads_status_suspended">Sospesa</string>
+    <string name="admin_ads_status_cancelled">Annullata</string>
+    <string name="admin_ads_suspend">Sospendi</string>
+    <string name="admin_ads_resume">Riprendi</string>
+    <string name="admin_ads_cancel">Annulla campagna</string>
+    <string name="admin_ads_confirm_suspend">Conferma sospensione</string>
+    <string name="admin_ads_confirm_cancel">Conferma annullamento</string>
+    <string name="admin_ads_suspend_placeholder">Motivo della sospensione (visibile all\'inserzionista)</string>
+    <string name="admin_ads_admin_note_label">Nota interna (solo staff)</string>
+    <string name="admin_ads_admin_note_placeholder">Non visibile all\'inserzionista</string>
+    <string name="admin_ads_paid_label">Pagati %1$s $ · %2$s</string>
+    <string name="admin_ads_not_paid_label">In attesa di pagamento</string>
     <!-- Admin marketplace review queue (src/app/admin/marketplace) -->
     <string name="admin_marketplace_title">Revisione Marketplace</string>
     <string name="admin_marketplace_no_listings">Nessun annuncio da esaminare.</string>

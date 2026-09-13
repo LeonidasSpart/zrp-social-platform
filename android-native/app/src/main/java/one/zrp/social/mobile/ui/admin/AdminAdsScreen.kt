@@ -51,8 +51,10 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 
 // The real AdCampaignStatus values the website's own review page
 // filters on, verbatim - "all" is the route's own escape hatch for no
-// status filter at all.
-private val STATUS_FILTERS = listOf("PENDING_REVIEW", "ACTIVE", "REJECTED", "all")
+// status filter at all. PAYMENT_PENDING/SUSPENDED joined the tab list
+// alongside the on-chain payment step and staff suspend/resume/cancel
+// actions added to lib/ads/lifecycle.ts.
+private val STATUS_FILTERS = listOf("PENDING_REVIEW", "PAYMENT_PENDING", "ACTIVE", "SUSPENDED", "REJECTED", "all")
 
 /** Ported from src/app/admin/ads/page.tsx - see AdminApi's own KDoc. */
 @Composable
@@ -126,8 +128,14 @@ fun AdminAdsScreen(onBack: () -> Unit) {
                     AdCampaignRow(
                         campaign = campaign,
                         isUpdating = state.updatingId == campaign.id,
+                        noteDraft = state.noteDrafts[campaign.id],
                         onApprove = { viewModel.approve(campaign.id) },
-                        onReject = { viewModel.openRejectModal(campaign.id) },
+                        onReject = { viewModel.openReasonPrompt(campaign.id, "reject") },
+                        onSuspend = { viewModel.openReasonPrompt(campaign.id, "suspend") },
+                        onResume = { viewModel.resume(campaign.id) },
+                        onCancel = { viewModel.openReasonPrompt(campaign.id, "cancel") },
+                        onNoteDraftChange = { text -> viewModel.updateNoteDraft(campaign.id, text) },
+                        onSaveNote = { viewModel.saveNote(campaign.id) },
                     )
                 }
             }
@@ -153,11 +161,13 @@ fun AdminAdsScreen(onBack: () -> Unit) {
         }
     }
 
-    val rejectCampaignId = state.rejectModalCampaignId
-    if (rejectCampaignId != null) {
-        RejectDialog(
-            onDismiss = { viewModel.closeRejectModal() },
-            onConfirm = { reason -> viewModel.submitReject(reason) },
+    val reasonPromptCampaignId = state.reasonPromptCampaignId
+    val reasonPromptAction = state.reasonPromptAction
+    if (reasonPromptCampaignId != null && reasonPromptAction != null) {
+        ReasonDialog(
+            action = reasonPromptAction,
+            onDismiss = { viewModel.closeReasonPrompt() },
+            onConfirm = { reason -> viewModel.submitReasonPrompt(reason) },
         )
     }
 }
@@ -165,7 +175,11 @@ fun AdminAdsScreen(onBack: () -> Unit) {
 @Composable
 private fun adStatusLabel(status: String): String = when (status) {
     "PENDING_REVIEW" -> stringResource(R.string.admin_review_status_pending_review)
+    "PAYMENT_PENDING" -> stringResource(R.string.admin_ads_status_payment_pending)
+    "PAYMENT_FAILED" -> stringResource(R.string.admin_ads_status_payment_failed)
     "ACTIVE" -> stringResource(R.string.admin_review_status_active)
+    "SUSPENDED" -> stringResource(R.string.admin_ads_status_suspended)
+    "CANCELLED" -> stringResource(R.string.admin_ads_status_cancelled)
     "REJECTED" -> stringResource(R.string.admin_review_status_rejected)
     else -> stringResource(R.string.admin_reports_all)
 }
@@ -174,8 +188,14 @@ private fun adStatusLabel(status: String): String = when (status) {
 private fun AdCampaignRow(
     campaign: AdminAdCampaign,
     isUpdating: Boolean,
+    noteDraft: String?,
     onApprove: () -> Unit,
     onReject: () -> Unit,
+    onSuspend: () -> Unit,
+    onResume: () -> Unit,
+    onCancel: () -> Unit,
+    onNoteDraftChange: (String) -> Unit,
+    onSaveNote: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -232,6 +252,25 @@ private fun AdCampaignRow(
             modifier = Modifier.padding(top = 4.dp),
         )
 
+        // The on-chain payment step's own status line, independent of
+        // the campaign's lifecycle status above - a campaign can sit in
+        // PAYMENT_PENDING with no paidAt yet, or (once system moves it
+        // to ACTIVE) show what was actually paid and with which tx.
+        Text(
+            text = if (campaign.paidAt != null) {
+                stringResource(
+                    R.string.admin_ads_paid_label,
+                    formatMoney(campaign.budgetTotal),
+                    truncateTxId(campaign.paymentTransactionId),
+                )
+            } else {
+                stringResource(R.string.admin_ads_not_paid_label)
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+
         if (!campaign.rejectionReason.isNullOrBlank()) {
             Text(
                 text = stringResource(R.string.admin_review_reason_label, campaign.rejectionReason),
@@ -241,38 +280,100 @@ private fun AdCampaignRow(
             )
         }
 
+        OutlinedTextField(
+            value = noteDraft ?: campaign.adminNote ?: "",
+            onValueChange = onNoteDraftChange,
+            label = { Text(stringResource(R.string.admin_ads_admin_note_label)) },
+            placeholder = { Text(stringResource(R.string.admin_ads_admin_note_placeholder)) },
+            textStyle = MaterialTheme.typography.bodySmall,
+            minLines = 1,
+            maxLines = 3,
+            modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+        )
+
         if (isUpdating) {
             CircularProgressIndicator(modifier = Modifier.padding(top = Spacing.sm).size(20.dp), strokeWidth = 2.dp)
-        } else if (campaign.status == "PENDING_REVIEW") {
+        } else {
             Row(modifier = Modifier.padding(top = Spacing.sm), horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                TextButton(onClick = onApprove) { Text(stringResource(R.string.admin_review_approve)) }
-                TextButton(onClick = onReject) {
-                    Text(stringResource(R.string.admin_review_reject), color = ZrpRed)
+                if (campaign.status == "PENDING_REVIEW") {
+                    TextButton(onClick = onApprove) { Text(stringResource(R.string.admin_review_approve)) }
+                    TextButton(onClick = onReject) {
+                        Text(stringResource(R.string.admin_review_reject), color = ZrpRed)
+                    }
+                }
+                if (campaign.status == "ACTIVE" || campaign.status == "PAUSED") {
+                    TextButton(onClick = onSuspend) {
+                        Text(stringResource(R.string.admin_ads_suspend), color = ZrpRed)
+                    }
+                }
+                if (campaign.status == "SUSPENDED") {
+                    TextButton(onClick = onResume) { Text(stringResource(R.string.admin_ads_resume)) }
+                }
+                if (campaign.status in CANCELLABLE_STATUSES) {
+                    TextButton(onClick = onCancel) {
+                        Text(stringResource(R.string.admin_ads_cancel), color = ZrpRed)
+                    }
+                }
+            }
+
+            // Only shown once the draft actually diverges from the saved
+            // note, matching the same "dirty" check the note textarea's
+            // save button uses on web.
+            if (noteDraft != null && noteDraft != (campaign.adminNote ?: "")) {
+                Row(modifier = Modifier.padding(top = Spacing.xs)) {
+                    TextButton(onClick = onSaveNote) { Text(stringResource(R.string.action_save)) }
                 }
             }
         }
     }
 }
 
+private val CANCELLABLE_STATUSES = setOf("ACTIVE", "PAUSED", "SUSPENDED", "PAYMENT_PENDING", "PAYMENT_FAILED")
+
+/** "5gT9…k2Qp"-style truncation so a full base58 signature never wraps the row. */
+private fun truncateTxId(txId: String?): String {
+    if (txId.isNullOrBlank()) return ""
+    return if (txId.length <= 12) txId else "${txId.take(6)}…${txId.takeLast(4)}"
+}
+
 @Composable
-private fun RejectDialog(onDismiss: () -> Unit, onConfirm: (reason: String) -> Unit) {
+private fun ReasonDialog(action: String, onDismiss: () -> Unit, onConfirm: (reason: String) -> Unit) {
     var reason by remember { mutableStateOf("") }
+
+    val title = when (action) {
+        "suspend" -> stringResource(R.string.admin_ads_suspend)
+        "cancel" -> stringResource(R.string.admin_ads_cancel)
+        else -> stringResource(R.string.admin_review_reject)
+    }
+    // Cancel deliberately reuses the suspend placeholder, same as
+    // src/app/admin/ads/page.tsx does (there is no separate cancel
+    // placeholder string - both are staff-facing reasons shown to the
+    // advertiser, unlike the note field below which never is).
+    val placeholder = when (action) {
+        "suspend", "cancel" -> stringResource(R.string.admin_ads_suspend_placeholder)
+        else -> stringResource(R.string.admin_ads_rejection_placeholder)
+    }
+    val confirmLabel = when (action) {
+        "suspend" -> stringResource(R.string.admin_ads_confirm_suspend)
+        "cancel" -> stringResource(R.string.admin_ads_confirm_cancel)
+        else -> stringResource(R.string.admin_reports_confirm_action)
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.admin_review_reject)) },
+        title = { Text(title) },
         text = {
             OutlinedTextField(
                 value = reason,
                 onValueChange = { reason = it },
                 label = { Text(stringResource(R.string.admin_reports_note_optional)) },
-                placeholder = { Text(stringResource(R.string.admin_ads_rejection_placeholder)) },
+                placeholder = { Text(placeholder) },
                 modifier = Modifier.fillMaxWidth(),
             )
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(reason) }) {
-                Text(stringResource(R.string.admin_reports_confirm_action), color = ZrpRed)
+                Text(confirmLabel, color = ZrpRed)
             }
         },
         dismissButton = {

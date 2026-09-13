@@ -1582,6 +1582,21 @@
     <string name="admin_ads_no_campaigns">Não há campanhas para analisar.</string>
     <string name="admin_ads_budget">%1$s %2$s · Orçamento %3$s</string>
     <string name="admin_ads_rejection_placeholder">Diz ao anunciante porque isto foi rejeitado...</string>
+    <!-- Ad lifecycle additions: on-chain payment step + staff suspend/resume/cancel (src/lib/ads/lifecycle.ts) -->
+    <string name="admin_ads_status_payment_pending">Pagamento pendente</string>
+    <string name="admin_ads_status_payment_failed">Pagamento falhou</string>
+    <string name="admin_ads_status_suspended">Suspensa</string>
+    <string name="admin_ads_status_cancelled">Cancelada</string>
+    <string name="admin_ads_suspend">Suspender</string>
+    <string name="admin_ads_resume">Retomar</string>
+    <string name="admin_ads_cancel">Cancelar campanha</string>
+    <string name="admin_ads_confirm_suspend">Confirmar suspensão</string>
+    <string name="admin_ads_confirm_cancel">Confirmar cancelamento</string>
+    <string name="admin_ads_suspend_placeholder">Motivo da suspensão (visível ao anunciante)</string>
+    <string name="admin_ads_admin_note_label">Nota interna (apenas para a equipe)</string>
+    <string name="admin_ads_admin_note_placeholder">Não é exibido ao anunciante</string>
+    <string name="admin_ads_paid_label">Pago $%1$s · %2$s</string>
+    <string name="admin_ads_not_paid_label">Aguardando pagamento</string>
     <string name="admin_marketplace_title">Análise do Mercado</string>
     <string name="admin_marketplace_no_listings">Não há anúncios para analisar.</string>
     <string name="admin_marketplace_price_on_request">Preço sob consulta</string>

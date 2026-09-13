@@ -7,12 +7,37 @@ import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { logAdminAction } from "@/lib/audit-log";
+import { canTransition } from "@/lib/ads/lifecycle";
+import type { AdCampaignStatus } from "@prisma/client";
+
+type StatusAction = "approve" | "reject" | "suspend" | "resume" | "cancel";
+// "note" is a status-preserving action: it lets staff save the internal
+// adminNote without needing to also perform a lifecycle transition (the
+// admin queue's note field is editable independent of approve/reject/
+// suspend/resume/cancel, and must not silently no-op when nothing else
+// changed - see the admin ads page's "Save note" button).
+type Action = StatusAction | "note";
+
+// Maps each status-changing admin action to the status it moves a
+// campaign TO. The FROM side is whatever the campaign's current status
+// actually is - validity of that specific from->to pair is checked
+// against the single shared lifecycle map in @/lib/ads/lifecycle, not
+// hand-rolled per action here.
+const TARGET_STATUS: Record<StatusAction, AdCampaignStatus> = {
+  approve: "PAYMENT_PENDING",
+  reject: "REJECTED",
+  suspend: "SUSPENDED",
+  resume: "ACTIVE",
+  cancel: "CANCELLED",
+};
+
+const VALID_ACTIONS: Action[] = ["approve", "reject", "suspend", "resume", "cancel", "note"];
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
+  const { id } = await params;
   const check = await requireStaff();
 
   if (!check.authorized) {
@@ -25,13 +50,16 @@ export async function PUT(
   });
 
   try {
-    const { id } = await params;
+    const body = await req.json();
+    const { action, rejectionReason, adminNote } = body as {
+      action?: string;
+      rejectionReason?: string;
+      adminNote?: string;
+    };
 
-    const { action, rejectionReason } = await req.json();
-
-    if (action !== "approve" && action !== "reject") {
+    if (!action || !VALID_ACTIONS.includes(action as Action)) {
       return NextResponse.json(
-        { error: 'action must be "approve" or "reject"' },
+        { error: 'action must be one of "approve", "reject", "suspend", "resume", "cancel", "note"' },
         { status: 400 }
       );
     }
@@ -48,12 +76,18 @@ export async function PUT(
       );
     }
 
-    if (campaign.status !== "PENDING_REVIEW") {
+    const isNoteOnly = action === "note";
+    const nextStatus = isNoteOnly ? campaign.status : TARGET_STATUS[action as StatusAction];
+
+    // ⚠️ SECURITY: the ONLY source of truth for which admin action is
+    // legal from the campaign's current status is this shared lifecycle
+    // map - never re-derive from/to validity inline here, or the web
+    // admin UI and any future admin surface (native, CLI) can silently
+    // drift apart on what's actually allowed. "note" never changes
+    // status, so it has nothing to validate against the lifecycle map.
+    if (!isNoteOnly && !canTransition("staff", campaign.status, nextStatus)) {
       return NextResponse.json(
-        {
-          error:
-            "Only campaigns pending review can be approved or rejected.",
-        },
+        { error: `Cannot ${action} a campaign in ${campaign.status} status.` },
         { status: 400 }
       );
     }
@@ -61,9 +95,20 @@ export async function PUT(
     const updated = await prisma.adCampaign.update({
       where: { id },
       data: {
-        status: action === "approve" ? "ACTIVE" : "REJECTED",
-        rejectionReason:
-          action === "reject" ? (rejectionReason || null) : null,
+        ...(isNoteOnly ? {} : { status: nextStatus }),
+        // rejectionReason/suspend-reason share one advertiser-visible
+        // field, matching the dashboard's existing display for it;
+        // approving/resuming clears it since it no longer applies. A
+        // plain note-save never touches it.
+        ...(isNoteOnly
+          ? {}
+          : {
+              rejectionReason:
+                action === "reject" || action === "suspend" || action === "cancel" ? (rejectionReason || null) : null,
+            }),
+        // adminNote is staff-only - never returned on any advertiser
+        // route (/api/ads/campaigns/*).
+        ...(typeof adminNote === "string" ? { adminNote: adminNote.slice(0, 2000) || null } : {}),
         reviewedBy: token?.id as string | undefined,
         reviewedAt: new Date(),
       },
@@ -71,10 +116,10 @@ export async function PUT(
 
     await logAdminAction({
       actor: check.session,
-      action: action === "approve" ? "ad_campaign.approve" : "ad_campaign.reject",
+      action: `ad_campaign.${action}`,
       targetType: "AdCampaign",
       targetId: id,
-      metadata: { rejectionReason: rejectionReason || null },
+      metadata: { rejectionReason: rejectionReason || null, fromStatus: campaign.status, toStatus: nextStatus },
     });
 
     return jsonWithDecimals({ campaign: updated });

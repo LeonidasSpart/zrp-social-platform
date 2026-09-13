@@ -34,6 +34,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ logged: false });
     }
 
+    // ⚠️ ABUSE: a signed-in viewer could otherwise script repeated
+    // impression POSTs for a rival's CPM campaign to burn through its
+    // budget for free. A real viewer scrolling past the same ad again
+    // within a short window is not a new, billable impression either
+    // way - dedupe per (campaign, viewer) rather than only rate-limiting
+    // by IP, which a logged-out/rotating-IP abuser would evade entirely.
+    if (viewerId) {
+      const recent = await prisma.adImpression.findFirst({
+        where: { campaignId, userId: viewerId, createdAt: { gte: new Date(Date.now() - 60_000) } },
+        select: { id: true },
+      });
+      if (recent) {
+        return NextResponse.json({ logged: false });
+      }
+    }
+
     await prisma.adImpression.create({
       data: { campaignId, userId: viewerId || null },
     });
