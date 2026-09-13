@@ -12,6 +12,7 @@ import {
 import ContentPerformanceTab from "@/components/ContentPerformanceTab";
 import AudienceGrowthTab from "@/components/AudienceGrowthTab";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 // ─── Inline components ──────────────────────────────────────────────
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -108,7 +109,7 @@ const Badge = ({ children, className = "" }: { children: React.ReactNode; classN
 export default function CreatorDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
@@ -417,7 +418,7 @@ export default function CreatorDashboard() {
                     <td className="p-3 font-semibold text-green-600 dark:text-green-400">${tip.amount.toFixed(2)}</td>
                     <td className="p-3 text-gray-600 dark:text-gray-400">{tip.message || "-"}</td>
                     <td className="p-3 text-gray-500 dark:text-gray-400 text-xs">
-                      {new Date(tip.createdAt).toLocaleDateString()}
+                      {new Date(tip.createdAt).toLocaleDateString(getDateLocale(language))}
                     </td>
                   </tr>
                 ))}
@@ -450,7 +451,7 @@ export default function CreatorDashboard() {
                   </span>
                 </div>
                 <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-                  {new Date(pp.createdAt).toLocaleDateString()}
+                  {new Date(pp.createdAt).toLocaleDateString(getDateLocale(language))}
                 </div>
               </div>
             ))}

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Scale, Clock, CheckCircle, XCircle, Filter, X, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface Appeal {
   id: string;
@@ -35,8 +36,6 @@ export default function AdminAppeals() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [decision, setDecision] = useState<"upheld" | "overturned">("upheld");
   const [resolutionNote, setResolutionNote] = useState("");
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   const fetchAppeals = async () => {
     setLoading(true);
@@ -180,7 +179,7 @@ export default function AdminAppeals() {
                     </p>
                   )}
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {new Date(appeal.createdAt).toLocaleString(localeMap[language] || "en-US")}
+                    {new Date(appeal.createdAt).toLocaleString(getDateLocale(language))}
                   </p>
                 </div>
                 {appeal.status === "pending" && (

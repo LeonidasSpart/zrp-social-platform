@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Flag, Clock, CheckCircle, AlertTriangle, Filter, X, ExternalLink, User, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface Report {
   id: string;
@@ -32,8 +33,6 @@ export default function AdminReports() {
   const [totalPages, setTotalPages] = useState(1);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   const ACTION_TYPES = [
     { value: "DELETE_POST", label: t("adminReports.actionDeletePost") },
@@ -360,11 +359,11 @@ export default function AdminReports() {
                     )}
                     {report.actionedAt && (
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {t("adminReports.actionedOn", { date: new Date(report.actionedAt).toLocaleString(localeMap[language] || "en-US") })}
+                        {t("adminReports.actionedOn", { date: new Date(report.actionedAt).toLocaleString(getDateLocale(language)) })}
                       </p>
                     )}
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                      {new Date(report.createdAt).toLocaleString(localeMap[language] || "en-US")}
+                      {new Date(report.createdAt).toLocaleString(getDateLocale(language))}
                     </p>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">

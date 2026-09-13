@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { getSocket } from "@/lib/socket-client";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { getDateLocale } from "@/lib/dateLocale";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -95,8 +96,6 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
   const { refreshUnreadMessageCount } = useUnreadCount();
   const { t, language } = useLanguage();
   const userId = session?.user?.id;
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   // ─── Conversation ───────────────────────────────────────────────────
   const [conversation, setConversation] = useState<GroupConversationDetail | null>(null);
@@ -1200,7 +1199,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                           }`}
                         >
                           <span>
-                            {new Date(message.createdAt).toLocaleTimeString(localeMap[language] || "en-US", {
+                            {new Date(message.createdAt).toLocaleTimeString(getDateLocale(language), {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}

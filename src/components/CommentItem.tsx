@@ -16,6 +16,7 @@ import {
 import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge"; // ✅ import
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface Comment {
   id: string;
@@ -56,7 +57,7 @@ export default function CommentItem({
   isReply = false,
 }: CommentItemProps) {
   const { data: session } = useSession();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [liked, setLiked] = useState(comment.liked || false);
   const [likesCount, setLikesCount] = useState(comment._count?.likes || 0);
   const [reposted, setReposted] = useState(comment.reposted || false);
@@ -203,7 +204,7 @@ export default function CommentItem({
             <span className="text-xs text-gray-500">@{comment.author.username}</span>
             <span className="text-xs text-gray-400">·</span>
             <span className="text-xs text-gray-400">
-              {new Date(comment.createdAt).toLocaleDateString()}
+              {new Date(comment.createdAt).toLocaleDateString(getDateLocale(language))}
             </span>
           </div>
 

@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle, Download, Trash2, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 export default function DeleteAccountPage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -34,7 +35,7 @@ export default function DeleteAccountPage() {
         const data = await res.json();
         if (data.scheduledFor) {
           setIsScheduled(true);
-          setDeletionDate(new Date(data.scheduledFor).toLocaleDateString("en-US", {
+          setDeletionDate(new Date(data.scheduledFor).toLocaleDateString(getDateLocale(language), {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -61,7 +62,7 @@ export default function DeleteAccountPage() {
           type: "success",
           text: data.message || t("deleteAccount.successScheduled"),
         });
-        setDeletionDate(new Date(data.deletionDate).toLocaleDateString("en-US", {
+        setDeletionDate(new Date(data.deletionDate).toLocaleDateString(getDateLocale(language), {
           year: "numeric",
           month: "long",
           day: "numeric",

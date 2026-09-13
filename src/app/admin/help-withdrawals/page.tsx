@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Loader2, CheckCircle, XCircle, Clock, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface HelpWithdrawal {
   id: string;
@@ -16,14 +17,9 @@ interface HelpWithdrawal {
   campaign: { id: string; title: string };
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function AdminHelpWithdrawalsPage() {
   const { t, language } = useLanguage();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
   const [withdrawals, setWithdrawals] = useState<HelpWithdrawal[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);

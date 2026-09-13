@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface ActivityHeatmapProps {
   username: string;
@@ -14,11 +15,6 @@ interface DayCell {
 }
 
 const WEEKS = 53;
-
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
 
 function buildGrid(counts: Record<string, number>): DayCell[][] {
   const today = new Date();
@@ -74,7 +70,7 @@ function getColorClass(count: number) {
 
 export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
   const { t, language } = useLanguage();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
   const [weeks, setWeeks] = useState<DayCell[][]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);

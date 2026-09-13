@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 // This page exists to resolve a link that already appears in the Terms of
 // Service and Help Center ("Community Guidelines" -> /guidelines), which
@@ -11,9 +12,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // Moderation sections rather than introducing new policy, so this page can
 // never say something different from the Terms it's meant to summarize.
 export default function GuidelinesPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
-  const lastUpdated = new Date().toLocaleDateString("en-US", {
+  const lastUpdated = new Date().toLocaleDateString(getDateLocale(language), {
     year: "numeric",
     month: "long",
     day: "numeric",

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface PollProps {
   pollId: string;
@@ -15,6 +17,7 @@ interface PollProps {
 
 export default function Poll({ pollId, question, options, votes, userVote, expiresAt, onVote }: PollProps) {
   const { data: session } = useSession();
+  const { language } = useLanguage();
   const [selected, setSelected] = useState<number | null>(userVote ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +107,7 @@ export default function Poll({ pollId, question, options, votes, userVote, expir
         <span>{totalVotes} {totalVotes === 1 ? "vote" : "votes"}</span>
         {isExpired && <span>Ended</span>}
         {!isExpired && expiresAt && (
-          <span>Ends {new Date(expiresAt).toLocaleDateString()}</span>
+          <span>Ends {new Date(expiresAt).toLocaleDateString(getDateLocale(language))}</span>
         )}
         {selected !== null && !isExpired && <span>✓ Voted</span>}
       </div>

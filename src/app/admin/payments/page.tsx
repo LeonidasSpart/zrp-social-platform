@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface Payment {
   id: string;
@@ -29,8 +30,6 @@ export default function AdminPayments() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -143,7 +142,7 @@ export default function AdminPayments() {
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
                     <Clock className="w-3 h-3" />
-                    <span>{new Date(payment.createdAt).toLocaleString(localeMap[language] || "en-US")}</span>
+                    <span>{new Date(payment.createdAt).toLocaleString(getDateLocale(language))}</span>
                     <span className="inline-flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full">
                       {t("adminPayments.pendingBadge")}
                     </span>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Loader2, Scale, Send } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface EligibleReport {
   id: string;
@@ -37,8 +38,6 @@ export default function AppealsPage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -148,7 +147,7 @@ export default function AppealsPage() {
               )}
               {r.actionedAt && (
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  {new Date(r.actionedAt).toLocaleString(localeMap[language] || "en-US")}
+                  {new Date(r.actionedAt).toLocaleString(getDateLocale(language))}
                 </p>
               )}
 
@@ -218,7 +217,7 @@ export default function AppealsPage() {
                 </p>
               )}
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                {new Date(a.createdAt).toLocaleString(localeMap[language] || "en-US")}
+                {new Date(a.createdAt).toLocaleString(getDateLocale(language))}
               </p>
             </div>
           ))}

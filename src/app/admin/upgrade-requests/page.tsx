@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Check, X, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface Request {
   id: string;
@@ -24,8 +25,6 @@ export default function AdminUpgradeRequests() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   const fetchRequests = async (status = "pending") => {
     setLoading(true);
@@ -113,7 +112,7 @@ export default function AdminUpgradeRequests() {
                     </p>
                   )}
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {t("upgradeReq.requested", { date: new Date(req.createdAt).toLocaleString(localeMap[language] || "en-US") })}
+                    {t("upgradeReq.requested", { date: new Date(req.createdAt).toLocaleString(getDateLocale(language)) })}
                   </p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">

@@ -12,8 +12,7 @@ import { buildMessagePreview } from "@/lib/conversationPreview";
 import { usePresence } from "@/contexts/PresenceContext";
 import { useSession } from "next-auth/react";
 import ConversationRowMenu from "@/components/ConversationRowMenu";
-
-const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
+import { getDateLocale } from "@/lib/dateLocale";
 
 export default function MessagesLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
@@ -130,7 +129,7 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                           <VerifiedBadge badgeType={partner.badgeType} className="flex-shrink-0" />
                         </p>
                         <span className="text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0">
-                          {new Date(lastMsg.createdAt).toLocaleDateString(localeMap[language] || "en-US", {
+                          {new Date(lastMsg.createdAt).toLocaleDateString(getDateLocale(language), {
                             month: "short",
                             day: "numeric",
                           })}
@@ -193,7 +192,7 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
                       </p>
                       {lastMsg && (
                         <span className="text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0">
-                          {new Date(lastMsg.createdAt).toLocaleDateString(localeMap[language] || "en-US", {
+                          {new Date(lastMsg.createdAt).toLocaleDateString(getDateLocale(language), {
                             month: "short",
                             day: "numeric",
                           })}

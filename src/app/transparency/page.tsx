@@ -25,6 +25,7 @@ import {
 } from "recharts";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface ModerationData {
   generatedAt: string;
@@ -77,11 +78,7 @@ export default function TransparencyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const localeMap: Record<string, string> = {
-    en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", es: "es-ES",
-    ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID", sq: "sq-AL",
-  };
-  const locale = localeMap[language] || "en-US";
+  const locale = getDateLocale(language);
 
   useEffect(() => {
     fetch("/api/transparency/moderation")

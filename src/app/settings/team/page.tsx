@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 interface TeamMember {
   id: string;
@@ -165,8 +166,6 @@ export default function TeamSettingsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<TeamMember | null>(null);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
-
-  const localeMap: Record<string, string> = { en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT" };
 
   // ─── Notification state ──────────────────────────────────────────
   const [notification, setNotification] = useState<Notification | null>(null);
@@ -400,7 +399,7 @@ export default function TeamSettingsPage() {
                   </td>
                   <td className="p-3">{member.user.email}</td>
                   <td className="p-3">{getRoleBadge(member.role)}</td>
-                  <td className="p-3">{new Date(member.createdAt).toLocaleDateString(localeMap[language] || "en-US")}</td>
+                  <td className="p-3">{new Date(member.createdAt).toLocaleDateString(getDateLocale(language))}</td>
                   <td className="p-3 text-right">
                     <div className="relative inline-block text-left">
                       <button

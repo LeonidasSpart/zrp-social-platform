@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, MapPin, Laptop, Calendar, ExternalLink, Bookmark, BookMarked, Users, Pencil, Flag } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ApplyModal from "@/components/opportunity/ApplyModal";
 import ReportModal from "@/components/ReportModal";
@@ -17,16 +18,11 @@ interface ListingDetail extends OpportunitySummary {
   alreadySaved?: boolean;
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function OpportunityListingPage() {
   const { t, language } = useLanguage();
   const { data: session } = useSession();
   const params = useParams<{ id: string }>();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
 
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loading, setLoading] = useState(true);

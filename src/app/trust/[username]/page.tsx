@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import type { TranslationKey } from "@/lib/translations";
 
 interface TrustSignal {
@@ -169,7 +170,7 @@ export default function TrustPassportPage(
   }
 ) {
   const params = use(props.params);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [data, setData] = useState<TrustData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -306,7 +307,7 @@ export default function TrustPassportPage(
 
   const formattedDate = new Date(
     data.user.createdAt
-  ).toLocaleDateString("en-US", {
+  ).toLocaleDateString(getDateLocale(language), {
     month: "long",
     year: "numeric",
   });

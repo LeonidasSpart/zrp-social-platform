@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 
 export default function PrivacyPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const SECTIONS = [
     { id: "introduction", number: "01", title: t("privacy.nav.introduction") },
@@ -26,7 +27,7 @@ export default function PrivacyPage() {
     { id: "contact", number: "16", title: t("privacy.nav.contact") },
   ];
 
-  const lastUpdated = new Date().toLocaleDateString("en-US", {
+  const lastUpdated = new Date().toLocaleDateString(getDateLocale(language), {
     year: "numeric",
     month: "long",
     day: "numeric",

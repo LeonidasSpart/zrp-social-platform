@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { TranslationKey } from '@/lib/translations';
+import { getDateLocale } from '@/lib/dateLocale';
 
 interface Ticket {
   id: string;
@@ -65,7 +66,7 @@ const CATEGORY_LABEL_KEYS: Record<string, TranslationKey> = {
 
 export default function AdminSupportPage() {
   const { data: session } = useSession();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ status: '', priority: '', category: '' });
@@ -161,7 +162,7 @@ export default function AdminSupportPage() {
                   <td className="py-3 px-4 text-center">{ticket._count.replies}</td>
                   <td className="py-3 px-4">{ticket.assignedAdmin?.username || '-'}</td>
                   <td className="py-3 px-4 text-zrp-charcoal/50 dark:text-white/50 text-xs">
-                    {new Date(ticket.createdAt).toLocaleDateString()}
+                    {new Date(ticket.createdAt).toLocaleDateString(getDateLocale(language))}
                   </td>
                 </tr>
               ))}

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import T from "@/components/i18n/T";
+import LocaleDateTime from "@/components/i18n/LocaleDateTime";
 import type { TranslationKey } from "@/lib/translations";
 
 const SITE_URL = "https://zrp.one";
@@ -129,17 +130,6 @@ export default async function NewsArticlePage({
     },
   });
 
-  const publishedDate = article.publishedAt.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
-  const publishedTime = article.publishedAt.toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -242,7 +232,11 @@ export default async function NewsArticlePage({
             <span className="hidden sm:inline">•</span>
 
             <time dateTime={article.publishedAt.toISOString()}>
-              {publishedDate} at {publishedTime}
+              <LocaleDateTime
+                iso={article.publishedAt.toISOString()}
+                dateOptions={{ day: "numeric", month: "long", year: "numeric" }}
+                timeOptions={{ hour: "2-digit", minute: "2-digit" }}
+              />
             </time>
 
             <span className="hidden sm:inline">•</span>

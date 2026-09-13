@@ -8,6 +8,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import {
   X,
@@ -208,6 +209,7 @@ export default function VideoFeedViewer({
   onClose,
 }: VideoFeedViewerProps) {
   const { data: session } = useSession();
+  const { t } = useLanguage();
 
   const [videos, setVideos] = useState<
     VideoPost[]
@@ -574,11 +576,11 @@ export default function VideoFeedViewer({
       );
 
     if (minutes < 1) {
-      return "Just now";
+      return t("notifications.justNow");
     }
 
     if (minutes < 60) {
-      return `${minutes}m`;
+      return t("time.minutesShort", { n: minutes });
     }
 
     const hours =
@@ -587,12 +589,10 @@ export default function VideoFeedViewer({
       );
 
     if (hours < 24) {
-      return `${hours}h`;
+      return t("time.hoursShort", { n: hours });
     }
 
-    return `${Math.floor(
-      hours / 24
-    )}d`;
+    return t("time.daysShort", { n: Math.floor(hours / 24) });
   };
 
   // ─────────────────────────────────────────────────────────────

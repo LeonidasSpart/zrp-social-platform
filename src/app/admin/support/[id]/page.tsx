@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { TranslationKey } from '@/lib/translations';
+import { getDateLocale } from '@/lib/dateLocale';
 
 const STATUS_LABEL_KEYS: Record<string, TranslationKey> = {
   OPEN: 'support.tickets.statusOpen',
@@ -61,7 +62,7 @@ export default function AdminTicketDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
   const [replyMessage, setReplyMessage] = useState('');
@@ -137,7 +138,7 @@ export default function AdminTicketDetailPage() {
             <span>{t('adminTicket.fromLabel', { username: ticket.user.username })}</span>
             <span>{t('adminTicket.planLabel', { plan: ticket.user.plan })}</span>
             <span>{t('support.ticketDetail.categoryLabel')} {t(CATEGORY_LABEL_KEYS[ticket.category] ?? 'support.categoryOther')}</span>
-            <span>{t('support.ticketDetail.createdLabel')} {new Date(ticket.createdAt).toLocaleString()}</span>
+            <span>{t('support.ticketDetail.createdLabel')} {new Date(ticket.createdAt).toLocaleString(getDateLocale(language))}</span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -206,7 +207,7 @@ export default function AdminTicketDetailPage() {
             {ticket.user.username[0].toUpperCase()}
           </div>
           <span className="font-medium">{ticket.user.username}</span>
-          <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">{new Date(ticket.createdAt).toLocaleString()}</span>
+          <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">{new Date(ticket.createdAt).toLocaleString(getDateLocale(language))}</span>
         </div>
         <p className="text-zrp-charcoal/80 dark:text-white/80 whitespace-pre-wrap">{ticket.message}</p>
       </div>
@@ -225,7 +226,7 @@ export default function AdminTicketDetailPage() {
               <span className="font-medium">{reply.user.username}</span>
               {reply.user.role === 'ADMIN' && <span className="text-xs text-zrp-red font-medium">{t('adminTicket.adminBadge')}</span>}
               {reply.isInternal && <span className="text-xs bg-yellow-200 dark:bg-yellow-800 px-2 py-0.5 rounded">{t('support.ticketDetail.internalNote')}</span>}
-              <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">{new Date(reply.createdAt).toLocaleString()}</span>
+              <span className="text-xs text-zrp-charcoal/50 dark:text-white/50">{new Date(reply.createdAt).toLocaleString(getDateLocale(language))}</span>
             </div>
             <p className="text-zrp-charcoal/80 dark:text-white/80 whitespace-pre-wrap">{reply.message}</p>
           </div>
