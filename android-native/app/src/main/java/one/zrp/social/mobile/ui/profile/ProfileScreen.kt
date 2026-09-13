@@ -37,6 +37,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CameraAlt
@@ -186,6 +187,9 @@ fun ProfileScreen(
                 var reportingPostId by remember { mutableStateOf<String?>(null) }
                 var isSubmittingReport by remember { mutableStateOf(false) }
                 var reportError by remember { mutableStateOf<String?>(null) }
+                var reportingProfile by remember { mutableStateOf(false) }
+                var isSubmittingProfileReport by remember { mutableStateOf(false) }
+                var profileReportError by remember { mutableStateOf<String?>(null) }
                 var deletingPostId by remember { mutableStateOf<String?>(null) }
                 var isDeletingPost by remember { mutableStateOf(false) }
                 var editingPostId by remember { mutableStateOf<String?>(null) }
@@ -264,6 +268,10 @@ fun ProfileScreen(
                             onFollowClick = { viewModel.toggleFollow() },
                             onBlockClick = { viewModel.toggleBlock() },
                             onMuteClick = { viewModel.toggleMute() },
+                            onReportClick = {
+                                reportingProfile = true
+                                profileReportError = null
+                            },
                             onLogoutClick = onLogout,
                             onMessageClick = { onMessageClick(profile.id, profile.username) },
                             onBookmarksClick = onOpenBookmarks,
@@ -501,6 +509,23 @@ fun ProfileScreen(
                     )
                 }
 
+                if (reportingProfile) {
+                    ReportDialog(
+                        isSubmitting = isSubmittingProfileReport,
+                        error = profileReportError,
+                        onDismiss = { reportingProfile = false },
+                        onSubmit = { reason, details ->
+                            isSubmittingProfileReport = true
+                            viewModel.reportUser(reason, details) { result ->
+                                isSubmittingProfileReport = false
+                                result
+                                    .onSuccess { reportingProfile = false }
+                                    .onFailure { profileReportError = it.message }
+                            }
+                        },
+                    )
+                }
+
                 val deletePostId = deletingPostId
                 if (deletePostId != null) {
                     AlertDialog(
@@ -584,6 +609,7 @@ private fun ProfileHeader(
     onFollowClick: () -> Unit,
     onBlockClick: () -> Unit,
     onMuteClick: () -> Unit,
+    onReportClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onMessageClick: () -> Unit,
     onBookmarksClick: () -> Unit,
@@ -736,6 +762,14 @@ private fun ProfileHeader(
                                     onClick = {
                                         moreMenuOpen = false
                                         onBlockClick()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.profile_report_user)) },
+                                    leadingIcon = { Icon(Icons.Filled.Flag, contentDescription = null, tint = ZrpRed) },
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        onReportClick()
                                     },
                                 )
                             }

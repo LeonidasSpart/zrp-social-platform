@@ -388,6 +388,7 @@
     <string name="profile_unmute">Réactiver</string>
     <string name="profile_block">Bloquer</string>
     <string name="profile_unblock">Débloquer</string>
+    <string name="profile_report_user">Signaler</string>
     <string name="profile_replies">Réponses</string>
     <string name="profile_media">Médias</string>
     <string name="profile_likes">J\'aime</string>

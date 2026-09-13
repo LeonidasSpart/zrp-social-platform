@@ -85,7 +85,7 @@ struct DataExportView: View {
     }
 }
 
-/// Report a post, comment or listing: `POST /api/reports`.
+/// Report a post, comment, listing or a bare profile: `POST /api/reports`.
 ///
 /// The reasons are the website's exact stored strings - `Report.reason`
 /// is free text that moderators read, so the value on the wire stays

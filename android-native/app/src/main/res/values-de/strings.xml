@@ -388,6 +388,7 @@
     <string name="profile_unmute">Ton an</string>
     <string name="profile_block">Blockieren</string>
     <string name="profile_unblock">Entsperren</string>
+    <string name="profile_report_user">Melden</string>
     <string name="profile_replies">Antworten</string>
     <string name="profile_media">Medien</string>
     <string name="profile_likes">Gefällt mir</string>

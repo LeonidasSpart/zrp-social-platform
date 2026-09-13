@@ -97,9 +97,9 @@ export default function RightPanel() {
   return (
     <aside
       className="
-        hidden xl:flex
+        hidden lg:flex
         flex-col
-        w-80
+        w-72 xl:w-80
         flex-shrink-0
         h-[100dvh]
         sticky
@@ -112,7 +112,7 @@ export default function RightPanel() {
       "
     >
       {/* The rail's own search field is gone: the header now carries
-          one at lg and above, so from 1280px up (where this rail
+          one at lg and above, so from 1024px up (where this rail now
           appears) the two sat on screen together showing the same
           placeholder and doing the same thing. The header's is the one
           that survives, because it is also present on Settings,

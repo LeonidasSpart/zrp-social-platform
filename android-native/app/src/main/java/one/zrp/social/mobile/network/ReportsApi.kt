@@ -17,6 +17,10 @@ data class CreateReportRequest(
     val listingId: String? = null,
     val opportunityId: String? = null,
     val campaignId: String? = null,
+    // A bare profile report (harassment, impersonation, fake account)
+    // with no single post/comment/listing attached - see the backend's
+    // reportedUserId field in prisma/schema.prisma.
+    val userId: String? = null,
     val reason: String,
     val details: String? = null,
 )

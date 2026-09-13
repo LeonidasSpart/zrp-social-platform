@@ -18,17 +18,26 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { postId, commentId, listingId, challengeId, opportunityId, campaignId, reason, details } = await req.json();
+    const { postId, commentId, listingId, challengeId, opportunityId, campaignId, userId, reason, details } =
+      await req.json();
 
     if (!reason) {
       return NextResponse.json({ error: "Reason is required" }, { status: 400 });
     }
 
-    if (!postId && !commentId && !listingId && !challengeId && !opportunityId && !campaignId) {
+    if (!postId && !commentId && !listingId && !challengeId && !opportunityId && !campaignId && !userId) {
       return NextResponse.json(
-        { error: "One of postId, commentId, listingId, challengeId, opportunityId, or campaignId is required" },
+        {
+          error:
+            "One of postId, commentId, listingId, challengeId, opportunityId, campaignId, or userId is required",
+        },
         { status: 400 }
       );
+    }
+
+    // A bare profile report can't target yourself.
+    if (userId && userId === session.user.id) {
+      return NextResponse.json({ error: "You can't report your own account." }, { status: 400 });
     }
 
     // ─── Prevent duplicate reports ────────────────────────────────────
@@ -49,7 +58,9 @@ export async function POST(req: NextRequest) {
             ? { challengeId }
             : opportunityId
               ? { opportunityId }
-              : { campaignId };
+              : campaignId
+                ? { campaignId }
+                : { reportedUserId: userId };
 
     const existingReport = await prisma.report.findFirst({
       where: {
@@ -75,6 +86,7 @@ export async function POST(req: NextRequest) {
         challengeId: challengeId || null,
         opportunityId: opportunityId || null,
         campaignId: campaignId || null,
+        reportedUserId: userId || null,
         reason,
         details: details || null,
         status: "pending",

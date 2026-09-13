@@ -71,6 +71,9 @@ export async function GET(req: NextRequest) {
               organizer: { select: { id: true, username: true, name: true } },
             },
           },
+          reportedUser: {
+            select: { id: true, username: true, name: true },
+          },
         },
       }),
       prisma.report.count({ where }),

@@ -337,6 +337,7 @@ called and the real response being handled.
 | --- | --- | --- | --- | --- | --- |
 | Report post / comment / listing | `POST /api/reports` | ✅ | ✅ | ✅ posts and listings; the site's exact stored reason strings | IMPLEMENTED |
 | Report a comment | `POST /api/reports` (`commentId`) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Report a profile (bare account report - harassment, impersonation, fake account) | `POST /api/reports` (`userId` → `reportedUserId`, a seventh polymorphic target distinct from the action-only `targetUserId`) | ✅ | ✅ | ✅ from the profile menu, not offered on your own profile (same guard as Block/Mute) | IMPLEMENTED |
 | Block / unblock | `POST /api/users/{username}/block` | ✅ | ✅ | ✅ toggle from the blocked list | IMPLEMENTED |
 | Blocked list | `GET /api/users/blocked` (bare array) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Mute / unmute | `GET/POST /api/users/mute` | ✅ | ✅ | ✅ toggle from the muted list | IMPLEMENTED |

@@ -585,6 +585,13 @@ class ProfileViewModel(
         }
     }
 
+    fun reportUser(reason: String, details: String?, onResult: (Result<Unit>) -> Unit) {
+        val profile = _state.value.profile ?: return
+        viewModelScope.launch {
+            onResult(repository.reportUser(profile.id, reason, details))
+        }
+    }
+
     // Applies the submitted content locally (post.copy) rather than
     // replacing with the server's returned object - PUT /posts/{id}
     // never carries a liked/reposted/bookmarked flag, so swapping in

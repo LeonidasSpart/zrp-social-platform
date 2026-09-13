@@ -388,6 +388,7 @@
     <string name="profile_unmute">إلغاء الكتم</string>
     <string name="profile_block">حظر</string>
     <string name="profile_unblock">إلغاء الحظر</string>
+    <string name="profile_report_user">إبلاغ</string>
     <string name="profile_replies">الردود</string>
     <string name="profile_media">الوسائط</string>
     <string name="profile_likes">الإعجابات</string>
