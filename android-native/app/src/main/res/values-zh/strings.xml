@@ -179,17 +179,17 @@
     <string name="nav_search">搜索</string>
     <string name="nav_explore">探索</string>
     <string name="nav_communities">社区</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">游戏</string>
     <string name="nav_news">新闻</string>
     <string name="nav_music">音乐</string>
     <string name="nav_marketplace">市场</string>
-    <string name="nav_opportunity">Opportunity</string>
-    <string name="nav_aid">Help</string>
+    <string name="nav_opportunity">机会</string>
+    <string name="nav_aid">援助</string>
     <string name="nav_ambassadors">全球大使</string>
     <string name="nav_ai">ZRP AI</string>
     <string name="nav_creator_studio">创作者工作室</string>
     <string name="nav_admin">管理员</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">短视频</string>
     <string name="nav_help_center">帮助中心</string>
     <string name="drawer_section_core">核心</string>
     <string name="drawer_section_discover">发现</string>
@@ -2183,4 +2183,12 @@
     <string name="pricing_support_priority">优先</string>
     <string name="pricing_support_247">全天候</string>
     <string name="pricing_upgrade_web_only">套餐升级目前仅通过 ZRP 网页版管理。</string>
+
+    <!-- Localization audit fixes (2026-09) -->
+    <string name="bookmarks_empty">暂无收藏。您保存的帖子会显示在这里。</string>
+    <string name="comments_empty">暂无评论。抢先评论吧。</string>
+    <string name="createpost_char_count">%1$d 字</string>
+    <string name="comments_share_title">分享评论</string>
+    <string name="messages_replying_to">回复 %1$s</string>
+    <string name="messages_replying_to_self">自己</string>
 </resources>

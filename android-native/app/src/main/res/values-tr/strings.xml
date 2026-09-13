@@ -179,17 +179,17 @@
     <string name="nav_search">Ara</string>
     <string name="nav_explore">Keşfet</string>
     <string name="nav_communities">Topluluklar</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">Oyunlar</string>
     <string name="nav_news">Haberler</string>
     <string name="nav_music">Müzik</string>
     <string name="nav_marketplace">Pazar Yeri</string>
-    <string name="nav_opportunity">Opportunity</string>
-    <string name="nav_aid">Help</string>
+    <string name="nav_opportunity">Fırsatlar</string>
+    <string name="nav_aid">Yardım</string>
     <string name="nav_ambassadors">Küresel Elçiler</string>
     <string name="nav_ai">ZRP Yapay Zeka</string>
     <string name="nav_creator_studio">Yaratıcı Stüdyosu</string>
     <string name="nav_admin">Yönetim</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Kısa Videolar</string>
     <string name="nav_help_center">Yardım Merkezi</string>
     <string name="drawer_section_core">Temel</string>
     <string name="drawer_section_discover">Keşfet</string>
@@ -1172,7 +1172,7 @@
     <string name="shorts_share">Paylaş</string>
     <string name="shorts_share_post_by">%1$s kullanıcısının gönderisi</string>
     <string name="shorts_comment">Yorumlar</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Kısa Videolar</string>
     <string name="shorts_discover_entry">Shorts\'u Keşfet</string>
     <string name="shorts_upload_close">Kapat</string>
     <string name="shorts_upload_remove_video">Videoyu kaldır</string>
@@ -2183,4 +2183,12 @@
     <string name="pricing_support_priority">Öncelikli</string>
     <string name="pricing_support_247">7/24</string>
     <string name="pricing_upgrade_web_only">Plan yükseltmeleri şu anda yalnızca ZRP Web üzerinden yönetiliyor.</string>
+
+    <!-- Localization audit fixes (2026-09) -->
+    <string name="bookmarks_empty">Henüz yer imi yok. Kaydettiğiniz gönderiler burada görünecek.</string>
+    <string name="comments_empty">Henüz yorum yok. İlk yanıtı sen ver.</string>
+    <string name="createpost_char_count">%1$d karakter</string>
+    <string name="comments_share_title">Yorumu paylaş</string>
+    <string name="messages_replying_to">%1$s kişisine yanıt veriliyor</string>
+    <string name="messages_replying_to_self">kendinize</string>
 </resources>

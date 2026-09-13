@@ -179,17 +179,17 @@
     <string name="nav_search">Rechercher</string>
     <string name="nav_explore">Explorer</string>
     <string name="nav_communities">Communautés</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">Jeux</string>
     <string name="nav_news">Actualités</string>
     <string name="nav_music">Musique</string>
     <string name="nav_marketplace">Marketplace</string>
-    <string name="nav_opportunity">Opportunity</string>
-    <string name="nav_aid">Help</string>
+    <string name="nav_opportunity">Opportunités</string>
+    <string name="nav_aid">Aide</string>
     <string name="nav_ambassadors">Ambassadeurs Mondiaux</string>
     <string name="nav_ai">IA ZRP</string>
     <string name="nav_creator_studio">Studio Créateur</string>
     <string name="nav_admin">Admin</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Vidéos courtes</string>
     <string name="nav_help_center">Centre d\'aide</string>
     <string name="drawer_section_core">Essentiel</string>
     <string name="drawer_section_discover">Découvrir</string>
@@ -1172,7 +1172,7 @@
     <string name="shorts_share">Partager</string>
     <string name="shorts_share_post_by">Publication de %1$s</string>
     <string name="shorts_comment">Commentaires</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Vidéos courtes</string>
     <string name="shorts_discover_entry">Découvrir Shorts</string>
     <string name="shorts_upload_close">Fermer</string>
     <string name="shorts_upload_remove_video">Supprimer la vidéo</string>
@@ -1202,7 +1202,7 @@
     <string name="caption_view_less">Voir moins</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Montant (USDC)</string>
-    <string name="creator_available_balance">Solde disponible : {amount} $</string>
+    <string name="creator_available_balance">Solde disponible : %1$s</string>
     <string name="creator_enter_amount_placeholder">Saisissez un montant</string>
     <string name="creator_enter_wallet_placeholder">Saisissez votre adresse de portefeuille Solana</string>
     <string name="creator_err_failed_load_dashboard">Échec du chargement du tableau de bord</string>
@@ -2183,4 +2183,12 @@
     <string name="pricing_support_priority">Prioritaire</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Les mises à niveau de forfait sont actuellement gérées sur ZRP Web.</string>
+
+    <!-- Localization audit fixes (2026-09) -->
+    <string name="bookmarks_empty">Aucun favori pour l\'instant. Les publications que vous enregistrez apparaîtront ici.</string>
+    <string name="comments_empty">Aucun commentaire pour l\'instant. Soyez le premier à répondre.</string>
+    <string name="createpost_char_count">%1$d caractères</string>
+    <string name="comments_share_title">Partager le commentaire</string>
+    <string name="messages_replying_to">En réponse à %1$s</string>
+    <string name="messages_replying_to_self">vous-même</string>
 </resources>

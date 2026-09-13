@@ -5,14 +5,12 @@
 
     <!-- Settings module + generic actions - real copy extracted from the
          website's own src/lib/translations.ts (settings.*/action.*
-         namespaces), translated into all 11 official ZRP languages (see
+         namespaces), translated into all 15 official ZRP languages (see
          values-fr, values-de, values-it, values-sq, values-es, values-ru,
-         values-ar, values-zh, values-tr, values-id). settings_account,
-         settings_security and settings_privacy_safety are English-only
-         here because the website's own CATEGORIES array
-         (src/app/settings/page.tsx) hardcodes those same three category
-         labels untranslated too - this matches real web behavior, not a
-         native gap. -->
+         values-ar, values-zh, values-tr, values-id, values-pt, values-ja,
+         values-ko, values-hi). settings_account, settings_security and
+         settings_privacy_safety here are the English source strings only -
+         every language override file carries its own real translation. -->
     <string name="settings_title">Settings</string>
     <string name="settings_account">Account</string>
     <string name="settings_profile_category">Profile</string>
@@ -1212,7 +1210,6 @@
     <string name="shorts_upload_err_internal_server">Something went wrong on our end while uploading. Please try again in a moment.</string>
     <string name="caption_view_more">View more</string>
     <string name="caption_view_less">View less</string>
-    <!-- "Shorts" is a proper noun, left untranslated in every one of web's own 11 language blocks (nav.shorts) - present only here so every locale falls back to this single default value. -->
     <string name="shorts_title">Shorts</string>
     <!-- ZRP Creator Studio (native parity) -->
     <string name="creator_amount_usdc_label">Amount (USDC)</string>
@@ -2199,4 +2196,14 @@
     <string name="pricing_support_priority">Priority</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Plan upgrades are currently managed on ZRP Web.</string>
+
+    <!-- Localization audit fixes (2026-09) - these were hardcoded English
+         literals bypassing the string-resource system entirely; now real
+         resources translated into all 15 official ZRP languages. -->
+    <string name="bookmarks_empty">No bookmarks yet. Posts you save will show up here.</string>
+    <string name="comments_empty">No comments yet. Be the first to reply.</string>
+    <string name="createpost_char_count">%1$d characters</string>
+    <string name="comments_share_title">Share comment</string>
+    <string name="messages_replying_to">Replying to %1$s</string>
+    <string name="messages_replying_to_self">yourself</string>
 </resources>

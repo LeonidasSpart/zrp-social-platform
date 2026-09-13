@@ -108,7 +108,7 @@ fun BookmarksScreen(
             state.posts.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: "No bookmarks yet. Posts you save will show up here.",
+                        text = state.error ?: stringResource(R.string.bookmarks_empty),
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {

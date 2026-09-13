@@ -116,12 +116,9 @@ import one.zrp.social.mobile.ui.theme.Spacing
  * boundary, not this one.
  *
  * Every label here is a string resource with real translations for
- * all 11 official ZRP languages (extracted from the website's own
+ * all 15 official ZRP languages (extracted from the website's own
  * src/lib/translations.ts) - see the per-language values directories
- * under res/. Account and Security stay English-only because the
- * website's own CATEGORIES array hardcodes those same two labels
- * untranslated too (see values/strings.xml's comment) - not a native
- * shortfall.
+ * under res/.
  */
 @Composable
 fun SettingsScreen(

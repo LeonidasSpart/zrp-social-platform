@@ -465,7 +465,7 @@ fun CreatePostScreen(
             }
 
             Text(
-                text = "${state.content.length} characters",
+                text = stringResource(R.string.createpost_char_count, state.content.length),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
