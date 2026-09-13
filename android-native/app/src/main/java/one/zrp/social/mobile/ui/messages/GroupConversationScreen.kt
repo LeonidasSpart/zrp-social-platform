@@ -77,6 +77,8 @@ import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.TypingIndicator
@@ -509,12 +511,19 @@ private fun GroupMessageBubble(
 
         Column(horizontalAlignment = if (isOwnMessage) Alignment.End else Alignment.Start) {
             if (showSenderHeader) {
-                Text(
-                    text = senderName,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 2.dp),
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(start = 4.dp, bottom = 2.dp)
+                        .clickable(onClick = onAvatarClick, role = Role.Button),
+                ) {
+                    Text(
+                        text = senderName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    VerifiedBadge(badgeType = sender?.badgeType, size = BadgeSize.small)
+                }
             }
 
             Box {

@@ -420,6 +420,8 @@ struct ConversationView: View {
 /// One message bubble, with its reply context and reactions.
 private struct MessageBubble: View {
 
+    @EnvironmentObject private var navigator: Navigator
+
     let message: Message
     let isOwn: Bool
     let quickReactions: [String]
@@ -548,10 +550,18 @@ private struct MessageBubble: View {
                 .fill(ZrpColor.outline)
                 .frame(width: 2)
             VStack(alignment: .leading, spacing: 0) {
-                if let name = replyTo.sender?.displayName {
-                    Text(verbatim: name)
+                if let sender = replyTo.sender {
+                    Button {
+                        navigator.push(.profile(username: sender.username))
+                    } label: {
+                        HStack(spacing: 2) {
+                            Text(verbatim: sender.displayName)
+                            VerifiedBadge(badgeType: sender.badgeType, size: 11)
+                        }
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    }
+                    .buttonStyle(.plain)
                 }
                 Text(verbatim: replyTo.content)
                     .font(.caption2)

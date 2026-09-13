@@ -31,7 +31,7 @@ const POST_INCLUDE = postInclude("");
 const COMMENT_INCLUDE = {
   comment: {
     include: {
-      author: { select: { id: true, username: true, name: true, avatarUrl: true } },
+      author: { select: { id: true, username: true, name: true, avatarUrl: true, badgeType: true } },
       post: {
         select: {
           id: true,

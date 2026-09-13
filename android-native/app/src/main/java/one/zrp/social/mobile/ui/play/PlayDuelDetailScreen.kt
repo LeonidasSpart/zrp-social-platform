@@ -1,6 +1,7 @@
 package one.zrp.social.mobile.ui.play
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,7 +38,12 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /** A single duel - ported from PlayDuelDetailPage.tsx. */
 @Composable
-fun PlayDuelDetailScreen(duelId: String, onBack: () -> Unit, onPlay: (challengeId: String, duelId: String) -> Unit) {
+fun PlayDuelDetailScreen(
+    duelId: String,
+    onBack: () -> Unit,
+    onPlay: (challengeId: String, duelId: String) -> Unit,
+    onOpenProfile: (String) -> Unit,
+) {
     val viewModel: PlayDuelDetailViewModel = viewModel(
         factory = remember { PlayDuelDetailViewModelFactory(duelId, PlayRepository()) },
     )
@@ -112,6 +119,7 @@ fun PlayDuelDetailScreen(duelId: String, onBack: () -> Unit, onPlay: (challengeI
                             username = me.username,
                             badgeType = me.badgeType,
                             score = if (duel.status == "COMPLETED") myScore else null,
+                            onClick = { onOpenProfile(me.username) },
                         )
                         Text(
                             text = stringResource(R.string.play_vs),
@@ -125,6 +133,7 @@ fun PlayDuelDetailScreen(duelId: String, onBack: () -> Unit, onPlay: (challengeI
                             username = opponent.username,
                             badgeType = opponent.badgeType,
                             score = if (duel.status == "COMPLETED") opponentScore else null,
+                            onClick = { onOpenProfile(opponent.username) },
                         )
                     }
 
@@ -176,8 +185,17 @@ fun PlayDuelDetailScreen(duelId: String, onBack: () -> Unit, onPlay: (challengeI
 }
 
 @Composable
-private fun DuelParticipantColumn(avatarUrl: String?, username: String, badgeType: String?, score: Int?) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun DuelParticipantColumn(
+    avatarUrl: String?,
+    username: String,
+    badgeType: String?,
+    score: Int?,
+    onClick: () -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(onClick = onClick, role = Role.Button),
+    ) {
         Avatar(url = avatarUrl, name = username, size = 56.dp)
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 6.dp)) {
             Text(text = "@$username", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)

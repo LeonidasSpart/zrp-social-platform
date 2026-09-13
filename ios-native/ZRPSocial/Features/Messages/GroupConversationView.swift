@@ -713,6 +713,8 @@ struct GroupConversationView: View {
 /// do not repeat it, matching how every group chat behaves.
 private struct GroupMessageBubble: View {
 
+    @EnvironmentObject private var navigator: Navigator
+
     let message: GroupMessage
     let isOwn: Bool
 
@@ -721,10 +723,18 @@ private struct GroupMessageBubble: View {
             if isOwn { Spacer(minLength: ZrpSpacing.xxl) }
 
             VStack(alignment: isOwn ? .trailing : .leading, spacing: 2) {
-                if !isOwn, let name = message.sender?.displayName, !name.isEmpty {
-                    Text(verbatim: name)
+                if !isOwn, let sender = message.sender, !sender.displayName.isEmpty {
+                    Button {
+                        navigator.push(.profile(username: sender.username))
+                    } label: {
+                        HStack(spacing: 2) {
+                            Text(verbatim: sender.displayName)
+                            VerifiedBadge(badgeType: sender.badgeType, size: 11)
+                        }
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 if let imageUrl = message.imageUrl, !imageUrl.isEmpty {

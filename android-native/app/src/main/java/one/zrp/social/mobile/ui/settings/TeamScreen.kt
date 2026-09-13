@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -73,7 +74,7 @@ private val TeamOwnerColor = Color(0xFFF59E0B)
  * still show, just stacked instead of side by side.
  */
 @Composable
-fun TeamScreen(onBack: () -> Unit) {
+fun TeamScreen(onBack: () -> Unit, onOpenProfile: (String) -> Unit) {
     val viewModel: TeamViewModel = viewModel(factory = remember { TeamViewModelFactory(TeamRepository()) })
     val state by viewModel.state.collectAsState()
 
@@ -110,7 +111,7 @@ fun TeamScreen(onBack: () -> Unit) {
                     textAlign = TextAlign.Center,
                 )
             }
-            else -> TeamBody(state = state, viewModel = viewModel)
+            else -> TeamBody(state = state, viewModel = viewModel, onOpenProfile = onOpenProfile)
         }
     }
 
@@ -186,7 +187,7 @@ private fun IneligibleBody(message: String?) {
 }
 
 @Composable
-private fun TeamBody(state: TeamUiState, viewModel: TeamViewModel) {
+private fun TeamBody(state: TeamUiState, viewModel: TeamViewModel, onOpenProfile: (String) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(Spacing.md)) {
         item {
             Row(
@@ -221,6 +222,7 @@ private fun TeamBody(state: TeamUiState, viewModel: TeamViewModel) {
                     trailingText = stringResource(R.string.team_account_owner),
                     onChangeRole = null,
                     onRemove = null,
+                    onOpenProfile = onOpenProfile,
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.xs))
             }
@@ -246,6 +248,7 @@ private fun TeamBody(state: TeamUiState, viewModel: TeamViewModel) {
                     trailingText = formatRelativeTime(member.createdAt),
                     onChangeRole = { role -> viewModel.updateMemberRole(member.id, role) },
                     onRemove = { viewModel.openRemoveDialog(member) },
+                    onOpenProfile = onOpenProfile,
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.xs))
             }
@@ -268,6 +271,7 @@ private fun MemberRow(
     trailingText: String,
     onChangeRole: ((String) -> Unit)?,
     onRemove: (() -> Unit)?,
+    onOpenProfile: (String) -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
 
@@ -275,12 +279,19 @@ private fun MemberRow(
         modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Avatar(url = avatarUrl, name = displayName, size = 40.dp)
-        Column(modifier = Modifier.padding(start = Spacing.sm).weight(1f)) {
-            Text(text = displayName, style = MaterialTheme.typography.bodyMedium)
-            Text(text = "@$username", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(text = email, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            RoleBadge(role = role)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = { onOpenProfile(username) }, role = Role.Button),
+        ) {
+            Avatar(url = avatarUrl, name = displayName, size = 40.dp)
+            Column(modifier = Modifier.padding(start = Spacing.sm)) {
+                Text(text = displayName, style = MaterialTheme.typography.bodyMedium)
+                Text(text = "@$username", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = email, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                RoleBadge(role = role)
+            }
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(text = trailingText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

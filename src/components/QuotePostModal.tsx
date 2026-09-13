@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge";
@@ -74,26 +75,36 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
         {/* ─── Original post preview ────────────────────────────────── */}
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
-              {post.author.avatarUrl ? (
-                <img
-                  src={post.author.avatarUrl}
-                  alt={post.author.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
-                  {post.author.name[0].toUpperCase()}
-                </div>
-              )}
-            </div>
+            <Link href={`/profile/${post.author.username}`} className="flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                {post.author.avatarUrl ? (
+                  <img
+                    src={post.author.avatarUrl}
+                    alt={post.author.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
+                    {post.author.name[0].toUpperCase()}
+                  </div>
+                )}
+              </div>
+            </Link>
             <div>
               <div className="flex items-center gap-1">
-                <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                <Link
+                  href={`/profile/${post.author.username}`}
+                  className="font-semibold text-gray-900 dark:text-white text-sm hover:underline"
+                >
                   {post.author.name}
-                </span>
+                </Link>
                 <VerifiedBadge badgeType={post.author.badgeType} />
-                <span className="text-xs text-gray-500">@{post.author.username}</span>
+                <Link
+                  href={`/profile/${post.author.username}`}
+                  className="text-xs text-gray-500 hover:underline"
+                >
+                  @{post.author.username}
+                </Link>
               </div>
               <p className="text-sm text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap">
                 {post.content}

@@ -55,6 +55,8 @@ import one.zrp.social.mobile.data.MediaUploadRepository
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ConversationParticipantDto
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.BadgeSize
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.ZrpEmptyState
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -344,12 +346,16 @@ private fun ParticipantRow(
     ) {
         Avatar(url = user.avatarUrl, name = user.name ?: user.username, size = 40.dp)
         Column(modifier = Modifier.weight(1f).padding(start = Spacing.sm)) {
-            Text(
-                text = (user.name ?: user.username) + if (isCurrentUser) " " + stringResource(R.string.group_you_suffix) else "",
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = (user.name ?: user.username) + if (isCurrentUser) " " + stringResource(R.string.group_you_suffix) else "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                VerifiedBadge(badgeType = user.badgeType, size = BadgeSize.small)
+            }
             Text(
                 text = "@${user.username}",
                 style = MaterialTheme.typography.labelSmall,

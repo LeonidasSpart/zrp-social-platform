@@ -90,10 +90,13 @@ export default function ListingCard({ listing, favorited, onToggleFavorite, show
             <span />
           )}
           {listing.seller && (
-            <span className="flex items-center gap-1 flex-shrink-0">
+            <Link
+              href={`/profile/${listing.seller.username}`}
+              className="flex items-center gap-1 flex-shrink-0 hover:underline"
+            >
               @{listing.seller.username}
               {listing.seller.badgeType && <VerifiedBadge badgeType={listing.seller.badgeType} />}
-            </span>
+            </Link>
           )}
         </div>
         {typeof listing.views === "number" && (

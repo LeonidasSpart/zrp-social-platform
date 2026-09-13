@@ -59,6 +59,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -103,7 +104,7 @@ import one.zrp.social.mobile.util.formatCount
  * reachable per-post destination that already exists.
  */
 @Composable
-fun CreatorScreen(onBack: () -> Unit, onOpenPost: (String) -> Unit) {
+fun CreatorScreen(onBack: () -> Unit, onOpenPost: (String) -> Unit, onOpenProfile: (String) -> Unit) {
     val viewModel: CreatorViewModel = viewModel(
         factory = remember { CreatorViewModelFactory(CreatorRepository()) },
     )
@@ -168,7 +169,7 @@ fun CreatorScreen(onBack: () -> Unit, onOpenPost: (String) -> Unit) {
                 }
 
                 when (state.activeTab) {
-                    CreatorTab.OVERVIEW -> OverviewTab(state = state, viewModel = viewModel)
+                    CreatorTab.OVERVIEW -> OverviewTab(state = state, viewModel = viewModel, onOpenProfile = onOpenProfile)
                     CreatorTab.CONTENT -> ContentTab(state = state, onOpenPost = onOpenPost)
                     CreatorTab.AUDIENCE -> AudienceTab(state = state)
                 }
@@ -204,7 +205,7 @@ private fun IneligibleBody(message: String?) {
 }
 
 @Composable
-private fun OverviewTab(state: CreatorUiState, viewModel: CreatorViewModel) {
+private fun OverviewTab(state: CreatorUiState, viewModel: CreatorViewModel, onOpenProfile: (String) -> Unit) {
     val profile = state.profile ?: return
     val stats = state.stats
 
@@ -295,7 +296,7 @@ private fun OverviewTab(state: CreatorUiState, viewModel: CreatorViewModel) {
                 )
             }
         } else {
-            items(state.recentTips, key = { it.id }) { tip -> TipRow(tip) }
+            items(state.recentTips, key = { it.id }) { tip -> TipRow(tip, onOpenProfile = onOpenProfile) }
         }
 
         item {
@@ -347,9 +348,12 @@ private fun SettingsToggleRow(label: String, checked: Boolean, onCheckedChange: 
 }
 
 @Composable
-private fun TipRow(tip: CreatorTip) {
+private fun TipRow(tip: CreatorTip, onOpenProfile: (String) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = { onOpenProfile(tip.sender.username) }, role = Role.Button)
+            .padding(vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Avatar(url = tip.sender.avatarUrl, name = tip.sender.name ?: tip.sender.username, size = 32.dp)

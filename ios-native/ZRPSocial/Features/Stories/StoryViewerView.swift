@@ -21,6 +21,7 @@ struct StoryViewerView: View {
     let viewerId: String?
 
     @ObservedObject var viewModel: StoriesViewModel
+    @EnvironmentObject private var navigator: Navigator
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -225,19 +226,26 @@ struct StoryViewerView: View {
 
     private func header(for story: Story) -> some View {
         HStack(spacing: ZrpSpacing.sm) {
-            AvatarView(
-                url: group.user.avatarUrl,
-                displayName: group.user.displayName,
-                size: ZrpMetrics.avatarSmall
-            )
-            VStack(alignment: .leading, spacing: 0) {
-                Text(verbatim: group.user.displayName)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.white)
-                Text(verbatim: RelativeTime.compact(from: story.createdAt))
-                    .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.75))
+            Button {
+                navigator.push(.profile(username: group.user.username))
+            } label: {
+                HStack(spacing: ZrpSpacing.sm) {
+                    AvatarView(
+                        url: group.user.avatarUrl,
+                        displayName: group.user.displayName,
+                        size: ZrpMetrics.avatarSmall
+                    )
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(verbatim: group.user.displayName)
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.white)
+                        Text(verbatim: RelativeTime.compact(from: story.createdAt))
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.75))
+                    }
+                }
             }
+            .buttonStyle(.plain)
             Spacer()
             Button { dismiss() } label: {
                 Image(systemName: "xmark")

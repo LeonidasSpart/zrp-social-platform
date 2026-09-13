@@ -227,7 +227,10 @@ struct NotificationsView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    text(for: notification)
+                    HStack(spacing: 4) {
+                        text(for: notification)
+                        VerifiedBadge(badgeType: notification.fromUser?.badgeType, size: 12)
+                    }
                     if let post = notification.post, !post.content.isEmpty {
                         Text(verbatim: post.content)
                             .font(.footnote)

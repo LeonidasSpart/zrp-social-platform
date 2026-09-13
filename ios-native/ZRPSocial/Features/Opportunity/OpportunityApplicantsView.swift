@@ -80,9 +80,12 @@ struct OpportunityApplicantsView: View {
                         HStack(spacing: ZrpSpacing.sm) {
                             AvatarView(url: person.avatarUrl, displayName: person.displayName, size: 36)
                             VStack(alignment: .leading, spacing: 0) {
-                                Text(verbatim: person.displayName)
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(ZrpColor.onSurface)
+                                HStack(spacing: 2) {
+                                    Text(verbatim: person.displayName)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(ZrpColor.onSurface)
+                                    VerifiedBadge(badgeType: person.badgeType, size: 12)
+                                }
                                 Text(verbatim: "@" + person.username)
                                     .font(.caption)
                                     .foregroundStyle(ZrpColor.onSurfaceMuted)

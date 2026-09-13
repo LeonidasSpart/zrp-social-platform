@@ -46,13 +46,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.AdminRepository
 import one.zrp.social.mobile.network.AdminUser
+import one.zrp.social.mobile.ui.components.BadgeSize
+import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
@@ -67,7 +71,7 @@ private val ASSIGNABLE_ROLES = listOf("USER", "MODERATOR", "ADMIN")
  * not the real authorization boundary.
  */
 @Composable
-fun AdminUsersScreen(isAdmin: Boolean, onBack: () -> Unit) {
+fun AdminUsersScreen(isAdmin: Boolean, onBack: () -> Unit, onOpenProfile: (String) -> Unit) {
     val viewModel: AdminUsersViewModel = viewModel(
         factory = remember { AdminUsersViewModelFactory(AdminRepository()) },
     )
@@ -151,6 +155,7 @@ fun AdminUsersScreen(isAdmin: Boolean, onBack: () -> Unit) {
                         onChangeRole = { role -> viewModel.changeRole(user.id, role) },
                         onChangePlan = { plan -> viewModel.requestPlanChange(user.id, plan) },
                         onDelete = { viewModel.requestDelete(user.id) },
+                        onOpenProfile = onOpenProfile,
                     )
                 }
             }
@@ -250,6 +255,7 @@ private fun UserRow(
     onChangeRole: (String) -> Unit,
     onChangePlan: (String) -> Unit,
     onDelete: () -> Unit,
+    onOpenProfile: (String) -> Unit,
 ) {
     var roleMenuOpen by remember { mutableStateOf(false) }
     var planMenuOpen by remember { mutableStateOf(false) }
@@ -262,8 +268,21 @@ private fun UserRow(
             .padding(Spacing.md),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = "@${user.username}", fontWeight = FontWeight.Bold)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = { onOpenProfile(user.username) }, role = Role.Button),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "@${user.username}",
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    VerifiedBadge(badgeType = user.badgeType, size = BadgeSize.small)
+                }
                 Text(text = user.email, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (user.banned) {

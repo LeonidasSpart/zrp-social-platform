@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import PlayXpBar from "@/components/play/PlayXpBar";
 import ChallengeCard from "@/components/play/ChallengeCard";
 import DuelCard from "@/components/play/DuelCard";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { TYPE_LABEL_KEYS } from "@/lib/play/types";
 import type { PlayChallengeDetail, PlayChallengeSummary, PlayDuelSummary, PlayLeaderboardEntry, PlayProfileStats } from "@/lib/play/types";
 
@@ -211,8 +212,9 @@ export default function PlayHomePage() {
                   alt={entry.user.username}
                   className="w-8 h-8 rounded-full object-cover"
                 />
-                <span className="flex-1 text-sm font-semibold text-gray-900 dark:text-white truncate">
-                  @{entry.user.username}
+                <span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-1">
+                  <span className="truncate">@{entry.user.username}</span>
+                  <VerifiedBadge badgeType={entry.user.badgeType} />
                 </span>
                 <span className="text-sm font-bold text-zrp-red">{t("play.xp", { n: entry.totalXp })}</span>
               </Link>

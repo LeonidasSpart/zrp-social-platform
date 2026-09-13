@@ -501,9 +501,12 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             {comment.author.badgeType && (
               <VerifiedBadge badgeType={comment.author.badgeType} />
             )}
-            <span className="text-xs text-gray-400 dark:text-gray-500">
+            <Link
+              href={`/profile/${comment.author.username}`}
+              className="text-xs text-gray-400 dark:text-gray-500 hover:underline"
+            >
               @{comment.author.username}
-            </span>
+            </Link>
             <span className="text-xs text-gray-400 dark:text-gray-500">·</span>
             <span className="text-xs text-gray-400 dark:text-gray-500">
               {timeAgo(comment.createdAt)}

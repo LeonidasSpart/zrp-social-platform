@@ -769,13 +769,16 @@ export default function AdminNewsPage() {
                                 /news/{article.slug}
                               </p>
 
-                              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                              <Link
+                                href={`/profile/${article.author.username}`}
+                                className="mt-1 block text-xs text-gray-500 hover:underline dark:text-gray-400"
+                              >
                                 {t("adminNews.byAuthor", {
                                   author:
                                     article.author.name ||
                                     `@${article.author.username}`,
                                 })}
-                              </p>
+                              </Link>
                             </div>
                           </div>
                         </td>
