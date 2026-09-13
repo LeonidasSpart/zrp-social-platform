@@ -177,6 +177,7 @@ fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
 
                     when (loggedOutScreen) {
                         LoggedOutScreen.WELCOME -> WelcomeScreen(
+                            formState = loginForm,
                             onSignIn = { loggedOutScreen = LoggedOutScreen.LOGIN },
                             onCreateAccount = { loggedOutScreen = LoggedOutScreen.SIGNUP },
                             onGoogleSignIn = { context -> authViewModel.loginWithGoogle(context) },

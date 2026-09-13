@@ -327,8 +327,35 @@ android {
         // (same rule behind every prior bump above). No feature change
         // here beyond what already merged to main since 4.0.15 - version
         // numbers only, so Play accepts this build as a genuine update.
-        versionCode 22
-        versionName "4.0.16"
+        //
+        // Bumps to versionCode 23 / versionName "4.0.17" for the actual
+        // root cause of "select an account, then nothing happens" as
+        // reported directly from the Welcome screen (the app's real
+        // first screen - WelcomeScreen.kt, matching the reference mock):
+        // every prior fix under this symptom (12: configChanges +
+        // viewModelScope; 13: GoogleSignInAttemptMarker; 16: diagnostic
+        // logging) made GoogleAuth.requestIdToken()/loginWithGoogle()
+        // itself complete reliably and update AuthViewModel's shared
+        // LoginFormState correctly - but WelcomeScreen never took a
+        // formState parameter at all, so none of that ever reached the
+        // screen the user was actually looking at. LoginScreen already
+        // rendered Submitting/Error/GoogleInterrupted for the identical
+        // states; WelcomeScreen showed nothing for any of them - only a
+        // successful sign-in (which navigates away via AuthUiState) had
+        // any visible effect there. Any failure - a cancelled picker
+        // that still shows Idle is fine, but a genuine Error or
+        // GoogleInterrupted - looked exactly like the reported "nothing
+        // happens", regardless of how correct the flow underneath it had
+        // become. Fixed by wiring formState into WelcomeScreen the same
+        // way LoginScreen already does (spinner on the Google icon
+        // during SubmittingGoogle, Error/GoogleInterrupted text below),
+        // and closing the same gap in SignupScreen.kt (Error was already
+        // shown there, GoogleInterrupted was not). No change to
+        // GoogleAuth.kt, the Credential Manager flow, signing, package
+        // identity, deep links, or the backend's audience validation -
+        // those were already correct.
+        versionCode 23
+        versionName "4.0.17"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
