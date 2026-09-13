@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "Reproduciendo ahora";
 "music.player.expandAria" = "Expandir reproductor";
 "music.player.closeAria" = "Cerrar reproductor";
+"music.player.dismissAria" = "Ocultar reproductor";
 "music.player.openNowPlayingAria" = "Abrir reproducción actual";
 "music.player.upNextLabel" = "A continuación";
 "music.queue.title" = "Tu cola";

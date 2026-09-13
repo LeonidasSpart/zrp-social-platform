@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "Сейчас играет";
 "music.player.expandAria" = "Развернуть плеер";
 "music.player.closeAria" = "Закрыть плеер";
+"music.player.dismissAria" = "Скрыть плеер";
 "music.player.openNowPlayingAria" = "Открыть текущее воспроизведение";
 "music.player.upNextLabel" = "Далее";
 "music.queue.title" = "Ваша очередь";

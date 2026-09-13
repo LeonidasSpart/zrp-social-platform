@@ -465,6 +465,7 @@
     <string name="music_verified_artist">認証済みアーティスト</string>
     <string name="music_like">いいね</string>
     <string name="music_pause">一時停止</string>
+    <string name="music_dismiss_player">プレイヤーを非表示にする</string>
     <string name="music_play">再生</string>
     <string name="music_unlike">いいねを取り消す</string>
     <string name="composer_placeholder_default">いまどうしてる？ #ハッシュタグや@メンションを使ってみましょう</string>

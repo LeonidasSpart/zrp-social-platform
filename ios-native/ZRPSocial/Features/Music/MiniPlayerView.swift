@@ -10,7 +10,7 @@ struct MiniPlayerView: View {
     @EnvironmentObject private var player: MusicPlayer
 
     var body: some View {
-        if let track = player.current {
+        if let track = player.current, !player.isDismissed {
             Button {
                 player.isExpanded = true
             } label: {
@@ -73,6 +73,26 @@ struct MiniPlayerView: View {
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(Text(.musicCommonNext))
+
+                        // Hides the bar only - playback (and the lock
+                        // screen / Control Center session) keeps running
+                        // untouched. A real Button nested in the outer
+                        // row's own Button label; SwiftUI resolves the
+                        // tap to whichever one's bounds were hit.
+                        Button {
+                            player.dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.subheadline)
+                                .foregroundStyle(ZrpColor.onSurfaceMuted)
+                                .frame(
+                                    width: ZrpMetrics.minTouchTarget,
+                                    height: ZrpMetrics.minTouchTarget
+                                )
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text(.musicPlayerDismissAria))
                     }
                     .padding(.horizontal, ZrpSpacing.md)
                     .padding(.vertical, ZrpSpacing.sm)

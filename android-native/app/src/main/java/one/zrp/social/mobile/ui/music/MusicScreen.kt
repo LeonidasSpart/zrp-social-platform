@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MusicNote
@@ -284,7 +285,7 @@ fun MusicScreen(
         }
 
         val currentTrack = playerState.currentTrack
-        if (currentTrack != null) {
+        if (currentTrack != null && !playerState.dismissed) {
             MiniPlayerBar(
                 track = currentTrack,
                 isPlaying = playerState.isPlaying,
@@ -293,6 +294,7 @@ fun MusicScreen(
                 durationMs = playerState.durationMs,
                 onTogglePlayPause = { player.togglePlayPause() },
                 onLikeClick = { viewModel.toggleLike(currentTrack) },
+                onDismiss = { player.dismissPlayer() },
             )
         }
     }
@@ -574,6 +576,7 @@ internal fun MiniPlayerBar(
     durationMs: Long,
     onTogglePlayPause: () -> Unit,
     onLikeClick: () -> Unit,
+    onDismiss: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         val progress = if (durationMs > 0) (positionMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f) else 0f
@@ -656,6 +659,15 @@ internal fun MiniPlayerBar(
                         tint = ZrpRed,
                     )
                 }
+            }
+
+            // Hides the bar only - playback (and the lock-screen/
+            // notification media session) keeps running untouched.
+            IconButton(onClick = onDismiss) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.music_dismiss_player),
+                )
             }
         }
     }

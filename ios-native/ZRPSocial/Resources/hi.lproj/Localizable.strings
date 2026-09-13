@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "अभी चल रहा है";
 "music.player.expandAria" = "प्लेयर बड़ा करें";
 "music.player.closeAria" = "प्लेयर बंद करें";
+"music.player.dismissAria" = "प्लेयर छुपाएं";
 "music.player.openNowPlayingAria" = "नाउ प्लेइंग खोलें";
 "music.player.upNextLabel" = "आगे";
 "music.queue.title" = "आपकी क्यू";

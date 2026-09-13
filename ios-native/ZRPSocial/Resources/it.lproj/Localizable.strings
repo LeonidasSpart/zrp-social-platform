@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "In riproduzione";
 "music.player.expandAria" = "Espandi lettore";
 "music.player.closeAria" = "Chiudi il lettore";
+"music.player.dismissAria" = "Nascondi il lettore";
 "music.player.openNowPlayingAria" = "Apri riproduzione in corso";
 "music.player.upNextLabel" = "In arrivo";
 "music.queue.title" = "La tua coda";

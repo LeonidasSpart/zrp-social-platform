@@ -48,6 +48,14 @@ final class MusicPlayer: ObservableObject {
     /// True while the expanded player is presented.
     @Published var isExpanded = false
 
+    /// True while the persistent mini-player bar is hidden from view.
+    ///
+    /// Independent of playback: dismissing hides the bar only - it does
+    /// not pause, does not clear `current`, and does not touch the
+    /// queue. The real `AVPlayer` (and its lock screen / Control Center
+    /// session) keeps running exactly as before.
+    @Published private(set) var isDismissed = false
+
     private let player = AVPlayer()
     private let repository: MusicRepositoryProtocol
 
@@ -118,7 +126,18 @@ final class MusicPlayer: ObservableObject {
         unshuffledQueue = playable
         queue = isShuffled ? Self.shuffled(playable, keepingFirst: resolvedIndex) : playable
         currentIndex = isShuffled ? 0 : resolvedIndex
+        // A deliberate "play this" action always brings the bar back,
+        // even if it was previously dismissed - unlike next()/previous(),
+        // which also serve automatic end-of-track advancement and must
+        // leave a dismissed bar dismissed.
+        isDismissed = false
         loadCurrent(autoPlay: true)
+    }
+
+    /// Hides the persistent mini-player bar. See `isDismissed`'s own
+    /// doc comment for why this is deliberately not a pause/stop/clear.
+    func dismiss() {
+        isDismissed = true
     }
 
     func togglePlayPause() {
@@ -150,6 +169,7 @@ final class MusicPlayer: ObservableObject {
         player.replaceCurrentItem(with: nil)
         isPlaying = false
         isExpanded = false
+        isDismissed = false
         current = nil
         queue = []
         unshuffledQueue = []

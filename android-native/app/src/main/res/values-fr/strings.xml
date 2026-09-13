@@ -468,6 +468,7 @@
     <string name="music_verified_artist">Artiste vérifié</string>
     <string name="music_like">J\'aime</string>
     <string name="music_pause">Pause</string>
+    <string name="music_dismiss_player">Masquer le lecteur</string>
     <string name="music_play">Lecture</string>
     <string name="music_unlike">Je n\'aime plus</string>
     <string name="composer_placeholder_default">Quoi de neuf ? Utilisez #hashtags et @mentions</string>

@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "再生中";
 "music.player.expandAria" = "プレイヤーを展開";
 "music.player.closeAria" = "プレイヤーを閉じる";
+"music.player.dismissAria" = "プレイヤーを非表示にする";
 "music.player.openNowPlayingAria" = "再生中の画面を開く";
 "music.player.upNextLabel" = "次に再生";
 "music.queue.title" = "マイキュー";

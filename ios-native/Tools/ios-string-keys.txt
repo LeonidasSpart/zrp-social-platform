@@ -364,6 +364,7 @@ music.common.playAll
 music.player.nowPlayingLabel
 music.player.expandAria
 music.player.closeAria
+music.player.dismissAria
 music.player.openNowPlayingAria
 music.player.upNextLabel
 music.queue.title

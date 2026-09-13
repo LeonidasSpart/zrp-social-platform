@@ -468,6 +468,7 @@
     <string name="music_verified_artist">Artis terverifikasi</string>
     <string name="music_like">Suka</string>
     <string name="music_pause">Jeda</string>
+    <string name="music_dismiss_player">Sembunyikan pemutar</string>
     <string name="music_play">Putar</string>
     <string name="music_unlike">Batalkan suka</string>
     <string name="composer_placeholder_default">Apa yang terjadi? Gunakan #hashtag dan @mention</string>

@@ -468,6 +468,7 @@
     <string name="music_verified_artist">Doğrulanmış sanatçı</string>
     <string name="music_like">Beğen</string>
     <string name="music_pause">Duraklat</string>
+    <string name="music_dismiss_player">Oynatıcıyı gizle</string>
     <string name="music_play">Oynat</string>
     <string name="music_unlike">Beğenmekten vazgeç</string>
     <string name="composer_placeholder_default">Neler oluyor? #hashtag ve @bahsetme kullanın</string>

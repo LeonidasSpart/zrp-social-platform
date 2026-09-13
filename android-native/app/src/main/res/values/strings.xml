@@ -478,6 +478,7 @@
     <string name="music_verified_artist">Verified artist</string>
     <string name="music_like">Like</string>
     <string name="music_pause">Pause</string>
+    <string name="music_dismiss_player">Hide player</string>
     <string name="music_play">Play</string>
     <string name="music_unlike">Unlike</string>
     <string name="composer_placeholder_default">What\'s happening? Use #hashtags and @mentions</string>

@@ -41,6 +41,8 @@ export default function MusicMiniPlayer() {
     repeat,
     buffering,
     error,
+    dismissed,
+    dismiss,
     play,
     pause,
     next,
@@ -55,7 +57,7 @@ export default function MusicMiniPlayer() {
 
   const [expanded, setExpanded] = useState(false);
 
-  if (!current) return null;
+  if (!current || dismissed) return null;
 
   const cover =
     current.coverUrl ||
@@ -471,6 +473,18 @@ export default function MusicMiniPlayer() {
                   aria-label={t("music.player.expandAria")}
                 >
                   <Maximize2 className="w-4 h-4" />
+                </button>
+
+                {/* Dismiss - hides the bar only. Does not pause, does not
+                    clear the current track, and does not touch the queue;
+                    playback (and lock-screen controls) keep working. */}
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  className="shrink-0 w-9 h-9 flex items-center justify-center text-white/50 hover:text-white transition"
+                  aria-label={t("music.player.dismissAria")}
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 

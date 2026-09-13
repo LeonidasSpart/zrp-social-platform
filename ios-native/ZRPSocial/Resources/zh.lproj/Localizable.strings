@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "正在播放";
 "music.player.expandAria" = "展开播放器";
 "music.player.closeAria" = "关闭播放器";
+"music.player.dismissAria" = "隐藏播放器";
 "music.player.openNowPlayingAria" = "打开当前播放";
 "music.player.upNextLabel" = "接下来";
 "music.queue.title" = "你的队列";

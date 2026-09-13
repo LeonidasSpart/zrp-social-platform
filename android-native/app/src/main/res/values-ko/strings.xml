@@ -465,6 +465,7 @@
     <string name="music_verified_artist">인증된 아티스트</string>
     <string name="music_like">좋아요</string>
     <string name="music_pause">일시정지</string>
+    <string name="music_dismiss_player">플레이어 숨기기</string>
     <string name="music_play">재생</string>
     <string name="music_unlike">좋아요 취소</string>
     <string name="composer_placeholder_default">무슨 일이 일어나고 있나요? #해시태그와 @멘션을 사용해 보세요</string>

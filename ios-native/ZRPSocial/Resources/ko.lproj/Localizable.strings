@@ -331,6 +331,7 @@
 "music.player.nowPlayingLabel" = "재생 중";
 "music.player.expandAria" = "플레이어 확장";
 "music.player.closeAria" = "플레이어 닫기";
+"music.player.dismissAria" = "플레이어 숨기기";
 "music.player.openNowPlayingAria" = "재생 중인 화면 열기";
 "music.player.upNextLabel" = "다음 곡";
 "music.queue.title" = "내 대기열";
