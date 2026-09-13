@@ -2205,7 +2205,7 @@
     <string name="communities_joined">منضم</string>
     <string name="communities_leave">مغادرة</string>
     <plurals name="communities_member_count">
-        <item quantity="one">عضو واحد</item>
+        <item quantity="one">%1$d عضو</item>
         <item quantity="other">%1$d عضو</item>
     </plurals>
     <string name="communities_create_title">إنشاء مجتمع</string>
