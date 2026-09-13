@@ -589,11 +589,11 @@
 "deleteAccount.cancelDeletionRequest" = "Cancel Deletion Request";
 "deleteAccount.cancelAnytimeHint" = "You can cancel this request at any time before the deletion date.";
 "deleteAccount.confirmDeletionTitle" = "Confirm Deletion";
-"deleteAccount.typeDeleteToConfirm" = "Type \"DELETE\" to confirm";
+"deleteAccount.typeDeleteToConfirm" = "Type \"{word}\" to confirm";
 "deleteAccount.deleteNow" = "Delete Now";
 "deleteAccount.deleting" = "Deleting...";
 "deleteAccount.permanentlyDeleteAccount" = "Permanently Delete Account";
-"deleteAccount.errTypeDeleteConfirm" = "Please type \"DELETE\" to confirm.";
+"deleteAccount.errTypeDeleteConfirm" = "Please type \"{word}\" to confirm.";
 "deleteAccount.errFailedDelete" = "Failed to delete account";
 "deleteAccount.errFailedSchedule" = "Failed to schedule deletion";
 "deleteAccount.errFailedCancel" = "Failed to cancel deletion";

@@ -1186,7 +1186,7 @@ enum L10nKey: String, CaseIterable {
     case deleteAccountCancelAnytimeHint = "deleteAccount.cancelAnytimeHint"
     /// en: "Confirm Deletion"
     case deleteAccountConfirmDeletionTitle = "deleteAccount.confirmDeletionTitle"
-    /// en: "Type \"DELETE\" to confirm"
+    /// en: "Type \"{word}\" to confirm"
     case deleteAccountTypeDeleteToConfirm = "deleteAccount.typeDeleteToConfirm"
     /// en: "Delete Now"
     case deleteAccountDeleteNow = "deleteAccount.deleteNow"
@@ -1194,7 +1194,7 @@ enum L10nKey: String, CaseIterable {
     case deleteAccountDeleting = "deleteAccount.deleting"
     /// en: "Permanently Delete Account"
     case deleteAccountPermanentlyDeleteAccount = "deleteAccount.permanentlyDeleteAccount"
-    /// en: "Please type \"DELETE\" to confirm."
+    /// en: "Please type \"{word}\" to confirm."
     case deleteAccountErrTypeDeleteConfirm = "deleteAccount.errTypeDeleteConfirm"
     /// en: "Failed to delete account"
     case deleteAccountErrFailedDelete = "deleteAccount.errFailedDelete"
@@ -2534,7 +2534,7 @@ extension L10nKey {
     /// The languages ZRP officially supports, in the same order as
     /// the web app's SUPPORTED_LANGUAGES.
     static let supportedLanguageCodes: [String] = [
-        "en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id"
+        "en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "pt", "ja", "ko", "hi"
     ]
 
     /// ZRP's right-to-left languages, read from the web app's own
@@ -2570,5 +2570,9 @@ struct ZrpLanguage: Identifiable, Equatable {
         ZrpLanguage(code: "zh", nativeName: "中文"),
         ZrpLanguage(code: "tr", nativeName: "Türkçe"),
         ZrpLanguage(code: "id", nativeName: "Bahasa Indonesia"),
+        ZrpLanguage(code: "pt", nativeName: "Português"),
+        ZrpLanguage(code: "ja", nativeName: "日本語"),
+        ZrpLanguage(code: "ko", nativeName: "한국어"),
+        ZrpLanguage(code: "hi", nativeName: "हिन्दी"),
     ]
 }

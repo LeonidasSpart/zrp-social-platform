@@ -10,12 +10,12 @@
 "nav.profile" = "الملف الشخصي";
 "nav.bookmarks" = "المحفوظات";
 "nav.creatorStudio" = "استوديو المبدعين";
-"nav.shorts" = "Shorts";
+"nav.shorts" = "مقاطع قصيرة";
 "nav.news" = "الأخبار";
 "nav.aiAssistant" = "ذكاء ZRP الاصطناعي";
-"nav.help" = "Help";
-"nav.opportunity" = "Opportunity";
-"nav.play" = "Play";
+"nav.help" = "المساعدة";
+"nav.opportunity" = "الفرص";
+"nav.play" = "الألعاب";
 "play.todaysChallenge" = "تحدي اليوم";
 "play.trending" = "التحديات الرائجة";
 "play.noTrendingYet" = "لا توجد تحديات رائجة بعد. كن أول من ينشئ واحدًا!";
@@ -463,7 +463,7 @@
 "marketplace.statusSold" = "تم البيع";
 "marketplace.statusExpired" = "منتهي الصلاحية";
 "marketplace.statusRemoved" = "تمت الإزالة";
-"marketplace.heroTitle" = "ZRP Market Plus";
+"marketplace.heroTitle" = "ZRP سوق Plus";
 "marketplace.heroSubtitle" = "السوق الفاخر لأعضاء ZRP الموثقين - سيارات غريبة، يخوت، طائرات خاصة، عقارات والمزيد.";
 "marketplace.searchPlaceholder" = "ابحث في الإعلانات...";
 "marketplace.createListing" = "إنشاء إعلان";
@@ -589,11 +589,11 @@
 "deleteAccount.cancelDeletionRequest" = "إلغاء طلب الحذف";
 "deleteAccount.cancelAnytimeHint" = "يمكنك إلغاء هذا الطلب في أي وقت قبل تاريخ الحذف.";
 "deleteAccount.confirmDeletionTitle" = "تأكيد الحذف";
-"deleteAccount.typeDeleteToConfirm" = "اكتب \"DELETE\" للتأكيد";
+"deleteAccount.typeDeleteToConfirm" = "اكتب \"{word}\" للتأكيد";
 "deleteAccount.deleteNow" = "احذف الآن";
 "deleteAccount.deleting" = "جارٍ الحذف...";
 "deleteAccount.permanentlyDeleteAccount" = "حذف الحساب نهائيًا";
-"deleteAccount.errTypeDeleteConfirm" = "يرجى كتابة \"DELETE\" للتأكيد.";
+"deleteAccount.errTypeDeleteConfirm" = "يرجى كتابة \"{word}\" للتأكيد.";
 "deleteAccount.errFailedDelete" = "فشل حذف الحساب";
 "deleteAccount.errFailedSchedule" = "فشلت جدولة الحذف";
 "deleteAccount.errFailedCancel" = "فشل إلغاء الحذف";
@@ -640,7 +640,7 @@
 "onboarding.bioPlaceholder" = "أخبرنا عن نفسك...";
 "onboarding.locationLabel" = "الموقع";
 "onboarding.website" = "الموقع الإلكتروني";
-"onboarding.websitePlaceholder" = "https://your-site.com";
+"onboarding.websitePlaceholder" = "https://موقعك.com";
 "onboarding.profilePicture" = "صورة الملف الشخصي";
 "onboarding.upload" = "رفع";
 "onboarding.continue" = "متابعة";
@@ -668,7 +668,7 @@
 "settings.bio" = "النبذة";
 "settings.bioPlaceholder" = "أخبرنا عن نفسك...";
 "settings.website" = "الموقع الإلكتروني";
-"settings.websitePlaceholder" = "https://your-website.com";
+"settings.websitePlaceholder" = "https://موقع-الويب-الخاص-بك.com";
 "settings.city" = "المدينة";
 "settings.country" = "الدولة";
 "settings.countryPlaceholder" = "الدولة";
