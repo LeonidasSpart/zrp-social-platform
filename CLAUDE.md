@@ -165,8 +165,13 @@ Single Postgres schema via Prisma. Broad shape:
   polymorphic "reactable" table, so new reaction-like features typically need both variants.
 - **Messaging/notifications**: `Message` (DM, persisted independent of the socket layer),
   `Notification`, `PushSubscription`.
-- **Moderation**: `Report` (against posts or comments), admin ban/plan endpoints under
-  `src/app/api/admin/*`.
+- **Communities & Lists**: `Community`/`CommunityMember` (hashtag-driven topic feeds with a
+  `CommunityCategory` and OWNER/ADMIN/MEMBER roles) and `List`/`ListMember` (X-style curated
+  lists of users, public or private) — a list's "feed" is the existing post feed filtered to
+  member `authorId`s, not a parallel content system.
+- **Moderation**: `Report` — seven polymorphic targets (`postId`, `commentId`, `listingId`,
+  `challengeId`, `opportunityId`, `campaignId`, `reportedUserId` for a bare-profile report),
+  `Appeal` (one per actioned report), admin ban/plan endpoints under `src/app/api/admin/*`.
 - **Monetisation**: `CreatorProfile` (per-user monetisation settings + running balance
   totals), `Tip`, `PremiumPost`/`PremiumPurchase` (pay-to-view posts), `WithdrawalRequest`
   (payout to a Solana wallet address). All of these carry a `platformFee`/`charityAmount`/
