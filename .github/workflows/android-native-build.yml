@@ -198,6 +198,20 @@ jobs:
             echo "::warning::Release signing NOT configured or the provided secrets failed validation - this .aab is UNSIGNED. Do not upload it to Google Play Console."
           fi
 
+      # SHA-256 and size of the actual .aab file that gets uploaded below,
+      # computed over the real bytes on disk right after the build and
+      # before signing/verification touch anything else - not a hash of
+      # the artifact zip actions/upload-artifact wraps it in afterwards
+      # (that zip's digest is a different value and isn't useful for
+      # verifying the .aab itself against a forensic report).
+      - name: Compute SHA-256 of release AAB
+        run: |
+          AAB_PATH="android-native/app/build/outputs/bundle/release/app-release.aab"
+          echo "── SHA-256 of the actual .aab file ──"
+          sha256sum "$AAB_PATH"
+          echo "── Size ──"
+          ls -la "$AAB_PATH"
+
       # Reads the versionCode/versionName/applicationId Gradle actually
       # embedded in the built bundle's manifest, rather than trusting that
       # build.gradle's source values made it through unchanged. bundletool
@@ -253,7 +267,7 @@ jobs:
             echo "No keystore was decoded this run - nothing to fingerprint."
             exit 0
           fi
-          keytool -list -v -keystore "$KEYSTORE_PATH" -alias "$ANDROID_KEY_ALIAS" -storepass "$ANDROID_KEYSTORE_PASSWORD" 2>/dev/null | grep -E "SHA1:|SHA256:"
+          keytool -list -v -keystore "$KEYSTORE_PATH" -alias "$ANDROID_KEY_ALIAS" -storepass "$ANDROID_KEYSTORE_PASSWORD" 2>/dev/null | grep -E "SHA1:|SHA256:|Owner:|Valid from"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4

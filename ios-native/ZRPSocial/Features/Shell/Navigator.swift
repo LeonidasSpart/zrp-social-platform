@@ -65,6 +65,15 @@ enum Route: Hashable {
     case appeals
     case trustPassport(username: String)
     case bookmarks
+    /// Real, database-backed communities - see prisma/schema.prisma's
+    /// Community/CommunityMember models. The first Communities feature
+    /// on iOS; there was no equivalent screen before this.
+    case communities
+    case communityDetail(id: String)
+    /// Twitter/X-style curated lists - entirely new on iOS, backed by
+    /// prisma/schema.prisma's List/ListMember models.
+    case lists
+    case listDetail(id: String)
     /// ZRP Shorts. `startId` opens the feed on one particular video -
     /// what tapping a video elsewhere in the app leads to.
     case shorts(startId: String?)
