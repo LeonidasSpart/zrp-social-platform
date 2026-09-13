@@ -10,7 +10,7 @@ import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 /*
- * Fixed bottom navigation for phones and tablets.
+ * Fixed bottom navigation for phones.
  *
  * Six primary destinations are always visible:
  * Home, Search, Shorts, Notifications, Messages, Profile.
@@ -18,8 +18,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
  * Explore, Bookmarks and additional account/settings actions remain
  * available from the header menu.
  *
- * Hidden at the lg breakpoint and above, where the desktop Sidebar
- * takes over.
+ * Hidden at the md breakpoint and above, where the Sidebar's compact
+ * icon-only rail (tablet) or full labeled rail (desktop) takes over.
  */
 export default function BottomNav() {
   const [mounted, setMounted] = useState(false);
@@ -80,7 +80,7 @@ export default function BottomNav() {
 
   return createPortal(
     <nav
-      className="lg:hidden fixed left-0 right-0 bottom-0 z-[9999] w-full bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800"
+      className="md:hidden fixed left-0 right-0 bottom-0 z-[9999] w-full bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800"
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
         position: "fixed",

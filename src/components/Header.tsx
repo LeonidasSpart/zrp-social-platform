@@ -113,7 +113,7 @@ export default function Header() {
    */
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
+      if (window.innerWidth >= 768) {
         setMobileMenuOpen(false);
         setUserMenuOpen(false);
         setLangMenuOpen(false);
@@ -216,10 +216,11 @@ export default function Header() {
     },
     {
       // Kept in sync with Sidebar.tsx's navItems by hand - this is the
-      // tablet/mobile nav drawer (rendered lg:hidden), a completely
-      // separate list from the desktop Sidebar (hidden lg:flex). Music
+      // phone-only nav drawer (rendered md:hidden), a completely
+      // separate list from the Sidebar rail (hidden md:flex, compact
+      // icon-only from md to lg, full labels from lg up). Music
       // was added to Sidebar but not here, which is exactly how it
-      // went missing from navigation on every screen below the lg
+      // went missing from navigation on every screen below the md
       // breakpoint - add any future nav destination to both.
       href: "/music",
       icon: Music2,
@@ -405,7 +406,7 @@ export default function Header() {
               <form
                 onSubmit={handleHeaderSearch}
                 role="search"
-                className="hidden lg:flex flex-1 justify-center px-4"
+                className="hidden md:flex flex-1 justify-center px-4"
               >
                 {/* globals.css caps .w-full at max-width:100% with
                     !important, which silently beats max-w-md - hence
@@ -438,7 +439,7 @@ export default function Header() {
                 DESKTOP HEADER
             ===================================================== */}
 
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
 
               {/* Admin */}
 
@@ -755,10 +756,10 @@ export default function Header() {
             </div>
 
             {/* =====================================================
-                TABLET + MOBILE HEADER CONTROLS
+                MOBILE HEADER CONTROLS
             ===================================================== */}
 
-            <div className="lg:hidden flex items-center gap-1">
+            <div className="md:hidden flex items-center gap-1">
 
               {/* Messages */}
 
@@ -836,7 +837,7 @@ export default function Header() {
       </header>
 
       {/* ===========================================================
-          ADVANCED TABLET / MOBILE MENU
+          ADVANCED MOBILE MENU
       =========================================================== */}
 
       {mobileMenuOpen && (
@@ -847,12 +848,12 @@ export default function Header() {
             type="button"
             aria-label={t("nav.closeMenu")}
             onClick={closeMobileMenu}
-            className="lg:hidden fixed inset-0 top-[calc(64px+env(safe-area-inset-top))] z-40 bg-black/30 backdrop-blur-[2px]"
+            className="md:hidden fixed inset-0 top-[calc(64px+env(safe-area-inset-top))] z-40 bg-black/30 backdrop-blur-[2px]"
           />
 
           {/* Menu Panel */}
 
-          <div className="lg:hidden fixed top-[calc(64px+env(safe-area-inset-top))] right-0 bottom-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zrp-deepBlack border-l border-gray-200 dark:border-gray-800 shadow-2xl overflow-y-auto">
+          <div className="md:hidden fixed top-[calc(64px+env(safe-area-inset-top))] right-0 bottom-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zrp-deepBlack border-l border-gray-200 dark:border-gray-800 shadow-2xl overflow-y-auto">
 
             {/* =====================================================
                 USER HEADER
