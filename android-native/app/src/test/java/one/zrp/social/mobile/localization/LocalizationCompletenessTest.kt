@@ -108,7 +108,7 @@ class LocalizationCompletenessTest {
     // that pluralize via inflection instead (German "Mitglied(er)",
     // Italian "membro/i", Spanish "miembro(s)", Albanian "anëtar(ë)")
     // correctly omit it.
-    private val optionalTokens = setOf("%2$s")
+    private val optionalTokens = setOf("%2\$s")
 
     /**
      * Values legitimately identical to English in EVERY language: ZRP's
