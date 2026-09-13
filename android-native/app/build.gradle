@@ -319,8 +319,16 @@ android {
         // of this branch carrying the inherited 20 would collide with it
         // ("Le code de version 20 a déjà été utilisé" - same failure
         // mode as the versionCode 2/7/19 collisions documented above).
-        versionCode 21
-        versionName "4.0.15"
+        //
+        // Bumps to versionCode 22 / versionName "4.0.16": versionCode 21
+        // (4.0.15) is the current live Internal Testing release, so a
+        // new upload has to strictly exceed it per Play's per-
+        // applicationId monotonically-increasing versionCode requirement
+        // (same rule behind every prior bump above). No feature change
+        // here beyond what already merged to main since 4.0.15 - version
+        // numbers only, so Play accepts this build as a genuine update.
+        versionCode 22
+        versionName "4.0.16"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
