@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -35,6 +36,35 @@ export default function Sidebar() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
+
+  // The rail scrolls vertically (overflow-y-auto), which per the CSS
+  // spec forces its overflow-x to "auto" too - harmless at the full
+  // w-64 desktop width, where these flyouts already fit inside it, but
+  // at the compact w-16 tablet rail a left-anchored flyout wider than
+  // the rail itself would be silently clipped/require horizontal
+  // scrolling to see. Portaling to <body> and positioning from the
+  // trigger's own rect (the same fix BottomNav already uses, for the
+  // same reason) keeps both flyouts fully visible at every width.
+  const langButtonRef = useRef<HTMLButtonElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const [langMenuPos, setLangMenuPos] = useState<{ left: number; bottom: number } | null>(null);
+  const [moreMenuPos, setMoreMenuPos] = useState<{ left: number; bottom: number } | null>(null);
+
+  const toggleLangMenu = () => {
+    if (!langMenuOpen && langButtonRef.current) {
+      const rect = langButtonRef.current.getBoundingClientRect();
+      setLangMenuPos({ left: rect.left, bottom: window.innerHeight - rect.top + 8 });
+    }
+    setLangMenuOpen((value) => !value);
+  };
+
+  const toggleMoreMenu = () => {
+    if (!moreMenuOpen && moreButtonRef.current) {
+      const rect = moreButtonRef.current.getBoundingClientRect();
+      setMoreMenuPos({ left: rect.left, bottom: window.innerHeight - rect.top + 8 });
+    }
+    setMoreMenuOpen((value) => !value);
+  };
 
   const isAuthenticated = !!session;
   const features = session?.user?.features;
@@ -179,9 +209,9 @@ export default function Sidebar() {
   return (
     <aside
       className="
-        hidden lg:flex
+        hidden md:flex
         flex-col
-        w-64
+        w-16 lg:w-64
         flex-shrink-0
         h-[100dvh]
         sticky
@@ -217,7 +247,8 @@ export default function Sidebar() {
             <Link
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={`relative flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
+              aria-label={item.label}
+              className={`relative flex items-center justify-center lg:justify-start gap-0 lg:gap-4 px-3 py-2.5 rounded-full text-lg transition ${
                 active
                   ? "font-bold text-gray-900 dark:text-white"
                   : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -234,20 +265,22 @@ export default function Sidebar() {
                 />
               )}
 
-              <item.icon
-                className={`w-6 h-6 ${
-                  active ? "text-zrp-red" : ""
-                }`}
-                strokeWidth={active ? 2.5 : 2}
-              />
+              <span className="relative inline-flex flex-shrink-0">
+                <item.icon
+                  className={`w-6 h-6 ${
+                    active ? "text-zrp-red" : ""
+                  }`}
+                  strokeWidth={active ? 2.5 : 2}
+                />
 
-              <span>{item.label}</span>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span className="absolute -right-1.5 -top-1 bg-zrp-red text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                    {item.badge > 9 ? "9+" : item.badge}
+                  </span>
+                )}
+              </span>
 
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute left-7 top-1 bg-zrp-red text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                  {item.badge > 9 ? "9+" : item.badge}
-                </span>
-              )}
+              <span className="hidden lg:inline">{item.label}</span>
             </Link>
 
             {GROUP_BREAK_AFTER.has(item.href) && (
@@ -267,7 +300,8 @@ export default function Sidebar() {
           <Link
             href="/admin"
             aria-current={isActive("/admin") ? "page" : undefined}
-            className={`relative flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
+            aria-label={t("nav.admin")}
+            className={`relative flex items-center justify-center lg:justify-start gap-0 lg:gap-4 px-3 py-2.5 rounded-full text-lg transition ${
               isActive("/admin")
                 ? "font-bold text-gray-900 dark:text-white"
                 : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -281,13 +315,13 @@ export default function Sidebar() {
             )}
 
             <LayoutDashboard
-              className={`w-6 h-6 ${
+              className={`w-6 h-6 flex-shrink-0 ${
                 isActive("/admin") ? "text-zrp-red" : ""
               }`}
               strokeWidth={isActive("/admin") ? 2.5 : 2}
             />
 
-            <span>{t("nav.admin")}</span>
+            <span className="hidden lg:inline">{t("nav.admin")}</span>
           </Link>
         )}
 
@@ -296,7 +330,8 @@ export default function Sidebar() {
           <Link
             href="/journalist"
             aria-current={isActive("/journalist") ? "page" : undefined}
-            className={`relative flex items-center gap-4 px-3 py-2.5 rounded-full text-lg transition ${
+            aria-label={t("nav.journalist")}
+            className={`relative flex items-center justify-center lg:justify-start gap-0 lg:gap-4 px-3 py-2.5 rounded-full text-lg transition ${
               isActive("/journalist")
                 ? "font-bold text-gray-900 dark:text-white"
                 : "font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -310,13 +345,13 @@ export default function Sidebar() {
             )}
 
             <Newspaper
-              className={`w-6 h-6 ${
+              className={`w-6 h-6 flex-shrink-0 ${
                 isActive("/journalist") ? "text-zrp-red" : ""
               }`}
               strokeWidth={isActive("/journalist") ? 2.5 : 2}
             />
 
-            <span>{t("nav.journalist")}</span>
+            <span className="hidden lg:inline">{t("nav.journalist")}</span>
           </Link>
         )}
 
@@ -324,15 +359,16 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={toggleTheme}
-          className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          aria-label={theme === "light" ? t("nav.darkMode") : t("nav.lightMode")}
+          className="w-full flex items-center justify-center lg:justify-start gap-0 lg:gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         >
           {theme === "light" ? (
-            <Moon className="w-6 h-6" />
+            <Moon className="w-6 h-6 flex-shrink-0" />
           ) : (
-            <Sun className="w-6 h-6" />
+            <Sun className="w-6 h-6 flex-shrink-0" />
           )}
 
-          <span>
+          <span className="hidden lg:inline">
             {theme === "light"
               ? t("nav.darkMode")
               : t("nav.lightMode")}
@@ -342,73 +378,84 @@ export default function Sidebar() {
         {/* Language selector */}
         <div className="relative">
           <button
+            ref={langButtonRef}
             type="button"
-            onClick={() => setLangMenuOpen(!langMenuOpen)}
+            onClick={toggleLangMenu}
             aria-haspopup="menu"
             aria-expanded={langMenuOpen}
-            className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            aria-label={`${t("nav.language")}: ${currentLangLabel}`}
+            className="w-full flex items-center justify-center lg:justify-start gap-0 lg:gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
-            <Globe className="w-6 h-6" />
+            <Globe className="w-6 h-6 flex-shrink-0" />
 
-            <span>{t("nav.language")}</span>
+            <span className="hidden lg:inline">{t("nav.language")}</span>
 
-            <span className="ml-auto text-sm text-gray-400">
+            <span className="hidden lg:inline ml-auto text-sm text-gray-400">
               {currentLangLabel}
             </span>
           </button>
 
-          {langMenuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setLangMenuOpen(false)}
-              />
+          {langMenuOpen && langMenuPos && typeof document !== "undefined" &&
+            createPortal(
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setLangMenuOpen(false)}
+                />
 
-              <div className="absolute left-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
-                {SUPPORTED_LANGUAGES.map((lang) => (
-                  <button
-                    type="button"
-                    key={lang.code}
-                    onClick={() => {
-                      setLanguage(lang.code);
-                      setLangMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition ${
-                      language === lang.code
-                        ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-medium"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+                <div
+                  style={{ left: langMenuPos.left, bottom: langMenuPos.bottom }}
+                  className="fixed w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden"
+                >
+                  {SUPPORTED_LANGUAGES.map((lang) => (
+                    <button
+                      type="button"
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setLangMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition ${
+                        language === lang.code
+                          ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-medium"
+                          : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </>,
+              document.body
+            )}
         </div>
 
         {/* More menu */}
         <div className="relative">
           <button
+            ref={moreButtonRef}
             type="button"
-            onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+            onClick={toggleMoreMenu}
             aria-haspopup="menu"
             aria-expanded={moreMenuOpen}
-            className="w-full flex items-center gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            aria-label={t("nav.more")}
+            className="w-full flex items-center justify-center lg:justify-start gap-0 lg:gap-4 px-3 py-2.5 rounded-full text-lg font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
-            <MoreHorizontal className="w-6 h-6" />
+            <MoreHorizontal className="w-6 h-6 flex-shrink-0" />
 
-            <span>{t("nav.more")}</span>
+            <span className="hidden lg:inline">{t("nav.more")}</span>
           </button>
 
-          {moreMenuOpen && (
+          {moreMenuOpen && moreMenuPos && typeof document !== "undefined" && createPortal(
             <>
               <div
                 className="fixed inset-0 z-40"
                 onClick={closeMoreMenu}
               />
 
-              <div className="absolute left-0 bottom-full mb-2 w-64 max-h-[70vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+              <div
+                style={{ left: moreMenuPos.left, bottom: moreMenuPos.bottom }}
+                className="fixed w-64 max-h-[70vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
                 <Link
                   href="/pricing"
                   onClick={closeMoreMenu}
@@ -589,7 +636,8 @@ export default function Sidebar() {
                   <span>{t("nav.signOut")}</span>
                 </button>
               </div>
-            </>
+            </>,
+            document.body
           )}
         </div>
       </nav>
@@ -597,17 +645,19 @@ export default function Sidebar() {
       {/* Post button */}
       <Link
         href="/"
+        aria-label={t("sidebar.postButton")}
         className="mt-4 bg-zrp-red text-white text-center py-3 rounded-full font-bold hover:bg-zrp-darkRed transition flex items-center justify-center gap-2"
       >
-        <PenSquare className="w-5 h-5" />
-        {t("sidebar.postButton")}
+        <PenSquare className="w-5 h-5 flex-shrink-0" />
+        <span className="hidden lg:inline">{t("sidebar.postButton")}</span>
       </Link>
 
       {/* User mini-card */}
       {session?.user && (
         <Link
           href={`/profile/${session.user.username}`}
-          className="mt-4 flex items-center gap-3 px-3 py-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          aria-label={session.user.name || session.user.username || undefined}
+          className="mt-4 flex items-center justify-center lg:justify-start gap-3 px-3 py-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         >
           <div className="w-9 h-9 rounded-full bg-zrp-red/10 flex items-center justify-center text-zrp-red font-semibold flex-shrink-0 overflow-hidden">
             {session.user.avatarUrl ? (
@@ -621,7 +671,7 @@ export default function Sidebar() {
             )}
           </div>
 
-          <div className="min-w-0 flex-1">
+          <div className="hidden lg:block min-w-0 flex-1">
             <p className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-1 min-w-0">
               <span className="truncate">
                 {session.user.name || session.user.username}
