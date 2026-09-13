@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
   PenSquare, Sun, Moon, Globe, Film, Newspaper, Store, Gamepad2,
   Briefcase, HeartHandshake, Music2, ChevronDown, Sparkles, Rocket,
-  Bot, Info, LifeBuoy, Scale,
+  Bot, Info, LifeBuoy, Scale, ListChecks,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -117,6 +117,7 @@ export default function Sidebar() {
     { href: "/news", icon: Newspaper, label: t("nav.news") },
     { href: "/marketplace", icon: Store, label: t("nav.marketplace") },
     { href: "/music", icon: Music2, label: t("nav.music") },
+    { href: "/communities", icon: Users, label: t("nav.communities") },
     { href: "/play", icon: Gamepad2, label: t("nav.play") },
     { href: "/opportunity", icon: Briefcase, label: t("nav.opportunity") },
     { href: "/aid", icon: HeartHandshake, label: t("nav.help") },
@@ -134,6 +135,14 @@ export default function Sidebar() {
       badge: unreadCount,
     },
     { href: "/bookmarks", icon: Bookmark, label: t("nav.bookmarks") },
+    { href: "/lists", icon: ListChecks, label: t("nav.lists") },
+    // Previously reachable only two levels deep (More -> Support ->
+    // Help Center) - the reference drawer shows Help & Support as a
+    // flat top-level item, matching how Android's drawer already
+    // surfaces it. The full Support hub (FAQ, Contact Support, My
+    // Tickets) still lives in the More menu unchanged; this promotes
+    // just the entry point people actually look for first.
+    { href: "/help", icon: LifeBuoy, label: t("footer.helpCenter") },
     {
       href: `/profile/${session?.user?.username}`,
       icon: User,
