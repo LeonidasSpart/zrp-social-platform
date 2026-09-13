@@ -354,6 +354,22 @@ describe.skipIf(!hasRealDatabaseUrl)("AdCampaign lifecycle (integration, real Po
   // ─── Serving eligibility ─────────────────────────────────────────
 
   it("serve never returns a PAYMENT_PENDING, rejected, or expired campaign - only a paid, active, in-window one", async () => {
+    // ⚠️ /api/ads/serve picks uniformly at RANDOM among every currently
+    // eligible ACTIVE campaign in the whole table, not just ones this
+    // test created - and earlier tests in this file (e.g. "a verified,
+    // sufficient on-chain payment activates the campaign") deliberately
+    // leave their own campaign ACTIVE with no endDate, since cleanup for
+    // the whole file only happens once in afterAll. Left alone, those
+    // are still real, still-eligible competitors for this test's final
+    // strict-equality assertion below - sealing them off first (rather
+    // than only excluding our own campaign, or asserting "one of several
+    // possible ids") is what makes this test deterministic instead of
+    // occasionally picking a different, equally legitimate active ad.
+    await prisma.adCampaign.updateMany({
+      where: { id: { in: campaignIds } },
+      data: { status: "COMPLETED" },
+    });
+
     const advertiser = await createUser("creator12");
     const viewer = await createUser("viewer1");
     const post = await createPost(advertiser.id);
