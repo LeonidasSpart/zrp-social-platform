@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zrp-v6'; // Bumped: page navigations (not just "/") now use network-first, fixing stale like/repost status on post/comment/short pages served from a previously cached version
+const CACHE_NAME = 'zrp-v7'; // Bumped: Next.js App Router client-side (RSC) navigation/prefetch requests are no longer treated as cacheable static assets - see the fetch handler's own comment below
 const STATIC_ASSETS = [
   '/favicon.ico',
   '/logo.png',
@@ -54,21 +54,51 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. For the home page AND any other page navigation (post detail,
-  // shorts, profile, etc.) - try network first, fallback to cache.
-  // Previously only "/" got this treatment; every other page fell
-  // through to rule 3 below (cache-first), which is fine for genuinely
-  // static assets (JS/CSS/images) but wrong for page navigations that
-  // embed personalized, frequently-changing data server-side (like
-  // whether *this* viewer has liked a specific post/comment/short).
-  // event.request.mode === "navigate" reliably distinguishes an actual
-  // page load/route change from an asset request, so this only affects
-  // navigations, not static files. This is also why "clear cache and
-  // history" alone didn't fix stale like status - Service Worker Cache
-  // Storage is a separate mechanism from what that browser action
-  // typically clears, so a previously cached page could keep being
-  // served with its old like state baked in until this fix.
-  if (url.pathname === '/' || event.request.mode === 'navigate') {
+  // Genuinely static, content-hashed or otherwise non-personalized
+  // assets: build output chunks, the handful of files precached at
+  // install, and anything else identifiable purely by extension. This is
+  // an ALLOWLIST on purpose (see rule 2's comment below for why an
+  // exclude-list is not safe here) - only requests recognized here ever
+  // reach rule 3's cache-first handling.
+  function isStaticAsset(pathname) {
+    if (pathname.startsWith('/_next/static/')) return true;
+    if (STATIC_ASSETS.includes(pathname)) return true;
+    return /\.(?:js|css|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|otf|mp4|webm|map)$/i.test(pathname);
+  }
+
+  // 2. Network-first for the home page, any full-page navigation, AND -
+  // this is the fix - every other same-origin GET that isn't recognized
+  // as a static asset by isStaticAsset() above.
+  //
+  // That last clause matters because event.request.mode === 'navigate'
+  // only covers an actual browser-level navigation (typing a URL,
+  // clicking a plain <a>, a form submit). It does NOT cover how the
+  // Next.js App Router itself moves between pages after the first load:
+  // clicking a <Link>, a router.push(), and prefetching all go through
+  // fetchServerResponse()'s createFetch(), which is a plain same-origin
+  // fetch() call to the SAME page path carrying an `RSC: 1` header (see
+  // node_modules/next/dist/client/components/router-reducer/
+  // fetch-server-response.js - read directly, not assumed) - a request
+  // this service worker's fetch handler DOES intercept, but whose `mode`
+  // the Fetch/Service-Worker spec fixes at 'cors' (fetch()'s own
+  // default), never 'navigate' - 'navigate' cannot be set from script at
+  // all. Before this fix, such a request matched neither "/" nor
+  // mode==='navigate', so it fell all the way through to rule 3's
+  // cache-first handling below, exactly like a JS/CSS file: a second
+  // client-side visit to the same route (a repeat Link click, browser
+  // back/forward, or a stale prefetch resolving late) could be served a
+  // CACHED RSC payload carrying stale personalized data (like/notification
+  // state, or - on a shared/kiosk device where a different account has
+  // since logged in - a previous account's page data entirely) instead of
+  // the fresh network response every hard navigation to that exact URL
+  // already correctly gets.
+  //
+  // Rewriting rule 3 as an allowlist of real static assets (above) rather
+  // than trying to enumerate every personalized/dynamic path is
+  // deliberate: a new personalized route added later is safe by default
+  // (network-first) instead of silently inheriting cache-first the way an
+  // exclude-list would.
+  if (url.pathname === '/' || event.request.mode === 'navigate' || !isStaticAsset(url.pathname)) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -90,7 +120,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. For other assets: cache first, fallback to network
+  // 3. For genuine static assets only (isStaticAsset() above): cache
+  // first, fallback to network.
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

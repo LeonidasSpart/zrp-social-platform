@@ -3,6 +3,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 const startHourlyNewsCycles = vi.hoisted(() => vi.fn(() => () => {}));
 vi.mock("@/lib/news/hourly-runner", () => ({ startHourlyNewsCycles }));
 
+const startWithdrawalReconciliation = vi.hoisted(() => vi.fn(() => () => {}));
+vi.mock("@/lib/withdrawals-reconcile-runner", () => ({ startWithdrawalReconciliation }));
+
 import { register } from "@/instrumentation";
 
 /*
@@ -17,9 +20,11 @@ describe("starting the news scheduler at boot", () => {
   // whatever runs next. stubEnv is scoped and unwound in afterEach.
   beforeEach(() => {
     startHourlyNewsCycles.mockClear();
+    startWithdrawalReconciliation.mockClear();
     vi.stubEnv("NEXT_RUNTIME", "nodejs");
     vi.stubEnv("NEWS_SCHEDULER", "");
     vi.stubEnv("NEXT_PHASE", "");
+    vi.stubEnv("WITHDRAWAL_RECONCILER", "");
   });
 
   afterEach(() => {
@@ -70,5 +75,65 @@ describe("starting the news scheduler at boot", () => {
 
     await register();
     expect(startHourlyNewsCycles).not.toHaveBeenCalled();
+  });
+});
+
+/*
+ * The withdrawal reconciliation runner: unlike the news scheduler, this
+ * touches real financial state, so it defaults to ON everywhere
+ * (including local dev - a stuck withdrawal is not something to leave
+ * unreconciled just because someone is running `npm run dev`) with an
+ * explicit off-switch for the one case that needs it: a read-only
+ * replica that must not write to WithdrawalRequest/CreatorProfile.
+ */
+describe("starting withdrawal reconciliation at boot", () => {
+  beforeEach(() => {
+    startHourlyNewsCycles.mockClear();
+    startWithdrawalReconciliation.mockClear();
+    vi.stubEnv("NEXT_RUNTIME", "nodejs");
+    vi.stubEnv("NEXT_PHASE", "");
+    vi.stubEnv("WITHDRAWAL_RECONCILER", "");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("starts by default in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+
+    await register();
+    expect(startWithdrawalReconciliation).toHaveBeenCalledTimes(1);
+  });
+
+  it("starts by default in development too - financial state is never left unreconciled by default", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+
+    await register();
+    expect(startWithdrawalReconciliation).toHaveBeenCalledTimes(1);
+  });
+
+  it("can be switched off explicitly, e.g. for a read-only replica", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("WITHDRAWAL_RECONCILER", "off");
+
+    await register();
+    expect(startWithdrawalReconciliation).not.toHaveBeenCalled();
+  });
+
+  it("does not start during a production build", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PHASE", "phase-production-build");
+
+    await register();
+    expect(startWithdrawalReconciliation).not.toHaveBeenCalled();
+  });
+
+  it("stays out of the edge runtime", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_RUNTIME", "edge");
+
+    await register();
+    expect(startWithdrawalReconciliation).not.toHaveBeenCalled();
   });
 });

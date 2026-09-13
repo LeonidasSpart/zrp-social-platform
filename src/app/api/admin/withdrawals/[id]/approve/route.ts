@@ -3,12 +3,26 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { sendUsdc } from "@/lib/solana";
 import { logAdminAction } from "@/lib/audit-log";
+import { recordTransactionHash, finalizeWithdrawal, failAndRefundWithdrawal } from "@/lib/withdrawals";
 
 // Finalizes a withdrawal: executes the on-chain USDC transfer, records
 // the transaction hash, and marks the request COMPLETED. The funds
 // were already reserved (deducted from the creator's balance) when the
 // request was created, so no further balance change happens on
 // success - only on failure, where the reservation is released back.
+//
+// ⚠️ CRASH SAFETY: recordTransactionHash() and finalizeWithdrawal() are
+// deliberately two separate, idempotent steps rather than one
+// $transaction run right after sendUsdc() returns - see
+// src/lib/withdrawals.ts's own comment for the full design. In short:
+// this process can be killed (a Railway redeploy's SIGTERM, a crash) at
+// any point after sendUsdc() has already moved real funds on-chain.
+// Persisting the signature FIRST, as its own minimal write, means a
+// crash after that point still leaves a durable trail - the periodic
+// reconciliation job (src/lib/withdrawals-reconcile-runner.ts) can find
+// this exact row, ask Solana whether that signature actually landed,
+// and finish the job with the SAME idempotent finalizeWithdrawal() this
+// route calls, without ever double-crediting the creator's balance.
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const adminCheck = await requireAdmin();
   if (!adminCheck.authorized) return adminCheck.response;
@@ -45,49 +59,22 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     );
   }
 
+  let signature: string;
   try {
-    const signature = await sendUsdc(withdrawal.walletAddress, withdrawal.amount.toNumber());
-
-    await prisma.$transaction([
-      prisma.withdrawalRequest.update({
-        where: { id },
-        data: {
-          status: "COMPLETED",
-          transactionHash: signature,
-          processedAt: new Date(),
-        },
-      }),
-      prisma.creatorProfile.update({
-        where: { id: withdrawal.creatorProfileId },
-        data: { totalWithdrawn: { increment: withdrawal.amount } },
-      }),
-    ]);
-
-    await logAdminAction({
-      actor: adminCheck.session,
-      action: "withdrawal.approve",
-      targetType: "WithdrawalRequest",
-      targetId: id,
-      metadata: { amount: withdrawal.amount.toString(), walletAddress: withdrawal.walletAddress, transactionHash: signature },
-    });
-
-    return NextResponse.json({ success: true, transactionHash: signature });
+    signature = await sendUsdc(withdrawal.walletAddress, withdrawal.amount.toNumber());
   } catch (error) {
+    // sendUsdc() itself threw: spl-token's transfer() only resolves once
+    // a submission is confirmed, so a thrown error here means no funds
+    // moved (or, in the rare case they did and only OUR observation of
+    // that failed, the periodic reconciliation job's wallet-history scan
+    // - see withdrawals.ts - will find the real on-chain outcome later
+    // and correct this safely either way). Safe to refund immediately.
     console.error("Withdrawal transfer failed:", error);
 
-    // The on-chain transfer didn't go through - release the reserved
-    // funds back to the creator's balance and mark the request FAILED
-    // so it isn't silently stuck in PROCESSING.
-    await prisma.$transaction([
-      prisma.withdrawalRequest.update({
-        where: { id },
-        data: { status: "FAILED" },
-      }),
-      prisma.creatorProfile.update({
-        where: { id: withdrawal.creatorProfileId },
-        data: { balance: { increment: withdrawal.amount } },
-      }),
-    ]);
+    await failAndRefundWithdrawal(
+      id,
+      error instanceof Error ? error.message : String(error)
+    );
 
     await logAdminAction({
       actor: adminCheck.session,
@@ -102,4 +89,19 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       { status: 500 }
     );
   }
+
+  // Funds have moved on-chain. From here on, every step is idempotent
+  // and crash-recoverable - see the module comment above.
+  await recordTransactionHash(id, signature);
+  await finalizeWithdrawal(id, signature);
+
+  await logAdminAction({
+    actor: adminCheck.session,
+    action: "withdrawal.approve",
+    targetType: "WithdrawalRequest",
+    targetId: id,
+    metadata: { amount: withdrawal.amount.toString(), walletAddress: withdrawal.walletAddress, transactionHash: signature },
+  });
+
+  return NextResponse.json({ success: true, transactionHash: signature });
 }

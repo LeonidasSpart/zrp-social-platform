@@ -38,10 +38,30 @@ function newsSchedulerEnabled(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
+/**
+ * Whether this process should periodically reconcile stuck withdrawals
+ * (see src/lib/withdrawals.ts and withdrawals-reconcile-runner.ts).
+ *
+ * On by default everywhere, including `next build` guarded out the same
+ * way as the news scheduler: WITHDRAWAL_RECONCILER=off is the kill
+ * switch if it's ever needed (e.g. a read-only replica that must not
+ * touch financial state), matching LEGACY_PASSWORD_MIGRATION's own
+ * pattern in server.js.
+ */
+function withdrawalReconcilerEnabled(): boolean {
+  if (process.env.NEXT_PHASE === "phase-production-build") return false;
+  return process.env.WITHDRAWAL_RECONCILER !== "off";
+}
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs" && newsSchedulerEnabled()) {
     const { startHourlyNewsCycles } = await import("@/lib/news/hourly-runner");
     startHourlyNewsCycles();
+  }
+
+  if (process.env.NEXT_RUNTIME === "nodejs" && withdrawalReconcilerEnabled()) {
+    const { startWithdrawalReconciliation } = await import("@/lib/withdrawals-reconcile-runner");
+    startWithdrawalReconciliation();
   }
 }
 
