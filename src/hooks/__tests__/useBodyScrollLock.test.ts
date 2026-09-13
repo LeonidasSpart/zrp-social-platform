@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import fs from "fs";
 import path from "path";
 
@@ -34,7 +34,7 @@ describe("useBodyScrollLock", () => {
     expect(hook).toMatch(/body\.top = `-\$\{scrollY\}px`/);
     expect(hook).toContain('body.width = "100%"');
     // Cleanup must restore the real scroll position, not just the styles.
-    expect(hook).toContain("window.scrollTo(0, scrollY)");
+    expect(hook).toContain("window.scrollTo(0, savedBodyState.scrollY)");
   });
 
   it("PostCard's lightbox uses the shared hook, not a raw overflow toggle", () => {
@@ -47,5 +47,102 @@ describe("useBodyScrollLock", () => {
     const source = read("src/components/VideoFeedViewer.tsx");
     expect(source).toContain("useBodyScrollLock(true)");
     expect(source).not.toContain('document.body.style.overflow');
+  });
+});
+
+/*
+ * Regression coverage for a real concurrent-consumer bug found in a
+ * forensic re-audit: PostCard's lightbox and the VideoFeedViewer it
+ * renders as a child can both be locking body scroll at the same time
+ * (independent `lightboxOpen`/`showVideoFeed` state, no mutual
+ * exclusion). The original implementation captured and restored
+ * `document.body.style` per call with no shared coordination, so
+ * whichever consumer unmounted FIRST - not necessarily the one that
+ * locked LAST - restored the body to its own "before" snapshot, which
+ * for the second lock was already the first lock's locked state:
+ * closing the lightbox while the video viewer was still open silently
+ * un-froze the page underneath it.
+ *
+ * `useBodyScrollLock` itself is untestable here without React/jsdom
+ * (this project runs vitest with environment: "node", see the comment
+ * atop this file), so this exercises the module-level
+ * lockBodyScroll/unlockBodyScroll reference-counting functions
+ * directly against a minimal faked `document`/`window`, dynamically
+ * re-imported per test (`vi.resetModules()`) so each test starts from
+ * a clean lockCount.
+ */
+describe("body scroll lock reference counting (two simultaneous consumers)", () => {
+  function fakeDom(initialScrollY: number) {
+    const body = { style: { overflow: "", position: "", top: "", width: "" } };
+    const scrollTo = vi.fn();
+    (globalThis as any).document = { body };
+    (globalThis as any).window = { scrollY: initialScrollY, scrollTo };
+    return { body, scrollTo };
+  }
+
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it("does not unlock the body while a second, still-active consumer holds the lock", async () => {
+    const { body, scrollTo } = fakeDom(250);
+    const { lockBodyScroll, unlockBodyScroll } = await import("../useBodyScrollLock");
+
+    // Lightbox locks first, capturing the real pre-lock (unlocked) styles.
+    lockBodyScroll();
+    expect(body.style.overflow).toBe("hidden");
+    expect(body.style.position).toBe("fixed");
+    expect(body.style.top).toBe("-250px");
+
+    // VideoFeedViewer locks second while the lightbox is still open.
+    lockBodyScroll();
+    // Still locked - the second lock must not re-capture the already-
+    // locked styles as its own "before" snapshot.
+    expect(body.style.overflow).toBe("hidden");
+
+    // The FIRST-mounted consumer (the lightbox) unmounts FIRST - not
+    // last - while the video viewer is still open.
+    unlockBodyScroll();
+
+    // The body must remain locked: one holder still needs it.
+    expect(body.style.overflow).toBe("hidden");
+    expect(body.style.position).toBe("fixed");
+    expect(body.style.top).toBe("-250px");
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    // Now the last remaining holder (the video viewer) unmounts.
+    unlockBodyScroll();
+
+    // Only now does the body actually restore to its real pre-lock state.
+    expect(body.style.overflow).toBe("");
+    expect(body.style.position).toBe("");
+    expect(body.style.top).toBe("");
+    expect(scrollTo).toHaveBeenCalledWith(0, 250);
+  });
+
+  it("a single consumer locks and unlocks correctly on its own", async () => {
+    const { body, scrollTo } = fakeDom(80);
+    const { lockBodyScroll, unlockBodyScroll } = await import("../useBodyScrollLock");
+
+    lockBodyScroll();
+    expect(body.style.overflow).toBe("hidden");
+
+    unlockBodyScroll();
+    expect(body.style.overflow).toBe("");
+    expect(scrollTo).toHaveBeenCalledWith(0, 80);
+  });
+
+  it("never drops the lock count below zero on an unbalanced extra unlock", async () => {
+    const { body } = fakeDom(0);
+    const { lockBodyScroll, unlockBodyScroll } = await import("../useBodyScrollLock");
+
+    lockBodyScroll();
+    unlockBodyScroll();
+    // An extra, unbalanced unlock (e.g. a defensive double-cleanup) must
+    // not underflow the counter and corrupt a LATER, unrelated lock.
+    unlockBodyScroll();
+
+    lockBodyScroll();
+    expect(body.style.overflow).toBe("hidden");
   });
 });

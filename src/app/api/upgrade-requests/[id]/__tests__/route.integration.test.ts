@@ -2,14 +2,12 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
 
-const { requireAdmin, logAdminAction, invalidateUserAuthState } = vi.hoisted(() => ({
+const { requireAdmin, invalidateUserAuthState } = vi.hoisted(() => ({
   requireAdmin: vi.fn(),
-  logAdminAction: vi.fn(),
   invalidateUserAuthState: vi.fn(),
 }));
 
 vi.mock("@/lib/admin", () => ({ requireAdmin }));
-vi.mock("@/lib/audit-log", () => ({ logAdminAction }));
 vi.mock("@/lib/auth-state", () => ({ invalidateUserAuthState }));
 
 import { prisma } from "@/lib/db";
@@ -25,6 +23,16 @@ import { PUT } from "../route";
  * `updateMany({where:{id,status:"pending"}})`, the same compare-and-swap
  * pattern already used correctly by the withdrawal approval route -
  * only one concurrent caller can ever win it.
+ *
+ * Also regression coverage for a forensic-audit finding: the claim, the
+ * plan update, and the audit-log write used to be three separate
+ * sequential awaits AFTER the claim committed - a crash between them
+ * left the request permanently "approved" with the plan never actually
+ * changed, and no way to retry (the pending-status guard rejects a
+ * retry once the row already shows "approved"). All three now run
+ * inside one `prisma.$transaction`, verified below by checking the real
+ * `auditLog` table (not a mock) exists in lockstep with the plan
+ * change - proving they commit or fail together.
  *
  * Uses a real Postgres because the property under test - two writers
  * racing against the SAME row - depends on genuine database-level
@@ -77,6 +85,7 @@ describe.skipIf(!hasRealDatabaseUrl)("PUT /api/upgrade-requests/[id] (integratio
   });
 
   afterAll(async () => {
+    await prisma.auditLog.deleteMany({ where: { targetId: { in: requestIds } } });
     await prisma.upgradeRequest.deleteMany({ where: { id: { in: requestIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   });
@@ -100,8 +109,13 @@ describe.skipIf(!hasRealDatabaseUrl)("PUT /api/upgrade-requests/[id] (integratio
     const finalRequest = await prisma.upgradeRequest.findUnique({ where: { id: request.id } });
     expect(finalRequest?.status).toBe("approved");
 
-    // The whole point of the fix: exactly one audit-log write, not two.
-    expect(logAdminAction).toHaveBeenCalledTimes(1);
+    // The whole point of the fix: exactly one audit-log write, not two -
+    // and it exists in the real table, proving it committed in the same
+    // transaction as the plan change rather than via a separate,
+    // independently-failable write.
+    const auditRows = await prisma.auditLog.findMany({ where: { targetId: request.id } });
+    expect(auditRows).toHaveLength(1);
+    expect(auditRows[0].action).toBe("upgrade_request.approve");
   });
 
   it("rejects approving a request that was already approved", async () => {
@@ -111,14 +125,16 @@ describe.skipIf(!hasRealDatabaseUrl)("PUT /api/upgrade-requests/[id] (integratio
     const first = await call(request.id, "approve");
     expect(first.status).toBe(200);
 
-    logAdminAction.mockClear();
     // A plain sequential re-call (not a race) is caught by the earlier
     // findUnique-based status check, which returns 400 - the 409 from
     // the atomic claim below only fires when two callers both pass that
     // check concurrently (see the race test above).
     const second = await call(request.id, "approve");
     expect(second.status).toBe(400);
-    expect(logAdminAction).not.toHaveBeenCalled();
+
+    // Still exactly the one audit-log write from the first, successful call.
+    const auditRows = await prisma.auditLog.findMany({ where: { targetId: request.id } });
+    expect(auditRows).toHaveLength(1);
   });
 
   it("only one of two concurrent denials of the same request succeeds", async () => {
