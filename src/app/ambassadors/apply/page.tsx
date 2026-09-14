@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ArrowLeft, Check, Loader2, Plus, X } from "lucide-react";
@@ -20,11 +20,24 @@ import { getAllCountries, isValidCountryCode } from "@/lib/ambassadors/countries
  * (src/app/admin/ambassadors), and the server validates every field
  * again regardless of what this form already checked - this form's
  * own validation is a UX convenience, not the security boundary.
+ *
+ * This page must never re-show the form to someone whose real
+ * AmbassadorProfile (GET /api/ambassadors/me, a fresh DB read - never
+ * a cached JWT claim, since ambassador status is never put on the
+ * JWT/session) is PENDING, APPROVED or SUSPENDED - POST /api/ambassadors
+ * /apply already rejects a resubmission from any of those states with
+ * 409 (see that route), so showing the form for them here would be a
+ * dead end at best and a stale "still just applying" view at worst for
+ * someone an admin already approved. Only REJECTED (re-apply allowed)
+ * and "never applied" fall through to the form below; everyone else is
+ * redirected to /ambassadors/dashboard, which reads the same fresh
+ * profile and renders the correct state (pending/approved/suspended).
  */
 export default function ApplyAmbassadorPage() {
   const { t, language } = useLanguage();
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const countries = useMemo(() => getAllCountries(language), [language]);
 
@@ -43,10 +56,40 @@ export default function ApplyAmbassadorPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Existing profile check, undefined while loading, null once we know
+  // there isn't one. Gates the form below so a direct hit on this URL
+  // (bookmark, the hero CTA, browser back) from someone who already has
+  // a PENDING/APPROVED/SUSPENDED profile redirects to the dashboard
+  // instead of re-showing the application form - see the file banner.
+  const [existingStatus, setExistingStatus] = useState<
+    "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | null | undefined
+  >(undefined);
+
   useEffect(() => {
     const fromQuery = searchParams.get("country")?.toUpperCase();
     if (fromQuery && isValidCountryCode(fromQuery)) setCountryCode(fromQuery);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    let cancelled = false;
+    fetch("/api/ambassadors/me", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : { profile: null }))
+      .then((data) => {
+        if (cancelled) return;
+        const profileStatus = data.profile?.status ?? null;
+        setExistingStatus(profileStatus);
+        if (profileStatus === "PENDING" || profileStatus === "APPROVED" || profileStatus === "SUSPENDED") {
+          router.replace("/ambassadors/dashboard");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setExistingStatus(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [status, router]);
 
   const addLanguage = () => {
     const value = languageInput.trim();
@@ -127,7 +170,15 @@ export default function ApplyAmbassadorPage() {
       </h1>
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{t("ambassadors.apply.subtitle")}</p>
 
-      {status === "loading" ? (
+      {status === "loading" ||
+      (status === "authenticated" &&
+        (existingStatus === undefined ||
+          existingStatus === "PENDING" ||
+          existingStatus === "APPROVED" ||
+          existingStatus === "SUSPENDED")) ? (
+        // Covers both "still checking the real profile" and "found one
+        // that isn't REJECTED, redirect to /ambassadors/dashboard is in
+        // flight" - never flash the form in either case.
         <div className="mt-10 flex justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-gray-400" aria-hidden="true" />
         </div>

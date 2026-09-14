@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2, CheckCircle, XCircle, Clock, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
 
 interface HelpWithdrawal {
   id: string;
@@ -13,7 +14,13 @@ interface HelpWithdrawal {
   walletAddress: string;
   status: string;
   createdAt: string;
-  organizer: { username: string; name: string | null; email: string };
+  organizer: {
+    username: string;
+    name: string | null;
+    email: string;
+    avatarUrl: string | null;
+    badgeType: string | null;
+  };
   campaign: { id: string; title: string };
 }
 
@@ -95,13 +102,14 @@ export default function AdminHelpWithdrawalsPage() {
             <div key={withdrawal.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-gray-900 dark:text-white">{withdrawal.organizer.name || withdrawal.organizer.username}</span>
-                    <span className="text-sm text-gray-500">@{withdrawal.organizer.username}</span>
-                    <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full">
-                      {withdrawal.amount} {withdrawal.currency}
-                    </span>
-                  </div>
+                  <AdminUserIdentity
+                    user={withdrawal.organizer}
+                    extra={
+                      <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full">
+                        {withdrawal.amount} {withdrawal.currency}
+                      </span>
+                    }
+                  />
                   <Link
                     href={`/aid/campaign/${withdrawal.campaign.id}`}
                     target="_blank"

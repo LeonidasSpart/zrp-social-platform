@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
 
 interface Payment {
   id: string;
@@ -19,6 +20,8 @@ interface Payment {
     username: string;
     name: string | null;
     email: string;
+    avatarUrl: string | null;
+    badgeType: string | null;
   };
 }
 
@@ -122,18 +125,19 @@ export default function AdminPayments() {
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {payment.user.name || payment.user.username}
-                    </span>
-                    <span className="text-sm text-gray-500">@{payment.user.username}</span>
-                    <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full">
-                      {payment.plan}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {payment.amount} {payment.currency}
-                    </span>
-                  </div>
+                  <AdminUserIdentity
+                    user={payment.user}
+                    extra={
+                      <>
+                        <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full">
+                          {payment.plan}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {payment.amount} {payment.currency}
+                        </span>
+                      </>
+                    }
+                  />
                   <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
                     <span className="font-medium">{t("adminPayments.tx")}</span>{" "}
                     <code className="text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">
