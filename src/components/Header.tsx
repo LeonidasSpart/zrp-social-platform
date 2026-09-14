@@ -417,7 +417,7 @@ export default function Header() {
                     stretched the whole 1069px middle band. */}
                 <div className="relative flex-1 max-w-[28rem]">
                   <Search
-                    className="pointer-events-none absolute left-3.5 top-1/2 w-4 h-4 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                    className="pointer-events-none absolute start-3.5 top-1/2 w-4 h-4 -translate-y-1/2 text-gray-500 dark:text-gray-400"
                     aria-hidden="true"
                   />
 
@@ -431,7 +431,7 @@ export default function Header() {
                       "rightPanel.searchPlaceholder"
                     )}
                     aria-label={t("nav.search")}
-                    className="w-full h-11 pl-10 pr-4 rounded-full border border-transparent bg-gray-100 text-sm text-gray-900 placeholder:text-gray-500 transition hover:bg-gray-200/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zrp-red dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400 dark:hover:bg-gray-700/70 dark:focus:bg-gray-800"
+                    className="w-full h-11 ps-10 pe-4 rounded-full border border-transparent bg-gray-100 text-sm text-gray-900 placeholder:text-gray-500 transition hover:bg-gray-200/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zrp-red dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400 dark:hover:bg-gray-700/70 dark:focus:bg-gray-800"
                   />
                 </div>
               </form>
