@@ -44,7 +44,7 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
           />
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
-              <span className="truncate">@{entry.user.username}</span>
+              <span className="truncate">@<bdi>{entry.user.username}</bdi></span>
               <VerifiedBadge badgeType={entry.user.badgeType} className="flex-shrink-0" />
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">{t("play.level", { n: entry.level })}</p>

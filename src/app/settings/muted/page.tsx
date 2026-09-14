@@ -163,7 +163,7 @@ export default function MutedUsersPage() {
                     {user.badgeType && <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />}
                   </div>
                   <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                    @{user.username}
+                    @<bdi>{user.username}</bdi>
                   </p>
                 </Link>
                 {user.bio && (

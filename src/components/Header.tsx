@@ -896,7 +896,7 @@ export default function Header() {
                     </p>
 
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      @{session.user.username}
+                      @<bdi>{session.user.username}</bdi>
                     </p>
                   </div>
 

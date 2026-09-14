@@ -92,7 +92,7 @@ export function FeedItem({ post, userId }: FeedItemProps) {
               {post.author.name || post.author.username}
             </Link>
             <VerifiedBadge badgeType={post.author.badgeType} />
-            <span className="text-sm text-zinc-500">@{post.author.username}</span>
+            <span className="text-sm text-zinc-500">@<bdi>{post.author.username}</bdi></span>
             <span className="text-sm text-zinc-400">·</span>
             <time className="text-sm text-zinc-400" dateTime={post.createdAt.toISOString()}>
               {timeAgo(post.createdAt)}

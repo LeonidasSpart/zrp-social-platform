@@ -693,7 +693,7 @@ export default function Sidebar() {
             </p>
 
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              @{session.user.username}
+              @<bdi>{session.user.username}</bdi>
             </p>
           </div>
         </Link>

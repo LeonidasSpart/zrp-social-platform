@@ -235,7 +235,7 @@ export default async function NewsArticlePage({
                   href={`/profile/${article.author.username}`}
                   className="hover:underline truncate block"
                 >
-                  @{article.author.username}
+                  @<bdi>{article.author.username}</bdi>
                 </Link>
               </div>
             </div>

@@ -286,7 +286,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                   </span>
                   {listing.seller.badgeType && <VerifiedBadge badgeType={listing.seller.badgeType} />}
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">@{listing.seller.username}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">@<bdi>{listing.seller.username}</bdi></p>
               </div>
             </Link>
             {listing.seller.badgeType && (

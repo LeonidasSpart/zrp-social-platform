@@ -1271,7 +1271,7 @@ export default function ProfilePage(
                 className="text-sm text-gray-500 hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
-                @{reply.author.username}
+                @<bdi>{reply.author.username}</bdi>
               </Link>
 
               <span className="text-sm text-gray-400">
@@ -1858,7 +1858,7 @@ export default function ProfilePage(
 
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              @{profile.username}
+              @<bdi>{profile.username}</bdi>
             </p>
 
             {/* "Follows you" - the reverse of isFollowing (does THIS

@@ -131,7 +131,7 @@ export default function PeopleDiscoveryPage() {
                     {user.badgeType && <VerifiedBadge badgeType={user.badgeType} />}
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    @{user.username}
+                    @<bdi>{user.username}</bdi>
                   </p>
                 </Link>
 
