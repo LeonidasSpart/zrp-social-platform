@@ -144,7 +144,7 @@ export default function AdminHelpPage() {
                         className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
                       >
                         <ExternalLink className="w-3 h-3" />
-                        @{campaign.organizer.username}
+                        <bdi>@{campaign.organizer.username}</bdi>
                       </Link>
                     </div>
                     <p className="font-semibold text-gray-900 dark:text-white mt-1">{campaign.title}</p>

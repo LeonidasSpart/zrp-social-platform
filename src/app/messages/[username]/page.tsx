@@ -221,7 +221,7 @@ export default function ChatPage(
               gap-1
             "
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
             {t("chat.backToMessages")}
           </Link>
         </div>
@@ -315,7 +315,7 @@ export default function ChatPage(
             min-h-[40px]
           "
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
           {t("chat.backToMessages")}
         </Link>
       </div>

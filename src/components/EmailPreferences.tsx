@@ -3,14 +3,16 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
 
-const preferenceLabels: Record<string, string> = {
-  mentions: "Mentions",
-  messages: "Direct Messages",
-  likes: "Likes on your posts",
-  comments: "Comments on your posts",
-  follows: "New followers",
-  reposts: "Reposts of your posts",
+const preferenceLabelKeys: Record<string, TranslationKey> = {
+  mentions: "emailPreferences.prefMentions",
+  messages: "emailPreferences.prefMessages",
+  likes: "emailPreferences.prefLikes",
+  comments: "emailPreferences.prefComments",
+  follows: "emailPreferences.prefFollows",
+  reposts: "emailPreferences.prefReposts",
 };
 
 const defaultPreferences = {
@@ -24,6 +26,7 @@ const defaultPreferences = {
 
 export default function EmailPreferences() {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [preferences, setPreferences] = useState<Record<string, boolean>>(defaultPreferences);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null); // track which key is being saved
@@ -37,10 +40,10 @@ export default function EmailPreferences() {
         // Merge with defaults to ensure all keys exist
         setPreferences({ ...defaultPreferences, ...data });
       } else {
-        setMessage({ type: "error", text: "Failed to load preferences" });
+        setMessage({ type: "error", text: t("emailPreferences.errLoadFailed") });
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Something went wrong" });
+      setMessage({ type: "error", text: t("auth.errSomethingWrong") });
     } finally {
       setLoading(false);
     }
@@ -69,16 +72,16 @@ export default function EmailPreferences() {
         const data = await res.json();
         // Update with the server response (ensures consistency)
         setPreferences((prev) => ({ ...prev, ...data.preferences }));
-        setMessage({ type: "success", text: "Preferences saved!" });
+        setMessage({ type: "success", text: t("emailPreferences.successSaved") });
         setTimeout(() => setMessage(null), 3000);
       } else {
         // Revert on error
         setPreferences((prev) => ({ ...prev, [key]: !newValue }));
-        setMessage({ type: "error", text: "Failed to save preference" });
+        setMessage({ type: "error", text: t("emailPreferences.errSaveFailed") });
       }
     } catch (error) {
       setPreferences((prev) => ({ ...prev, [key]: !newValue }));
-      setMessage({ type: "error", text: "Something went wrong" });
+      setMessage({ type: "error", text: t("auth.errSomethingWrong") });
     } finally {
       setSaving(null);
     }
@@ -97,7 +100,7 @@ export default function EmailPreferences() {
       {Object.entries(preferences).map(([key, value]) => (
         <div key={key} className="flex items-center justify-between">
           <span className="text-sm text-gray-700 dark:text-gray-300">
-            {preferenceLabels[key] || key}
+            {preferenceLabelKeys[key] ? t(preferenceLabelKeys[key]) : key}
           </span>
           <button
             onClick={() => handleToggle(key)}

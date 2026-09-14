@@ -488,7 +488,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           {depth > 1 && parentAuthorUsername && (
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">
               {t("profile.replyingTo")}{" "}
-              <span className="text-zrp-red">@{parentAuthorUsername}</span>
+              <span className="text-zrp-red"><bdi>@{parentAuthorUsername}</bdi></span>
             </p>
           )}
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -505,7 +505,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               href={`/profile/${comment.author.username}`}
               className="text-xs text-gray-400 dark:text-gray-500 hover:underline"
             >
-              @{comment.author.username}
+              <bdi>@{comment.author.username}</bdi>
             </Link>
             <span className="text-xs text-gray-400 dark:text-gray-500">·</span>
             <span className="text-xs text-gray-400 dark:text-gray-500">

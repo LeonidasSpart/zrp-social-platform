@@ -150,7 +150,7 @@ export default function AdminMarketplacePage() {
                         className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
                       >
                         <ExternalLink className="w-3 h-3" />
-                        @{listing.seller.username}
+                        <bdi>@{listing.seller.username}</bdi>
                       </Link>
                     </div>
                     <p className="font-semibold text-gray-900 dark:text-white mt-1">{listing.title}</p>

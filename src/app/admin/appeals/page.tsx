@@ -164,7 +164,7 @@ export default function AdminAppeals() {
                       className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
                       <ExternalLink className="w-3 h-3" />
-                      @{appeal.user.username}
+                      <bdi>@{appeal.user.username}</bdi>
                     </Link>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">

@@ -17,7 +17,7 @@ interface PollProps {
 
 export default function Poll({ pollId, question, options, votes, userVote, expiresAt, onVote }: PollProps) {
   const { data: session } = useSession();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [selected, setSelected] = useState<number | null>(userVote ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,10 +42,10 @@ export default function Poll({ pollId, question, options, votes, userVote, expir
         onVote();
       } else {
         const data = await res.json();
-        setError(data.error || "Failed to vote");
+        setError(data.error || t("poll.errVoteFailed"));
       }
     } catch (error) {
-      setError("Failed to vote. Please try again.");
+      setError(t("poll.errVoteFailedRetry"));
     } finally {
       setSubmitting(false);
     }
@@ -90,7 +90,7 @@ export default function Poll({ pollId, question, options, votes, userVote, expir
                 <span className="text-sm text-gray-800 dark:text-gray-200">{option}</span>
                 {selected !== null && (
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {percentage}% ({count} votes)
+                    {percentage}% {t("poll.optionVoteCount", { count })}
                   </span>
                 )}
               </div>
@@ -104,12 +104,12 @@ export default function Poll({ pollId, question, options, votes, userVote, expir
       )}
 
       <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
-        <span>{totalVotes} {totalVotes === 1 ? "vote" : "votes"}</span>
-        {isExpired && <span>Ended</span>}
+        <span>{t(totalVotes === 1 ? "poll.totalVoteSingular" : "poll.totalVotePlural", { count: totalVotes })}</span>
+        {isExpired && <span>{t("poll.ended")}</span>}
         {!isExpired && expiresAt && (
-          <span>Ends {new Date(expiresAt).toLocaleDateString(getDateLocale(language))}</span>
+          <span>{t("poll.endsOn", { date: new Date(expiresAt).toLocaleDateString(getDateLocale(language)) })}</span>
         )}
-        {selected !== null && !isExpired && <span>✓ Voted</span>}
+        {selected !== null && !isExpired && <span>✓ {t("poll.voted")}</span>}
       </div>
     </div>
   );

@@ -1643,7 +1643,7 @@ export default function PostCard({
                       give. The max-width still stops a pathologically
                       long handle from pushing the timestamp out. */}
                   <span className="block max-w-[10rem] truncate text-gray-500 dark:text-gray-400 text-sm hover:underline">
-                    @{post.author.username}
+                    <bdi>@{post.author.username}</bdi>
                   </span>
                 </Link>
 
@@ -1782,7 +1782,7 @@ export default function PostCard({
                       href={`/profile/${originalAuthor.username}`}
                       className="hover:underline text-zrp-red"
                     >
-                      @{originalAuthor.username}
+                      <bdi>@{originalAuthor.username}</bdi>
                     </Link>
                   </span>
                 </div>
@@ -1988,7 +1988,7 @@ export default function PostCard({
                           <VerifiedBadge badgeType={post.quotePost.author.badgeType} />
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400 truncate min-w-0">
-                          @{post.quotePost.author.username}
+                          <bdi>@{post.quotePost.author.username}</bdi>
                         </span>
                       </div>
 
@@ -2813,11 +2813,11 @@ export default function PostCard({
           <div className="bg-white dark:bg-zrp-deepBlack rounded-2xl shadow-xl max-w-sm w-full p-6">
 
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Delete Post?
+              {t("postCard.deleteTitle")}
             </h2>
 
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-              This action cannot be undone.
+              {t("postCard.deleteBody")}
             </p>
 
             <div className="flex gap-3 justify-end">
@@ -2830,7 +2830,7 @@ export default function PostCard({
                 }
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               >
-                Cancel
+                {t("action.cancel")}
               </button>
 
               <button
@@ -2843,8 +2843,8 @@ export default function PostCard({
                 className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {deleting
-                  ? "Deleting..."
-                  : "Delete"}
+                  ? t("postCard.deleting")
+                  : t("action.delete")}
               </button>
 
             </div>

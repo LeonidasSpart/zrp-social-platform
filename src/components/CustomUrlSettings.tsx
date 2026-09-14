@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Check, X, Loader2, ExternalLink } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // ─── Inline components ──────────────────────────────────────────────
 interface ButtonProps {
@@ -72,6 +73,7 @@ export default function CustomUrlSettings({
   onUpdate,
 }: CustomUrlSettingsProps) {
   const { data: session, update } = useSession();
+  const { t } = useLanguage();
   const [customUrl, setCustomUrl] = useState(currentCustomUrl || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,27 +93,27 @@ export default function CustomUrlSettings({
 
     const trimmed = customUrl.trim().toLowerCase();
     if (!trimmed) {
-      setError("Custom URL cannot be empty.");
+      setError(t("customUrl.errEmpty"));
       return;
     }
 
     if (!/^[a-z0-9_-]+$/.test(trimmed)) {
-      setError("Only letters, numbers, underscores, and hyphens are allowed.");
+      setError(t("customUrl.errInvalidChars"));
       return;
     }
 
     if (trimmed.length < 3) {
-      setError("Must be at least 3 characters.");
+      setError(t("customUrl.errTooShort"));
       return;
     }
 
     if (trimmed.length > 30) {
-      setError("Must be less than 30 characters.");
+      setError(t("customUrl.errTooLong"));
       return;
     }
 
     if (trimmed === currentUsername.toLowerCase()) {
-      setError("This is already your username. Choose a different custom URL.");
+      setError(t("customUrl.errSameAsUsername"));
       return;
     }
 
@@ -125,10 +127,10 @@ export default function CustomUrlSettings({
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to update custom URL");
+        throw new Error(data.error || t("customUrl.errUpdateFailed"));
       }
 
-      setSuccess(`Your custom URL is now /@${trimmed}`);
+      setSuccess(t("customUrl.successUpdated", { url: trimmed }));
       await update();
       onUpdate();
     } catch (err: any) {
@@ -139,7 +141,7 @@ export default function CustomUrlSettings({
   };
 
   const handleRemove = async () => {
-    if (!confirm("Remove your custom URL? Your profile will revert to your username.")) return;
+    if (!confirm(t("customUrl.confirmRemove"))) return;
 
     setLoading(true);
     setError(null);
@@ -151,11 +153,11 @@ export default function CustomUrlSettings({
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to remove custom URL");
+        throw new Error(data.error || t("customUrl.errRemoveFailed"));
       }
 
       setCustomUrl("");
-      setSuccess("Custom URL removed.");
+      setSuccess(t("customUrl.successRemoved"));
       await update();
       onUpdate();
     } catch (err: any) {
@@ -169,13 +171,13 @@ export default function CustomUrlSettings({
     return (
       <div className="p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Custom profile URLs are available on <strong>Pro</strong>, <strong>Business</strong>, and <strong>Enterprise</strong> plans.
+          {t("customUrl.upgradeNote")}
         </p>
         <Button
           onClick={() => window.location.href = "/pricing"}
           className="mt-2"
         >
-          Upgrade to get custom URL
+          {t("customUrl.upgradeCta")}
         </Button>
       </div>
     );
@@ -188,9 +190,9 @@ export default function CustomUrlSettings({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold">Custom Profile URL</h3>
+        <h3 className="text-lg font-semibold">{t("customUrl.title")}</h3>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Set a custom URL for your profile. It will replace your username in the profile link.
+          {t("customUrl.description")}
         </p>
       </div>
 
@@ -222,7 +224,7 @@ export default function CustomUrlSettings({
         <div className="flex items-center gap-3">
           <Button type="submit" disabled={loading || customUrl === currentCustomUrl}>
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            {loading ? "Saving..." : "Save"}
+            {loading ? t("settings.saving") : t("action.save")}
           </Button>
           {currentCustomUrl && (
             <Button
@@ -231,7 +233,7 @@ export default function CustomUrlSettings({
               onClick={handleRemove}
               disabled={loading}
             >
-              Remove
+              {t("customUrl.removeButton")}
             </Button>
           )}
           <a
@@ -240,14 +242,14 @@ export default function CustomUrlSettings({
             rel="noopener noreferrer"
             className="text-sm text-zrp-red hover:underline flex items-center gap-1"
           >
-            View profile <ExternalLink className="w-3 h-3" />
+            {t("customUrl.viewProfile")} <ExternalLink className="w-3 h-3" />
           </a>
         </div>
       </form>
 
       {currentCustomUrl && (
         <div className="text-xs text-gray-500 dark:text-gray-400">
-          Current URL: <a href={currentUrl} className="text-zrp-red hover:underline">{currentUrl}</a>
+          {t("customUrl.currentUrlLabel")} <a href={currentUrl} className="text-zrp-red hover:underline">{currentUrl}</a>
         </div>
       )}
     </div>

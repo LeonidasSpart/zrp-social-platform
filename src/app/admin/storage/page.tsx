@@ -93,7 +93,7 @@ export default function AdminStoragePage() {
           href="/admin"
           className="mb-3 inline-flex items-center gap-2 text-sm text-gray-500 transition hover:text-red-600 dark:text-gray-400"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" />
           {t("adminStorage.backToAdmin")}
         </Link>
 

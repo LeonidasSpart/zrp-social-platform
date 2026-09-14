@@ -71,7 +71,7 @@ export default function MyCampaignsPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Link href="/aid" className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-zrp-red transition mb-4">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
         {t("help.backToAid")}
       </Link>
 

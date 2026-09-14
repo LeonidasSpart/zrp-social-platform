@@ -63,7 +63,7 @@ export default function PlayProfilePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Link href="/play" className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-zrp-red transition mb-4">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
         {t("play.backToPlay")}
       </Link>
 
@@ -79,7 +79,7 @@ export default function PlayProfilePage() {
           href={`/profile/${data.user.username}`}
           className="flex flex-wrap items-center justify-center gap-1 mt-2 hover:underline"
         >
-          <h1 className="text-lg font-bold text-gray-900 dark:text-white break-words">@{data.user.username}</h1>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-white break-words"><bdi>@{data.user.username}</bdi></h1>
           <VerifiedBadge badgeType={data.user.badgeType} className="flex-shrink-0" />
         </Link>
         <div className="mt-4 flex justify-center">

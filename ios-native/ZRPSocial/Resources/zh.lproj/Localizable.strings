@@ -535,7 +535,7 @@
 "settings.privateAccountDesc" = "只有获批准的关注者才能看到你的帖子和个人资料详情。";
 "settings.updatePrivacy" = "更新隐私设置";
 "settings.successPrivacyUpdated" = "隐私设置已更新！";
-"settings.errPrivacyUpdateFailed" = "失败 to 更新 隐私 设置";
+"settings.errPrivacyUpdateFailed" = "隐私设置更新失败";
 "settings.changePassword" = "修改密码";
 "settings.changePasswordTitle" = "修改密码";
 "settings.currentPassword" = "当前密码";
@@ -547,7 +547,7 @@
 "settings.errPasswordFieldsRequired" = "所有字段均为必填项";
 "settings.errPasswordMinLength" = "新密码至少需要 6 个字符";
 "settings.errPasswordsMismatch" = "两次输入的密码不一致";
-"settings.errPasswordUpdateFailed" = "失败 to 更新 密码";
+"settings.errPasswordUpdateFailed" = "密码更新失败";
 "settings.successPasswordUpdated" = "密码更新成功！";
 "settings.blockedUsers" = "已屏蔽的用户";
 "settings.mutedUsers" = "已静音的用户";
@@ -676,7 +676,7 @@
 "settings.countryPlaceholder" = "国家";
 "settings.profilePicture" = "头像";
 "settings.successProfileUpdated" = "个人资料更新成功！";
-"settings.errProfileUpdateFailed" = "失败 to 更新 资料";
+"settings.errProfileUpdateFailed" = "资料更新失败";
 "settings.usernameTitle" = "用户名";
 "settings.currentUsername" = "当前用户名";
 "settings.newUsername" = "新用户名";

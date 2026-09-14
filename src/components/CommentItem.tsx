@@ -205,7 +205,7 @@ export default function CommentItem({
               href={`/profile/${comment.author.username}`}
               className="text-xs text-gray-500 hover:underline"
             >
-              @{comment.author.username}
+              <bdi>@{comment.author.username}</bdi>
             </Link>
             <span className="text-xs text-gray-400">·</span>
             <span className="text-xs text-gray-400">

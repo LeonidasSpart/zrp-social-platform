@@ -43,7 +43,7 @@ export default function AdminUserIdentity({
         href={`/profile/${user.username}`}
         className="text-sm text-gray-500 hover:underline dark:text-gray-400"
       >
-        @{user.username}
+        <bdi>@{user.username}</bdi>
       </Link>
       {user.badgeType && <VerifiedBadge badgeType={user.badgeType} />}
       {extra}

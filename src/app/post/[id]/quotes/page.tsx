@@ -91,7 +91,7 @@ export default function QuotesPage(props: { params: Promise<{ id: string }> }) {
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="flex items-center gap-3 mb-4">
         <Link href={`/post/${params.id}`} className="text-gray-500 hover:text-gray-700 transition">
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 rtl:-scale-x-100" />
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t("quotes.title")}</h1>
         <span className="text-sm text-gray-500 ml-auto">{t("quotes.count", { n: quotes.length })}</span>

@@ -125,7 +125,7 @@ export default function CampaignDetailPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Link href="/aid" className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-zrp-red transition mb-4">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
         {t("help.backToAid")}
       </Link>
 
@@ -188,7 +188,7 @@ export default function CampaignDetailPage() {
             <div className="flex min-w-0 items-center gap-2 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
               <img src={campaign.organizer.avatarUrl || "/default-avatar.png"} alt={campaign.organizer.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
               <Link href={`/profile/${campaign.organizer.username}`} className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:text-zrp-red transition">
-                <span className="truncate">@{campaign.organizer.username}</span>
+                <span className="truncate"><bdi>@{campaign.organizer.username}</bdi></span>
                 <VerifiedBadge badgeType={campaign.organizer.badgeType} className="flex-shrink-0" />
               </Link>
             </div>

@@ -1,3 +1,15 @@
+// Load .env/.env.local/.env.development etc. the same way Next.js's own
+// CLI would, and do it before anything below reads process.env. This file
+// is a custom server (bypasses `next dev`/`next start`), and next()'s own
+// env loading is lazy - deferred until the real request-handling server is
+// built on first request/prepare() - so anything that reads process.env at
+// module-require time (the PrismaClient below included) would otherwise
+// run before .env is applied and silently fall back to defaults (e.g. the
+// `pg` driver's default of 127.0.0.1:5432 instead of DATABASE_URL's real
+// host/port). Matches Next.js's documented custom-server pattern.
+const { loadEnvConfig } = require("@next/env");
+loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
+
 const { createServer } = require("http");
 const { parse } = require("url");
 const next = require("next");

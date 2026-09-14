@@ -107,7 +107,7 @@ export default function OpportunityListingPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Link href="/opportunity" className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-zrp-red transition mb-4">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
         {t("opportunity.backToOpportunity")}
       </Link>
 
@@ -180,7 +180,7 @@ export default function OpportunityListingPage() {
           <div className="flex min-w-0 items-center gap-2 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
             <img src={listing.poster.avatarUrl || "/default-avatar.png"} alt={listing.poster.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
             <Link href={`/profile/${listing.poster.username}`} className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:text-zrp-red transition">
-              <span className="truncate">@{listing.poster.username}</span>
+              <span className="truncate"><bdi>@{listing.poster.username}</bdi></span>
               <VerifiedBadge badgeType={listing.poster.badgeType} className="flex-shrink-0" />
             </Link>
           </div>

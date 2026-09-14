@@ -358,7 +358,7 @@ export default function OnboardingPage() {
                               <span className="truncate">{user.name || user.username}</span>
                               <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.username}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate"><bdi>@{user.username}</bdi></p>
                           </div>
                         </div>
                         <button

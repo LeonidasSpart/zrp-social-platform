@@ -178,7 +178,7 @@ export default function AdminMusicPage() {
                         className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
                       >
                         <ExternalLink className="w-3 h-3" />
-                        @{artist.user.username}
+                        <bdi>@{artist.user.username}</bdi>
                       </Link>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         {t(artist._count.tracks === 1 ? "music.count.tracksOne" : "music.count.tracksOther", { count: artist._count.tracks })}

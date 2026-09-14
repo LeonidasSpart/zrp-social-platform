@@ -245,7 +245,7 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="mb-4">
         <Link href="/" className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" /> {t("postDetail.backToFeed")}
+          <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {t("postDetail.backToFeed")}
         </Link>
       </div>
 

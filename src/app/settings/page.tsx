@@ -754,7 +754,7 @@ export default function SettingsPage() {
                       {t("settings.currentUsername")}
                     </label>
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-600 dark:text-gray-400">@{userData.username}</span>
+                      <span className="text-gray-600 dark:text-gray-400"><bdi>@{userData.username}</bdi></span>
                     </div>
                   </div>
 

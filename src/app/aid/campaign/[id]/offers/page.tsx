@@ -56,7 +56,7 @@ export default function CampaignOffersPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Link href={`/aid/campaign/${params.id}`} className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-zrp-red transition mb-4">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
         {t("help.backToCampaign")}
       </Link>
 
@@ -79,7 +79,7 @@ export default function CampaignOffersPage() {
                     <img src={offer.offerer.avatarUrl || "/default-avatar.png"} alt={offer.offerer.username} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                     <div className="min-w-0">
                       <Link href={`/profile/${offer.offerer.username}`} className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:text-zrp-red transition">
-                        <span className="truncate">@{offer.offerer.username}</span>
+                        <span className="truncate"><bdi>@{offer.offerer.username}</bdi></span>
                         <VerifiedBadge badgeType={offer.offerer.badgeType} className="flex-shrink-0" />
                       </Link>
                       <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">

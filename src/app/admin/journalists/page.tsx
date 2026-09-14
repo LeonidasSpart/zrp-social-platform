@@ -208,7 +208,7 @@ export default function AdminJournalistsPage() {
           href="/admin"
           className="mb-3 inline-flex items-center gap-2 text-sm text-gray-500 transition hover:text-red-600 dark:text-gray-400"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" />
           {t("adminJournalists.backToAdmin")}
         </Link>
 
@@ -324,7 +324,7 @@ export default function AdminJournalistsPage() {
                         href={`/profile/${profile.user.username}`}
                         className="text-sm text-gray-500 hover:underline dark:text-gray-400"
                       >
-                        @{profile.user.username}
+                        <bdi>@{profile.user.username}</bdi>
                       </Link>
                       {profile.user.badgeType && <VerifiedBadge badgeType={profile.user.badgeType} />}
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[profile.status]}`}>

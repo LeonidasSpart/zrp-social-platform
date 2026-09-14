@@ -139,11 +139,11 @@ export default function AdminUsers() {
         fetchUsers();
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || "Failed to update role");
+        alert(err.error || t("adminUsers.errUpdateRoleFailed"));
       }
     } catch (error) {
       console.error("Role update error:", error);
-      alert("Failed to update role");
+      alert(t("adminUsers.errUpdateRoleFailed"));
     }
   };
 
@@ -158,11 +158,11 @@ export default function AdminUsers() {
         fetchUsers();
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || "Failed to update badge");
+        alert(err.error || t("adminUsers.errUpdateBadgeFailed"));
       }
     } catch (error) {
       console.error("Badge update error:", error);
-      alert("Failed to update badge");
+      alert(t("adminUsers.errUpdateBadgeFailed"));
     }
   };
 
@@ -376,7 +376,7 @@ export default function AdminUsers() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <Link href={`/profile/${user.username}`} className="hover:underline">
                           <span className="font-medium text-gray-900 dark:text-white">{user.name || user.username}</span>
-                          <span className="text-gray-500 text-xs ml-1">@{user.username}</span>
+                          <span className="text-gray-500 text-xs ml-1"><bdi>@{user.username}</bdi></span>
                         </Link>
                       </td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300 truncate max-w-[150px] hidden sm:table-cell">

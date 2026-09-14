@@ -74,6 +74,13 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   // The brand itself
   "ZRP",
   "ZRP Social",
+  // Third-party payment brand names - never translated in any language
+  "PayPal",
+  // ISO banking standard acronyms - identical in every language (French/
+  // CJK values legitimately differ only in spacing/colon width, which
+  // already makes them distinct from this exact English string).
+  "IBAN:",
+  "BIC:",
 ]);
 
 /**
@@ -241,6 +248,13 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.categoryZrp",
     "trust.outOf100",
+    // "vote"/"votes" and "Mentions" are the actual French words for
+    // these concepts (regular -s plural, same spelling as English) -
+    // not untranslated leftovers.
+    "poll.totalVoteSingular",
+    "poll.totalVotePlural",
+    "poll.optionVoteCount",
+    "emailPreferences.prefMentions",
   ],
   de: [
     "adminNews.urlPlaceholder",
@@ -331,6 +345,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.categoryZrp",
     "trust.outOf100",
+    // "Bank" is the same word in German.
+    "upgradeRequest.bankLabel",
   ],
   it: [
     "adminNews.slugLabel",
@@ -833,6 +849,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.categoryZrp",
     "trust.outOf100",
+    // "Bank" is a standard Indonesian loanword, same spelling as English.
+    "upgradeRequest.bankLabel",
   ],
   pt: [
     "adminNews.slugLabel",

@@ -74,7 +74,7 @@ export default function AdminPosts() {
           onClick={() => setSelectedPost(null)}
           className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-zrp-red hover:underline"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <ArrowLeft className="h-4 w-4 rtl:-scale-x-100" aria-hidden="true" />
           {t("adminPosts.title")}
         </button>
 

@@ -79,7 +79,7 @@ export default function RepostsPage(props: { params: Promise<{ id: string }> }) 
     <div className="max-w-2xl mx-auto py-4 px-4">
       <div className="flex items-center gap-3 mb-4">
         <Link href={`/post/${params.id}`} className="text-gray-500 hover:text-gray-700 transition">
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 rtl:-scale-x-100" />
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Repeat className="w-5 h-5 text-green-500" />
@@ -120,7 +120,7 @@ export default function RepostsPage(props: { params: Promise<{ id: string }> }) 
                   </span>
                   <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
                 </div>
-                <div className="truncate text-sm text-gray-500">@{user.username}</div>
+                <div className="truncate text-sm text-gray-500"><bdi>@{user.username}</bdi></div>
               </div>
               {user.isFollowing && (
                 <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">

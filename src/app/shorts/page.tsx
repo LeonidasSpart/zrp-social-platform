@@ -1089,7 +1089,7 @@ export default function ShortsPage() {
         className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
         aria-label={t("shorts.back")}
       >
-        <ArrowLeft className="w-6 h-6" />
+        <ArrowLeft className="w-6 h-6 rtl:-scale-x-100" />
       </button>
 
       {/* TITLE */}

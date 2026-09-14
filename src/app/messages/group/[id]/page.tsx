@@ -89,7 +89,7 @@ export default function GroupChatPage(props: { params: Promise<{ id: string }> }
           href="/messages"
           className="inline-flex items-center gap-1.5 text-zrp-red hover:underline text-sm font-medium min-h-[40px]"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
           {t("chat.backToMessages")}
         </Link>
       </div>

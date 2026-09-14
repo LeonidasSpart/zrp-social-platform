@@ -188,7 +188,7 @@ export default function UserMultiSelect({
                       </span>
                       <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
                     </span>
-                    <span className="block text-xs text-gray-400 truncate">@{user.username}</span>
+                    <span className="block text-xs text-gray-400 truncate"><bdi>@{user.username}</bdi></span>
                   </span>
                   <span
                     className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
