@@ -710,19 +710,16 @@ export default function SettingsPage() {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t("settings.currentPasswordRequired")}
-                    </label>
-                    <input
-                      type="password"
-                      value={emailPassword}
-                      onChange={(e) => setEmailPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      placeholder={t("settings.currentPasswordPlaceholder")}
-                      required
-                    />
-                  </div>
+                  <PasswordInput
+                    id="email-current-password"
+                    name="currentPassword"
+                    value={emailPassword}
+                    onChange={(e) => setEmailPassword(e.target.value)}
+                    label={t("settings.currentPasswordRequired")}
+                    placeholder={t("settings.currentPasswordPlaceholder")}
+                    required
+                    autoComplete="current-password"
+                  />
                   {emailMessage && (
                     <p className={`text-sm ${emailMessage.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                       {emailMessage.text}
