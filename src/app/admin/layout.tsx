@@ -22,6 +22,7 @@ import {
   Music2,
   Rss,
   Globe2,
+  BarChart3,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -146,11 +147,17 @@ export default function AdminLayout({
       icon: Music2,
     },
 
-    // Upgrade Requests, Storage Cleanup and HELP fund withdrawals
-    // require full admin access - approving a payout is a sensitive,
-    // financial action, same bar as the existing creator withdrawals.
+    // Analytics, Upgrade Requests, Storage Cleanup and HELP fund
+    // withdrawals require full admin access - platform-wide metrics and
+    // approving a payout are both a sensitive bar, same as the existing
+    // creator withdrawals.
     ...(isFullAdmin
       ? [
+          {
+            href: "/admin/analytics",
+            labelKey: "analytics.title" as TranslationKey,
+            icon: BarChart3,
+          },
           {
             href: "/admin/upgrade-requests",
             labelKey: "upgradeReq.title" as TranslationKey,
