@@ -194,6 +194,7 @@
 "profile.userNotFound" = "Pengguna tidak ditemukan";
 "profile.protectedAccount" = "Akun ini privat";
 "profile.protectedMessage" = "Ikuti akun ini untuk melihat postingan dan detail profil mereka.";
+"profile.editProfileButton" = "Edit profil";
 "action.follow" = "Ikuti";
 "action.following" = "Mengikuti";
 "action.unfollow" = "Berhenti Mengikuti";

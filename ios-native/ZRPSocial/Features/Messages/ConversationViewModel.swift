@@ -490,6 +490,22 @@ final class ConversationViewModel: ObservableObject {
         }
     }
 
+    /// Clears this whole thread, same as the conversation list's delete.
+    /// Returns whether it succeeded, so the view knows whether it is safe
+    /// to pop off the now-gone thread.
+    func deleteConversation() async -> Bool {
+        do {
+            try await repository.deleteConversation(with: partner.id)
+            return true
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+            return false
+        } catch {
+            errorMessage = L10n.string(.messagesErrDeleteFailed)
+            return false
+        }
+    }
+
     /// The route returns the message's complete reaction list after the
     /// toggle, so that is applied wholesale rather than the client
     /// predicting the result of add/remove/replace.

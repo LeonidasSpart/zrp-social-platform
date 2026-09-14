@@ -385,8 +385,19 @@ android {
         // cancellation from the account picker itself - a platform/
         // Play-Services-level condition, not a ZRP code defect) or
         // something else entirely that this pass has not yet found.
-        versionCode 24
-        versionName "4.0.18"
+        //
+        // Bumps to versionCode 25 / versionName "4.0.19" for the frontend
+        // surgical audit landing alongside this: the Quote Post composer
+        // keyboard/layout fix, the feed video aspect-ratio/sizing fix
+        // (shared root cause with the web/PostCard fix - see
+        // InlineVideoView.swift on iOS for the equivalent), and the
+        // messages-contact-popup "Delete conversation" parity fix (this
+        // app already had the real deleteConversation endpoint wired
+        // from the conversation-list row; it was just missing from
+        // ChatContactPopup's own "More" menu, which now matches it).
+        // None of this changes applicationId, signing, or deep links.
+        versionCode 25
+        versionName "4.0.19"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

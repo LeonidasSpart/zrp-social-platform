@@ -100,10 +100,24 @@ struct ProfileHeaderView: View {
     @ViewBuilder
     private var followControl: some View {
         if isOwnProfile {
-            // Editing a profile is Phase 6b. Rather than an "Edit Profile"
-            // button that opens nothing, the viewer's own profile simply
-            // shows no action here.
-            EmptyView()
+            // The website resolves its own-profile case by deep-linking
+            // this same slot to `/settings` rather than a separate
+            // profile-edit modal; this pushes the same real, working
+            // `EditProfileView` Settings already opens (`Route.editProfile`)
+            // instead of inventing a second edit surface.
+            Button {
+                navigator.push(.editProfile)
+            } label: {
+                Text(.profileEditProfileButton)
+                    .font(.subheadline.weight(.semibold))
+                    .frame(minWidth: 100)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
+                    .padding(.horizontal, ZrpSpacing.lg)
+                    .background(ZrpColor.surfaceHighest)
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().strokeBorder(ZrpColor.outline, lineWidth: 1))
+            }
         } else {
             Button(action: onToggleFollow) {
                 Group {

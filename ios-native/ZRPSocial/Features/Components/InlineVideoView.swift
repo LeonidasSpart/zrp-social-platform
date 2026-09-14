@@ -1,3 +1,4 @@
+import AVFoundation
 import SwiftUI
 import UIKit
 
@@ -20,6 +21,16 @@ struct InlineVideoView: View {
     @EnvironmentObject private var videos: FeedVideoCoordinator
     @EnvironmentObject private var music: MusicPlayer
 
+    /// The video's own real shape, read once from its asset. Defaults to
+    /// 16:9 until that load completes - the same "assume, then correct"
+    /// order the web (`captureVideoAspect`/`videoAspectRatio`) and Android
+    /// (`PostVideoPlayer`'s `onVideoSizeChanged`) fixes use. Kept separate
+    /// from the shared `FeedVideoCoordinator` player on purpose: only one
+    /// post's video is ever loaded into that player at a time, but every
+    /// card in the feed still needs its own correct box shape - including
+    /// the ones currently showing a poster, not playing.
+    @State private var videoAspectRatio: CGFloat = 16.0 / 9.0
+
     private var isActive: Bool { videos.activeId == id }
 
     var body: some View {
@@ -40,7 +51,7 @@ struct InlineVideoView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .aspectRatio(16.0 / 9.0, contentMode: .fit)
+        .aspectRatio(videoAspectRatio, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
         .overlay(alignment: .bottomTrailing) {
             if isActive {
@@ -93,5 +104,39 @@ struct InlineVideoView: View {
                     .onDisappear { videos.unregister(id: id) }
             }
         }
+        .task(id: url) { await loadVideoAspectRatio() }
+    }
+
+    /// Reads this video's real, rotation-corrected display size and
+    /// updates `videoAspectRatio` once it is known, so SwiftUI re-lays out
+    /// the card at its actual shape instead of the assumed 16:9 default.
+    ///
+    /// `naturalSize` alone is the CODED frame, not the displayed one - a
+    /// clip shot in portrait is very often stored as a landscape frame
+    /// plus a 90/270 `preferredTransform` meant to rotate it at playback
+    /// time (AVFoundation's equivalent of ExoPlayer's
+    /// `unappliedRotationDegrees`, handled the same way in the Android
+    /// fix). Applying the transform to the natural size before taking its
+    /// width/height is what corrects for that; skipping it reproduces the
+    /// exact same "wrong box" bug this method exists to fix.
+    ///
+    /// Uses its own `AVURLAsset` rather than the coordinator's shared
+    /// `AVPlayer` - that player only ever holds the one post currently
+    /// playing, but every card, playing or not, needs its own box shape.
+    private func loadVideoAspectRatio() async {
+        guard let assetURL = URL(string: url) else { return }
+        let asset = AVURLAsset(url: assetURL)
+        guard let track = try? await asset.loadTracks(withMediaType: .video).first else { return }
+        guard let (naturalSize, transform) = try? await track.load(.naturalSize, .preferredTransform) else {
+            return
+        }
+        guard !Task.isCancelled else { return }
+
+        let displaySize = naturalSize.applying(transform)
+        let width = abs(displaySize.width)
+        let height = abs(displaySize.height)
+        guard width > 0, height > 0 else { return }
+
+        videoAspectRatio = width / height
     }
 }

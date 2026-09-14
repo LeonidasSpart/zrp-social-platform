@@ -279,13 +279,15 @@ interface MessagesApi {
     @DELETE("messages/delete/{id}")
     suspend fun deleteMessage(@Path("id") messageId: String)
 
-    // The real, permanent whole-conversation delete
-    // (src/app/api/messages/conversation/[userId]/route.ts) - the same
-    // endpoint the website's ChatContactDrawer already calls. This is a
-    // genuine hard delete: every message between the two users in both
-    // directions, server-side, plus their attachments' UploadThing
-    // cleanup - not a per-device hide. Before this, no client in this app
-    // ever called it; only deleteMessage() (one message) existed here.
+    // Deletes the whole 1:1 conversation with userId - the same endpoint
+    // the website's ChatContactDrawer already calls
+    // (src/app/api/messages/conversation/[userId]/route.ts). This is a
+    // soft, per-user delete: it upserts a ConversationClearance row for
+    // the caller only, hiding the conversation from their own list/
+    // thread from that point on. No Message row is ever deleted, and the
+    // other party's own view is unaffected - a new message from either
+    // side after this makes the conversation reappear (for the caller)
+    // the same way a fresh clearance timestamp does on web.
     @DELETE("messages/conversation/{userId}")
     suspend fun deleteConversation(@Path("userId") userId: String)
 

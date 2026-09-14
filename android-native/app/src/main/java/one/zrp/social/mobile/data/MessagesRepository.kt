@@ -55,12 +55,14 @@ class MessagesRepository {
         ApiClient.messagesApi.deleteMessage(messageId)
     }
 
-    // Deletes the whole 1:1 thread server-side (see MessagesApi's own
-    // KDoc: every message in both directions, permanently). Used by the
-    // conversation-list row menu - this is the root fix for "deleting a
-    // conversation doesn't work on Android": no client here ever called
-    // this endpoint before, so there was nothing to fail at the UI layer
-    // - the failure was that the call never existed.
+    // Deletes the whole 1:1 thread - a soft, per-user hide server-side,
+    // not a hard delete (see MessagesApi's own KDoc: a ConversationClearance
+    // row for the caller only, no Message row ever removed). Used by both
+    // the conversation-list row menu and ChatContactPopup's "More" menu -
+    // this is the root fix for "deleting a conversation doesn't work on
+    // Android": no client here ever called this endpoint before, so there
+    // was nothing to fail at the UI layer - the failure was that the call
+    // never existed.
     suspend fun deleteConversation(partnerId: String): Result<Unit> {
         return try {
             ApiClient.messagesApi.deleteConversation(partnerId)

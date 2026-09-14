@@ -161,6 +161,36 @@ img, video, iframe, svg {
   display: none; /* Chrome, Safari, and other WebKit browsers */
 }
 
+/* ─── Text-input fill color (WebKit paste/dark-mode bug) ─────────────
+   Reported bug: pasted text in a composer (e.g. Shorts caption) can
+   render invisible - black-on-black in dark mode - while typed text is
+   fine. Every textarea/input in this app already sets an explicit
+   Tailwind `color` (e.g. `text-gray-900 dark:text-white`) with no
+   missing/omitted color class anywhere audited, so this isn't an
+   authoring gap. It matches a known WebKit/Blink quirk instead: on
+   some engine versions, a form control's actual glyph color is drawn
+   from `-webkit-text-fill-color`, a distinct paint property from CSS
+   `color` that the engine can independently reset to its own native
+   default (opaque black) around paste/autofill/dictation-driven value
+   changes - `color` itself stays correctly applied in the DOM the
+   whole time, which is why this doesn't show up as a missing class in
+   markup/devtools computed styles for `color`. Pinning
+   -webkit-text-fill-color to currentColor keeps it locked to whatever
+   `color` already resolves to, closing that gap at its root rather
+   than special-casing the Shorts composer alone - every text input in
+   the app gets the same guarantee. */
+textarea,
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+[contenteditable="true"] {
+  -webkit-text-fill-color: currentColor;
+}
+
 /* ─── Keyboard focus ────────────────────────────────────────────────
    Interactive elements had no consistent focus indicator: form controls
    set focus:ring-2 focus:ring-zrp-red individually, but links, buttons

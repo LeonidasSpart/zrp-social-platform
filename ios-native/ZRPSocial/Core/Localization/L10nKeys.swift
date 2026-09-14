@@ -396,6 +396,8 @@ enum L10nKey: String, CaseIterable {
     case profileProtectedAccount = "profile.protectedAccount"
     /// en: "Follow this account to see their posts and profile details."
     case profileProtectedMessage = "profile.protectedMessage"
+    /// en: "Edit profile"
+    case profileEditProfileButton = "profile.editProfileButton"
     /// en: "Follow"
     case actionFollow = "action.follow"
     /// en: "Following"
