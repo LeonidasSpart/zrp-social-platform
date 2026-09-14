@@ -376,7 +376,7 @@ export default function AdminUsers() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <Link href={`/profile/${user.username}`} className="hover:underline">
                           <span className="font-medium text-gray-900 dark:text-white">{user.name || user.username}</span>
-                          <span className="text-gray-500 text-xs ml-1">@<bdi>{user.username}</bdi></span>
+                          <span className="text-gray-500 text-xs ml-1"><bdi>@{user.username}</bdi></span>
                         </Link>
                       </td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300 truncate max-w-[150px] hidden sm:table-cell">

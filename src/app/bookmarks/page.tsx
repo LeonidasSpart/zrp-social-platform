@@ -203,7 +203,7 @@ export default function BookmarksPage() {
                           {comment.author.name || comment.author.username}
                         </span>
                         <VerifiedBadge badgeType={comment.author.badgeType} />
-                        <span className="text-xs text-gray-500">@<bdi>{comment.author.username}</bdi></span>
+                        <span className="text-xs text-gray-500"><bdi>@{comment.author.username}</bdi></span>
                         <span className="text-xs text-gray-400">·</span>
                         <span className="text-xs text-gray-400">
                           {new Date(comment.createdAt).toLocaleDateString(getDateLocale(language))}
@@ -215,7 +215,7 @@ export default function BookmarksPage() {
                       <div className="mt-1 text-xs text-gray-400">
                         {t("bookmarks.replyingTo")}{" "}
                         <span className="text-zrp-red">
-                          @<bdi>{comment.post.author.username}</bdi>
+                          <bdi>@{comment.post.author.username}</bdi>
                         </span>
                       </div>
                     </div>

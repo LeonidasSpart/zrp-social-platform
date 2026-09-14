@@ -187,7 +187,7 @@ export default function SearchPage() {
                             {user.badgeType && <VerifiedBadge badgeType={user.badgeType} />}
                           </div>
                           <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                            @<bdi>{user.username}</bdi>
+                            <bdi>@{user.username}</bdi>
                           </p>
                         </div>
                       </Link>

@@ -141,7 +141,7 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
                       href={`/profile/${post.author.username}`}
                       className="text-xs text-gray-500 hover:underline"
                     >
-                      @<bdi>{post.author.username}</bdi>
+                      <bdi>@{post.author.username}</bdi>
                     </Link>
                   </div>
                   <p className="text-sm text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap">

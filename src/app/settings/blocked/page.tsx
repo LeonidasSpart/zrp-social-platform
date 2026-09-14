@@ -161,7 +161,7 @@ export default function BlockedUsersPage() {
                     {user.badgeType && <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />}
                   </div>
                   <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                    @<bdi>{user.username}</bdi>
+                    <bdi>@{user.username}</bdi>
                   </p>
                 </Link>
                 {user.bio && (

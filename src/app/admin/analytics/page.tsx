@@ -246,7 +246,7 @@ export default function AnalyticsPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-800 dark:text-gray-200 truncate">{post.content}</p>
                   <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400">
-                    <span>@<bdi>{post.author.username}</bdi></span>
+                    <span><bdi>@{post.author.username}</bdi></span>
                     <span>❤️ {post._count.likes}</span>
                     <span>💬 {post._count.comments}</span>
                     <span>🔄 {post._count.reposts}</span>

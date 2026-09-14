@@ -222,7 +222,7 @@ export default function PlayHomePage() {
                   className="w-8 h-8 rounded-full object-cover"
                 />
                 <span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-1">
-                  <span className="truncate">@<bdi>{entry.user.username}</bdi></span>
+                  <span className="truncate"><bdi>@{entry.user.username}</bdi></span>
                   <VerifiedBadge badgeType={entry.user.badgeType} />
                 </span>
                 <span className="text-sm font-bold text-zrp-red">{t("play.xp", { n: entry.totalXp })}</span>

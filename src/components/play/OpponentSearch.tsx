@@ -40,7 +40,7 @@ export default function OpponentSearch({ value, onChange, excludeUserId }: Oppon
         <img src={value.avatarUrl || "/default-avatar.png"} alt={value.username} className="w-9 h-9 rounded-full object-cover" />
         <div className="flex-1 min-w-0">
           <div className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
-            <span className="truncate">@<bdi>{value.username}</bdi></span>
+            <span className="truncate"><bdi>@{value.username}</bdi></span>
             <VerifiedBadge badgeType={value.badgeType} className="flex-shrink-0" />
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function OpponentSearch({ value, onChange, excludeUserId }: Oppon
             >
               <img src={user.avatarUrl || "/default-avatar.png"} alt={user.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
               <div className="flex min-w-0 flex-1 items-center gap-1 text-sm text-gray-800 dark:text-gray-200">
-                <span className="truncate">@<bdi>{user.username}</bdi></span>
+                <span className="truncate"><bdi>@{user.username}</bdi></span>
                 <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
               </div>
             </button>

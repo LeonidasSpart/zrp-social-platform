@@ -79,7 +79,7 @@ export default function PlayProfilePage() {
           href={`/profile/${data.user.username}`}
           className="flex flex-wrap items-center justify-center gap-1 mt-2 hover:underline"
         >
-          <h1 className="text-lg font-bold text-gray-900 dark:text-white break-words">@<bdi>{data.user.username}</bdi></h1>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-white break-words"><bdi>@{data.user.username}</bdi></h1>
           <VerifiedBadge badgeType={data.user.badgeType} className="flex-shrink-0" />
         </Link>
         <div className="mt-4 flex justify-center">

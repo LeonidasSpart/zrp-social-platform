@@ -58,7 +58,7 @@ export default function PlayDuelDetailPage() {
           <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
             <img src={me.avatarUrl || "/default-avatar.png"} alt={me.username} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
             <div className="flex min-w-0 max-w-full items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
-              <span className="truncate">@<bdi>{me.username}</bdi></span>
+              <span className="truncate"><bdi>@{me.username}</bdi></span>
               <VerifiedBadge badgeType={me.badgeType} className="flex-shrink-0" />
             </div>
             {duel.status === "COMPLETED" && myScore !== null && (
@@ -69,7 +69,7 @@ export default function PlayDuelDetailPage() {
           <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
             <img src={opponent.avatarUrl || "/default-avatar.png"} alt={opponent.username} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
             <div className="flex min-w-0 max-w-full items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
-              <span className="truncate">@<bdi>{opponent.username}</bdi></span>
+              <span className="truncate"><bdi>@{opponent.username}</bdi></span>
               <VerifiedBadge badgeType={opponent.badgeType} className="flex-shrink-0" />
             </div>
             {duel.status === "COMPLETED" && (

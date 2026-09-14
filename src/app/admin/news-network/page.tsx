@@ -662,7 +662,7 @@ export default function AdminNewsNetworkPage() {
                         rel="noopener noreferrer"
                         className="mt-0.5 inline-flex items-center gap-1 text-xs text-gray-600 hover:underline dark:text-gray-300"
                       >
-                        <ExternalLink className="h-3 w-3" aria-hidden="true" />@<bdi>{feed.user.username}</bdi>
+                        <ExternalLink className="h-3 w-3" aria-hidden="true" /><bdi>@{feed.user.username}</bdi>
                       </Link>
                       <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                         {feed.language.toUpperCase()} · {feed.country ?? feed.region} ·{" "}

@@ -211,7 +211,7 @@ export default function ExplorePage() {
                   <img src={p.avatarUrl || "/default-avatar.png"} alt="" className="w-11 h-11 rounded-full object-cover shrink-0" />
                   <div className="min-w-0">
                     <div className="font-bold truncate">{p.name || p.username}</div>
-                    <div className="text-sm text-gray-500 dark:text-white/50 truncate">@<bdi>{p.username}</bdi></div>
+                    <div className="text-sm text-gray-500 dark:text-white/50 truncate"><bdi>@{p.username}</bdi></div>
                   </div>
                 </Link>
               ))}

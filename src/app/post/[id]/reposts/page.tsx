@@ -120,7 +120,7 @@ export default function RepostsPage(props: { params: Promise<{ id: string }> }) 
                   </span>
                   <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
                 </div>
-                <div className="truncate text-sm text-gray-500">@<bdi>{user.username}</bdi></div>
+                <div className="truncate text-sm text-gray-500"><bdi>@{user.username}</bdi></div>
               </div>
               {user.isFollowing && (
                 <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">

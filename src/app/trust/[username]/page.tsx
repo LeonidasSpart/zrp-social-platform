@@ -409,7 +409,7 @@ export default function TrustPassportPage(
           </div>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            @<bdi>{data.user.username}</bdi>
+            <bdi>@{data.user.username}</bdi>
           </p>
 
           {/* Trust level badge */}

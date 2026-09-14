@@ -375,7 +375,7 @@ export default function TeamSettingsPage() {
                       <Avatar src={owner.avatarUrl || undefined} fallback={getInitials(owner.name, owner.email)} />
                       <div>
                         <p className="font-medium">{owner.name || owner.username}</p>
-                        <p className="text-xs text-gray-500">@<bdi>{owner.username}</bdi></p>
+                        <p className="text-xs text-gray-500"><bdi>@{owner.username}</bdi></p>
                       </div>
                     </div>
                   </td>
@@ -393,7 +393,7 @@ export default function TeamSettingsPage() {
                       <Avatar src={member.user.avatarUrl || undefined} fallback={getInitials(member.user.name, member.user.email)} />
                       <div>
                         <p className="font-medium">{member.user.name || member.user.username}</p>
-                        <p className="text-xs text-gray-500">@<bdi>{member.user.username}</bdi></p>
+                        <p className="text-xs text-gray-500"><bdi>@{member.user.username}</bdi></p>
                       </div>
                     </div>
                   </td>
