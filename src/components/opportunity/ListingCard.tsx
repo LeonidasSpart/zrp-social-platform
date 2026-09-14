@@ -54,9 +54,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
         </div>
       )}
       {listing.poster && (
-        <div className="flex items-center gap-1 mt-1 text-[11px] text-gray-400 dark:text-gray-500">
-          {t("play.by", { name: listing.poster.username })}
-          <VerifiedBadge badgeType={listing.poster.badgeType} />
+        <div className="flex min-w-0 items-center gap-1 mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+          <span className="truncate">{t("play.by", { name: listing.poster.username })}</span>
+          <VerifiedBadge badgeType={listing.poster.badgeType} className="flex-shrink-0" />
         </div>
       )}
     </Link>

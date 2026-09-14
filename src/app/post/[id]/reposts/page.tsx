@@ -113,14 +113,14 @@ export default function RepostsPage(props: { params: Promise<{ id: string }> }) 
                   </div>
                 )}
               </div>
-              <div>
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-gray-900 dark:text-white">
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-1">
+                  <span className="truncate font-semibold text-gray-900 dark:text-white">
                     {user.name || user.username}
                   </span>
-                  <VerifiedBadge badgeType={user.badgeType} />
+                  <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
                 </div>
-                <div className="text-sm text-gray-500">@{user.username}</div>
+                <div className="truncate text-sm text-gray-500">@{user.username}</div>
               </div>
               {user.isFollowing && (
                 <span className="ml-auto text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">

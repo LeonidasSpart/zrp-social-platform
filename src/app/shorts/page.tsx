@@ -1385,7 +1385,7 @@ export default function ShortsPage() {
 
                         <Link
                           href={`/profile/${post.author.username}`}
-                          className="flex items-center gap-2 mb-2"
+                          className="flex min-w-0 items-center gap-2 mb-2"
                         >
                           <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden flex-shrink-0">
 
@@ -1427,13 +1427,15 @@ export default function ShortsPage() {
 
                           </div>
 
-                          <span className="font-semibold flex items-center gap-1">
-                            {post
-                              .author
-                              .name ||
-                              post
+                          <span className="font-semibold flex min-w-0 items-center gap-1">
+                            <span className="truncate">
+                              {post
                                 .author
-                                .username}
+                                .name ||
+                                post
+                                  .author
+                                  .username}
+                            </span>
 
                             <VerifiedBadge
                               badgeType={
@@ -1441,10 +1443,11 @@ export default function ShortsPage() {
                                   .author
                                   .badgeType
                               }
+                              className="flex-shrink-0"
                             />
                           </span>
 
-                          <span className="text-white/70 text-sm">
+                          <span className="text-white/70 text-sm flex-shrink-0">
                             ·{" "}
                             {timeAgo(
                               post.createdAt

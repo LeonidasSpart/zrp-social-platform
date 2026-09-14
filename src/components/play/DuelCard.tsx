@@ -47,10 +47,10 @@ export default function DuelCard({ duel, onAccept, onDecline, busy }: DuelCardPr
       <div className="min-w-0 flex-1">
         <Link
           href={`/play/profile/${opponent.username}`}
-          className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white truncate hover:underline"
+          className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:underline"
         >
-          @{opponent.username}
-          <VerifiedBadge badgeType={opponent.badgeType} />
+          <span className="truncate">@{opponent.username}</span>
+          <VerifiedBadge badgeType={opponent.badgeType} className="flex-shrink-0" />
         </Link>
         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
           {t(TYPE_LABEL_KEYS[duel.challenge.type])} - {duel.challenge.title}

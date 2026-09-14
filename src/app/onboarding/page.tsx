@@ -343,8 +343,8 @@ export default function OnboardingPage() {
                         key={user.id}
                         className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex-shrink-0">
                             {user.avatarUrl ? (
                               <img src={user.avatarUrl} alt={user.name || user.username} className="w-full h-full object-cover" />
                             ) : (
@@ -353,17 +353,17 @@ export default function OnboardingPage() {
                               </div>
                             )}
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white flex items-center gap-1">
-                              {user.name || user.username}
-                              <VerifiedBadge badgeType={user.badgeType} />
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 dark:text-white flex min-w-0 items-center gap-1">
+                              <span className="truncate">{user.name || user.username}</span>
+                              <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">@{user.username}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.username}</p>
                           </div>
                         </div>
                         <button
                           onClick={() => handleFollowToggle(user.id)}
-                          className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                          className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition ${
                             isFollowing
                               ? "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                               : "bg-zrp-red text-white hover:bg-zrp-darkRed"

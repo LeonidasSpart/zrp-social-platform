@@ -76,8 +76,8 @@ export default function MusicArtistsPage() {
                   alt=""
                   className="w-20 h-20 rounded-full object-cover mx-auto"
                 />
-                <div className="font-bold mt-3 truncate flex items-center justify-center gap-1">
-                  {artist.displayName}
+                <div className="mt-3 flex min-w-0 items-center justify-center gap-1 font-bold">
+                  <span className="truncate">{artist.displayName}</span>
                   {artist.verified && <ShieldCheck className="w-4 h-4 text-zrp-red shrink-0" />}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
