@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdminLayout from "@/components/AdminLayout";
 import {
   LineChart,
   Line,
@@ -73,21 +72,17 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
-        </div>
-      </AdminLayout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <AdminLayout>
-        <div className="text-center py-12 text-gray-500">
-          <p>{t("analytics.errLoad")}</p>
-        </div>
-      </AdminLayout>
+      <div className="text-center py-12 text-gray-500">
+        <p>{t("analytics.errLoad")}</p>
+      </div>
     );
   }
 
@@ -111,7 +106,7 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <AdminLayout>
+    <>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("analytics.title")}</h1>
         <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -263,6 +258,6 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 }
