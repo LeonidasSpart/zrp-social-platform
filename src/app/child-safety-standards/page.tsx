@@ -74,8 +74,9 @@ export default function ChildSafetyStandardsPage() {
           </h2>
           <p className="leading-7 text-[15px]">
             ZRP Social requires every account holder to be at least 16 years
-            old. Accounts found to belong to a person under this minimum age
-            are removed.
+            old. Accounts identified as belonging to a person below this
+            minimum age may be removed in accordance with our policies and
+            applicable law.
           </p>
         </div>
 
@@ -85,11 +86,11 @@ export default function ChildSafetyStandardsPage() {
           </h2>
           <p className="leading-7 text-[15px]">
             Every post, comment, message thread, and profile on ZRP Social can
-            be reported directly from within the app. Reports involving a
-            child safety concern are treated as our highest priority and are
-            reviewed by our moderation team ahead of standard queue order.
-            You do not need an account to raise a child safety concern with
-            us. See the contact option below.
+            be reported directly from within the app. Reports involving child
+            safety concerns are prioritized for review in accordance with our
+            internal safety procedures. You do not need an account to raise a
+            child safety concern with us. Please use the contact information
+            below.
           </p>
         </div>
 
@@ -98,10 +99,13 @@ export default function ChildSafetyStandardsPage() {
             4. What happens after a report
           </h2>
           <p className="leading-7 text-[15px]">
-            Content that violates this policy is removed and the account
-            responsible is permanently banned. Where we are legally required
-            or permitted to do so, we cooperate with law enforcement and
-            report apparent CSAE to the appropriate authorities.
+            Content that violates this policy may be removed, and accounts
+            responsible for serious or confirmed violations may be suspended
+            or permanently terminated in accordance with our policies and
+            applicable law. Where required by applicable law, or otherwise
+            permitted by law, we report confirmed CSAM and other child-safety
+            matters to the appropriate authorities and cooperate with lawful
+            requests from law enforcement.
           </p>
         </div>
 
@@ -118,8 +122,8 @@ export default function ChildSafetyStandardsPage() {
             >
               contact@zrp.one
             </a>
-            . We aim to acknowledge and act on child safety reports as a
-            priority.
+            . Child safety reports are handled in accordance with our internal
+            safety and enforcement procedures and applicable law.
           </p>
         </div>
 
