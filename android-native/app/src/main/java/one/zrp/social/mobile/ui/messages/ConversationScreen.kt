@@ -99,10 +99,7 @@ import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ChatMessage
-import one.zrp.social.mobile.ui.call.CallPhase
-import one.zrp.social.mobile.ui.call.CallScreen
 import one.zrp.social.mobile.ui.call.CallViewModel
-import one.zrp.social.mobile.ui.call.CallViewModelFactory
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
@@ -128,23 +125,23 @@ fun ConversationScreen(
     partnerUsername: String,
     onBack: () -> Unit,
     onOpenProfile: () -> Unit,
+    // Hoisted from ZrpSocialApp (MainActivity.kt), not created here - a
+    // CallViewModel created per-screen (and torn down/disconnected on
+    // leaving this screen, as this used to do via DisposableEffect) means
+    // a call can only ever be RECEIVED while this exact conversation is
+    // open. This is now one Activity-scoped instance whose signaling
+    // connection and incoming-call listener live for the whole logged-in
+    // session, matching web's CallContext.tsx fix for the identical bug.
+    // CallScreen itself is now rendered globally too (see MainActivity.kt),
+    // not from inside this composable.
+    callViewModel: CallViewModel,
 ) {
     val viewModel: ConversationViewModel = viewModel(
         factory = remember(partnerId) { ConversationViewModelFactory(MessagesRepository(), partnerId) },
     )
     val state by viewModel.state.collectAsState()
 
-    val callViewModel: CallViewModel = viewModel(factory = remember { CallViewModelFactory() })
-    val callState by callViewModel.state.collectAsState()
     val context = LocalContext.current
-
-    // Signaling is only live while this screen is open - matches
-    // page.tsx's own page-scoped setupSocket()/useEffect cleanup (see
-    // CallViewModel's own KDoc).
-    DisposableEffect(Unit) {
-        callViewModel.connectSignaling()
-        onDispose { callViewModel.disconnectSignaling() }
-    }
 
     var deletingMessageId by remember { mutableStateOf<String?>(null) }
     var isDeletingMessage by remember { mutableStateOf(false) }
@@ -322,11 +319,6 @@ fun ConversationScreen(
 
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
         viewModel.onVoiceRecorded(contentResolver, uri, file.name, "audio/mp4", file.length())
-    }
-
-    if (callState.phase != CallPhase.IDLE) {
-        CallScreen(viewModel = callViewModel, onDismiss = {})
-        return
     }
 
     // MainActivity opts into enableEdgeToEdge(), so AndroidManifest.xml's
