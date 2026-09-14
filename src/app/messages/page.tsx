@@ -184,7 +184,7 @@ export default function MessagesIndexPage() {
               </p>
 
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                Start a conversation to see it here.
+                {t("messages.startConversationHint")}
               </p>
             </div>
           ) : (
@@ -446,7 +446,7 @@ export default function MessagesIndexPage() {
           </p>
 
           <p className="text-sm mt-1 text-gray-400 dark:text-gray-500">
-            {t("messages.startConversation")}
+            {t("messages.selectConversationHint")}
           </p>
         </div>
       </section>

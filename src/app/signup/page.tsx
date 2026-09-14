@@ -82,7 +82,7 @@ export default function SignupPage() {
     e.preventDefault();
 
     if (usernameStatus === "taken") {
-      setError("That username is taken. Pick a suggestion below or try another.");
+      setError(t("auth.usernameTakenHint"));
       return;
     }
 
@@ -334,13 +334,13 @@ export default function SignupPage() {
 
                   {usernameStatus === "invalid" && username.trim().length > 0 && (
                     <p className="text-xs text-red-500 mt-1">
-                      3-20 characters, letters/numbers/underscores only
+                      {t("auth.usernameFormatHint")}
                     </p>
                   )}
 
                   {usernameStatus === "taken" && (
                     <div className="mt-2">
-                      <p className="text-xs text-red-500">That username is taken.</p>
+                      <p className="text-xs text-red-500">{t("auth.usernameTaken")}</p>
                       {usernameSuggestions.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-1.5">
                           {usernameSuggestions.map((s) => (

@@ -39,16 +39,16 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage({ type: "success", text: "Your upgrade request has been sent. We'll contact you shortly." });
+        setMessage({ type: "success", text: t("upgradeRequest.successSent") });
         setTimeout(() => {
           onSuccess();
           onClose();
         }, 2000);
       } else {
-        setMessage({ type: "error", text: data.error || "Failed to send request." });
+        setMessage({ type: "error", text: data.error || t("upgradeRequest.errSendFailed") });
       }
     } catch (error) {
-      setMessage({ type: "error", text: "Something went wrong." });
+      setMessage({ type: "error", text: t("auth.errSomethingWrong") });
     } finally {
       setLoading(false);
     }
@@ -66,39 +66,39 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
         </button>
 
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-          Upgrade to {planLabel}
+          {t("upgradeRequest.title", { plan: planLabel })}
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Price: <span className="font-semibold">CHF {price.toFixed(2)} / month</span>
+          {t("upgradeRequest.priceLabel", { price: price.toFixed(2) })}
         </p>
 
         <div className="bg-zrp-red/5 dark:bg-zrp-red/10 border border-zrp-red/20 dark:border-zrp-red/30 rounded-lg p-4 mb-4">
-          <p className="text-sm text-zrp-red dark:text-zrp-red font-medium">Bank Transfer Instructions</p>
+          <p className="text-sm text-zrp-red dark:text-zrp-red font-medium">{t("upgradeRequest.bankInstructionsTitle")}</p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            Please transfer the amount to the following bank account:
+            {t("upgradeRequest.bankTransferInstruction")}
           </p>
           <div className="mt-2 text-xs font-mono bg-white dark:bg-gray-700 p-2 rounded border border-zrp-red/20 dark:border-zrp-red/30">
-            <p>Bank: Swissquote Bank SA</p>
-            <p>Account: 1234-5678-90</p>
-            <p>IBAN: CH93 1234 5678 9012 3456 7</p>
-            <p>BIC: SWQBCHZZ</p>
-            <p>Reference: Your email + Plan name</p>
+            <p>{t("upgradeRequest.bankLabel")} Swissquote Bank SA</p>
+            <p>{t("upgradeRequest.accountLabel")} 1234-5678-90</p>
+            <p>{t("upgradeRequest.ibanLabel")} CH93 1234 5678 9012 3456 7</p>
+            <p>{t("upgradeRequest.bicLabel")} SWQBCHZZ</p>
+            <p>{t("upgradeRequest.referenceLabel")} Your email + Plan name</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Payment Method
+              {t("upgradeRequest.paymentMethodLabel")}
             </label>
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value as any)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent"
             >
-              <option value="bank">Bank Transfer</option>
-              <option value="paypal">PayPal</option>
-              <option value="crypto">Cryptocurrency</option>
+              <option value="bank">{t("upgradeRequest.methodBank")}</option>
+              <option value="paypal">{t("upgradeRequest.methodPaypal")}</option>
+              <option value="crypto">{t("upgradeRequest.methodCrypto")}</option>
             </select>
           </div>
 
@@ -131,7 +131,7 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             >
-              Cancel
+              {t("action.cancel")}
             </button>
             <button
               type="submit"
@@ -139,13 +139,13 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
               className="px-4 py-2 bg-zrp-red text-white rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition flex items-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading ? "Sending..." : "Submit Request"}
+              {loading ? t("upgradeRequest.sending") : t("upgradeRequest.submitButton")}
             </button>
           </div>
         </form>
 
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-4 text-center">
-          Your request will be reviewed by our team. We'll contact you via email within 24 hours.
+          {t("upgradeRequest.footerNote")}
         </p>
       </div>
     </div>

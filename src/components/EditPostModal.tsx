@@ -32,7 +32,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) {
-      setError("Content cannot be empty");
+      setError(t("editPost.errContentEmpty"));
       return;
     }
 
@@ -48,13 +48,13 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to update post");
+        throw new Error(data.error || t("editPost.errUpdateFailed"));
       }
 
       onUpdate();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("auth.errSomethingWrong"));
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
       <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-lg w-full p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Edit Post</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("editPost.title")}</h2>
           <button
             onClick={onClose}
             aria-label={t("help.close")}
@@ -96,14 +96,14 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
                 onClick={onClose}
                 className="px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               >
-                Cancel
+                {t("action.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={!content.trim() || loading}
                 className="bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                {loading ? "Saving..." : "Save"}
+                {loading ? t("settings.saving") : t("action.save")}
               </button>
             </div>
           </div>

@@ -110,13 +110,13 @@ export function PostActions({
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: "ZRP Post",
-        text: "Check out this post on ZRP Social!",
+        title: t("postActions.shareTitle"),
+        text: t("postActions.shareText"),
         url: `${window.location.origin}/post/${postId}`,
       });
     } else {
       navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
-      alert("Link copied to clipboard!");
+      alert(t("postActions.linkCopied"));
     }
   };
 
