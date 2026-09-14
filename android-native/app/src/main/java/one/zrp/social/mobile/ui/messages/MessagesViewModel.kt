@@ -153,15 +153,16 @@ class MessagesViewModel(private val repository: MessagesRepository) : ViewModel(
     }
 
     /**
-     * Deletes the whole 1:1 conversation with [partnerId] - the real,
-     * permanent server-side delete (see MessagesRepository's own KDoc),
-     * not a local-only hide. On success the row is removed immediately
-     * and the same "delete-conversation" socket relay the website emits
-     * is sent too, so the other party's own list (and this account's
-     * other open sessions) update live rather than only on their next
-     * refresh. On failure the row is left exactly as it was and the
-     * caller is handed the real error to show - this never pretends a
-     * failed delete succeeded.
+     * Deletes the whole 1:1 conversation with [partnerId] - a real,
+     * server-side per-user hide (see MessagesRepository's own KDoc: a
+     * ConversationClearance row for this account only, not a Message
+     * row delete), not a purely local-only hide. On success the row is
+     * removed immediately and the same "delete-conversation" socket
+     * relay the website emits is sent too, so the other party's own
+     * list (and this account's other open sessions) update live rather
+     * than only on their next refresh. On failure the row is left
+     * exactly as it was and the caller is handed the real error to show
+     * - this never pretends a failed delete succeeded.
      */
     fun deleteConversation(partnerId: String, onResult: (Result<Unit>) -> Unit) {
         viewModelScope.launch {

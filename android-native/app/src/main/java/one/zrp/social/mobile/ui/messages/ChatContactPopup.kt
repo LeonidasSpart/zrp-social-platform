@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Photo
@@ -61,7 +62,11 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
  * separate profile fetch needed), Profile/Call/Video/More actions, and
  * a shared-media grid using the exact same real-photos-only filter
  * (excludes voice-message and document attachments, which reuse
- * imageUrl too) the website itself applies.
+ * imageUrl too) the website itself applies. The "More" menu matches
+ * ChatContactDrawer.tsx's own two items, Block/Unblock and Delete
+ * conversation - [onDeleteConversation] only dismisses this sheet and
+ * hands off to the host screen, which owns the confirm dialog and the
+ * real delete call (see ConversationScreen).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +79,7 @@ fun ChatContactPopup(
     onVoiceCall: () -> Unit,
     onVideoCall: () -> Unit,
     onBlockToggled: (Boolean) -> Unit,
+    onDeleteConversation: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
@@ -189,6 +195,29 @@ fun ChatContactPopup(
                                         .onSuccess { onBlockToggled(it.blocked) }
                                     blocking = false
                                 }
+                            },
+                        )
+                        // Matches ChatContactDrawer.tsx's own "More" menu, which
+                        // has both Block/Unblock and this - see MessagesScreen.kt's
+                        // own conversation-list row menu for the exact same action
+                        // reached from the other screen this real delete endpoint
+                        // is already wired to. The confirm dialog and the actual
+                        // repository call both live in this popup's host screen
+                        // (ConversationScreen), which owns the ViewModel this
+                        // action needs - this item only dismisses the sheet and
+                        // asks the host to start that flow.
+                        DropdownMenuItem(
+                            leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
+                            text = {
+                                Text(
+                                    stringResource(R.string.messages_delete_conversation),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            },
+                            onClick = {
+                                showMore = false
+                                onDismiss()
+                                onDeleteConversation()
                             },
                         )
                     }

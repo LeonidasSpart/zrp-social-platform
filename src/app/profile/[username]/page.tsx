@@ -287,6 +287,7 @@ export default function ProfilePage(
   const [posts, setPosts] = useState<Post[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [postsError, setPostsError] = useState(false);
 
   const [pinnedPost, setPinnedPost] =
     useState<Post | null>(null);
@@ -485,13 +486,28 @@ export default function ProfilePage(
     [params.username, activeTab]
   );
 
+  // Aborts whichever tab-fetch is still in flight when a new one starts
+  // - previously, switching tabs quickly (Posts -> Media -> Posts) left
+  // every prior fetch running with nothing to cancel it, so whichever
+  // response happened to resolve LAST won the race and could silently
+  // overwrite the correct, currently-selected tab's posts with a stale
+  // tab's data. One ref shared across calls, since fetchPosts itself is
+  // recreated per tab via useCallback below.
+  const postsAbortRef = useRef<AbortController | null>(null);
+
   const fetchPosts = useCallback(
     async () => {
+      postsAbortRef.current?.abort();
+      const controller = new AbortController();
+      postsAbortRef.current = controller;
+
       setLoading(true);
+      setPostsError(false);
       setNextCursor(null);
 
       try {
-        const res = await fetch(getTabEndpoint());
+        const res = await fetch(getTabEndpoint(), { signal: controller.signal });
+        if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
         const data = await res.json();
 
         // Tabs that don't support pagination (e.g. "analytics" isn't
@@ -506,12 +522,20 @@ export default function ProfilePage(
           setNextCursor(data.nextCursor || null);
         }
       } catch (error) {
+        // A newer fetchPosts call aborting this one is expected, not a
+        // real failure - only a genuine error should surface as the
+        // tab's error state.
+        if (error instanceof DOMException && error.name === "AbortError") return;
         console.error(
           "Error fetching posts:",
           error
         );
+        setPosts([]);
+        setPostsError(true);
       } finally {
-        setLoading(false);
+        if (postsAbortRef.current === controller) {
+          setLoading(false);
+        }
       }
     },
     [getTabEndpoint]
@@ -2222,7 +2246,13 @@ export default function ProfilePage(
           unless you happened to swipe a strip that looked static. The
           fade at the trailing edge is the affordance; scroll-snap makes
           the swipe land on a tab rather than between two. */}
-      <div className="relative mt-4">
+      {/* Sticky beneath the app header (top-14 matches Header.tsx's own
+          height, the same 3.5rem constant the messages pages already use
+          for keyboard-safe-area math) once scrolled into the tab strip,
+          the way X's profile tabs pin to the top while browsing a long
+          post list - an explicit background is required since sticky
+          content is otherwise transparent to whatever scrolls beneath it. */}
+      <div className="relative mt-4 sticky top-14 z-20 bg-white dark:bg-zrp-deepBlack">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent dark:from-zrp-deepBlack lg:hidden"
@@ -2302,6 +2332,16 @@ export default function ProfilePage(
           ) : (
             <SkeletonFeed count={3} />
           )
+        ) : postsError ? (
+          <div className="text-center py-12 text-gray-500">
+            <p>{t("profile.errLoadPosts")}</p>
+            <button
+              onClick={() => fetchPosts()}
+              className="mt-3 px-4 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+            >
+              {t("action.retry")}
+            </button>
+          </div>
         ) : !canViewPosts ? (
           renderProtectedMessage()
         ) : activeTab ===

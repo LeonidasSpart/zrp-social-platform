@@ -194,6 +194,7 @@
 "profile.userNotFound" = "Пользователь не найден";
 "profile.protectedAccount" = "Этот аккаунт закрыт";
 "profile.protectedMessage" = "Подпишитесь на этот аккаунт, чтобы видеть его публикации и сведения о профиле.";
+"profile.editProfileButton" = "Редактировать профиль";
 "action.follow" = "Подписаться";
 "action.following" = "Подписан";
 "action.unfollow" = "Отписаться";

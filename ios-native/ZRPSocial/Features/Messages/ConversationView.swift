@@ -6,6 +6,7 @@ import UIKit
 struct ConversationView: View {
 
     @EnvironmentObject private var session: SessionController
+    @EnvironmentObject private var navigator: Navigator
     @StateObject private var viewModel: ConversationViewModel
 
     @FocusState private var isComposerFocused: Bool
@@ -13,6 +14,7 @@ struct ConversationView: View {
     @StateObject private var voiceRecorder = VoiceRecorder()
     @State private var editing: Message?
     @State private var editDraft = ""
+    @State private var isConfirmingDeleteConversation = false
 
     /// The reaction set the message route accepts. Any emoji is valid
     /// server-side; this is the quick palette, matching what the web
@@ -62,7 +64,31 @@ struct ConversationView: View {
                 }
             }
             .sheet(isPresented: $isShowingContact) {
-                ChatContactSheet(partner: viewModel.partner, messages: viewModel.messages)
+                ChatContactSheet(
+                    partner: viewModel.partner,
+                    messages: viewModel.messages,
+                    onDeleteConversation: { isConfirmingDeleteConversation = true }
+                )
+            }
+            .confirmationDialog(
+                Text(.messagesDeleteConversation),
+                isPresented: $isConfirmingDeleteConversation,
+                titleVisibility: .visible
+            ) {
+                Button(role: .destructive) {
+                    Task {
+                        // Post-delete, this thread has nothing left to
+                        // show - close it and land back on the
+                        // conversation list, matching the website's
+                        // handleConversationDeleted.
+                        if await viewModel.deleteConversation() { navigator.pop() }
+                    }
+                } label: {
+                    Text(.actionDelete)
+                }
+                Button(role: .cancel) {} label: { Text(.actionCancel) }
+            } message: {
+                Text(.messagesDeleteConfirm)
             }
             .task { await viewModel.start() }
             .onDisappear {

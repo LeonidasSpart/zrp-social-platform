@@ -132,7 +132,9 @@ struct MessagesRepository: MessagesRepositoryProtocol {
         return response.reactions
     }
 
-    /// Deletes the entire conversation for both directions.
+    /// Soft, per-user clearance: hides the conversation for this account
+    /// only, not a hard delete of the message rows for both parties. A
+    /// new message from either side makes it reappear.
     func deleteConversation(with userId: String) async throws {
         try await client.sendIgnoringResponse(
             Endpoint.delete("messages/conversation/\(userId)")

@@ -2315,10 +2315,27 @@ export default function PostCard({
                         ref={
                           videoContainerRef
                         }
-                        className="relative w-full max-h-[75dvh] bg-black flex items-center justify-center"
+                        // Root cause of "some videos render inside a
+                        // smaller box with black space": width was
+                        // pinned to w-full (a definite value) while
+                        // height was independently capped by
+                        // max-h-[75dvh] - CSS aspect-ratio only ever
+                        // solves the axis left `auto` (height here), so
+                        // once a tall/portrait video's ratio-derived
+                        // height got clamped to 75dvh, width never
+                        // shrank back to match, leaving the box's real
+                        // on-screen shape wrong for exactly that video.
+                        // Capping width to whatever 75dvh-tall would
+                        // actually require for THIS video's own ratio
+                        // (mirroring the sibling <img> branch just
+                        // below, which has no such conflict since both
+                        // its axes stay auto) fixes both axes together
+                        // instead of only one.
+                        className="relative max-h-[75dvh] bg-black flex items-center justify-center mx-auto"
                         style={{
                           aspectRatio:
                             videoAspectRatio,
+                          width: `min(100%, calc(75dvh * ${videoAspectRatio}))`,
                         }}
                       >
                         <video

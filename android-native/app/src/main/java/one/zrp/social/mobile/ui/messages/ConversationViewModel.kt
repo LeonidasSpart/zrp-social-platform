@@ -322,6 +322,33 @@ class ConversationViewModel(
         }
     }
 
+    /**
+     * Deletes the whole 1:1 conversation with [partnerId] - reuses the
+     * same real MessagesRepository.deleteConversation() the conversation
+     * list's own delete flow already calls (see
+     * MessagesRepository.deleteConversation's own KDoc for the real
+     * per-user "clearance" semantics: only this account's view is
+     * hidden server-side, not the messages themselves - a new message
+     * from either side makes it reappear). No local message-list state
+     * to clear on success: ChatContactPopup's caller (ConversationScreen)
+     * navigates straight back to the conversation list once this
+     * resolves, the same way ChatInterface.tsx's own
+     * handleConversationDeleted does a router.push("/messages"). On
+     * success this also emits the same "delete-conversation" socket
+     * relay the conversation-list screen and the website both send, so
+     * the other party's own list (and this account's other open
+     * sessions) update live rather than only on their next refresh.
+     */
+    fun deleteConversation(onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deleteConversation(partnerId)
+            if (result.isSuccess) {
+                socket?.emit("delete-conversation", JSONObject().put("otherUserId", partnerId))
+            }
+            onResult(result)
+        }
+    }
+
     fun toggleReaction(messageId: String, emoji: String) {
         viewModelScope.launch {
             repository.toggleReaction(messageId, emoji).onSuccess { response ->

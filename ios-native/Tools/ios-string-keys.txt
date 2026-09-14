@@ -211,6 +211,7 @@ profile.noPosts
 profile.userNotFound
 profile.protectedAccount
 profile.protectedMessage
+profile.editProfileButton
 action.follow
 action.following
 action.unfollow

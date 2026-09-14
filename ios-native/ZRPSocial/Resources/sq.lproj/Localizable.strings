@@ -194,6 +194,7 @@
 "profile.userNotFound" = "Përdoruesi nuk u gjet";
 "profile.protectedAccount" = "Kjo llogari është private";
 "profile.protectedMessage" = "Ndiqni këtë llogari për të parë postimet dhe detajet e profilit të tyre.";
+"profile.editProfileButton" = "Modifiko profilin";
 "action.follow" = "Ndiq";
 "action.following" = "Duke ndjekur";
 "action.unfollow" = "Mos ndiq më";

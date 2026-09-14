@@ -151,6 +151,17 @@ fun ConversationScreen(
     var showContactPopup by remember { mutableStateOf(false) }
     var isBlocked by remember { mutableStateOf(false) }
 
+    // Delete-conversation flow reached from ChatContactPopup's own "More"
+    // menu (matches ChatContactDrawer.tsx's own Block/Unblock + Delete
+    // conversation pair) - mirrors MessagesScreen's own pending-delete
+    // dialog pattern exactly, just scoped to this one conversation
+    // instead of a whole list. On success this thread has nothing left
+    // to show, so onBack() closes it - matching ChatInterface.tsx's own
+    // handleConversationDeleted, which does a router.push("/messages").
+    var showDeleteConversationDialog by remember { mutableStateOf(false) }
+    var isDeletingConversation by remember { mutableStateOf(false) }
+    var deleteConversationError by remember { mutableStateOf<String?>(null) }
+
     val listState = rememberLazyListState()
     var pendingScrollIndex by remember { mutableStateOf<Int?>(null) }
 
@@ -422,6 +433,10 @@ fun ConversationScreen(
                 onVoiceCall = { requestCall(isVideo = false) },
                 onVideoCall = { requestCall(isVideo = true) },
                 onBlockToggled = { isBlocked = it },
+                onDeleteConversation = {
+                    deleteConversationError = null
+                    showDeleteConversationDialog = true
+                },
             )
         }
 
@@ -812,6 +827,74 @@ fun ConversationScreen(
             onSubmit = { emoji ->
                 viewModel.toggleReaction(reactingMessageId, emoji)
                 reactingToMessageId = null
+            },
+        )
+    }
+
+    // Mirrors MessagesScreen's own pending-delete AlertDialog verbatim -
+    // same title/body/error copy (real, shared strings), just triggered
+    // from ChatContactPopup's "More" menu instead of a list row. Unlike
+    // that screen, a successful delete here leaves nothing to show in
+    // this thread, so it also calls onBack() once the dialog itself has
+    // closed.
+    if (showDeleteConversationDialog) {
+        val fallbackDeleteConversationError = stringResource(R.string.messages_err_delete_conversation)
+        AlertDialog(
+            onDismissRequest = {
+                if (!isDeletingConversation) {
+                    showDeleteConversationDialog = false
+                    deleteConversationError = null
+                }
+            },
+            title = { Text(stringResource(R.string.messages_delete_conversation)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.messages_delete_conversation_confirm))
+                    val err = deleteConversationError
+                    if (err != null) {
+                        Spacer(modifier = Modifier.height(Spacing.sm))
+                        Text(
+                            text = err,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                if (isDeletingConversation) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                } else {
+                    TextButton(onClick = {
+                        isDeletingConversation = true
+                        deleteConversationError = null
+                        viewModel.deleteConversation { result ->
+                            isDeletingConversation = false
+                            result.fold(
+                                onSuccess = {
+                                    showDeleteConversationDialog = false
+                                    onBack()
+                                },
+                                onFailure = { error ->
+                                    deleteConversationError = error.message ?: fallbackDeleteConversationError
+                                },
+                            )
+                        }
+                    }) {
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConversationDialog = false
+                        deleteConversationError = null
+                    },
+                    enabled = !isDeletingConversation,
+                ) {
+                    Text(stringResource(R.string.action_cancel))
+                }
             },
         )
     }

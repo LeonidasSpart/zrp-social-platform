@@ -194,6 +194,7 @@
 "profile.userNotFound" = "未找到用户";
 "profile.protectedAccount" = "此账号为私密账号";
 "profile.protectedMessage" = "关注此账号后即可查看其帖子和个人资料详情。";
+"profile.editProfileButton" = "编辑个人资料";
 "action.follow" = "关注";
 "action.following" = "已关注";
 "action.unfollow" = "取消关注";

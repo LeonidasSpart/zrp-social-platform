@@ -194,6 +194,7 @@
 "profile.userNotFound" = "User not found";
 "profile.protectedAccount" = "This account is private";
 "profile.protectedMessage" = "Follow this account to see their posts and profile details.";
+"profile.editProfileButton" = "Edit profile";
 "action.follow" = "Follow";
 "action.following" = "Following";
 "action.unfollow" = "Unfollow";

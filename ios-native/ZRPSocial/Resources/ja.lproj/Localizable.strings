@@ -194,6 +194,7 @@
 "profile.userNotFound" = "ユーザーが見つかりません";
 "profile.protectedAccount" = "このアカウントは非公開です";
 "profile.protectedMessage" = "このアカウントをフォローすると、投稿とプロフィール情報を閲覧できます。";
+"profile.editProfileButton" = "プロフィールを編集";
 "action.follow" = "フォロー";
 "action.following" = "フォロー中";
 "action.unfollow" = "フォロー解除";

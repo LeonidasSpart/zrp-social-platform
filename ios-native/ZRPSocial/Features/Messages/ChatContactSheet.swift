@@ -4,7 +4,8 @@ import SwiftUI
 ///
 /// The native form of the website's `ChatContactDrawer`: the real avatar,
 /// display name, verification badge and handle, a way to their profile,
-/// blocking, and the pictures already exchanged in this thread.
+/// blocking, deleting the conversation, and the pictures already
+/// exchanged in this thread.
 ///
 /// **Call and video are deliberately absent, not forgotten.** ZRP's
 /// calling is WebRTC - `server.js` relays simple-peer SDP offers over the
@@ -21,6 +22,12 @@ struct ChatContactSheet: View {
     /// The thread already on screen. Shared media comes from it rather
     /// than from a second request: the client is holding every message.
     let messages: [Message]
+
+    /// Confirmed-delete signal to the parent. The parent, not this sheet,
+    /// owns the confirmation dialog and the repository call - it is the
+    /// one that also needs to pop the now-gone thread off the nav stack
+    /// once the delete succeeds. Mirrors `GroupManageSheet`'s `onLeave`.
+    var onDeleteConversation: () -> Void = {}
 
     @EnvironmentObject private var navigator: Navigator
     @Environment(\.dismiss) private var dismiss
@@ -104,6 +111,16 @@ struct ChatContactSheet: View {
                     moderate(block: false)
                 } label: {
                     Label { Text(.mutedTitle) } icon: { Image(systemName: "speaker.slash") }
+                }
+                Button(role: .destructive) {
+                    // The parent owns the confirmation dialog (and the
+                    // pop off the nav stack once delete succeeds), so
+                    // this sheet closes itself first rather than the
+                    // dialog appearing to stack on top of it.
+                    dismiss()
+                    onDeleteConversation()
+                } label: {
+                    Label { Text(.messagesDeleteConversation) } icon: { Image(systemName: "trash") }
                 }
             } label: {
                 tile("ellipsis", .chatContactMore)
