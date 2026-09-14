@@ -218,7 +218,7 @@ export default function Sidebar() {
         top-0
         px-2
         py-4
-        border-r
+        border-e
         border-gray-200
         dark:border-gray-800
         overflow-y-auto
@@ -261,7 +261,7 @@ export default function Sidebar() {
               {active && (
                 <span
                   aria-hidden="true"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
+                  className="absolute start-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
                 />
               )}
 
@@ -274,7 +274,7 @@ export default function Sidebar() {
                 />
 
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span className="absolute -right-1.5 -top-1 bg-zrp-red text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                  <span className="absolute -end-1.5 -top-1 bg-zrp-red text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                     {item.badge > 9 ? "9+" : item.badge}
                   </span>
                 )}
@@ -310,7 +310,7 @@ export default function Sidebar() {
             {isActive("/admin") && (
               <span
                 aria-hidden="true"
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
+                className="absolute start-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
               />
             )}
 
@@ -340,7 +340,7 @@ export default function Sidebar() {
             {isActive("/journalist") && (
               <span
                 aria-hidden="true"
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
+                className="absolute start-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-zrp-red"
               />
             )}
 
@@ -390,7 +390,7 @@ export default function Sidebar() {
 
             <span className="hidden lg:inline">{t("nav.language")}</span>
 
-            <span className="hidden lg:inline ml-auto text-sm text-gray-400">
+            <span className="hidden lg:inline ms-auto text-sm text-gray-400">
               {currentLangLabel}
             </span>
           </button>
@@ -560,7 +560,7 @@ export default function Sidebar() {
                         key={item.href}
                         href={item.href}
                         onClick={closeMoreMenu}
-                        className="block pl-11 pr-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="block ps-11 pe-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         {item.label}
                       </Link>
@@ -594,7 +594,7 @@ export default function Sidebar() {
                         key={item.href}
                         href={item.href}
                         onClick={closeMoreMenu}
-                        className="block pl-11 pr-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="block ps-11 pe-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         {item.label}
                       </Link>
@@ -626,7 +626,7 @@ export default function Sidebar() {
                         key={item.href}
                         href={item.href}
                         onClick={closeMoreMenu}
-                        className="block pl-11 pr-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="block ps-11 pe-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         {item.label}
                       </Link>

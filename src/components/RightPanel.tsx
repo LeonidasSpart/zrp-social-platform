@@ -105,7 +105,7 @@ export default function RightPanel() {
         sticky
         top-0
         py-4
-        pl-4
+        ps-4
         overflow-y-auto
         overscroll-contain
         scrollbar-hide
