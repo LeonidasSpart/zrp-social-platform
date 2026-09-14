@@ -454,8 +454,19 @@ android {
         // code change was ever intentionally released for testing here.
         // No source change - version number only, so the next build can
         // actually be uploaded.
-        versionCode 28
-        versionName "4.0.22"
+        // Bumps to versionCode 29 / versionName "4.0.23": fixes calls
+        // (voice and video) being unreachable except while the recipient
+        // already had the exact right conversation screen open - the
+        // CallViewModel that owns the signaling socket listener and the
+        // whole WebRTC call state machine was created per-screen
+        // (ConversationScreen's own nav-back-stack-scoped viewModel()),
+        // and its DisposableEffect actively disconnected the socket on
+        // leaving that screen. Now created once at the Activity level
+        // (ZrpSocialApp in MainActivity.kt) and passed down, so an
+        // incoming call is receivable app-wide for the whole logged-in
+        // session - matching the equivalent fix on web (CallContext.tsx).
+        versionCode 29
+        versionName "4.0.23"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

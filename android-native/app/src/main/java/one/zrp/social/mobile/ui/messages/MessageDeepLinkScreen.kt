@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ProfileRepository
+import one.zrp.social.mobile.ui.call.CallViewModel
 import one.zrp.social.mobile.ui.components.EmptyStateAction
 import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
@@ -40,6 +41,7 @@ fun MessageDeepLinkScreen(
     username: String,
     onBack: () -> Unit,
     onOpenProfile: (String) -> Unit,
+    callViewModel: CallViewModel,
 ) {
     var partnerId by remember(username) { mutableStateOf<String?>(null) }
     var error by remember(username) { mutableStateOf<String?>(null) }
@@ -61,6 +63,7 @@ fun MessageDeepLinkScreen(
             partnerUsername = username,
             onBack = onBack,
             onOpenProfile = { onOpenProfile(username) },
+            callViewModel = callViewModel,
         )
         loadError != null -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             ZrpEmptyState(

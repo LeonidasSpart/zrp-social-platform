@@ -198,7 +198,16 @@ import one.zrp.social.mobile.ui.theme.ZrpWhite
  */
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: WindowSizeClass) {
+fun ZrpNavHost(
+    onLogout: () -> Unit,
+    currentUser: MobileUser?,
+    windowSizeClass: WindowSizeClass,
+    // Hoisted from ZrpSocialApp (MainActivity.kt) - one Activity-scoped
+    // CallViewModel for the whole logged-in session, not created inside
+    // ConversationScreen itself. See ConversationScreen.kt's own
+    // callViewModel parameter comment for why.
+    callViewModel: one.zrp.social.mobile.ui.call.CallViewModel,
+) {
     val navController = rememberNavController()
     val isStaff = currentUser?.role == "ADMIN" || currentUser?.role == "MODERATOR"
     val isAdminRole = currentUser?.role == "ADMIN"
@@ -630,6 +639,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                         onOpenProfile = goToProfile,
                         onOpenGroupInfo = goToGroupInfo,
                         onNewGroup = goToNewGroup,
+                        callViewModel = callViewModel,
                     )
                 } else {
                     MessagesScreen(
@@ -794,6 +804,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                         partnerUsername = username,
                         onBack = { navController.popBackStack() },
                         onOpenProfile = { goToProfile(username) },
+                        callViewModel = callViewModel,
                     )
                 }
             }
@@ -816,6 +827,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                         username = username,
                         onBack = { navController.popBackStack() },
                         onOpenProfile = goToProfile,
+                        callViewModel = callViewModel,
                     )
                 }
             }

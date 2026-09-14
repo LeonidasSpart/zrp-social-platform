@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import one.zrp.social.mobile.R
+import one.zrp.social.mobile.ui.call.CallViewModel
 import one.zrp.social.mobile.ui.components.ZrpEmptyState
 
 /**
@@ -60,6 +61,7 @@ fun MessagesHomeScreen(
     onOpenProfile: (String) -> Unit,
     onOpenGroupInfo: (conversationId: String) -> Unit,
     onNewGroup: () -> Unit,
+    callViewModel: CallViewModel,
 ) {
     var selected by remember { mutableStateOf<SelectedThread?>(null) }
 
@@ -91,6 +93,7 @@ fun MessagesHomeScreen(
                     partnerUsername = current.partnerUsername,
                     onBack = { selected = null },
                     onOpenProfile = { onOpenProfile(current.partnerUsername) },
+                    callViewModel = callViewModel,
                 )
                 is SelectedThread.Group -> GroupConversationScreen(
                     conversationId = current.conversationId,

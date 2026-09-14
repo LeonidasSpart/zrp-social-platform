@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -36,6 +37,10 @@ import one.zrp.social.mobile.ui.auth.ForgotPasswordScreen
 import one.zrp.social.mobile.ui.auth.LoginScreen
 import one.zrp.social.mobile.ui.auth.SignupScreen
 import one.zrp.social.mobile.ui.auth.WelcomeScreen
+import one.zrp.social.mobile.ui.call.CallPhase
+import one.zrp.social.mobile.ui.call.CallScreen
+import one.zrp.social.mobile.ui.call.CallViewModel
+import one.zrp.social.mobile.ui.call.CallViewModelFactory
 import one.zrp.social.mobile.ui.navigation.ZrpNavHost
 import one.zrp.social.mobile.ui.onboarding.OnboardingScreen
 import one.zrp.social.mobile.ui.theme.ZrpSocialTheme
@@ -223,11 +228,61 @@ fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
                             onFinished = { authViewModel.onOnboardingFinished() },
                         )
                     } else {
-                        ZrpNavHost(
-                            onLogout = { authViewModel.logout() },
-                            currentUser = currentAuthState.user,
-                            windowSizeClass = windowSizeClass,
+                        // ⚠️ ROOT CAUSE THIS FIXES: CallViewModel used to be
+                        // created inside ConversationScreen itself, scoped
+                        // to that one Compose Navigation back-stack entry -
+                        // Navigation Compose destroys a screen-scoped
+                        // ViewModel (and this app's own DisposableEffect
+                        // additionally disconnected the signaling socket
+                        // outright) the moment the user left that exact
+                        // conversation. That meant a call could only ever
+                        // be RECEIVED while the recipient already had that
+                        // precise 1:1 thread open - anywhere else in the
+                        // app (home feed, another chat, backgrounded),
+                        // nothing was listening for "incoming-call" at all,
+                        // so the caller's screen just rang forever with no
+                        // response. Confirmed via a real device recording.
+                        // This is the exact same bug independently present
+                        // in the web client (see CallContext.tsx), fixed
+                        // there the same way: hoist to the one scope that
+                        // survives navigation for the whole logged-in
+                        // session. Here that's this composable - created
+                        // once per Composition at this level (not inside
+                        // any NavHost destination), so it lives as long as
+                        // ZrpNavHost itself does, independent of which
+                        // screen is currently showing.
+                        val callViewModel: CallViewModel = viewModel(
+                            factory = remember { CallViewModelFactory() },
                         )
+                        val callUiState by callViewModel.state.collectAsState()
+
+                        LaunchedEffect(Unit) {
+                            callViewModel.connectSignaling()
+                        }
+
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            ZrpNavHost(
+                                onLogout = {
+                                    callViewModel.disconnectSignaling()
+                                    authViewModel.logout()
+                                },
+                                currentUser = currentAuthState.user,
+                                windowSizeClass = windowSizeClass,
+                                callViewModel = callViewModel,
+                            )
+
+                            // Rendered above the whole NavHost, as a
+                            // full-screen overlay, regardless of which
+                            // screen is currently on the back stack - an
+                            // incoming call now interrupts the user
+                            // wherever they are in the app, matching the
+                            // web fix (CallContext.tsx renders
+                            // CallComponent the same way, as a sibling of
+                            // {children} at the app root).
+                            if (callUiState.phase != CallPhase.IDLE) {
+                                CallScreen(viewModel = callViewModel, onDismiss = {})
+                            }
+                        }
                     }
                 }
             }
