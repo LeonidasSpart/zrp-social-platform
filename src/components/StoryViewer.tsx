@@ -143,10 +143,29 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+      {/* This button is a direct child of the `fixed inset-0` backdrop,
+          so its offset is measured from the true viewport edge, not from
+          the centred story card below. layout.tsx sets viewportFit:
+          "cover", so in an installed standalone PWA the viewport starts
+          underneath the system status bar / notch and
+          env(safe-area-inset-top) is non-zero there - a bare top-4
+          (16px) drew this button across the clock/battery icons on
+          Android and under the notch/Dynamic Island on iOS. Same fix
+          already shipped for shorts/page.tsx's equivalent top chrome; an
+          ordinary mobile browser already clears the status bar with its
+          address bar, and the inset resolves to 0 there, so calc(1rem +
+          0px) stays the original 16px on every surface that was already
+          correct.
+
+          This was also a padding-less hit target: an 8x8 (32px) icon
+          with no padding around it, under this repo's 44px touch-target
+          floor. rounded-full bg-black/40 p-2 matches the close-button
+          convention used elsewhere in this codebase (shorts/page.tsx,
+          VideoFeedViewer.tsx) and brings the tappable area to 48x48. */}
       <button
         onClick={onClose}
         aria-label={t("help.close")}
-        className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-4 z-20 flex items-center justify-center rounded-full bg-black/40 p-2 text-white transition hover:bg-black/60 hover:text-gray-300"
       >
         <X className="w-8 h-8" />
       </button>
