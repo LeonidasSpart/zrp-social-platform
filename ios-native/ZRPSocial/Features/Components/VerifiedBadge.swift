@@ -22,7 +22,11 @@ struct VerifiedBadge: View {
     private var style: Style? {
         switch badgeType {
         case "verified":
-            return Style(color: Color(hex: 0x3B82F6), systemImage: "checkmark.seal.fill", label: .iosBadgeVerified)
+            // ZrpColor.blue/red reused from Theme/ZrpColors.swift rather
+            // than respelling their hex values here (same values,
+            // 0x3B82F6 / 0xFF2D2D) - keeps this file from drifting off
+            // the palette by hand-edit.
+            return Style(color: ZrpColor.blue, systemImage: "checkmark.seal.fill", label: .iosBadgeVerified)
         case "organization":
             return Style(color: Color(hex: 0xFFD700), systemImage: "checkmark.seal.fill", label: .iosBadgeOrganization)
         case "government":
@@ -33,7 +37,7 @@ struct VerifiedBadge: View {
             // ZRP brand red, but a distinct newspaper glyph so it is never
             // visually confused with the "team" staff badge - the same
             // reasoning the web component documents.
-            return Style(color: Color(hex: 0xFF2D2D), systemImage: "newspaper.fill", label: .iosBadgeJournalist)
+            return Style(color: ZrpColor.red, systemImage: "newspaper.fill", label: .iosBadgeJournalist)
         default:
             return nil
         }

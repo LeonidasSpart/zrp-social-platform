@@ -7,6 +7,8 @@
     <string name="settings_security">Безопасность</string>
     <string name="settings_privacy_safety">Конфиденциальность и безопасность</string>
     <string name="nav_language">Язык</string>
+    <string name="nav_dark_mode">Тёмная тема</string>
+    <string name="nav_light_mode">Светлая тема</string>
     <string name="settings_account_info">Информация об аккаунте</string>
     <string name="settings_change_email">Изменить электронную почту</string>
     <string name="settings_current_email">Текущий адрес электронной почты</string>

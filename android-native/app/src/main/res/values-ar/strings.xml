@@ -7,6 +7,8 @@
     <string name="settings_security">الأمان</string>
     <string name="settings_privacy_safety">الخصوصية والأمان</string>
     <string name="nav_language">اللغة</string>
+    <string name="nav_dark_mode">الوضع الداكن</string>
+    <string name="nav_light_mode">الوضع الفاتح</string>
     <string name="settings_account_info">معلومات الحساب</string>
     <string name="settings_change_email">تغيير البريد الإلكتروني</string>
     <string name="settings_current_email">البريد الإلكتروني الحالي</string>

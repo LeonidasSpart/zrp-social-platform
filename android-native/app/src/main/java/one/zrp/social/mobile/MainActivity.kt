@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.data.AuthRepository
 import one.zrp.social.mobile.data.GoogleSignInAttemptMarker
+import one.zrp.social.mobile.data.ThemePreferenceStore
 import one.zrp.social.mobile.ui.auth.AuthUiState
 import one.zrp.social.mobile.ui.auth.AuthViewModel
 import one.zrp.social.mobile.ui.auth.AuthViewModelFactory
@@ -38,6 +39,8 @@ import one.zrp.social.mobile.ui.auth.WelcomeScreen
 import one.zrp.social.mobile.ui.navigation.ZrpNavHost
 import one.zrp.social.mobile.ui.onboarding.OnboardingScreen
 import one.zrp.social.mobile.ui.theme.ZrpSocialTheme
+import one.zrp.social.mobile.ui.theme.resolveDarkTheme
+import androidx.compose.foundation.isSystemInDarkTheme
 
 private enum class LoggedOutScreen { WELCOME, LOGIN, SIGNUP, FORGOT_PASSWORD }
 
@@ -112,7 +115,22 @@ fun ZrpSocialApp(windowSizeClass: WindowSizeClass) {
         }
     }
 
-    ZrpSocialTheme {
+    // Resolved once per Composition from the persisted manual override (see
+    // ThemePreferenceStore's own KDoc) - re-read on every fresh Composition
+    // rather than cached across the app's lifetime, which is exactly what
+    // makes AppearanceSettingsScreen's own Activity.recreate() (the same
+    // apply-immediately mechanism LanguageSettingsScreen already uses for
+    // its per-app locale switch) pick the new choice straight back up.
+    // `isSystemInDarkTheme()` covers the null ("no explicit choice yet")
+    // branch and stays reactive to the live system setting for as long as
+    // that branch applies.
+    val themePreferenceStore = remember { ThemePreferenceStore(context) }
+    val darkTheme = resolveDarkTheme(
+        storedPreference = themePreferenceStore.get(),
+        systemDark = isSystemInDarkTheme(),
+    )
+
+    ZrpSocialTheme(darkTheme = darkTheme) {
         Surface(modifier = Modifier.fillMaxSize()) {
             val authState by authViewModel.authState.collectAsState()
             val loginForm by authViewModel.loginForm.collectAsState()

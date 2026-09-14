@@ -168,6 +168,7 @@ import one.zrp.social.mobile.ui.trust.TrustPassportScreen
 import one.zrp.social.mobile.ui.settings.AccountSettingsScreen
 import one.zrp.social.mobile.ui.settings.ApiKeysScreen
 import one.zrp.social.mobile.ui.settings.AppealsScreen
+import one.zrp.social.mobile.ui.settings.AppearanceSettingsScreen
 import one.zrp.social.mobile.ui.settings.DeleteAccountScreen
 import one.zrp.social.mobile.ui.settings.LanguageSettingsScreen
 import one.zrp.social.mobile.ui.settings.NotificationSettingsScreen
@@ -279,6 +280,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
     val goToSettingsSecurity: () -> Unit = { navController.navigate("settings/security") }
     val goToSettingsPrivacy: () -> Unit = { navController.navigate("settings/privacy") }
     val goToSettingsLanguage: () -> Unit = { navController.navigate("settings/language") }
+    val goToSettingsAppearance: () -> Unit = { navController.navigate("settings/appearance") }
     val goToSettingsNotifications: () -> Unit = { navController.navigate("settings/notifications") }
     val goToAppeals: () -> Unit = { navController.navigate("settings/appeals") }
     val goToDeleteAccount: () -> Unit = { navController.navigate("settings/delete-account") }
@@ -1266,6 +1268,7 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
                     onOpenSecurity = goToSettingsSecurity,
                     onOpenPrivacy = goToSettingsPrivacy,
                     onOpenLanguage = goToSettingsLanguage,
+                    onOpenAppearance = goToSettingsAppearance,
                     onOpenNotifications = goToSettingsNotifications,
                     onOpenCreator = goToCreator,
                     onOpenJournalist = goToJournalist,
@@ -1636,6 +1639,9 @@ fun ZrpNavHost(onLogout: () -> Unit, currentUser: MobileUser?, windowSizeClass: 
             }
             composable("settings/language") {
                 LanguageSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable("settings/appearance") {
+                AppearanceSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable("settings/notifications") {
                 NotificationSettingsScreen(onBack = { navController.popBackStack() })
