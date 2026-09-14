@@ -445,8 +445,17 @@ android {
         // dark-mode contrast bug in support-ticket internal-note cards
         // (white text on a fixed pale-yellow literal). None of this
         // changes applicationId, signing, or deep links.
-        versionCode 27
-        versionName "4.0.21"
+        // Bumps to versionCode 28 / versionName "4.0.22": Play Console
+        // rejected an upload of the versionCode 27 AAB built from commit
+        // e9c1b05d ("Le code de version 27 a deja ete utilise") - a
+        // versionCode 27 release was already uploaded to Internal Testing
+        // by a separate concurrent session before this fix's AAB could be
+        // uploaded, so the slot is taken even though no version-27 native
+        // code change was ever intentionally released for testing here.
+        // No source change - version number only, so the next build can
+        // actually be uploaded.
+        versionCode 28
+        versionName "4.0.22"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
