@@ -115,7 +115,7 @@ export default function BottomNav() {
               />
 
               {item.badge !== undefined && item.badge > 0 && (
-                <span className="absolute top-2 left-1/2 translate-x-2 bg-zrp-red text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
+                <span className="absolute top-2 left-1/2 translate-x-2 rtl:-translate-x-2 bg-zrp-red text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
                   {item.badge > 9 ? "9+" : item.badge}
                 </span>
               )}

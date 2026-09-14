@@ -510,7 +510,7 @@ export default function Header() {
                 </button>
 
                 {langMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                  <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
                     {SUPPORTED_LANGUAGES.map(
                       (lang) => (
                         <button
@@ -627,7 +627,7 @@ export default function Header() {
                   </button>
 
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
+                    <div className="absolute end-0 mt-2 w-64 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
 
                       {/* User information */}
 
@@ -777,7 +777,7 @@ export default function Header() {
                   <MessageSquare className="w-5 h-5" />
 
                   {unreadMessageCount > 0 && (
-                    <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-zrp-red text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 bg-zrp-red text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                       {unreadMessageCount > 9
                         ? "9+"
                         : unreadMessageCount}
@@ -799,7 +799,7 @@ export default function Header() {
                   <Bell className="w-5 h-5" />
 
                   {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-zrp-red text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 bg-zrp-red text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                       {unreadCount > 9
                         ? "9+"
                         : unreadCount}
@@ -858,7 +858,7 @@ export default function Header() {
 
           {/* Menu Panel */}
 
-          <div className="md:hidden fixed top-[calc(64px+env(safe-area-inset-top))] right-0 bottom-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zrp-deepBlack border-l border-gray-200 dark:border-gray-800 shadow-2xl overflow-y-auto">
+          <div className="md:hidden fixed top-[calc(64px+env(safe-area-inset-top))] end-0 bottom-0 z-50 w-full sm:w-[420px] bg-white dark:bg-zrp-deepBlack border-s border-gray-200 dark:border-gray-800 shadow-2xl overflow-y-auto">
 
             {/* =====================================================
                 USER HEADER
@@ -1369,7 +1369,7 @@ export default function Header() {
                       {t("nav.language")}
                     </span>
 
-                    <span className="text-xs font-semibold text-gray-400 mr-1">
+                    <span className="text-xs font-semibold text-gray-400 me-1">
                       {currentLangLabel}
                     </span>
 
