@@ -177,11 +177,11 @@ export default function OpportunityListingPage() {
         <p className="mt-5 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{listing.description}</p>
 
         {listing.poster && (
-          <div className="flex items-center gap-2 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <img src={listing.poster.avatarUrl || "/default-avatar.png"} alt={listing.poster.username} className="w-8 h-8 rounded-full object-cover" />
-            <Link href={`/profile/${listing.poster.username}`} className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:text-zrp-red transition">
-              @{listing.poster.username}
-              <VerifiedBadge badgeType={listing.poster.badgeType} />
+          <div className="flex min-w-0 items-center gap-2 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <img src={listing.poster.avatarUrl || "/default-avatar.png"} alt={listing.poster.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+            <Link href={`/profile/${listing.poster.username}`} className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:text-zrp-red transition">
+              <span className="truncate">@{listing.poster.username}</span>
+              <VerifiedBadge badgeType={listing.poster.badgeType} className="flex-shrink-0" />
             </Link>
           </div>
         )}

@@ -141,9 +141,9 @@ export default function ChatContactDrawer({
               receiverName?.[0]?.toUpperCase() || "?"
             )}
           </div>
-          <p className="mt-3 font-bold text-lg text-gray-900 dark:text-white flex items-center gap-1">
-            {receiverName}
-            <VerifiedBadge badgeType={receiverBadgeType} />
+          <p className="mt-3 flex max-w-full flex-wrap items-center justify-center gap-1 text-center text-lg font-bold text-gray-900 dark:text-white">
+            <span className="break-words">{receiverName}</span>
+            <VerifiedBadge badgeType={receiverBadgeType} className="flex-shrink-0" />
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">@{receiverUsername}</p>
         </div>

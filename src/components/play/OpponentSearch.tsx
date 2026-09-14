@@ -39,9 +39,9 @@ export default function OpponentSearch({ value, onChange, excludeUserId }: Oppon
       <div className="flex items-center gap-3 p-3 rounded-xl border border-zrp-red bg-zrp-red/5">
         <img src={value.avatarUrl || "/default-avatar.png"} alt={value.username} className="w-9 h-9 rounded-full object-cover" />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white truncate">
-            @{value.username}
-            <VerifiedBadge badgeType={value.badgeType} />
+          <div className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
+            <span className="truncate">@{value.username}</span>
+            <VerifiedBadge badgeType={value.badgeType} className="flex-shrink-0" />
           </div>
         </div>
         <button type="button" onClick={() => onChange(null)} aria-label={t("play.selectOpponent")}>
@@ -76,10 +76,10 @@ export default function OpponentSearch({ value, onChange, excludeUserId }: Oppon
               }}
               className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-left"
             >
-              <img src={user.avatarUrl || "/default-avatar.png"} alt={user.username} className="w-8 h-8 rounded-full object-cover" />
-              <div className="flex items-center gap-1 text-sm text-gray-800 dark:text-gray-200">
-                @{user.username}
-                <VerifiedBadge badgeType={user.badgeType} />
+              <img src={user.avatarUrl || "/default-avatar.png"} alt={user.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+              <div className="flex min-w-0 flex-1 items-center gap-1 text-sm text-gray-800 dark:text-gray-200">
+                <span className="truncate">@{user.username}</span>
+                <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
               </div>
             </button>
           ))}

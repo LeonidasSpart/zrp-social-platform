@@ -918,7 +918,7 @@ export default function VideoFeedViewer({
                     <div className="flex-1 min-w-0 text-white pointer-events-auto">
                       <Link
                         href={`/profile/${post.author.username}`}
-                        className="flex items-center gap-2 mb-2"
+                        className="flex min-w-0 items-center gap-2 mb-2"
                         onClick={
                           onClose
                         }
@@ -961,13 +961,15 @@ export default function VideoFeedViewer({
                           )}
                         </div>
 
-                        <span className="font-semibold flex items-center gap-1">
-                          {post
-                            .author
-                            .name ||
-                            post
+                        <span className="font-semibold flex min-w-0 items-center gap-1">
+                          <span className="truncate">
+                            {post
                               .author
-                              .username}
+                              .name ||
+                              post
+                                .author
+                                .username}
+                          </span>
 
                           <VerifiedBadge
                             badgeType={
@@ -975,10 +977,11 @@ export default function VideoFeedViewer({
                                 .author
                                 .badgeType
                             }
+                            className="flex-shrink-0"
                           />
                         </span>
 
-                        <span className="text-white/70 text-sm">
+                        <span className="text-white/70 text-sm flex-shrink-0">
                           ·{" "}
                           {timeAgo(
                             post.createdAt
