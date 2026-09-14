@@ -17,6 +17,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { UnreadCountProvider } from "@/contexts/UnreadCountContext";
 import { PresenceProvider } from "@/contexts/PresenceContext";
+import { CallProvider } from "@/contexts/CallContext";
 import PageTransition from "@/components/PageTransition";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
@@ -363,6 +364,16 @@ export default async function RootLayout({
                     <AuthProvider>
                       <UnreadCountProvider>
                       <PresenceProvider>
+                      {/*
+                        CallProvider must live at this app-wide level, not
+                        inside any individual page - see CallContext.tsx's
+                        own top comment for why: a call can only ever be
+                        received while its listener is actually registered,
+                        and this is the one place guaranteed to stay mounted
+                        for the whole authenticated session regardless of
+                        which page the user is currently on.
+                      */}
+                      <CallProvider>
                         <GoogleAnalytics />
                         <NativeAppBridge />
 
@@ -401,6 +412,7 @@ export default async function RootLayout({
                         <ServiceWorkerRegistration />
 
                         <BottomNav />
+                      </CallProvider>
                       </PresenceProvider>
                       </UnreadCountProvider>
                     </AuthProvider>
