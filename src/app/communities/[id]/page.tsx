@@ -31,6 +31,8 @@ export default function CommunityDetailPage() {
   const [myRole, setMyRole] = useState<string | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [feedError, setFeedError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [feedLoading, setFeedLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -43,16 +45,24 @@ export default function CommunityDetailPage() {
 
   const loadCommunity = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const res = await fetch(`/api/communities/${params.id}`, { cache: "no-store" });
       if (res.status === 404) {
         setNotFound(true);
         return;
       }
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setCommunity(data.community);
       setIsMember(data.isMember);
       setMyRole(data.myRole);
+    } catch {
+      // A network/server failure previously left `community` null with
+      // neither `notFound` nor any error flag set, so it fell through
+      // to the "not found" screen below - indistinguishable from a
+      // community that genuinely doesn't exist.
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -60,10 +70,14 @@ export default function CommunityDetailPage() {
 
   const loadFeed = useCallback(async () => {
     setFeedLoading(true);
+    setFeedError(false);
     try {
       const res = await fetch(`/api/communities/${params.id}/feed`, { cache: "no-store" });
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setPosts(data.posts || []);
+    } catch {
+      setFeedError(true);
     } finally {
       setFeedLoading(false);
     }
@@ -105,6 +119,21 @@ export default function CommunityDetailPage() {
 
   if (status === "loading" || loading) {
     return <div className="flex items-center justify-center min-h-screen">{t("action.loading")}</div>;
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-gray-500 dark:text-white/50">{t("communities.errorLoad")}</p>
+        <button
+          type="button"
+          onClick={loadCommunity}
+          className="px-4 py-1.5 rounded-full border border-gray-300 dark:border-white/15 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-white/10 transition"
+        >
+          {t("action.retry")}
+        </button>
+      </div>
+    );
   }
 
   if (notFound || !community) {
@@ -186,6 +215,17 @@ export default function CommunityDetailPage() {
           {feedLoading ? (
             <div className="py-12 flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
+            </div>
+          ) : feedError ? (
+            <div className="text-center py-12 text-gray-500 dark:text-white/50">
+              <p>{t("communities.detail.feedErrorLoad")}</p>
+              <button
+                type="button"
+                onClick={loadFeed}
+                className="mt-3 px-4 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+              >
+                {t("action.retry")}
+              </button>
             </div>
           ) : posts.length === 0 ? (
             <EmptyState
