@@ -7,6 +7,8 @@
     <string name="settings_security">Keamanan</string>
     <string name="settings_privacy_safety">Privasi &amp; Keamanan</string>
     <string name="nav_language">Bahasa</string>
+    <string name="nav_dark_mode">Mode Gelap</string>
+    <string name="nav_light_mode">Mode Terang</string>
     <string name="settings_account_info">Informasi Akun</string>
     <string name="settings_change_email">Ubah Email</string>
     <string name="settings_current_email">Email Saat Ini</string>

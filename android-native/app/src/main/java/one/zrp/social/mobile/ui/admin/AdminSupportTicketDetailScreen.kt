@@ -541,9 +541,16 @@ private fun InitialAvatar(username: String) {
 
 @Composable
 private fun ReplyCard(reply: AdminTicketReply) {
+    // Was a fixed pale-yellow literal (0xFFFEF9C3) with no dark-mode
+    // counterpart, paired with ambient (theme-following) text - a real
+    // white-on-pale-yellow contrast failure in dark mode. Same fix as
+    // TicketDetailScreen's own ReplyCard (see its own comment): a real
+    // MaterialTheme role so contentColorFor() resolves correctly in both
+    // themes, matching the website's admin/support/[id]/page.tsx pairing
+    // its light-mode yellow with an explicit dark: variant.
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = if (reply.isInternal) Color(0xFFFEF9C3) else MaterialTheme.colorScheme.surfaceContainerLow,
+        color = if (reply.isInternal) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth().padding(top = Spacing.md),
     ) {
         Column(modifier = Modifier.padding(Spacing.md)) {
@@ -557,10 +564,11 @@ private fun ReplyCard(reply: AdminTicketReply) {
                     Text(
                         text = stringResource(R.string.support_detail_internal_note),
                         style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .padding(start = 4.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFFFDE68A))
+                            .background(MaterialTheme.colorScheme.outlineVariant)
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     )
                 }

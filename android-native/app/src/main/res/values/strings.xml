@@ -17,6 +17,8 @@
     <string name="settings_security">Security</string>
     <string name="settings_privacy_safety">Privacy &amp; Safety</string>
     <string name="nav_language">Language</string>
+    <string name="nav_dark_mode">Dark Mode</string>
+    <string name="nav_light_mode">Light Mode</string>
     <string name="settings_account_info">Account Info</string>
     <string name="settings_change_email">Change Email</string>
     <string name="settings_current_email">Current Email</string>

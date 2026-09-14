@@ -6,6 +6,8 @@
     <string name="settings_security">セキュリティ</string>
     <string name="settings_privacy_safety">プライバシーと安全</string>
     <string name="nav_language">言語</string>
+    <string name="nav_dark_mode">ダークモード</string>
+    <string name="nav_light_mode">ライトモード</string>
     <string name="settings_account_info">アカウント情報</string>
     <string name="settings_change_email">メールアドレスを変更</string>
     <string name="settings_current_email">現在のメールアドレス</string>

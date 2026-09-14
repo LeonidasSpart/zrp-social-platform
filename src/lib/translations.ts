@@ -30773,7 +30773,7 @@ export const translations: Record<Language, TranslationDict> = {
     "nav.login": "تسجيل الدخول",
     "nav.signup": "إنشاء حساب",
     "nav.admin": "المسؤول",
-    "nav.darkMode": "深色模式",
+    "nav.darkMode": "الوضع الداكن",
     "nav.lightMode": "الوضع الفاتح",
     "nav.signOut": "تسجيل الخروج",
     "nav.language": "اللغة",

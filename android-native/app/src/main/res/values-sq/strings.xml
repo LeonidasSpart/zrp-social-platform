@@ -7,6 +7,8 @@
     <string name="settings_security">Siguria</string>
     <string name="settings_privacy_safety">Privatësia dhe siguria</string>
     <string name="nav_language">Gjuha</string>
+    <string name="nav_dark_mode">Modali i errët</string>
+    <string name="nav_light_mode">Modali i dritës</string>
     <string name="settings_account_info">Informatat e llogarisë</string>
     <string name="settings_change_email">Ndrysho emailin</string>
     <string name="settings_current_email">Emaili aktual</string>

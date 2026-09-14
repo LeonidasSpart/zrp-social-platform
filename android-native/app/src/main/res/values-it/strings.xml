@@ -7,6 +7,8 @@
     <string name="settings_security">Sicurezza</string>
     <string name="settings_privacy_safety">Privacy e sicurezza</string>
     <string name="nav_language">Lingua</string>
+    <string name="nav_dark_mode">Modalità scura</string>
+    <string name="nav_light_mode">Modalità chiara</string>
     <string name="settings_account_info">Informazioni account</string>
     <string name="settings_change_email">Cambia email</string>
     <string name="settings_current_email">Email attuale</string>

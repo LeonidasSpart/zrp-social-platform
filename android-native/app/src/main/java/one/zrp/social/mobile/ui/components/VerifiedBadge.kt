@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.ZrpBlue
+import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
  * The same real per-account badge the website's VerifiedBadge.tsx
@@ -33,7 +35,10 @@ private data class BadgeStyle(val color: Color, val label: String, val icon: Ima
 private val BadgeCheckIcon = Icons.Filled.Verified
 
 private val BadgeStyles: Map<String, BadgeStyle> = mapOf(
-    "verified" to BadgeStyle(Color(0xFF3B82F6), "Verified account", BadgeCheckIcon),
+    // ZrpBlue/ZrpRed reused from ui/theme/Color.kt rather than respelling
+    // their hex values here - same values (0xFF3B82F6 / 0xFFFF2D2D), just
+    // via the token so this file can't drift from the palette by hand-edit.
+    "verified" to BadgeStyle(ZrpBlue, "Verified account", BadgeCheckIcon),
     "organization" to BadgeStyle(Color(0xFFFFD700), "Verified organization", BadgeCheckIcon),
     "government" to BadgeStyle(Color(0xFF9CA3AF), "Government official", BadgeCheckIcon),
     "team" to BadgeStyle(Color(0xFFEF4444), "ZRP Team", BadgeCheckIcon),
@@ -41,13 +46,13 @@ private val BadgeStyles: Map<String, BadgeStyle> = mapOf(
     // (Newspaper, not BadgeCheck) so it's never visually confused with
     // the "team" staff badge despite both leaning on ZRP red - matched
     // here rather than reusing the same seal shape for both.
-    "journalist" to BadgeStyle(Color(0xFFFF2D2D), "Verified Journalist", Icons.Filled.Newspaper),
+    "journalist" to BadgeStyle(ZrpRed, "Verified Journalist", Icons.Filled.Newspaper),
     // ZRP News Network editorial feed (ZRP News World, ZRP Travel, ...).
     // Same ZRP brand red as journalist because both mark official ZRP
     // editorial identities, but an RssFeed glyph so an automated feed is
     // never mistaken for a verified human journalist - matches
     // VerifiedBadge.tsx's "editorial" entry exactly.
-    "editorial" to BadgeStyle(Color(0xFFFF2D2D), "Official ZRP editorial feed (automated)", Icons.Filled.RssFeed),
+    "editorial" to BadgeStyle(ZrpRed, "Official ZRP editorial feed (automated)", Icons.Filled.RssFeed),
 )
 
 /**

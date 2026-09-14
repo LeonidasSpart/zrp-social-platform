@@ -6,6 +6,8 @@
     <string name="settings_security">सुरक्षा</string>
     <string name="settings_privacy_safety">गोपनीयता और सुरक्षा</string>
     <string name="nav_language">भाषा</string>
+    <string name="nav_dark_mode">डार्क मोड</string>
+    <string name="nav_light_mode">लाइट मोड</string>
     <string name="settings_account_info">खाता जानकारी</string>
     <string name="settings_change_email">ईमेल बदलें</string>
     <string name="settings_current_email">मौजूदा ईमेल</string>

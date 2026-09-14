@@ -7,6 +7,8 @@
     <string name="settings_security">Seguridad</string>
     <string name="settings_privacy_safety">Privacidad y seguridad</string>
     <string name="nav_language">Idioma</string>
+    <string name="nav_dark_mode">Modo oscuro</string>
+    <string name="nav_light_mode">Modo claro</string>
     <string name="settings_account_info">Información de la cuenta</string>
     <string name="settings_change_email">Cambiar correo electrónico</string>
     <string name="settings_current_email">Correo electrónico actual</string>
