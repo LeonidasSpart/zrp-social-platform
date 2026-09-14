@@ -7,6 +7,8 @@
     <string name="settings_security">Siguria</string>
     <string name="settings_privacy_safety">Privatësia dhe siguria</string>
     <string name="nav_language">Gjuha</string>
+    <string name="nav_dark_mode">Modali i errët</string>
+    <string name="nav_light_mode">Modali i dritës</string>
     <string name="settings_account_info">Informatat e llogarisë</string>
     <string name="settings_change_email">Ndrysho emailin</string>
     <string name="settings_current_email">Emaili aktual</string>
@@ -2119,6 +2121,10 @@
     <string name="ambassadors_apply_field_motivation">Pse dëshiron të bëhesh Ambasador i ZRP?</string>
     <string name="ambassadors_apply_field_description">Përshkruaj komunitetin tënd (opsionale)</string>
     <string name="ambassadors_apply_field_audience">Madhësia e përafërt e audiencës ose komunitetit tënd (opsionale)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">Duke aplikuar, ju konfirmoni se keni lexuar</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">Kodin e Sjelljes së Ambasadorëve</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">Kam lexuar dhe pranoj të respektoj Udhëzimet e Komunitetit të ZRP-së dhe Kodin e Sjelljes së Ambasadorëve.</string>
+    <string name="ambassadors_apply_err_code_required">Duhet të pranoni Kodin e Sjelljes së Ambasadorëve për të aplikuar.</string>
     <string name="ambassadors_apply_submit">Dërgo aplikimin</string>
     <string name="ambassadors_apply_submitting">Duke dërguar...</string>
     <string name="ambassadors_apply_err_country_required">Zgjidh vendin tënd.</string>

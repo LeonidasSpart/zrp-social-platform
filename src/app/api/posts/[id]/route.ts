@@ -6,6 +6,7 @@ import { checkPostLength } from "@/lib/limits";
 import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 import { canViewPrivateContent } from "@/lib/permissions";
 import { validateMediaUrls } from "@/lib/media-url";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 // GET a single post (with all data for the post page)
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -98,7 +99,14 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       result.poll = poll;
     }
 
-    return NextResponse.json(result);
+    // ⚠️ SECURITY: redact pay-per-view content the viewer hasn't paid for
+    // before it ever leaves the server - see src/lib/premium-content.ts.
+    // The single-post page reads this endpoint directly, so it must be
+    // gated exactly like every feed/listing endpoint - a direct post URL
+    // is otherwise a free bypass around any feed-level gating.
+    const [gated] = await applyPremiumGating([result], session?.user?.id);
+
+    return NextResponse.json(gated);
   } catch (error) {
     console.error("Error fetching post:", error);
     return NextResponse.json({ error: "Failed to fetch post" }, { status: 500 });

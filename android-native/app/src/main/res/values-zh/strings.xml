@@ -7,6 +7,8 @@
     <string name="settings_security">安全</string>
     <string name="settings_privacy_safety">隐私与安全</string>
     <string name="nav_language">语言</string>
+    <string name="nav_dark_mode">深色模式</string>
+    <string name="nav_light_mode">浅色模式</string>
     <string name="settings_account_info">账户信息</string>
     <string name="settings_change_email">更改邮箱</string>
     <string name="settings_current_email">当前邮箱</string>
@@ -2119,6 +2121,10 @@
     <string name="ambassadors_apply_field_motivation">你为什么想成为 ZRP 大使？</string>
     <string name="ambassadors_apply_field_description">描述你的社区（选填）</string>
     <string name="ambassadors_apply_field_audience">你的受众或社区大致规模（选填）</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">提交申请即表示您确认已阅读</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">《大使行为准则》</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">我已阅读并同意遵守 ZRP《社区准则》和《大使行为准则》。</string>
+    <string name="ambassadors_apply_err_code_required">您必须接受《大使行为准则》才能提交申请。</string>
     <string name="ambassadors_apply_submit">提交申请</string>
     <string name="ambassadors_apply_submitting">提交中...</string>
     <string name="ambassadors_apply_err_country_required">请选择你的国家。</string>

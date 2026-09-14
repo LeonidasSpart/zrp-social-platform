@@ -6,6 +6,8 @@
     <string name="settings_security">सुरक्षा</string>
     <string name="settings_privacy_safety">गोपनीयता और सुरक्षा</string>
     <string name="nav_language">भाषा</string>
+    <string name="nav_dark_mode">डार्क मोड</string>
+    <string name="nav_light_mode">लाइट मोड</string>
     <string name="settings_account_info">खाता जानकारी</string>
     <string name="settings_change_email">ईमेल बदलें</string>
     <string name="settings_current_email">मौजूदा ईमेल</string>
@@ -2066,6 +2068,10 @@
     <string name="ambassadors_apply_field_motivation">आप ZRP एंबेसडर क्यों बनना चाहते हैं?</string>
     <string name="ambassadors_apply_field_description">अपने समुदाय के बारे में बताएं (वैकल्पिक)</string>
     <string name="ambassadors_apply_field_audience">अनुमानित दर्शक या समुदाय का आकार (वैकल्पिक)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">आवेदन करके, आप पुष्टि करते हैं कि आपने</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">एंबेसडर आचार संहिता</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">मैंने ZRP समुदाय दिशा-निर्देश और एंबेसडर आचार संहिता पढ़ ली है और इनका पालन करने के लिए सहमत हूं।</string>
+    <string name="ambassadors_apply_err_code_required">आवेदन करने के लिए आपको एंबेसडर आचार संहिता स्वीकार करनी होगी।</string>
     <string name="ambassadors_apply_submit">आवेदन सबमिट करें</string>
     <string name="ambassadors_apply_submitting">सबमिट किया जा रहा है...</string>
     <string name="ambassadors_apply_err_country_required">अपना देश चुनें।</string>

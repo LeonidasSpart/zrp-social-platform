@@ -57,7 +57,30 @@ android {
         // property so a build with none configured still compiles -
         // GoogleAuth.kt's own call simply fails at runtime with a clear
         // error until it's set, instead of failing the build.
-        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${project.findProperty('GOOGLE_WEB_CLIENT_ID') ?: ''}\""
+        //
+        // The raw property value is sanitized before being embedded in
+        // a generated Java string literal: a client ID pasted into the
+        // GitHub Actions secret UI can pick up a trailing/embedded
+        // newline or stray quote the same way the release keystore's
+        // own base64 secret can (see android-native-build.yml's
+        // "Configure release signing" step comment on that) - and an
+        // unescaped newline inside a Java string literal is a hard
+        // compile error ("unclosed string literal"), not a runtime
+        // failure GoogleAuth.kt's own call could surface cleanly. This
+        // has actually happened here (GOOGLE_WEB_CLIENT_ID was recently
+        // rotated per #331's own follow-up note) and broke
+        // compileDebugJavaWithJavac for every build, including on main,
+        // until the secret is next corrected - stripping whitespace and
+        // escaping embedded quotes/backslashes here means a bad paste
+        // degrades to "Google Sign-In doesn't work" again, not "the
+        // app doesn't build at all".
+        def rawGoogleWebClientId = (project.findProperty('GOOGLE_WEB_CLIENT_ID') ?: '').toString()
+        def safeGoogleWebClientId = rawGoogleWebClientId
+            .trim()
+            .replaceAll(/[\r\n]/, '')
+            .replace('\\', '\\\\')
+            .replace('"', '\\"')
+        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${safeGoogleWebClientId}\""
         // versionCode 1 ("1.0") is the existing Capacitor app's Internal
         // Testing release - confirmed via Play Console there is no
         // Production release yet. This native app's own first release
@@ -409,8 +432,21 @@ android {
         // repeat pass on the same "text evicts sibling badge" defect
         // class across Play/Shorts/Music/Ads/Opportunity/Aid surfaces).
         // None of this changes applicationId, signing, or deep links.
-        versionCode 26
-        versionName "4.0.20"
+        //
+        // Bumps to versionCode 27 / versionName "4.0.21" for real native
+        // fixes: the Ambassador application form could never actually be
+        // submitted (the shared backend unconditionally rejects any
+        // request without a real codeOfConductAccepted=true, and this
+        // app never sent one or showed the checkbox/link needed to
+        // accept it - confirmed by a real user report); a status/nav bar
+        // appearance that no longer updated on a system Light/Dark flip
+        // mid-session; a new Settings > Appearance toggle bringing
+        // manual Light/Dark control to parity with the website; and a
+        // dark-mode contrast bug in support-ticket internal-note cards
+        // (white text on a fixed pale-yellow literal). None of this
+        // changes applicationId, signing, or deep links.
+        versionCode 27
+        versionName "4.0.21"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -7,6 +7,8 @@
     <string name="settings_security">Keamanan</string>
     <string name="settings_privacy_safety">Privasi &amp; Keamanan</string>
     <string name="nav_language">Bahasa</string>
+    <string name="nav_dark_mode">Mode Gelap</string>
+    <string name="nav_light_mode">Mode Terang</string>
     <string name="settings_account_info">Informasi Akun</string>
     <string name="settings_change_email">Ubah Email</string>
     <string name="settings_current_email">Email Saat Ini</string>
@@ -2119,6 +2121,10 @@
     <string name="ambassadors_apply_field_motivation">Mengapa kamu ingin menjadi Duta ZRP?</string>
     <string name="ambassadors_apply_field_description">Jelaskan komunitasmu (opsional)</string>
     <string name="ambassadors_apply_field_audience">Perkiraan ukuran audiens atau komunitasmu (opsional)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">Dengan mengajukan permohonan, Anda menyatakan telah membaca</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">Kode Etik Duta</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">Saya telah membaca dan setuju untuk mematuhi Pedoman Komunitas ZRP dan Kode Etik Duta.</string>
+    <string name="ambassadors_apply_err_code_required">Anda harus menyetujui Kode Etik Duta untuk dapat mengajukan permohonan.</string>
     <string name="ambassadors_apply_submit">Kirim aplikasi</string>
     <string name="ambassadors_apply_submitting">Mengirim...</string>
     <string name="ambassadors_apply_err_country_required">Pilih negaramu.</string>

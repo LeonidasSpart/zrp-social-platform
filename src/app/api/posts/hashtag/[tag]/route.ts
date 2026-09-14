@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { viewablePostAuthorFilter } from "@/lib/permissions";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ tag: string }> }) {
   const params = await props.params;
@@ -125,7 +126,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ tag: stri
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         include,
       });
-      return NextResponse.json(await withLiked(posts));
+      // ⚠️ SECURITY: redact pay-per-view content the viewer hasn't paid
+      // for before it ever leaves the server - see
+      // src/lib/premium-content.ts.
+      return NextResponse.json(await applyPremiumGating(await withLiked(posts), viewerId));
     }
 
     const { cursor, limit: pageSize } = parseCursorParams(req);
@@ -138,7 +142,8 @@ export async function GET(req: NextRequest, props: { params: Promise<{ tag: stri
     });
 
     const { items, nextCursor } = buildPage(rawPosts, pageSize);
-    return NextResponse.json({ items: await withLiked(items), nextCursor });
+    const gatedItems = await applyPremiumGating(await withLiked(items), viewerId);
+    return NextResponse.json({ items: gatedItems, nextCursor });
   } catch (error) {
     console.error("Error fetching hashtag posts:", error);
     return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });

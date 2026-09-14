@@ -7,6 +7,8 @@
     <string name="settings_security">Seguridad</string>
     <string name="settings_privacy_safety">Privacidad y seguridad</string>
     <string name="nav_language">Idioma</string>
+    <string name="nav_dark_mode">Modo oscuro</string>
+    <string name="nav_light_mode">Modo claro</string>
     <string name="settings_account_info">Información de la cuenta</string>
     <string name="settings_change_email">Cambiar correo electrónico</string>
     <string name="settings_current_email">Correo electrónico actual</string>
@@ -2119,6 +2121,10 @@
     <string name="ambassadors_apply_field_motivation">¿Por qué quieres ser Embajador de ZRP?</string>
     <string name="ambassadors_apply_field_description">Describe tu comunidad (opcional)</string>
     <string name="ambassadors_apply_field_audience">Tamaño aproximado de tu audiencia o comunidad (opcional)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">Al postularse, usted confirma haber leído el</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">Código de Conducta de los Embajadores</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">He leído y acepto cumplir las Normas de la Comunidad de ZRP y el Código de Conducta de los Embajadores.</string>
+    <string name="ambassadors_apply_err_code_required">Debe aceptar el Código de Conducta de los Embajadores para postularse.</string>
     <string name="ambassadors_apply_submit">Enviar solicitud</string>
     <string name="ambassadors_apply_submitting">Enviando...</string>
     <string name="ambassadors_apply_err_country_required">Selecciona tu país.</string>

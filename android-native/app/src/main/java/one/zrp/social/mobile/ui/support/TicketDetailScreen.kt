@@ -243,9 +243,19 @@ private fun InitialAvatar(username: String) {
 @Composable
 private fun ReplyCard(reply: SupportReply) {
     Surface(
+        // Was a fixed pale-yellow literal (0xFFFEF9C3) with no dark-mode
+        // counterpart - fine against light-mode's near-black ambient text,
+        // but in dark mode that same ambient text resolves to near-white
+        // (onSurface), giving white-on-pale-yellow: a real, verified
+        // contrast failure, not just an off-brand hue. surfaceContainerHighest
+        // is a real MaterialTheme role, so Surface's own contentColorFor()
+        // now resolves the ambient text correctly in both themes - matching
+        // the website's own reply.isInternal styling (support/tickets/[id]/
+        // page.tsx), which pairs its light-mode yellow with an explicit
+        // dark: variant for exactly this reason.
         shape = RoundedCornerShape(12.dp),
         color = if (reply.isInternal) {
-            Color(0xFFFEF9C3)
+            MaterialTheme.colorScheme.surfaceContainerHighest
         } else {
             MaterialTheme.colorScheme.surfaceContainerLow
         },
@@ -264,13 +274,20 @@ private fun ReplyCard(reply: SupportReply) {
                     )
                 }
                 if (reply.isInternal) {
+                    // Same fixed-pale-yellow-literal contrast bug as the
+                    // Surface above (0xFFFDE68A, no dark counterpart) -
+                    // outlineVariant is a real theme role with a correct
+                    // dark-mode value, and the explicit onSurface pairs a
+                    // guaranteed-readable text color rather than relying on
+                    // ambient inheritance through a plain background() modifier.
                     Text(
                         text = stringResource(R.string.support_detail_internal_note),
                         style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .padding(start = 4.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFFFDE68A))
+                            .background(MaterialTheme.colorScheme.outlineVariant)
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     )
                 }

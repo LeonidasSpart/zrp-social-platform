@@ -19,6 +19,7 @@ import {
   Briefcase,
   HeartHandshake,
   Wallet,
+  Banknote,
   Music2,
   Rss,
   Globe2,
@@ -167,6 +168,11 @@ export default function AdminLayout({
             href: "/admin/storage",
             labelKey: "adminStorage.title" as TranslationKey,
             icon: HardDrive,
+          },
+          {
+            href: "/admin/withdrawals",
+            labelKey: "adminWithdrawals.title" as TranslationKey,
+            icon: Banknote,
           },
           {
             href: "/admin/help-withdrawals",
