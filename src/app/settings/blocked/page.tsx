@@ -153,14 +153,14 @@ export default function BlockedUsersPage() {
 
               {/* User info */}
               <div className="flex-1 min-w-0">
-                <Link href={`/profile/${user.username}`} className="hover:underline">
-                  <div className="flex items-center gap-1">
-                    <span className="font-semibold text-gray-900 dark:text-white">
+                <Link href={`/profile/${user.username}`} className="block min-w-0 hover:underline">
+                  <div className="flex min-w-0 items-center gap-1">
+                    <span className="truncate font-semibold text-gray-900 dark:text-white">
                       {user.name || user.username}
                     </span>
-                    {user.badgeType && <VerifiedBadge badgeType={user.badgeType} />}
+                    {user.badgeType && <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="truncate text-sm text-gray-500 dark:text-gray-400">
                     @{user.username}
                   </p>
                 </Link>

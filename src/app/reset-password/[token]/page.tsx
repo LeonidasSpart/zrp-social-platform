@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function ResetPasswordPage(props: { params: Promise<{ token: string }> }) {
   const params = use(props.params);
@@ -88,34 +89,30 @@ export default function ResetPasswordPage(props: { params: Promise<{ token: stri
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("resetPassword.newPassword")}
-            </label>
-            <input
-              type="password"
+            <PasswordInput
+              id="reset-new-password"
+              name="newPassword"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
-              placeholder="••••••••"
+              label={t("resetPassword.newPassword")}
               required
               minLength={6}
+              autoComplete="new-password"
+              className="rounded-xl px-4 py-3.5 text-base dark:bg-gray-800 sm:py-3"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t("auth.passwordMinLength")}</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("resetPassword.confirmPassword")}
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          <PasswordInput
+            id="reset-confirm-password"
+            name="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            label={t("resetPassword.confirmPassword")}
+            required
+            autoComplete="new-password"
+            className="rounded-xl px-4 py-3.5 text-base dark:bg-gray-800 sm:py-3"
+          />
 
           <button
             type="submit"

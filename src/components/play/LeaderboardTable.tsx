@@ -43,9 +43,9 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
             className="w-9 h-9 rounded-full object-cover flex-shrink-0"
           />
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white truncate">
-              @{entry.user.username}
-              <VerifiedBadge badgeType={entry.user.badgeType} />
+            <div className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
+              <span className="truncate">@{entry.user.username}</span>
+              <VerifiedBadge badgeType={entry.user.badgeType} className="flex-shrink-0" />
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">{t("play.level", { n: entry.level })}</p>
           </div>

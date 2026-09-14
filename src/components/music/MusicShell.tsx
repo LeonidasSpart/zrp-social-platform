@@ -492,8 +492,8 @@ export default function MusicShell() {
                           </div>
                         )}
                       </div>
-                      <div className="mt-2 text-sm font-bold truncate flex items-center justify-center gap-1">
-                        {artist.displayName}
+                      <div className="mt-2 flex min-w-0 items-center justify-center gap-1 text-sm font-bold">
+                        <span className="truncate">{artist.displayName}</span>
                         {artist.verified && <ShieldCheck className="w-3.5 h-3.5 text-zrp-red shrink-0" aria-label={t("music.artistDetail.verifiedAria")} />}
                       </div>
                     </Link>

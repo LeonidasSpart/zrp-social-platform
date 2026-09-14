@@ -396,8 +396,21 @@ android {
         // from the conversation-list row; it was just missing from
         // ChatContactPopup's own "More" menu, which now matches it).
         // None of this changes applicationId, signing, or deep links.
-        versionCode 25
-        versionName "4.0.19"
+        //
+        // Bumps to versionCode 26 / versionName "4.0.20" for the full-
+        // product surgical mission landing alongside this: the only
+        // native-side change is AccountSettingsScreen.kt's own password
+        // field (the email-change form's "current password" input) now
+        // getting the same reveal toggle Login/Signup/SecuritySettings
+        // already had - a real, if small, UI fix, so the version still
+        // moves even though most of this pass's work is on the web app
+        // (Ambassador state sync, admin identity rendering, PWA Shorts/
+        // Stories safe-area, nav/settings/search reachability, and a
+        // repeat pass on the same "text evicts sibling badge" defect
+        // class across Play/Shorts/Music/Ads/Opportunity/Aid surfaces).
+        // None of this changes applicationId, signing, or deep links.
+        versionCode 26
+        versionName "4.0.20"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

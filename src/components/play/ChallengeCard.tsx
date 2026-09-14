@@ -43,9 +43,9 @@ export default function ChallengeCard({ challenge }: ChallengeCardProps) {
         <span>{t("play.plays", { n: challenge.playCount })}</span>
       </div>
       {challenge.creator && (
-        <div className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
-          {t("play.by", { name: challenge.creator.username })}
-          <VerifiedBadge badgeType={challenge.creator.badgeType} />
+        <div className="flex min-w-0 items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
+          <span className="truncate">{t("play.by", { name: challenge.creator.username })}</span>
+          <VerifiedBadge badgeType={challenge.creator.badgeType} className="flex-shrink-0" />
         </div>
       )}
     </Link>

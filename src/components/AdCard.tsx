@@ -103,10 +103,10 @@ export default function AdCard({ ad }: AdCardProps) {
         <div className="flex-1 min-w-0">
           <Link
             href={`/profile/${ad.post.author.username}`}
-            className="font-semibold text-gray-900 dark:text-white hover:underline inline-flex items-center gap-1"
+            className="flex min-w-0 items-center gap-1 font-semibold text-gray-900 dark:text-white hover:underline"
           >
-            {ad.post.author.name || ad.post.author.username}
-            <VerifiedBadge badgeType={ad.post.author.badgeType} />
+            <span className="truncate">{ad.post.author.name || ad.post.author.username}</span>
+            <VerifiedBadge badgeType={ad.post.author.badgeType} className="flex-shrink-0" />
           </Link>
           {/* ─── Content/image: the actual tracked, billed ad click ──── */}
           <a href="#" onClick={handleClick} className="block cursor-pointer">

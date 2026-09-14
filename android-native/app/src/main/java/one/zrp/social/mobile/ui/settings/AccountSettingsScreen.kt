@@ -17,6 +17,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,13 +32,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -59,6 +64,11 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit, o
     )
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    // The "current password" confirmation field for changing email had
+    // no reveal toggle at all (unlike every other password field in the
+    // app) - always PasswordVisualTransformation() with no trailing
+    // icon or visible state to flip.
+    var emailPasswordVisible by remember { mutableStateOf(false) }
 
     // Fires once per fresh export: hands the downloaded file to a
     // FileProvider content:// Uri and opens the share sheet, then tells
@@ -195,8 +205,18 @@ fun AccountSettingsScreen(onBack: () -> Unit, onOpenDeleteAccount: () -> Unit, o
                     label = { Text(stringResource(R.string.settings_current_password_field)) },
                     singleLine = true,
                     enabled = !state.isUpdatingEmail,
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (emailPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { emailPasswordVisible = !emailPasswordVisible }) {
+                            Icon(
+                                imageVector = if (emailPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = stringResource(
+                                    if (emailPasswordVisible) R.string.action_hide_password else R.string.action_show_password
+                                ),
+                            )
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = Spacing.sm),

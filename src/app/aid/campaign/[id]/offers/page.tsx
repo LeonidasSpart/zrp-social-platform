@@ -78,9 +78,9 @@ export default function CampaignOffersPage() {
                   <div className="flex items-center gap-2 min-w-0">
                     <img src={offer.offerer.avatarUrl || "/default-avatar.png"} alt={offer.offerer.username} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                     <div className="min-w-0">
-                      <Link href={`/profile/${offer.offerer.username}`} className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:text-zrp-red transition truncate">
-                        @{offer.offerer.username}
-                        <VerifiedBadge badgeType={offer.offerer.badgeType} />
+                      <Link href={`/profile/${offer.offerer.username}`} className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:text-zrp-red transition">
+                        <span className="truncate">@{offer.offerer.username}</span>
+                        <VerifiedBadge badgeType={offer.offerer.badgeType} className="flex-shrink-0" />
                       </Link>
                       <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
                         <meta.icon className="w-3 h-3" />

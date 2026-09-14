@@ -54,23 +54,23 @@ export default function PlayDuelDetailPage() {
         </p>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white text-center mt-1 mb-6">{duel.challenge.title}</h1>
 
-        <div className="flex items-center justify-center gap-6">
-          <div className="flex flex-col items-center gap-2">
-            <img src={me.avatarUrl || "/default-avatar.png"} alt={me.username} className="w-14 h-14 rounded-full object-cover" />
-            <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
-              @{me.username}
-              <VerifiedBadge badgeType={me.badgeType} />
+        <div className="flex min-w-0 items-center justify-center gap-6">
+          <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
+            <img src={me.avatarUrl || "/default-avatar.png"} alt={me.username} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
+            <div className="flex min-w-0 max-w-full items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
+              <span className="truncate">@{me.username}</span>
+              <VerifiedBadge badgeType={me.badgeType} className="flex-shrink-0" />
             </div>
             {duel.status === "COMPLETED" && myScore !== null && (
               <p className="text-lg font-extrabold text-gray-900 dark:text-white">{myScore}</p>
             )}
           </div>
-          <span className="text-sm font-bold text-gray-400">{t("play.vs")}</span>
-          <div className="flex flex-col items-center gap-2">
-            <img src={opponent.avatarUrl || "/default-avatar.png"} alt={opponent.username} className="w-14 h-14 rounded-full object-cover" />
-            <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
-              @{opponent.username}
-              <VerifiedBadge badgeType={opponent.badgeType} />
+          <span className="shrink-0 text-sm font-bold text-gray-400">{t("play.vs")}</span>
+          <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
+            <img src={opponent.avatarUrl || "/default-avatar.png"} alt={opponent.username} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
+            <div className="flex min-w-0 max-w-full items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white">
+              <span className="truncate">@{opponent.username}</span>
+              <VerifiedBadge badgeType={opponent.badgeType} className="flex-shrink-0" />
             </div>
             {duel.status === "COMPLETED" && (
               <p className="text-lg font-extrabold text-gray-900 dark:text-white">
