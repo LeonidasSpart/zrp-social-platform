@@ -139,11 +139,11 @@ export default function AdminUsers() {
         fetchUsers();
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || "Failed to update role");
+        alert(err.error || t("adminUsers.errUpdateRoleFailed"));
       }
     } catch (error) {
       console.error("Role update error:", error);
-      alert("Failed to update role");
+      alert(t("adminUsers.errUpdateRoleFailed"));
     }
   };
 
@@ -158,11 +158,11 @@ export default function AdminUsers() {
         fetchUsers();
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || "Failed to update badge");
+        alert(err.error || t("adminUsers.errUpdateBadgeFailed"));
       }
     } catch (error) {
       console.error("Badge update error:", error);
-      alert("Failed to update badge");
+      alert(t("adminUsers.errUpdateBadgeFailed"));
     }
   };
 

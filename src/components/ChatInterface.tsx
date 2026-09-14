@@ -859,7 +859,7 @@ export default function ChatInterface({
 
         alert(
           err?.error ||
-            "Failed to edit message"
+            t("chat.errEditMessage")
         );
       }
     } catch (error) {
@@ -868,7 +868,7 @@ export default function ChatInterface({
         error
       );
 
-      alert("Failed to edit message");
+      alert(t("chat.errEditMessage"));
     } finally {
       setSavingEdit(false);
     }

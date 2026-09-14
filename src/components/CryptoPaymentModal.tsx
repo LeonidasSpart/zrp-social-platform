@@ -31,7 +31,7 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
 
   const handleSubmit = async () => {
     if (!transactionId.trim()) {
-      setError("Please paste the transaction signature.");
+      setError(t("cryptoPayment.errNoSignature"));
       return;
     }
 
@@ -47,12 +47,12 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
         body: JSON.stringify({ plan, transactionId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to submit payment");
-      alert("Payment request submitted! An admin will verify it within 24 hours.");
+      if (!res.ok) throw new Error(data.error || t("cryptoPayment.errSubmitFailed"));
+      alert(t("cryptoPayment.successSubmitted"));
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("auth.errSomethingWrong"));
     } finally {
       setSubmitting(false);
     }
@@ -70,13 +70,13 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
         </button>
 
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          Subscribe to {plan.charAt(0).toUpperCase() + plan.slice(1)}
+          {t("cryptoPayment.subscribeTitle", { plan: plan.charAt(0).toUpperCase() + plan.slice(1) })}
         </h2>
 
         <div className="space-y-4">
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Send exactly <span className="font-bold">{amount} USDC</span> (Solana) to the address below.
+              {t("cryptoPayment.sendInstruction", { amount })}
             </p>
           </div>
 
@@ -116,11 +116,11 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
             disabled={submitting}
             className="w-full bg-zrp-red text-white py-2 rounded-lg font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
           >
-            {submitting ? "Submitting..." : "Submit for Verification"}
+            {submitting ? t("cryptoPayment.submitting") : t("cryptoPayment.submitButton")}
           </button>
 
           <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-            Your plan will be upgraded once an admin verifies the transaction.
+            {t("cryptoPayment.footerNote")}
           </p>
         </div>
       </div>
