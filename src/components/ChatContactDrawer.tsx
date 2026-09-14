@@ -145,7 +145,7 @@ export default function ChatContactDrawer({
             <span className="break-words">{receiverName}</span>
             <VerifiedBadge badgeType={receiverBadgeType} className="flex-shrink-0" />
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">@{receiverUsername}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">@<bdi>{receiverUsername}</bdi></p>
         </div>
 
         {/* ─── Quick actions ──────────────────────────────────────── */}
@@ -207,7 +207,7 @@ export default function ChatContactDrawer({
                   className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition disabled:opacity-50"
                 >
                   {blocking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />}
-                  {blocked ? t("chat.unblock") : t("chat.block")} @{receiverUsername}
+                  {blocked ? t("chat.unblock") : t("chat.block")} @<bdi>{receiverUsername}</bdi>
                 </button>
                 <button
                   onClick={() => {

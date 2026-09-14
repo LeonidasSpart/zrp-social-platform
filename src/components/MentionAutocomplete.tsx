@@ -140,7 +140,7 @@ export default function MentionAutocomplete({
                   <span className="truncate">{user.name || user.username}</span>
                   <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">@{user.username}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">@<bdi>{user.username}</bdi></p>
               </div>
             </button>
           ))}

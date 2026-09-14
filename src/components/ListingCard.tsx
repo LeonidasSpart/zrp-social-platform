@@ -94,7 +94,7 @@ export default function ListingCard({ listing, favorited, onToggleFavorite, show
               href={`/profile/${listing.seller.username}`}
               className="flex items-center gap-1 flex-shrink-0 hover:underline"
             >
-              @{listing.seller.username}
+              @<bdi>{listing.seller.username}</bdi>
               {listing.seller.badgeType && <VerifiedBadge badgeType={listing.seller.badgeType} />}
             </Link>
           )}

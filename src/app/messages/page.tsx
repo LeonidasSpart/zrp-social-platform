@@ -273,7 +273,7 @@ export default function MessagesIndexPage() {
                         </div>
 
                         <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate mt-0.5">
-                          @{partner.username}
+                          @<bdi>{partner.username}</bdi>
                         </p>
 
                         <p

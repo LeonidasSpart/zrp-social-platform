@@ -153,7 +153,7 @@ export default function AdminAdsReview() {
                     href={`/profile/${c.advertiser.username}`}
                     className="text-sm text-zrp-red hover:underline"
                   >
-                    @{c.advertiser.username}
+                    @<bdi>{c.advertiser.username}</bdi>
                   </Link>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
                     {c.post.content}

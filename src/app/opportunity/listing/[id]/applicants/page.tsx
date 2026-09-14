@@ -76,7 +76,7 @@ export default function ListingApplicantsPage() {
                 <div className="flex items-center gap-2 min-w-0">
                   <img src={app.applicant.avatarUrl || "/default-avatar.png"} alt={app.applicant.username} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
                   <Link href={`/profile/${app.applicant.username}`} className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:text-zrp-red transition">
-                    <span className="truncate">@{app.applicant.username}</span>
+                    <span className="truncate">@<bdi>{app.applicant.username}</bdi></span>
                     <VerifiedBadge badgeType={app.applicant.badgeType} className="flex-shrink-0" />
                   </Link>
                 </div>

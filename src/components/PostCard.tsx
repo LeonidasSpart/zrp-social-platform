@@ -1643,7 +1643,7 @@ export default function PostCard({
                       give. The max-width still stops a pathologically
                       long handle from pushing the timestamp out. */}
                   <span className="block max-w-[10rem] truncate text-gray-500 dark:text-gray-400 text-sm hover:underline">
-                    @{post.author.username}
+                    @<bdi>{post.author.username}</bdi>
                   </span>
                 </Link>
 
@@ -1782,7 +1782,7 @@ export default function PostCard({
                       href={`/profile/${originalAuthor.username}`}
                       className="hover:underline text-zrp-red"
                     >
-                      @{originalAuthor.username}
+                      @<bdi>{originalAuthor.username}</bdi>
                     </Link>
                   </span>
                 </div>
@@ -1988,7 +1988,7 @@ export default function PostCard({
                           <VerifiedBadge badgeType={post.quotePost.author.badgeType} />
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400 truncate min-w-0">
-                          @{post.quotePost.author.username}
+                          @<bdi>{post.quotePost.author.username}</bdi>
                         </span>
                       </div>
 

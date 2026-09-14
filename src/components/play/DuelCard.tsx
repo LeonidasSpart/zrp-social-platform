@@ -49,7 +49,7 @@ export default function DuelCard({ duel, onAccept, onDecline, busy }: DuelCardPr
           href={`/play/profile/${opponent.username}`}
           className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-white hover:underline"
         >
-          <span className="truncate">@{opponent.username}</span>
+          <span className="truncate">@<bdi>{opponent.username}</bdi></span>
           <VerifiedBadge badgeType={opponent.badgeType} className="flex-shrink-0" />
         </Link>
         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">

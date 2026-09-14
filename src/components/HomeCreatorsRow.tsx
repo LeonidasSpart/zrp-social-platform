@@ -128,7 +128,7 @@ export default function HomeCreatorsRow() {
                 href={`/profile/${user.username}`}
                 className="text-xs text-gray-500 dark:text-gray-400 truncate w-full hover:underline"
               >
-                @{user.username}
+                @<bdi>{user.username}</bdi>
               </Link>
 
               <button
