@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1039614279907-59h3s681ga3b8vt482f1d4iv4vlsec7v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "one.zrp.social",
+            "certificate_hash": "08ed5a156ba0411bf9ddda7b7d92a94ee37156ee"
+          }
+        },
+        {
           "client_id": "1039614279907-ma6pu1r2tulfnqvikoie8sq0vn3uul63.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -28,6 +36,10 @@
             "package_name": "one.zrp.social",
             "certificate_hash": "e2a7949b2228dffc3ff15481520df3a8c3dbad6b"
           }
+        },
+        {
+          "client_id": "1039614279907-8fplogvm75mimqmbcvqf8mkrud9om5n3.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -37,7 +49,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1039614279907-8fplogvm75mimqmbcvqf8mkrud9om5n3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
