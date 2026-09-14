@@ -89,7 +89,7 @@ export default function ChildSafetyStandardsPage() {
             child safety concern are treated as our highest priority and are
             reviewed by our moderation team ahead of standard queue order.
             You do not need an account to raise a child safety concern with
-            us &mdash; see the contact option below.
+            us. See the contact option below.
           </p>
         </div>
 
