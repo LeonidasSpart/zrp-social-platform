@@ -69,6 +69,13 @@ data class AmbassadorApplyRequest(
     val motivation: String,
     val communityDescription: String?,
     val audienceSize: Int?,
+    // Server-side gated (see validateApplication in the web repo's
+    // src/lib/ambassadors/validation.ts): POST /api/ambassadors/apply
+    // rejects every request with codeOfConductAccepted !== true, no
+    // matter what else is filled in. Without this field the Android
+    // client could never submit a real application - every attempt
+    // failed with that exact server error and no control to resolve it.
+    val codeOfConductAccepted: Boolean,
 )
 
 data class AmbassadorApplyResponse(

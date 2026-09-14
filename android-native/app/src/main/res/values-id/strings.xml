@@ -2119,6 +2119,10 @@
     <string name="ambassadors_apply_field_motivation">Mengapa kamu ingin menjadi Duta ZRP?</string>
     <string name="ambassadors_apply_field_description">Jelaskan komunitasmu (opsional)</string>
     <string name="ambassadors_apply_field_audience">Perkiraan ukuran audiens atau komunitasmu (opsional)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">Dengan mengajukan permohonan, Anda menyatakan telah membaca</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">Kode Etik Duta</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">Saya telah membaca dan setuju untuk mematuhi Pedoman Komunitas ZRP dan Kode Etik Duta.</string>
+    <string name="ambassadors_apply_err_code_required">Anda harus menyetujui Kode Etik Duta untuk dapat mengajukan permohonan.</string>
     <string name="ambassadors_apply_submit">Kirim aplikasi</string>
     <string name="ambassadors_apply_submitting">Mengirim...</string>
     <string name="ambassadors_apply_err_country_required">Pilih negaramu.</string>

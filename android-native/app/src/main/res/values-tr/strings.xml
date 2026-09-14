@@ -2119,6 +2119,10 @@
     <string name="ambassadors_apply_field_motivation">Neden ZRP Elçisi olmak istiyorsun?</string>
     <string name="ambassadors_apply_field_description">Topluluğunu tanımla (isteğe bağlı)</string>
     <string name="ambassadors_apply_field_audience">Kitlenin veya topluluğunun yaklaşık büyüklüğü (isteğe bağlı)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">Başvurarak, aşağıdakini okuduğunuzu onaylarsınız:</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">Elçi Davranış Kuralları</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">ZRP Topluluk Kurallarını ve Elçi Davranış Kurallarını okudum ve bunlara uymayı kabul ediyorum.</string>
+    <string name="ambassadors_apply_err_code_required">Başvurmak için Elçi Davranış Kurallarını kabul etmelisiniz.</string>
     <string name="ambassadors_apply_submit">Başvuruyu Gönder</string>
     <string name="ambassadors_apply_submitting">Gönderiliyor...</string>
     <string name="ambassadors_apply_err_country_required">Ülkeni seç.</string>

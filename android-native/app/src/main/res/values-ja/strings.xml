@@ -2066,6 +2066,10 @@
     <string name="ambassadors_apply_field_motivation">ZRPアンバサダーになりたい理由を教えてください</string>
     <string name="ambassadors_apply_field_description">あなたのコミュニティについて教えてください(任意)</string>
     <string name="ambassadors_apply_field_audience">おおよそのオーディエンス・コミュニティ規模(任意)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">応募することで、以下を読んだことを確認したものとみなされます:</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">アンバサダー行動規範</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">ZRPコミュニティガイドラインおよびアンバサダー行動規範を読み、これに従うことに同意します。</string>
+    <string name="ambassadors_apply_err_code_required">応募するには、アンバサダー行動規範に同意する必要があります。</string>
     <string name="ambassadors_apply_submit">応募を送信</string>
     <string name="ambassadors_apply_submitting">送信中...</string>
     <string name="ambassadors_apply_err_country_required">国を選択してください。</string>

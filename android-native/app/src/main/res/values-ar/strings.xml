@@ -2119,6 +2119,10 @@
     <string name="ambassadors_apply_field_motivation">لماذا تريد أن تصبح سفيرًا لـ ZRP؟</string>
     <string name="ambassadors_apply_field_description">صف مجتمعك (اختياري)</string>
     <string name="ambassadors_apply_field_audience">الحجم التقريبي لجمهورك أو مجتمعك (اختياري)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">بتقديمك لهذا الطلب، فإنك تؤكد أنك قد قرأت</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">مدونة سلوك السفراء</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">لقد قرأت إرشادات مجتمع ZRP ومدونة سلوك السفراء وأوافق على الالتزام بهما.</string>
+    <string name="ambassadors_apply_err_code_required">يجب عليك قبول مدونة سلوك السفراء لتقديم الطلب.</string>
     <string name="ambassadors_apply_submit">إرسال الطلب</string>
     <string name="ambassadors_apply_submitting">جارٍ الإرسال...</string>
     <string name="ambassadors_apply_err_country_required">اختر دولتك.</string>

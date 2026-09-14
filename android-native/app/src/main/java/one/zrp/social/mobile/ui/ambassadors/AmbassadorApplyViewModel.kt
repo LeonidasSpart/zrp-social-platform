@@ -27,6 +27,7 @@ data class AmbassadorApplyUiState(
     val motivation: String = "",
     val communityDescription: String = "",
     val audienceSize: String = "",
+    val codeOfConductAccepted: Boolean = false,
     val isSubmitting: Boolean = false,
     val error: String? = null,
     val success: Boolean = false,
@@ -136,7 +137,16 @@ class AmbassadorApplyViewModel(
         }
     }
 
-    fun submit(errCountryRequired: String, errMotivationRequired: String, errGeneric: String) {
+    fun onCodeOfConductAcceptedChange(value: Boolean) {
+        _state.update { it.copy(codeOfConductAccepted = value, error = null) }
+    }
+
+    fun submit(
+        errCountryRequired: String,
+        errMotivationRequired: String,
+        errCodeOfConductRequired: String,
+        errGeneric: String,
+    ) {
         val current = _state.value
         if (current.countryCode.isNullOrEmpty()) {
             _state.update { it.copy(error = errCountryRequired) }
@@ -144,6 +154,14 @@ class AmbassadorApplyViewModel(
         }
         if (current.motivation.isBlank()) {
             _state.update { it.copy(error = errMotivationRequired) }
+            return
+        }
+        // Mirrors validateApplication's own server-side gate exactly (see
+        // AmbassadorApplyRequest's own KDoc) - checked here too so the
+        // user sees this specific message instantly instead of a round
+        // trip to the server for something the client already knows.
+        if (!current.codeOfConductAccepted) {
+            _state.update { it.copy(error = errCodeOfConductRequired) }
             return
         }
 
@@ -157,6 +175,7 @@ class AmbassadorApplyViewModel(
                 motivation = current.motivation.trim(),
                 communityDescription = current.communityDescription.trim().ifEmpty { null },
                 audienceSize = current.audienceSize.toIntOrNull(),
+                codeOfConductAccepted = current.codeOfConductAccepted,
             )
                 .onSuccess { _state.update { it.copy(isSubmitting = false, success = true) } }
                 .onFailure { e -> _state.update { it.copy(isSubmitting = false, error = e.message ?: errGeneric) } }

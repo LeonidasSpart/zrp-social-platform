@@ -2119,6 +2119,10 @@
     <string name="ambassadors_apply_field_motivation">Warum möchtest du ZRP-Botschafter werden?</string>
     <string name="ambassadors_apply_field_description">Beschreibe deine Community (optional)</string>
     <string name="ambassadors_apply_field_audience">Ungefähre Größe deiner Zielgruppe oder Community (optional)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">Mit Ihrer Bewerbung bestätigen Sie, dass Sie den</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">Verhaltenskodex für Botschafter</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">Ich habe die ZRP-Community-Richtlinien und den Verhaltenskodex für Botschafter gelesen und erkläre mich damit einverstanden, sie einzuhalten.</string>
+    <string name="ambassadors_apply_err_code_required">Sie müssen den Verhaltenskodex für Botschafter annehmen, um sich zu bewerben.</string>
     <string name="ambassadors_apply_submit">Bewerbung einreichen</string>
     <string name="ambassadors_apply_submitting">Wird gesendet...</string>
     <string name="ambassadors_apply_err_country_required">Wähle dein Land aus.</string>

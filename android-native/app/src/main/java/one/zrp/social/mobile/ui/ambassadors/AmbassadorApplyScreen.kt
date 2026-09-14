@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -49,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -83,7 +85,9 @@ fun AmbassadorApplyScreen(
 
     val errCountryRequired = stringResource(R.string.ambassadors_apply_err_country_required)
     val errMotivationRequired = stringResource(R.string.ambassadors_apply_err_motivation_required)
+    val errCodeOfConductRequired = stringResource(R.string.ambassadors_apply_err_code_required)
     val errGeneric = stringResource(R.string.ambassadors_apply_err_generic)
+    val uriHandler = LocalUriHandler.current
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -193,6 +197,44 @@ fun AmbassadorApplyScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
+                Surface(
+                    shape = RoundedCornerShape(Radius.sm),
+                    tonalElevation = 1.dp,
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.lg),
+                ) {
+                    Column(modifier = Modifier.padding(Spacing.md)) {
+                        Row {
+                            Text(
+                                text = stringResource(R.string.ambassadors_apply_code_of_conduct_link_prefix) + " ",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = stringResource(R.string.ambassadors_apply_code_of_conduct_link_label),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = ZrpRed,
+                                modifier = Modifier.clickable {
+                                    uriHandler.openUri("https://zrp.one/community-code#b-ambassador-code")
+                                },
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.padding(top = Spacing.sm),
+                        ) {
+                            Checkbox(
+                                checked = state.codeOfConductAccepted,
+                                onCheckedChange = { viewModel.onCodeOfConductAcceptedChange(it) },
+                            )
+                            Text(
+                                text = stringResource(R.string.ambassadors_apply_code_of_conduct_checkbox),
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(top = Spacing.sm),
+                            )
+                        }
+                    }
+                }
+
                 if (state.error != null) {
                     Text(
                         text = state.error ?: "",
@@ -203,7 +245,9 @@ fun AmbassadorApplyScreen(
                 }
 
                 Button(
-                    onClick = { viewModel.submit(errCountryRequired, errMotivationRequired, errGeneric) },
+                    onClick = {
+                        viewModel.submit(errCountryRequired, errMotivationRequired, errCodeOfConductRequired, errGeneric)
+                    },
                     enabled = !state.isSubmitting,
                     colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
                     modifier = Modifier.fillMaxWidth().padding(top = Spacing.xl),

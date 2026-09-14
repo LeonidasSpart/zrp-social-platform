@@ -2119,6 +2119,10 @@
     <string name="ambassadors_apply_field_motivation">Почему вы хотите стать послом ZRP?</string>
     <string name="ambassadors_apply_field_description">Опишите ваше сообщество (необязательно)</string>
     <string name="ambassadors_apply_field_audience">Приблизительный размер вашей аудитории или сообщества (необязательно)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">Подавая заявку, вы подтверждаете, что ознакомились с</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">Кодексом поведения амбассадора</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">Я прочитал(а) и обязуюсь соблюдать Правила сообщества ZRP и Кодекс поведения амбассадора.</string>
+    <string name="ambassadors_apply_err_code_required">Для подачи заявки необходимо принять Кодекс поведения амбассадора.</string>
     <string name="ambassadors_apply_submit">Отправить заявку</string>
     <string name="ambassadors_apply_submitting">Отправка...</string>
     <string name="ambassadors_apply_err_country_required">Выберите вашу страну.</string>

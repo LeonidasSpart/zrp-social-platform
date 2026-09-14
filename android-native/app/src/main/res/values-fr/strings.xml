@@ -2119,6 +2119,10 @@
     <string name="ambassadors_apply_field_motivation">Pourquoi voulez-vous devenir Ambassadeur ZRP ?</string>
     <string name="ambassadors_apply_field_description">Décrivez votre communauté (facultatif)</string>
     <string name="ambassadors_apply_field_audience">Taille approximative de votre audience ou communauté (facultatif)</string>
+    <string name="ambassadors_apply_code_of_conduct_link_prefix">En postulant, vous confirmez avoir lu le</string>
+    <string name="ambassadors_apply_code_of_conduct_link_label">Code de conduite des ambassadeurs</string>
+    <string name="ambassadors_apply_code_of_conduct_checkbox">J’ai lu et j’accepte de respecter les Règles de la communauté ZRP et le Code de conduite des ambassadeurs.</string>
+    <string name="ambassadors_apply_err_code_required">Vous devez accepter le Code de conduite des ambassadeurs pour postuler.</string>
     <string name="ambassadors_apply_submit">Envoyer la candidature</string>
     <string name="ambassadors_apply_submitting">Envoi en cours...</string>
     <string name="ambassadors_apply_err_country_required">Sélectionnez votre pays.</string>

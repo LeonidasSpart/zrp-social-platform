@@ -35,6 +35,7 @@ class AmbassadorsRepository {
         motivation: String,
         communityDescription: String?,
         audienceSize: Int?,
+        codeOfConductAccepted: Boolean,
     ): Result<AmbassadorProfile> {
         return try {
             val request = AmbassadorApplyRequest(
@@ -45,6 +46,7 @@ class AmbassadorsRepository {
                 motivation = motivation,
                 communityDescription = communityDescription,
                 audienceSize = audienceSize,
+                codeOfConductAccepted = codeOfConductAccepted,
             )
             val response = ApiClient.ambassadorsApi.apply(request)
             val profile = response.profile
