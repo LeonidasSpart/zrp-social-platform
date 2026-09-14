@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -54,7 +55,11 @@ export async function GET(req: NextRequest) {
       (p as any).liked = likedIds.has(p.id);
     });
 
-    return NextResponse.json(posts);
+    // ⚠️ SECURITY: redact pay-per-view content the viewer hasn't paid for
+    // before it ever leaves the server - see src/lib/premium-content.ts.
+    const gatedPosts = await applyPremiumGating(posts, session.user.id);
+
+    return NextResponse.json(gatedPosts);
   } catch (error) {
     console.error("Error fetching feed:", error);
     return NextResponse.json({ error: "Failed to fetch feed" }, { status: 500 });

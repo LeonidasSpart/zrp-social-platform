@@ -2591,9 +2591,6 @@ export default function ProfilePage(
               profile.name ||
               profile.username
             }
-            recipientWallet={
-              profile.solanaWallet
-            }
             onTipSent={() => {
               fetchProfile();
             }}

@@ -24,11 +24,25 @@ import { nativePaymentHeaders } from "@/lib/native-payment-policy";
  * itself; it only needed a transaction ID to hand to the backend.
  *
  * This version keeps tipping working with zero backend changes:
- * show the recipient's saved wallet address, the sender pays
- * manually from their own wallet app (Phantom, Solflare, etc.,
- * entirely outside this app), then pastes the resulting
- * transaction ID here to confirm - which the backend verifies
- * exactly as before.
+ * the sender pays manually from their own wallet app (Phantom,
+ * Solflare, etc., entirely outside this app), then pastes the
+ * resulting transaction ID here to confirm - which the backend
+ * verifies exactly as before.
+ *
+ * ⚠️ CORRECTNESS: the deposit address shown below MUST be ZRP's
+ * platform wallet (NEXT_PUBLIC_PLATFORM_WALLET), never the
+ * recipient creator's own saved `solanaWallet`. Every on-chain
+ * payment on ZRP settles to the platform wallet - the backend's
+ * verifyUsdcTransaction() (src/lib/solana.ts) hard-rejects any
+ * transaction that didn't credit the platform's own USDC account,
+ * regardless of who it names as recipient. This component used
+ * to show the creator's own `solanaWallet` here instead (and
+ * blocked tipping entirely for any creator who hadn't set one),
+ * which meant a tipper who followed the UI's own instructions
+ * paid the wrong address and every real tip attempt failed
+ * verification. See ContributeModal.tsx and
+ * AdCampaignPaymentModal.tsx for the same, correctly-wired
+ * pattern this was brought in line with.
  * ============================================================
  */
 
@@ -37,7 +51,6 @@ interface TipModalProps {
   onClose: () => void;
   recipientId: string;
   recipientName: string;
-  recipientWallet: string | null;
   onTipSent: () => void;
 }
 
@@ -46,10 +59,10 @@ export default function TipModal({
   onClose,
   recipientId,
   recipientName,
-  recipientWallet,
   onTipSent,
 }: TipModalProps) {
   const { t } = useLanguage();
+  const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET || "";
   const [amount, setAmount] = useState("5");
   const [message, setMessage] = useState("");
   const [transactionId, setTransactionId] = useState("");
@@ -61,9 +74,9 @@ export default function TipModal({
   if (!isOpen) return null;
 
   const handleCopyAddress = async () => {
-    if (!recipientWallet) return;
+    if (!platformWallet) return;
     try {
-      await navigator.clipboard.writeText(recipientWallet);
+      await navigator.clipboard.writeText(platformWallet);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -163,10 +176,10 @@ export default function TipModal({
               {t("tipModal.verifyingOnChain", { name: recipientName })}
             </p>
           </div>
-        ) : !recipientWallet ? (
+        ) : !platformWallet ? (
           <div className="py-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {t("tipModal.noWallet", { name: recipientName })}
+              {t("tipModal.walletNotConfigured")}
             </p>
           </div>
         ) : (
@@ -177,7 +190,7 @@ export default function TipModal({
               </label>
               <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
                 <span className="flex-1 truncate font-mono text-xs text-gray-700 dark:text-gray-300">
-                  {recipientWallet}
+                  {platformWallet}
                 </span>
                 <button
                   type="button"

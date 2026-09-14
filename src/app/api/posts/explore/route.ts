@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
 import { viewablePostAuthorFilter } from "@/lib/permissions";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export const dynamic = 'force-dynamic';
 
@@ -113,6 +114,7 @@ export async function GET(req: NextRequest) {
         },
         select: {
           id: true,
+          authorId: true,
           content: true,
           imageUrl: true,
           // imageUrls (plural, the multi-image array) was missing here
@@ -198,7 +200,7 @@ export async function GET(req: NextRequest) {
       await setCached(cacheKey, ranked, 300);
     }
 
-    const page = ranked.slice(offset, offset + limit);
+    let page = ranked.slice(offset, offset + limit);
     const nextCursor = offset + limit < ranked.length ? String(offset + limit) : null;
 
     // ─── Add liked status for this page only (always fresh, never cached) ──
@@ -238,6 +240,13 @@ export async function GET(req: NextRequest) {
         });
       }
     }
+
+    // ⚠️ SECURITY: redact pay-per-view content the viewer hasn't paid for
+    // before it ever leaves the server - see src/lib/premium-content.ts.
+    // The ranked list above is cached across viewers, so this must be
+    // applied fresh per-request to this page slice, never baked into
+    // the cached payload itself.
+    page = await applyPremiumGating(page, userId);
 
     return NextResponse.json({ posts: page, nextCursor });
   } catch (error) {
