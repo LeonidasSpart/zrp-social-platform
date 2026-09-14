@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
@@ -164,8 +165,12 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       return result;
     });
 
+    // ⚠️ SECURITY: redact pay-per-view content the viewer hasn't paid for
+    // before it ever leaves the server - see src/lib/premium-content.ts.
+    const gatedPosts = await applyPremiumGating(transformedPosts, session?.user?.id);
+
     return NextResponse.json({
-      posts: transformedPosts,
+      posts: gatedPosts,
       nextCursor,
     });
   } catch (error: any) {
