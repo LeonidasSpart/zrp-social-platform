@@ -77,9 +77,15 @@ jobs:
           distribution: "temurin"
           java-version: "21"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
+      # GitHub-hosted ubuntu-latest runners ship with the Android SDK
+      # preinstalled (ANDROID_HOME already set, cmdline-tools on PATH),
+      # so no separate SDK setup step is needed here. This used to run
+      # android-actions/setup-android@v3, which was removed because its
+      # bootstrap unconditionally calls `sdkmanager tools` - the legacy
+      # "tools" package Google has since dropped entirely from the SDK
+      # repository - making every build fail at this step with "Failed
+      # to find package 'tools'" regardless of anything in this
+      # workflow. The licenses/platform install below is unaffected.
       - name: Accept SDK licenses and install platform 36
         run: |
           yes | sdkmanager --licenses > /dev/null || true
