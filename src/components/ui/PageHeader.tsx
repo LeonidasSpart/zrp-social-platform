@@ -58,9 +58,9 @@ export default function PageHeader({
           type="button"
           onClick={onBack}
           aria-label={backLabel ?? "Back"}
-          className="-ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+          className="-ms-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
         >
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+          <ArrowLeft className="h-5 w-5 rtl:-scale-x-100" aria-hidden="true" />
         </button>
       )}
 

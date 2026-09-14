@@ -110,7 +110,7 @@ export default function FollowingPage(props: { params: Promise<{ username: strin
           href={`/profile/${params.username}`}
           className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 rtl:-scale-x-100" />
         </Link>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
           {t("following.title")}
