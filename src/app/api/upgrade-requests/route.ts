@@ -67,6 +67,8 @@ export async function GET(req: NextRequest) {
           name: true,
           email: true,
           plan: true,
+          avatarUrl: true,
+          badgeType: true,
         },
       },
     },

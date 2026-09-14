@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Check, X, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
 
 interface Request {
   id: string;
@@ -17,6 +18,8 @@ interface Request {
     name: string | null;
     email: string;
     plan: string;
+    avatarUrl: string | null;
+    badgeType: string | null;
   };
 }
 
@@ -89,23 +92,24 @@ export default function AdminUpgradeRequests() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {req.user.name || req.user.username}
-                    </span>
-                    <span className="text-sm text-gray-500">@{req.user.username}</span>
-                    <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 px-2 py-0.5 rounded-full">
-                      {req.user.plan}
-                    </span>
-                    <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 px-2 py-0.5 rounded-full">
-                      → {req.requestedPlan}
-                    </span>
-                    {req.paymentMethod && (
-                      <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
-                        {req.paymentMethod}
-                      </span>
-                    )}
-                  </div>
+                  <AdminUserIdentity
+                    user={req.user}
+                    extra={
+                      <>
+                        <span className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 px-2 py-0.5 rounded-full">
+                          {req.user.plan}
+                        </span>
+                        <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 px-2 py-0.5 rounded-full">
+                          → {req.requestedPlan}
+                        </span>
+                        {req.paymentMethod && (
+                          <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                            {req.paymentMethod}
+                          </span>
+                        )}
+                      </>
+                    }
+                  />
                   {req.message && (
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                       {req.message}

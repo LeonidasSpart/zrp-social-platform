@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Search, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { flagEmoji } from "@/lib/ambassadors/countries";
+import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
 import type { TranslationKey } from "@/lib/translations";
 
 /*
@@ -33,7 +34,14 @@ interface AmbassadorProfile {
   rejectionReason: string | null;
   suspensionReason: string | null;
   appliedAt: string;
-  user: { id: string; username: string; name: string | null; email: string; avatarUrl: string | null };
+  user: {
+    id: string;
+    username: string;
+    name: string | null;
+    email: string;
+    avatarUrl: string | null;
+    badgeType: string | null;
+  };
 }
 
 const STATUS_TABS: Array<{ value: AmbassadorStatus | ""; labelKey: TranslationKey }> = [
@@ -237,17 +245,16 @@ export default function AdminAmbassadorsPage() {
                   className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {profile.user.name || profile.user.username}
-                      </p>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">@{profile.user.username}</span>
-                      <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[profile.status]}`}
-                      >
-                        {t(STATUS_LABEL_KEYS[profile.status])}
-                      </span>
-                    </div>
+                    <AdminUserIdentity
+                      user={profile.user}
+                      extra={
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[profile.status]}`}
+                        >
+                          {t(STATUS_LABEL_KEYS[profile.status])}
+                        </span>
+                      }
+                    />
 
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{profile.user.email}</p>
 

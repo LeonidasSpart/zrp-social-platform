@@ -15,7 +15,9 @@ export async function GET(req: NextRequest) {
     where: { status: status as any },
     orderBy: { createdAt: "asc" },
     include: {
-      organizer: { select: { id: true, username: true, name: true, email: true } },
+      organizer: {
+        select: { id: true, username: true, name: true, email: true, avatarUrl: true, badgeType: true },
+      },
       campaign: { select: { id: true, title: true } },
     },
   });
