@@ -446,7 +446,7 @@ export default function MessagesIndexPage() {
           </p>
 
           <p className="text-sm mt-1 text-gray-400 dark:text-gray-500">
-            Select a conversation to start chatting.
+            {t("messages.startConversation")}
           </p>
         </div>
       </section>
