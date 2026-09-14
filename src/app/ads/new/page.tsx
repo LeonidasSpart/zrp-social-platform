@@ -81,7 +81,7 @@ export default function NewAdCampaign() {
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
       <Link href="/ads" className="inline-flex items-center gap-1 text-sm text-zrp-red hover:underline mb-4">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
         {t("ads.new.backToCampaigns")}
       </Link>
 

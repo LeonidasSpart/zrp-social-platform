@@ -347,7 +347,7 @@ export default function TrustPassportPage(
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
               aria-label={t("trust.backToProfile")}
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+              <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-200 rtl:-scale-x-100" />
             </Link>
 
             <div className="min-w-0">

@@ -38,7 +38,7 @@ export default function NotFound() {
           onClick={() => window.history.back()}
           className="inline-flex items-center gap-2 px-6 py-2.5 border border-gray-300 dark:border-gray-600 rounded-full font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" />
           {t("notFound.goBack")}
         </button>
       </div>

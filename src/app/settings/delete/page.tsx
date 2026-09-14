@@ -138,7 +138,7 @@ export default function DeleteAccountPage() {
     <div className="max-w-2xl mx-auto py-8 px-4">
       <div className="mb-6">
         <Link href="/settings" className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" /> {t("deleteAccount.backToSettings")}
+          <ArrowLeft className="w-4 h-4 rtl:-scale-x-100" /> {t("deleteAccount.backToSettings")}
         </Link>
       </div>
 
