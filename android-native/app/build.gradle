@@ -409,8 +409,21 @@ android {
         // repeat pass on the same "text evicts sibling badge" defect
         // class across Play/Shorts/Music/Ads/Opportunity/Aid surfaces).
         // None of this changes applicationId, signing, or deep links.
-        versionCode 26
-        versionName "4.0.20"
+        //
+        // Bumps to versionCode 27 / versionName "4.0.21" for real native
+        // fixes: the Ambassador application form could never actually be
+        // submitted (the shared backend unconditionally rejects any
+        // request without a real codeOfConductAccepted=true, and this
+        // app never sent one or showed the checkbox/link needed to
+        // accept it - confirmed by a real user report); a status/nav bar
+        // appearance that no longer updated on a system Light/Dark flip
+        // mid-session; a new Settings > Appearance toggle bringing
+        // manual Light/Dark control to parity with the website; and a
+        // dark-mode contrast bug in support-ticket internal-note cards
+        // (white text on a fixed pale-yellow literal). None of this
+        // changes applicationId, signing, or deep links.
+        versionCode 27
+        versionName "4.0.21"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
