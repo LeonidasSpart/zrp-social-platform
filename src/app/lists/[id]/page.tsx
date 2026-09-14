@@ -21,6 +21,8 @@ export default function ListDetailPage() {
   const [posts, setPosts] = useState<any[]>([]);
   const [notFound, setNotFound] = useState(false);
   const [forbidden, setForbidden] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [feedError, setFeedError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [feedLoading, setFeedLoading] = useState(true);
   const [addUsername, setAddUsername] = useState("");
@@ -33,6 +35,7 @@ export default function ListDetailPage() {
 
   const loadList = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const res = await fetch(`/api/lists/${params.id}`, { cache: "no-store" });
       if (res.status === 404) {
@@ -43,9 +46,16 @@ export default function ListDetailPage() {
         setForbidden(true);
         return;
       }
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setList(data.list);
       setIsOwner(data.isOwner);
+    } catch {
+      // A network/server failure previously left `list` null with none
+      // of notFound/forbidden set, so it fell through to the "private
+      // list" screen below - telling the viewer a list is private when
+      // it may simply have failed to load.
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -53,11 +63,14 @@ export default function ListDetailPage() {
 
   const loadFeed = useCallback(async () => {
     setFeedLoading(true);
+    setFeedError(false);
     try {
       const res = await fetch(`/api/lists/${params.id}/feed`, { cache: "no-store" });
-      if (!res.ok) return;
+      if (!res.ok) throw new Error();
       const data = await res.json();
       setPosts(data.posts || []);
+    } catch {
+      setFeedError(true);
     } finally {
       setFeedLoading(false);
     }
@@ -118,6 +131,21 @@ export default function ListDetailPage() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
         <div className="font-bold text-lg">{t("lists.detail.notFound")}</div>
         <Link href="/lists" className="text-zrp-red font-semibold">{t("lists.title")}</Link>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-gray-500 dark:text-white/50">{t("lists.errorLoad")}</p>
+        <button
+          type="button"
+          onClick={loadList}
+          className="px-4 py-1.5 rounded-full border border-gray-300 dark:border-white/15 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-white/10 transition"
+        >
+          {t("action.retry")}
+        </button>
       </div>
     );
   }
@@ -224,6 +252,17 @@ export default function ListDetailPage() {
           {feedLoading ? (
             <div className="py-12 flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-zrp-red border-t-transparent" />
+            </div>
+          ) : feedError ? (
+            <div className="text-center py-12 text-gray-500 dark:text-white/50">
+              <p>{t("lists.detail.feedErrorLoad")}</p>
+              <button
+                type="button"
+                onClick={loadFeed}
+                className="mt-3 px-4 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+              >
+                {t("action.retry")}
+              </button>
             </div>
           ) : posts.length === 0 ? (
             <EmptyState icon={ListChecks} title={t("lists.detail.feedEmptyTitle")} body={t("lists.detail.feedEmptyBody")} />
