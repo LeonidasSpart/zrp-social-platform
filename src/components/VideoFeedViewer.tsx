@@ -734,7 +734,7 @@ export default function VideoFeedViewer({
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
+          className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-4 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
           aria-label="Close"
         >
           <X className="w-6 h-6" />
@@ -771,10 +771,24 @@ export default function VideoFeedViewer({
 
   return (
     <div className="fixed inset-0 bg-black z-[100]">
-      {/* CLOSE */}
+      {/* CLOSE
+
+          These buttons are direct children of this `fixed inset-0`
+          container, so their offset is measured from the true viewport
+          edge. layout.tsx sets viewportFit: "cover", so in an installed
+          standalone PWA the viewport starts underneath the system status
+          bar / notch and env(safe-area-inset-top) is non-zero there - a
+          bare top-4 (16px) then draws the close/mute buttons across the
+          clock and battery icons. shorts/page.tsx (the other, adjacent
+          fullscreen video viewer) already carries this fix; this is a
+          second, separate viewer - opened by tapping a video post in the
+          feed rather than from the Shorts tab - that had the old,
+          unfixed offset. In an ordinary mobile browser the address bar
+          already clears the status bar and the inset resolves to 0, so
+          calc(1rem + 0px) stays the original 16px there. */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
         aria-label="Close"
       >
         <X className="w-6 h-6" />
@@ -787,7 +801,7 @@ export default function VideoFeedViewer({
             (m) => !m
           )
         }
-        className="absolute top-4 left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
         aria-label={
           muted
             ? "Unmute"
