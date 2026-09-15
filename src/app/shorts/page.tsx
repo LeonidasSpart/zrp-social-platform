@@ -21,6 +21,7 @@ import {
   Loader2,
   Plus,
   Lock,
+  Zap,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ShortUploadModal from "@/components/ShortUploadModal";
@@ -1267,6 +1268,21 @@ export default function ShortsPage() {
 
       {/* TOP RIGHT */}
       <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-4 z-30 flex items-center gap-2">
+
+        {/* Entry point into ZRP Discover (src/app/discover/) - the new
+            ranked, swipeable vertical feed built on GET /api/discover.
+            BottomNav's five primary slots are already full (see its own
+            comment), so this Shorts-adjacent surface is the mobile
+            discovery path; Sidebar carries the equivalent desktop/tablet
+            link. */}
+        <Link
+          href="/discover"
+          className="text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+          title={t("nav.discover")}
+          aria-label={t("nav.discover")}
+        >
+          <Zap className="w-6 h-6" />
+        </Link>
 
         <button
           onClick={() =>
