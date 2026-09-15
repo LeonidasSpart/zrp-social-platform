@@ -77,23 +77,30 @@ jobs:
           distribution: "temurin"
           java-version: "21"
 
-      # GitHub-hosted ubuntu-latest runners ship with the Android SDK
-      # preinstalled (ANDROID_HOME already set) but do NOT put its
-      # cmdline-tools/sdkmanager on PATH by default - this step adds it.
-      # This replaces android-actions/setup-android@v3, which used to do
-      # that PATH setup for us but was removed because its own bootstrap
-      # unconditionally calls `sdkmanager tools` - the legacy "tools"
-      # package Google has since dropped entirely from the SDK
-      # repository - which made every build fail with "Failed to find
-      # package 'tools'" regardless of anything in this workflow. The
-      # cmdline-tools version directory name isn't stable across runner
-      # image updates, so this locates it dynamically rather than
-      # hardcoding a path.
-      - name: Add Android SDK cmdline-tools to PATH
+      # This used to run android-actions/setup-android@v3, removed because
+      # its own bootstrap unconditionally calls `sdkmanager tools` - the
+      # legacy "tools" package Google has since dropped entirely from the
+      # SDK repository - failing every build with "Failed to find package
+      # 'tools'" regardless of anything in this workflow. A follow-up
+      # attempt assumed the runner ships a working cmdline-tools install
+      # and just needed adding to PATH; that assumption was wrong too -
+      # the runner's cmdline-tools directory exists but is empty, so
+      # sdkmanager was never found either way. This installs the SDK
+      # command-line tools directly from Google's official download
+      # instead of depending on runner-image internals at all.
+      - name: Install Android SDK cmdline-tools
         run: |
-          SDKMANAGER_DIR=$(dirname "$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 2 -name sdkmanager -type f | sort -V | tail -n1)")
-          echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
-          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          ANDROID_SDK_ROOT="${ANDROID_HOME:-$HOME/android-sdk}"
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          curl -fsSL -o "$RUNNER_TEMP/cmdline-tools.zip" \
+            "https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip"
+          unzip -q "$RUNNER_TEMP/cmdline-tools.zip" -d "$ANDROID_SDK_ROOT/cmdline-tools"
+          rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
 
       - name: Accept SDK licenses and install platform 36
         run: |
