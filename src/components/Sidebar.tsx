@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
   PenSquare, Sun, Moon, Globe, Film, Newspaper, Store, Gamepad2,
   Briefcase, HeartHandshake, Music2, ChevronDown, Sparkles, Rocket,
-  Bot, Info, LifeBuoy, Scale, ListChecks, Megaphone,
+  Bot, Info, LifeBuoy, Scale, ListChecks, Megaphone, Zap,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -135,7 +135,8 @@ export default function Sidebar() {
   if (
     !isAuthenticated ||
     pathname?.startsWith("/onboarding") ||
-    pathname?.startsWith("/shorts")
+    pathname?.startsWith("/shorts") ||
+    pathname?.startsWith("/discover")
   ) {
     return null;
   }
@@ -143,6 +144,7 @@ export default function Sidebar() {
   const navItems: NavItem[] = [
     { href: "/", icon: Home, label: t("nav.home") },
     { href: "/shorts", icon: Film, label: t("nav.shorts") },
+    { href: "/discover", icon: Zap, label: t("nav.discover") },
     { href: "/explore", icon: Compass, label: t("nav.explore") },
     { href: "/news", icon: Newspaper, label: t("nav.news") },
     { href: "/marketplace", icon: Store, label: t("nav.marketplace") },
