@@ -41,6 +41,7 @@ fun MessageDeepLinkScreen(
     username: String,
     onBack: () -> Unit,
     onOpenProfile: (String) -> Unit,
+    onOpenHashtag: (String) -> Unit,
     callViewModel: CallViewModel,
 ) {
     var partnerId by remember(username) { mutableStateOf<String?>(null) }
@@ -63,6 +64,8 @@ fun MessageDeepLinkScreen(
             partnerUsername = username,
             onBack = onBack,
             onOpenProfile = { onOpenProfile(username) },
+            onOpenUserProfile = onOpenProfile,
+            onOpenHashtag = onOpenHashtag,
             callViewModel = callViewModel,
         )
         loadError != null -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

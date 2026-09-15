@@ -42,6 +42,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -77,6 +78,7 @@ import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -106,6 +108,7 @@ fun GroupConversationScreen(
     onBack: () -> Unit,
     onOpenInfo: () -> Unit,
     onOpenProfile: (String) -> Unit,
+    onOpenHashtag: (String) -> Unit,
 ) {
     val viewModel: GroupConversationViewModel = viewModel(
         factory = remember(conversationId) {
@@ -268,6 +271,8 @@ fun GroupConversationScreen(
                                 val targetIndex = state.messages.indexOfFirst { it.id == targetId }
                                 if (targetIndex >= 0) pendingScrollIndex = targetIndex + topOffset
                             },
+                            onMentionClick = onOpenProfile,
+                            onHashtagClick = onOpenHashtag,
                         )
                     }
                 }
@@ -478,6 +483,8 @@ private fun GroupMessageBubble(
     onAddReactionClick: () -> Unit,
     onAvatarClick: () -> Unit,
     onReplyPreviewClick: (String) -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val actionsLabel = stringResource(R.string.chat_message_actions_cd)
@@ -559,7 +566,15 @@ private fun GroupMessageBubble(
                         }
 
                         if (message.content.isNotBlank()) {
-                            Text(text = message.content, color = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface)
+                            LinkifiedText(
+                                text = message.content,
+                                style = LocalTextStyle.current.copy(
+                                    color = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
+                                ),
+                                onMentionClick = onMentionClick,
+                                onHashtagClick = onHashtagClick,
+                                linkColor = if (isOwnMessage) Color.White else ZrpRed,
+                            )
                         }
 
                         val attachmentUrl = message.imageUrl

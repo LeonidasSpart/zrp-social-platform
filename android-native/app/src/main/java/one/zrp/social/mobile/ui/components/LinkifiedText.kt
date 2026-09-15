@@ -41,6 +41,10 @@ private const val TAG_URL = "url"
  * showing for, matching PostCard.tsx's own suppression of a URL's raw
  * text once LinkPreviewCard confirms it found something for that exact
  * link, so the same URL isn't shown twice in one post.
+ *
+ * [linkColor] overrides the token color (default [ZrpRed]) - needed on
+ * a surface that itself renders on a red background (an own-message
+ * chat bubble), where ZrpRed-on-ZrpRed would be unreadable.
  */
 @Composable
 fun LinkifiedText(
@@ -51,9 +55,10 @@ fun LinkifiedText(
     onHashtagClick: (String) -> Unit,
     onNonLinkClick: (() -> Unit)? = null,
     suppressUrl: String? = null,
+    linkColor: Color = ZrpRed,
 ) {
     val context = LocalContext.current
-    val annotated = remember(text, suppressUrl) { buildLinkifiedString(text, suppressUrl) }
+    val annotated = remember(text, suppressUrl, linkColor) { buildLinkifiedString(text, suppressUrl, linkColor) }
 
     ClickableText(
         text = annotated,
@@ -76,7 +81,7 @@ fun LinkifiedText(
     )
 }
 
-private fun buildLinkifiedString(content: String, suppressUrl: String? = null): AnnotatedString {
+private fun buildLinkifiedString(content: String, suppressUrl: String? = null, linkColor: Color = ZrpRed): AnnotatedString {
     return AnnotatedString.Builder(content.length).apply {
         var lastIndex = 0
         for (match in CONTENT_REGEX.findAll(content)) {
@@ -114,7 +119,7 @@ private fun buildLinkifiedString(content: String, suppressUrl: String? = null): 
             if (!isSuppressed) {
                 val start = length
                 append(raw)
-                addStyle(SpanStyle(color = ZrpRed, textDecoration = TextDecoration.Underline), start, length)
+                addStyle(SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline), start, length)
                 val value = if (type == TAG_URL) raw else raw.substring(1)
                 addStringAnnotation(type, value, start, length)
             }

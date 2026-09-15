@@ -60,6 +60,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -104,6 +105,7 @@ import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ImageLightbox
+import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -125,6 +127,12 @@ fun ConversationScreen(
     partnerUsername: String,
     onBack: () -> Unit,
     onOpenProfile: () -> Unit,
+    // A message can @mention or link to any user, not just the
+    // conversation partner (that's what onOpenProfile above is for) -
+    // and can also contain a #hashtag. Mirrors PostCard's own
+    // onAuthorClick/onHashtagClick pair.
+    onOpenUserProfile: (String) -> Unit,
+    onOpenHashtag: (String) -> Unit,
     // Hoisted from ZrpSocialApp (MainActivity.kt), not created here - a
     // CallViewModel created per-screen (and torn down/disconnected on
     // leaving this screen, as this used to do via DisposableEffect) means
@@ -547,6 +555,8 @@ fun ConversationScreen(
                                 if (index >= 0) pendingScrollIndex = index + topOffset
                             },
                             ownReaction = message.reactions.firstOrNull { it.user.id != partnerId }?.emoji,
+                            onMentionClick = onOpenUserProfile,
+                            onHashtagClick = onOpenHashtag,
                         )
                     }
                 }
@@ -1083,6 +1093,8 @@ private fun MessageBubble(
     onReactClick: (String) -> Unit,
     onAddReactionClick: () -> Unit,
     onReplyPreviewClick: (String) -> Unit,
+    onMentionClick: (String) -> Unit,
+    onHashtagClick: (String) -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     // Web's ChatInterface.tsx has a working lightbox on every received
@@ -1144,9 +1156,20 @@ private fun MessageBubble(
                     }
 
                     if (message.content.isNotBlank()) {
-                        Text(
+                        LinkifiedText(
                             text = message.content,
-                            color = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
+                            style = LocalTextStyle.current.copy(
+                                color = if (isOwnMessage) Color.White else MaterialTheme.colorScheme.onSurface,
+                            ),
+                            onMentionClick = onMentionClick,
+                            onHashtagClick = onHashtagClick,
+                            // Own-message bubbles are ZrpRed - the
+                            // default link color would be invisible on
+                            // that background, so link text stays white
+                            // with its underline as the only cue,
+                            // matching the composer's own attachment
+                            // icons on this same bubble.
+                            linkColor = if (isOwnMessage) Color.White else ZrpRed,
                         )
                     }
 

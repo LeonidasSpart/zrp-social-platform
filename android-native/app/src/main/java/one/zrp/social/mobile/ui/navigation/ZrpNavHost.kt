@@ -637,6 +637,7 @@ fun ZrpNavHost(
                     MessagesHomeScreen(
                         currentUserId = currentUserId,
                         onOpenProfile = goToProfile,
+                        onOpenHashtag = goToHashtag,
                         onOpenGroupInfo = goToGroupInfo,
                         onNewGroup = goToNewGroup,
                         callViewModel = callViewModel,
@@ -668,6 +669,7 @@ fun ZrpNavHost(
                         onBack = { navController.popBackStack() },
                         onOpenInfo = { goToGroupInfo(conversationId) },
                         onOpenProfile = goToProfile,
+                        onOpenHashtag = goToHashtag,
                     )
                 }
             }
@@ -804,6 +806,8 @@ fun ZrpNavHost(
                         partnerUsername = username,
                         onBack = { navController.popBackStack() },
                         onOpenProfile = { goToProfile(username) },
+                        onOpenUserProfile = goToProfile,
+                        onOpenHashtag = goToHashtag,
                         callViewModel = callViewModel,
                     )
                 }
@@ -827,6 +831,7 @@ fun ZrpNavHost(
                         username = username,
                         onBack = { navController.popBackStack() },
                         onOpenProfile = goToProfile,
+                        onOpenHashtag = goToHashtag,
                         callViewModel = callViewModel,
                     )
                 }

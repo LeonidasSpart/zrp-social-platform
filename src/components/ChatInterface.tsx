@@ -31,6 +31,7 @@ import { usePresence } from "@/contexts/PresenceContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ChatContactDrawer from "@/components/ChatContactDrawer";
 import ConfirmModal from "@/components/ConfirmModal";
+import ParsedContent from "@/components/ParsedContent";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
@@ -2667,9 +2668,19 @@ export default function ChatInterface({
                                 sm:leading-5
                               "
                             >
-                              {
-                                displayContent
-                              }
+                              <ParsedContent
+                                content={displayContent}
+                                linkClassName={
+                                  isOwn
+                                    ? "underline decoration-white/70 hover:decoration-white"
+                                    : "text-zrp-red hover:underline"
+                                }
+                                urlClassName={
+                                  isOwn
+                                    ? "underline decoration-white/70 hover:decoration-white break-all"
+                                    : "text-blue-600 dark:text-blue-400 hover:underline break-all"
+                                }
+                              />
                             </p>
                           )
                         )}
