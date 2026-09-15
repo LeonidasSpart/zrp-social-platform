@@ -225,6 +225,31 @@ limitation is documented in the root `CLAUDE.md`).
 
 ## Admin Subscriptions & Billing (`/admin/subscriptions`)
 
+**UI/UX fix (post-launch, second pass):** a real device screenshot showed
+the table squeezed into a phone viewport - every column and header wrapped
+character-by-character ("STATUS" as a single letter per line, usernames
+broken into fragments), and every avatar rendered as a broken-image icon.
+Two distinct root causes:
+
+1. The table's own `w-full` class, with no `min-w`, let it shrink to fit
+   any viewport instead of overflowing and scrolling - so a phone-width
+   screen compressed all 8 columns instead of scrolling past them. Fixed
+   by giving the table a `min-w-[1040px]` (so it now scrolls horizontally,
+   with a sticky first column, on anything narrower) and replacing it
+   entirely below the `md` breakpoint with a card-per-user list
+   (`MobileUserCard`) rather than trying to force a wide table into a
+   narrow layout at all.
+2. `/public/default-avatar.png` - the fallback every avatar in the app
+   (not just this dashboard) fell back to - has never existed as a real
+   file. `src/components/ui/avatar.tsx` now renders generated initials on
+   a deterministic color (`src/lib/avatar-fallback.ts`, unit-tested) when
+   there's no image or the real one fails to load, instead of pointing at
+   a second missing asset. Scoped to the shared `Avatar` component and its
+   two real call sites (`AdminUserIdentity`, `FeedItem`) - the ~14 other
+   places in the app that reference `/default-avatar.png` directly as a
+   raw string (Comments, Play, Opportunity, Aid, Settings, Explore, …) are
+   a separate, pre-existing, sitewide issue outside this fix's scope.
+
 **Root-cause fix (post-launch):** the list route originally queried
 `Subscription` as its base table. Since a `Subscription` row is only
 created via the new payment/grant/backfill path, any user without one -
