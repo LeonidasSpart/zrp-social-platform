@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
+import { applyVerifiedPayment, toBillingIntervalEnum } from "@/lib/subscriptions";
+import type { Plan } from "@/lib/limits";
 
 export async function POST(req: NextRequest) {
   const adminCheck = await requireAdmin();
@@ -41,9 +43,23 @@ export async function POST(req: NextRequest) {
     });
     if (claimed.count === 0) return null;
 
-    await tx.user.update({
-      where: { id: payment.userId },
-      data: { plan: payment.plan },
+    // Grants/extends the authoritative, time-bounded Subscription period
+    // (and, inside that same call, writes User.plan) - see
+    // src/lib/subscriptions.ts. The SubscriptionPayment unique constraint
+    // on paymentRequestId is a second, independent guard on top of the
+    // updateMany claim above: even if this route were ever invoked twice
+    // for the same already-claimed payment, this insert would fail the
+    // unique constraint rather than silently granting a second period.
+    await applyVerifiedPayment(tx, {
+      userId: payment.userId,
+      plan: payment.plan as Plan,
+      billingInterval: toBillingIntervalEnum(payment.billingInterval ?? "monthly"),
+      amount: payment.amount.toString(),
+      currency: payment.currency,
+      paymentMethod: "crypto",
+      source: { type: "payment_request", id: payment.id },
+      actorId: adminCheck.session.user.id,
+      actorUsername: adminCheck.session.user.username ?? null,
     });
 
     await tx.auditLog.create({

@@ -1,0 +1,30 @@
+name: Cron - subscription J-7 reminders
+
+# Calls GET /api/cron/subscription-reminders on a schedule so a user
+# entering the last 7 days of their paid period gets a renewal reminder
+# exactly once - see src/lib/subscriptions.ts (sendJ7Reminders). The
+# durable reminderSentAt claim makes repeated/overlapping runs safe, so
+# this can run as often as the other cron workflows without any risk of
+# duplicate reminders.
+#
+# Requires the same CRON_SECRET repository secret the other cron
+# workflows already use.
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the subscription-reminders cron route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://zrp.one/api/cron/subscription-reminders"

@@ -473,6 +473,7 @@ model User {
 
   upgradeRequests UpgradeRequest[]
   paymentRequests PaymentRequest[]
+  subscription    Subscription?
 
   blockedUsers Blocked[] @relation("Blocker")
   blockedBy    Blocked[] @relation("Blocked")
@@ -1320,6 +1321,14 @@ model PaymentRequest {
   amount   Decimal @db.Decimal(18, 6)
   currency String  @default("USDC")
 
+  // Which of the plan's two published durations (see PLANS.priceMonthly /
+  // priceYearly in src/lib/limits.ts) this payment is for. Nullable only
+  // because every row created before this column existed predates billing
+  // intervals entirely - those are all treated as "monthly" when backfilled
+  // into a Subscription (it's the only duration the crypto route ever
+  // charged). Every new row always sets this explicitly.
+  billingInterval String? @default("monthly")
+
   transactionId String?
 
   status String @default("pending")
@@ -1329,6 +1338,154 @@ model PaymentRequest {
 
   @@index([userId])
   @@index([status])
+}
+
+// ─── Subscription lifecycle ──────────────────────────────────────────
+//
+// The single authoritative, time-bounded record of a user's paid
+// entitlement. `User.plan` remains a denormalized display/compatibility
+// cache (existing code all over the app reads it directly) but is never
+// itself the source of truth from here on - every write to it must be
+// accompanied by a Subscription write in the same transaction, and the
+// expiration engine is what forces it back down when a period lapses.
+//
+// ZRP has no auto-charging payment method today (Solana/USDC payments are
+// user-initiated, manually verified - see PaymentRequest/UpgradeRequest
+// and src/lib/solana.ts). So this models a MANUAL renewal lifecycle: a
+// user pays again before/after their period ends and the period is
+// extended or restarted; nothing here ever charges anyone automatically.
+// `nextBillingAt` is therefore "the date the user needs to pay again by
+// to keep uninterrupted access", not a scheduled auto-charge.
+enum SubscriptionStatus {
+  PENDING // created but never granted a paid period yet (should be rare/transient)
+  ACTIVE // currentPeriodEnd is in the future and entitlement is granted
+  EXPIRED // currentPeriodEnd passed and the expiration engine has revoked entitlement
+  CANCELED // an admin canceled remaining paid time (e.g. chargeback/abuse)
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+model Subscription {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Mirrors User.plan while ACTIVE; kept here too so a lapsed/canceled
+  // subscription still records what plan it *was* for.
+  plan            String
+  status          SubscriptionStatus @default(PENDING)
+  billingInterval BillingInterval?
+
+  // The current continuous paid period. `currentPeriodStart` only moves
+  // when a fresh period starts (first grant, plan change, or renewal
+  // after a lapse); extending an already-active period only pushes
+  // `currentPeriodEnd` forward. `nextBillingAt` always mirrors
+  // `currentPeriodEnd` while ACTIVE and is cleared on expiry/cancel.
+  startedAt          DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  nextBillingAt      DateTime?
+
+  canceledAt DateTime?
+  expiredAt  DateTime?
+
+  lastPaymentAt DateTime?
+
+  // Durable dedup marker for the J-7 reminder: set the instant the
+  // reminder is claimed for the CURRENT period, reset to null whenever
+  // the period changes (extend/renew/plan-change), so a subscription can
+  // never receive more than one reminder per billing period no matter how
+  // many times the reminder worker runs.
+  reminderSentAt DateTime?
+
+  // True for a Subscription row created by the migration's historical
+  // backfill (see docs/subscriptions.md) rather than by a real payment
+  // event, so admin UI and reporting can label it distinctly and never
+  // mistake it for a real, dated purchase.
+  isLegacyBackfill Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments SubscriptionPayment[]
+  events   SubscriptionEvent[]
+
+  @@index([status])
+  @@index([currentPeriodEnd])
+  @@index([plan])
+  @@index([status, currentPeriodEnd])
+}
+
+// One durable, append-only row per period-granting payment (a verified
+// PaymentRequest, an approved UpgradeRequest, or a manual admin grant).
+// Exactly one of paymentRequestId / upgradeRequestId / adminGrantRef is
+// set, and each carries its own @unique constraint - this is the actual
+// idempotency guard: submitting the same verified payment twice hits a
+// database unique-constraint violation on the second insert, inside the
+// same transaction that claims the source row, so it can never silently
+// grant a second period. An application-level "does one already exist"
+// check is only ever a fast path in front of this.
+model SubscriptionPayment {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  userId         String
+
+  plan            String
+  billingInterval BillingInterval
+  amount          Decimal         @db.Decimal(18, 6)
+  currency        String          @default("USDC")
+
+  // "crypto" | "admin_grant" | "legacy_backfill"
+  paymentMethod String
+
+  paymentRequestId String? @unique
+  upgradeRequestId String? @unique
+  adminGrantRef    String? @unique
+
+  periodStart DateTime
+  periodEnd   DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([createdAt])
+}
+
+// Billing audit log: every state transition a Subscription goes through,
+// who caused it (null actor = system/cron), and the before/after snapshot.
+// Deliberately does not duplicate raw payment details already on
+// SubscriptionPayment (no card/wallet data ever lands here).
+model SubscriptionEvent {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  userId         String
+
+  // "payment_verified" | "subscription_created" | "subscription_renewed" |
+  // "subscription_extended" | "plan_changed" | "subscription_expired" |
+  // "subscription_canceled" | "subscription_restored" |
+  // "admin_entitlement_change" | "reminder_sent" | "reminder_failed" |
+  // "payment_failed" | "backfilled"
+  action String
+
+  actorId       String?
+  actorUsername String?
+
+  prevState Json?
+  newState  Json?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([subscriptionId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }
 
 model CommentLike {

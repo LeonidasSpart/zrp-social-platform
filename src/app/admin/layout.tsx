@@ -24,6 +24,7 @@ import {
   Rss,
   Globe2,
   BarChart3,
+  CreditCard,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -163,6 +164,15 @@ export default function AdminLayout({
             href: "/admin/upgrade-requests",
             labelKey: "upgradeReq.title" as TranslationKey,
             icon: DollarSign,
+          },
+          {
+            // Literal label, same escape hatch used by "ZRP News Network"
+            // above - a new staff-only surface, not yet in the shared
+            // 15-language dictionary. See src/app/admin/subscriptions/
+            // page.tsx's own comment for the full rationale.
+            href: "/admin/subscriptions",
+            label: "Subscriptions & Billing",
+            icon: CreditCard,
           },
           {
             href: "/admin/storage",
