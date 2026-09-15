@@ -93,6 +93,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
       getServerSession.mockReset();
     });
 
+    const creatorProfileIds: string[] = [];
+
     afterAll(async () => {
       await prisma.like.deleteMany({ where: { postId: { in: postIds } } });
       await prisma.bookmark.deleteMany({ where: { postId: { in: postIds } } });
@@ -100,6 +102,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
       await prisma.follow.deleteMany({ where: { OR: [{ followerId: { in: userIds } }, { followingId: { in: userIds } }] } });
       await prisma.blocked.deleteMany({ where: { OR: [{ blockerId: { in: userIds } }, { blockedId: { in: userIds } }] } });
       await prisma.mute.deleteMany({ where: { muterId: { in: userIds } } });
+      await prisma.premiumPost.deleteMany({ where: { postId: { in: postIds } } });
+      await prisma.creatorProfile.deleteMany({ where: { id: { in: creatorProfileIds } } });
       await prisma.post.deleteMany({ where: { id: { in: postIds } } });
       await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     });
@@ -327,6 +331,74 @@ describe.skipIf(!hasRealDatabaseUrl)(
       const authedItem = (await authedRes.json()).items.find((i: { id: string }) => i.id === post.id);
       expect(authedItem.viewerState.liked).toBe(true);
       expect(authedItem.viewerState.followsAuthor).toBe(true);
+    });
+
+    it("25. redacts a pay-per-view post's real content for a viewer who hasn't purchased it, but shows the real content to the creator and a purchaser", async () => {
+      const creator = await createUser("premiumcreator25");
+      const stranger = await createUser("premiumstranger25");
+      const purchaser = await createUser("premiumpurchaser25");
+
+      const profile = await prisma.creatorProfile.create({ data: { userId: creator.id } });
+      creatorProfileIds.push(profile.id);
+
+      const post = await createVideoPost(creator.id, { content: `SECRET-PREMIUM-CONTENT-${runId}` });
+      const realVideoUrl = post.imageUrl;
+
+      const premiumPost = await prisma.premiumPost.create({
+        data: {
+          postId: post.id,
+          creatorProfileId: profile.id,
+          price: 5,
+          previewContent: "preview only",
+        },
+      });
+
+      await prisma.premiumPurchase.create({
+        data: {
+          premiumPostId: premiumPost.id,
+          userId: purchaser.id,
+          amount: 5,
+          creatorAmount: 4,
+          platformFee: 1,
+          status: "COMPLETED",
+        },
+      });
+
+      // Stranger: never purchased - must never see the real caption
+      // OR the real video URL (media.url must be null, not the actual
+      // media, for locked content - see DiscoverFeedItem.media.url).
+      getServerSession.mockResolvedValue(sessionFor(stranger.id));
+      const strangerRes = await GET(req({ limit: "50" }));
+      const strangerItem = (await strangerRes.json()).items.find((i: { id: string }) => i.id === post.id);
+      expect(strangerItem).toBeTruthy();
+      expect(strangerItem.caption).not.toContain("SECRET-PREMIUM-CONTENT");
+      expect(strangerItem.media.url).toBeNull();
+      expect(strangerItem.premiumPost).toBeTruthy();
+      expect(strangerItem.premiumPost.locked).toBe(true);
+
+      // Anonymous: same as stranger - never purchased, never sees real
+      // content or the real media URL.
+      getServerSession.mockResolvedValue(null);
+      const anonRes = await GET(req({ limit: "50" }));
+      const anonItem = (await anonRes.json()).items.find((i: { id: string }) => i.id === post.id);
+      expect(anonItem.caption).not.toContain("SECRET-PREMIUM-CONTENT");
+      expect(anonItem.media.url).toBeNull();
+
+      // The creator themself: always sees the real content and the real URL.
+      getServerSession.mockResolvedValue(sessionFor(creator.id));
+      const creatorRes = await GET(req({ limit: "50" }));
+      const creatorItem = (await creatorRes.json()).items.find((i: { id: string }) => i.id === post.id);
+      expect(creatorItem.caption).toContain("SECRET-PREMIUM-CONTENT");
+      expect(creatorItem.media.url).toBe(realVideoUrl);
+
+      // A completed purchaser: sees the real content and the real URL.
+      getServerSession.mockResolvedValue(sessionFor(purchaser.id));
+      const purchaserRes = await GET(req({ limit: "50" }));
+      const purchaserItem = (await purchaserRes.json()).items.find((i: { id: string }) => i.id === post.id);
+      expect(purchaserItem.caption).toContain("SECRET-PREMIUM-CONTENT");
+      expect(purchaserItem.media.url).toBe(realVideoUrl);
+
+      await prisma.premiumPurchase.deleteMany({ where: { premiumPostId: premiumPost.id } });
     });
   }
 );

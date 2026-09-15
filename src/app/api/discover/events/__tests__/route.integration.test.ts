@@ -135,6 +135,107 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(count).toBe(1);
     });
 
+    it("19c. dedupes a repeated IMPRESSION from an ANONYMOUS caller by IP - the fix for the documented-vs-actual mismatch", async () => {
+      const author = await createUser("author19c");
+      const post = await createVideoPost(author.id);
+      getToken.mockResolvedValue(null);
+      const ip = "198.51.100.19";
+
+      const first = await POST(req({ postId: post.id, eventType: "IMPRESSION" }, ip));
+      expect((await first.json()).recorded).toBe(true);
+
+      // Before the fix, this endpoint only deduped by userId, so an
+      // anonymous caller (userId always null) could spam unlimited
+      // IMPRESSION rows for the same post from the same IP with zero
+      // dedup - this is the exact abuse this test proves is now closed.
+      const second = await POST(req({ postId: post.id, eventType: "IMPRESSION" }, ip));
+      expect((await second.json()).recorded).toBe(false);
+
+      const third = await POST(req({ postId: post.id, eventType: "IMPRESSION" }, ip));
+      expect((await third.json()).recorded).toBe(false);
+
+      const count = await prisma.discoverEvent.count({
+        where: { postId: post.id, userId: null, eventType: "IMPRESSION" },
+      });
+      expect(count).toBe(1);
+    });
+
+    it("19d. does NOT dedupe two different anonymous callers (different IPs) hitting the same post", async () => {
+      const author = await createUser("author19d");
+      const post = await createVideoPost(author.id);
+      getToken.mockResolvedValue(null);
+
+      const first = await POST(req({ postId: post.id, eventType: "START" }, "198.51.100.20"));
+      expect((await first.json()).recorded).toBe(true);
+
+      const second = await POST(req({ postId: post.id, eventType: "START" }, "198.51.100.21"));
+      expect((await second.json()).recorded).toBe(true);
+
+      const count = await prisma.discoverEvent.count({
+        where: { postId: post.id, userId: null, eventType: "START" },
+      });
+      expect(count).toBe(2);
+    });
+
+    it("19e. an authenticated viewer's dedup is unaffected by IP changes (still keyed by userId, not ip)", async () => {
+      const author = await createUser("author19e");
+      const viewer = await createUser("viewer19e");
+      const post = await createVideoPost(author.id);
+      getToken.mockResolvedValue({ id: viewer.id });
+
+      const first = await POST(req({ postId: post.id, eventType: "IMPRESSION" }, "198.51.100.22"));
+      expect((await first.json()).recorded).toBe(true);
+
+      // Same signed-in viewer, different IP (e.g. switched networks
+      // mid-scroll) - still deduped, because authenticated dedup keys
+      // on the verified userId, never on ip.
+      const second = await POST(req({ postId: post.id, eventType: "IMPRESSION" }, "198.51.100.23"));
+      expect((await second.json()).recorded).toBe(false);
+
+      const count = await prisma.discoverEvent.count({
+        where: { postId: post.id, userId: viewer.id, eventType: "IMPRESSION" },
+      });
+      expect(count).toBe(1);
+    });
+
+    it("19f. never persists ip alongside a known userId (ip is null on every authenticated row)", async () => {
+      const author = await createUser("author19f");
+      const viewer = await createUser("viewer19f");
+      const post = await createVideoPost(author.id);
+      getToken.mockResolvedValue({ id: viewer.id });
+
+      await POST(req({ postId: post.id, eventType: "IMPRESSION" }, "198.51.100.24"));
+
+      const row = await prisma.discoverEvent.findFirst({ where: { postId: post.id, userId: viewer.id } });
+      expect(row?.ip).toBeNull();
+    });
+
+    it("20b. never attributes an event to a client-supplied userId/viewerId - attribution always comes from the verified session", async () => {
+      const author = await createUser("author20b");
+      const realViewer = await createUser("realviewer20b");
+      const impersonated = await createUser("impersonated20b");
+      const post = await createVideoPost(author.id);
+      // The verified session belongs to realViewer - the route must
+      // never trust anything the client puts in the body instead.
+      getToken.mockResolvedValue({ id: realViewer.id });
+
+      const res = await POST(
+        req({
+          postId: post.id,
+          eventType: "IMPRESSION",
+          // An attacker-controlled body trying to spoof attribution.
+          userId: impersonated.id,
+          viewerId: impersonated.id,
+        })
+      );
+      expect(res.status).toBe(200);
+      expect((await res.json()).recorded).toBe(true);
+
+      const row = await prisma.discoverEvent.findFirst({ where: { postId: post.id } });
+      expect(row?.userId).toBe(realViewer.id);
+      expect(row?.userId).not.toBe(impersonated.id);
+    });
+
     it("COMPLETE events are not deduped the way IMPRESSION/START are (one per real watch, not spam-prone the same way)", async () => {
       const author = await createUser("author19b");
       const viewer = await createUser("viewer19b");
