@@ -225,6 +225,42 @@ limitation is documented in the root `CLAUDE.md`).
 
 ## Admin Subscriptions & Billing (`/admin/subscriptions`)
 
+**Root-cause fix (post-launch):** the list route originally queried
+`Subscription` as its base table. Since a `Subscription` row is only
+created via the new payment/grant/backfill path, any user without one -
+every free user, and every legacy-paid user not yet run through
+`scripts/backfill-subscriptions.ts` (a manual, one-time operator step,
+never wired into CI/CD) - was structurally invisible to search and every
+filter, even though the KPI counters (computed separately, over `User`)
+showed real numbers. The symptom matched exactly: correct-looking KPIs
+next to a search/filter table that silently came back empty for real
+users. The fix moves the base query to `prisma.user.findMany` with
+`subscription` as an optional relation, so every user is reachable with
+or without a `Subscription` row, and defines a `buildPopulationWhere()`
+helper that both the overview KPIs and the filtered list call with the
+exact same arguments - making a KPI/list count mismatch structurally
+impossible rather than something to keep in sync by hand. A second, real
+bug found during this fix (pre-dating it, not introduced by it): the row
+wrapped `AdminUserIdentity` - which already renders its own `<Link>`s to
+`/profile/username` - inside another `<Link>` to the billing detail page,
+producing invalid nested `<a>` tags and a reproducible hydration error
+that left the table rendering empty after certain navigations. Every
+other admin page using `AdminUserIdentity` leaves it unwrapped for
+exactly this reason; the subscriptions page now does too, with a separate
+"Billing" link alongside it.
+
+Four population values beyond the four real `SubscriptionStatus` values
+are supported by both the KPI counters and the `status` filter, via the
+same `buildPopulationWhere()`:
+- `PAID` - `User.plan !== "free"` (mirrors what the app itself currently
+  grants access on, per "Source of truth" above).
+- `FREE` - `User.plan === "free"`.
+- `NO_SUBSCRIPTION` - `User.plan !== "free"` **and** no `Subscription`
+  row: the "needs reconciliation" bucket. Never folded into `FREE` -
+  this user is still receiving paid features via the legacy plan field,
+  and reporting them as free would understate paid usage exactly the
+  way "Existing users" below warns against.
+
 `src/app/api/admin/subscriptions/route.ts` (list + overview, server-side
 search/filter/sort/pagination - never loads the full table),
 `.../[userId]/route.ts` (per-user detail: current state, full payment

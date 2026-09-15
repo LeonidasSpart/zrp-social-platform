@@ -120,6 +120,14 @@ export default function AdminSubscriptionDetailPage() {
             <Field label="Expired at" value={sub.expiredAt ? new Date(sub.expiredAt).toLocaleString() : "-"} />
             <Field label="Legacy backfill" value={sub.isLegacyBackfill ? "Yes" : "No"} />
           </div>
+        ) : data.user.plan !== "free" ? (
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            Needs reconciliation - <code className="text-xs">User.plan</code> is currently{" "}
+            <span className="font-medium">{data.user.plan}</span>, but no Subscription record exists yet. This
+            user is still receiving that plan&apos;s features (the app enforces access via the legacy plan field),
+            but it has no tracked period, payment history or expiration here. Use &quot;Grant / extend&quot; below
+            to create an authoritative record, or run <code className="text-xs">scripts/backfill-subscriptions.ts</code>.
+          </p>
         ) : (
           <p className="text-sm text-gray-500">No subscription record - this user has never had a paid entitlement tracked by this system.</p>
         )}
