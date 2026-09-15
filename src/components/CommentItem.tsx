@@ -17,6 +17,7 @@ import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge"; // ✅ import
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import ParsedContent from "@/components/ParsedContent";
 
 interface Comment {
   id: string;
@@ -243,7 +244,7 @@ export default function CommentItem({
           ) : (
             <>
               <p className="mt-0.5 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
-                {comment.content}
+                <ParsedContent content={comment.content} />
               </p>
               {comment.imageUrl && (
                 <div className="mt-2 rounded-lg overflow-hidden max-h-40">
