@@ -575,6 +575,9 @@ model User {
   // ─── ZRP Lists ───────────────────────────────────────────────
   ownedLists      List[]       @relation("ListOwner")
   listMemberships ListMember[] @relation("ListMemberUser")
+
+  // ─── ZRP Discover ────────────────────────────────────────────
+  discoverEvents DiscoverEvent[] @relation("DiscoverEventUser")
 }
 
 model JournalistProfile {
@@ -720,6 +723,9 @@ model Post {
   // Set when this post was published by the ZRP News Network
   // automation, linking it back to its story, sources and rendition.
   newsPublication NewsPublication?
+
+  // ─── ZRP Discover ────────────────────────────────────────────
+  discoverEvents DiscoverEvent[]
 
   @@index([createdAt])
   @@index([authorId])
@@ -3012,4 +3018,87 @@ model ListMember {
 
   @@unique([listId, userId])
   @@index([userId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ZRP DISCOVER
+// ════════════════════════════════════════════════════════════════════
+//
+// Backend foundation for ZRP's vertical-video discovery feed (V1). The
+// content itself is NOT a new type - a "Discover item" is exactly the
+// same Post row the existing Shorts feed (GET /api/videos) already
+// serves (`type: POST`, `mediaType: "video"`), reused as-is rather than
+// duplicated into a parallel video model. This section only adds what
+// genuinely doesn't exist yet: a place to record watch/engagement
+// events for those posts, which the ranking service can later read to
+// evolve beyond the freshness+engagement V1 signals - see
+// src/lib/discover/ for the feed/ranking/diversity/event services.
+
+// One row per meaningful client-reported watch signal for a single
+// Discover impression. Deliberately NOT split into 7 separate tables
+// (one per event type) - that would just be the same polymorphic-target
+// problem Report already solved, inverted. Kept intentionally light
+// (no per-post aggregate columns here): V1 ranking reads the post's
+// existing _count relations (likes/comments/reposts/bookmarks) plus
+// freshness, so a Redis or Postgres outage on this table degrades
+// analytics, never the feed itself. See DiscoverEventService
+// (src/lib/discover/events.ts) for validation/dedup and
+// src/app/api/discover/events/route.ts for the endpoint.
+enum DiscoverEventType {
+  IMPRESSION // the item entered the viewport (server-authorized existence check only)
+  START // playback started
+  PROGRESS_25
+  PROGRESS_50
+  PROGRESS_75
+  COMPLETE // reached (approximately) the end
+  SKIP // viewer swiped away before COMPLETE
+}
+
+model DiscoverEvent {
+  id String @id @default(cuid())
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Nullable: Discover supports anonymous browsing (same as
+  // /api/videos and /api/posts/explore today), and an anonymous
+  // viewer's watch events are still worth recording in aggregate even
+  // though they can't be tied to an account. SetNull (not Cascade) so
+  // a later account deletion doesn't retroactively falsify historical
+  // aggregate watch-time/completion-rate numbers for the content.
+  userId String?
+  user   User?   @relation("DiscoverEventUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  // ⚠️ SECURITY: the anonymous-caller half of DiscoverEventService's
+  // dedup window (src/lib/discover/events.ts). userId alone cannot
+  // dedup a signed-out caller - every anonymous request has
+  // userId: null, so a scripted caller with no session could otherwise
+  // spam unlimited IMPRESSION/START rows for the same post with zero
+  // dedup, undermining the exact rank-inflation defense this table
+  // exists for. Populated ONLY when userId is null (never store an IP
+  // alongside a request we can already attribute to a real account -
+  // minimizes retained PII to what's actually needed) - resolved via
+  // the same trusted-proxy getRequestIp() every other rate-limited
+  // route already uses, never trusted from a client-supplied field.
+  ip String?
+
+  eventType DiscoverEventType
+
+  // Client-reported elapsed playback time at the moment of this event,
+  // in milliseconds. Never trusted as authoritative on its own (a
+  // client can lie), only ever used in aggregate - see the "Known
+  // limitations" note in docs/discover-backend.md, the same
+  // bounded-plausibility caveat ZRP PLAY's REACTION game documents for
+  // client-reported timing it can't independently verify.
+  watchedMs Int?
+
+  createdAt DateTime @default(now())
+
+  // Powers the dedup window in DiscoverEventService (one IMPRESSION/
+  // START per viewer-or-IP per post per short window) and the future
+  // avg-watch-time/completion-rate/skip-rate aggregation queries.
+  @@index([postId, eventType])
+  @@index([postId, createdAt])
+  @@index([userId, postId, eventType, createdAt])
+  @@index([ip, postId, eventType, createdAt])
 }

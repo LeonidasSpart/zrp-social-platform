@@ -15,20 +15,23 @@ import {
   MessageCircle,
   Repeat,
   Share2,
+  Bookmark,
   Volume2,
   VolumeX,
   Loader2,
   Plus,
+  Lock,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ShortUploadModal from "@/components/ShortUploadModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCaptionDisplayState } from "@/lib/shortsCaption";
+import { belongsInVideoFeed, isLockedPremiumVideoPost } from "@/lib/video-feed";
 
 interface ShortPost {
   id: string;
   content: string;
-  imageUrl: string;
+  imageUrl: string | null;
   mediaType?: string | null;
   createdAt: string;
 
@@ -49,6 +52,17 @@ interface ShortPost {
 
   liked?: boolean;
   reposted?: boolean;
+  bookmarked?: boolean;
+
+  // ⚠️ SECURITY: see src/lib/premium-content.ts - when `locked` is true,
+  // `imageUrl` has already been redacted server-side.
+  premiumPost?: {
+    id: string;
+    price: number;
+    currency: string;
+    previewContent: string;
+    locked: boolean;
+  } | null;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -223,7 +237,16 @@ function filterRealVideos(
         return false;
       }
 
-      if (!post.imageUrl) {
+      /*
+       * A locked premium video has no imageUrl (redacted
+       * server-side) but still belongs on a slide of its
+       * own - see src/lib/video-feed.ts.
+       */
+      if (isLockedPremiumVideoPost(post)) {
+        return true;
+      }
+
+      if (!belongsInVideoFeed(post)) {
         return false;
       }
 
@@ -646,6 +669,61 @@ export default function ShortsPage() {
   ]);
 
   // ─────────────────────────────────────────────────────────────
+  // WATCH TRACKING
+  // ─────────────────────────────────────────────────────────────
+  //
+  // Reuses the existing per-post view counter (POST
+  // /api/posts/[id]/view, same one PostCard already calls) rather than
+  // inventing a second analytics system. Deduped with a ref Set so a
+  // Short is counted at most once per time this page is open,
+  // regardless of how many times the activeIndex effect above re-runs
+  // for the same slide (re-renders, mute toggles, scroll jitter).
+  // ─────────────────────────────────────────────────────────────
+
+  const trackedViewIds =
+    useRef<Set<string>>(
+      new Set()
+    );
+
+  useEffect(() => {
+    const post =
+      videos[activeIndex];
+
+    if (
+      !post ||
+      isLockedPremiumVideoPost(
+        post
+      )
+    ) {
+      return;
+    }
+
+    if (
+      trackedViewIds.current.has(
+        post.id
+      )
+    ) {
+      return;
+    }
+
+    trackedViewIds.current.add(
+      post.id
+    );
+
+    fetch(
+      `/api/posts/${post.id}/view`,
+      {
+        method: "POST",
+      }
+    ).catch(() => {
+      // Views aren't critical - never surface this to the viewer.
+    });
+  }, [
+    activeIndex,
+    videos,
+  ]);
+
+  // ─────────────────────────────────────────────────────────────
   // KEYBOARD NAVIGATION
   // ─────────────────────────────────────────────────────────────
 
@@ -937,6 +1015,96 @@ export default function ShortsPage() {
     };
 
   // ─────────────────────────────────────────────────────────────
+  // BOOKMARK (SAVE)
+  // ─────────────────────────────────────────────────────────────
+  //
+  // Reuses POST /api/posts/[id]/bookmark - same endpoint PostCard uses
+  // for every other post type. Save was entirely missing from Shorts.
+  // ─────────────────────────────────────────────────────────────
+
+  const [bookmarkLoading, setBookmarkLoading] =
+    useState<string | null>(null);
+
+  const handleBookmark =
+    async (postId: string) => {
+      if (!session || bookmarkLoading) {
+        return;
+      }
+
+      setBookmarkLoading(postId);
+
+      setVideos((prev) =>
+        prev.map((video) =>
+          video.id === postId
+            ? {
+                ...video,
+                bookmarked:
+                  !video.bookmarked,
+              }
+            : video
+        )
+      );
+
+      try {
+        const res =
+          await fetch(
+            `/api/posts/${postId}/bookmark`,
+            {
+              method: "POST",
+            }
+          );
+
+        if (res.ok) {
+          const data =
+            await res.json();
+
+          setVideos((prev) =>
+            prev.map((video) =>
+              video.id === postId
+                ? {
+                    ...video,
+                    bookmarked:
+                      data.bookmarked,
+                  }
+                : video
+            )
+          );
+        } else {
+          setVideos((prev) =>
+            prev.map((video) =>
+              video.id === postId
+                ? {
+                    ...video,
+                    bookmarked:
+                      !video.bookmarked,
+                  }
+                : video
+            )
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error bookmarking Short:",
+          error
+        );
+
+        setVideos((prev) =>
+          prev.map((video) =>
+            video.id === postId
+              ? {
+                  ...video,
+                  bookmarked:
+                    !video.bookmarked,
+                }
+              : video
+          )
+        );
+      } finally {
+        setBookmarkLoading(null);
+      }
+    };
+
+  // ─────────────────────────────────────────────────────────────
   // SHARE
   // ─────────────────────────────────────────────────────────────
 
@@ -1212,14 +1380,23 @@ export default function ShortsPage() {
               index
             ) => {
 
+              const locked =
+                isLockedPremiumVideoPost(
+                  post
+                );
+
               /*
                * FINAL RENDER PROTECTION.
                *
                * If anything somehow bypassed
                * filterRealVideos(), do not
-               * render it.
+               * render it. A locked premium video
+               * legitimately has no imageUrl
+               * (redacted server-side) and renders
+               * its own locked slide below instead.
                */
               if (
+                !locked &&
                 !isRealVideoMedia(
                   post.imageUrl,
                   post.mediaType
@@ -1242,7 +1419,55 @@ export default function ShortsPage() {
                   className="relative h-full w-full snap-start snap-always flex items-center justify-center pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(3.5rem+env(safe-area-inset-bottom))]"
                 >
 
-                  {/* REAL VIDEO ONLY */}
+                  {/* REAL VIDEO, OR A LOCKED-PREMIUM SLIDE.
+                      ⚠️ SECURITY: `locked` is true only when the server
+                      already redacted `imageUrl` to null (see
+                      src/lib/premium-content.ts) - no <video> is ever
+                      rendered in that case, so the real media URL never
+                      reaches the client for a post this viewer hasn't
+                      purchased. */}
+                  {locked && (
+                    <div className="flex flex-col items-center gap-3 px-8 text-center text-white">
+                      <div className="rounded-full bg-white/10 p-4">
+                        <Lock className="w-8 h-8" />
+                      </div>
+
+                      <p className="font-semibold">
+                        {t(
+                          "shorts.premiumLockedTitle"
+                        )}
+                      </p>
+
+                      {post.premiumPost && (
+                        <p className="text-sm text-white/70">
+                          {t(
+                            "shorts.premiumLockedBody",
+                            {
+                              price:
+                                post
+                                  .premiumPost
+                                  .price,
+                              currency:
+                                post
+                                  .premiumPost
+                                  .currency,
+                            }
+                          )}
+                        </p>
+                      )}
+
+                      <Link
+                        href={`/post/${post.id}`}
+                        className="mt-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium hover:bg-white/25 transition"
+                      >
+                        {t(
+                          "shorts.premiumLockedCta"
+                        )}
+                      </Link>
+                    </div>
+                  )}
+
+                  {!locked && (
                   <video
                     ref={(
                       el
@@ -1252,7 +1477,8 @@ export default function ShortsPage() {
                       ] = el;
                     }}
                     src={
-                      post.imageUrl
+                      post.imageUrl ??
+                      undefined
                     }
                     className="max-h-full max-w-full object-contain"
                     loop
@@ -1353,6 +1579,7 @@ export default function ShortsPage() {
                       );
                     }}
                   />
+                  )}
 
                   {/* HEART BURST */}
                   {burstId ===
@@ -1592,6 +1819,30 @@ export default function ShortsPage() {
                                 .reposts
                             )}
                           </span>
+                        </button>
+
+                        {/* SAVE */}
+                        <button
+                          onClick={() =>
+                            handleBookmark(
+                              post.id
+                            )
+                          }
+                          disabled={
+                            bookmarkLoading ===
+                            post.id
+                          }
+                          className="flex flex-col items-center gap-1"
+                          aria-label={t("nav.bookmarks")}
+                          aria-pressed={!!post.bookmarked}
+                        >
+                          <Bookmark
+                            className={`w-7 h-7 ${
+                              post.bookmarked
+                                ? "fill-white text-white"
+                                : ""
+                            }`}
+                          />
                         </button>
 
                         {/* SHARE */}

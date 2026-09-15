@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { applyPremiumGating } from "@/lib/premium-content";
+// Shared video/GIF/image classifier, also used by ZRP Discover
+// (src/lib/discover/candidates.ts) - see src/lib/video-media.ts for
+// the extracted logic and its priority rules. Behavior here is
+// unchanged from before the extraction.
+import { isRealVideoPost } from "@/lib/video-media";
 
 export const dynamic = "force-dynamic";
 
@@ -276,235 +282,6 @@ async function fetchVideoBatch({
 }
 
 // ─────────────────────────────────────────────────────────────
-// MEDIA PATH
-// ─────────────────────────────────────────────────────────────
-
-function getMediaPath(
-  url?: string | null
-) {
-  if (!url) {
-    return "";
-  }
-
-  return url
-    .toLowerCase()
-    .split("?")[0]
-    .split("#")[0]
-    .trim();
-}
-
-// ─────────────────────────────────────────────────────────────
-// GIF DETECTION
-// ─────────────────────────────────────────────────────────────
-//
-// GIF ALWAYS WINS.
-//
-// A record marked "video" is STILL rejected if the URL clearly
-// identifies a GIF.
-// ─────────────────────────────────────────────────────────────
-
-function isGifMedia(
-  url?: string | null,
-  mediaType?: string | null
-) {
-  const normalizedType =
-    mediaType?.toLowerCase().trim();
-
-  if (!url) {
-    return normalizedType === "gif";
-  }
-
-  const normalizedUrl =
-    url.toLowerCase();
-
-  const path =
-    getMediaPath(url);
-
-  // .gif
-  if (path.endsWith(".gif")) {
-    return true;
-  }
-
-  // mediaType = gif
-  if (normalizedType === "gif") {
-    return true;
-  }
-
-  // CDN parameters
-  if (
-    /[?&](format|fm|f)=gif(?:&|$)/i.test(
-      normalizedUrl
-    )
-  ) {
-    return true;
-  }
-
-  // MIME indicator in URL
-  if (
-    normalizedUrl.includes("image/gif")
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-// ─────────────────────────────────────────────────────────────
-// IMAGE DETECTION
-// ─────────────────────────────────────────────────────────────
-
-function isImageMedia(
-  url?: string | null
-) {
-  if (!url) {
-    return false;
-  }
-
-  const path =
-    getMediaPath(url);
-
-  const imageExtensions = [
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".webp",
-    ".svg",
-    ".avif",
-    ".bmp",
-    ".ico",
-    ".tif",
-    ".tiff",
-    ".heic",
-    ".heif",
-  ];
-
-  return imageExtensions.some(
-    (extension) =>
-      path.endsWith(extension)
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// REAL VIDEO DETECTION
-// ─────────────────────────────────────────────────────────────
-//
-// IMPORTANT:
-//
-// DO NOT require a video file extension.
-//
-// Railway/storage/CDN URLs can be extensionless.
-//
-// Priority:
-//
-// 1. GIF -> reject
-// 2. Known image -> reject
-// 3. mediaType === "video" -> accept
-// 4. Known video extension -> accept
-// 5. Otherwise -> reject
-// ─────────────────────────────────────────────────────────────
-
-function isRealVideoPost(
-  post: {
-    imageUrl?: string | null;
-    mediaType?: string | null;
-  }
-) {
-  const url = post.imageUrl;
-
-  const mediaType =
-    post.mediaType?.toLowerCase().trim();
-
-  if (!url) {
-    return false;
-  }
-
-  // ───────────────────────────────────────────────────────
-  // 1. GIF ALWAYS REJECTED
-  // ───────────────────────────────────────────────────────
-
-  if (
-    isGifMedia(
-      url,
-      mediaType
-    )
-  ) {
-    return false;
-  }
-
-  // ───────────────────────────────────────────────────────
-  // 2. KNOWN IMAGE FORMATS REJECTED
-  // ───────────────────────────────────────────────────────
-
-  if (
-    isImageMedia(url)
-  ) {
-    return false;
-  }
-
-  const path =
-    getMediaPath(url);
-
-  // ───────────────────────────────────────────────────────
-  // 3. KNOWN VIDEO EXTENSIONS
-  // ───────────────────────────────────────────────────────
-
-  const videoExtensions = [
-    ".mp4",
-    ".webm",
-    ".mov",
-    ".avi",
-    ".mkv",
-    ".m4v",
-    ".3gp",
-  ];
-
-  const hasVideoExtension =
-    videoExtensions.some(
-      (extension) =>
-        path.endsWith(extension)
-    );
-
-  if (hasVideoExtension) {
-    // Never allow an explicit image type through.
-    if (
-      mediaType === "image" ||
-      mediaType === "gif"
-    ) {
-      return false;
-    }
-
-    return true;
-  }
-
-  // ───────────────────────────────────────────────────────
-  // 4. EXTENSIONLESS VIDEO
-  // ───────────────────────────────────────────────────────
-  //
-  // This is the important fix.
-  //
-  // If the database says video and the URL is not a known
-  // image/GIF, accept it.
-  //
-  // This supports storage/CDN URLs such as:
-  //
-  // https://storage.example.com/abc123
-  //
-  // where there is no .mp4 at the end.
-  // ───────────────────────────────────────────────────────
-
-  if (mediaType === "video") {
-    return true;
-  }
-
-  // ───────────────────────────────────────────────────────
-  // 5. EVERYTHING ELSE IS REJECTED
-  // ───────────────────────────────────────────────────────
-
-  return false;
-}
-
-// ─────────────────────────────────────────────────────────────
 // POST SELECT
 // ─────────────────────────────────────────────────────────────
 
@@ -523,6 +300,11 @@ function postSelect() {
     views: true,
 
     commentsEnabled: true,
+
+    // ⚠️ SECURITY: required by applyPremiumGating() below - it needs the
+    // raw authorId to decide "does the viewer own this post" without a
+    // second query. Never returned to the client un-gated (see withLiked).
+    authorId: true,
 
     author: {
       select: {
@@ -570,6 +352,7 @@ async function withLiked(
     const [
       likes,
       reposts,
+      bookmarks,
     ] = await Promise.all([
       prisma.like.findMany({
         where: {
@@ -586,6 +369,20 @@ async function withLiked(
       }),
 
       prisma.repost.findMany({
+        where: {
+          userId,
+
+          postId: {
+            in: postIds,
+          },
+        },
+
+        select: {
+          postId: true,
+        },
+      }),
+
+      prisma.bookmark.findMany({
         where: {
           userId,
 
@@ -616,6 +413,14 @@ async function withLiked(
         )
       );
 
+    const bookmarkedIds =
+      new Set(
+        bookmarks.map(
+          (bookmark) =>
+            bookmark.postId
+        )
+      );
+
     posts.forEach(
       (post) => {
         post.liked =
@@ -627,12 +432,31 @@ async function withLiked(
           repostedIds.has(
             post.id
           );
+
+        post.bookmarked =
+          bookmarkedIds.has(
+            post.id
+          );
       }
     );
   }
 
-  return NextResponse.json({
+  // ⚠️ SECURITY: redact pay-per-view video content the viewer hasn't
+  // purchased before it ever leaves the server - same helper every other
+  // post-listing route uses (src/lib/premium-content.ts). Before this,
+  // /api/videos selected and returned the real `imageUrl` (the playable
+  // video URL) for every post regardless of PremiumPost/PremiumPurchase
+  // status, so a premium/pay-per-view Short was fully playable by anyone
+  // - including a logged-out visitor - who opened Shorts, bypassing the
+  // paywall entirely even though the on-chain purchase flow itself was
+  // real and independently verified.
+  const gatedPosts = await applyPremiumGating(
     posts,
+    userId ?? null
+  );
+
+  return NextResponse.json({
+    posts: gatedPosts,
     nextCursor,
   });
 }
