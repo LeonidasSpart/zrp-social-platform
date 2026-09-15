@@ -180,6 +180,7 @@
 "action.repost" = "Repost";
 "action.reply" = "Reply";
 "action.delete" = "Delete";
+"action.copy" = "Copy";
 "action.cancel" = "Cancel";
 "action.retry" = "Retry";
 "action.loading" = "Loading...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 Comments are disabled for this post.";
 "postDetail.postNotFound" = "Post not found";
 "action.edit" = "Edit";
-"action.copy" = "Copy";
 "stories.yourStory" = "Your Story";
 "stories.addStory" = "Add Story";
 "stories.whatsOnYourMind" = "What's on your mind?";

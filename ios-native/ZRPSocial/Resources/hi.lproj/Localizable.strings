@@ -180,6 +180,7 @@
 "action.repost" = "रीपोस्ट करें";
 "action.reply" = "रिप्लाई करें";
 "action.delete" = "डिलीट करें";
+"action.copy" = "कॉपी करें";
 "action.cancel" = "रद्द करें";
 "action.retry" = "फिर से कोशिश करें";
 "action.loading" = "लोड हो रहा है...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 इस पोस्ट के लिए कमेंट बंद हैं।";
 "postDetail.postNotFound" = "पोस्ट नहीं मिली";
 "action.edit" = "एडिट करें";
-"action.copy" = "कॉपी करें";
 "stories.yourStory" = "आपकी स्टोरी";
 "stories.addStory" = "स्टोरी जोड़ें";
 "stories.whatsOnYourMind" = "आपके मन में क्या है?";

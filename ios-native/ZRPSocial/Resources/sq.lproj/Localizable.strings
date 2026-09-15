@@ -180,6 +180,7 @@
 "action.repost" = "Ripubliko";
 "action.reply" = "Përgjigju";
 "action.delete" = "Fshi";
+"action.copy" = "Kopjo";
 "action.cancel" = "Anulo";
 "action.retry" = "Riprovo";
 "action.loading" = "Duke u ngarkuar...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 Komentet janë çaktivizuar për këtë postim.";
 "postDetail.postNotFound" = "Postimi nuk u gjet";
 "action.edit" = "Ndrysho";
-"action.copy" = "Kopjo";
 "stories.yourStory" = "Storia jote";
 "stories.addStory" = "Shto Storie";
 "stories.whatsOnYourMind" = "Çfarë po mendon?";

@@ -180,6 +180,7 @@
 "action.repost" = "Yeniden Paylaş";
 "action.reply" = "Yanıtla";
 "action.delete" = "Sil";
+"action.copy" = "Kopyala";
 "action.cancel" = "İptal";
 "action.retry" = "Yeniden Dene";
 "action.loading" = "Yükleniyor...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 Bu gönderi için yorumlar devre dışı.";
 "postDetail.postNotFound" = "Gönderi bulunamadı";
 "action.edit" = "Düzenle";
-"action.copy" = "Kopyala";
 "stories.yourStory" = "Hikayen";
 "stories.addStory" = "Hikaye Ekle";
 "stories.whatsOnYourMind" = "Aklından ne geçiyor?";

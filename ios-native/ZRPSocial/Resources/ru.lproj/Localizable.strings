@@ -180,6 +180,7 @@
 "action.repost" = "Репост";
 "action.reply" = "Ответить";
 "action.delete" = "Удалить";
+"action.copy" = "Копировать";
 "action.cancel" = "Отмена";
 "action.retry" = "Повторить";
 "action.loading" = "Загрузка...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 Комментарии к этой публикации отключены.";
 "postDetail.postNotFound" = "Публикация не найдена";
 "action.edit" = "Изменить";
-"action.copy" = "Копировать";
 "stories.yourStory" = "Ваша история";
 "stories.addStory" = "Добавить историю";
 "stories.whatsOnYourMind" = "О чём вы думаете?";

@@ -193,6 +193,7 @@ action.like
 action.repost
 action.reply
 action.delete
+action.copy
 action.cancel
 action.retry
 action.loading

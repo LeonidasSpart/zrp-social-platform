@@ -180,6 +180,7 @@
 "action.repost" = "리포스트";
 "action.reply" = "답글";
 "action.delete" = "삭제";
+"action.copy" = "복사";
 "action.cancel" = "취소";
 "action.retry" = "다시 시도";
 "action.loading" = "로딩 중...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 이 게시물은 댓글이 비활성화되어 있습니다.";
 "postDetail.postNotFound" = "게시물을 찾을 수 없습니다";
 "action.edit" = "편집";
-"action.copy" = "복사";
 "stories.yourStory" = "내 스토리";
 "stories.addStory" = "스토리 추가";
 "stories.whatsOnYourMind" = "무슨 생각을 하고 계신가요?";

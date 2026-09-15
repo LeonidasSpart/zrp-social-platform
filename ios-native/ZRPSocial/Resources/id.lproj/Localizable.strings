@@ -180,6 +180,7 @@
 "action.repost" = "Bagikan Ulang";
 "action.reply" = "Balas";
 "action.delete" = "Hapus";
+"action.copy" = "Salin";
 "action.cancel" = "Batal";
 "action.retry" = "Coba Lagi";
 "action.loading" = "Memuat...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 Komentar dinonaktifkan untuk postingan ini.";
 "postDetail.postNotFound" = "Postingan tidak ditemukan";
 "action.edit" = "Ubah";
-"action.copy" = "Salin";
 "stories.yourStory" = "Kisahmu";
 "stories.addStory" = "Tambah Kisah";
 "stories.whatsOnYourMind" = "Apa yang Anda pikirkan?";

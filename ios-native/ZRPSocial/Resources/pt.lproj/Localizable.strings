@@ -180,6 +180,7 @@
 "action.repost" = "Republicar";
 "action.reply" = "Responder";
 "action.delete" = "Eliminar";
+"action.copy" = "Copiar";
 "action.cancel" = "Cancelar";
 "action.retry" = "Tentar novamente";
 "action.loading" = "A carregar...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 Os comentários estão desativados nesta publicação.";
 "postDetail.postNotFound" = "Publicação não encontrada";
 "action.edit" = "Editar";
-"action.copy" = "Copiar";
 "stories.yourStory" = "A Sua História";
 "stories.addStory" = "Adicionar História";
 "stories.whatsOnYourMind" = "Em que está a pensar?";

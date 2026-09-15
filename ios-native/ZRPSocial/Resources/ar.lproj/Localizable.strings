@@ -180,6 +180,7 @@
 "action.repost" = "إعادة نشر";
 "action.reply" = "رد";
 "action.delete" = "حذف";
+"action.copy" = "نسخ";
 "action.cancel" = "إلغاء";
 "action.retry" = "إعادة المحاولة";
 "action.loading" = "جارٍ التحميل...";
@@ -221,7 +222,6 @@
 "postDetail.commentsDisabled" = "💬 التعليقات معطّلة لهذا المنشور.";
 "postDetail.postNotFound" = "المنشور غير موجود";
 "action.edit" = "تعديل";
-"action.copy" = "نسخ";
 "stories.yourStory" = "قصتك";
 "stories.addStory" = "إضافة قصة";
 "stories.whatsOnYourMind" = "بم تفكر؟";
