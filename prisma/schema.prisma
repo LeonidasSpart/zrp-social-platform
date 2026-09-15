@@ -581,6 +581,11 @@ model User {
   // ─── ZRP Discover ────────────────────────────────────────────
   discoverEvents      DiscoverEvent[]     @relation("DiscoverEventUser")
   discoverDismissals  DiscoverDismissal[]
+
+  // Admin Subscriptions & Billing (list/KPI queries filter and group by
+  // plan directly on User, since a legacy-paid user may have no
+  // Subscription row yet - see docs/subscriptions.md "Legacy users").
+  @@index([plan])
 }
 
 model JournalistProfile {
