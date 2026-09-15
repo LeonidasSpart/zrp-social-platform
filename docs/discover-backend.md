@@ -77,7 +77,7 @@ Response:
     {
       "id": "post-id",
       "author": { "id": "...", "username": "...", "name": "...", "avatarUrl": "...", "badgeType": "..." },
-      "media": { "url": "https://...", "type": "video" },
+      "media": { "url": "https://...", "type": "video" }, // url is null only for a locked pay-per-view item - see below
       "caption": "post content",
       "audio": null, // see "Audio / music" below
       "stats": { "likes": 0, "comments": 0, "reposts": 0, "saves": 0, "views": 0 },
@@ -91,10 +91,21 @@ Response:
 ```
 
 A pay-per-view (`PremiumPost`) item the viewer hasn't purchased is
-redacted the same way every other Post-serving route redacts it —
-`caption`/`media.url` replaced with the creator's preview, plus a
-`premiumPost` summary object — via the existing
-`applyPremiumGating` (`src/lib/premium-content.ts`), not a new gate.
+redacted the same way every other Post-serving route redacts it, via
+the existing `applyPremiumGating` (`src/lib/premium-content.ts`, not a
+new gate): `caption` is replaced with the creator's own preview text,
+`media.url` becomes `null` (the real video URL is never sent to a
+viewer who hasn't paid for it — there is nothing else to redact it to,
+since unlike a text preview there's no "preview clip" concept), and a
+`premiumPost` summary object (`{ id, price, currency, previewContent,
+locked: true }`) is attached so the client can render a paywall instead
+of an unexplained missing video. `media.url` is otherwise always a
+real string — it is nullable in the `DiscoverFeedItem` type
+specifically for this one case. Covered by the "redacts a pay-per-view
+post's real content" test in
+`src/app/api/discover/__tests__/route.integration.test.ts`, which
+asserts a non-purchasing viewer gets `media.url: null` while the
+creator and a completed purchaser get the real URL.
 
 `items`/`nextCursor` (not the legacy `posts` key some older routes like
 `/api/videos` and `/api/posts/explore` use) matches the newer
@@ -250,12 +261,12 @@ the codebase's fail-closed convention.
 
 `DiscoverEvent` (see `prisma/schema.prisma`) is one row per reported
 signal: `postId`, optional `userId` (nullable — anonymous viewers still
-count), `eventType`, optional `watchedMs`, `createdAt`. Deliberately
-**not** split into seven tables (one per event type) or into
-per-post aggregate counter columns on `Post` — this keeps the write
-path simple and keeps a Redis or Postgres hiccup on analytics from ever
-being able to affect the feed itself (V1 ranking never reads this
-table; see "Future ranking evolution").
+count), optional `ip` (see dedup below), `eventType`, optional
+`watchedMs`, `createdAt`. Deliberately **not** split into seven tables
+(one per event type) or into per-post aggregate counter columns on
+`Post` — this keeps the write path simple and keeps a Redis or Postgres
+hiccup on analytics from ever being able to affect the feed itself (V1
+ranking never reads this table; see "Future ranking evolution").
 
 Abuse handling, mirroring the only existing precedent for this shape of
 endpoint (`AdImpression`/`AdClick`'s dedup in
@@ -264,19 +275,49 @@ endpoint (`AdImpression`/`AdClick`'s dedup in
 - The target post must still be a live, qualifying Discover candidate
   (published, non-scheduled, video-typed) or the event is accepted-but-
   not-recorded (`recorded: false`) — stops writes against arbitrary/
-  deleted/private ids.
-- `IMPRESSION`/`START` are deduped per `(post, viewer)` within a 60s
-  window — a real viewer scrolling past the same item again moments
-  later isn't a new countable signal, and without this a scripted
-  caller could inflate a post's rank purely with impression spam.
-  `PROGRESS_*`/`COMPLETE`/`SKIP` aren't deduped (a real session only
-  produces a handful of these), bounded instead by the route's overall
-  IP rate limit.
+  deleted/private ids. `recorded: false` is returned for exactly the
+  same reason whether the id is wrong, belongs to a private/removed/
+  non-video post, or was deduped — the response never lets a caller
+  distinguish those cases from each other, so it can't be used as an
+  existence/visibility oracle for a post id.
+- `IMPRESSION`/`START` are deduped within a 60s window, keyed on the
+  strongest identity available for that request:
+  - **Signed-in caller**: `(post, userId)` — the verified session's id
+    (`getVerifiedToken`), never anything from the request body.
+  - **Anonymous caller (no session at all)**: `(post, ip)` — the same
+    trusted-proxy-resolved IP every rate-limited route in this codebase
+    already uses (`getRequestIp()`, `src/lib/rate-limit.ts`), so this
+    adds no new authentication requirement and no new way to resolve a
+    client's identity beyond what already exists elsewhere in ZRP.
+    **This anonymous half did not exist in an earlier version of this
+    file** — the code only deduped by `userId`, so a signed-out caller
+    (`userId` always `null`) was never deduped at all, silently
+    contradicting this same paragraph's own claim. Fixed by adding the
+    `ip` column above and the anonymous branch in
+    `DiscoverEventService.recordDiscoverEvent` — see
+    `src/app/api/discover/events/__tests__/route.integration.test.ts`
+    tests 19c–19f for the regression coverage (anonymous spam from one
+    IP is deduped; two different anonymous IPs are each still counted;
+    an authenticated viewer's dedup is unaffected by IP changes; `ip`
+    is never persisted on a row that already has a `userId`).
+  - `ip` is populated **only** when `userId` is `null` — a request that
+    already carries a verified identity never also gets its IP
+    persisted here, to avoid retaining IP data the dedup logic has no
+    use for once a stronger identity exists.
+  - `PROGRESS_*`/`COMPLETE`/`SKIP` aren't deduped (a real session only
+    produces a handful of these), bounded instead by the route's
+    overall per-IP rate limit.
 - `watchedMs` is clamped to 30 minutes and never trusted as an
   authoritative signal on its own — the same "bounded plausibility, not
   full verification" stance ZRP PLAY's `REACTION` game already
   documents for client-reported timing it can't independently verify
   server-side either.
+- `userId` on every row is read from `RecordDiscoverEventInput.viewerId`
+  only, which the route populates exclusively from the server-verified
+  JWT (`getVerifiedToken`) — a client-supplied `userId`/`viewerId` field
+  in the POST body is never read by `recordDiscoverEvent()` at all, so
+  it cannot attribute an event to another account. See the "never
+  attributes an event to a client-supplied userId" regression test.
 
 This gives the backend what it needs to eventually compute average
 watch time, completion rate, and skip rate per post via aggregation
@@ -314,7 +355,13 @@ One new table, one new enum — additive only, no changes to any
 existing model or column:
 
 - `DiscoverEventType` enum
-- `DiscoverEvent` model — see `prisma/migrations/20260915120000_add_discover_events/migration.sql`
+- `DiscoverEvent` model (`id`, `postId`, `userId?`, `ip?`, `eventType`,
+  `watchedMs?`, `createdAt`) — see
+  `prisma/migrations/20260915120000_add_discover_events/migration.sql`.
+  `ip` was added in this feature's hardening pass to close the
+  anonymous-dedup gap described in "Watch events / analytics" above;
+  since this migration had not shipped to any deployed environment yet,
+  it was amended in place rather than stacked as a second migration.
 
 Indexes (`src/lib/discover/candidates.ts` / `events.ts` describe the
 queries these support):
@@ -327,8 +374,9 @@ queries these support):
   filters and a 200-row `take` cap bounds the worst case regardless.
 - `DiscoverEvent`: `(postId, eventType)` and `(postId, createdAt)` for
   the future per-post aggregation queries (avg watch time/completion/
-  skip rate), and `(userId, postId, eventType, createdAt)` for the
-  dedup lookup in `DiscoverEventService`.
+  skip rate); `(userId, postId, eventType, createdAt)` for the
+  authenticated-caller dedup lookup; `(ip, postId, eventType,
+  createdAt)` for the anonymous-caller dedup lookup.
 
 ## Performance
 
@@ -366,18 +414,85 @@ queries these support):
 - **Rate-limit bypass / event spam / database amplification** — see
   "Rate limiting" and "Watch events" above; both endpoints are IP rate
   limited and the event endpoint additionally dedupes its two highest-
-  frequency event types.
+  frequency event types **for both authenticated and anonymous
+  callers** (see "Anonymous event abuse" immediately below — this was a
+  real gap in an earlier version of this PR, now closed and tested).
+- **Anonymous event abuse** — a hardening pass found and fixed a real
+  documented-vs-actual mismatch: `DiscoverEventService`'s dedup
+  originally keyed only on `userId`, so every anonymous caller
+  (`userId` is always `null` when signed out) was never deduped at
+  all — a scripted, signed-out client could POST unlimited
+  IMPRESSION/START rows for the same post with no dedup protection,
+  undermining the rank-inflation defense the dedup exists for (bounded
+  only by the route's 120/min IP rate limit, which is a much coarser
+  ceiling than per-post dedup). Fixed by adding `DiscoverEvent.ip`
+  (populated only when `userId` is `null`) and an anonymous dedup
+  branch keyed on `(post, ip)`, using the same trusted-proxy
+  `getRequestIp()` every other rate-limited route already resolves —
+  no new authentication requirement, no new identity-resolution
+  mechanism. Regression tests: `src/app/api/discover/events/__tests__/route.integration.test.ts`
+  tests 19c (repeated anonymous IMPRESSION from one IP is deduped),
+  19d (two different anonymous IPs are each still counted, proving
+  this isn't over-aggressive), 19e (an authenticated viewer's dedup
+  stays keyed on `userId`, unaffected by IP changes), and 19f (`ip` is
+  never persisted on a row that already has a `userId`). IP-based
+  dedup is still just a rate-*shaping* measure, not a strong identity
+  boundary (shared IPs — NAT, a household, a school — can
+  under-count distinct real viewers as one; a motivated attacker can
+  rotate IPs to evade it) — the route's hard 120/min-per-IP rate limit
+  is the actual abuse ceiling either way; dedup only stops trivial,
+  unrotated spam from inflating engagement-derived rank.
 - **Unauthenticated writes** — `POST /api/discover/events` is
   reachable while signed out by design (anonymous impressions are
   real signal, same as `/api/ads/impression`), but it can only ever
   create a `DiscoverEvent` row, never mutate a `Post`/`User`/anything
   else, and every row is attributed to a verified user id or explicitly
   `null` — never a client-supplied id.
+- **Client-supplied identity spoofing** — `recordDiscoverEvent()`
+  (`src/lib/discover/events.ts`) reads `viewerId` only from its typed
+  `RecordDiscoverEventInput.viewerId` parameter, which the route
+  populates exclusively from `getVerifiedToken` — it never reads a
+  `userId`/`viewerId` field out of the parsed request body, so a client
+  cannot attribute an event to a different account by sending one.
+  Regression test: "never attributes an event to a client-supplied
+  userId/viewerId" in the same integration test file (test 20b) —
+  sends a spoofed `userId`/`viewerId` in the body alongside a real
+  verified session for a *different* account and asserts the stored row
+  is attributed to the verified session, never the spoofed id.
 - **Sensitive data exposure / logging secrets** — `console.error` calls
   in both routes log only the caught `Error` object (matching every
   other route in the codebase), never a request body or session; the
   author `select` is a fixed five-field allowlist, so there is no
-  password/token/email field to ever leak.
+  password/token/email field to ever leak. `DiscoverEvent.ip` is
+  written to the database but never read back into any API response —
+  neither `GET /api/discover` nor `POST /api/discover/events` selects
+  or returns it.
+- **Redis failure behavior (re-audited in this pass)** — dedup itself
+  has no Redis dependency at all (it's a plain `prisma.discoverEvent.findFirst`
+  query), so a Redis outage cannot disable or weaken the anonymous/
+  authenticated dedup fix above. Rate limiting still fails closed via
+  the existing in-memory fallback (`checkRateLimitKey`,
+  `src/lib/rate-limit.ts`) — never fail-open. Feed ranking/pagination
+  caching still fails soft to a fresh per-request Postgres recompute —
+  never a blank page or a crash.
+- **Premium leakage (re-audited in this pass, one real bug found and
+  fixed)** — `applyPremiumGating` sets a locked premium post's
+  `imageUrl` to `null`, but `DiscoverFeedItem.media.url` was originally
+  typed as a plain (non-nullable) `string`, with a `post.imageUrl as
+  string` cast at the one call site that built it — a type assertion,
+  not a runtime guard, so the real behavior (a `null` reaching the
+  response) was masked from the type checker rather than fixed. This
+  was a correctness/data-shape bug, not an actual content leak — the
+  real video URL was never sent to an unpaid viewer either before or
+  after this fix — but a `null` disguised as `string` risked breaking a
+  client's video player and contradicted the surrounding code comment's
+  own claim ("never null by the time a post reaches here", which was
+  true for the candidate pool but not after premium gating runs).
+  Fixed by making `media.url` honestly `string | null` in the type and
+  removing the cast; verified with the "redacts a pay-per-view post's
+  real content" integration test, which explicitly asserts
+  `media.url === null` for a non-purchasing viewer and the real URL for
+  the creator/a purchaser.
 
 ## Tests
 
@@ -402,14 +517,18 @@ queries these support):
   creator diversity, freshness and engagement ranking, low-engagement
   content still surfacing, no sensitive fields ever returned,
   anonymous-vs-authenticated viewer state, event recording, event
-  validation, event dedup, and `watchedMs` clamping. `describe.skipIf`-
-  gated on a real `DATABASE_URL`, per the project's existing
-  integration-test convention (`CLAUDE.md`).
+  validation, event dedup (both the authenticated-userId path and the
+  anonymous-IP path added in the hardening pass), client-supplied-
+  identity-spoofing rejection, pay-per-view redaction (caption AND
+  media URL, for a non-purchasing viewer vs. the creator vs. a
+  purchaser), and `watchedMs` clamping.
+  `describe.skipIf`-gated on a real `DATABASE_URL`, per the project's
+  existing integration-test convention (`CLAUDE.md`).
 
 See the PR description's "Tests" section for exactly which of the
-above were actually executed in this environment and their results —
-this doc describes what the suite covers, not a claim that every line
-here was run against a live database in every environment.
+above were actually executed against a live database and their exact
+results — as of the hardening pass, all of them were (57/57 Discover
+tests passed against a real, freshly-provisioned Postgres, 0 skipped).
 
 ## Known limitations / audit findings
 
@@ -430,18 +549,28 @@ here was run against a live database in every environment.
   in V1 (see "Audio / music" above).
 - **No content-language field on `Post`** — no language-aware
   filtering/ranking is possible yet (see "Multilingual discovery").
-- **DB integration tests are written to the project's real-Postgres
-  convention but were not executed against a live database in every
-  environment this was built in** — see the PR's "Tests" section for
-  exactly what was and wasn't run.
 - **A future concurrent-write race**: `DiscoverEventService`'s dedup
   check-then-create is not atomic (two simultaneous requests for the
-  same viewer/post/event-type within the same instant could both pass
-  the dedup check before either writes). Consistent with the existing
-  `AdImpression`/`AdClick` dedup this was modeled on, which has the
-  same property — a reasonable, documented V1 tradeoff for an
+  same viewer-or-IP/post/event-type within the same instant could both
+  pass the dedup check before either writes). Consistent with the
+  existing `AdImpression`/`AdClick` dedup this was modeled on, which has
+  the same property — a reasonable, documented V1 tradeoff for an
   analytics-only table, not a security or correctness boundary for
   anything financial or access-controlling.
+- **IP-based anonymous dedup is a rate-shaping measure, not a strong
+  identity boundary** — see "Anonymous event abuse" in the Security
+  review above: shared IPs can under-count distinct anonymous viewers
+  as one, and a motivated attacker can rotate IPs to evade it. The
+  route's 120/min-per-IP hard rate limit is the actual abuse ceiling
+  either way.
+- **`DiscoverEvent.ip` retention has no dedicated purge job** — an
+  anonymous row's `ip` is retained indefinitely once written (matching
+  `AdImpression`/`AdClick`'s own indefinite retention of `userId`, the
+  closest existing precedent), even though it's only ever read back
+  within the 60s dedup window. A future privacy/retention pass could
+  add a scheduled job to null out `ip` (or delete the row) once it's
+  aged past that window; not implemented here to avoid introducing a
+  new background job as part of this PR.
 
 ## Future ranking evolution
 
