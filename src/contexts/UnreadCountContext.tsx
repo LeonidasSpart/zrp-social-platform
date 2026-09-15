@@ -87,6 +87,23 @@ export function UnreadCountProvider({ children }: { children: ReactNode }) {
     };
   }, [session?.user?.id]);
 
+  // Same instant-update pattern as the message handler above, for the
+  // notification bell - "notification:new" fires server-side the
+  // moment a like/comment/reply/repost/follow/mention notification is
+  // created (src/lib/notifications.ts). Re-fetches the real count from
+  // the server rather than incrementing local state, so a duplicate
+  // event (reconnect race, multiple tabs) can never leave the badge
+  // permanently wrong.
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const socket = getSocket(session.user.id);
+    const handleNewNotification = () => fetchUnreadCount();
+    socket.on("notification:new", handleNewNotification);
+    return () => {
+      socket.off("notification:new", handleNewNotification);
+    };
+  }, [session?.user?.id]);
+
   return (
     <UnreadCountContext.Provider
       value={{

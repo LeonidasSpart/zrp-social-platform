@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { rateLimit } from "@/lib/rate-limit";
 
 // GET all notifications for current user
 //
@@ -20,6 +21,9 @@ import { parseCursorParams, buildPage } from "@/lib/pagination";
 // header keeps getting exactly today's response: the 50 most recent
 // notifications, as a bare array, byte-for-byte unchanged.
 export async function GET(req: NextRequest) {
+  const limited = await rateLimit(req, { limit: 60, window: 60, type: "notifications-list" });
+  if (!limited.success) return limited.response;
+
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -68,6 +72,9 @@ export async function GET(req: NextRequest) {
 
 // Mark notifications as read
 export async function PUT(req: NextRequest) {
+  const limited = await rateLimit(req, { limit: 30, window: 60, type: "notifications-mark-all-read" });
+  if (!limited.success) return limited.response;
+
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

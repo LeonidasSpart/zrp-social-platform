@@ -20,7 +20,7 @@ interface FromUser {
 
 interface Notification {
   id: string;
-  type: "like" | "comment" | "follow" | "repost" | "message";
+  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_request" | "repost" | "message";
   read: boolean;
   createdAt: string;
   fromUser: FromUser;
@@ -40,9 +40,13 @@ interface GroupedNotification {
   postId?: string;
   postContent?: string;
   read: boolean;
+  // Every underlying Notification.id this row represents - a click marks
+  // ALL of them read (not just the group's synthetic key), since one row
+  // can stand in for several real notifications once grouped.
+  ids: string[];
 }
 
-const GROUPABLE_TYPES = new Set<Notification["type"]>(["like", "repost", "follow"]);
+const GROUPABLE_TYPES = new Set<Notification["type"]>(["like", "comment_like", "repost", "follow"]);
 
 function groupNotifications(list: Notification[]): GroupedNotification[] {
   const result: GroupedNotification[] = [];
@@ -58,6 +62,7 @@ function groupNotifications(list: Notification[]): GroupedNotification[] {
         postId: n.post?.id,
         postContent: n.post?.content,
         read: n.read,
+        ids: [n.id],
       });
       continue;
     }
@@ -71,6 +76,7 @@ function groupNotifications(list: Notification[]): GroupedNotification[] {
         g.users.push(n.fromUser);
       }
       g.read = g.read && n.read;
+      g.ids.push(n.id);
     } else {
       indexByKey.set(groupKey, result.length);
       result.push({
@@ -81,6 +87,7 @@ function groupNotifications(list: Notification[]): GroupedNotification[] {
         postId: n.post?.id,
         postContent: n.post?.content,
         read: n.read,
+        ids: [n.id],
       });
     }
   }
@@ -131,19 +138,15 @@ export default function NotificationsPage() {
     }
   };
 
-  const markAsRead = async () => {
+  // Explicit "Mark all as read" only - opening/loading this page must
+  // NOT blindly mark everything read (confirmed bug: a useEffect here
+  // used to fire this on every mount the moment any unread notification
+  // existed, with no user action at all).
+  const markAllAsRead = async () => {
     try {
       const res = await fetch("/api/notifications", { method: "PUT" });
       if (res.ok) {
-        // The server now has every notification marked read, but the
-        // local state still shows whatever `read` values were fetched
-        // originally - without this, the unread highlighting (blue
-        // border/background) would keep showing until the next full
-        // page reload, even though it's already been marked read.
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-        // Also refresh the bell icon's badge count immediately, instead
-        // of leaving it stuck showing a stale number for up to 30
-        // seconds (its normal background polling interval).
         refreshUnreadCount();
       }
     } catch (error) {
@@ -151,11 +154,26 @@ export default function NotificationsPage() {
     }
   };
 
-  useEffect(() => {
-    if (notifications.some((n) => !n.read)) {
-      markAsRead();
-    }
-  }, [notifications]);
+  // Marks exactly the notifications behind one row read (a grouped row
+  // can represent several underlying ids) - fired on click, in parallel,
+  // fire-and-forget so navigation isn't held up waiting on it.
+  const markOneRead = (ids: string[]) => {
+    const unreadIds = ids.filter(
+      (id) => notifications.find((n) => n.id === id)?.read === false
+    );
+    if (unreadIds.length === 0) return;
+
+    setNotifications((prev) =>
+      prev.map((n) => (unreadIds.includes(n.id) ? { ...n, read: true } : n))
+    );
+    refreshUnreadCount();
+
+    Promise.all(
+      unreadIds.map((id) =>
+        fetch(`/api/notifications/${id}`, { method: "PUT" }).catch(() => {})
+      )
+    );
+  };
 
   const handleFollowBack = async (username: string, userId: string) => {
     setFollowingBack((prev) => ({ ...prev, [userId]: "loading" }));
@@ -179,10 +197,13 @@ export default function NotificationsPage() {
   const getIcon = (type: string) => {
     switch (type) {
       case "like":
+      case "comment_like":
         return <Heart className="w-4 h-4 text-red-500 fill-red-500" />;
       case "comment":
+      case "reply":
         return <MessageCircle className="w-4 h-4 text-blue-500" />;
       case "follow":
+      case "follow_request":
         return <UserPlus className="w-4 h-4 text-green-500" />;
       case "repost":
         return <Repeat className="w-4 h-4 text-green-500" />;
@@ -205,10 +226,16 @@ export default function NotificationsPage() {
     switch (type) {
       case "like":
         return plural ? t("notifications.likedPostSuffixPlural") : t("notifications.likedPostSuffix");
+      case "comment_like":
+        return t("notifications.likedCommentSuffix");
       case "comment":
         return t("notifications.commentedPostSuffix");
+      case "reply":
+        return t("notifications.repliedCommentSuffix");
       case "follow":
         return plural ? t("notifications.startedFollowingSuffixPlural") : t("notifications.startedFollowingSuffix");
+      case "follow_request":
+        return t("notifications.followRequestSuffix");
       case "repost":
         return plural ? t("notifications.repostedPostSuffixPlural") : t("notifications.repostedPostSuffix");
       case "message":
@@ -264,9 +291,23 @@ export default function NotificationsPage() {
     );
   }
 
+  const hasUnread = notifications.some((n) => !n.read);
+
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t("notifications.title")}</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("notifications.title")}</h1>
+
+        {hasUnread && (
+          <button
+            type="button"
+            onClick={markAllAsRead}
+            className="text-sm font-medium text-zrp-red hover:underline"
+          >
+            {t("notifications.markAllRead")}
+          </button>
+        )}
+      </div>
 
       {/* ─── Filter tabs ─────────────────────────────────────────────── */}
       <div className="flex border-b border-gray-200 dark:border-gray-800 mb-4">
@@ -340,7 +381,7 @@ export default function NotificationsPage() {
               >
                 <div className="flex items-start gap-3">
                   {/* ─── Avatar stack ───────────────────────────────── */}
-                  <Link href={linkHref} className="flex-shrink-0">
+                  <Link href={linkHref} onClick={() => markOneRead(g.ids)} className="flex-shrink-0">
                     {g.users.length === 1 ? (
                       <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                         {primaryUser.avatarUrl ? (
@@ -373,7 +414,7 @@ export default function NotificationsPage() {
                   </Link>
 
                   <div className="flex-1 min-w-0">
-                    <Link href={linkHref} className="block">
+                    <Link href={linkHref} onClick={() => markOneRead(g.ids)} className="block">
                       <div className="flex items-center gap-2 flex-wrap">
                         {getIcon(g.type)}
                         <p className="text-sm text-gray-800 dark:text-gray-200">

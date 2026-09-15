@@ -4,7 +4,15 @@ import { randomUUID } from "crypto";
 import { prisma } from "@/lib/db";
 
 const { getVerifiedToken } = vi.hoisted(() => ({ getVerifiedToken: vi.fn() }));
-vi.mock("@/lib/auth-guards", () => ({ getVerifiedToken }));
+// Partial mock (spreads the real module) rather than a full replacement -
+// this route's duel-result path calls createNotification()
+// (src/lib/notifications.ts), which now also imports isBlockedEitherWay
+// from this same module. A full-replacement mock here would silently
+// leave that export undefined for any test that reaches it.
+vi.mock("@/lib/auth-guards", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/auth-guards")>();
+  return { ...actual, getVerifiedToken };
+});
 
 import { POST as submit } from "../route";
 

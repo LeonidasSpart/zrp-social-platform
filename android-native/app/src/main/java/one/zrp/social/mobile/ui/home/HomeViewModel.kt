@@ -45,6 +45,14 @@ class HomeViewModel(
     val forYouState: StateFlow<HomeUiState> = _forYou.asStateFlow()
     val followingState: StateFlow<HomeUiState> = _following.asStateFlow()
 
+    // Like/repost/bookmark toggles previously had no in-flight guard at
+    // all - unlike ProfileViewModel/FollowListViewModel's toggleFollow,
+    // which already guards for exactly this reason (see their own
+    // comment: two overlapping requests against a plain-toggle endpoint
+    // leave optimistic state one flip behind). A rapid double-tap here
+    // fired two overlapping POSTs; this closes that gap the same way.
+    private val pendingToggles = mutableSetOf<String>()
+
     // Fetched once, the same way ProfileViewModel/FollowListViewModel
     // resolve "who am I" - lets PostCard show Delete instead of Report
     // on the signed-in user's own posts here too, matching the
@@ -124,6 +132,9 @@ class HomeViewModel(
     }
 
     fun toggleLike(tab: FeedTab, postId: String) {
+        val key = "like:$postId"
+        if (!pendingToggles.add(key)) return
+
         val stateFlow = stateFlowFor(tab)
         val previousPosts = stateFlow.value.posts
 
@@ -138,10 +149,14 @@ class HomeViewModel(
             repository.toggleLike(postId).onFailure {
                 stateFlow.update { it.copy(posts = previousPosts) }
             }
+            pendingToggles.remove(key)
         }
     }
 
     fun toggleRepost(tab: FeedTab, postId: String) {
+        val key = "repost:$postId"
+        if (!pendingToggles.add(key)) return
+
         val stateFlow = stateFlowFor(tab)
         val previousPosts = stateFlow.value.posts
 
@@ -155,10 +170,14 @@ class HomeViewModel(
             repository.toggleRepost(postId).onFailure {
                 stateFlow.update { it.copy(posts = previousPosts) }
             }
+            pendingToggles.remove(key)
         }
     }
 
     fun toggleBookmark(tab: FeedTab, postId: String) {
+        val key = "bookmark:$postId"
+        if (!pendingToggles.add(key)) return
+
         val stateFlow = stateFlowFor(tab)
         val previousPosts = stateFlow.value.posts
 
@@ -170,6 +189,7 @@ class HomeViewModel(
             repository.toggleBookmark(postId).onFailure {
                 stateFlow.update { it.copy(posts = previousPosts) }
             }
+            pendingToggles.remove(key)
         }
     }
 

@@ -7,6 +7,7 @@ import { sendPushNotification } from "@/lib/push-notifications";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkPostLength } from "@/lib/limits";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { notifyMentionedUsers } from "@/lib/mentions";
 
 // ─── GET: Fetch a page of threaded comments with counts and status ──
 // Paginates by top-level comment (cursor + limit), then loads only the
@@ -181,10 +182,11 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     }
 
     // ─── Validate parent comment if provided ────────────────────────
+    let parentAuthorId: string | null = null;
     if (parentId) {
       const parent = await prisma.comment.findUnique({
         where: { id: parentId },
-        select: { id: true, postId: true },
+        select: { id: true, postId: true, authorId: true },
       });
       if (!parent) {
         return NextResponse.json({ error: "Parent comment not found" }, { status: 404 });
@@ -192,6 +194,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       if (parent.postId !== postId) {
         return NextResponse.json({ error: "Parent comment does not belong to this post" }, { status: 400 });
       }
+      parentAuthorId = parent.authorId;
     }
 
     // ─── Create comment ──────────────────────────────────────────────
@@ -230,20 +233,65 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
     // ─── Send notification (if not the author) ──────────────────────
     if (postAuthor && postAuthor.authorId !== session.user.id) {
-      await createNotification({
+      const notified = await createNotification({
         userId: postAuthor.authorId,
         type: "comment",
         fromUserId: session.user.id,
         postId: postId,
       });
 
-      await sendPushNotification(
-        postAuthor.authorId,
-        "New Comment",
-        `${session.user.name || session.user.username} commented on your post.`,
-        `/post/${postId}`
-      );
+      if (notified) {
+        await sendPushNotification(
+          postAuthor.authorId,
+          "New Comment",
+          `${session.user.name || session.user.username} commented on your post.`,
+          `/post/${postId}`
+        );
+      }
     }
+
+    // ─── Reply: also notify the parent comment's author ─────────────
+    // Confirmed missing by audit - a reply only ever notified the post
+    // author, never the person actually being replied to. Skipped when
+    // that person already got the "comment" notification above (the
+    // parent-comment author IS the post author) or is the replier
+    // themself, so nobody gets two notifications for one action.
+    if (
+      parentAuthorId &&
+      parentAuthorId !== session.user.id &&
+      parentAuthorId !== postAuthor?.authorId
+    ) {
+      const notifiedReply = await createNotification({
+        userId: parentAuthorId,
+        type: "reply",
+        fromUserId: session.user.id,
+        postId: postId,
+      });
+
+      if (notifiedReply) {
+        await sendPushNotification(
+          parentAuthorId,
+          "New Reply",
+          `${session.user.name || session.user.username} replied to your comment.`,
+          `/post/${postId}`
+        );
+      }
+    }
+
+    // ─── @mentions in the comment body ───────────────────────────────
+    // Comments previously had no mention parsing at all (confirmed by
+    // audit). Excludes whoever already got a "comment"/"reply"
+    // notification above for this same comment, so mentioning the
+    // person you're replying to doesn't also fire a redundant
+    // "mentioned you" notification.
+    await notifyMentionedUsers({
+      content: content.trim(),
+      authorId: session.user.id,
+      postId,
+      excludeUserIds: [postAuthor?.authorId, parentAuthorId].filter(
+        (id): id is string => !!id
+      ),
+    });
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {

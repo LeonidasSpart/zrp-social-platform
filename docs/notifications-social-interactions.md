@@ -1,0 +1,188 @@
+# Notifications & Social Interactions
+
+Architecture notes for the notification system and the social interactions
+that produce notifications (likes, comments, replies, reposts, follows,
+mentions). Written alongside a surgical audit-and-fix pass - see git
+history around this file's introduction for the full list of confirmed
+bugs found and fixed. When this document and the source disagree, the
+source wins.
+
+## Source of truth
+
+- **Notification state**: the `Notification` table (`prisma/schema.prisma`).
+  `src/lib/notifications.ts`'s `createNotification()` is the single writer.
+- **Unread counts**: computed fresh from the DB on every read
+  (`GET /api/notifications/unread`, `GET /api/messages/unread`) - never
+  cached/derived client-side by incrementing a counter.
+- **Client unread state**: `src/contexts/UnreadCountContext.tsx` is the
+  ONE shared source for the whole web app. Header, Sidebar and BottomNav
+  all read from it; none of them may poll or fetch independently (Sidebar
+  used to - that was a confirmed bug, fixed by wiring it to the same
+  context).
+- **Repost quota**: `RepostDailyUsage` (a per-user-per-day row), enforced
+  atomically by `src/lib/repost-quota.ts`. No repost quota existed
+  anywhere in this codebase before this - see "Repost quota" below.
+
+## The notification pipeline
+
+```
+domain action (like/comment/reply/repost/follow/mention)
+      |
+      v
+createNotification()  (src/lib/notifications.ts)
+      |  - skip if self-action
+      |  - skip if either party has blocked the other
+      v
+Notification row created (durable)
+      |
+      +--> emitToUser(userId, "notification:new") -- realtime, best-effort
+      |         (src/lib/socket-emit.ts -> server.js's Socket.IO instance)
+      |
+      +--> email, IF the type isn't in NEVER_EMAIL_TYPES and the
+      |         recipient's preferences allow it
+      |
+      v
+caller (the route) sends push ONLY if createNotification() returned true
+      (src/lib/push-notifications.ts - a separate delivery channel;
+      a blocked relationship or a self-action must not still push)
+```
+
+`createNotification()` returns `boolean`: whether a Notification row was
+actually created. Every call site that also sends push checks this first,
+so a suppressed in-app notification (self-action, blocked relationship)
+never still fires a push alert.
+
+## Realtime
+
+`server.js` stashes its one Socket.IO instance on `globalThis.__zrpIO`
+right after creating it. `src/lib/socket-emit.ts` is the only place any
+`src/app/api/**` route reads it back from - both run in the same Node
+process (the custom-server pattern this repo already uses for messaging),
+but API routes have no other way to reach the socket server.
+
+`"notification:new"` is a tiny payload (just the notification's `type`) -
+the client re-fetches its real unread count from
+`/api/notifications/unread` rather than trusting anything in the socket
+event, the same pattern `"receive-message"` already used before this. A
+duplicate/replayed event can never leave the badge permanently wrong,
+because it's a re-fetch, not an increment.
+
+## Read semantics
+
+Two distinct pieces of state, never confused:
+
+- `PUT /api/notifications` - marks **every** unread notification read.
+  Only fired by an explicit "Mark all as read" button.
+- `PUT /api/notifications/[id]` - marks **one** notification read. Fired
+  when a user clicks that specific notification, before navigating.
+  Ownership-checked (404s for someone else's notification, never reveals
+  it exists) and idempotent.
+
+Opening the notifications page does **not** mark anything read - it used
+to (a `useEffect` fired on every mount the moment any unread notification
+existed), which was a confirmed bug against the intended semantics.
+
+Message read state (`Message.read` / `ConversationParticipant.lastReadAt`)
+is entirely separate from `Notification.read` - opening a message
+notification marks that notification read; it does not, by itself, mark
+the underlying message(s) read. That's controlled by opening the actual
+conversation, unchanged by this pass.
+
+## Duplicate-notification prevention
+
+There's no DB-level dedup constraint on `Notification` (its `type`/
+`fromUserId`/`postId` combination isn't unique) - instead, undo actions
+retract their own notification directly:
+
+- Unlike deletes the matching unread `like` notification.
+- Un-liking a comment deletes the matching unread `comment_like`
+  notification (a distinct type from `like`, specifically so an unlike on
+  a post and an unlike on a comment can never delete the wrong one for
+  the same `postId`).
+- Unfollow deletes the matching unread `follow` notification.
+- Un-reposting deletes the matching unread `repost` notification.
+
+This means a like -> unlike -> like cycle leaves exactly one notification
+behind, not an orphaned first one plus a second.
+
+## Reply vs. comment
+
+A reply (a comment with `parentId` set) notifies **both** the post author
+(`type: "comment"`, unchanged) and the parent comment's author
+(`type: "reply"`, new) - unless they're the same person, in which case
+only one notification is sent, never two for one action.
+
+## Mentions
+
+`src/lib/mentions.ts` is shared between post creation and comment
+creation. `Post.mentions` (a denormalized array of raw usernames) already
+existed but nothing ever notified anyone - `notifyMentionedUsers()` is the
+missing half: it resolves `@username` to a real, existing user
+(case-insensitive) and calls `createNotification()` for each one found,
+skipping the author, anyone already notified for the same action (e.g. the
+post/parent-comment author), and any blocked-either-way relationship
+(via `createNotification()`'s own check). A scheduled post's mentions are
+never notified until it actually publishes.
+
+## Repost quota
+
+No repost quota existed anywhere in this codebase before this pass -
+reposting was unlimited per user/day. `src/lib/repost-quota.ts` adds one,
+following the exact atomic-reservation pattern `src/lib/ai-quota.ts`
+already established for AI daily usage:
+
+```
+UPDATE "RepostDailyUsage" SET reposts = reposts + 1
+ WHERE userId = ? AND date = ? AND reposts < ?
+```
+
+A single conditional `UPDATE` the database serializes - two concurrent
+requests racing for the last slot can't both pass a stale pre-increment
+read. `PlanLimits.repostsPerDay` (`src/lib/limits.ts`): free 50, pro 150,
+business 500, enterprise effectively unlimited - chosen as a generous
+anti-spam ceiling, not a monetization lever (reposting has always been
+free; this only stops automation).
+
+The slot is reserved **before** the `Repost` row is written, and handed
+back (`releaseRepost()`) if the write then fails for any reason (a
+concurrent duplicate, the post having been deleted) - a failed repost
+never costs a slot. Undoing a repost does **not** restore the slot: this
+is deliberate, so a repost/un-repost loop can't bypass the daily limit.
+
+## What was audited and found already correct (not touched)
+
+- Web Push / FCM delivery (`src/lib/push-notifications.ts`, `src/lib/fcm.ts`):
+  durable DB write always happens before push is attempted, push failure
+  is fully isolated (never rolls back or blocks the business mutation),
+  and stale subscriptions/tokens are pruned on a permanent-failure
+  response (404/410/`registration-token-not-registered`).
+- `Like`, `Repost`, `CommentLike`, `CommentRepost`, `Follow`, `Mute`,
+  `Blocked` all already had `@@unique` composite constraints preventing a
+  duplicate row at the database level, even before the race-handling
+  added in this pass (which only fixed the resulting unhandled-error ->
+  500 UX, not a data-integrity gap).
+- Android and iOS unread-badge state: both already have one shared
+  ViewModel per count, not scattered per-screen state (unlike web's
+  Sidebar, which was the one outlier there).
+- iOS push notifications are not implemented - a known, already-documented
+  gap (`ios-native/PARITY.md` §B3) blocked on external Firebase/APNs
+  credentials, not something this pass could fix.
+
+## Deliberately not built this pass
+
+- Notification.type is not an enum - keeping it a plain `String` avoided a
+  larger, riskier migration for a cosmetic type-safety improvement; the
+  one real bug this caused (two monetization notification types stored in
+  inconsistent casing) was left alone since fixing it meant touching
+  payment-flow files outside this pass's actual scope (notifications and
+  social interactions, not monetization).
+- No generic notification-grouping infrastructure beyond what already
+  existed (`GROUPABLE_TYPES` on the web notifications page, already
+  present before this pass) - extended only far enough to cover the new
+  `comment_like` type consistently with `like`.
+- No request-level idempotency key on comment creation - the existing
+  rate limiter plus the client's own submit-in-flight guard were judged a
+  reasonable existing mitigation; a dedicated idempotency-key system was
+  out of proportion for the confirmed risk (a double-tap creating two
+  near-identical comments), which is a lesser issue than the security/
+  business-rule bugs this pass focused on.
