@@ -29,12 +29,34 @@
  *     same item again moments later is not a new, countable signal
  *     either way, and without this a scripted caller could otherwise
  *     inflate a post's engagement-derived rank via nothing but
- *     impression spam.
+ *     impression spam. This genuinely covers BOTH signed-in and
+ *     anonymous callers: a signed-in caller is deduped by (post,
+ *     userId), an anonymous one (no session at all) by (post, ip) -
+ *     see the `dedupWhere` branch in recordDiscoverEvent() below. An
+ *     earlier version of this file only implemented the userId half
+ *     despite this same comment
+ *     already claiming "viewer-or-IP" - every anonymous caller was
+ *     therefore never deduped at all, undermining the exact defense
+ *     this paragraph describes. Fixed without adding any new
+ *     authentication requirement: `ip` is resolved the same
+ *     trusted-proxy way every other rate-limited route already
+ *     resolves it (getRequestIp(), src/lib/rate-limit.ts) - callers
+ *     that were anonymous before this fix are still anonymous now.
  *
  * Never trusted as an authoritative score/engagement source on its own
  * - see prisma/schema.prisma's comment on DiscoverEvent.watchedMs and
  * ZRP PLAY's identical documented caveat for client-reported timing
  * (src/lib/play/ - REACTION game).
+ *
+ * ⚠️ SECURITY: `userId` on every row written here comes from
+ * RecordDiscoverEventInput.viewerId, which the route
+ * (src/app/api/discover/events/route.ts) populates ONLY from the
+ * server-verified JWT (getVerifiedToken) - this module never reads a
+ * client-supplied id field, so a spoofed `userId`/`viewerId` in the
+ * request body cannot attribute an event to someone else's account.
+ * See the regression test "never attributes an event to a client-
+ * supplied userId" in
+ * src/app/api/discover/events/__tests__/route.integration.test.ts.
  */
 
 import { prisma } from "@/lib/db";
@@ -73,7 +95,15 @@ export interface RecordDiscoverEventInput {
   postId: unknown;
   eventType: unknown;
   watchedMs?: unknown;
+  // Server-verified identity only - see the route handler, which reads
+  // this from getVerifiedToken, never from the request body.
   viewerId: string | null | undefined;
+  // Trusted-proxy-resolved client IP (getRequestIp(), src/lib/rate-limit.ts).
+  // Required (not optional) so a caller of this function can never
+  // silently skip the anonymous-dedup path by omitting it - the route
+  // always has one (getRequestIp() has a loopback fallback, it never
+  // returns null/undefined).
+  ip: string;
 }
 
 export type RecordDiscoverEventResult =
@@ -93,7 +123,7 @@ export function normalizeWatchedMs(value: unknown): number | null {
 export async function recordDiscoverEvent(
   input: RecordDiscoverEventInput
 ): Promise<RecordDiscoverEventResult> {
-  const { postId, eventType, viewerId } = input;
+  const { postId, eventType, viewerId, ip } = input;
 
   if (typeof postId !== "string" || postId.length === 0) {
     return { ok: false, status: 400, error: "postId is required" };
@@ -119,14 +149,23 @@ export async function recordDiscoverEvent(
     return { ok: true, recorded: false };
   }
 
-  if (DEDUPED_EVENT_TYPES.has(eventType) && viewerId) {
+  // ⚠️ SECURITY: a signed-in caller is deduped by (post, userId) - the
+  // strongest identity available. A signed-out caller has no userId at
+  // all, so it falls back to (post, ip); skipping this fallback (as an
+  // earlier version of this function did) would let any anonymous/
+  // scripted caller bypass dedup entirely just by omitting a session,
+  // which is a strictly weaker but real check - IP can be shared (NAT,
+  // a household, a school) or rotated by a determined attacker, so this
+  // is a rate-shaping measure layered UNDER the route's hard per-IP
+  // rate limit (120/min), not a replacement for it. See "Known
+  // limitations" in docs/discover-backend.md.
+  if (DEDUPED_EVENT_TYPES.has(eventType)) {
+    const dedupWhere = viewerId
+      ? { postId, userId: viewerId, eventType }
+      : { postId, userId: null, ip, eventType };
+
     const recent = await prisma.discoverEvent.findFirst({
-      where: {
-        postId,
-        userId: viewerId,
-        eventType,
-        createdAt: { gte: new Date(Date.now() - DEDUP_WINDOW_MS) },
-      },
+      where: { ...dedupWhere, createdAt: { gte: new Date(Date.now() - DEDUP_WINDOW_MS) } },
       select: { id: true },
     });
     if (recent) {
@@ -138,6 +177,9 @@ export async function recordDiscoverEvent(
     data: {
       postId,
       userId: viewerId || null,
+      // Never persisted alongside a known userId - see the schema
+      // comment on DiscoverEvent.ip for why.
+      ip: viewerId ? null : ip,
       eventType,
       watchedMs,
     },

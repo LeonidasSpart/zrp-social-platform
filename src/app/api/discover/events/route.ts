@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, getRequestIp } from "@/lib/rate-limit";
 import { recordDiscoverEvent } from "@/lib/discover/events";
 
 /**
@@ -36,7 +36,17 @@ export async function POST(req: NextRequest) {
 
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    // ⚠️ SECURITY: viewerId comes ONLY from the server-verified JWT -
+    // never from the request body - so a caller cannot attribute an
+    // event to someone else's account by sending a spoofed id field.
+    // See the "never attributes an event to a client-supplied userId"
+    // regression test.
     const viewerId = typeof token?.id === "string" ? token.id : null;
+    // Trusted-proxy IP resolution, same as every other rate-limited
+    // route (src/lib/rate-limit.ts) - used below as the anonymous-
+    // caller half of DiscoverEventService's dedup, never read from the
+    // request body/headers directly.
+    const ip = getRequestIp(req);
 
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object") {
@@ -48,6 +58,7 @@ export async function POST(req: NextRequest) {
       eventType: (body as Record<string, unknown>).eventType,
       watchedMs: (body as Record<string, unknown>).watchedMs,
       viewerId,
+      ip,
     });
 
     if (!result.ok) {
