@@ -16,16 +16,19 @@ import {
   MessageCircle,
   Repeat,
   Share2,
+  Bookmark,
   Volume2,
   VolumeX,
   Loader2,
+  Lock,
 } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
+import { belongsInVideoFeed, isLockedPremiumVideoPost } from "@/lib/video-feed";
 
 interface VideoPost {
   id: string;
   content: string;
-  imageUrl: string;
+  imageUrl: string | null;
   imageUrls?: string[];
   mediaType?: string | null;
   createdAt: string;
@@ -46,6 +49,20 @@ interface VideoPost {
   };
 
   liked?: boolean;
+  reposted?: boolean;
+  bookmarked?: boolean;
+
+  // ⚠️ SECURITY: see src/lib/premium-content.ts. When `locked` is true,
+  // `imageUrl` above has already been redacted server-side (never the
+  // real video URL) - `previewContent`/`price`/`currency` are the only
+  // premium fields safe to render.
+  premiumPost?: {
+    id: string;
+    price: number;
+    currency: string;
+    previewContent: string;
+    locked: boolean;
+  } | null;
 }
 
 interface VideoFeedViewerProps {
@@ -174,7 +191,19 @@ function filterVideoPosts(
   posts: VideoPost[]
 ) {
   return posts.filter((post) => {
-    if (!post?.imageUrl) {
+    if (!post) {
+      return false;
+    }
+
+    /*
+     * A locked premium video has no imageUrl (redacted server-side)
+     * but still belongs on a slide of its own - see src/lib/video-feed.ts.
+     */
+    if (isLockedPremiumVideoPost(post)) {
+      return true;
+    }
+
+    if (!belongsInVideoFeed(post)) {
       return false;
     }
 
@@ -470,6 +499,61 @@ export default function VideoFeedViewer({
   ]);
 
   // ─────────────────────────────────────────────────────────────
+  // WATCH TRACKING
+  // ─────────────────────────────────────────────────────────────
+  //
+  // Reuses the existing per-post view counter (POST
+  // /api/posts/[id]/view, same one PostCard already calls) rather than
+  // inventing a second analytics system. Deduped with a ref Set so a
+  // video is counted at most once per time this viewer is open,
+  // regardless of how many times the activeIndex effect above re-runs
+  // for the same slide (re-renders, mute toggles, scroll jitter).
+  // ─────────────────────────────────────────────────────────────
+
+  const trackedViewIds =
+    useRef<Set<string>>(
+      new Set()
+    );
+
+  useEffect(() => {
+    const post =
+      videos[activeIndex];
+
+    if (
+      !post ||
+      isLockedPremiumVideoPost(
+        post
+      )
+    ) {
+      return;
+    }
+
+    if (
+      trackedViewIds.current.has(
+        post.id
+      )
+    ) {
+      return;
+    }
+
+    trackedViewIds.current.add(
+      post.id
+    );
+
+    fetch(
+      `/api/posts/${post.id}/view`,
+      {
+        method: "POST",
+      }
+    ).catch(() => {
+      // Views aren't critical - never surface this to the viewer.
+    });
+  }, [
+    activeIndex,
+    videos,
+  ]);
+
+  // ─────────────────────────────────────────────────────────────
   // LOCK BODY SCROLL
   // ─────────────────────────────────────────────────────────────
 
@@ -685,6 +769,163 @@ export default function VideoFeedViewer({
     };
 
   // ─────────────────────────────────────────────────────────────
+  // REPOST
+  // ─────────────────────────────────────────────────────────────
+  //
+  // Reuses POST /api/posts/[id]/repost - the same endpoint
+  // src/app/shorts/page.tsx's handleRepost already calls. This viewer's
+  // Repost button previously rendered the count with no onClick at all,
+  // so it silently did nothing when tapped.
+  // ─────────────────────────────────────────────────────────────
+
+  const handleRepost =
+    async (postId: string) => {
+      if (!session) {
+        return;
+      }
+
+      try {
+        const res =
+          await fetch(
+            `/api/posts/${postId}/repost`,
+            {
+              method: "POST",
+            }
+          );
+
+        if (res.ok) {
+          const data =
+            await res.json();
+
+          setVideos((prev) =>
+            prev.map((video) =>
+              video.id === postId
+                ? {
+                    ...video,
+                    reposted:
+                      data.reposted,
+                    _count: {
+                      ...video._count,
+                      reposts:
+                        data.reposted
+                          ? video
+                              ._count
+                              .reposts +
+                            1
+                          : Math.max(
+                              0,
+                              video
+                                ._count
+                                .reposts -
+                                1
+                            ),
+                    },
+                  }
+                : video
+            )
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error reposting video:",
+          error
+        );
+      }
+    };
+
+  // ─────────────────────────────────────────────────────────────
+  // BOOKMARK (SAVE)
+  // ─────────────────────────────────────────────────────────────
+  //
+  // Reuses POST /api/posts/[id]/bookmark - same endpoint PostCard uses
+  // for every other post type. Save was entirely missing from this
+  // viewer's interaction rail.
+  // ─────────────────────────────────────────────────────────────
+
+  const [bookmarkLoading, setBookmarkLoading] =
+    useState<string | null>(null);
+
+  const handleBookmark =
+    async (postId: string) => {
+      if (!session || bookmarkLoading) {
+        return;
+      }
+
+      setBookmarkLoading(postId);
+
+      setVideos((prev) =>
+        prev.map((video) =>
+          video.id === postId
+            ? {
+                ...video,
+                bookmarked:
+                  !video.bookmarked,
+              }
+            : video
+        )
+      );
+
+      try {
+        const res =
+          await fetch(
+            `/api/posts/${postId}/bookmark`,
+            {
+              method: "POST",
+            }
+          );
+
+        if (res.ok) {
+          const data =
+            await res.json();
+
+          setVideos((prev) =>
+            prev.map((video) =>
+              video.id === postId
+                ? {
+                    ...video,
+                    bookmarked:
+                      data.bookmarked,
+                  }
+                : video
+            )
+          );
+        } else {
+          // Roll back the optimistic toggle.
+          setVideos((prev) =>
+            prev.map((video) =>
+              video.id === postId
+                ? {
+                    ...video,
+                    bookmarked:
+                      !video.bookmarked,
+                  }
+                : video
+            )
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error bookmarking video:",
+          error
+        );
+
+        setVideos((prev) =>
+          prev.map((video) =>
+            video.id === postId
+              ? {
+                  ...video,
+                  bookmarked:
+                    !video.bookmarked,
+                }
+              : video
+          )
+        );
+      } finally {
+        setBookmarkLoading(null);
+      }
+    };
+
+  // ─────────────────────────────────────────────────────────────
   // SHARE
   // ─────────────────────────────────────────────────────────────
 
@@ -700,12 +941,16 @@ export default function VideoFeedViewer({
         try {
           await navigator.share(
             {
-              title: `Post by ${
-                post.author
-                  .name ||
-                post.author
-                  .username
-              }`,
+              title: t(
+                "shorts.sharePostBy",
+                {
+                  name:
+                    post.author
+                      .name ||
+                    post.author
+                      .username,
+                }
+              ),
               url,
             }
           );
@@ -735,7 +980,7 @@ export default function VideoFeedViewer({
         <button
           onClick={onClose}
           className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-4 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
-          aria-label="Close"
+          aria-label={t("shorts.close")}
         >
           <X className="w-6 h-6" />
         </button>
@@ -751,15 +996,14 @@ export default function VideoFeedViewer({
     return (
       <div className="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center gap-4">
         <p className="text-white text-center px-6">
-          No videos are available
-          right now.
+          {t("shorts.noVideosAvailable")}
         </p>
 
         <button
           onClick={onClose}
           className="text-white bg-white/10 rounded-full px-4 py-2 hover:bg-white/20 transition"
         >
-          Close
+          {t("shorts.close")}
         </button>
       </div>
     );
@@ -789,7 +1033,7 @@ export default function VideoFeedViewer({
       <button
         onClick={onClose}
         className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
-        aria-label="Close"
+        aria-label={t("shorts.close")}
       >
         <X className="w-6 h-6" />
       </button>
@@ -804,8 +1048,8 @@ export default function VideoFeedViewer({
         className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
         aria-label={
           muted
-            ? "Unmute"
-            : "Mute"
+            ? t("shorts.unmute")
+            : t("shorts.mute")
         }
       >
         {muted ? (
@@ -848,16 +1092,25 @@ export default function VideoFeedViewer({
                 post.mediaType
               );
 
+            const locked =
+              isLockedPremiumVideoPost(
+                post
+              );
+
             /*
              * This should never happen because
              * filterVideoPosts() removes them.
              *
              * Keeping the guard makes the component
-             * safe if the API changes later.
+             * safe if the API changes later. A locked
+             * premium video legitimately has no
+             * imageUrl (redacted server-side) and is
+             * rendered as its own locked slide below,
+             * not dropped.
              */
             if (
-              !realVideo ||
-              gif
+              !locked &&
+              (!realVideo || gif)
             ) {
               return null;
             }
@@ -867,44 +1120,93 @@ export default function VideoFeedViewer({
                 key={post.id}
                 className="relative h-full w-full snap-start snap-always flex items-center justify-center"
               >
-                {/* REAL VIDEO ONLY */}
-                <video
-                  ref={(el) => {
-                    videoRefs.current[
-                      post.id
-                    ] = el;
-                  }}
-                  src={
-                    post.imageUrl
-                  }
-                  className="max-h-full max-w-full object-contain"
-                  loop
-                  muted={
-                    muted
-                  }
-                  playsInline
-                  webkit-playsinline="true"
-                  preload="metadata"
-                  controls={false}
-                  onClick={(
-                    e
-                  ) => {
-                    e.stopPropagation();
+                {/* REAL VIDEO, OR A LOCKED-PREMIUM SLIDE.
+                    ⚠️ SECURITY: `locked` is true only when the server
+                    already redacted `imageUrl` to null (see
+                    src/lib/premium-content.ts) - never rendered a
+                    <video> at all in that case, so the real media URL
+                    never reaches the client for a post the viewer
+                    hasn't purchased. */}
+                {locked ? (
+                  <div className="flex flex-col items-center gap-3 px-8 text-center text-white">
+                    <div className="rounded-full bg-white/10 p-4">
+                      <Lock className="w-8 h-8" />
+                    </div>
 
-                    const el =
-                      e.currentTarget;
+                    <p className="font-semibold">
+                      {t(
+                        "shorts.premiumLockedTitle"
+                      )}
+                    </p>
 
-                    if (
-                      el.paused
-                    ) {
-                      el.play().catch(
-                        () => {}
-                      );
-                    } else {
-                      el.pause();
+                    {post.premiumPost && (
+                      <p className="text-sm text-white/70">
+                        {t(
+                          "shorts.premiumLockedBody",
+                          {
+                            price:
+                              post
+                                .premiumPost
+                                .price,
+                            currency:
+                              post
+                                .premiumPost
+                                .currency,
+                          }
+                        )}
+                      </p>
+                    )}
+
+                    <Link
+                      href={`/post/${post.id}`}
+                      onClick={onClose}
+                      className="mt-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium hover:bg-white/25 transition"
+                    >
+                      {t(
+                        "shorts.premiumLockedCta"
+                      )}
+                    </Link>
+                  </div>
+                ) : (
+                  <video
+                    ref={(el) => {
+                      videoRefs.current[
+                        post.id
+                      ] = el;
+                    }}
+                    src={
+                      post.imageUrl ??
+                      undefined
                     }
-                  }}
-                />
+                    className="max-h-full max-w-full object-contain"
+                    loop
+                    muted={
+                      muted
+                    }
+                    playsInline
+                    webkit-playsinline="true"
+                    preload="metadata"
+                    controls={false}
+                    onClick={(
+                      e
+                    ) => {
+                      e.stopPropagation();
+
+                      const el =
+                        e.currentTarget;
+
+                      if (
+                        el.paused
+                      ) {
+                        el.play().catch(
+                          () => {}
+                        );
+                      } else {
+                        el.pause();
+                      }
+                    }}
+                  />
+                )}
 
                 {/* ─────────────────────────────────────────────
                     OVERLAY
@@ -1022,7 +1324,8 @@ export default function VideoFeedViewer({
                           )
                         }
                         className="flex flex-col items-center gap-1"
-                        aria-label="Like"
+                        aria-label={t("shorts.like")}
+                        aria-pressed={!!post.liked}
                       >
                         <Heart
                           className={`w-7 h-7 ${
@@ -1061,8 +1364,23 @@ export default function VideoFeedViewer({
                       </Link>
 
                       {/* REPOST */}
-                      <div className="flex flex-col items-center gap-1">
-                        <Repeat className="w-7 h-7" />
+                      <button
+                        onClick={() =>
+                          handleRepost(
+                            post.id
+                          )
+                        }
+                        className="flex flex-col items-center gap-1"
+                        aria-label={t("shorts.repost")}
+                        aria-pressed={!!post.reposted}
+                      >
+                        <Repeat
+                          className={`w-7 h-7 ${
+                            post.reposted
+                              ? "text-green-500"
+                              : ""
+                          }`}
+                        />
 
                         <span className="text-xs">
                           {formatCount(
@@ -1071,7 +1389,31 @@ export default function VideoFeedViewer({
                               .reposts
                           )}
                         </span>
-                      </div>
+                      </button>
+
+                      {/* SAVE */}
+                      <button
+                        onClick={() =>
+                          handleBookmark(
+                            post.id
+                          )
+                        }
+                        disabled={
+                          bookmarkLoading ===
+                          post.id
+                        }
+                        className="flex flex-col items-center gap-1"
+                        aria-label={t("nav.bookmarks")}
+                        aria-pressed={!!post.bookmarked}
+                      >
+                        <Bookmark
+                          className={`w-7 h-7 ${
+                            post.bookmarked
+                              ? "fill-white text-white"
+                              : ""
+                          }`}
+                        />
+                      </button>
 
                       {/* SHARE */}
                       <button
@@ -1081,7 +1423,7 @@ export default function VideoFeedViewer({
                           )
                         }
                         className="flex flex-col items-center gap-1"
-                        aria-label="Share"
+                        aria-label={t("shorts.share")}
                       >
                         <Share2 className="w-7 h-7" />
                       </button>
