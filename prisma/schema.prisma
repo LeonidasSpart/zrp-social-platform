@@ -3069,6 +3069,19 @@ model DiscoverEvent {
   userId String?
   user   User?   @relation("DiscoverEventUser", fields: [userId], references: [id], onDelete: SetNull)
 
+  // ⚠️ SECURITY: the anonymous-caller half of DiscoverEventService's
+  // dedup window (src/lib/discover/events.ts). userId alone cannot
+  // dedup a signed-out caller - every anonymous request has
+  // userId: null, so a scripted caller with no session could otherwise
+  // spam unlimited IMPRESSION/START rows for the same post with zero
+  // dedup, undermining the exact rank-inflation defense this table
+  // exists for. Populated ONLY when userId is null (never store an IP
+  // alongside a request we can already attribute to a real account -
+  // minimizes retained PII to what's actually needed) - resolved via
+  // the same trusted-proxy getRequestIp() every other rate-limited
+  // route already uses, never trusted from a client-supplied field.
+  ip String?
+
   eventType DiscoverEventType
 
   // Client-reported elapsed playback time at the moment of this event,
@@ -3082,9 +3095,10 @@ model DiscoverEvent {
   createdAt DateTime @default(now())
 
   // Powers the dedup window in DiscoverEventService (one IMPRESSION/
-  // START per viewer per post per short window) and the future
+  // START per viewer-or-IP per post per short window) and the future
   // avg-watch-time/completion-rate/skip-rate aggregation queries.
   @@index([postId, eventType])
   @@index([postId, createdAt])
   @@index([userId, postId, eventType, createdAt])
+  @@index([ip, postId, eventType, createdAt])
 }

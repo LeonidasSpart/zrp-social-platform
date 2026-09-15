@@ -6,6 +6,7 @@ CREATE TABLE "DiscoverEvent" (
     "id" TEXT NOT NULL,
     "postId" TEXT NOT NULL,
     "userId" TEXT,
+    "ip" TEXT,
     "eventType" "DiscoverEventType" NOT NULL,
     "watchedMs" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -21,6 +22,9 @@ CREATE INDEX "DiscoverEvent_postId_createdAt_idx" ON "DiscoverEvent"("postId", "
 
 -- CreateIndex
 CREATE INDEX "DiscoverEvent_userId_postId_eventType_createdAt_idx" ON "DiscoverEvent"("userId", "postId", "eventType", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "DiscoverEvent_ip_postId_eventType_createdAt_idx" ON "DiscoverEvent"("ip", "postId", "eventType", "createdAt");
 
 -- AddForeignKey
 ALTER TABLE "DiscoverEvent" ADD CONSTRAINT "DiscoverEvent_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
