@@ -180,6 +180,7 @@
 "action.repost" = "リポスト";
 "action.reply" = "返信";
 "action.delete" = "削除";
+"action.copy" = "コピー";
 "action.cancel" = "キャンセル";
 "action.retry" = "再試行";
 "action.loading" = "読み込み中...";

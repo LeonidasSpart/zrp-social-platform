@@ -180,6 +180,7 @@
 "action.repost" = "Reposten";
 "action.reply" = "Antworten";
 "action.delete" = "Löschen";
+"action.copy" = "Kopieren";
 "action.cancel" = "Abbrechen";
 "action.retry" = "Erneut versuchen";
 "action.loading" = "Wird geladen...";

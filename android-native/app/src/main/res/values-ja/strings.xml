@@ -359,6 +359,7 @@
     <string name="home_refresh_feed_cd">フィードを更新</string>
     <string name="action_edit">編集</string>
     <string name="action_reply">返信</string>
+    <string name="action_copy">コピー</string>
     <string name="feed_for_you">おすすめ</string>
     <string name="feed_following">フォロー中</string>
     <string name="search_placeholder">ユーザー、投稿、ハッシュタグを検索...</string>

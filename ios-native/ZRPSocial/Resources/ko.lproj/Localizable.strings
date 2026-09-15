@@ -180,6 +180,7 @@
 "action.repost" = "리포스트";
 "action.reply" = "답글";
 "action.delete" = "삭제";
+"action.copy" = "복사";
 "action.cancel" = "취소";
 "action.retry" = "다시 시도";
 "action.loading" = "로딩 중...";

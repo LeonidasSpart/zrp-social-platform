@@ -46,6 +46,7 @@ const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
 import QuotePostModal from "./QuotePostModal";
 import VideoFeedViewer from "./VideoFeedViewer";
 import LinkPreviewCard from "./LinkPreviewCard";
+import ParsedContent from "./ParsedContent";
 import Poll from "./Poll";
 import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -1993,7 +1994,7 @@ export default function PostCard({
                       </div>
 
                       <p className="mt-1 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words line-clamp-6">
-                        {post.quotePost.content}
+                        <ParsedContent content={post.quotePost.content} />
                       </p>
 
                       {(post.quotePost.imageUrl || post.quotePost.imageUrls?.length) && (

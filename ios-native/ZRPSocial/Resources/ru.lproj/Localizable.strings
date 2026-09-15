@@ -180,6 +180,7 @@
 "action.repost" = "Репост";
 "action.reply" = "Ответить";
 "action.delete" = "Удалить";
+"action.copy" = "Копировать";
 "action.cancel" = "Отмена";
 "action.retry" = "Повторить";
 "action.loading" = "Загрузка...";

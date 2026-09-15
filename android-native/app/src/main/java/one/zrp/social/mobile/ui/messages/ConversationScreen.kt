@@ -80,11 +80,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -105,8 +107,10 @@ import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ImageLightbox
+import one.zrp.social.mobile.ui.components.LinkPreviewBlock
 import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.extractFirstUrl
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
@@ -1097,6 +1101,21 @@ private fun MessageBubble(
     onHashtagClick: (String) -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
+    val clipboard = LocalClipboardManager.current
+
+    // Matches PostCard's own previewUrl/linkPreviewFound pair - no
+    // preview for an image message (there's nothing left to unfurl),
+    // and the matching raw URL token in the bubble's own LinkifiedText
+    // is hidden only once the card below it actually found something.
+    val previewUrl = remember(message.id, message.content, message.imageUrl) {
+        if (message.imageUrl == null && message.content.isNotBlank()) {
+            extractFirstUrl(message.content)
+        } else {
+            null
+        }
+    }
+    var linkPreviewFound by remember(message.id) { mutableStateOf(false) }
+
     // Web's ChatInterface.tsx has a working lightbox on every received
     // message image (its own lightboxImage state); this bubble's image
     // attachment previously had no tap handler at all, so nothing opened.
@@ -1170,6 +1189,14 @@ private fun MessageBubble(
                             // matching the composer's own attachment
                             // icons on this same bubble.
                             linkColor = if (isOwnMessage) Color.White else ZrpRed,
+                            suppressUrl = if (linkPreviewFound) previewUrl else null,
+                        )
+                    }
+
+                    if (previewUrl != null) {
+                        LinkPreviewBlock(
+                            url = previewUrl,
+                            onLoaded = { found -> linkPreviewFound = found },
                         )
                     }
 
@@ -1280,6 +1307,20 @@ private fun MessageBubble(
                     text = { Text(stringResource(R.string.action_reply)) },
                     onClick = { menuOpen = false; onReplyClick() },
                 )
+                // There was previously no way at all to copy a message's
+                // text natively - only the website had this. Copies the
+                // real message content, matching the exact text that was
+                // sent, never any UI chrome (timestamp, read receipts,
+                // reactions) around it.
+                if (message.content.isNotBlank()) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.action_copy)) },
+                        onClick = {
+                            menuOpen = false
+                            clipboard.setText(AnnotatedString(message.content))
+                        },
+                    )
+                }
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.reaction_react_action)) },
                     onClick = { menuOpen = false; onAddReactionClick() },

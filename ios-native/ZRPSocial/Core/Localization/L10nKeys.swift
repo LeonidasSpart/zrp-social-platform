@@ -368,6 +368,8 @@ enum L10nKey: String, CaseIterable {
     case actionReply = "action.reply"
     /// en: "Delete"
     case actionDelete = "action.delete"
+    /// en: "Copy"
+    case actionCopy = "action.copy"
     /// en: "Cancel"
     case actionCancel = "action.cancel"
     /// en: "Retry"

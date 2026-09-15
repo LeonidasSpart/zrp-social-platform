@@ -180,6 +180,7 @@
 "action.repost" = "转发";
 "action.reply" = "回复";
 "action.delete" = "删除";
+"action.copy" = "复制";
 "action.cancel" = "取消";
 "action.retry" = "重试";
 "action.loading" = "加载中...";

@@ -372,6 +372,7 @@
     <string name="home_refresh_feed_cd">Refresh feed</string>
     <string name="action_edit">Edit</string>
     <string name="action_reply">Reply</string>
+    <string name="action_copy">Copy</string>
     <string name="feed_for_you">For you</string>
     <string name="feed_following">Following</string>
     <string name="search_placeholder">Search users, posts, hashtags...</string>

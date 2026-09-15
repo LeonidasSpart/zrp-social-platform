@@ -246,4 +246,14 @@ describe("extractFirstUrl", () => {
   it("returns null for empty content", () => {
     expect(extractFirstUrl("")).toBeNull();
   });
+
+  // Regression: the exact message shape ChatInterface/GroupChatInterface
+  // send through this function to decide whether to render a
+  // LinkPreviewCard under a message bubble - the mandatory Google Play
+  // test case from the messaging/link-previews mission.
+  it("extracts the Google Play URL out of a real message string", () => {
+    expect(
+      extractFirstUrl("Check this out: https://play.google.com/store/apps/details?id=one.zrp.social")
+    ).toBe("https://play.google.com/store/apps/details?id=one.zrp.social");
+  });
 });

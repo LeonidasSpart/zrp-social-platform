@@ -362,6 +362,7 @@
     <string name="home_refresh_feed_cd">تحديث التغذية</string>
     <string name="action_edit">تعديل</string>
     <string name="action_reply">رد</string>
+    <string name="action_copy">نسخ</string>
     <string name="feed_for_you">لك</string>
     <string name="feed_following">المتابَعون</string>
     <string name="search_placeholder">بحث مستخدمون, منشورات, وسوم...</string>

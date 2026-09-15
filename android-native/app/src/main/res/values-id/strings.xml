@@ -362,6 +362,7 @@
     <string name="home_refresh_feed_cd">Segarkan beranda</string>
     <string name="action_edit">Edit</string>
     <string name="action_reply">Balas</string>
+    <string name="action_copy">Salin</string>
     <string name="feed_for_you">Untuk Anda</string>
     <string name="feed_following">Mengikuti</string>
     <string name="search_placeholder">Cari pengguna, postingan, tagar...</string>

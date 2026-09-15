@@ -180,6 +180,7 @@
 "action.repost" = "रीपोस्ट करें";
 "action.reply" = "रिप्लाई करें";
 "action.delete" = "डिलीट करें";
+"action.copy" = "कॉपी करें";
 "action.cancel" = "रद्द करें";
 "action.retry" = "फिर से कोशिश करें";
 "action.loading" = "लोड हो रहा है...";
