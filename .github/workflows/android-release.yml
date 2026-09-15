@@ -78,14 +78,23 @@ jobs:
           java-version: "21"
 
       # GitHub-hosted ubuntu-latest runners ship with the Android SDK
-      # preinstalled (ANDROID_HOME already set, cmdline-tools on PATH),
-      # so no separate SDK setup step is needed here. This used to run
-      # android-actions/setup-android@v3, which was removed because its
-      # bootstrap unconditionally calls `sdkmanager tools` - the legacy
-      # "tools" package Google has since dropped entirely from the SDK
-      # repository - making every build fail at this step with "Failed
-      # to find package 'tools'" regardless of anything in this
-      # workflow. The licenses/platform install below is unaffected.
+      # preinstalled (ANDROID_HOME already set) but do NOT put its
+      # cmdline-tools/sdkmanager on PATH by default - this step adds it.
+      # This replaces android-actions/setup-android@v3, which used to do
+      # that PATH setup for us but was removed because its own bootstrap
+      # unconditionally calls `sdkmanager tools` - the legacy "tools"
+      # package Google has since dropped entirely from the SDK
+      # repository - which made every build fail with "Failed to find
+      # package 'tools'" regardless of anything in this workflow. The
+      # cmdline-tools version directory name isn't stable across runner
+      # image updates, so this locates it dynamically rather than
+      # hardcoding a path.
+      - name: Add Android SDK cmdline-tools to PATH
+        run: |
+          SDKMANAGER_DIR=$(dirname "$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 2 -name sdkmanager -type f | sort -V | tail -n1)")
+          echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+
       - name: Accept SDK licenses and install platform 36
         run: |
           yes | sdkmanager --licenses > /dev/null || true
