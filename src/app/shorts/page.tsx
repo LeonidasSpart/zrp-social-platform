@@ -28,6 +28,11 @@ import ShortUploadModal from "@/components/ShortUploadModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCaptionDisplayState } from "@/lib/shortsCaption";
 import { belongsInVideoFeed, isLockedPremiumVideoPost } from "@/lib/video-feed";
+import {
+  getStoredSoundPreference,
+  setStoredSoundPreference,
+  playRespectingSoundPreference,
+} from "@/lib/video-sound-preference";
 
 interface ShortPost {
   id: string;
@@ -315,8 +320,10 @@ export default function ShortsPage() {
     setLoadingMore,
   ] = useState(false);
 
+  // Starts from the viewer's own stored preference (shared with
+  // VideoFeedViewer and Discover) rather than always muted.
   const [muted, setMuted] =
-    useState(true);
+    useState(() => !getStoredSoundPreference());
 
   // Per-Short, so scrolling to the next one starts collapsed again and
   // an expanded caption never leaks across slides.
@@ -634,35 +641,64 @@ export default function ShortsPage() {
   // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    Object.entries(
-      videoRefs.current
-    ).forEach(
-      ([id, el]) => {
-        if (!el) {
-          return;
-        }
+    const playActive = () => {
+      Object.entries(
+        videoRefs.current
+      ).forEach(
+        ([id, el]) => {
+          if (!el) {
+            return;
+          }
 
+          const activePost =
+            videos[
+              activeIndex
+            ];
+
+          if (
+            activePost &&
+            id ===
+              activePost.id
+          ) {
+            playRespectingSoundPreference(el, !muted, () =>
+              setMuted(true)
+            );
+          } else {
+            el.pause();
+          }
+        }
+      );
+    };
+
+    // A backgrounded browser tab was never told to pause - the active
+    // video (and its audio, if unmuted) kept playing behind the scenes.
+    // Pausing on hide and resuming (respecting the current sound
+    // preference) on return matches every mainstream video product.
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
         const activePost =
-          videos[
-            activeIndex
-          ];
-
-        if (
-          activePost &&
-          id ===
-            activePost.id
-        ) {
-          el.muted =
-            muted;
-
-          el.play().catch(
-            () => {}
-          );
-        } else {
-          el.pause();
-        }
+          videos[activeIndex];
+        const el = activePost
+          ? videoRefs.current[activePost.id]
+          : null;
+        el?.pause();
+      } else {
+        playActive();
       }
+    };
+
+    playActive();
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
     );
+    return () => {
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+    };
   }, [
     activeIndex,
     videos,
@@ -1300,9 +1336,11 @@ export default function ShortsPage() {
           0 && (
           <button
             onClick={() =>
-              setMuted(
-                (m) => !m
-              )
+              setMuted((m) => {
+                const next = !m;
+                setStoredSoundPreference(!next);
+                return next;
+              })
             }
             className="text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
             aria-label={

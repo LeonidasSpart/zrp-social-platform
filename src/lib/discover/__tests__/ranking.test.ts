@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scoreCandidate, rankCandidates } from "../ranking";
+import { scoreCandidate, rankCandidates, getDiscoverReason } from "../ranking";
 import type { DiscoverCandidatePost } from "../types";
 
 function candidate(overrides: Partial<DiscoverCandidatePost> & { id: string }): DiscoverCandidatePost {
@@ -87,5 +87,42 @@ describe("DiscoverRankingService", () => {
 
     expect(ranked1).toEqual(["first", "second", "third"]);
     expect(ranked1).toEqual(ranked2);
+  });
+});
+
+describe("getDiscoverReason", () => {
+  it("returns 'recent' for a post younger than the threshold", () => {
+    const post = candidate({ id: "fresh", createdAt: hoursAgo(1) });
+    expect(getDiscoverReason(post, NOW)).toBe("recent");
+  });
+
+  it("returns 'popular' for a post older than the threshold - it can only rank this high on real engagement", () => {
+    const post = candidate({ id: "old", createdAt: hoursAgo(48) });
+    expect(getDiscoverReason(post, NOW)).toBe("popular");
+  });
+
+  it("never returns a third, fabricated reason - always exactly 'recent' or 'popular'", () => {
+    const posts = [
+      candidate({ id: "a", createdAt: hoursAgo(0) }),
+      candidate({ id: "b", createdAt: hoursAgo(6) }),
+      candidate({ id: "c", createdAt: hoursAgo(1000) }),
+    ];
+    for (const post of posts) {
+      expect(["recent", "popular"]).toContain(getDiscoverReason(post, NOW));
+    }
+  });
+
+  it("handles a post whose createdAt round-tripped through the Redis JSON cache as a string, not a Date", () => {
+    // getOrderedFeedList (feed.ts) caches the ranked list in Redis;
+    // getCached's JSON.parse leaves createdAt as an ISO string even
+    // though DiscoverCandidatePost's type still claims Date - toFeedItem
+    // calls getDiscoverReason on exactly this cache-hit data, so this
+    // must not throw the way `post.createdAt.getTime()` would.
+    const cachedShapePost = candidate({ id: "cached", createdAt: hoursAgo(1) });
+    // @ts-expect-error - simulating the real runtime shape after a Redis round-trip
+    cachedShapePost.createdAt = hoursAgo(1).toISOString();
+
+    expect(() => getDiscoverReason(cachedShapePost, NOW)).not.toThrow();
+    expect(getDiscoverReason(cachedShapePost, NOW)).toBe("recent");
   });
 });

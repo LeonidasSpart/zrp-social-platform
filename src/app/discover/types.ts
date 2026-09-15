@@ -42,6 +42,10 @@ export interface DiscoverFeedItemDTO {
   };
   commentsEnabled: boolean;
   createdAt: string;
+  /** The real, honest reason this item ranked where it did - see
+   * DiscoverRankingService.getDiscoverReason. Drives the "Why am I
+   * seeing this?" affordance. */
+  reason: "recent" | "popular";
   premiumPost?: {
     id: string;
     price: number;
