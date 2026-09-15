@@ -17,6 +17,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { renderArticleBody } from "@/lib/sanitize";
 import { resolveScheduledAt } from "@/lib/scheduled-time";
 import { isTrustedUploadUrl, validateMediaUrls } from "@/lib/media-url";
+import { notifyMentionedUsers } from "@/lib/mentions";
 
 // ─────────────────────────────────────────────────────────────
 // MEDIA HELPERS
@@ -856,6 +857,19 @@ export async function POST(
                 m.slice(1)
             ),
         },
+      });
+    }
+
+    // mentions were previously only stored on Post.mentions and never
+    // notified anyone (confirmed unused "mention" notification type by
+    // audit) - only for a post that's actually live now, never a
+    // scheduled one, so a mentioned user is never notified about
+    // content that isn't published yet.
+    if (mentions.length && post.status === "published") {
+      await notifyMentionedUsers({
+        content,
+        authorId: user.id,
+        postId: post.id,
       });
     }
 

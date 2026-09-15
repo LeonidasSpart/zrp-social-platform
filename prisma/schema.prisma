@@ -520,6 +520,7 @@ model User {
 
   aiConversations AIConversation[]
   aiDailyUsage    AIDailyUsage[]
+  repostDailyUsage RepostDailyUsage[]
 
   adCampaigns   AdCampaign[]   @relation("AdAdvertiser")
   adImpressions AdImpression[] @relation("AdImpressionUser")
@@ -924,6 +925,7 @@ model Notification {
 
   @@index([userId])
   @@index([userId, read])
+  @@index([userId, createdAt])
   @@index([createdAt])
   @@index([fromUserId])
 }
@@ -2092,6 +2094,28 @@ model AIDailyUsage {
 
   messages   Int @default(0)
   tokensUsed Int @default(0)
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// Repost daily quota - atomic reservation, same shape and pattern as
+// AIDailyUsage/reserveAiMessage (src/lib/ai-quota.ts): a single
+// conditional UPDATE the database serialises, so N concurrent repost
+// requests can never all pass a stale pre-increment read. See
+// src/lib/repost-quota.ts for the reservation logic and
+// docs/notifications-social-interactions.md for why this exists (no
+// repost quota existed anywhere in the codebase before this model).
+model RepostDailyUsage {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date DateTime @default(now())
+
+  reposts Int @default(0)
 
   @@unique([userId, date])
   @@index([userId])

@@ -176,6 +176,15 @@ app.prepare().then(async () => {
     maxHttpBufferSize: 1024 * 1024,
   });
 
+  // Exposes this instance to Next API routes (src/app/api/**), which run
+  // in the same process via app.getRequestHandler() but have no other
+  // way to reach it - see src/lib/socket-emit.ts, the one place that
+  // reads this back. Never used to relay untrusted data: every emit
+  // through that helper carries a server-verified recipient and a small
+  // "go re-fetch your state" payload, the same pattern already used for
+  // "receive-message".
+  globalThis.__zrpIO = io;
+
   // ─── Socket.IO cross-instance adapter ──────────────────────────────
   // Without this, io.to()/socket.to()/io.emit() only ever reach sockets
   // connected to THIS process. That's invisible with one Railway

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
@@ -29,8 +30,12 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  // Was its own independent fetch+30s-poll loop for both counts,
+  // duplicating UnreadCountContext's own polling and missing its
+  // instant socket-driven updates entirely - Header/BottomNav already
+  // read from this shared context, so Sidebar's badge could silently
+  // disagree with theirs for up to 30s. One source of truth now.
+  const { unreadCount, unreadMessageCount } = useUnreadCount();
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -68,48 +73,6 @@ export default function Sidebar() {
 
   const isAuthenticated = !!session;
   const features = session?.user?.features;
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const fetchUnread = async () => {
-      try {
-        const res = await fetch("/api/notifications/unread");
-
-        if (res.ok) {
-          const data = await res.json();
-          setUnreadCount(data.count);
-        }
-      } catch {}
-    };
-
-    fetchUnread();
-
-    const interval = setInterval(fetchUnread, 30000);
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const fetchUnreadMessages = async () => {
-      try {
-        const res = await fetch("/api/messages/unread");
-
-        if (res.ok) {
-          const data = await res.json();
-          setUnreadMessageCount(data.count);
-        }
-      } catch {}
-    };
-
-    fetchUnreadMessages();
-
-    const interval = setInterval(fetchUnreadMessages, 30000);
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
 
   // Both popovers were dismissable by pointer only - the invisible
   // fixed backdrop each one renders catches a click, but a keyboard
