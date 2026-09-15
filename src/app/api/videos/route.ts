@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { applyPremiumGating } from "@/lib/premium-content";
 // Shared video/GIF/image classifier, also used by ZRP Discover
 // (src/lib/discover/candidates.ts) - see src/lib/video-media.ts for
 // the extracted logic and its priority rules. Behavior here is
@@ -300,6 +301,11 @@ function postSelect() {
 
     commentsEnabled: true,
 
+    // ⚠️ SECURITY: required by applyPremiumGating() below - it needs the
+    // raw authorId to decide "does the viewer own this post" without a
+    // second query. Never returned to the client un-gated (see withLiked).
+    authorId: true,
+
     author: {
       select: {
         id: true,
@@ -346,6 +352,7 @@ async function withLiked(
     const [
       likes,
       reposts,
+      bookmarks,
     ] = await Promise.all([
       prisma.like.findMany({
         where: {
@@ -362,6 +369,20 @@ async function withLiked(
       }),
 
       prisma.repost.findMany({
+        where: {
+          userId,
+
+          postId: {
+            in: postIds,
+          },
+        },
+
+        select: {
+          postId: true,
+        },
+      }),
+
+      prisma.bookmark.findMany({
         where: {
           userId,
 
@@ -392,6 +413,14 @@ async function withLiked(
         )
       );
 
+    const bookmarkedIds =
+      new Set(
+        bookmarks.map(
+          (bookmark) =>
+            bookmark.postId
+        )
+      );
+
     posts.forEach(
       (post) => {
         post.liked =
@@ -403,12 +432,31 @@ async function withLiked(
           repostedIds.has(
             post.id
           );
+
+        post.bookmarked =
+          bookmarkedIds.has(
+            post.id
+          );
       }
     );
   }
 
-  return NextResponse.json({
+  // ⚠️ SECURITY: redact pay-per-view video content the viewer hasn't
+  // purchased before it ever leaves the server - same helper every other
+  // post-listing route uses (src/lib/premium-content.ts). Before this,
+  // /api/videos selected and returned the real `imageUrl` (the playable
+  // video URL) for every post regardless of PremiumPost/PremiumPurchase
+  // status, so a premium/pay-per-view Short was fully playable by anyone
+  // - including a logged-out visitor - who opened Shorts, bypassing the
+  // paywall entirely even though the on-chain purchase flow itself was
+  // real and independently verified.
+  const gatedPosts = await applyPremiumGating(
     posts,
+    userId ?? null
+  );
+
+  return NextResponse.json({
+    posts: gatedPosts,
     nextCursor,
   });
 }

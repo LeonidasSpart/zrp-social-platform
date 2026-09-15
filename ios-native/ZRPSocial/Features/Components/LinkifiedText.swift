@@ -20,6 +20,14 @@ struct LinkifiedText: View {
     /// going to Safari.
     var onZrpLink: ((Route) -> Void)?
 
+    /// Overrides for a surface that renders on its own colored
+    /// background (an own-message chat bubble is ZrpColor.red) - the
+    /// defaults match every existing call site (post/comment/profile
+    /// text on a plain surface) unchanged.
+    var textColor: Color = ZrpColor.onSurface
+    var linkColor: Color = ZrpColor.red
+    var font: Font = .body
+
     /// The scheme is never registered in Info.plist. It exists only as a
     /// marker inside the attributed string and is always consumed by the
     /// handler below, so nothing outside the app can ever be launched
@@ -28,9 +36,9 @@ struct LinkifiedText: View {
 
     var body: some View {
         Text(attributed)
-            .font(.body)
-            .foregroundStyle(ZrpColor.onSurface)
-            .tint(ZrpColor.red)
+            .font(font)
+            .foregroundStyle(textColor)
+            .tint(linkColor)
             .textSelection(.enabled)
             .environment(\.openURL, OpenURLAction { url in
                 guard url.scheme == Self.internalScheme else {
@@ -73,7 +81,7 @@ struct LinkifiedText: View {
         for token in Self.tokens(in: content, includeHashtags: onHashtag != nil, includeMentions: onMention != nil) {
             guard let range = Self.range(of: token, in: &result) else { continue }
             result[range].link = token.url
-            result[range].foregroundColor = ZrpColor.red
+            result[range].foregroundColor = linkColor
         }
         return result
     }

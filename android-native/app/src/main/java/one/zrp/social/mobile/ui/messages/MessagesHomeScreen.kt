@@ -59,6 +59,7 @@ private sealed class SelectedThread {
 fun MessagesHomeScreen(
     currentUserId: String,
     onOpenProfile: (String) -> Unit,
+    onOpenHashtag: (String) -> Unit,
     onOpenGroupInfo: (conversationId: String) -> Unit,
     onNewGroup: () -> Unit,
     callViewModel: CallViewModel,
@@ -93,6 +94,8 @@ fun MessagesHomeScreen(
                     partnerUsername = current.partnerUsername,
                     onBack = { selected = null },
                     onOpenProfile = { onOpenProfile(current.partnerUsername) },
+                    onOpenUserProfile = onOpenProfile,
+                    onOpenHashtag = onOpenHashtag,
                     callViewModel = callViewModel,
                 )
                 is SelectedThread.Group -> GroupConversationScreen(
@@ -101,6 +104,7 @@ fun MessagesHomeScreen(
                     onBack = { selected = null },
                     onOpenInfo = { onOpenGroupInfo(current.conversationId) },
                     onOpenProfile = onOpenProfile,
+                    onOpenHashtag = onOpenHashtag,
                 )
                 null -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     ZrpEmptyState(

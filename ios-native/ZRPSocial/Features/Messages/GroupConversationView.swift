@@ -751,9 +751,18 @@ private struct GroupMessageBubble: View {
                 if !message.content.isEmpty,
                    ChatAttachmentKind.of(message.content) == .image
                        || message.imageUrl?.isEmpty != false {
-                    Text(verbatim: message.content)
-                        .font(.subheadline)
-                        .foregroundStyle(isOwn ? .white : ZrpColor.onSurface)
+                    LinkifiedText(
+                        content: message.content,
+                        onHashtag: { navigator.push(.hashtag(tag: $0)) },
+                        onMention: { navigator.push(.profile(username: $0)) },
+                        onZrpLink: { navigator.push($0) },
+                        // An own-message bubble is ZrpColor.red - the
+                        // default onSurface/red pair would be unreadable
+                        // on it, so both text and link stay white there.
+                        textColor: isOwn ? .white : ZrpColor.onSurface,
+                        linkColor: isOwn ? .white : ZrpColor.red,
+                        font: .subheadline
+                    )
                         .padding(.horizontal, ZrpSpacing.md)
                         .padding(.vertical, ZrpSpacing.sm)
                         .background(isOwn ? ZrpColor.red : ZrpColor.surfaceElevated)
