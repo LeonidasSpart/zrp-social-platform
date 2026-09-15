@@ -152,4 +152,34 @@ describe.skipIf(!hasRealDatabaseUrl)("PUT /api/upgrade-requests/[id] (integratio
     const finalUser = await prisma.user.findUnique({ where: { id: user.id } });
     expect(finalUser?.plan).toBe("free");
   });
+
+  // Subscription lifecycle coverage: approving an UpgradeRequest must not
+  // just flip User.plan (the old behavior) - it must also grant a
+  // time-bounded Subscription period, exactly like the crypto payment
+  // path, and remain idempotent under the same race.
+  it("approving grants a Subscription period, not just User.plan", async () => {
+    const user = await createUser("subgrant");
+    const request = await createUpgradeRequest(user.id, "pro");
+
+    const res = await call(request.id, "approve");
+    expect(res.status).toBe(200);
+
+    const sub = await prisma.subscription.findUnique({ where: { userId: user.id } });
+    expect(sub?.status).toBe("ACTIVE");
+    expect(sub?.plan).toBe("pro");
+    expect(sub?.currentPeriodEnd?.getTime()).toBeGreaterThan(Date.now());
+
+    const payments = await prisma.subscriptionPayment.findMany({ where: { upgradeRequestId: request.id } });
+    expect(payments).toHaveLength(1);
+  });
+
+  it("only one of two concurrent approvals grants a Subscription period (never two)", async () => {
+    const user = await createUser("subrace");
+    const request = await createUpgradeRequest(user.id, "business");
+
+    await Promise.all([call(request.id, "approve"), call(request.id, "approve")]);
+
+    const payments = await prisma.subscriptionPayment.findMany({ where: { upgradeRequestId: request.id } });
+    expect(payments).toHaveLength(1);
+  });
 });

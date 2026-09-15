@@ -1,0 +1,37 @@
+name: Cron - expire subscriptions
+
+# Calls GET /api/cron/expire-subscriptions on a schedule so a paid
+# Subscription whose currentPeriodEnd has passed actually gets marked
+# EXPIRED and the user's plan downgraded to free - see
+# src/lib/subscriptions.ts (expireDueSubscriptions) for the idempotent,
+# concurrency-safe implementation. Same independent-GitHub-Actions-
+# schedule pattern as cron-expire-ad-campaigns.yml / cron-delete-
+# scheduled-accounts.yml, since this repo has no in-repo record of how
+# the two oldest CRON_SECRET routes are invoked in production.
+#
+# Requires the same CRON_SECRET repository secret the other cron
+# workflows already use.
+on:
+  schedule:
+    # Hourly keeps the window between real expiry and enforcement small
+    # without adding real load - one findMany over an indexed
+    # (status, currentPeriodEnd) column plus a handful of per-row
+    # transactions on the (presumably small) set of subscriptions that
+    # actually expired in the last hour.
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the expire-subscriptions cron route
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "https://zrp.one/api/cron/expire-subscriptions"

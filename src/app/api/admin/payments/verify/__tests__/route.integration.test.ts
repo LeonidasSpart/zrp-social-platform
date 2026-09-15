@@ -115,4 +115,35 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/admin/payments/verify (integrati
     const auditRows = await prisma.auditLog.findMany({ where: { targetId: payment.id } });
     expect(auditRows).toHaveLength(1);
   });
+
+  // Subscription lifecycle coverage: verifying a crypto PaymentRequest
+  // must grant a time-bounded Subscription period, not just flip
+  // User.plan, and stay idempotent/race-safe exactly like the plan
+  // change and audit log above.
+  it("verifying grants a Subscription period, not just User.plan", async () => {
+    const user = await createUser("subgrant");
+    const payment = await createPaymentRequest(user.id, "enterprise");
+
+    const res = await call(payment.id);
+    expect(res.status).toBe(200);
+
+    const sub = await prisma.subscription.findUnique({ where: { userId: user.id } });
+    expect(sub?.status).toBe("ACTIVE");
+    expect(sub?.plan).toBe("enterprise");
+    expect(sub?.currentPeriodEnd?.getTime()).toBeGreaterThan(Date.now());
+
+    const payments = await prisma.subscriptionPayment.findMany({ where: { paymentRequestId: payment.id } });
+    expect(payments).toHaveLength(1);
+    expect(payments[0].paymentMethod).toBe("crypto");
+  });
+
+  it("only one of two concurrent verifications grants a Subscription period (never two)", async () => {
+    const user = await createUser("subrace");
+    const payment = await createPaymentRequest(user.id, "pro");
+
+    await Promise.all([call(payment.id), call(payment.id)]);
+
+    const payments = await prisma.subscriptionPayment.findMany({ where: { paymentRequestId: payment.id } });
+    expect(payments).toHaveLength(1);
+  });
 });

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
 import { requireAdmin } from "@/lib/admin";
+import { applyVerifiedPayment, getPlanPrice, toBillingIntervalEnum, type BillingIntervalInput } from "@/lib/subscriptions";
+import type { Plan } from "@/lib/limits";
 
 export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -9,8 +11,13 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
   if (!adminCheck.authorized) return adminCheck.response;
   const session = adminCheck.session;
 
-  const { action } = await req.json(); // "approve" or "deny"
+  const { action, billingInterval } = await req.json(); // action: "approve" | "deny"
   const requestId = params.id;
+  // UpgradeRequest predates billing intervals entirely (it's the older,
+  // free-text manual-upgrade path) and never collects one from the user,
+  // so the approving admin picks it explicitly; defaults to monthly,
+  // matching the only duration this path has ever granted historically.
+  const interval: BillingIntervalInput = billingInterval === "yearly" ? "yearly" : "monthly";
 
   const request = await prisma.upgradeRequest.findUnique({
     where: { id: requestId },
@@ -55,9 +62,20 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
       });
       if (claimed.count === 0) return null;
 
-      await tx.user.update({
-        where: { id: request.userId },
-        data: { plan: request.requestedPlan },
+      // Grants/extends the authoritative Subscription period (writes
+      // User.plan as part of the same call) - see src/lib/subscriptions.ts.
+      // amount is looked up from the plan config, not stored on
+      // UpgradeRequest (this legacy path never collected one).
+      await applyVerifiedPayment(tx, {
+        userId: request.userId,
+        plan: request.requestedPlan as Plan,
+        billingInterval: toBillingIntervalEnum(interval),
+        amount: getPlanPrice(request.requestedPlan, interval),
+        currency: "USDC",
+        paymentMethod: "manual",
+        source: { type: "upgrade_request", id: request.id },
+        actorId: session.user.id,
+        actorUsername: session.user.username ?? null,
       });
 
       await tx.auditLog.create({
