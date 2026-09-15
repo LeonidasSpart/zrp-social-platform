@@ -143,10 +143,16 @@ function toFeedItem(
       badgeType: post.author.badgeType,
     },
     media: {
-      // Never null by the time a post reaches here - fetchCandidatePool's
-      // WHERE clause requires `imageUrl: { not: null }` and re-validates
-      // with isRealVideoPost(), which itself requires a URL.
-      url: post.imageUrl as string,
+      // ⚠️ SECURITY: fetchCandidatePool's WHERE clause and its
+      // isRealVideoPost() re-check guarantee `imageUrl` is a real
+      // string when this post LEAVES the candidate pool - but for a
+      // locked pay-per-view post, applyPremiumGating (called before
+      // toFeedItem, see getDiscoverFeed below) deliberately overwrites
+      // it back to `null` for any viewer who hasn't purchased it. This
+      // must pass that `null` straight through, never fall back to the
+      // real URL - see DiscoverFeedItem.media.url's own comment and the
+      // "redacts a pay-per-view post's real content" regression test.
+      url: post.imageUrl,
       type: "video",
     },
     caption: post.content,

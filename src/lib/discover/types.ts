@@ -55,7 +55,14 @@ export interface DiscoverFeedItem {
     badgeType: string | null;
   };
   media: {
-    url: string;
+    // Nullable - not a normal-content case, only a locked pay-per-view
+    // item: applyPremiumGating (src/lib/premium-content.ts) replaces
+    // imageUrl with null for a premium post the viewer hasn't
+    // purchased, and this is the one field DiscoverFeedItem carries
+    // that value through into (rather than defaulting it back to a
+    // placeholder string), so a client never receives the real video
+    // URL for content it hasn't paid for.
+    url: string | null;
     type: "video";
   };
   caption: string;
