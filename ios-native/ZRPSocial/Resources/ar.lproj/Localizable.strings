@@ -221,6 +221,7 @@
 "postDetail.commentsDisabled" = "💬 التعليقات معطّلة لهذا المنشور.";
 "postDetail.postNotFound" = "المنشور غير موجود";
 "action.edit" = "تعديل";
+"action.copy" = "نسخ";
 "stories.yourStory" = "قصتك";
 "stories.addStory" = "إضافة قصة";
 "stories.whatsOnYourMind" = "بم تفكر؟";

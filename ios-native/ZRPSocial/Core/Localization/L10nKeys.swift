@@ -450,6 +450,8 @@ enum L10nKey: String, CaseIterable {
     case postDetailPostNotFound = "postDetail.postNotFound"
     /// en: "Edit"
     case actionEdit = "action.edit"
+    /// en: "Copy"
+    case actionCopy = "action.copy"
     /// en: "Your Story"
     case storiesYourStory = "stories.yourStory"
     /// en: "Add Story"

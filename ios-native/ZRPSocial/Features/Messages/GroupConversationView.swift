@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 @MainActor
 final class GroupConversationViewModel: ObservableObject {
@@ -768,6 +769,27 @@ private struct GroupMessageBubble: View {
                         .background(isOwn ? ZrpColor.red : ZrpColor.surfaceElevated)
                         .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg))
                         .fixedSize(horizontal: false, vertical: true)
+                        // Group messages had no long-press action at all
+                        // on iOS - unlike 1:1 chat's own .contextMenu,
+                        // there was no way to copy a message's text here
+                        // either. This adds just that, without inventing
+                        // reply/react/edit/delete affordances this screen
+                        // never had.
+                        .contextMenu {
+                            Button {
+                                UIPasteboard.general.string = message.content
+                            } label: {
+                                Label { Text(.actionCopy) } icon: { Image(systemName: "doc.on.doc") }
+                            }
+                        }
+                }
+
+                // Same rule PostCardView's own `linkPreview` uses: no
+                // preview once the message already carries an image, and
+                // only the message's own text is scanned for a link.
+                if message.imageUrl?.isEmpty != false,
+                   let target = FirstURL.first(in: message.content) {
+                    LinkPreviewCard(url: target)
                 }
 
                 Text(verbatim: RelativeTime.compact(from: message.createdAt))

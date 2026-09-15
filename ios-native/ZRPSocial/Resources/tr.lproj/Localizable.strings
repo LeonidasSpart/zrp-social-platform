@@ -221,6 +221,7 @@
 "postDetail.commentsDisabled" = "💬 Bu gönderi için yorumlar devre dışı.";
 "postDetail.postNotFound" = "Gönderi bulunamadı";
 "action.edit" = "Düzenle";
+"action.copy" = "Kopyala";
 "stories.yourStory" = "Hikayen";
 "stories.addStory" = "Hikaye Ekle";
 "stories.whatsOnYourMind" = "Aklından ne geçiyor?";

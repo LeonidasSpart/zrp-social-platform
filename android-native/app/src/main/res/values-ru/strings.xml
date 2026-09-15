@@ -362,6 +362,7 @@
     <string name="home_refresh_feed_cd">Обновить ленту</string>
     <string name="action_edit">Изменить</string>
     <string name="action_reply">Ответить</string>
+    <string name="action_copy">Копировать</string>
     <string name="feed_for_you">Для вас</string>
     <string name="feed_following">Подписки</string>
     <string name="search_placeholder">поиск пользователей, публикаций, хэштегов...</string>

@@ -362,6 +362,7 @@
     <string name="home_refresh_feed_cd">Akışı yenile</string>
     <string name="action_edit">Düzenle</string>
     <string name="action_reply">Yanıtla</string>
+    <string name="action_copy">Kopyala</string>
     <string name="feed_for_you">Senin için</string>
     <string name="feed_following">Takip Edilenler</string>
     <string name="search_placeholder">Kullanıcı, gönderi, hashtag ara...</string>

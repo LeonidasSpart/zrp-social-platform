@@ -18,6 +18,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ReportModal from "@/components/ReportModal";
+import ParsedContent from "@/components/ParsedContent";
 import {
   CATEGORY_META,
   formatListingPrice,
@@ -212,7 +213,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               {t("marketplace.description")}
             </h2>
             <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-              {listing.description}
+              <ParsedContent content={listing.description} />
             </p>
           </div>
         </div>

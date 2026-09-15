@@ -519,6 +519,15 @@ private struct MessageBubble: View {
                     font: .subheadline
                 )
             }
+            // Same rule PostCardView's own `linkPreview` uses: no
+            // preview once the message already carries an image, and
+            // only the message's own text is scanned for a link -
+            // messages had no preview card at all until now, despite
+            // this exact, already-working component.
+            if message.imageUrl?.isEmpty != false,
+               let target = FirstURL.first(in: message.content) {
+                LinkPreviewCard(url: target)
+            }
         }
             .padding(.horizontal, ZrpSpacing.md)
             .padding(.vertical, ZrpSpacing.sm)
@@ -527,6 +536,17 @@ private struct MessageBubble: View {
             .contextMenu {
                 Button(action: onReply) {
                     Label { Text(.iosChatReply) } icon: { Image(systemName: "arrowshape.turn.up.left") }
+                }
+                // There was previously no way at all to copy a
+                // message's text - only the website had this. Copies
+                // the real message content, never any surrounding UI
+                // chrome (timestamp, read receipts, reactions).
+                if !message.content.isEmpty {
+                    Button {
+                        UIPasteboard.general.string = message.content
+                    } label: {
+                        Label { Text(.actionCopy) } icon: { Image(systemName: "doc.on.doc") }
+                    }
                 }
                 ForEach(quickReactions, id: \.self) { emoji in
                     Button { onReact(emoji) } label: { Text(verbatim: emoji) }

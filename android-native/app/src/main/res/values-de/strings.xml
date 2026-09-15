@@ -362,6 +362,7 @@
     <string name="home_refresh_feed_cd">Feed aktualisieren</string>
     <string name="action_edit">Bearbeiten</string>
     <string name="action_reply">Antworten</string>
+    <string name="action_copy">Kopieren</string>
     <string name="feed_for_you">Für dich</string>
     <string name="feed_following">Folge ich</string>
     <string name="search_placeholder">Nutzer, Beiträge, Hashtags suchen...</string>

@@ -359,6 +359,7 @@
     <string name="home_refresh_feed_cd">फ़ीड रीफ़्रेश करें</string>
     <string name="action_edit">संपादित करें</string>
     <string name="action_reply">जवाब दें</string>
+    <string name="action_copy">कॉपी करें</string>
     <string name="feed_for_you">आपके लिए</string>
     <string name="feed_following">फ़ॉलोइंग</string>
     <string name="search_placeholder">यूज़र, पोस्ट, हैशटैग खोजें...</string>

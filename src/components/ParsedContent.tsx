@@ -13,6 +13,12 @@ interface ParsedContentProps {
   // is what every existing call site (PostCard included) already
   // assumes a link tap should override, not add to.
   stopPropagation?: boolean;
+  // The exact URL a sibling LinkPreviewCard has already confirmed a
+  // rich card for - that one raw URL token is hidden from the text so
+  // it isn't shown twice (once as plain link text, once as the card),
+  // matching PostCard's own suppression pattern. Any other URL in the
+  // same content still renders normally.
+  suppressUrl?: string | null;
 }
 
 function renderPart(
@@ -20,7 +26,8 @@ function renderPart(
   index: number,
   linkClassName: string,
   urlClassName: string,
-  stopPropagation: boolean
+  stopPropagation: boolean,
+  suppressUrl?: string | null
 ) {
   const onClick = stopPropagation ? (e: React.MouseEvent) => e.stopPropagation() : undefined;
 
@@ -44,6 +51,11 @@ function renderPart(
 
   if (part.type === "url") {
     const href = part.value.startsWith("http") ? part.value : `https://${part.value}`;
+
+    if (suppressUrl && href === suppressUrl) {
+      return null;
+    }
+
     const internalPath = getInternalPath(part.value);
 
     // A URL that names one of ZRP's own pages navigates inside the SPA
@@ -85,12 +97,13 @@ export default function ParsedContent({
   linkClassName = "text-zrp-red hover:underline",
   urlClassName = "text-blue-600 dark:text-blue-400 hover:underline break-all",
   stopPropagation = true,
+  suppressUrl = null,
 }: ParsedContentProps) {
   const parts = parseContent(content);
   return (
     <>
       {parts.map((part, index) =>
-        renderPart(part, index, linkClassName, urlClassName, stopPropagation)
+        renderPart(part, index, linkClassName, urlClassName, stopPropagation, suppressUrl)
       )}
     </>
   );

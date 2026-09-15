@@ -10,6 +10,7 @@ import { getDateLocale } from "@/lib/dateLocale";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ApplyModal from "@/components/opportunity/ApplyModal";
 import ReportModal from "@/components/ReportModal";
+import ParsedContent from "@/components/ParsedContent";
 import { TYPE_META, type OpportunitySummary } from "@/lib/opportunity";
 
 interface ListingDetail extends OpportunitySummary {
@@ -174,7 +175,9 @@ export default function OpportunityListingPage() {
           </div>
         )}
 
-        <p className="mt-5 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{listing.description}</p>
+        <p className="mt-5 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
+          <ParsedContent content={listing.description} />
+        </p>
 
         {listing.poster && (
           <div className="flex min-w-0 items-center gap-2 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">

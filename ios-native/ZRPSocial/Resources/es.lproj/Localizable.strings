@@ -221,6 +221,7 @@
 "postDetail.commentsDisabled" = "💬 Los comentarios están desactivados para esta publicación.";
 "postDetail.postNotFound" = "Publicación no encontrada";
 "action.edit" = "Editar";
+"action.copy" = "Copiar";
 "stories.yourStory" = "Tu historia";
 "stories.addStory" = "Añadir historia";
 "stories.whatsOnYourMind" = "¿Qué estás pensando?";

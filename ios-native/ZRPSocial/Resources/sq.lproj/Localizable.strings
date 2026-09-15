@@ -221,6 +221,7 @@
 "postDetail.commentsDisabled" = "💬 Komentet janë çaktivizuar për këtë postim.";
 "postDetail.postNotFound" = "Postimi nuk u gjet";
 "action.edit" = "Ndrysho";
+"action.copy" = "Kopjo";
 "stories.yourStory" = "Storia jote";
 "stories.addStory" = "Shto Storie";
 "stories.whatsOnYourMind" = "Çfarë po mendon?";

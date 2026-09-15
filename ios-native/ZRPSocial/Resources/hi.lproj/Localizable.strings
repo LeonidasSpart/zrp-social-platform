@@ -221,6 +221,7 @@
 "postDetail.commentsDisabled" = "💬 इस पोस्ट के लिए कमेंट बंद हैं।";
 "postDetail.postNotFound" = "पोस्ट नहीं मिली";
 "action.edit" = "एडिट करें";
+"action.copy" = "कॉपी करें";
 "stories.yourStory" = "आपकी स्टोरी";
 "stories.addStory" = "स्टोरी जोड़ें";
 "stories.whatsOnYourMind" = "आपके मन में क्या है?";

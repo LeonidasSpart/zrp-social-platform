@@ -20,6 +20,8 @@ import {
   Info,
   WifiOff,
   Video,
+  Copy,
+  Check,
 } from "lucide-react";
 import { getSocket } from "@/lib/socket-client";
 import { useUploadThing } from "@/lib/uploadthing-client";
@@ -30,6 +32,8 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import GroupInfoPanel from "@/components/GroupInfoPanel";
 import ConfirmModal from "@/components/ConfirmModal";
 import ParsedContent from "@/components/ParsedContent";
+import LinkPreviewCard from "@/components/LinkPreviewCard";
+import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { hydrateGroupSocketMessage, type RawGroupSocketMessage } from "@/lib/groupMessageHydration";
 import { describeGroupTyping } from "@/lib/groupTyping";
 import type { GroupConversationDetail, GroupParticipantUser } from "@/lib/groupConversationTypes";
@@ -406,6 +410,26 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
   const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null);
   const [activeMessageActions, setActiveMessageActions] = useState<string | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+
+  const handleCopyMessage = async (id: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      return;
+    }
+    setCopiedMessageId(id);
+    window.setTimeout(() => {
+      setCopiedMessageId((current) => (current === id ? null : current));
+    }, 1500);
+  };
+
+  // Maps messageId -> the exact URL a rich preview card was confirmed
+  // for, so that one raw URL token can be hidden from the message text
+  // once the card below it is already showing it (matches PostCard).
+  const [linkPreviewFound, setLinkPreviewFound] = useState<
+    Record<string, string | null>
+  >({});
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -991,6 +1015,12 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                 // as-is, matching 1:1 ChatInterface's own displayContent
                 // rule exactly.
                 const displayContent = message.content && message.content !== "📷 Image" ? message.content : "";
+
+                // No preview for image messages - the image itself is
+                // already the media, and there's nothing left to unfurl.
+                const previewUrl =
+                  !message.imageUrl && displayContent ? extractFirstUrl(displayContent) : null;
+
                 const reactionGroups = groupReactions(message.reactions);
                 const isActive = activeMessageActions === message.id;
                 const senderName = message.sender.name || message.sender.username;
@@ -1066,6 +1096,28 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                             >
                               <Smile className="h-4 w-4" />
                             </button>
+
+                            {displayContent && (
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleCopyMessage(message.id, message.content);
+                                }}
+                                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                aria-label={
+                                  copiedMessageId === message.id
+                                    ? t("chat.messageCopied")
+                                    : t("chat.copyMessage")
+                                }
+                              >
+                                {copiedMessageId === message.id ? (
+                                  <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </button>
+                            )}
 
                             {canDelete(message) && (
                               <button
@@ -1211,8 +1263,22 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                                   ? "underline decoration-white/70 hover:decoration-white break-all"
                                   : "text-blue-600 dark:text-blue-400 hover:underline break-all"
                               }
+                              suppressUrl={linkPreviewFound[message.id] ?? null}
                             />
                           </p>
+                        )}
+
+                        {/* LINK PREVIEW */}
+                        {previewUrl && (
+                          <LinkPreviewCard
+                            url={previewUrl}
+                            onLoaded={(found) =>
+                              setLinkPreviewFound((prev) => ({
+                                ...prev,
+                                [message.id]: found ? previewUrl : null,
+                              }))
+                            }
+                          />
                         )}
 
                         <div

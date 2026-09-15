@@ -221,6 +221,7 @@
 "postDetail.commentsDisabled" = "💬 Kommentare sind für diesen Beitrag deaktiviert.";
 "postDetail.postNotFound" = "Beitrag nicht gefunden";
 "action.edit" = "Bearbeiten";
+"action.copy" = "Kopieren";
 "stories.yourStory" = "Deine Story";
 "stories.addStory" = "Story hinzufügen";
 "stories.whatsOnYourMind" = "Was gibt's Neues?";

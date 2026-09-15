@@ -362,6 +362,7 @@
     <string name="home_refresh_feed_cd">刷新动态</string>
     <string name="action_edit">编辑</string>
     <string name="action_reply">回复</string>
+    <string name="action_copy">复制</string>
     <string name="feed_for_you">为你推荐</string>
     <string name="feed_following">正在关注</string>
     <string name="search_placeholder">搜索 用户, 帖子, 话题标签...</string>

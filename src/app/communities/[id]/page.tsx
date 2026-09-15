@@ -9,6 +9,7 @@ import PostCard from "@/components/PostCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import EmptyState from "@/components/ui/EmptyState";
 import ConfirmModal from "@/components/ConfirmModal";
+import ParsedContent from "@/components/ParsedContent";
 
 const CATEGORY_KEY: Record<string, string> = {
   TRAVEL: "communities.category.travel",
@@ -164,7 +165,9 @@ export default function CommunityDetailPage() {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <p className="text-sm text-gray-600 dark:text-white/70">{community.description}</p>
+        <p className="text-sm text-gray-600 dark:text-white/70">
+          <ParsedContent content={community.description} />
+        </p>
 
         <div className="mt-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-white/50">

@@ -221,6 +221,7 @@
 "postDetail.commentsDisabled" = "💬 此帖子已禁用评论。";
 "postDetail.postNotFound" = "未找到帖子";
 "action.edit" = "编辑";
+"action.copy" = "复制";
 "stories.yourStory" = "你的动态";
 "stories.addStory" = "添加动态";
 "stories.whatsOnYourMind" = "你在想什么?";

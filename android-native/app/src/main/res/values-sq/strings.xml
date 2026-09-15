@@ -362,6 +362,7 @@
     <string name="home_refresh_feed_cd">Rifresko feed-in</string>
     <string name="action_edit">Ndrysho</string>
     <string name="action_reply">Përgjigju</string>
+    <string name="action_copy">Kopjo</string>
     <string name="feed_for_you">Për ju</string>
     <string name="feed_following">Duke ndjekur</string>
     <string name="search_placeholder">Kërko përdorues, postime, hashtags...</string>
