@@ -7,6 +7,7 @@ export interface PlanLimits {
   imagesPerPost: number;
   videoUploadMB: number;
   scheduledPostsPerMonth: number;
+  repostsPerDay: number;
   analytics: 'basic' | 'advanced' | 'full' | 'custom';
   verifiedBadge: boolean;
   customProfileUrl: boolean;
@@ -28,6 +29,7 @@ export const PLANS: Record<Plan, PlanLimits> = {
     imagesPerPost: 1,
     videoUploadMB: 32,
     scheduledPostsPerMonth: 5,
+    repostsPerDay: 50,
     analytics: 'basic',
     verifiedBadge: false,
     customProfileUrl: false,
@@ -47,6 +49,7 @@ export const PLANS: Record<Plan, PlanLimits> = {
     imagesPerPost: 4,
     videoUploadMB: 100,
     scheduledPostsPerMonth: 50,
+    repostsPerDay: 150,
     analytics: 'advanced',
     verifiedBadge: true,
     customProfileUrl: true,
@@ -66,6 +69,7 @@ export const PLANS: Record<Plan, PlanLimits> = {
     imagesPerPost: 10,
     videoUploadMB: 500,
     scheduledPostsPerMonth: 500,
+    repostsPerDay: 500,
     analytics: 'full',
     verifiedBadge: true,
     customProfileUrl: true,
@@ -85,6 +89,7 @@ export const PLANS: Record<Plan, PlanLimits> = {
     imagesPerPost: 999999,
     videoUploadMB: 2048,
     scheduledPostsPerMonth: 999999,
+    repostsPerDay: 999999,
     analytics: 'custom',
     verifiedBadge: true,
     customProfileUrl: true,

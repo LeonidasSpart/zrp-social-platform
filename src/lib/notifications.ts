@@ -1,11 +1,15 @@
 import { prisma } from "./db";
 import { sendEmail, buildNotificationEmail } from "./email";
+import { isBlockedEitherWay } from "./auth-guards";
+import { emitToUser } from "./socket-emit";
 
 interface CreateNotificationParams {
   userId: string;
   type:
     | "like"
+    | "comment_like"
     | "comment"
+    | "reply"
     | "follow"
     | "repost"
     | "mention"
@@ -56,6 +60,13 @@ const defaultPreferences = {
 
 type Preferences = typeof defaultPreferences;
 
+/**
+ * Returns whether an in-app Notification row was actually created - a
+ * caller that also sends push (a separate delivery channel, see
+ * src/lib/push-notifications.ts) checks this first so a blocked/muted
+ * relationship or a self-action skips push too, rather than pushing
+ * despite the in-app notification having been suppressed.
+ */
 export async function createNotification({
   userId,
   type,
@@ -67,8 +78,19 @@ export async function createNotification({
   duelId,
   opportunityId,
   campaignId,
-}: CreateNotificationParams) {
-  if (userId === fromUserId) return;
+}: CreateNotificationParams): Promise<boolean> {
+  if (userId === fromUserId) return false;
+
+  // ⚠️ SECURITY/PRIVACY: a blocked-either-way relationship must never
+  // produce a notification in either direction - confirmed missing by
+  // audit (a user who blocked, or was blocked by, the actor could still
+  // get a like/comment/follow/repost/mention notification from them).
+  // This is the single choke point every notification-producing route
+  // goes through, rather than repeating the check in each route.
+  // Ticket/moderation/marketplace/etc. system notifications never carry
+  // a real "actor" a user could have blocked, so this only ever fires
+  // for the genuine social-interaction types.
+  if (await isBlockedEitherWay(userId, fromUserId)) return false;
 
   // ─── 1. Create in‑app notification (always) ──────────────────────
   try {
@@ -85,8 +107,16 @@ export async function createNotification({
     });
   } catch (error) {
     console.error("Error creating notification:", error);
-    return;
+    return false;
   }
+
+  // ─── Realtime: tell any of this user's open tabs/devices a new
+  // notification landed, so the bell badge updates immediately instead
+  // of waiting for the next 30s poll. Deliberately a tiny payload (just
+  // the type) - the client re-fetches the real unread count from
+  // /api/notifications/unread rather than trusting anything in this
+  // event, the same safe pattern already used for "receive-message".
+  emitToUser(userId, "notification:new", { type });
 
   // ─── 2. Check email preferences and send email ────────────────────
   try {
@@ -101,7 +131,9 @@ export async function createNotification({
     // untouched by this change.
     const NEVER_EMAIL_TYPES = new Set([
       "like",
+      "comment_like",
       "comment",
+      "reply",
       "repost",
       "message",
       "mention",
@@ -111,19 +143,21 @@ export async function createNotification({
       "opportunity_new_application",
       "help_new_offer",
     ]);
-    if (NEVER_EMAIL_TYPES.has(type)) return;
+    if (NEVER_EMAIL_TYPES.has(type)) return true;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { email: true, name: true, emailPreferences: true },
     });
 
-    if (!user?.email) return; // no email to send
+    if (!user?.email) return true; // no email to send
 
     const prefs = (user.emailPreferences || defaultPreferences) as Preferences;
     const typeMap: Record<string, keyof Preferences> = {
       like: "likes",
+      comment_like: "likes",
       comment: "comments",
+      reply: "comments",
       follow: "follows",
       repost: "reposts",
       mention: "mentions",
@@ -141,7 +175,7 @@ export async function createNotification({
     // other type already has a typeMap entry today, so the gate below
     // is unchanged for all of them.
     const prefKey = typeMap[type];
-    if (prefKey && prefs[prefKey] === false) return;
+    if (prefKey && prefs[prefKey] === false) return true;
 
     // ─── 3. Fetch actor info ──────────────────────────────────────
     const fromUser = await prisma.user.findUnique({
@@ -155,7 +189,9 @@ export async function createNotification({
     // ─── 4. Define action & emoji per type ──────────────────────────
     const actionMap: Record<string, { action: string; emoji: string }> = {
       like: { action: "liked your post", emoji: "❤️" },
+      comment_like: { action: "liked your comment", emoji: "❤️" },
       comment: { action: "commented on your post", emoji: "💬" },
+      reply: { action: "replied to your comment", emoji: "💬" },
       follow: { action: "started following you", emoji: "👋" },
       repost: { action: "reposted your post", emoji: "🔄" },
       mention: { action: "mentioned you in a post", emoji: "📝" },
@@ -451,7 +487,9 @@ export async function createNotification({
     // ─── 7. Subject ──────────────────────────────────────────────────
     const subjectMap: Record<string, string> = {
       like: `${actorName} liked your post`,
+      comment_like: `${actorName} liked your comment`,
       comment: `${actorName} commented on your post`,
+      reply: `${actorName} replied to your comment`,
       follow: `${actorName} started following you`,
       repost: `${actorName} reposted your post`,
       mention: `${actorName} mentioned you in a post`,
@@ -491,6 +529,8 @@ export async function createNotification({
     // Log but don't fail: the in‑app notification already exists.
     console.error("Error sending email notification:", error);
   }
+
+  return true;
 }
 
 // ─── Helper functions for ticket notifications ──────────────────────
