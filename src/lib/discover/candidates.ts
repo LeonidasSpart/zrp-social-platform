@@ -32,6 +32,7 @@
 import { prisma } from "@/lib/db";
 import { viewablePostAuthorFilter } from "@/lib/permissions";
 import { isRealVideoPost } from "@/lib/video-media";
+import { getDismissedPostIds } from "./dismissals";
 import type { DiscoverCandidatePost } from "./types";
 
 // Matches /api/posts/explore's own candidate pool size - large enough
@@ -102,17 +103,26 @@ function candidateSelect() {
  * "video"`) - the DB filter on `mediaType: "video"` alone is not
  * sufficient, same reasoning /api/videos documents for its own
  * equivalent step.
+ *
+ * Also excludes posts the viewer has individually dismissed via "Not
+ * interested" (DiscoverDismissalService) - content-level, unlike the
+ * author-level blocked/muted exclusion above, so dismissing one post
+ * doesn't hide everything else from that creator.
  */
 export async function fetchCandidatePool(
   viewerId: string | null | undefined
 ): Promise<DiscoverCandidatePost[]> {
-  const excludedAuthorIds = await getExcludedAuthorIds(viewerId);
+  const [excludedAuthorIds, dismissedPostIds] = await Promise.all([
+    getExcludedAuthorIds(viewerId),
+    getDismissedPostIds(viewerId),
+  ]);
 
   const posts = await prisma.post.findMany({
     take: CANDIDATE_POOL_SIZE,
     orderBy: { createdAt: "desc" },
     where: {
       authorId: { notIn: excludedAuthorIds },
+      id: { notIn: dismissedPostIds },
       status: "published",
       scheduledAt: null,
       mediaType: "video",

@@ -60,6 +60,24 @@ export function scoreCandidate(post: DiscoverCandidatePost, now: number = Date.n
   return engagement / ageHours;
 }
 
+// A post surfaces into a ranked page for exactly one of two reasons,
+// given score = engagement / ageHours: it's new enough that freshness
+// is carrying it (the age divisor is still small), or it's old enough
+// that it could only have ranked this high on real engagement (the age
+// divisor is already large, so the numerator must be too). This
+// threshold is the boundary "Why am I seeing this?" uses to pick
+// between t("discover.reasonRecent") and t("discover.reasonPopular") -
+// never a third, fabricated reason (no follow/watch-history signal
+// exists in scoreCandidate() to honestly claim either of those).
+const RECENT_REASON_THRESHOLD_HOURS = 6;
+
+export type DiscoverReason = "recent" | "popular";
+
+export function getDiscoverReason(post: DiscoverCandidatePost, now: number = Date.now()): DiscoverReason {
+  const ageHours = (now - post.createdAt.getTime()) / (1000 * 60 * 60);
+  return ageHours < RECENT_REASON_THRESHOLD_HOURS ? "recent" : "popular";
+}
+
 /**
  * Scores every candidate and stable-sorts descending. Array.prototype.sort
  * in every JS engine ZRP runs on is a stable sort, so candidates that tie

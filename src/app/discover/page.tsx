@@ -19,6 +19,11 @@ import ReportModal from "@/components/ReportModal";
 import DiscoverSlide from "@/components/discover/DiscoverSlide";
 import DiscoverCommentsSheet from "@/components/discover/DiscoverCommentsSheet";
 import {
+  getStoredSoundPreference,
+  setStoredSoundPreference,
+  playRespectingSoundPreference,
+} from "@/lib/video-sound-preference";
+import {
   getProgressEventsToFire,
   shouldFireImpression,
   shouldFireSkip,
@@ -52,7 +57,9 @@ export default function DiscoverPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [paginationError, setPaginationError] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [muted, setMuted] = useState(true);
+  // Starts from the viewer's own stored preference (shared with Shorts
+  // and VideoFeedViewer) rather than always muted.
+  const [muted, setMuted] = useState(() => !getStoredSoundPreference());
   const [activePostId, setActivePostId] = useState<string | null>(null);
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
   const [reportPostId, setReportPostId] = useState<string | null>(null);
@@ -321,15 +328,36 @@ export default function DiscoverPage() {
 
   // ── Play only the active video, pause every other loaded one ─────
   useEffect(() => {
-    Object.entries(videoRefs.current).forEach(([id, el]) => {
-      if (!el) return;
-      if (id === activePostId) {
-        el.muted = muted;
-        el.play().catch(() => {});
+    const playActive = () => {
+      Object.entries(videoRefs.current).forEach(([id, el]) => {
+        if (!el) return;
+        if (id === activePostId) {
+          playRespectingSoundPreference(el, !muted, () => setMuted(true));
+        } else {
+          el.pause();
+        }
+      });
+    };
+
+    // A backgrounded browser tab was never told to pause - the active
+    // video (and its audio, if unmuted) kept playing behind the scenes.
+    // Pausing on hide and resuming (respecting the current sound
+    // preference) on return matches every mainstream video product.
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        const el = activePostId ? videoRefs.current[activePostId] : null;
+        el?.pause();
       } else {
-        el.pause();
+        playActive();
       }
-    });
+    };
+
+    playActive();
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [activePostId, muted]);
 
   const registerVideoEl = useCallback((id: string, el: HTMLVideoElement | null) => {
@@ -605,6 +633,61 @@ export default function DiscoverPage() {
     [reportPostId, t]
   );
 
+  // "Not interested" - content-level dismissal via the new
+  // DiscoverDismissalService. "Mute creator"/"Block creator" call the
+  // EXISTING /api/users/mute and /api/users/[username]/block endpoints
+  // directly - candidates.ts already excludes both from future Discover
+  // requests, so no new backend is needed for those two, only the UI
+  // entry point and removing their posts from the current session.
+  const handleNotInterested = useCallback(
+    async (postId: string) => {
+      setItems((prev) => prev.filter((it) => it.id !== postId));
+      try {
+        const res = await fetch("/api/discover/not-interested", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ postId }),
+        });
+        setToast(res.ok ? t("discover.notInterestedConfirmed") : t("discover.notInterestedFailed"));
+      } catch {
+        setToast(t("discover.notInterestedFailed"));
+      }
+    },
+    [t]
+  );
+
+  const handleMuteCreator = useCallback(
+    async (item: DiscoverClientItem) => {
+      setItems((prev) => prev.filter((it) => it.author.id !== item.author.id));
+      try {
+        const res = await fetch("/api/users/mute", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: item.author.id }),
+        });
+        setToast(res.ok ? t("discover.creatorMuted") : t("discover.actionFailed"));
+      } catch {
+        setToast(t("discover.actionFailed"));
+      }
+    },
+    [t]
+  );
+
+  const handleBlockCreator = useCallback(
+    async (item: DiscoverClientItem) => {
+      setItems((prev) => prev.filter((it) => it.author.id !== item.author.id));
+      try {
+        const res = await fetch(`/api/users/${item.author.username}/block`, {
+          method: "POST",
+        });
+        setToast(res.ok ? t("discover.creatorBlocked") : t("discover.actionFailed"));
+      } catch {
+        setToast(t("discover.actionFailed"));
+      }
+    },
+    [t]
+  );
+
   const isAuthenticated = !!session;
   const activeIndex = activePostId ? items.findIndex((it) => it.id === activePostId) : -1;
 
@@ -655,7 +738,13 @@ export default function DiscoverPage() {
       {items.length > 0 && (
         <button
           type="button"
-          onClick={() => setMuted((m) => !m)}
+          onClick={() =>
+            setMuted((m) => {
+              const next = !m;
+              setStoredSoundPreference(!next);
+              return next;
+            })
+          }
           className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
           aria-label={muted ? t("shorts.unmute") : t("shorts.mute")}
         >
@@ -741,6 +830,9 @@ export default function DiscoverPage() {
                 onOpenComments={setCommentsPostId}
                 onShare={handleShare}
                 onReport={setReportPostId}
+                onNotInterested={handleNotInterested}
+                onMuteCreator={handleMuteCreator}
+                onBlockCreator={handleBlockCreator}
               />
             </div>
           ))}

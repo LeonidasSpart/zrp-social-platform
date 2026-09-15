@@ -38,7 +38,7 @@ import { prisma } from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
 import { applyPremiumGating } from "@/lib/premium-content";
 import { fetchCandidatePool } from "./candidates";
-import { rankCandidates } from "./ranking";
+import { rankCandidates, getDiscoverReason } from "./ranking";
 import { diversifyByCreator } from "./diversity";
 import type { DiscoverFeedItem, DiscoverFeedPage, ScoredDiscoverPost } from "./types";
 
@@ -172,6 +172,12 @@ function toFeedItem(
     },
     commentsEnabled: post.commentsEnabled,
     createdAt: new Date(post.createdAt).toISOString(),
+    // Computed at response time (not at rank time) - the cached ranked
+    // list can be up to CACHE_TTL_SECONDS old, but the reason is purely
+    // explanatory, never security- or ordering-sensitive, so recomputing
+    // it fresh per request (cheap: one Date subtraction) is simpler than
+    // also caching it and risking it drifting from the real age anyway.
+    reason: getDiscoverReason(post),
     ...(post.premiumPost ? { premiumPost: post.premiumPost } : {}),
   };
 }

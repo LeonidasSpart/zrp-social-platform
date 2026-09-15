@@ -577,7 +577,8 @@ model User {
   listMemberships ListMember[] @relation("ListMemberUser")
 
   // ─── ZRP Discover ────────────────────────────────────────────
-  discoverEvents DiscoverEvent[] @relation("DiscoverEventUser")
+  discoverEvents      DiscoverEvent[]     @relation("DiscoverEventUser")
+  discoverDismissals  DiscoverDismissal[]
 }
 
 model JournalistProfile {
@@ -725,7 +726,8 @@ model Post {
   newsPublication NewsPublication?
 
   // ─── ZRP Discover ────────────────────────────────────────────
-  discoverEvents DiscoverEvent[]
+  discoverEvents     DiscoverEvent[]
+  discoverDismissals DiscoverDismissal[]
 
   @@index([createdAt])
   @@index([authorId])
@@ -3101,4 +3103,29 @@ model DiscoverEvent {
   @@index([postId, createdAt])
   @@index([userId, postId, eventType, createdAt])
   @@index([ip, postId, eventType, createdAt])
+}
+
+// A viewer's "Not interested" on a single Discover post - content-level
+// negative feedback, distinct from Mute/Blocked (both creator-level,
+// already excluded from candidates.ts) and from moderation's Report
+// (which asks staff to act on the content, not "show me less of this").
+// Requires a signed-in viewer (unlike DiscoverEvent, which also accepts
+// anonymous rows) since this is a stored personal preference, not
+// passive analytics - there is nowhere to persist it for a signed-out
+// visitor. Cascade on user deletion: it's that viewer's own preference,
+// nothing else depends on it surviving their account.
+model DiscoverDismissal {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
 }

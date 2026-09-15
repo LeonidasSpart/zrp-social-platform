@@ -82,6 +82,12 @@ export interface DiscoverFeedItem {
   };
   commentsEnabled: boolean;
   createdAt: string;
+  // "recent" | "popular" - the real, honest reason this item ranked
+  // where it did (DiscoverRankingService.getDiscoverReason), shown by
+  // the client's "Why am I seeing this?" affordance. Never a
+  // fabricated personalization reason - scoreCandidate() has no follow/
+  // watch-history signal to honestly claim either of those yet.
+  reason: "recent" | "popular";
   // Present only when premium-gated content redacted this item - same
   // shape applyPremiumGating attaches everywhere else (src/lib/premium-content.ts).
   premiumPost?: {

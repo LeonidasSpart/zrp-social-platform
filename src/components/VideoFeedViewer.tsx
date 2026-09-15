@@ -24,6 +24,11 @@ import {
 } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { belongsInVideoFeed, isLockedPremiumVideoPost } from "@/lib/video-feed";
+import {
+  getStoredSoundPreference,
+  setStoredSoundPreference,
+  playRespectingSoundPreference,
+} from "@/lib/video-sound-preference";
 
 interface VideoPost {
   id: string;
@@ -253,8 +258,11 @@ export default function VideoFeedViewer({
   const [loadingMore, setLoadingMore] =
     useState(false);
 
+  // Starts from the viewer's own stored preference (shared with Shorts
+  // and Discover) rather than always muted - see PLAY ACTIVE VIDEO
+  // below for the audible-autoplay-then-fallback-to-muted handling.
   const [muted, setMuted] =
-    useState(true);
+    useState(() => !getStoredSoundPreference());
 
   const [activeIndex, setActiveIndex] =
     useState(0);
@@ -469,29 +477,58 @@ export default function VideoFeedViewer({
   // ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    Object.entries(
-      videoRefs.current
-    ).forEach(([id, el]) => {
-      if (!el) {
-        return;
-      }
+    const playActive = () => {
+      Object.entries(
+        videoRefs.current
+      ).forEach(([id, el]) => {
+        if (!el) {
+          return;
+        }
 
-      const post =
-        videos[activeIndex];
+        const post =
+          videos[activeIndex];
 
-      if (
-        post &&
-        id === post.id
-      ) {
-        el.muted = muted;
+        if (
+          post &&
+          id === post.id
+        ) {
+          playRespectingSoundPreference(el, !muted, () =>
+            setMuted(true)
+          );
+        } else {
+          el.pause();
+        }
+      });
+    };
 
-        el.play().catch(
-          () => {}
-        );
+    // A backgrounded browser tab was never told to pause - the active
+    // video (and its audio, if unmuted) kept playing behind the scenes.
+    // Pausing on hide and resuming (respecting the current sound
+    // preference) on return matches every mainstream video product.
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        const post = videos[activeIndex];
+        const el = post
+          ? videoRefs.current[post.id]
+          : null;
+        el?.pause();
       } else {
-        el.pause();
+        playActive();
       }
-    });
+    };
+
+    playActive();
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+    return () => {
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+    };
   }, [
     activeIndex,
     videos,
@@ -1041,9 +1078,11 @@ export default function VideoFeedViewer({
       {/* MUTE */}
       <button
         onClick={() =>
-          setMuted(
-            (m) => !m
-          )
+          setMuted((m) => {
+            const next = !m;
+            setStoredSoundPreference(!next);
+            return next;
+          })
         }
         className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
         aria-label={

@@ -14,6 +14,7 @@ import {
   UserPlus,
   Check,
   Clock,
+  X,
 } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ParsedContent from "@/components/ParsedContent";
@@ -43,6 +44,9 @@ interface DiscoverSlideProps {
   onOpenComments: (id: string) => void;
   onShare: (item: DiscoverClientItem) => void;
   onReport: (id: string) => void;
+  onNotInterested: (id: string) => void;
+  onMuteCreator: (item: DiscoverClientItem) => void;
+  onBlockCreator: (item: DiscoverClientItem) => void;
 }
 
 const timeAgoParts = (iso: string): { minutes: number; hours: number; days: number } => {
@@ -67,11 +71,15 @@ export default function DiscoverSlide({
   onOpenComments,
   onShare,
   onReport,
+  onNotInterested,
+  onMuteCreator,
+  onBlockCreator,
 }: DiscoverSlideProps) {
   const { t } = useLanguage();
   const [captionExpanded, setCaptionExpanded] = useState(false);
   const [playbackError, setPlaybackError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [whyOpen, setWhyOpen] = useState(false);
 
   const locked = item.premiumPost?.locked === true;
 
@@ -296,45 +304,128 @@ export default function DiscoverSlide({
               <Share2 className="w-7 h-7" />
             </button>
 
-            {isAuthenticated && !item.isOwnPost && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((v) => !v)}
-                  className="flex flex-col items-center gap-1"
-                  aria-label={t("discover.more")}
-                  aria-haspopup="menu"
-                  aria-expanded={menuOpen}
-                >
-                  <MoreHorizontal className="w-6 h-6" />
-                </button>
+            {/* "Why am I seeing this?" is transparency, available to
+                everyone (including an anonymous or own-post viewer) -
+                the same menu button, but the moderation-adjacent items
+                below it only render for a signed-in viewer looking at
+                someone else's post, same as before. */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="flex flex-col items-center gap-1"
+                aria-label={t("discover.more")}
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+              >
+                <MoreHorizontal className="w-6 h-6" />
+              </button>
 
-                {menuOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setMenuOpen(false)}
-                    />
-                    <div
-                      role="menu"
-                      className="absolute bottom-full end-0 mb-2 w-40 rounded-lg bg-white dark:bg-gray-800 shadow-lg overflow-hidden z-20 text-gray-900 dark:text-white"
+              {menuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setMenuOpen(false)}
+                  />
+                  <div
+                    role="menu"
+                    className="absolute bottom-full end-0 mb-2 w-52 rounded-lg bg-white dark:bg-gray-800 shadow-lg overflow-hidden z-20 text-gray-900 dark:text-white"
+                  >
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setWhyOpen(true);
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
+                      {t("discover.whyAmISeeing")}
+                    </button>
+
+                    {isAuthenticated && !item.isOwnPost && (
+                      <>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            onNotInterested(item.id);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        >
+                          {t("discover.notInterested")}
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            onMuteCreator(item);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        >
+                          {t("discover.muteCreator")}
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            onBlockCreator(item);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        >
+                          {t("discover.blockCreator")}
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            onReport(item.id);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        >
+                          {t("report.modalTitle")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {whyOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setWhyOpen(false)}
+                  />
+                  <div
+                    role="dialog"
+                    aria-label={t("discover.whyAmISeeing")}
+                    className="absolute bottom-full end-0 mb-2 w-64 rounded-lg bg-white dark:bg-gray-800 shadow-lg p-4 z-40 text-gray-900 dark:text-white"
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <p className="font-semibold text-sm">{t("discover.whyAmISeeing")}</p>
                       <button
                         type="button"
-                        role="menuitem"
-                        onClick={() => {
-                          setMenuOpen(false);
-                          onReport(item.id);
-                        }}
-                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        onClick={() => setWhyOpen(false)}
+                        aria-label={t("discover.closeExplanation")}
+                        className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                       >
-                        {t("report.modalTitle")}
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
-                  </>
-                )}
-              </div>
-            )}
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      {item.reason === "recent"
+                        ? t("discover.reasonRecent")
+                        : t("discover.reasonPopular")}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
