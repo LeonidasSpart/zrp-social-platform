@@ -6,13 +6,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Megaphone, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { parseOwnPostsResponse, type OwnPostSummary } from "@/lib/ads/parse-own-posts";
 
-interface OwnPost {
-  id: string;
-  content: string;
-  imageUrl: string | null;
-  imageUrls: string[];
-}
+type OwnPost = OwnPostSummary;
 
 export default function NewAdCampaign() {
   const { data: session } = useSession();
@@ -32,8 +28,8 @@ export default function NewAdCampaign() {
   useEffect(() => {
     if (!session?.user?.username) return;
     fetch(`/api/users/${session.user.username}/posts`)
-      .then((res) => (res.ok ? res.json() : { posts: [] }))
-      .then((data) => setPosts(data.posts || data || []))
+      .then((res) => (res.ok ? res.json() : { items: [] }))
+      .then((data) => setPosts(parseOwnPostsResponse(data)))
       .catch(() => setPosts([]))
       .finally(() => setLoadingPosts(false));
   }, [session?.user?.username]);
@@ -101,10 +97,11 @@ export default function NewAdCampaign() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="ads-new-campaign-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {t("ads.new.campaignName")}
           </label>
           <input
+            id="ads-new-campaign-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -153,10 +150,11 @@ export default function NewAdCampaign() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="ads-new-bid-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t("ads.new.bidType")}
             </label>
             <select
+              id="ads-new-bid-type"
               value={bidType}
               onChange={(e) => setBidType(e.target.value as "CPC" | "CPM")}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -166,10 +164,11 @@ export default function NewAdCampaign() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="ads-new-bid-amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {bidType === "CPC" ? t("ads.new.costPerClick") : t("ads.new.costPer1000Views")}
             </label>
             <input
+              id="ads-new-bid-amount"
               type="number"
               min="0.01"
               step="0.01"
@@ -181,10 +180,11 @@ export default function NewAdCampaign() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="ads-new-budget-total" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {t("ads.new.totalBudget")}
           </label>
           <input
+            id="ads-new-budget-total"
             type="number"
             min="1"
             step="1"
@@ -198,10 +198,11 @@ export default function NewAdCampaign() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="ads-new-target-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {t("ads.new.linkWhenClicked")}
           </label>
           <input
+            id="ads-new-target-url"
             type="url"
             value={targetUrl}
             onChange={(e) => setTargetUrl(e.target.value)}
