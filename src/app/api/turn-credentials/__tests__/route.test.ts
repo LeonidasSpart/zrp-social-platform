@@ -24,6 +24,33 @@ function req(opts: { ip?: string; headers?: Record<string, string> } = {}) {
   });
 }
 
+// Every IP used below must be structurally unique, because this suite
+// deliberately does NOT mock the rate limiter (see the comment at the
+// top of the file) - checkRateLimitKey() is real, and its buckets are
+// keyed by IP and shared across every test case in this file for the
+// lifetime of the process (Redis in CI, an in-memory Map otherwise;
+// see src/lib/rate-limit.ts). A prior version hardcoded literal IPs per
+// test alongside a separately *randomized* IP for the two threshold
+// tests below, and the random range silently overlapped several of the
+// literals - about a 1-in-8 chance per run of an unrelated test
+// inheriting an already-exhausted bucket and failing with an
+// unexplained 429 (observed twice in CI). uniqueIp() makes that class
+// of bug structurally impossible: every call - whether for a one-shot
+// test or a 21-request threshold loop - gets an address nothing else in
+// this file can ever collide with, instead of relying on everyone who
+// edits this file to keep manually picking non-overlapping literals.
+let nextTestIpOctet = 1;
+function uniqueIp(): string {
+  // 203.0.113.0/24 is TEST-NET-3 (RFC 5737) - reserved for documentation
+  // and testing, never a real routable client, and large enough (254
+  // usable host addresses) for every test case here with room to spare.
+  const octet = nextTestIpOctet++;
+  if (octet > 254) {
+    throw new Error("uniqueIp() exhausted 203.0.113.0/24 - widen the range");
+  }
+  return `203.0.113.${octet}`;
+}
+
 // A real Metered TURN REST API response shape: short-lived, per-request
 // username/credential pairs plus plain STUN entries - never the provider
 // API key itself.
@@ -63,21 +90,21 @@ describe("GET /api/turn-credentials", () => {
 
   it("rejects an unauthenticated request with 401", async () => {
     getServerSession.mockResolvedValue(null);
-    const res = await GET(req({ ip: "203.0.113.10" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     expect(res.status).toBe(401);
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it("rejects a session with no user id", async () => {
     getServerSession.mockResolvedValue({ user: {} });
-    const res = await GET(req({ ip: "203.0.113.11" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     expect(res.status).toBe(401);
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it("issues credentials for an authenticated, active user", async () => {
     getServerSession.mockResolvedValue({ user: { id: "user-active-1" } });
-    const res = await GET(req({ ip: "203.0.113.12" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual(FAKE_METERED_RESPONSE);
@@ -91,7 +118,7 @@ describe("GET /api/turn-credentials", () => {
   // proves the existing 401 path is what a banned caller actually hits.
   it("a banned user (no session, per auth.ts's authoritative ban model) is rejected the same way as unauthenticated", async () => {
     getServerSession.mockResolvedValue(null);
-    const res = await GET(req({ ip: "203.0.113.13" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     expect(res.status).toBe(401);
     expect(global.fetch).not.toHaveBeenCalled();
   });
@@ -99,7 +126,7 @@ describe("GET /api/turn-credentials", () => {
   // ─── Rate limiting ─────────────────────────────────────────────────
 
   it("IP rate limit: rejects after the configured per-IP threshold, even for distinct authenticated users sharing an IP", async () => {
-    const ip = `203.0.113.${20 + Math.floor(Math.random() * 50)}`;
+    const ip = uniqueIp();
     const statuses: number[] = [];
     for (let i = 0; i < 21; i++) {
       getServerSession.mockResolvedValue({ user: { id: `distinct-user-${i}` } });
@@ -142,7 +169,7 @@ describe("GET /api/turn-credentials", () => {
     delete process.env.METERED_APP_NAME;
     delete process.env.METERED_API_KEY;
     getServerSession.mockResolvedValue({ user: { id: "user-no-provider" } });
-    const res = await GET(req({ ip: "203.0.113.30" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual([
@@ -155,7 +182,7 @@ describe("GET /api/turn-credentials", () => {
   it("provider failure (non-2xx): falls back to STUN-only rather than surfacing the provider error", async () => {
     global.fetch = vi.fn(async () => new Response("Internal error", { status: 500 })) as unknown as typeof fetch;
     getServerSession.mockResolvedValue({ user: { id: "user-provider-500" } });
-    const res = await GET(req({ ip: "203.0.113.31" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual([
@@ -169,7 +196,7 @@ describe("GET /api/turn-credentials", () => {
       throw new Error(`connect ECONNREFUSED ${process.env.METERED_API_KEY}`);
     }) as unknown as typeof fetch;
     getServerSession.mockResolvedValue({ user: { id: "user-provider-error" } });
-    const res = await GET(req({ ip: "203.0.113.32" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).not.toContain(process.env.METERED_API_KEY);
@@ -184,7 +211,7 @@ describe("GET /api/turn-credentials", () => {
 
   it("response contains only temporary TURN/STUN credentials, never the provider's long-lived API key", async () => {
     getServerSession.mockResolvedValue({ user: { id: "user-shape-check" } });
-    const res = await GET(req({ ip: "203.0.113.40" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     const body = await res.json();
     for (const entry of body) {
       if (entry.credential) {
@@ -197,7 +224,7 @@ describe("GET /api/turn-credentials", () => {
 
   it("the outbound provider request URL is never echoed back to the caller", async () => {
     getServerSession.mockResolvedValue({ user: { id: "user-url-check" } });
-    const res = await GET(req({ ip: "203.0.113.41" }));
+    const res = await GET(req({ ip: uniqueIp() }));
     const text = await res.text();
     expect(text).not.toContain("metered.live");
     expect(text).not.toContain(process.env.METERED_API_KEY);
@@ -213,7 +240,7 @@ describe("GET /api/turn-credentials", () => {
     getServerSession.mockResolvedValue({ user: { id: "legit-caller" } });
     const res = await GET(
       new NextRequest("https://zrp.one/api/turn-credentials", {
-        headers: { "x-forwarded-for": "203.0.113.50" },
+        headers: { "x-forwarded-for": uniqueIp() },
       })
     );
     expect(res.status).toBe(200);
