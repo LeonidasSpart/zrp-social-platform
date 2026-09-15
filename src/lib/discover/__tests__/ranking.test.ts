@@ -111,4 +111,18 @@ describe("getDiscoverReason", () => {
       expect(["recent", "popular"]).toContain(getDiscoverReason(post, NOW));
     }
   });
+
+  it("handles a post whose createdAt round-tripped through the Redis JSON cache as a string, not a Date", () => {
+    // getOrderedFeedList (feed.ts) caches the ranked list in Redis;
+    // getCached's JSON.parse leaves createdAt as an ISO string even
+    // though DiscoverCandidatePost's type still claims Date - toFeedItem
+    // calls getDiscoverReason on exactly this cache-hit data, so this
+    // must not throw the way `post.createdAt.getTime()` would.
+    const cachedShapePost = candidate({ id: "cached", createdAt: hoursAgo(1) });
+    // @ts-expect-error - simulating the real runtime shape after a Redis round-trip
+    cachedShapePost.createdAt = hoursAgo(1).toISOString();
+
+    expect(() => getDiscoverReason(cachedShapePost, NOW)).not.toThrow();
+    expect(getDiscoverReason(cachedShapePost, NOW)).toBe("recent");
+  });
 });

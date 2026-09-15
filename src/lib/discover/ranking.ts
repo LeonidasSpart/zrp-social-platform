@@ -74,7 +74,12 @@ const RECENT_REASON_THRESHOLD_HOURS = 6;
 export type DiscoverReason = "recent" | "popular";
 
 export function getDiscoverReason(post: DiscoverCandidatePost, now: number = Date.now()): DiscoverReason {
-  const ageHours = (now - post.createdAt.getTime()) / (1000 * 60 * 60);
+  // Unlike scoreCandidate (only ever called on fresh-from-Postgres rows,
+  // before getOrderedFeedList caches them), this runs in toFeedItem
+  // AFTER a possible Redis round-trip - getCached's JSON.parse leaves
+  // createdAt as a string, not a Date, even though ScoredDiscoverPost's
+  // type still claims Date. `new Date(...)` accepts both.
+  const ageHours = (now - new Date(post.createdAt).getTime()) / (1000 * 60 * 60);
   return ageHours < RECENT_REASON_THRESHOLD_HOURS ? "recent" : "popular";
 }
 
