@@ -4,7 +4,16 @@ import { randomUUID } from "crypto";
 import { prisma } from "@/lib/db";
 
 const { getVerifiedToken } = vi.hoisted(() => ({ getVerifiedToken: vi.fn() }));
-vi.mock("@/lib/auth-guards", () => ({ getVerifiedToken }));
+// Partial mock (spreads the real module) rather than a full
+// replacement - a full replacement here would silently leave any
+// other export (e.g. isBlockedEitherWay, used internally by
+// src/lib/notifications.ts) undefined for any code path that
+// reaches it, which is exactly what broke a sibling test the same
+// way (see the PR that introduced this comment).
+vi.mock("@/lib/auth-guards", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/auth-guards")>();
+  return { ...actual, getVerifiedToken };
+});
 
 import { GET, POST } from "../route";
 
