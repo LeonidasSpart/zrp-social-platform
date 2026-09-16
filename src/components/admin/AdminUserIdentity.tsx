@@ -31,7 +31,7 @@ export default function AdminUserIdentity({
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-2">
       <Link href={`/profile/${user.username}`} className="shrink-0" aria-hidden="true" tabIndex={-1}>
-        <Avatar src={user.avatarUrl} alt="" className="h-9 w-9" />
+        <Avatar src={user.avatarUrl} alt="" name={user.name || user.username} className="h-9 w-9" />
       </Link>
       <Link
         href={`/profile/${user.username}`}

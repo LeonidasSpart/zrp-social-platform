@@ -145,6 +145,7 @@ export async function GET(req: NextRequest) {
         name: true,
         plan: true,
         badgeType: true,
+        avatarUrl: true,
         subscription: {
           include: { payments: { orderBy: { createdAt: "desc" }, take: 1 } },
         },
@@ -223,7 +224,7 @@ export async function GET(req: NextRequest) {
       return {
         id: s?.id ?? null,
         userId: u.id,
-        user: { id: u.id, username: u.username, email: u.email, name: u.name, plan: u.plan, badgeType: u.badgeType },
+        user: { id: u.id, username: u.username, email: u.email, name: u.name, plan: u.plan, badgeType: u.badgeType, avatarUrl: u.avatarUrl },
         plan: s?.plan ?? u.plan,
         status: s?.status ?? (u.plan !== "free" ? "NO_SUBSCRIPTION" : "FREE"),
         billingInterval: s?.billingInterval ?? null,
