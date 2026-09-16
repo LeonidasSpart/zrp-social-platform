@@ -110,6 +110,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
             error: `Daily repost limit reached (${reservation.limit}). Try again tomorrow or upgrade for a higher limit.`,
             limit: reservation.limit,
             used: reservation.used,
+            remaining: 0,
           },
           { status: 429 }
         );
@@ -163,7 +164,15 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         }
       }
 
-      return NextResponse.json({ reposted: true });
+      // Quota was previously enforced with no client-visible signal at
+      // all until the 429 hit - the client now learns how much is left
+      // after every successful repost too, so the UI can warn before
+      // the limit is actually reached instead of only after.
+      return NextResponse.json({
+        reposted: true,
+        limit: reservation.limit,
+        remaining: Math.max(0, reservation.limit - reservation.used),
+      });
     }
   } catch (error) {
     console.error("Repost error:", error);

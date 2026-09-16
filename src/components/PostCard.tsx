@@ -343,6 +343,14 @@ export default function PostCard({
     post._count?.reposts || 0
   );
 
+  // Repost quota was previously enforced with zero client-visible
+  // signal - a blocked request just silently did nothing (the fetch
+  // succeeded at the network level but returned 429, which the old
+  // code never even inspected). Shown as a brief, self-dismissing
+  // notice near the repost button rather than a full toast system,
+  // since PostCard is mounted many times per screen.
+  const [repostNotice, setRepostNotice] = useState<string | null>(null);
+
   const [viewsCount, setViewsCount] = useState(
     post.views || 0
   );
@@ -1165,6 +1173,13 @@ export default function PostCard({
   // REPOST
   // ─────────────────────────────────────────────────────────────
 
+  const showRepostNotice = (message: string) => {
+    setRepostNotice(message);
+    setTimeout(() => {
+      setRepostNotice((current) => (current === message ? null : current));
+    }, 5000);
+  };
+
   const handleRepost =
     async () => {
       try {
@@ -1176,10 +1191,10 @@ export default function PostCard({
             }
           );
 
-        if (res.ok) {
-          const data =
-            await res.json();
+        const data =
+          await res.json().catch(() => null);
 
+        if (res.ok && data) {
           setReposted(
             data.reposted
           );
@@ -1192,6 +1207,21 @@ export default function PostCard({
                   repostsCount - 1
                 )
           );
+
+          // Only present on a fresh repost (not on undo) - warn once
+          // the daily quota is getting close, rather than always
+          // showing a running count.
+          if (
+            data.reposted &&
+            typeof data.remaining === "number" &&
+            data.remaining <= 10
+          ) {
+            showRepostNotice(t("post.repostsLeftToday", { n: data.remaining }));
+          }
+        } else if (res.status === 429 && data) {
+          // Previously a completely silent failure - the button just
+          // did nothing once the daily repost quota was hit.
+          showRepostNotice(t("post.repostLimitReached", { n: data.limit ?? "" }));
         }
       } catch (error) {
         console.error(
@@ -2622,6 +2652,15 @@ export default function PostCard({
                       )}{" "}
                       quotes
                     </Link>
+                  </div>
+                )}
+
+                {repostNotice && (
+                  <div
+                    role="status"
+                    className="absolute left-0 top-full mt-1 w-48 px-3 py-2 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs shadow-lg z-20"
+                  >
+                    {repostNotice}
                   </div>
                 )}
               </div>

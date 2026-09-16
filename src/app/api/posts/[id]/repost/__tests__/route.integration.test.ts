@@ -76,7 +76,13 @@ describe.skipIf(!hasRealDatabaseUrl)(
 
       const first = await POST(req(post.id), { params: Promise.resolve({ id: post.id }) });
       expect(first.status).toBe(200);
-      expect((await first.json()).reposted).toBe(true);
+      const firstBody = await first.json();
+      expect(firstBody.reposted).toBe(true);
+      // The client needs to know how much quota is left after a
+      // successful repost so it can warn before the daily limit is
+      // actually hit, not just after (confirmed missing before this).
+      expect(firstBody.limit).toBe(50);
+      expect(firstBody.remaining).toBe(49);
 
       const row = await prisma.repost.findUnique({ where: { postId_userId: { postId: post.id, userId: reposter.id } } });
       expect(row).toBeTruthy();
@@ -163,6 +169,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(blockedRes.status).toBe(429);
       const blockedBody = await blockedRes.json();
       expect(blockedBody.limit).toBe(50);
+      expect(blockedBody.remaining).toBe(0);
 
       const usageStillFifty = await prisma.repostDailyUsage.findUnique({
         where: { userId_date: { userId: reposter.id, date: dateKey } },
