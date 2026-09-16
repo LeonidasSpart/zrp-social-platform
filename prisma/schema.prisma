@@ -768,6 +768,8 @@ model Comment {
   reposts   CommentRepost[]
   bookmarks CommentBookmark[]
 
+  notifications Notification[] @relation("Notification_comment")
+
   @@index([postId])
   @@index([createdAt])
   @@index([parentId])
@@ -919,6 +921,15 @@ model Notification {
   postId String?
   post   Post?   @relation("Notification_post", fields: [postId], references: [id], onDelete: Cascade)
 
+  // Disambiguates a comment-level notification (comment_like,
+  // comment_repost) from another comment on the SAME post by the SAME
+  // actor - without this, retracting one comment's notification on
+  // unlike/un-repost could delete the wrong comment's notification,
+  // since both only had postId+type+fromUserId to match on. Nullable:
+  // most notification types aren't comment-scoped at all.
+  commentId String?
+  comment   Comment? @relation("Notification_comment", fields: [commentId], references: [id], onDelete: Cascade)
+
   read Boolean @default(false)
 
   createdAt DateTime @default(now())
@@ -928,6 +939,7 @@ model Notification {
   @@index([userId, createdAt])
   @@index([createdAt])
   @@index([fromUserId])
+  @@index([commentId])
 }
 
 model Message {

@@ -86,6 +86,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
         where: { userId: commentAuthor.id, fromUserId: liker.id, postId: post.id },
       });
       expect(notif?.type).toBe("comment_like");
+      expect(notif?.commentId).toBe(comment.id);
 
       const unlikeRes = await POST(req(comment.id), { params: Promise.resolve({ id: comment.id }) });
       expect((await unlikeRes.json()).liked).toBe(false);
@@ -94,6 +95,48 @@ describe.skipIf(!hasRealDatabaseUrl)(
         where: { userId: commentAuthor.id, fromUserId: liker.id, type: "comment_like", postId: post.id },
       });
       expect(notifAfterUnlike).toBeNull();
+    });
+
+    it("unliking one comment never retracts the notification for a DIFFERENT comment on the same post liked by the same user", async () => {
+      const postAuthor = await createUser("postauthor4");
+      const commentAuthor = await createUser("commentauthor4");
+      const liker = await createUser("liker4");
+
+      const post = await prisma.post.create({
+        data: { content: `post ${runId}`, authorId: postAuthor.id, status: "published" },
+      });
+      postIds.push(post.id);
+      const commentA = await prisma.comment.create({
+        data: { content: `comment A ${runId}`, postId: post.id, authorId: commentAuthor.id },
+      });
+      commentIds.push(commentA.id);
+      const commentB = await prisma.comment.create({
+        data: { content: `comment B ${runId}`, postId: post.id, authorId: commentAuthor.id },
+      });
+      commentIds.push(commentB.id);
+
+      getServerSession.mockResolvedValue(sessionFor(liker));
+
+      await POST(req(commentA.id), { params: Promise.resolve({ id: commentA.id }) });
+      await POST(req(commentB.id), { params: Promise.resolve({ id: commentB.id }) });
+
+      // Unlike comment A only.
+      await POST(req(commentA.id), { params: Promise.resolve({ id: commentA.id }) });
+
+      const notifForA = await prisma.notification.findFirst({
+        where: { userId: commentAuthor.id, fromUserId: liker.id, type: "comment_like", commentId: commentA.id },
+      });
+      expect(notifForA).toBeNull();
+
+      // Comment B's notification must survive - this is the exact
+      // ambiguity that used to exist before Notification.commentId:
+      // both notifications shared the same type/fromUserId/postId, so
+      // retracting A's could also delete B's.
+      const notifForB = await prisma.notification.findFirst({
+        where: { userId: commentAuthor.id, fromUserId: liker.id, type: "comment_like", commentId: commentB.id },
+      });
+      expect(notifForB).toBeTruthy();
+      expect(notifForB?.read).toBe(false);
     });
 
     it("liking your own comment never creates a self-notification", async () => {

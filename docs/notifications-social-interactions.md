@@ -128,12 +128,16 @@ retract their own notification directly:
 - Un-reposting deletes the matching unread `repost` notification.
 - Un-reposting a comment deletes the matching unread `comment_repost`
   notification (a distinct type from `repost`, mirroring why
-  `comment_like` is distinct from `like` - see below. Note this shares
-  the same `commentId`-less limitation as `comment_like`: two different
-  comments under the same post, both reposted by the same user, aren't
-  distinguishable by `Notification`'s columns alone, so un-reposting one
-  can retract the notification for the other too. Pre-existing, accepted
-  limitation - not introduced by this pass).
+  `comment_like` is distinct from `like`).
+
+`Notification.commentId` (nullable, added alongside the `comment_repost`
+type) disambiguates *which* comment a `comment_like`/`comment_repost`
+notification is about. Before this column existed, both types only had
+`postId`+`type`+`fromUserId` to match on - two different comments under
+the same post, both liked (or reposted) by the same user, were
+indistinguishable, so unliking/un-reposting one could retract the
+notification for the other. Retraction now also filters on `commentId`,
+so it can only ever match the specific comment being un-liked/un-reposted.
 
 This means a like -> unlike -> like cycle leaves exactly one notification
 behind, not an orphaned first one plus a second.

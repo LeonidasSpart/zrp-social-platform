@@ -69,23 +69,20 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
       // Retract the comment_repost notification this created - same
       // like/unlike-cycle reasoning as the post-repost and like routes.
-      // Quota is deliberately NOT restored here, matching post-repost's
-      // own reasoning: undoing a repost must not let a repost/un-repost
-      // loop bypass the daily limit.
-      const undoneComment = await prisma.comment.findUnique({
-        where: { id: commentId },
-        select: { postId: true },
+      // Scoped to this exact commentId, so un-reposting one comment can
+      // never retract the notification for a DIFFERENT comment on the
+      // same post that this same user also reposted. Quota is
+      // deliberately NOT restored here, matching post-repost's own
+      // reasoning: undoing a repost must not let a repost/un-repost loop
+      // bypass the daily limit.
+      await prisma.notification.deleteMany({
+        where: {
+          type: "comment_repost",
+          fromUserId: userId,
+          commentId,
+          read: false,
+        },
       });
-      if (undoneComment) {
-        await prisma.notification.deleteMany({
-          where: {
-            type: "comment_repost",
-            fromUserId: userId,
-            postId: undoneComment.postId,
-            read: false,
-          },
-        });
-      }
 
       return NextResponse.json({ reposted: false });
     } else {
@@ -154,8 +151,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
           type: "comment_repost",
           fromUserId: userId,
           postId: comment.postId,
-          // commentId removed: we don't have the field in Notification yet
-          // (same limitation as comment_like - see the comment-like route).
+          commentId,
         });
 
         if (notified) {

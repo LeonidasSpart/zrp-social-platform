@@ -40,6 +40,12 @@ interface CreateNotificationParams {
     | "music_artist_verified";
   fromUserId: string;
   postId?: string;
+  // Disambiguates which comment a comment_like/comment_repost/reply
+  // notification is about - without it, two different comments under the
+  // same post from the same actor share type+fromUserId+postId, so
+  // retracting one on unlike/un-repost could delete the wrong one's
+  // notification. See prisma/schema.prisma's Notification.commentId.
+  commentId?: string;
   ticketId?: string; // ✅ added for ticket links
   ticketSubject?: string; // ✅ added for ticket subject in email
   listingId?: string; // ZRP Market Plus - links a listing approval/rejection email to the listing
@@ -73,6 +79,7 @@ export async function createNotification({
   type,
   fromUserId,
   postId,
+  commentId,
   ticketId,
   ticketSubject,
   listingId,
@@ -101,6 +108,7 @@ export async function createNotification({
         type,
         fromUserId,
         postId,
+        commentId,
         // For ticket notifications, we store the ticket ID in the message or link
         // Since the Notification model doesn't have a ticketId field, we store it in the link
         // Or you could add a new field to the schema
