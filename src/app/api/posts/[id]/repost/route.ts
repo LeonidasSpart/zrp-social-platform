@@ -8,6 +8,7 @@ import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { getPlanLimits, getUserPlan } from "@/lib/limits";
 import { reserveRepost, releaseRepost } from "@/lib/repost-quota";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 
 function isUniqueViolation(err: unknown): boolean {
   return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
@@ -97,6 +98,25 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
       return NextResponse.json({ reposted: false });
     } else {
+      // ⚠️ SECURITY/PRIVACY: confirmed missing by audit - a blocked-either-way
+      // relationship could still repost the post, unlike follow/messages
+      // which correctly block the interaction itself, not just the
+      // resulting notification. Checked up front, before a quota slot is
+      // even reserved - a blocked relationship must never cost the
+      // reposter part of their daily limit for an interaction that can't
+      // happen anyway.
+      const targetPost = await prisma.post.findUnique({
+        where: { id: postId },
+        select: { authorId: true },
+      });
+      if (
+        targetPost &&
+        targetPost.authorId !== userId &&
+        (await isBlockedEitherWay(userId, targetPost.authorId))
+      ) {
+        return NextResponse.json({ error: "Unable to repost this post" }, { status: 403 });
+      }
+
       // Repost: reserve a daily quota slot BEFORE writing the Repost
       // row - see src/lib/repost-quota.ts. No repost quota existed
       // anywhere in this codebase before this (confirmed by audit);

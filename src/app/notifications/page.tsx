@@ -20,7 +20,7 @@ interface FromUser {
 
 interface Notification {
   id: string;
-  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_request" | "repost" | "message";
+  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_request" | "repost" | "comment_repost" | "message";
   read: boolean;
   createdAt: string;
   fromUser: FromUser;
@@ -46,7 +46,7 @@ interface GroupedNotification {
   ids: string[];
 }
 
-const GROUPABLE_TYPES = new Set<Notification["type"]>(["like", "comment_like", "repost", "follow"]);
+const GROUPABLE_TYPES = new Set<Notification["type"]>(["like", "comment_like", "repost", "comment_repost", "follow"]);
 
 function groupNotifications(list: Notification[]): GroupedNotification[] {
   const result: GroupedNotification[] = [];
@@ -206,6 +206,7 @@ export default function NotificationsPage() {
       case "follow_request":
         return <UserPlus className="w-4 h-4 text-green-500" />;
       case "repost":
+      case "comment_repost":
         return <Repeat className="w-4 h-4 text-green-500" />;
       case "message":
         return <Mail className="w-4 h-4 text-zrp-red" />;
@@ -238,6 +239,8 @@ export default function NotificationsPage() {
         return t("notifications.followRequestSuffix");
       case "repost":
         return plural ? t("notifications.repostedPostSuffixPlural") : t("notifications.repostedPostSuffix");
+      case "comment_repost":
+        return plural ? t("notifications.repostedCommentSuffixPlural") : t("notifications.repostedCommentSuffix");
       case "message":
         return t("notifications.sentMessageSuffix");
       case "appeal_resolved":

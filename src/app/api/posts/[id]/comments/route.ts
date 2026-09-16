@@ -8,6 +8,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { checkPostLength } from "@/lib/limits";
 import { canViewPrivateContent } from "@/lib/permissions";
 import { notifyMentionedUsers } from "@/lib/mentions";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 
 // ─── GET: Fetch a page of threaded comments with counts and status ──
 // Paginates by top-level comment (cursor + limit), then loads only the
@@ -171,7 +172,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     // ─── Check if comments are enabled for this post ────────────────
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      select: { commentsEnabled: true },
+      select: { commentsEnabled: true, authorId: true },
     });
 
     if (!post || post.commentsEnabled === false) {
@@ -179,6 +180,14 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         { error: "Comments are disabled for this post." },
         { status: 403 }
       );
+    }
+
+    // ⚠️ SECURITY/PRIVACY: confirmed missing by audit - a blocked-either-way
+    // relationship could still comment on the post, unlike follow/messages
+    // which correctly block the interaction itself, not just the resulting
+    // notification. Checked up front, before any comment is created.
+    if (post.authorId !== session.user.id && (await isBlockedEitherWay(session.user.id, post.authorId))) {
+      return NextResponse.json({ error: "Comments are disabled for this post." }, { status: 403 });
     }
 
     // ─── Validate parent comment if provided ────────────────────────
@@ -193,6 +202,12 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       }
       if (parent.postId !== postId) {
         return NextResponse.json({ error: "Parent comment does not belong to this post" }, { status: 400 });
+      }
+      if (
+        parent.authorId !== session.user.id &&
+        (await isBlockedEitherWay(session.user.id, parent.authorId))
+      ) {
+        return NextResponse.json({ error: "Comments are disabled for this post." }, { status: 403 });
       }
       parentAuthorId = parent.authorId;
     }

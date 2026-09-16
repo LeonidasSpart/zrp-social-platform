@@ -45,6 +45,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
     afterAll(async () => {
       await prisma.notification.deleteMany({ where: { postId: { in: postIds } } });
       await prisma.commentLike.deleteMany({ where: { commentId: { in: commentIds } } });
+      await prisma.blocked.deleteMany({ where: { OR: [{ blockerId: { in: userIds } }, { blockedId: { in: userIds } }] } });
       await prisma.comment.deleteMany({ where: { postId: { in: postIds } } });
       await prisma.post.deleteMany({ where: { id: { in: postIds } } });
       await prisma.user.deleteMany({ where: { id: { in: userIds } } });
@@ -115,6 +116,32 @@ describe.skipIf(!hasRealDatabaseUrl)(
         where: { userId: commentAuthor.id, fromUserId: commentAuthor.id },
       });
       expect(notif).toBeNull();
+    });
+
+    it("blocks liking a comment for a blocked-either-way relationship, not just the notification", async () => {
+      const postAuthor = await createUser("postauthor3");
+      const commentAuthor = await createUser("commentauthor3");
+      const liker = await createUser("liker3");
+      await prisma.blocked.create({ data: { blockerId: commentAuthor.id, blockedId: liker.id } });
+
+      const post = await prisma.post.create({
+        data: { content: `post ${runId}`, authorId: postAuthor.id, status: "published" },
+      });
+      postIds.push(post.id);
+      const comment = await prisma.comment.create({
+        data: { content: `comment ${runId}`, postId: post.id, authorId: commentAuthor.id },
+      });
+      commentIds.push(comment.id);
+
+      getServerSession.mockResolvedValue(sessionFor(liker));
+
+      const res = await POST(req(comment.id), { params: Promise.resolve({ id: comment.id }) });
+      expect(res.status).toBe(403);
+
+      const like = await prisma.commentLike.findUnique({
+        where: { commentId_userId: { commentId: comment.id, userId: liker.id } },
+      });
+      expect(like).toBeNull();
     });
   }
 );

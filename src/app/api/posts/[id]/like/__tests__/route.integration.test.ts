@@ -92,7 +92,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(notifs).toHaveLength(1);
     });
 
-    it("never notifies a blocked-either-way relationship, even though the like itself still lands", async () => {
+    it("blocks the like itself (not just the notification) for a blocked-either-way relationship", async () => {
       const author = await createUser("author2");
       const liker = await createUser("liker2");
       await prisma.blocked.create({ data: { blockerId: liker.id, blockedId: author.id } });
@@ -100,16 +100,29 @@ describe.skipIf(!hasRealDatabaseUrl)(
       getServerSession.mockResolvedValue(sessionFor(liker));
 
       const res = await POST(req(post.id), { params: Promise.resolve({ id: post.id }) });
-      expect(res.status).toBe(200);
-      expect((await res.json()).liked).toBe(true);
+      expect(res.status).toBe(403);
 
       const like = await prisma.like.findUnique({ where: { postId_userId: { postId: post.id, userId: liker.id } } });
-      expect(like).toBeTruthy();
+      expect(like).toBeNull();
 
       const notif = await prisma.notification.findFirst({
         where: { userId: author.id, fromUserId: liker.id, type: "like", postId: post.id },
       });
       expect(notif).toBeNull();
+    });
+
+    it("blocks the like in the other direction too (author blocked the liker)", async () => {
+      const author = await createUser("author2b");
+      const liker = await createUser("liker2b");
+      await prisma.blocked.create({ data: { blockerId: author.id, blockedId: liker.id } });
+      const post = await createPost(author.id);
+      getServerSession.mockResolvedValue(sessionFor(liker));
+
+      const res = await POST(req(post.id), { params: Promise.resolve({ id: post.id }) });
+      expect(res.status).toBe(403);
+
+      const like = await prisma.like.findUnique({ where: { postId_userId: { postId: post.id, userId: liker.id } } });
+      expect(like).toBeNull();
     });
 
     it("a concurrent duplicate like request is idempotent, not a 500, and never produces a duplicate row", async () => {
