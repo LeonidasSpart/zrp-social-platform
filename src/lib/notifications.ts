@@ -12,6 +12,7 @@ interface CreateNotificationParams {
     | "reply"
     | "follow"
     | "repost"
+    | "comment_repost"
     | "mention"
     | "message"
     | "follow_request"
@@ -135,6 +136,7 @@ export async function createNotification({
       "comment",
       "reply",
       "repost",
+      "comment_repost",
       "message",
       "mention",
       "follow",

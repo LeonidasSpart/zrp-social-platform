@@ -122,7 +122,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(notif).toBeNull();
     });
 
-    it("never notifies a blocked-either-way relationship", async () => {
+    it("blocks the repost itself (not just the notification) for a blocked-either-way relationship, and never spends a quota slot on it", async () => {
       const author = await createUser("author3");
       const reposter = await createUser("reposter3");
       await prisma.blocked.create({ data: { blockerId: author.id, blockedId: reposter.id } });
@@ -130,13 +130,22 @@ describe.skipIf(!hasRealDatabaseUrl)(
       getServerSession.mockResolvedValue(sessionFor(reposter));
 
       const res = await POST(req(post.id), { params: Promise.resolve({ id: post.id }) });
-      expect(res.status).toBe(200);
-      expect((await res.json()).reposted).toBe(true);
+      expect(res.status).toBe(403);
+
+      const row = await prisma.repost.findUnique({ where: { postId_userId: { postId: post.id, userId: reposter.id } } });
+      expect(row).toBeNull();
 
       const notif = await prisma.notification.findFirst({
         where: { userId: author.id, fromUserId: reposter.id, type: "repost", postId: post.id },
       });
       expect(notif).toBeNull();
+
+      const dateKey = new Date();
+      dateKey.setHours(0, 0, 0, 0);
+      const usage = await prisma.repostDailyUsage.findUnique({
+        where: { userId_date: { userId: reposter.id, date: dateKey } },
+      });
+      expect(usage).toBeNull();
     });
 
     it("enforces the daily repost quota atomically and does not consume it on a duplicate/racing request", async () => {

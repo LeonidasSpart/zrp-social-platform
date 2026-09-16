@@ -7,6 +7,15 @@ history around this file's introduction for the full list of confirmed
 bugs found and fixed. When this document and the source disagree, the
 source wins.
 
+A second pass (see git history for the commit introducing "Blocked-user
+enforcement" and the `comment_repost` type below) closed two gaps the
+first pass's own audit had missed: likes/comments/comment-likes/reposts
+only ever suppressed the *notification* for a blocked-either-way
+relationship, not the interaction itself (unlike follow and messages,
+which already blocked the interaction) - and `/api/comments/[id]/repost`
+had been missed entirely, with none of the hardening every sibling toggle
+route already had.
+
 ## Source of truth
 
 - **Notification state**: the `Notification` table (`prisma/schema.prisma`).
@@ -22,6 +31,22 @@ source wins.
 - **Repost quota**: `RepostDailyUsage` (a per-user-per-day row), enforced
   atomically by `src/lib/repost-quota.ts`. No repost quota existed
   anywhere in this codebase before this - see "Repost quota" below.
+
+## Blocked-user enforcement
+
+`isBlockedEitherWay()` (`src/lib/auth-guards.ts`) checks both directions
+of the `Blocked` table in one query. Follow and messages already checked
+it up front, before any mutation, returning 403 - the interaction itself
+never forms for a blocked-either-way relationship. Like, comment (and
+reply), comment-like, post-repost and comment-repost did not: they only
+suppressed the resulting *notification* (via `createNotification()`'s own
+internal check), so the Like/Comment/CommentLike/Repost/CommentRepost row
+itself still landed. This is now fixed the same way as follow/messages -
+checked up front, before the row is created (and, for reposts, before a
+daily quota slot is even reserved, so a blocked relationship can't cost
+the reposter part of their limit for an interaction that can't happen
+anyway). `createNotification()`'s own check is unchanged and still runs -
+it's a second, redundant layer now, not the only one.
 
 ## The notification pipeline
 
@@ -101,6 +126,14 @@ retract their own notification directly:
   the same `postId`).
 - Unfollow deletes the matching unread `follow` notification.
 - Un-reposting deletes the matching unread `repost` notification.
+- Un-reposting a comment deletes the matching unread `comment_repost`
+  notification (a distinct type from `repost`, mirroring why
+  `comment_like` is distinct from `like` - see below. Note this shares
+  the same `commentId`-less limitation as `comment_like`: two different
+  comments under the same post, both reposted by the same user, aren't
+  distinguishable by `Notification`'s columns alone, so un-reposting one
+  can retract the notification for the other too. Pre-existing, accepted
+  limitation - not introduced by this pass).
 
 This means a like -> unlike -> like cycle leaves exactly one notification
 behind, not an orphaned first one plus a second.
@@ -149,6 +182,19 @@ concurrent duplicate, the post having been deleted) - a failed repost
 never costs a slot. Undoing a repost does **not** restore the slot: this
 is deliberate, so a repost/un-repost loop can't bypass the daily limit.
 
+`/api/comments/[id]/repost` shares the exact same per-user
+`RepostDailyUsage` counter - a repost is a repost for quota purposes,
+whether of a post or a comment. This route was missed entirely by the
+first audit pass: before this fix it had no quota accounting at all (a
+straightforward bypass - hit your post-repost limit, keep reposting
+comments for free), no notification to the comment's author, no blocked-
+either-way check, and no race-safety on concurrent create/delete (an
+unhandled `P2002`/`P2025` would 500). It's now been brought fully in line
+with `/api/posts/[id]/repost`, including a new `comment_repost`
+notification type (distinct from `comment_like` and `repost` - see
+"Duplicate-notification prevention" above) and web UI support
+(icon/action text on the notifications page, `GROUPABLE_TYPES`).
+
 ## What was audited and found already correct (not touched)
 
 - Web Push / FCM delivery (`src/lib/push-notifications.ts`, `src/lib/fcm.ts`):
@@ -179,7 +225,8 @@ is deliberate, so a repost/un-repost loop can't bypass the daily limit.
 - No generic notification-grouping infrastructure beyond what already
   existed (`GROUPABLE_TYPES` on the web notifications page, already
   present before this pass) - extended only far enough to cover the new
-  `comment_like` type consistently with `like`.
+  `comment_like` and `comment_repost` types consistently with `like` and
+  `repost`.
 - No request-level idempotency key on comment creation - the existing
   rate limiter plus the client's own submit-in-flight guard were judged a
   reasonable existing mitigation; a dedicated idempotency-key system was

@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 
 function isUniqueViolation(err: unknown): boolean {
   return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
@@ -70,6 +71,23 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
       return NextResponse.json({ liked: false });
     } else {
+      // ⚠️ SECURITY/PRIVACY: confirmed missing by audit - a blocked-either-way
+      // relationship could still like the comment, unlike follow/messages
+      // which correctly block the interaction itself, not just the
+      // resulting notification. Checked up front, before the CommentLike
+      // row is created.
+      const targetComment = await prisma.comment.findUnique({
+        where: { id: commentId },
+        select: { authorId: true, postId: true },
+      });
+      if (
+        targetComment &&
+        targetComment.authorId !== userId &&
+        (await isBlockedEitherWay(userId, targetComment.authorId))
+      ) {
+        return NextResponse.json({ error: "Unable to like this comment" }, { status: 403 });
+      }
+
       // Like
       try {
         await prisma.commentLike.create({
@@ -84,10 +102,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       }
 
       // Send notification to comment author (if not self)
-      const comment = await prisma.comment.findUnique({
-        where: { id: commentId },
-        select: { authorId: true, postId: true },
-      });
+      const comment = targetComment;
       if (comment && comment.authorId !== userId) {
         await createNotification({
           userId: comment.authorId,

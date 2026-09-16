@@ -37,6 +37,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
     afterAll(async () => {
       await prisma.notification.deleteMany({ where: { postId: { in: postIds } } });
       await prisma.comment.deleteMany({ where: { postId: { in: postIds } } });
+      await prisma.blocked.deleteMany({ where: { OR: [{ blockerId: { in: userIds } }, { blockedId: { in: userIds } }] } });
       await prisma.post.deleteMany({ where: { id: { in: postIds } } });
       await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     });
@@ -151,6 +152,42 @@ describe.skipIf(!hasRealDatabaseUrl)(
       // author (comment) + mentioned (mention) = 2, never a third one
       // for the nonexistent username.
       expect(totalNotifs).toBe(2);
+    });
+
+    it("blocks commenting on a post for a blocked-either-way relationship with the post author", async () => {
+      const author = await createUser("author5");
+      const commenter = await createUser("commenter5");
+      await prisma.blocked.create({ data: { blockerId: author.id, blockedId: commenter.id } });
+      const post = await createPost(author.id);
+      getServerSession.mockResolvedValue(sessionFor(commenter));
+
+      const res = await POST(req(post.id, { content: "let me in" }), { params: Promise.resolve({ id: post.id }) });
+      expect(res.status).toBe(403);
+
+      const comments = await prisma.comment.findMany({ where: { postId: post.id, authorId: commenter.id } });
+      expect(comments).toHaveLength(0);
+    });
+
+    it("blocks replying to a comment for a blocked-either-way relationship with the parent comment's author, even though the post author isn't involved", async () => {
+      const author = await createUser("author6");
+      const parentCommenter = await createUser("commenter6a");
+      const replier = await createUser("commenter6b");
+      await prisma.blocked.create({ data: { blockerId: parentCommenter.id, blockedId: replier.id } });
+      const post = await createPost(author.id);
+
+      getServerSession.mockResolvedValue(sessionFor(parentCommenter));
+      const topLevel = await POST(req(post.id, { content: "top level" }), { params: Promise.resolve({ id: post.id }) });
+      const topLevelComment = await topLevel.json();
+
+      getServerSession.mockResolvedValue(sessionFor(replier));
+      const reply = await POST(
+        req(post.id, { content: "trying to reply anyway", parentId: topLevelComment.id }),
+        { params: Promise.resolve({ id: post.id }) }
+      );
+      expect(reply.status).toBe(403);
+
+      const replies = await prisma.comment.findMany({ where: { postId: post.id, authorId: replier.id } });
+      expect(replies).toHaveLength(0);
     });
   }
 );
