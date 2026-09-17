@@ -35,4 +35,5 @@ val SUPPORTED_LANGUAGES = listOf(
     SupportedLanguage("da", "Dansk"),
     SupportedLanguage("hr", "Hrvatski"),
     SupportedLanguage("bg", "Български"),
+    SupportedLanguage("el", "Ελληνικά"),
 )

@@ -2692,7 +2692,7 @@ extension L10nKey {
     /// The languages ZRP officially supports, in the same order as
     /// the web app's SUPPORTED_LANGUAGES.
     static let supportedLanguageCodes: [String] = [
-        "en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "pt", "ja", "ko", "hi", "nl", "pl", "ro", "cs", "hu", "sv", "da", "hr", "bg"
+        "en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "pt", "ja", "ko", "hi", "nl", "pl", "ro", "cs", "hu", "sv", "da", "hr", "bg", "el"
     ]
 
     /// ZRP's right-to-left languages, read from the web app's own
@@ -2741,5 +2741,6 @@ struct ZrpLanguage: Identifiable, Equatable {
         ZrpLanguage(code: "da", nativeName: "Dansk"),
         ZrpLanguage(code: "hr", nativeName: "Hrvatski"),
         ZrpLanguage(code: "bg", nativeName: "Български"),
+        ZrpLanguage(code: "el", nativeName: "Ελληνικά"),
     ]
 }

@@ -38,6 +38,7 @@ const DATE_LOCALE_MAP: Record<Language, string> = {
   da: "da-DK",
   hr: "hr-HR",
   bg: "bg-BG",
+  el: "el-GR",
 };
 
 /** BCP-47 tag for `toLocaleDateString`/`toLocaleTimeString`/`toLocaleString`. */

@@ -101,7 +101,7 @@ class LocalizationCompletenessTest {
 
     private val languages = listOf(
         "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "pt", "ja", "ko", "hi",
-        "nl", "pl", "ro", "cs", "hu", "sv", "da", "hr", "bg",
+        "nl", "pl", "ro", "cs", "hu", "sv", "da", "hr", "bg", "el",
     )
 
     private val placeholderRegex = Regex("""%\d+\$[sd]|\{[a-zA-Z]+\}""")
@@ -1230,6 +1230,32 @@ class LocalizationCompletenessTest {
             "admin_upgrade_requests_plan_change",
             "music_title",
             "play_xp",
+            "trust_out_of_100",
+        ),
+        // Greek keeps these as established, self-consistent loanwords -
+        // matching the same choice already made (and reviewed) for these
+        // exact terms in src/lib/translations.ts's Greek dictionary
+        // (auth.email, opportunity.typeHackathon,
+        // music.artistDetail.singlesHeading, nav.marketplace, and
+        // multiple "hashtag" occurrences all keep the English word).
+        // nav_aid/"Help" and shorts_title/"Shorts" were NOT included here -
+        // those were genuine gaps (web's own nav.help/nav.shorts translate
+        // to "Βοήθεια"/"Σύντομα Βίντεο") and have been fixed in
+        // values-el/strings.xml instead of allowlisted.
+        "el" to setOf(
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_publication_meta",
+            "admin_news_network_verify_failed",
+            "admin_upgrade_requests_plan_change",
+            "auth_email",
+            "communities_create_hashtag_label",
+            "music_artist_detail_singles_heading",
+            "music_title",
+            "nav_marketplace",
+            "opportunity_type_hackathon",
+            "play_xp",
+            "team_col_email",
             "trust_out_of_100",
         ),
     )
