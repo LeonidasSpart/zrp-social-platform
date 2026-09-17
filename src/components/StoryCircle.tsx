@@ -70,12 +70,14 @@ export default function StoryCircle({ user, hasUnseen, onClick, storyPreview, st
               src={storyPreview}
               alt={user.name || user.username}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : user.avatarUrl ? (
             <img
               src={user.avatarUrl}
               alt={user.name || user.username}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-500 text-xl font-bold">

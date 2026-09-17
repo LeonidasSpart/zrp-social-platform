@@ -448,6 +448,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               src={getAvatarSrc(comment.author)}
               alt={getDisplayName(comment.author)}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           </div>
         </Link>
