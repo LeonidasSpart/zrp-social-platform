@@ -62,6 +62,7 @@ import one.zrp.social.mobile.data.JournalistRepository
 import one.zrp.social.mobile.network.NEWS_CATEGORIES
 import one.zrp.social.mobile.ui.news.newsCategoryLabel
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * ZRP Journalist article editor - ported from ArticleEditorForm.tsx.
@@ -267,7 +268,7 @@ private fun EditorFormBody(
                 ArticleEditorViewModel.slugRequiredError -> stringResource(R.string.journalist_editor_err_slug_required)
                 ArticleEditorViewModel.contentRequiredError -> stringResource(R.string.journalist_editor_err_content_required)
                 ArticleEditorViewModel.saveFailedError -> stringResource(R.string.journalist_editor_err_save_failed)
-                else -> displayedError
+                else -> localizedError(displayedError) ?: displayedError
             }
             Surface(
                 shape = RoundedCornerShape(12.dp),

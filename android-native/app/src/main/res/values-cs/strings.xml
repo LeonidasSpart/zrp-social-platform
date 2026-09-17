@@ -2248,4 +2248,5 @@
     <string name="settings_err_passwords_dont_match">Nová hesla se neshodují.</string>
     <string name="ai_service_unavailable">Služba AI je dočasně nedostupná</string>
     <string name="auth_username_taken_hint">Toto uživatelské jméno je již obsazené. Vyber návrh níže nebo zkus jiné.</string>
+    <string name="music_couldnt_play_track">Tuto skladbu se nepodařilo přehrát.</string>
 </resources>

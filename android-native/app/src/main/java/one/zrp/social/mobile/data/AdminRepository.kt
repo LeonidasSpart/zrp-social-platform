@@ -95,7 +95,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update the report."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -109,7 +109,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this user's status."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -119,7 +119,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this user's role."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -130,7 +130,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to delete this user."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -145,7 +145,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to delete this post."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -164,7 +164,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to resolve this appeal."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -184,7 +184,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to review this campaign."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -199,7 +199,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to review this listing."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -214,7 +214,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to review this listing."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -229,7 +229,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to review this campaign."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -245,7 +245,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this journalist."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -256,7 +256,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to grant journalist status."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -270,7 +270,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this artist."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -281,7 +281,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to delete this artist."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -318,7 +318,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this ticket."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -329,7 +329,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to delete this ticket."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -339,7 +339,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to send your reply."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -350,7 +350,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to resolve this ticket."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -380,7 +380,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to scan UploadThing storage."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -393,7 +393,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to clean up UploadThing storage."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -430,7 +430,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to record this disbursement."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -449,7 +449,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to verify this payment."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -470,7 +470,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to approve this withdrawal."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -481,7 +481,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to reject this withdrawal."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -497,7 +497,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to approve this withdrawal."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -508,7 +508,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to reject this withdrawal."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -525,7 +525,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to process this request."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -554,7 +554,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to create this article."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -565,7 +565,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this article."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -579,7 +579,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to review this article."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -590,7 +590,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to delete this article."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -601,7 +601,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this user's plan."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -637,7 +637,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update the automation setting."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -653,7 +653,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "The cycle failed to run."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -666,7 +666,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to provision the editorial feeds."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -677,7 +677,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this feed."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -698,7 +698,7 @@ class AdminRepository {
             // are the useful ones here.
             Result.failure(Exception(e.zrpErrorMessage() ?: "That upload failed."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -708,7 +708,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to install the starter sources."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -719,7 +719,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this source."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -730,7 +730,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to clear the backoff."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -743,7 +743,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Verification failed."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -754,7 +754,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to reject this story."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -768,7 +768,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to publish the correction."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -779,7 +779,7 @@ class AdminRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to remove this post."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 }

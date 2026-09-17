@@ -179,7 +179,7 @@ class SettingsRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't export your data. Please try again."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -189,7 +189,7 @@ class SettingsRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: genericError))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 }

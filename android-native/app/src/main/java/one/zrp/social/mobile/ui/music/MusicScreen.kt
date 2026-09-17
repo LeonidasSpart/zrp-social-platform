@@ -70,6 +70,7 @@ import one.zrp.social.mobile.network.MusicTrack
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * ZRP Music - real tracks, real playback, real likes. Reached from the
@@ -195,7 +196,7 @@ fun MusicScreen(
                         // app doesn't expose, so reusing that copy verbatim would be
                         // misleading here.
                         Text(
-                            text = state.error ?: "No tracks available yet.",
+                            text = localizedError(state.error) ?: "No tracks available yet.",
                             color = if (state.error != null) {
                                 MaterialTheme.colorScheme.error
                             } else {

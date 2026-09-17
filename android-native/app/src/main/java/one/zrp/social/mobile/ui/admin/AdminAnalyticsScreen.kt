@@ -49,6 +49,7 @@ import one.zrp.social.mobile.network.AdminAnalyticsDaily
 import one.zrp.social.mobile.network.AdminAnalyticsTopPost
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 private val dailyDateFormat = ThreadLocal.withInitial {
     SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
@@ -80,8 +81,9 @@ fun AdminAnalyticsScreen(onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val localizedStateError = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedStateError
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

@@ -48,6 +48,7 @@ import one.zrp.social.mobile.network.AdminAuditEntry
 import one.zrp.social.mobile.ui.support.formatTicketDateTime
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The audit log viewer - see AdminAuditLogViewModel's own KDoc. Every
@@ -66,8 +67,9 @@ fun AdminAuditLogScreen(onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val localizedErrorMessage = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedErrorMessage
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

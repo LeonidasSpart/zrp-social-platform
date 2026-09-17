@@ -21,7 +21,7 @@ class LegalRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't load this page."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 

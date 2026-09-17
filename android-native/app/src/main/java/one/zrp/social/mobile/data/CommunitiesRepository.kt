@@ -18,7 +18,7 @@ class CommunitiesRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't load communities. Please try again."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -28,7 +28,7 @@ class CommunitiesRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't load this community."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -46,7 +46,7 @@ class CommunitiesRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't create this community."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -56,7 +56,7 @@ class CommunitiesRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't join this community."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -66,7 +66,7 @@ class CommunitiesRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't leave this community."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -77,7 +77,7 @@ class CommunitiesRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't delete this community. Try again."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -87,7 +87,7 @@ class CommunitiesRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't load this community's posts."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -104,7 +104,7 @@ class CommunitiesRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't submit this report. Please try again."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 }

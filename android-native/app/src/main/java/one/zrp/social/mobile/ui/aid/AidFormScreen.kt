@@ -54,6 +54,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.AidRepository
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Create Campaign - the same real category/needTypes/title/description/
@@ -301,7 +302,7 @@ fun AidFormScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                             AidFormViewModel.goalAmountRequiredError -> stringResource(R.string.aid_err_goal_amount_required)
                             AidFormViewModel.createFailedError -> stringResource(R.string.aid_err_create_failed)
                             AidFormViewModel.imageUploadFailedError -> stringResource(R.string.aid_err_image_upload_failed)
-                            else -> error
+                            else -> localizedError(error) ?: error
                         }
                         Text(
                             text = errorText,

@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">De nye adgangskoder stemmer ikke overens.</string>
     <string name="ai_service_unavailable">AI-tjenesten er midlertidigt utilgængelig</string>
     <string name="auth_username_taken_hint">Det brugernavn er optaget. Vælg et forslag nedenfor, eller prøv et andet.</string>
+    <string name="music_couldnt_play_track">Dette nummer kunne ikke afspilles.</string>
 </resources>

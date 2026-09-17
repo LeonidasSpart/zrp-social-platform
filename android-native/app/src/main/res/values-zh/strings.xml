@@ -2293,4 +2293,5 @@
     <string name="settings_err_passwords_dont_match">新密码不一致。</string>
     <string name="ai_service_unavailable">AI 服务暂时不可用</string>
     <string name="auth_username_taken_hint">该用户名已被占用。请从下方建议中选择，或尝试其他用户名。</string>
+    <string name="music_couldnt_play_track">无法播放此曲目。</string>
 </resources>

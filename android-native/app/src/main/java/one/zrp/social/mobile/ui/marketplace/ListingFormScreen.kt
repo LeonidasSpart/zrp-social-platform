@@ -55,6 +55,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MarketplaceRepository
+import one.zrp.social.mobile.util.localizedError
 
 private val CURRENCIES = listOf("USD", "EUR", "CHF", "GBP", "AED")
 
@@ -329,7 +330,7 @@ fun ListingFormScreen(listingId: String?, onBack: () -> Unit, onSaved: (String) 
                     ListingFormViewModel.createFailedError -> stringResource(R.string.marketplace_err_create_failed)
                     ListingFormViewModel.updateFailedError -> stringResource(R.string.marketplace_err_update_failed)
                     null -> null
-                    else -> state.error
+                    else -> localizedError(state.error)
                 }
                 if (errorText != null) {
                     Text(

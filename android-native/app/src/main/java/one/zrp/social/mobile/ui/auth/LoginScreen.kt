@@ -43,6 +43,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The mobile app's own sign-in screen - a real Compose UI calling the
@@ -138,7 +139,7 @@ fun LoginScreen(
 
         if (formState is LoginFormState.Error) {
             Text(
-                text = formState.message,
+                text = localizedError(formState.message) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 12.dp),

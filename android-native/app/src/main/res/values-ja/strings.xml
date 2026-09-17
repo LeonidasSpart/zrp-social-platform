@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">新しいパスワードが一致しません。</string>
     <string name="ai_service_unavailable">AIサービスは一時的に利用できません</string>
     <string name="auth_username_taken_hint">そのユーザー名はすでに使われています。下記の候補から選ぶか、別の名前をお試しください。</string>
+    <string name="music_couldnt_play_track">このトラックを再生できませんでした。</string>
 </resources>

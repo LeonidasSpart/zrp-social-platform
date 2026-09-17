@@ -51,6 +51,7 @@ import one.zrp.social.mobile.data.AdminRepository
 import one.zrp.social.mobile.network.AdminMusicArtist
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 // This route's own filter values, verbatim - it filters on the
 // artist's `verified` flag rather than any status enum.
@@ -67,8 +68,9 @@ fun AdminMusicArtistsScreen(onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val localizedErrorMessage = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedErrorMessage
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

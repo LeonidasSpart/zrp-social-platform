@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">새 비밀번호가 일치하지 않습니다.</string>
     <string name="ai_service_unavailable">AI 서비스를 일시적으로 이용할 수 없습니다</string>
     <string name="auth_username_taken_hint">이미 사용 중인 사용자 이름입니다. 아래 추천 중에서 선택하거나 다른 이름을 시도해 보세요.</string>
+    <string name="music_couldnt_play_track">이 트랙을 재생할 수 없습니다.</string>
 </resources>

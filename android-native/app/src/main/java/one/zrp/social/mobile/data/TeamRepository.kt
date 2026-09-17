@@ -32,7 +32,7 @@ class TeamRepository {
                 Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't load your team."))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -57,7 +57,7 @@ class TeamRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: genericError))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 }

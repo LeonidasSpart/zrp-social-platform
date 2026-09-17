@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">Az új jelszavak nem egyeznek.</string>
     <string name="ai_service_unavailable">Az AI-szolgáltatás átmenetileg nem érhető el</string>
     <string name="auth_username_taken_hint">Ez a felhasználónév foglalt. Válassz egy alábbi javaslatot, vagy próbálj mást.</string>
+    <string name="music_couldnt_play_track">Ezt a számot nem sikerült lejátszani.</string>
 </resources>

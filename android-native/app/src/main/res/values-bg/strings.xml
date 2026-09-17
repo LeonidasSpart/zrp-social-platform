@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">Новите пароли не съвпадат.</string>
     <string name="ai_service_unavailable">AI услугата временно не е налична</string>
     <string name="auth_username_taken_hint">Това потребителско име вече е заето. Избери предложение по-долу или опитай друго.</string>
+    <string name="music_couldnt_play_track">Тази песен не можа да бъде възпроизведена.</string>
 </resources>

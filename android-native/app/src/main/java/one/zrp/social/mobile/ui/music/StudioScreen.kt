@@ -57,6 +57,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MusicRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 private enum class StudioTab { TRACKS, ALBUMS, ARTIST }
 
@@ -257,7 +258,7 @@ private fun GateContent(
 
         if (state.error != null) {
             Text(
-                text = state.error,
+                text = localizedError(state.error)!!,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = Spacing.sm),
@@ -373,7 +374,7 @@ private fun ArtistProfileForm(
 
         if (state.error != null) {
             Text(
-                text = state.error,
+                text = localizedError(state.error)!!,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = Spacing.sm),

@@ -66,6 +66,7 @@ import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.ui.theme.ZrpWhite
 import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The Notifications tab: the same real list the website's
@@ -136,7 +137,7 @@ fun NotificationsScreen(
                         val error = state.error
                         if (error != null) {
                             Text(
-                                text = error,
+                                text = localizedError(error) ?: "",
                                 color = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.padding(24.dp),
                             )

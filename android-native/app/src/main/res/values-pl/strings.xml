@@ -2248,4 +2248,5 @@
     <string name="settings_err_passwords_dont_match">Nowe hasła nie są identyczne.</string>
     <string name="ai_service_unavailable">Usługa AI tymczasowo niedostępna</string>
     <string name="auth_username_taken_hint">Ta nazwa użytkownika jest zajęta. Wybierz propozycję poniżej lub spróbuj innej.</string>
+    <string name="music_couldnt_play_track">Nie udało się odtworzyć tego utworu.</string>
 </resources>

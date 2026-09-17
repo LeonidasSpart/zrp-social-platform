@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">Οι νέοι κωδικοί πρόσβασης δεν ταιριάζουν.</string>
     <string name="ai_service_unavailable">Η υπηρεσία AI είναι προσωρινά μη διαθέσιμη</string>
     <string name="auth_username_taken_hint">Αυτό το όνομα χρήστη είναι ήδη σε χρήση. Διάλεξε μια πρόταση παρακάτω ή δοκίμασε άλλο.</string>
+    <string name="music_couldnt_play_track">Δεν ήταν δυνατή η αναπαραγωγή αυτού του κομματιού.</string>
 </resources>

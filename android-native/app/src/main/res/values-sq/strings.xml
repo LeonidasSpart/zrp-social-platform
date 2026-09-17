@@ -2293,4 +2293,5 @@
     <string name="settings_err_passwords_dont_match">Fjalëkalimet e reja nuk përputhen.</string>
     <string name="ai_service_unavailable">Shërbimi i AI përkohësisht i padisponueshëm</string>
     <string name="auth_username_taken_hint">Ky emër përdoruesi është i zënë. Zgjidh një sugjerim më poshtë ose provo një tjetër.</string>
+    <string name="music_couldnt_play_track">Kënga nuk mund të luhej.</string>
 </resources>

@@ -43,6 +43,7 @@ import one.zrp.social.mobile.network.SupportReply
 import one.zrp.social.mobile.network.SupportTicketDetail
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * ZRP Support - ported from src/app/support/tickets/[id]/page.tsx.
@@ -178,7 +179,7 @@ private fun TicketDetailBody(ticket: SupportTicketDetail, state: TicketDetailUiS
                         )
                         if (state.error != null) {
                             Text(
-                                text = state.error ?: "",
+                                text = localizedError(state.error) ?: "",
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(top = Spacing.sm),

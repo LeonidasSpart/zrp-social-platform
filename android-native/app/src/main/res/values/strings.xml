@@ -2308,4 +2308,5 @@
     <string name="settings_err_passwords_dont_match">New passwords don't match.</string>
     <string name="ai_service_unavailable">AI service temporarily unavailable</string>
     <string name="auth_username_taken_hint">That username is taken. Pick a suggestion below or try another.</string>
+    <string name="music_couldnt_play_track">Couldn't play this track.</string>
 </resources>

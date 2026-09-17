@@ -55,6 +55,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.StoriesRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The story composer - a real POST /stories call with the same
@@ -177,7 +178,7 @@ fun CreateStoryScreen(onPosted: () -> Unit) {
 
         if (state.error != null) {
             Text(
-                text = state.error ?: "",
+                text = localizedError(state.error) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 8.dp),
@@ -211,7 +212,7 @@ fun CreateStoryScreen(onPosted: () -> Unit) {
 private fun storyMediaErrorMessage(error: StoryMediaError): String = when (error) {
     StoryMediaError.UnsupportedType -> stringResource(R.string.stories_err_unsupported_type)
     is StoryMediaError.FileTooLarge -> stringResource(R.string.stories_err_file_too_large)
-    is StoryMediaError.UploadFailed -> error.detail
+    is StoryMediaError.UploadFailed -> localizedError(error.detail) ?: error.detail
 }
 
 @OptIn(UnstableApi::class)

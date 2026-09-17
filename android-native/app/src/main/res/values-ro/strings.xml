@@ -2243,4 +2243,5 @@
     <string name="settings_err_passwords_dont_match">Parolele noi nu coincid.</string>
     <string name="ai_service_unavailable">Serviciul AI este temporar indisponibil</string>
     <string name="auth_username_taken_hint">Acest nume de utilizator este deja luat. Alege o sugestie de mai jos sau încearcă altul.</string>
+    <string name="music_couldnt_play_track">Această piesă nu a putut fi redată.</string>
 </resources>

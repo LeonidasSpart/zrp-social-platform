@@ -90,6 +90,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.TypingIndicator
 import one.zrp.social.mobile.util.formatRelativeTime
 import one.zrp.social.mobile.util.formatTypingIndicator
+import one.zrp.social.mobile.util.localizedError
 import one.zrp.social.mobile.util.queryFileNameAndSize
 
 /**
@@ -292,7 +293,7 @@ fun GroupConversationScreen(
 
         if (state.error != null) {
             Text(
-                text = state.error ?: "",
+                text = localizedError(state.error) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -465,7 +466,7 @@ private fun typingIndicatorText(indicator: TypingIndicator): String? = when (ind
 private fun chatAttachmentErrorMessage(error: ChatAttachmentError): String = when (error) {
     is ChatAttachmentError.FileTooLarge -> stringResource(R.string.chat_err_file_too_large).replace("{size}", error.maxMb.toString())
     is ChatAttachmentError.InvalidType -> stringResource(R.string.chat_err_invalid_file_type)
-    is ChatAttachmentError.UploadFailed -> stringResource(R.string.chat_err_image_upload_failed) + " " + error.detail
+    is ChatAttachmentError.UploadFailed -> stringResource(R.string.chat_err_image_upload_failed) + " " + (localizedError(error.detail) ?: error.detail)
 }
 
 private val OwnMessageShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 4.dp)

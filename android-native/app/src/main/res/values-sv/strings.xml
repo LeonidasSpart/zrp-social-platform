@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">De nya lösenorden matchar inte.</string>
     <string name="ai_service_unavailable">AI-tjänsten är tillfälligt otillgänglig</string>
     <string name="auth_username_taken_hint">Det användarnamnet är upptaget. Välj ett förslag nedan eller prova ett annat.</string>
+    <string name="music_couldnt_play_track">Det gick inte att spela upp det här spåret.</string>
 </resources>

@@ -2243,4 +2243,5 @@
     <string name="settings_err_passwords_dont_match">Nove lozinke se ne podudaraju.</string>
     <string name="ai_service_unavailable">AI usluga trenutačno nije dostupna</string>
     <string name="auth_username_taken_hint">To korisničko ime je zauzeto. Odaberi jedan od prijedloga ispod ili pokušaj drugo.</string>
+    <string name="music_couldnt_play_track">Ovu pjesmu nije bilo moguće reproducirati.</string>
 </resources>

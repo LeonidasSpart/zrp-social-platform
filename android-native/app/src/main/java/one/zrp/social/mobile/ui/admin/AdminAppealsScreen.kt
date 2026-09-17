@@ -49,6 +49,7 @@ import one.zrp.social.mobile.data.AdminRepository
 import one.zrp.social.mobile.network.AdminAppeal
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 private val STATUS_FILTERS = listOf("pending", "upheld", "overturned", "all")
 
@@ -66,8 +67,9 @@ fun AdminAppealsScreen(onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val localizedErrorMessage = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedErrorMessage
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

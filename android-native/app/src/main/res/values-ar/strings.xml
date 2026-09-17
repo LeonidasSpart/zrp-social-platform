@@ -2293,4 +2293,5 @@
     <string name="settings_err_passwords_dont_match">كلمتا المرور الجديدتان غير متطابقتين.</string>
     <string name="ai_service_unavailable">خدمة الذكاء الاصطناعي غير متاحة مؤقتًا</string>
     <string name="auth_username_taken_hint">اسم المستخدم هذا مُستخدم بالفعل. اختر اقتراحًا أدناه أو جرّب اسمًا آخر.</string>
+    <string name="music_couldnt_play_track">تعذّر تشغيل هذا المقطع.</string>
 </resources>

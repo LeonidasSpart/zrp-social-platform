@@ -2293,4 +2293,5 @@
     <string name="settings_err_passwords_dont_match">Les nouveaux mots de passe ne correspondent pas.</string>
     <string name="ai_service_unavailable">Service IA temporairement indisponible</string>
     <string name="auth_username_taken_hint">Ce nom d'utilisateur est déjà pris. Choisissez une suggestion ci-dessous ou essayez-en un autre.</string>
+    <string name="music_couldnt_play_track">Impossible de lire ce titre.</string>
 </resources>

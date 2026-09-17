@@ -35,6 +35,7 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.home.PostCard
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * A single #hashtag feed - real posts from GET /posts/hashtag/{tag},
@@ -107,7 +108,7 @@ fun HashtagScreen(
             state.posts.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: stringResource(R.string.hashtag_no_posts, tag),
+                        text = localizedError(state.error) ?: stringResource(R.string.hashtag_no_posts, tag),
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {

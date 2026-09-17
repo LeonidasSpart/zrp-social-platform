@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.OpportunityRepository
+import one.zrp.social.mobile.util.localizedError
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -283,7 +284,7 @@ fun OpportunityFormScreen(listingId: String?, onBack: () -> Unit, onSaved: (Stri
                     OpportunityFormViewModel.createFailedError -> stringResource(R.string.opportunity_err_create_failed)
                     OpportunityFormViewModel.updateFailedError -> stringResource(R.string.opportunity_err_update_failed)
                     null -> null
-                    else -> state.error
+                    else -> localizedError(state.error)
                 }
                 if (errorText != null) {
                     Text(

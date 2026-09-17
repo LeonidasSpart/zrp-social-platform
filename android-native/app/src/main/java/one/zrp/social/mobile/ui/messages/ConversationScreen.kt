@@ -114,6 +114,7 @@ import one.zrp.social.mobile.ui.components.extractFirstUrl
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.localizedError
 import one.zrp.social.mobile.util.queryFileNameAndSize
 
 /**
@@ -576,7 +577,7 @@ fun ConversationScreen(
 
         if (state.error != null) {
             Text(
-                text = state.error ?: "",
+                text = localizedError(state.error) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -861,7 +862,7 @@ fun ConversationScreen(
                     if (err != null) {
                         Spacer(modifier = Modifier.height(Spacing.sm))
                         Text(
-                            text = err,
+                            text = localizedError(err)!!,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                         )
@@ -923,7 +924,7 @@ private fun chatAttachmentErrorMessage(error: ChatAttachmentError): String = whe
         stringResource(R.string.chat_err_file_too_large).replace("{size}", error.maxMb.toString())
     is ChatAttachmentError.InvalidType -> stringResource(R.string.chat_err_invalid_file_type)
     is ChatAttachmentError.UploadFailed ->
-        stringResource(R.string.chat_err_image_upload_failed) + " " + error.detail
+        stringResource(R.string.chat_err_image_upload_failed) + " " + (localizedError(error.detail) ?: error.detail)
 }
 
 // Matches ChatInterface.tsx's own `<video controls preload="metadata">` -

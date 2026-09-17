@@ -54,6 +54,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.CommunitiesRepository
 import one.zrp.social.mobile.network.CommunitySummary
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.util.localizedError
 
 @Composable
 fun communityCategoryLabel(category: String): String = when (category) {
@@ -144,7 +145,7 @@ fun CommunitiesScreen(onBack: () -> Unit, onOpenCommunity: (String) -> Unit) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = state.error ?: stringResource(R.string.communities_empty_title),
+                            text = localizedError(state.error) ?: stringResource(R.string.communities_empty_title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                         )
@@ -325,7 +326,7 @@ private fun CreateCommunityDialog(
                     modifier = Modifier.padding(top = Spacing.xs),
                 )
                 if (error != null) {
-                    Text(text = error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = Spacing.sm))
+                    Text(text = localizedError(error) ?: "", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = Spacing.sm))
                 }
             }
         },

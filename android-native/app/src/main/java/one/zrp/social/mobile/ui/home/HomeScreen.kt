@@ -64,6 +64,7 @@ import one.zrp.social.mobile.ui.components.PostSkeletonList
 import one.zrp.social.mobile.ui.components.ZrpEmptyState
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The native Home screen: the same two real feed streams the website
@@ -234,7 +235,7 @@ fun HomeScreen(
                 if (state.error != null && state.posts.isEmpty()) {
                     ZrpEmptyState(
                         icon = Icons.Filled.CloudOff,
-                        title = state.error,
+                        title = localizedError(state.error)!!,
                         primaryAction = EmptyStateAction(
                             label = stringResource(R.string.feed_retry),
                             icon = Icons.Filled.Refresh,

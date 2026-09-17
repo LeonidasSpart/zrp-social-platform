@@ -85,6 +85,7 @@ import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.PollLimits
 import one.zrp.social.mobile.util.getPlanLimits
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The Create tab's composer - a real POST /api/posts call. Photo/video
@@ -383,7 +384,7 @@ fun CreatePostScreen(
 
         if (state.error != null) {
             Text(
-                text = state.error ?: "",
+                text = localizedError(state.error) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 8.dp),
@@ -621,7 +622,7 @@ private fun mediaErrorMessage(error: MediaValidationError): String = when (error
     is MediaValidationError.OnlyMedia -> stringResource(R.string.composer_err_only_media)
     is MediaValidationError.GifLimit -> stringResource(R.string.composer_err_gif_limit, error.maxImages)
     is MediaValidationError.UploadFailed ->
-        stringResource(R.string.composer_err_upload_failed) + ": " + error.detail
+        stringResource(R.string.composer_err_upload_failed) + ": " + (localizedError(error.detail) ?: error.detail)
 }
 
 /**

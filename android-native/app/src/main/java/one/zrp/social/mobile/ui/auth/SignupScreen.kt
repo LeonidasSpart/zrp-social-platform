@@ -46,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.AuthRepository
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The mobile app's own account-creation screen - a real Compose UI
@@ -205,7 +206,7 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
 
         if (state.error != null) {
             Text(
-                text = state.error ?: "",
+                text = localizedError(state.error) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 12.dp),
@@ -251,7 +252,7 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
 
         if (googleForm is LoginFormState.Error) {
             Text(
-                text = (googleForm as LoginFormState.Error).message,
+                text = localizedError((googleForm as LoginFormState.Error).message) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 8.dp),

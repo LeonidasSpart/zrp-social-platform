@@ -2293,4 +2293,5 @@
     <string name="settings_err_passwords_dont_match">Die neuen Passwörter stimmen nicht überein.</string>
     <string name="ai_service_unavailable">KI-Dienst vorübergehend nicht verfügbar</string>
     <string name="auth_username_taken_hint">Dieser Benutzername ist bereits vergeben. Wähle einen der Vorschläge unten oder versuche es mit einem anderen.</string>
+    <string name="music_couldnt_play_track">Dieser Titel konnte nicht abgespielt werden.</string>
 </resources>

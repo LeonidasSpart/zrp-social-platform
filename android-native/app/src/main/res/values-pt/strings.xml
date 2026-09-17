@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">As novas palavras-passe não coincidem.</string>
     <string name="ai_service_unavailable">Serviço de IA temporariamente indisponível</string>
     <string name="auth_username_taken_hint">Esse nome de utilizador já está em uso. Escolhe uma sugestão abaixo ou tenta outro.</string>
+    <string name="music_couldnt_play_track">Não foi possível reproduzir esta faixa.</string>
 </resources>

@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">नए पासवर्ड मेल नहीं खाते।</string>
     <string name="ai_service_unavailable">AI सेवा अस्थायी रूप से उपलब्ध नहीं है</string>
     <string name="auth_username_taken_hint">वह यूज़रनेम पहले से लिया जा चुका है। नीचे दिए सुझाव में से चुनें या कोई और नाम आज़माएं।</string>
+    <string name="music_couldnt_play_track">यह ट्रैक चलाया नहीं जा सका।</string>
 </resources>

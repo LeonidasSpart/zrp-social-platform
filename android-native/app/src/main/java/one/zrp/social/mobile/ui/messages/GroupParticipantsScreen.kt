@@ -60,6 +60,7 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.ZrpEmptyState
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 import one.zrp.social.mobile.util.queryFileNameAndSize
 
 /**
@@ -146,7 +147,7 @@ fun GroupParticipantsScreen(
             }
             conversation == null -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    ZrpEmptyState(icon = Icons.Filled.Groups, title = state.error ?: stringResource(R.string.group_load_error))
+                    ZrpEmptyState(icon = Icons.Filled.Groups, title = localizedError(state.error) ?: stringResource(R.string.group_load_error))
                 }
             }
             else -> {
@@ -217,7 +218,7 @@ fun GroupParticipantsScreen(
                                 text = if (state.nameError == NAME_REQUIRED_ERROR) {
                                     stringResource(R.string.group_name_required)
                                 } else {
-                                    state.nameError ?: ""
+                                    localizedError(state.nameError) ?: ""
                                 },
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
@@ -250,7 +251,7 @@ fun GroupParticipantsScreen(
                     }
                     if (state.removeError != null) {
                         Text(
-                            text = state.removeError ?: "",
+                            text = localizedError(state.removeError) ?: "",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                         )
@@ -271,7 +272,7 @@ fun GroupParticipantsScreen(
                     )
                     if (state.addMembersError != null) {
                         Text(
-                            text = state.addMembersError ?: "",
+                            text = localizedError(state.addMembersError) ?: "",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = Spacing.xs),

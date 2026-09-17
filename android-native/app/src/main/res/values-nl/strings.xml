@@ -2238,4 +2238,5 @@
     <string name="settings_err_passwords_dont_match">Nieuwe wachtwoorden komen niet overeen.</string>
     <string name="ai_service_unavailable">AI-service tijdelijk niet beschikbaar</string>
     <string name="auth_username_taken_hint">Die gebruikersnaam is al in gebruik. Kies een suggestie hieronder of probeer een andere.</string>
+    <string name="music_couldnt_play_track">Dit nummer kon niet worden afgespeeld.</string>
 </resources>

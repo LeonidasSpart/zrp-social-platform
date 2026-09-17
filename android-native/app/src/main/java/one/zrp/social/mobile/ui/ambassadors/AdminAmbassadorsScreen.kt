@@ -52,6 +52,7 @@ import one.zrp.social.mobile.data.AmbassadorsRepository
 import one.zrp.social.mobile.network.AdminAmbassadorProfile
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 // The real UPPERCASE AmbassadorStatus values, in the same tab order as
 // the website's own admin page - "" is its All tab.
@@ -75,8 +76,9 @@ fun AdminAmbassadorsScreen(onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val localizedStateError = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedStateError
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

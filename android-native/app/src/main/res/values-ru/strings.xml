@@ -2293,4 +2293,5 @@
     <string name="settings_err_passwords_dont_match">Новые пароли не совпадают.</string>
     <string name="ai_service_unavailable">Сервис ИИ временно недоступен</string>
     <string name="auth_username_taken_hint">Это имя пользователя уже занято. Выберите вариант ниже или попробуйте другое.</string>
+    <string name="music_couldnt_play_track">Не удалось воспроизвести этот трек.</string>
 </resources>

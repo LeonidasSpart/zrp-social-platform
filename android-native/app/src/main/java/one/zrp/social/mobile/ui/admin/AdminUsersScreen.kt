@@ -59,6 +59,7 @@ import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 private val ROLE_FILTERS = listOf("ALL", "USER", "MODERATOR", "ADMIN")
 private val STATUS_FILTERS = listOf("ALL", "ACTIVE", "BANNED")
@@ -80,8 +81,9 @@ fun AdminUsersScreen(isAdmin: Boolean, onBack: () -> Unit, onOpenProfile: (Strin
 
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val localizedErrorMessage = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedErrorMessage
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

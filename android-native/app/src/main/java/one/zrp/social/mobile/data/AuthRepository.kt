@@ -46,7 +46,7 @@ class AuthRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(extractErrorMessage(e) ?: "Something went wrong. Please try again."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -62,7 +62,7 @@ class AuthRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(extractErrorMessage(e) ?: "Something went wrong. Please try again."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 
@@ -117,7 +117,7 @@ class AuthRepository {
         } catch (e: HttpException) {
             Result.failure(Exception(extractErrorMessage(e) ?: "Registration failed. Please try again later."))
         } catch (e: Exception) {
-            Result.failure(Exception("Couldn't reach ZRP. Check your connection and try again."))
+            Result.failure(Exception(ZrpErrors.NETWORK))
         }
     }
 

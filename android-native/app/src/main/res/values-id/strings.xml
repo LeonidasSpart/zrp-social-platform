@@ -2293,4 +2293,5 @@
     <string name="settings_err_passwords_dont_match">Kata sandi baru tidak cocok.</string>
     <string name="ai_service_unavailable">Layanan AI untuk sementara tidak tersedia</string>
     <string name="auth_username_taken_hint">Nama pengguna itu sudah digunakan. Pilih saran di bawah atau coba nama lain.</string>
+    <string name="music_couldnt_play_track">Trek ini tidak dapat diputar.</string>
 </resources>

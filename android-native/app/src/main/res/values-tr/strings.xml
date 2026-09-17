@@ -2293,4 +2293,5 @@
     <string name="settings_err_passwords_dont_match">Yeni şifreler eşleşmiyor.</string>
     <string name="ai_service_unavailable">Yapay zeka hizmeti geçici olarak kullanılamıyor</string>
     <string name="auth_username_taken_hint">Bu kullanıcı adı alınmış. Aşağıdaki önerilerden birini seçin veya başka bir tane deneyin.</string>
+    <string name="music_couldnt_play_track">Bu parça çalınamadı.</string>
 </resources>

@@ -35,6 +35,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The Profile category screen - name/bio/location/country/website,
@@ -150,7 +151,7 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
 
         if (state.error != null) {
             Text(
-                text = state.error ?: "",
+                text = localizedError(state.error) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = Spacing.sm),
@@ -208,7 +209,7 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
 
         if (state.walletError != null) {
             Text(
-                text = state.walletError ?: "",
+                text = localizedError(state.walletError) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = Spacing.sm),
