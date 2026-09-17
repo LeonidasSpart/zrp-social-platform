@@ -7,6 +7,15 @@ history around this file's introduction for the full list of confirmed
 bugs found and fixed. When this document and the source disagree, the
 source wins.
 
+A second pass (see git history for the commit introducing "Blocked-user
+enforcement" and the `comment_repost` type below) closed two gaps the
+first pass's own audit had missed: likes/comments/comment-likes/reposts
+only ever suppressed the *notification* for a blocked-either-way
+relationship, not the interaction itself (unlike follow and messages,
+which already blocked the interaction) - and `/api/comments/[id]/repost`
+had been missed entirely, with none of the hardening every sibling toggle
+route already had.
+
 ## Source of truth
 
 - **Notification state**: the `Notification` table (`prisma/schema.prisma`).
@@ -22,6 +31,22 @@ source wins.
 - **Repost quota**: `RepostDailyUsage` (a per-user-per-day row), enforced
   atomically by `src/lib/repost-quota.ts`. No repost quota existed
   anywhere in this codebase before this - see "Repost quota" below.
+
+## Blocked-user enforcement
+
+`isBlockedEitherWay()` (`src/lib/auth-guards.ts`) checks both directions
+of the `Blocked` table in one query. Follow and messages already checked
+it up front, before any mutation, returning 403 - the interaction itself
+never forms for a blocked-either-way relationship. Like, comment (and
+reply), comment-like, post-repost and comment-repost did not: they only
+suppressed the resulting *notification* (via `createNotification()`'s own
+internal check), so the Like/Comment/CommentLike/Repost/CommentRepost row
+itself still landed. This is now fixed the same way as follow/messages -
+checked up front, before the row is created (and, for reposts, before a
+daily quota slot is even reserved, so a blocked relationship can't cost
+the reposter part of their limit for an interaction that can't happen
+anyway). `createNotification()`'s own check is unchanged and still runs -
+it's a second, redundant layer now, not the only one.
 
 ## The notification pipeline
 
@@ -101,9 +126,62 @@ retract their own notification directly:
   the same `postId`).
 - Unfollow deletes the matching unread `follow` notification.
 - Un-reposting deletes the matching unread `repost` notification.
+- Un-reposting a comment deletes the matching unread `comment_repost`
+  notification (a distinct type from `repost`, mirroring why
+  `comment_like` is distinct from `like`).
 
-This means a like -> unlike -> like cycle leaves exactly one notification
-behind, not an orphaned first one plus a second.
+`Notification.commentId` (nullable, `onDelete: Cascade` to `Comment`)
+disambiguates *which* comment a `comment_like`/`comment_repost`
+notification is about - it is the actual identity key of the underlying
+interaction, since `CommentLike`/`CommentRepost` are each uniquely keyed
+on `(commentId, userId)`. Before this column existed, both notification
+types only had `postId`+`type`+`fromUserId` to match on for retraction -
+insufficient, because a single post can have many comments, and the same
+actor can like (or repost) several different comments under the same
+post: two such notifications would share an identical
+`postId`+`type`+`fromUserId` (and even `userId`/recipient, if the same
+person authored both comments) despite being two entirely distinct
+interactions. Retraction now filters on `commentId` too, so it can only
+ever match the specific comment being un-liked/un-reposted - `comment`
+and `reply` do not carry a `commentId` since neither is ever retracted
+(there is no "un-comment" action), so no such ambiguity exists for them.
+
+This means a like -> unlike -> like cycle (or repost -> un-repost ->
+repost) leaves exactly one notification behind, not an orphaned first one
+plus a second, and interacting with a different comment on the same post
+never disturbs another comment's already-existing notification.
+
+**Migration/backfill note**: `commentId` is nullable specifically so
+existing `Notification` rows (created before this column existed) don't
+need a backfill to remain valid - a NULL `commentId` is simply a
+notification with no comment-level identity, which is what every existing
+row already was in practice. A deliberate choice was made NOT to
+heuristically backfill `commentId` on old `comment_like`/`comment_repost`
+rows: the only way to guess which comment an old row was about is by
+matching `postId`+`fromUserId`+approximate `createdAt` against
+`CommentLike`/`CommentRepost`, which is exactly ambiguous in the one case
+that matters (the same user having liked/reposted more than one comment
+by the same author on the same post around the same time) - a guessed
+backfill could assign the *wrong* comment, which is worse than leaving it
+unset. The bounded, one-time consequence: an unlike/un-repost on a
+comment whose original notification predates this migration won't match
+the new precise-`commentId` retraction query (a NULL column never equals
+a concrete id), so that specific old notification is left in place rather
+than retracted - a cosmetically stale notification, not an incorrect one,
+and not a security or data-integrity issue. It self-resolves once read
+(the `read: false` guard on every retraction query already excludes read
+notifications) or ages out with normal use; every notification created
+from this deploy onward carries the correct `commentId` from day one.
+
+**Side effect of the FK's `onDelete: Cascade`**: deleting a comment
+(`DELETE /api/comments/[id]`) now also deletes any `comment_like`/
+`comment_repost` notification that referenced it - previously those rows
+were orphaned indefinitely, pointing at a comment that no longer exists,
+the same way a deleted post already cascades all of its own
+notifications via `Notification.postId`. `comment`/`reply` notifications
+are not part of this cascade (no `commentId`) and remain orphaned on
+comment deletion exactly as they did before this pass - unchanged,
+existing behavior, not a regression introduced here.
 
 ## Reply vs. comment
 
@@ -149,6 +227,19 @@ concurrent duplicate, the post having been deleted) - a failed repost
 never costs a slot. Undoing a repost does **not** restore the slot: this
 is deliberate, so a repost/un-repost loop can't bypass the daily limit.
 
+`/api/comments/[id]/repost` shares the exact same per-user
+`RepostDailyUsage` counter - a repost is a repost for quota purposes,
+whether of a post or a comment. This route was missed entirely by the
+first audit pass: before this fix it had no quota accounting at all (a
+straightforward bypass - hit your post-repost limit, keep reposting
+comments for free), no notification to the comment's author, no blocked-
+either-way check, and no race-safety on concurrent create/delete (an
+unhandled `P2002`/`P2025` would 500). It's now been brought fully in line
+with `/api/posts/[id]/repost`, including a new `comment_repost`
+notification type (distinct from `comment_like` and `repost` - see
+"Duplicate-notification prevention" above) and web UI support
+(icon/action text on the notifications page, `GROUPABLE_TYPES`).
+
 ## What was audited and found already correct (not touched)
 
 - Web Push / FCM delivery (`src/lib/push-notifications.ts`, `src/lib/fcm.ts`):
@@ -179,7 +270,8 @@ is deliberate, so a repost/un-repost loop can't bypass the daily limit.
 - No generic notification-grouping infrastructure beyond what already
   existed (`GROUPABLE_TYPES` on the web notifications page, already
   present before this pass) - extended only far enough to cover the new
-  `comment_like` type consistently with `like`.
+  `comment_like` and `comment_repost` types consistently with `like` and
+  `repost`.
 - No request-level idempotency key on comment creation - the existing
   rate limiter plus the client's own submit-in-flight guard were judged a
   reasonable existing mitigation; a dedicated idempotency-key system was

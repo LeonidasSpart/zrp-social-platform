@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications"; // ← Added
 import { rateLimit } from "@/lib/rate-limit";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 
 function isUniqueViolation(err: unknown): boolean {
   return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
@@ -68,6 +69,33 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
       return NextResponse.json({ liked: false });
     } else {
+      // Get post author up front - both to check the block relationship
+      // before the Like exists at all, and to notify below.
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+        select: {
+          authorId: true,
+          author: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+
+      // ⚠️ SECURITY/PRIVACY: confirmed missing by audit - a blocked-either-way
+      // relationship could still like the post, unlike follow/messages which
+      // correctly block the interaction itself, not just the resulting
+      // notification. Checked up front, before the Like row is created -
+      // the interaction itself must never form.
+      if (
+        post &&
+        post.authorId !== userId &&
+        (await isBlockedEitherWay(userId, post.authorId))
+      ) {
+        return NextResponse.json({ error: "Unable to like this post" }, { status: 403 });
+      }
+
       // Like: create like and notification
       try {
         await prisma.like.create({
@@ -82,19 +110,6 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         if (!isUniqueViolation(err)) throw err;
         return NextResponse.json({ liked: true });
       }
-
-      // Get post author to send notification
-      const post = await prisma.post.findUnique({
-        where: { id: postId },
-        select: {
-          authorId: true,
-          author: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
 
       if (post && post.authorId !== userId) {
         // ─── Send database notification ──────────────────────────────
