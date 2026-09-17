@@ -40,6 +40,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.util.formatAbsoluteDateEnglish
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Real 30-day scheduled deletion, matching src/app/settings/delete/
@@ -157,7 +158,7 @@ fun DeleteAccountScreen(onBack: () -> Unit, onAccountDeleted: () -> Unit) {
                 }
                 if (state.error != null) {
                     Text(
-                        text = state.error ?: "",
+                        text = localizedError(state.error) ?: "",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(top = Spacing.sm),

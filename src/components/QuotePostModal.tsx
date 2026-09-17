@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { getPlanLimits } from "@/lib/limits";
 
 interface Props {
@@ -67,7 +68,7 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || t("quote.errGeneric"));
+        throw new Error(localizeApiMessage(data.error, t) || t("quote.errGeneric"));
       }
       onQuotePosted();
       onClose();

@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import ListingForm, { type ListingFormValues } from "@/components/ListingForm";
 
 interface ListingData {
@@ -74,7 +75,7 @@ export default function EditListingPage({ params }: { params: Promise<{ id: stri
       if (res.ok) {
         router.push(`/marketplace/listing/${id}`);
       } else {
-        throw new Error(data.error || t("marketplace.errUpdateFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("marketplace.errUpdateFailed"));
       }
     } finally {
       setSubmitting(false);

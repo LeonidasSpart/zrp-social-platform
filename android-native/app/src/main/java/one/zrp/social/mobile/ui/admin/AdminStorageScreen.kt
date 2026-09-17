@@ -43,6 +43,7 @@ import one.zrp.social.mobile.data.AdminRepository
 import one.zrp.social.mobile.network.AdminStorageScan
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Ported from src/app/admin/storage/page.tsx - see
@@ -63,8 +64,9 @@ fun AdminStorageScreen(onBack: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
 
+    val localizedStateError = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedStateError
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

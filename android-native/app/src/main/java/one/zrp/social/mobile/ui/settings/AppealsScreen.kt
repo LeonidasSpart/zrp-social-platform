@@ -44,6 +44,7 @@ import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.localizedError
 
 // Real Prisma enum values (report.status/appeal.status), the same
 // action-type strings admin/reports.tsx already writes - reused
@@ -97,7 +98,7 @@ fun AppealsScreen(onBack: () -> Unit) {
             ) {
                 if (state.error != null) {
                     Text(
-                        text = state.error ?: "",
+                        text = localizedError(state.error) ?: "",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(bottom = Spacing.md),
@@ -214,7 +215,7 @@ private fun EligibleReportCard(
                     )
                     if (submitError != null) {
                         Text(
-                            text = submitError,
+                            text = localizedError(submitError) ?: "",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = Spacing.xs),

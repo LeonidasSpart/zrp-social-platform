@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 export default function ForgotPasswordPage() {
   const { t } = useLanguage();
@@ -26,7 +27,7 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
       setMessage({
         type: "success",
-        text: data.message || t("forgotPassword.successDefault"),
+        text: localizeApiMessage(data.message, t) || t("forgotPassword.successDefault"),
       });
     } catch (error) {
       setMessage({ type: "error", text: t("auth.errTryAgain") });

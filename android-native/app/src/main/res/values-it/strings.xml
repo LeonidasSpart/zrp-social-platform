@@ -2285,4 +2285,13 @@
     <string name="lists_error_load">Impossibile caricare le liste.</string>
     <string name="lists_error_create">Impossibile creare la lista.</string>
     <string name="lists_error_add_member">Impossibile aggiungere il membro.</string>
-    <string name="lists_error_remove_member">Impossibile rimuovere il membro.</string></resources>
+    <string name="lists_error_remove_member">Impossibile rimuovere il membro.</string>
+    <string name="auth_err_network">Impossibile raggiungere ZRP. Controlla la connessione e riprova.</string>
+    <string name="auth_registration_failed">Registrazione non riuscita. Riprova più tardi.</string>
+    <string name="auth_enter_email_username_password">Inserisci la tua email o il nome utente e la password.</string>
+    <string name="settings_err_fill_all_fields">Compila tutti i campi.</string>
+    <string name="settings_err_passwords_dont_match">Le nuove password non corrispondono.</string>
+    <string name="ai_service_unavailable">Servizio IA temporaneamente non disponibile</string>
+    <string name="auth_username_taken_hint">Questo nome utente è già in uso. Scegli un suggerimento qui sotto o prova con un altro.</string>
+    <string name="music_couldnt_play_track">Impossibile riprodurre questo brano.</string>
+</resources>

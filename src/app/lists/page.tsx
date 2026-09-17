@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, ListChecks, Plus, X, Lock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 type ListSummary = {
   id: string;
@@ -60,7 +61,7 @@ export default function ListsPage() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || t("lists.errorCreate"));
+      if (!res.ok) throw new Error(localizeApiMessage(data.error, t) || t("lists.errorCreate"));
       setCreating(false);
       setForm({ name: "", description: "", isPrivate: false });
       router.push(`/lists/${data.list.id}`);

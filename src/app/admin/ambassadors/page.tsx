@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { flagEmoji } from "@/lib/ambassadors/countries";
 import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
 import type { TranslationKey } from "@/lib/translations";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 /*
  * /admin/ambassadors - the review queue behind
@@ -102,7 +103,7 @@ export default function AdminAmbassadorsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t("adminAmbassadors.errFailedLoad"));
+        throw new Error(localizeApiMessage(data.error, t) || t("adminAmbassadors.errFailedLoad"));
       }
 
       setProfiles(data.profiles || []);
@@ -150,7 +151,7 @@ export default function AdminAmbassadorsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t(ACTION_ERROR_KEYS[action]));
+        throw new Error(localizeApiMessage(data.error, t) || t(ACTION_ERROR_KEYS[action]));
       }
 
       setSuccess(t(ACTION_SUCCESS_KEYS[action]));

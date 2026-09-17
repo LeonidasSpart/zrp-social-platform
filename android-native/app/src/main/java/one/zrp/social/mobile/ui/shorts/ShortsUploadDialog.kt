@@ -63,6 +63,7 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.getPlanLimits
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * ZRP Shorts' "Post a Short" - ported from ShortUploadModal.tsx: a
@@ -291,9 +292,9 @@ private fun shortUploadErrorMessage(error: ShortUploadError): String = when (err
     ShortUploadError.PublishedGif -> stringResource(R.string.shorts_upload_err_published_gif)
     ShortUploadError.UrlGenFailed -> stringResource(R.string.shorts_upload_err_url_gen_failed)
     is ShortUploadError.UploadFailed ->
-        stringResource(R.string.shorts_upload_err_generic) + ": " + error.detail
+        stringResource(R.string.shorts_upload_err_generic) + ": " + (localizedError(error.detail) ?: error.detail)
     is ShortUploadError.PublishFailed ->
-        error.detail ?: stringResource(R.string.shorts_upload_err_failed_publish)
+        localizedError(error.detail) ?: stringResource(R.string.shorts_upload_err_failed_publish)
 }
 
 /**

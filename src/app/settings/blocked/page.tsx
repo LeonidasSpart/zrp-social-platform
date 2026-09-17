@@ -8,6 +8,7 @@ import { ChevronLeft, Loader2, Ban, Calendar } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface BlockedUser {
   id: string;
@@ -75,7 +76,7 @@ export default function BlockedUsersPage() {
         setBlockedUsers((prev) => prev.filter((u) => u.id !== userId));
       } else {
         const err = await res.json();
-        alert(err.error || t("blocked.errUnblock"));
+        alert(localizeApiMessage(err.error, t) || t("blocked.errUnblock"));
       }
     } catch (error) {
       console.error("Unblock error:", error);

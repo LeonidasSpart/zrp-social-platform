@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import PasswordInput from "@/components/PasswordInput";
 
 export default function ResetPasswordPage(props: { params: Promise<{ token: string }> }) {
@@ -46,7 +47,7 @@ export default function ResetPasswordPage(props: { params: Promise<{ token: stri
         setMessage({ type: "success", text: t("resetPassword.successMessage") });
         setTimeout(() => router.push("/login"), 2000);
       } else {
-        setMessage({ type: "error", text: data.error || t("resetPassword.errGeneric") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("resetPassword.errGeneric") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("auth.errTryAgain") });

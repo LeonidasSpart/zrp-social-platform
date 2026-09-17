@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Scale, Clock, CheckCircle, XCircle, Filter, X, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Appeal {
   id: string;
@@ -81,7 +82,7 @@ export default function AdminAppeals() {
         setTimeout(() => setMessage(null), 3000);
       } else {
         const data = await res.json();
-        setMessage({ type: "error", text: data.error || t("adminReports.errUpdateFailed") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("adminReports.errUpdateFailed") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });

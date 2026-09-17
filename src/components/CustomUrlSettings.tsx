@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Check, X, Loader2, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 // ─── Inline components ──────────────────────────────────────────────
 interface ButtonProps {
@@ -127,7 +128,7 @@ export default function CustomUrlSettings({
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || t("customUrl.errUpdateFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("customUrl.errUpdateFailed"));
       }
 
       setSuccess(t("customUrl.successUpdated", { url: trimmed }));
@@ -153,7 +154,7 @@ export default function CustomUrlSettings({
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || t("customUrl.errRemoveFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("customUrl.errRemoveFailed"));
       }
 
       setCustomUrl("");

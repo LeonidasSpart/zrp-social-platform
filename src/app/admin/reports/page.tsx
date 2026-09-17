@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Flag, Clock, CheckCircle, AlertTriangle, Filter, X, ExternalLink, User, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Report {
   id: string;
@@ -144,7 +145,7 @@ export default function AdminReports() {
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        setMessage({ type: "error", text: err.error || t("adminReports.errDeleteFailed") });
+        setMessage({ type: "error", text: localizeApiMessage(err.error, t) || t("adminReports.errDeleteFailed") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });

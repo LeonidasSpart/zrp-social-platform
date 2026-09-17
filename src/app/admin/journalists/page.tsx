@@ -16,6 +16,7 @@ import {
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 type JournalistStatus = "PENDING" | "VERIFIED" | "REJECTED" | "SUSPENDED";
 
@@ -102,7 +103,7 @@ export default function AdminJournalistsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t("adminJournalists.errFailedLoad"));
+        throw new Error(localizeApiMessage(data.error, t) || t("adminJournalists.errFailedLoad"));
       }
 
       setProfiles(data.profiles || []);
@@ -152,7 +153,7 @@ export default function AdminJournalistsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t(ACTION_ERROR_KEYS[action]));
+        throw new Error(localizeApiMessage(data.error, t) || t(ACTION_ERROR_KEYS[action]));
       }
 
       setSuccess(t(ACTION_SUCCESS_KEYS[action]));
@@ -188,7 +189,7 @@ export default function AdminJournalistsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t("adminJournalists.errFailedGrant"));
+        throw new Error(localizeApiMessage(data.error, t) || t("adminJournalists.errFailedGrant"));
       }
 
       setSuccess(t("adminJournalists.grantSuccess", { username }));

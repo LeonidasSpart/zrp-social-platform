@@ -63,6 +63,7 @@ import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * A single post's real comment thread - the same GET/POST
@@ -127,7 +128,7 @@ fun CommentsScreen(
                 state.comments.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = state.error ?: stringResource(R.string.comments_empty),
+                            text = localizedError(state.error) ?: stringResource(R.string.comments_empty),
                             color = if (state.error != null) {
                                 MaterialTheme.colorScheme.error
                             } else {
@@ -166,7 +167,7 @@ fun CommentsScreen(
 
         if (state.error != null && state.comments.isNotEmpty()) {
             Text(
-                text = state.error ?: "",
+                text = localizedError(state.error) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),

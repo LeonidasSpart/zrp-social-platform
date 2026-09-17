@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import ListingForm, { type ListingFormValues } from "@/components/ListingForm";
 
 export default function NewListingPage() {
@@ -38,7 +39,7 @@ export default function NewListingPage() {
       if (res.ok) {
         router.push(`/marketplace/listing/${data.listing.id}`);
       } else {
-        throw new Error(data.error || t("marketplace.errCreateFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("marketplace.errCreateFailed"));
       }
     } finally {
       setSubmitting(false);

@@ -43,6 +43,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PlayChallengeContent
 import one.zrp.social.mobile.data.PlayRepository
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Play a challenge - ported from PlayChallengePage.tsx. When duelId is
@@ -178,7 +179,7 @@ fun PlayChallengeScreen(
                                 PlayChallengeViewModel.submitFailedError -> stringResource(R.string.play_err_submit_failed)
                                 PlayChallengeViewModel.duelCreateFailedError -> stringResource(R.string.play_err_duel_create_failed)
                                 PlayChallengeViewModel.shareFailedError -> stringResource(R.string.play_err_share_failed)
-                                else -> error
+                                else -> localizedError(error) ?: error
                             }
                             Text(
                                 text = errorText,

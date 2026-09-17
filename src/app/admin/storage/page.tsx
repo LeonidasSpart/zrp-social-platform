@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Search, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface OrphanFile {
   key: string;
@@ -47,7 +48,7 @@ export default function AdminStoragePage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || t("adminStorage.errScanFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("adminStorage.errScanFailed"));
       }
 
       setResult(data);
@@ -74,7 +75,7 @@ export default function AdminStoragePage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || t("adminStorage.errDeleteFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("adminStorage.errDeleteFailed"));
       }
 
       setDeletedMessage(t("adminStorage.deletedMessage", { deleted: data.deleted, total: data.orphanedCount }));

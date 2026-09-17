@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ChevronLeft, Loader2, Scale, Send } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface EligibleReport {
   id: string;
@@ -79,7 +80,7 @@ export default function AppealsPage() {
         setMessage("");
         load();
       } else {
-        setError(data.error || t("appeals.errSubmitFailed"));
+        setError(localizeApiMessage(data.error, t) || t("appeals.errSubmitFailed"));
       }
     } catch (err) {
       setError(t("appeals.errSubmitFailed"));

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { formatTotalDuration } from "@/lib/music/duration";
 import { MUSIC_GENRES } from "@/lib/music/genres";
 
@@ -279,7 +280,7 @@ export default function MusicStudio({
       onTrackChange?.();
     } else {
       const data = await res.json().catch(() => ({}));
-      setMessage({ type: "error", text: data.error || t("music.studio.saveFailed") });
+      setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("music.studio.saveFailed") });
     }
   };
 
@@ -295,7 +296,7 @@ export default function MusicStudio({
       loadMyTracks();
     } else {
       const data = await res.json().catch(() => ({}));
-      setMessage({ type: "error", text: data.error || t("music.studio.saveFailed") });
+      setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("music.studio.saveFailed") });
     }
   };
 
@@ -601,7 +602,7 @@ function TracksTab({
         });
         if (!trackRes.ok) {
           const data = await trackRes.json().catch(() => ({}));
-          throw new Error(data.error || t("music.shell.publishFailedDefault"));
+          throw new Error(localizeApiMessage(data.error, t) || t("music.shell.publishFailedDefault"));
         }
 
         setPendingUpload(null);
@@ -945,7 +946,7 @@ function EditTrackModal({
     setSaving(false);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || t("music.studio.saveFailed"));
+      setError(localizeApiMessage(data.error, t) || t("music.studio.saveFailed"));
       return;
     }
     const updated = await res.json();
@@ -1189,7 +1190,7 @@ function CreateAlbumModal({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || t("music.studio.saveFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("music.studio.saveFailed"));
       }
       const album = await res.json();
       onCreated(album);
@@ -1332,7 +1333,7 @@ function ManageAlbumModal({
     setSaving(false);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || t("music.studio.saveFailed"));
+      setError(localizeApiMessage(data.error, t) || t("music.studio.saveFailed"));
       return;
     }
     const updated = await res.json();
@@ -1558,7 +1559,7 @@ function ArtistTab({ onSaved }: { onSaved: () => void }) {
     setSaving(false);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || t("music.studio.saveFailed"));
+      setError(localizeApiMessage(data.error, t) || t("music.studio.saveFailed"));
       return;
     }
     setSuccess(true);

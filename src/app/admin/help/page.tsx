@@ -5,6 +5,7 @@ import Link from "next/link";
 import { HeartHandshake, ExternalLink, CheckCircle, XCircle, ShieldOff, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CATEGORY_META, formatCampaignAmount, type HelpCampaignSummary } from "@/lib/help";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface AdminCampaign extends HelpCampaignSummary {
   id: string;
@@ -64,7 +65,7 @@ export default function AdminHelpPage() {
         setTimeout(() => setMessage(null), 3000);
       } else {
         const data = await res.json();
-        setMessage({ type: "error", text: data.error || t("adminReports.errUpdateFailed") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("adminReports.errUpdateFailed") });
       }
     } catch {
       setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });

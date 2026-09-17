@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Paperclip, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface ApplyModalProps {
   listingId: string;
@@ -52,7 +53,7 @@ export default function ApplyModal({ listingId, onClose, onApplied }: ApplyModal
         body: JSON.stringify({ coverNote: coverNote.trim() || undefined, resumeUrl: resumeUrl || undefined }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to apply");
+      if (!res.ok) throw new Error(localizeApiMessage(data.error, t) || "Failed to apply");
       onApplied();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("opportunity.errApplyFailed"));

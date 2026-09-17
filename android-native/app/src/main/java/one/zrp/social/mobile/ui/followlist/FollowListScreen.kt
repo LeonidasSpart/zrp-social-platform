@@ -44,6 +44,7 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.ui.theme.ZrpWhite
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Real followers or following, from the same GET
@@ -105,7 +106,7 @@ fun FollowListScreen(
             }
             state.users.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    val emptyText = state.error ?: stringResource(
+                    val emptyText = localizedError(state.error) ?: stringResource(
                         if (mode == FollowListMode.FOLLOWERS) R.string.followers_empty else R.string.following_empty,
                     )
                     Text(

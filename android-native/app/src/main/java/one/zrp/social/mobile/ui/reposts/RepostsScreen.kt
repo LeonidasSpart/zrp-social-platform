@@ -41,6 +41,7 @@ import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * "Who reposted this post" - the same real GET /posts/{id}/reposts
@@ -102,7 +103,7 @@ fun RepostsScreen(
             state.users.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: stringResource(R.string.reposts_empty),
+                        text = localizedError(state.error) ?: stringResource(R.string.reposts_empty),
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {

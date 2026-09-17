@@ -2285,4 +2285,13 @@
     <string name="lists_error_load">Listen konnten nicht geladen werden.</string>
     <string name="lists_error_create">Liste konnte nicht erstellt werden.</string>
     <string name="lists_error_add_member">Mitglied konnte nicht hinzugefügt werden.</string>
-    <string name="lists_error_remove_member">Mitglied konnte nicht entfernt werden.</string></resources>
+    <string name="lists_error_remove_member">Mitglied konnte nicht entfernt werden.</string>
+    <string name="auth_err_network">ZRP konnte nicht erreicht werden. Bitte Verbindung prüfen und erneut versuchen.</string>
+    <string name="auth_registration_failed">Registrierung fehlgeschlagen. Bitte später erneut versuchen.</string>
+    <string name="auth_enter_email_username_password">Gib deine E-Mail-Adresse oder deinen Benutzernamen und dein Passwort ein.</string>
+    <string name="settings_err_fill_all_fields">Bitte alle Felder ausfüllen.</string>
+    <string name="settings_err_passwords_dont_match">Die neuen Passwörter stimmen nicht überein.</string>
+    <string name="ai_service_unavailable">KI-Dienst vorübergehend nicht verfügbar</string>
+    <string name="auth_username_taken_hint">Dieser Benutzername ist bereits vergeben. Wähle einen der Vorschläge unten oder versuche es mit einem anderen.</string>
+    <string name="music_couldnt_play_track">Dieser Titel konnte nicht abgespielt werden.</string>
+</resources>

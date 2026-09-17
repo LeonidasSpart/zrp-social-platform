@@ -24,6 +24,7 @@ import {
   Check,
 } from "lucide-react";
 import { getSocket } from "@/lib/socket-client";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { getDateLocale } from "@/lib/dateLocale";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -475,7 +476,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
       });
       if (!res.ok) {
         const error = await res.json().catch(() => null);
-        throw new Error(error?.error || "Failed to send message");
+        throw new Error(localizeApiMessage(error?.error, t) || "Failed to send message");
       }
       const saved = await res.json();
       setMessages((prev) => prev.map((m) => (m.id === tempId ? saved : m)));
@@ -553,7 +554,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
         setPendingDeleteId(null);
       } else {
         const err = await res.json().catch(() => null);
-        setDeleteError(err?.error || t("chat.errDeleteMessage"));
+        setDeleteError(localizeApiMessage(err?.error, t) || t("chat.errDeleteMessage"));
         setPendingDeleteId(null);
       }
     } catch (error) {

@@ -56,6 +56,7 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.ui.theme.ZrpWhite
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The native onboarding flow shown right after a first login whose
@@ -164,7 +165,7 @@ fun OnboardingScreen(onAccountMissing: () -> Unit, onFinished: () -> Unit) {
 
 @Composable
 private fun resolveErrorMessage(error: OnboardingError): String = when (error) {
-    is OnboardingError.Server -> error.message
+    is OnboardingError.Server -> localizedError(error.message) ?: error.message
     OnboardingError.SaveProfileFailed -> stringResource(R.string.onboarding_err_save_profile)
     OnboardingError.FollowUsersFailed -> stringResource(R.string.onboarding_err_follow_users)
     OnboardingError.SkipFailed -> stringResource(R.string.onboarding_err_skip)

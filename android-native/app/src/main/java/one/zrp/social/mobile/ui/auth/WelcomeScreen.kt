@@ -49,6 +49,7 @@ import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpDeepBlack
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.ui.theme.ZrpWhite
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The very first screen a logged-out user sees - a landing/chooser
@@ -222,7 +223,7 @@ fun WelcomeScreen(
             // displayed it.
             if (formState is LoginFormState.Error) {
                 Text(
-                    text = formState.message,
+                    text = localizedError(formState.message) ?: "",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,

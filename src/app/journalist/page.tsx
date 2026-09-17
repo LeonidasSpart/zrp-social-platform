@@ -18,6 +18,7 @@ import {
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 type JournalistStatus = "PENDING" | "VERIFIED" | "REJECTED" | "SUSPENDED";
 
@@ -139,7 +140,7 @@ export default function JournalistDashboardPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t("journalistDash.errFailedSubmit"));
+        throw new Error(localizeApiMessage(data.error, t) || t("journalistDash.errFailedSubmit"));
       }
 
       await load();

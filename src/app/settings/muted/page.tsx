@@ -8,6 +8,7 @@ import { ChevronLeft, User, Loader2, BellOff, Calendar } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface MutedUser {
   id: string;
@@ -75,7 +76,7 @@ export default function MutedUsersPage() {
         setMutedUsers((prev) => prev.filter((user) => user.id !== userId));
       } else {
         const err = await res.json();
-        alert(err.error || t("muted.errUnmute"));
+        alert(localizeApiMessage(err.error, t) || t("muted.errUnmute"));
       }
     } catch (error) {
       console.error("Unmute error:", error);

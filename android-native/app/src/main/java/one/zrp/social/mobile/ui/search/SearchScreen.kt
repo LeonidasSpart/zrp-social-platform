@@ -61,6 +61,7 @@ import one.zrp.social.mobile.network.SearchUser
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The Search tab: real typed search against the website's own /search
@@ -387,7 +388,7 @@ private fun SearchResultsContent(
     if (state.error != null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
-                text = state.error,
+                text = localizedError(state.error) ?: "",
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(24.dp),
             )

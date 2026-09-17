@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.AiRepository
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.util.localizedError
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 /**
@@ -158,7 +159,7 @@ fun AiChatScreen(onBack: () -> Unit) {
             val message = if (state.error == AiChatViewModel.genericErrorSentinel) {
                 stringResource(R.string.ai_chat_err_could_not_generate)
             } else {
-                state.error
+                localizedError(state.error)
             }
             Text(
                 text = message ?: "",

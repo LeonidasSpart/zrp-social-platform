@@ -41,6 +41,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /** The Security category screen - password change (PUT /api/user/password). */
 @Composable
@@ -105,7 +106,7 @@ fun SecuritySettingsScreen(onBack: () -> Unit) {
 
             if (state.error != null) {
                 Text(
-                    text = state.error ?: "",
+                    text = localizedError(state.error) ?: "",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = Spacing.sm),
@@ -113,7 +114,7 @@ fun SecuritySettingsScreen(onBack: () -> Unit) {
             }
             if (state.successMessage != null) {
                 Text(
-                    text = state.successMessage ?: "",
+                    text = localizedError(state.successMessage) ?: "",
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = Spacing.sm),

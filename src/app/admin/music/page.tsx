@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Music2, ExternalLink, ShieldCheck, ShieldOff, Search, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface AdminMusicArtist {
   id: string;
@@ -61,7 +62,7 @@ export default function AdminMusicPage() {
         setTimeout(() => setMessage(null), 3000);
       } else {
         const data = await res.json();
-        setMessage({ type: "error", text: data.error || t("music.admin.updateFailedMsg") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("music.admin.updateFailedMsg") });
       }
     } catch {
       setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });
@@ -81,7 +82,7 @@ export default function AdminMusicPage() {
         setTimeout(() => setMessage(null), 3000);
       } else {
         const data = await res.json().catch(() => ({}));
-        setMessage({ type: "error", text: data.error || t("music.admin.deleteFailedMsg") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("music.admin.deleteFailedMsg") });
       }
     } catch {
       setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });

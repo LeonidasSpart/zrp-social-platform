@@ -45,6 +45,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.ListsRepository
 import one.zrp.social.mobile.network.ListSummary
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.util.localizedError
 
 @Composable
 fun ListsScreen(onBack: () -> Unit, onOpenList: (String) -> Unit) {
@@ -82,7 +83,7 @@ fun ListsScreen(onBack: () -> Unit, onOpenList: (String) -> Unit) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = state.error ?: stringResource(R.string.lists_empty_title),
+                            text = localizedError(state.error) ?: stringResource(R.string.lists_empty_title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                         )
@@ -203,7 +204,7 @@ private fun CreateListDialog(
                     Text(stringResource(R.string.lists_create_private_label))
                 }
                 if (error != null) {
-                    Text(text = error, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = Spacing.sm))
+                    Text(text = localizedError(error) ?: "", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = Spacing.sm))
                 }
             }
         },

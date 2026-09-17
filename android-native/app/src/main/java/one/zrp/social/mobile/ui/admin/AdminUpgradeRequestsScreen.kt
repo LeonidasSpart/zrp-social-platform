@@ -45,6 +45,7 @@ import one.zrp.social.mobile.network.AdminUpgradeRequest
 import one.zrp.social.mobile.ui.support.formatTicketDateTime
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 // The real lowercase UpgradeRequest statuses. Like the website's own
 // page, the queue opens on "pending" - the only status anything can be
@@ -69,8 +70,9 @@ fun AdminUpgradeRequestsScreen(isAdmin: Boolean, onBack: () -> Unit) {
 
     LaunchedEffect(isAdmin) { if (isAdmin) viewModel.load() }
 
+    val localizedErrorMessage = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedErrorMessage
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { X, Users, Pencil, Check, Loader2, Camera, UserMinus, LogOut, Ban, Crown } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePresence } from "@/contexts/PresenceContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import UserMultiSelect, { type SelectableUser } from "@/components/UserMultiSelect";
@@ -72,7 +73,7 @@ export default function GroupInfoPanel({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setRenameError(data?.error || t("group.info.errRename"));
+        setRenameError(localizeApiMessage(data?.error, t) || t("group.info.errRename"));
         return;
       }
       onUpdated(data);
@@ -102,7 +103,7 @@ export default function GroupInfoPanel({
         });
         const data = await res.json().catch(() => null);
         if (!res.ok) {
-          setAvatarError(data?.error || t("group.info.errRename"));
+          setAvatarError(localizeApiMessage(data?.error, t) || t("group.info.errRename"));
         } else {
           onUpdated(data);
         }
@@ -151,7 +152,7 @@ export default function GroupInfoPanel({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setAddError(data?.error || t("group.info.errAdd"));
+        setAddError(localizeApiMessage(data?.error, t) || t("group.info.errAdd"));
         return;
       }
       onUpdated(data);
@@ -178,7 +179,7 @@ export default function GroupInfoPanel({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setActionError(data?.error || t("group.info.errRemove"));
+        setActionError(localizeApiMessage(data?.error, t) || t("group.info.errRemove"));
         return;
       }
       onUpdated({
@@ -202,7 +203,7 @@ export default function GroupInfoPanel({
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setActionError(data?.error || t("group.info.errLeave"));
+        setActionError(localizeApiMessage(data?.error, t) || t("group.info.errLeave"));
         return;
       }
       onLeft();

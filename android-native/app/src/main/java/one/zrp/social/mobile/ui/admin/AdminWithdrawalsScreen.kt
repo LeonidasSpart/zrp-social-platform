@@ -46,6 +46,7 @@ import one.zrp.social.mobile.network.AdminWithdrawal
 import one.zrp.social.mobile.ui.support.formatTicketDateTime
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 // The real WithdrawalStatus enum, verbatim. There's no "all" chip here
 // because the route filters on exactly one status - it has no all-value
@@ -72,8 +73,9 @@ fun AdminWithdrawalsScreen(isAdmin: Boolean, onBack: () -> Unit) {
 
     LaunchedEffect(isAdmin) { if (isAdmin) viewModel.load() }
 
+    val localizedErrorMessage = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedErrorMessage
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             viewModel.consumeError()

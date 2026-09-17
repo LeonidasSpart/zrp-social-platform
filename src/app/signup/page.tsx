@@ -13,6 +13,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { Check, X, Loader2 } from "lucide-react";
 import { isNativeApp, nativeGoogleSignIn, nativeAppleSignIn } from "@/lib/nativeAuth";
 import type { TranslationKey } from "@/lib/translations";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
@@ -99,7 +100,7 @@ export default function SignupPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || t("auth.errSomethingWrong"));
+        setError(localizeApiMessage(data.error, t) || t("auth.errSomethingWrong"));
         setLoading(false);
         return;
       }

@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.SettingsRepository
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The Privacy & Safety category screen - the same public-likes/public-
@@ -101,7 +102,7 @@ fun PrivacySettingsScreen(
 
                 if (state.error != null) {
                     Text(
-                        text = state.error ?: "",
+                        text = localizedError(state.error) ?: "",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),

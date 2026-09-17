@@ -65,6 +65,7 @@ import one.zrp.social.mobile.network.GroupConversationSummary
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The Messages tab's conversation list - real 1:1 conversations (the
@@ -140,7 +141,7 @@ fun MessagesScreen(
                         if (loadError != null) {
                             ZrpEmptyState(
                                 icon = Icons.Filled.CloudOff,
-                                title = loadError,
+                                title = localizedError(loadError)!!,
                                 primaryAction = EmptyStateAction(
                                     label = stringResource(R.string.feed_retry),
                                     icon = Icons.Filled.Refresh,
@@ -206,7 +207,7 @@ fun MessagesScreen(
                     if (err != null) {
                         Spacer(modifier = Modifier.height(Spacing.sm))
                         Text(
-                            text = err,
+                            text = localizedError(err)!!,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                         )

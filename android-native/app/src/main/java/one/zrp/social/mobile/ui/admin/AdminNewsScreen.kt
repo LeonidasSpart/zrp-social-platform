@@ -89,6 +89,7 @@ import one.zrp.social.mobile.ui.journalist.journalistArticleStatusLabel
 import one.zrp.social.mobile.ui.news.newsCategoryLabel
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * The native ZRP News editorial desk - ported from
@@ -115,8 +116,9 @@ fun AdminNewsScreen(onBack: () -> Unit, onViewArticle: (String) -> Unit) {
 
     LaunchedEffect(Unit) { viewModel.load(1) }
 
+    val localizedStateError = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedStateError
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             viewModel.consumeError()
@@ -784,7 +786,7 @@ private fun AdminNewsEditorBody(
             if (coverError != null) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
                     Text(
-                        text = stringResource(R.string.journalist_editor_err_cover_upload_failed, coverError),
+                        text = stringResource(R.string.journalist_editor_err_cover_upload_failed, localizedError(coverError)!!),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.weight(1f),

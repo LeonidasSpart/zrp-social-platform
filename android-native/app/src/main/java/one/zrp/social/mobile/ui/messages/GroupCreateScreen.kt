@@ -31,6 +31,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * "New group": a real name, at least [GROUP_MIN_OTHER_PARTICIPANTS]
@@ -86,7 +87,7 @@ fun GroupCreateScreen(onBack: () -> Unit, onCreated: (conversationId: String) ->
 
             if (state.error != null) {
                 Text(
-                    text = state.error ?: "",
+                    text = localizedError(state.error) ?: "",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = Spacing.sm),

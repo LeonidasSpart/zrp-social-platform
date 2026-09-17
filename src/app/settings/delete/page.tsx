@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, AlertTriangle, Download, Trash2, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 export default function DeleteAccountPage() {
   const { data: session, status, update } = useSession();
@@ -60,7 +61,7 @@ export default function DeleteAccountPage() {
       if (res.ok) {
         setMessage({
           type: "success",
-          text: data.message || t("deleteAccount.successScheduled"),
+          text: localizeApiMessage(data.message, t) || t("deleteAccount.successScheduled"),
         });
         setDeletionDate(new Date(data.deletionDate).toLocaleDateString(getDateLocale(language), {
           year: "numeric",
@@ -70,7 +71,7 @@ export default function DeleteAccountPage() {
         setIsScheduled(true);
         setShowConfirm(false);
       } else {
-        setMessage({ type: "error", text: data.error || t("deleteAccount.errFailedSchedule") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("deleteAccount.errFailedSchedule") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("deleteAccount.errGeneric") });
@@ -89,7 +90,7 @@ export default function DeleteAccountPage() {
         setIsScheduled(false);
         setDeletionDate(null);
       } else {
-        setMessage({ type: "error", text: data.error || t("deleteAccount.errFailedCancel") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("deleteAccount.errFailedCancel") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("deleteAccount.errGenericShort") });
@@ -117,7 +118,7 @@ export default function DeleteAccountPage() {
       if (res.ok) {
         router.push("/login?deleted=true");
       } else {
-        setMessage({ type: "error", text: data.error || t("deleteAccount.errFailedDelete") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("deleteAccount.errFailedDelete") });
         setLoading(false);
       }
     } catch (error) {

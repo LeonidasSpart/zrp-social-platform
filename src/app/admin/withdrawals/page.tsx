@@ -5,6 +5,7 @@ import { Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
 import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 /*
  * Creator payout review queue.
@@ -71,7 +72,7 @@ export default function AdminWithdrawalsPage() {
       const res = await fetch(`/api/admin/withdrawals/${id}/${action}`, { method: "POST" });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || t("adminWithdrawals.errActionFailed"));
+        throw new Error(localizeApiMessage(err.error, t) || t("adminWithdrawals.errActionFailed"));
       }
       await fetchWithdrawals();
     } catch (err) {

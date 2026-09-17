@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Store, ExternalLink, CheckCircle, XCircle, ShieldOff, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CATEGORY_META, formatListingPrice, type ListingSummary } from "@/lib/marketplace";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface AdminListing extends ListingSummary {
   seller: { id: string; username: string; name: string | null; avatarUrl: string | null; badgeType: string | null };
@@ -63,7 +64,7 @@ export default function AdminMarketplacePage() {
         setTimeout(() => setMessage(null), 3000);
       } else {
         const data = await res.json();
-        setMessage({ type: "error", text: data.error || t("adminReports.errUpdateFailed") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("adminReports.errUpdateFailed") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("adminReports.errSomethingWrong") });

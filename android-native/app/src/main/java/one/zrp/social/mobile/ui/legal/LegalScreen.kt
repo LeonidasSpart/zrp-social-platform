@@ -46,6 +46,7 @@ import one.zrp.social.mobile.network.LegalSection
 import one.zrp.social.mobile.network.LegalTableRow
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Terms of Service / Privacy Policy / Community Guidelines / Help Center
@@ -125,7 +126,7 @@ private fun LegalErrorBody(message: String?, onRetry: () -> Unit) {
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = message ?: stringResource(R.string.legal_load_error),
+            text = localizedError(message) ?: stringResource(R.string.legal_load_error),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = Spacing.md),

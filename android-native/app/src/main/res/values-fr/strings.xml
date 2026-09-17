@@ -2285,4 +2285,13 @@
     <string name="lists_error_load">Échec du chargement des listes.</string>
     <string name="lists_error_create">Échec de la création de la liste.</string>
     <string name="lists_error_add_member">Échec de l\'ajout du membre.</string>
-    <string name="lists_error_remove_member">Échec de la suppression du membre.</string></resources>
+    <string name="lists_error_remove_member">Échec de la suppression du membre.</string>
+    <string name="auth_err_network">Impossible de joindre ZRP. Vérifiez votre connexion et réessayez.</string>
+    <string name="auth_registration_failed">L\'inscription a échoué. Réessayez plus tard.</string>
+    <string name="auth_enter_email_username_password">Saisis ton e-mail ou nom d\'utilisateur et ton mot de passe.</string>
+    <string name="settings_err_fill_all_fields">Veuillez remplir tous les champs.</string>
+    <string name="settings_err_passwords_dont_match">Les nouveaux mots de passe ne correspondent pas.</string>
+    <string name="ai_service_unavailable">Service IA temporairement indisponible</string>
+    <string name="auth_username_taken_hint">Ce nom d\'utilisateur est déjà pris. Choisissez une suggestion ci-dessous ou essayez-en un autre.</string>
+    <string name="music_couldnt_play_track">Impossible de lire ce titre.</string>
+</resources>

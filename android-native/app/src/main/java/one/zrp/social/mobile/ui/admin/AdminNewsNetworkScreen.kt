@@ -68,6 +68,7 @@ import one.zrp.social.mobile.network.AdminNewsStory
 import one.zrp.social.mobile.ui.support.formatTicketDateTime
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 private val HealthyGreen = Color(0xFF15803D)
 private val WarningAmber = Color(0xFFA16207)
@@ -104,8 +105,9 @@ fun AdminNewsNetworkScreen(
 
     LaunchedEffect(isAdmin) { if (isAdmin) viewModel.load() }
 
+    val localizedErrorMessage = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedErrorMessage
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             viewModel.consumeError()

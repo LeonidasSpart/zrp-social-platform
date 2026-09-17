@@ -55,6 +55,7 @@ import one.zrp.social.mobile.ui.support.supportStatusLabel
 import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 // "" is the website's own empty <select> option (= no filter), the rest
 // are the exact wire values the PUT route validates against.
@@ -86,8 +87,9 @@ fun AdminSupportTicketsScreen(isAdmin: Boolean, onBack: () -> Unit, onOpenTicket
 
     LaunchedEffect(isAdmin) { if (isAdmin) viewModel.load() }
 
+    val localizedErrorMessage = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedErrorMessage
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface GifPickerProps {
   onSelect: (url: string) => void;
@@ -39,13 +40,13 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
       const res = await fetch("/api/gifs/trending");
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Couldn't load GIFs. Try again later.");
+        setError(localizeApiMessage(data.error, t) || t("gifPicker.loadError"));
         return;
       }
       setTrending(data.results || []);
     } catch (err) {
       console.error("Error fetching trending GIFs:", err);
-      setError("Couldn't load GIFs. Try again later.");
+      setError(t("gifPicker.loadError"));
     }
   };
 
@@ -58,13 +59,13 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
       const res = await fetch(`/api/gifs/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Couldn't search GIFs. Try again later.");
+        setError(localizeApiMessage(data.error, t) || t("gifPicker.searchError"));
         return;
       }
       setGifs(data.results || []);
     } catch (err) {
       console.error("Error searching GIFs:", err);
-      setError("Couldn't search GIFs. Try again later.");
+      setError(t("gifPicker.searchError"));
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
         className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden"
       >
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Choose a GIF</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("gifPicker.title")}</h2>
           <button
             onClick={onClose}
             aria-label={t("help.close")}
@@ -118,12 +119,12 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
 
         <div className="p-4 overflow-y-auto max-h-[50vh]">
           {loading ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t("action.loading")}</div>
           ) : error ? (
             <div className="text-center py-8 text-red-500 dark:text-red-400">{error}</div>
           ) : displayGifs.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              {query.length >= 2 ? "No GIFs found" : "Type to search GIFs"}
+              {query.length >= 2 ? t("gifPicker.noResults") : t("gifPicker.typeToSearch")}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">

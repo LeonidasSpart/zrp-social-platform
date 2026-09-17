@@ -64,6 +64,7 @@ import one.zrp.social.mobile.network.AmbassadorCountry
 import one.zrp.social.mobile.ui.theme.Radius
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Become a ZRP Ambassador - ported from src/app/ambassadors/apply/page.tsx.
@@ -237,7 +238,7 @@ fun AmbassadorApplyScreen(
 
                 if (state.error != null) {
                     Text(
-                        text = state.error ?: "",
+                        text = localizedError(state.error) ?: "",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = Spacing.lg),

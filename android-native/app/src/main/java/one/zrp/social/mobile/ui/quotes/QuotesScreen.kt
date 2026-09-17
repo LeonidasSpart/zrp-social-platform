@@ -39,6 +39,7 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.home.PostCard
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Real posts that quoted a given post - GET /posts/{id}/quotes, the
@@ -115,7 +116,7 @@ fun QuotesScreen(
             state.posts.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: stringResource(R.string.quotes_empty),
+                        text = localizedError(state.error) ?: stringResource(R.string.quotes_empty),
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {

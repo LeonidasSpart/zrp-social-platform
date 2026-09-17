@@ -51,6 +51,7 @@ import one.zrp.social.mobile.network.SupportTicketSummary
 import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * ZRP Support - ported from src/app/support/tickets/page.tsx: the
@@ -68,8 +69,13 @@ fun SupportTicketsScreen(onBack: () -> Unit, onOpenTicket: (String) -> Unit, onN
 
     LaunchedEffect(Unit) { viewModel.load() }
 
+    // localizedError() is @Composable (it resolves a string resource), so it
+    // must be called here at the composable's own top level - not inside the
+    // LaunchedEffect below, whose lambda runs as a plain coroutine with no
+    // composable context.
+    val localizedStateError = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedStateError
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()

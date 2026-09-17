@@ -16,6 +16,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ReportModal from "@/components/ReportModal";
 import ParsedContent from "@/components/ParsedContent";
@@ -122,7 +123,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
         setShowReportModal(false);
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || t("marketplace.reportFailed"));
+        alert(localizeApiMessage(err.error, t) || t("marketplace.reportFailed"));
         if (res.status === 409) setShowReportModal(false);
       }
     } catch (error) {

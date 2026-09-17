@@ -38,6 +38,7 @@ import one.zrp.social.mobile.data.BookmarksRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.home.PostCard
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * Real saved posts from GET /bookmarks - the same list the website's
@@ -108,7 +109,7 @@ fun BookmarksScreen(
             state.posts.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: stringResource(R.string.bookmarks_empty),
+                        text = localizedError(state.error) ?: stringResource(R.string.bookmarks_empty),
                         color = if (state.error != null) {
                             MaterialTheme.colorScheme.error
                         } else {

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 type NewsCategory =
   | "WORLD"
@@ -230,7 +231,7 @@ export default function AdminNewsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t("adminNews.errFailedLoad"));
+        throw new Error(localizeApiMessage(data.error, t) || t("adminNews.errFailedLoad"));
       }
 
       setArticles(data.articles || []);
@@ -362,7 +363,7 @@ export default function AdminNewsPage() {
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.error ||
+          localizeApiMessage(data.error, t) ||
             (editingArticle
               ? t("adminNews.errFailedUpdate")
               : t("adminNews.errFailedCreate"))
@@ -412,7 +413,7 @@ export default function AdminNewsPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t("adminNews.errFailedDeleteArticle"));
+        throw new Error(localizeApiMessage(data.error, t) || t("adminNews.errFailedDeleteArticle"));
       }
 
       setSuccess(t("adminNews.successDeleted"));
@@ -459,7 +460,7 @@ export default function AdminNewsPage() {
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.error ||
+          localizeApiMessage(data.error, t) ||
             (decision === "approve"
               ? t("adminNews.errFailedApproveArticle")
               : t("adminNews.errFailedRejectArticle"))

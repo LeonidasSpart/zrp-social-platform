@@ -41,6 +41,7 @@ import one.zrp.social.mobile.data.SupportRepository
 import one.zrp.social.mobile.network.SUPPORT_CATEGORIES
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * ZRP Support - ported from src/app/support/page.tsx: the create-
@@ -88,7 +89,7 @@ fun NewTicketScreen(onBack: () -> Unit, onSubmitted: () -> Unit, onOpenMyTickets
 
             if (state.error != null) {
                 Text(
-                    text = state.error ?: "",
+                    text = localizedError(state.error) ?: "",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = Spacing.md),

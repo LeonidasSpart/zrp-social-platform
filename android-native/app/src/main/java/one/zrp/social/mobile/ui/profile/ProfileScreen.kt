@@ -115,6 +115,7 @@ import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.ui.theme.ZrpWhite
 import one.zrp.social.mobile.util.formatCount
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * A single profile screen instance - the signed-in user's own profile
@@ -177,7 +178,7 @@ fun ProfileScreen(
             profile == null -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.error ?: "Couldn't load this profile.",
+                        text = localizedError(state.error) ?: "Couldn't load this profile.",
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(24.dp),
                     )

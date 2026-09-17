@@ -48,6 +48,7 @@ import one.zrp.social.mobile.data.AdminRepository
 import one.zrp.social.mobile.network.AdminAdCampaign
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 // The real AdCampaignStatus values the website's own review page
 // filters on, verbatim - "all" is the route's own escape hatch for no
@@ -67,8 +68,9 @@ fun AdminAdsScreen(onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { viewModel.load() }
 
+    val localizedStateError = localizedError(state.error)
     LaunchedEffect(state.error) {
-        val message = state.error
+        val message = localizedStateError
         if (message != null) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.consumeError()
