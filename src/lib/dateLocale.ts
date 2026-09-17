@@ -29,6 +29,15 @@ const DATE_LOCALE_MAP: Record<Language, string> = {
   ja: "ja-JP",
   ko: "ko-KR",
   hi: "hi-IN",
+  nl: "nl-NL",
+  pl: "pl-PL",
+  ro: "ro-RO",
+  cs: "cs-CZ",
+  hu: "hu-HU",
+  sv: "sv-SE",
+  da: "da-DK",
+  hr: "hr-HR",
+  bg: "bg-BG",
 };
 
 /** BCP-47 tag for `toLocaleDateString`/`toLocaleTimeString`/`toLocaleString`. */
