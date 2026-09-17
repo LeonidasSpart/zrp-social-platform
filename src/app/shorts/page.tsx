@@ -896,6 +896,15 @@ export default function ShortsPage() {
         return;
       }
 
+      // Snapshot the pre-optimistic array so a failed/thrown request can
+      // restore it exactly, rather than recomputing the inverse - the
+      // recompute-on-rollback approach previously here read `video.liked`
+      // AFTER the optimistic flip had already been applied, so its
+      // condition was inverted and the like COUNT landed two off from
+      // truth on every rejected/failed like instead of back at its
+      // original value.
+      const previousVideos = videos;
+
       setVideos(
         (prev) =>
           prev.map(
@@ -940,46 +949,19 @@ export default function ShortsPage() {
             }
           );
 
+        // Reject the optimistic update on ANY failure - an HTTP error
+        // response or a thrown network error must roll back the same
+        // way, or the optimistic "liked" state can survive locally even
+        // though nothing was ever persisted.
         if (!res.ok) {
-          setVideos(
-            (prev) =>
-              prev.map(
-                (video) =>
-                  video.id ===
-                  postId
-                    ? {
-                        ...video,
-
-                        liked:
-                          !video.liked,
-
-                        _count: {
-                          ...video._count,
-
-                          likes:
-                            video.liked
-                              ? video
-                                  ._count
-                                  .likes +
-                                1
-                              : Math.max(
-                                  0,
-                                  video
-                                    ._count
-                                    .likes -
-                                    1
-                                ),
-                        },
-                      }
-                    : video
-              )
-          );
+          setVideos(previousVideos);
         }
       } catch (error) {
         console.error(
           "Error liking Short:",
           error
         );
+        setVideos(previousVideos);
       }
     };
 

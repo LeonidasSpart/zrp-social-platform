@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Heart,
@@ -61,6 +61,24 @@ export default function CommentItem({
   const { t, language } = useLanguage();
   const [liked, setLiked] = useState(comment.liked || false);
   const [likesCount, setLikesCount] = useState(comment._count?.likes || 0);
+
+  // `useState`'s initial value only runs on this component's FIRST
+  // mount - if the same CommentItem instance stays mounted while its
+  // parent legitimately refetches this thread (onUpdate, a background
+  // refresh) and gets a genuinely different `liked`/like-count from the
+  // server, this local state would otherwise silently ignore that
+  // update forever, since handleLike below only ever calls
+  // setLiked/setLikesCount itself (never re-derives from props again).
+  // Safe to resync unconditionally: handleLike is non-optimistic (only
+  // touches this state after a confirmed `res.ok`), so there's never a
+  // pending local mutation these effects could clobber.
+  useEffect(() => {
+    setLiked(comment.liked || false);
+  }, [comment.id, comment.liked]);
+
+  useEffect(() => {
+    setLikesCount(comment._count?.likes || 0);
+  }, [comment.id, comment._count?.likes]);
   const [reposted, setReposted] = useState(comment.reposted || false);
   const [repostsCount, setRepostsCount] = useState(comment._count?.reposts || 0);
   const [bookmarked, setBookmarked] = useState(comment.bookmarked || false);

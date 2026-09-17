@@ -445,39 +445,36 @@ export default function DiscoverPage() {
   const handleToggleLike = useCallback(
     (id: string) => {
       if (!requireAuth()) return;
+      // Captured during the optimistic update below so a failed request
+      // can restore the EXACT original item, rather than recomputing the
+      // inverse from post-mutation state - recomputing here read
+      // `it.viewerState.liked`/`it.stats.likes` AFTER the optimistic flip
+      // had already been applied, so the rollback's condition was
+      // inverted and the like count landed two off from truth on every
+      // rejected/failed like instead of back at its original value.
+      let previousItem: DiscoverClientItem | undefined;
       setItems((prev) =>
-        prev.map((it) =>
-          it.id === id
-            ? {
-                ...it,
-                viewerState: { ...it.viewerState, liked: !it.viewerState.liked },
-                stats: {
-                  ...it.stats,
-                  likes: it.viewerState.liked ? Math.max(0, it.stats.likes - 1) : it.stats.likes + 1,
-                },
-              }
-            : it
-        )
+        prev.map((it) => {
+          if (it.id !== id) return it;
+          previousItem = it;
+          return {
+            ...it,
+            viewerState: { ...it.viewerState, liked: !it.viewerState.liked },
+            stats: {
+              ...it.stats,
+              likes: it.viewerState.liked ? Math.max(0, it.stats.likes - 1) : it.stats.likes + 1,
+            },
+          };
+        })
       );
       fetch(`/api/posts/${id}/like`, { method: "POST" })
         .then((res) => {
           if (!res.ok) throw new Error("failed");
         })
         .catch(() => {
-          setItems((prev) =>
-            prev.map((it) =>
-              it.id === id
-                ? {
-                    ...it,
-                    viewerState: { ...it.viewerState, liked: !it.viewerState.liked },
-                    stats: {
-                      ...it.stats,
-                      likes: it.viewerState.liked ? Math.max(0, it.stats.likes - 1) : it.stats.likes + 1,
-                    },
-                  }
-                : it
-            )
-          );
+          const restored = previousItem;
+          if (!restored) return;
+          setItems((prev) => prev.map((it) => (it.id === id ? restored : it)));
         });
     },
     [requireAuth]
