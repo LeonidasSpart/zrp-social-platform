@@ -128,15 +128,60 @@ retract their own notification directly:
 - Un-reposting deletes the matching unread `repost` notification.
 - Un-reposting a comment deletes the matching unread `comment_repost`
   notification (a distinct type from `repost`, mirroring why
-  `comment_like` is distinct from `like` - see below. Note this shares
-  the same `commentId`-less limitation as `comment_like`: two different
-  comments under the same post, both reposted by the same user, aren't
-  distinguishable by `Notification`'s columns alone, so un-reposting one
-  can retract the notification for the other too. Pre-existing, accepted
-  limitation - not introduced by this pass).
+  `comment_like` is distinct from `like`).
 
-This means a like -> unlike -> like cycle leaves exactly one notification
-behind, not an orphaned first one plus a second.
+`Notification.commentId` (nullable, `onDelete: Cascade` to `Comment`)
+disambiguates *which* comment a `comment_like`/`comment_repost`
+notification is about - it is the actual identity key of the underlying
+interaction, since `CommentLike`/`CommentRepost` are each uniquely keyed
+on `(commentId, userId)`. Before this column existed, both notification
+types only had `postId`+`type`+`fromUserId` to match on for retraction -
+insufficient, because a single post can have many comments, and the same
+actor can like (or repost) several different comments under the same
+post: two such notifications would share an identical
+`postId`+`type`+`fromUserId` (and even `userId`/recipient, if the same
+person authored both comments) despite being two entirely distinct
+interactions. Retraction now filters on `commentId` too, so it can only
+ever match the specific comment being un-liked/un-reposted - `comment`
+and `reply` do not carry a `commentId` since neither is ever retracted
+(there is no "un-comment" action), so no such ambiguity exists for them.
+
+This means a like -> unlike -> like cycle (or repost -> un-repost ->
+repost) leaves exactly one notification behind, not an orphaned first one
+plus a second, and interacting with a different comment on the same post
+never disturbs another comment's already-existing notification.
+
+**Migration/backfill note**: `commentId` is nullable specifically so
+existing `Notification` rows (created before this column existed) don't
+need a backfill to remain valid - a NULL `commentId` is simply a
+notification with no comment-level identity, which is what every existing
+row already was in practice. A deliberate choice was made NOT to
+heuristically backfill `commentId` on old `comment_like`/`comment_repost`
+rows: the only way to guess which comment an old row was about is by
+matching `postId`+`fromUserId`+approximate `createdAt` against
+`CommentLike`/`CommentRepost`, which is exactly ambiguous in the one case
+that matters (the same user having liked/reposted more than one comment
+by the same author on the same post around the same time) - a guessed
+backfill could assign the *wrong* comment, which is worse than leaving it
+unset. The bounded, one-time consequence: an unlike/un-repost on a
+comment whose original notification predates this migration won't match
+the new precise-`commentId` retraction query (a NULL column never equals
+a concrete id), so that specific old notification is left in place rather
+than retracted - a cosmetically stale notification, not an incorrect one,
+and not a security or data-integrity issue. It self-resolves once read
+(the `read: false` guard on every retraction query already excludes read
+notifications) or ages out with normal use; every notification created
+from this deploy onward carries the correct `commentId` from day one.
+
+**Side effect of the FK's `onDelete: Cascade`**: deleting a comment
+(`DELETE /api/comments/[id]`) now also deletes any `comment_like`/
+`comment_repost` notification that referenced it - previously those rows
+were orphaned indefinitely, pointing at a comment that no longer exists,
+the same way a deleted post already cascades all of its own
+notifications via `Notification.postId`. `comment`/`reply` notifications
+are not part of this cascade (no `commentId`) and remain orphaned on
+comment deletion exactly as they did before this pass - unchanged,
+existing behavior, not a regression introduced here.
 
 ## Reply vs. comment
 

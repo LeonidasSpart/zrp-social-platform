@@ -101,6 +101,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
       });
       expect(notif).toBeTruthy();
       expect(notif?.read).toBe(false);
+      expect(notif?.commentId).toBe(comment.id);
 
       const second = await POST(req(comment.id), { params: Promise.resolve({ id: comment.id }) });
       expect(second.status).toBe(200);
@@ -115,6 +116,16 @@ describe.skipIf(!hasRealDatabaseUrl)(
         where: { userId: commentAuthor.id, fromUserId: reposter.id, type: "comment_repost", postId: post.id },
       });
       expect(notifAfterUndo).toBeNull();
+
+      // A full repost -> un-repost -> repost cycle must leave exactly one
+      // notification behind, never an orphaned first one plus a second.
+      const third = await POST(req(comment.id), { params: Promise.resolve({ id: comment.id }) });
+      expect((await third.json()).reposted).toBe(true);
+
+      const notifsAfterRerepost = await prisma.notification.findMany({
+        where: { userId: commentAuthor.id, fromUserId: reposter.id, type: "comment_repost", commentId: comment.id },
+      });
+      expect(notifsAfterRerepost).toHaveLength(1);
     });
 
     it("never notifies a self-repost", async () => {
@@ -130,6 +141,51 @@ describe.skipIf(!hasRealDatabaseUrl)(
         where: { fromUserId: commentAuthor.id, type: "comment_repost" },
       });
       expect(notif).toBeNull();
+    });
+
+    it("un-reposting one comment never retracts the notification for a DIFFERENT comment on the same post reposted by the same user", async () => {
+      const postAuthor = await createUser("postauthor2b");
+      const commentAuthor = await createUser("commentauthor2b");
+      const reposter = await createUser("reposter2b");
+      const { post, comment: commentA } = await createCommentedPost(postAuthor.id, commentAuthor.id);
+      const commentB = await prisma.comment.create({
+        data: { content: `comment B ${runId}`, postId: post.id, authorId: commentAuthor.id },
+      });
+      commentIds.push(commentB.id);
+
+      getServerSession.mockResolvedValue(sessionFor(reposter));
+
+      await POST(req(commentA.id), { params: Promise.resolve({ id: commentA.id }) });
+
+      const notifForAAfterCreate = await prisma.notification.findFirst({
+        where: { userId: commentAuthor.id, fromUserId: reposter.id, type: "comment_repost", commentId: commentA.id },
+      });
+      expect(notifForAAfterCreate).toBeTruthy();
+
+      // Reposting a DIFFERENT comment (B) must never disturb A's
+      // already-existing notification, checked immediately at the
+      // moment B's notification is created.
+      await POST(req(commentB.id), { params: Promise.resolve({ id: commentB.id }) });
+
+      const notifForAAfterB = await prisma.notification.findFirst({
+        where: { userId: commentAuthor.id, fromUserId: reposter.id, type: "comment_repost", commentId: commentA.id },
+      });
+      expect(notifForAAfterB?.id).toBe(notifForAAfterCreate!.id);
+      expect(notifForAAfterB?.read).toBe(false);
+
+      // Un-repost comment A only.
+      await POST(req(commentA.id), { params: Promise.resolve({ id: commentA.id }) });
+
+      const notifForA = await prisma.notification.findFirst({
+        where: { userId: commentAuthor.id, fromUserId: reposter.id, type: "comment_repost", commentId: commentA.id },
+      });
+      expect(notifForA).toBeNull();
+
+      const notifForB = await prisma.notification.findFirst({
+        where: { userId: commentAuthor.id, fromUserId: reposter.id, type: "comment_repost", commentId: commentB.id },
+      });
+      expect(notifForB).toBeTruthy();
+      expect(notifForB?.read).toBe(false);
     });
 
     it("blocks the repost itself (not just the notification) for a blocked-either-way relationship, and never spends a quota slot on it", async () => {
@@ -211,6 +267,11 @@ describe.skipIf(!hasRealDatabaseUrl)(
 
       const reposts = await prisma.commentRepost.findMany({ where: { commentId: comment.id, userId: reposter.id } });
       expect(reposts.length).toBeLessThanOrEqual(1);
+
+      const notifs = await prisma.notification.findMany({
+        where: { userId: commentAuthor.id, fromUserId: reposter.id, type: "comment_repost", commentId: comment.id },
+      });
+      expect(notifs.length).toBeLessThanOrEqual(1);
     });
   }
 );

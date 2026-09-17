@@ -58,16 +58,12 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       // post-like route's unlike branch. "comment_like" is a distinct
       // type from the post "like" so this can never delete the wrong
       // notification for a post and a comment that happen to share a
-      // postId.
-      const comment = await prisma.comment.findUnique({
-        where: { id: commentId },
-        select: { postId: true },
+      // postId. Also scoped to this exact commentId, so unliking one
+      // comment can never retract the notification for a DIFFERENT
+      // comment on the same post that this same user also liked.
+      await prisma.notification.deleteMany({
+        where: { type: "comment_like", fromUserId: userId, commentId, read: false },
       });
-      if (comment) {
-        await prisma.notification.deleteMany({
-          where: { type: "comment_like", fromUserId: userId, postId: comment.postId, read: false },
-        });
-      }
 
       return NextResponse.json({ liked: false });
     } else {
@@ -109,7 +105,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
           type: "comment_like",
           fromUserId: userId,
           postId: comment.postId,
-          // commentId removed: we don't have the field in Notification yet
+          commentId,
         });
       }
       return NextResponse.json({ liked: true });
