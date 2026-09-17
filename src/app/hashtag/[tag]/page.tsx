@@ -83,7 +83,7 @@ export default function HashtagPage(props: { params: Promise<{ tag: string }> })
           #{params.tag}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm">
-          {t("hashtag.postCount", { n: posts.length, word: posts.length === 1 ? t("action.post").toLowerCase() : t("profile.posts").toLowerCase() })}
+          {t("hashtag.postCount", { n: posts.length, word: posts.length === 1 ? t("hashtag.postSingular") : t("hashtag.postPlural") })}
         </p>
       </div>
 

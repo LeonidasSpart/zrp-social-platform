@@ -349,6 +349,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "upgradeRequest.bankLabel",
   ],
   it: [
+    "hashtag.postSingular",
     "adminNews.slugLabel",
     "adminNews.urlPlaceholder",
     "adminPayments.tx",
@@ -951,6 +952,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
   ],
   nl: [
+    "hashtag.postSingular",
+    "hashtag.postPlural",
     "action.repost",
     "adminAds.budgetSummary",
     "adminDash.admins",
@@ -1156,6 +1159,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "upgradeRequest.bankLabel",
   ],
   pl: [
+    "hashtag.postSingular",
     "adminJournalists.portfolio",
     "adminNews.slugLabel",
     "adminPayments.tx",
