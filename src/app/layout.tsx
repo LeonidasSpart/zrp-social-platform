@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Orbitron } from "next/font/google";
 import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import "./globals.css";
 
 import { SUPPORTED_LANGUAGES, RTL_LANGUAGES, type Language } from "@/lib/translations";
@@ -238,6 +240,17 @@ export default async function RootLayout({
     cookieLang && SUPPORTED_LANG_CODES.includes(cookieLang) ? cookieLang : "en";
   const initialDir = RTL_LANGUAGES.includes(initialLang) ? "rtl" : "ltr";
 
+  // Resolved once per full page load (this layout persists across
+  // client-side navigations in the App Router, so this doesn't add
+  // per-navigation cost) and handed to AuthProvider so useSession()
+  // doesn't have to fetch /api/auth/session itself before every page's
+  // own data-fetching effects can even start - see AuthProvider.tsx's
+  // own comment for the full reasoning. Uses the same throttled,
+  // JWT-decode-plus-cached-DB-recheck path every other getServerSession/
+  // getVerifiedToken call in this app already goes through - not a new
+  // category of cost.
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang={initialLang} dir={initialDir} suppressHydrationWarning>
       <head>
@@ -361,7 +374,7 @@ export default async function RootLayout({
                       </div>
                     }
                   >
-                    <AuthProvider>
+                    <AuthProvider session={session}>
                       <UnreadCountProvider>
                       <PresenceProvider>
                       {/*
