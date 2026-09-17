@@ -9,7 +9,17 @@ import {
   ReactNode,
 } from "react";
 import { useSession } from "next-auth/react";
-import Peer from "simple-peer";
+// Type-only: simple-peer (+ its readable-stream/get-browser-rtc deps, ~100KB
+// built) is loaded as a real value only inside startCall/acceptCall below,
+// via a dynamic import(). This provider is mounted app-wide in the root
+// layout so every incoming call can be answered from any screen (see the
+// comment above), which previously meant `import Peer from "simple-peer"`
+// shipped that ~100KB to every single page load for every user, even the
+// overwhelming majority who never place or receive a call in a session -
+// confirmed via the built app-build-manifest.json, where the chunk
+// containing simple-peer was reachable from "/layout" (loaded on every
+// route) rather than only from call-related screens.
+import type Peer from "simple-peer";
 import { getSocket } from "@/lib/socket-client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import CallComponent from "@/components/CallComponent";
@@ -227,9 +237,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
     endingCallRef.current = false;
 
     try {
-      const [stream, iceServers] = await Promise.all([
+      const [stream, iceServers, { default: Peer }] = await Promise.all([
         navigator.mediaDevices.getUserMedia({ video: isVideo, audio: true }),
         getIceServers(),
+        import("simple-peer"),
       ]);
 
       setLocalStream(stream);
@@ -308,12 +319,13 @@ export function CallProvider({ children }: { children: ReactNode }) {
     endingCallRef.current = false;
 
     try {
-      const [stream, iceServers] = await Promise.all([
+      const [stream, iceServers, { default: Peer }] = await Promise.all([
         navigator.mediaDevices.getUserMedia({
           video: isVideoCall,
           audio: true,
         }),
         getIceServers(),
+        import("simple-peer"),
       ]);
 
       setLocalStream(stream);
