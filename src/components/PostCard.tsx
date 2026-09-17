@@ -328,6 +328,26 @@ export default function PostCard({
     post._count?.likes || 0
   );
 
+  // `useState`'s initial value only runs on this component's FIRST
+  // mount - if the same PostCard instance stays mounted while its
+  // parent legitimately refetches this exact post (a background
+  // refresh, pull-to-refresh, or `onUpdate`) and gets a genuinely
+  // different `liked`/like-count from the server, this local state
+  // would otherwise silently ignore that update forever, since
+  // `handleLike` below only ever calls `setLiked`/`setLikesCount`
+  // itself (never re-derives from props again). Resyncing here closes
+  // that gap without any optimistic-update race: PostCard's own
+  // `handleLike` is non-optimistic (waits for `res.ok` before touching
+  // this state), so there's never a pending local mutation these
+  // effects could clobber.
+  useEffect(() => {
+    setLiked(post.liked || false);
+  }, [post.id, post.liked]);
+
+  useEffect(() => {
+    setLikesCount(post._count?.likes || 0);
+  }, [post.id, post._count?.likes]);
+
   const [commentsCount, setCommentsCount] = useState(
     post._count?.comments || 0
   );
