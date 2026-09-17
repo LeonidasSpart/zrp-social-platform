@@ -659,26 +659,25 @@ export default function HomePage() {
 
   /*
    * ================================================================
-   * USER
+   * LOAD WHEN FEED CHANGES
    * ================================================================
-   */
-
-  const userId =
-    session?.user?.id;
-
-  /*
-   * ================================================================
-   * LOAD WHEN USER / FEED CHANGES
-   * ================================================================
+   *
+   * Previously gated on `session?.user?.id` being resolved client-side
+   * first - a real, measurable delay, since useSession() only resolves
+   * after its own network round trip (/api/auth/session), and this page
+   * is unreachable by an unauthenticated visitor at all (middleware
+   * redirects to /login before this component's JS ever runs - see
+   * src/middleware.ts's "REQUIRE AUTHENTICATION" block). The feed API
+   * itself already re-derives identity server-side from the session
+   * cookie regardless of what the client believes; waiting for the
+   * client's own copy of something the server already guarantees only
+   * delayed the very first thing a user sees after opening the app.
    */
 
   useEffect(() => {
-    if (userId) {
-      loadPosts();
-    }
+    loadPosts();
   }, [
     feedType,
-    userId,
     loadPosts,
   ]);
 

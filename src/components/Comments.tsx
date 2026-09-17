@@ -11,6 +11,7 @@ import ReportModal from "./ReportModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ParsedContent from "@/components/ParsedContent";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
+import { useAutoGrowTextarea, sizeTextareaToContent } from "@/hooks/useAutoGrowTextarea";
 
 interface Comment {
   id: string;
@@ -72,6 +73,11 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const limits = getPlanLimits(plan);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
+  // Hooks can only run from a real component - safe here since this
+  // textarea is rendered once at this component's own top level (not
+  // once per comment row, unlike the reply/edit textareas further down,
+  // which use the plain sizeTextareaToContent() helper instead).
+  const newCommentRef = useAutoGrowTextarea(newComment);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -507,11 +513,11 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           {isEditing ? (
             <div className="mt-1 flex items-end gap-2">
               <textarea
+                ref={(el) => sizeTextareaToContent(el)}
                 value={editContent}
                 onChange={(e) => {
                   setEditContent(e.target.value);
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${e.target.scrollHeight}px`;
+                  sizeTextareaToContent(e.target);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -519,8 +525,9 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                     saveEdit(comment.id);
                   }
                 }}
-                rows={1}
-                className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-hidden max-h-40"
+                aria-label={t("action.edit")}
+                rows={2}
+                className="flex-1 min-w-0 px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-y-auto max-h-52"
                 autoFocus
                 maxLength={limits.postLength}
               />
@@ -633,15 +640,16 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           {isReplying && (
             <div className="mt-2 flex items-end gap-2">
               <textarea
+                ref={(el) => sizeTextareaToContent(el)}
                 value={replyContent}
                 onChange={(e) => {
                   setReplyContent(e.target.value);
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${e.target.scrollHeight}px`;
+                  sizeTextareaToContent(e.target);
                 }}
                 placeholder={t("comment.replyToPlaceholder", { name: comment.author.name || comment.author.username })}
-                rows={1}
-                className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-hidden max-h-40"
+                aria-label={t("comment.replyToPlaceholder", { name: comment.author.name || comment.author.username })}
+                rows={2}
+                className="flex-1 min-w-0 px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-y-auto max-h-52"
                 maxLength={limits.postLength}
                 autoFocus
                 onKeyDown={(e) => {
@@ -718,12 +726,9 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       {session && !replyingTo && (
         <form onSubmit={handleSubmit} className="mt-3 flex gap-2 items-end">
           <textarea
+            ref={newCommentRef}
             value={newComment}
-            onChange={(e) => {
-              setNewComment(e.target.value);
-              e.target.style.height = "auto";
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
+            onChange={(e) => setNewComment(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -731,8 +736,14 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               }
             }}
             placeholder={t("postDetail.commentPlaceholder")}
-            rows={1}
-            className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-hidden max-h-40"
+            aria-label={t("postDetail.commentPlaceholder")}
+            rows={2}
+            // text-base (16px), not text-sm (14px): below 16px, iOS
+            // Safari zooms the whole page in on focus, which is itself
+            // a real contributor to "I can't see what I'm typing" on
+            // mobile - confirmed user feedback this size increase
+            // directly addresses, not a cosmetic guess.
+            className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-y-auto max-h-52"
             maxLength={limits.postLength}
           />
           <button

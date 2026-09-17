@@ -18,6 +18,7 @@ import VerifiedBadge from "./VerifiedBadge"; // ✅ import
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
 import ParsedContent from "@/components/ParsedContent";
+import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
 
 interface Comment {
   id: string;
@@ -92,6 +93,7 @@ export default function CommentItem({
 
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
+  const editContentRef = useAutoGrowTextarea(editContent);
   const [savingEdit, setSavingEdit] = useState(false);
 
   const isAuthor = session?.user?.id === comment.author.id;
@@ -236,9 +238,11 @@ export default function CommentItem({
           {isEditing ? (
             <div className="mt-1 flex items-start gap-2">
               <textarea
+                ref={editContentRef}
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                aria-label={t("action.edit")}
+                className="flex-1 px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none overflow-y-auto max-h-52"
                 rows={2}
                 autoFocus
               />

@@ -9,6 +9,7 @@ import PostCard from "@/components/PostCard";
 import CommentItem from "@/components/CommentItem";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
+import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
 
 interface Post {
   id: string;
@@ -70,7 +71,7 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
   const [parentId, setParentId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"recent" | "relevant" | "likes">("recent");
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useAutoGrowTextarea(commentContent);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -160,8 +161,7 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
   };
 
   // ─── Submit comment ──────────────────────────────────────────────
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitComment = async () => {
     if (!commentContent.trim() || !session) return;
 
     setSubmitting(true);
@@ -201,6 +201,11 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSubmitComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitComment();
   };
 
   // ─── Sort comments ────────────────────────────────────────────────
@@ -256,19 +261,33 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
         <>
           {/* ─── Comment Composer ────────────────────────────────────── */}
           {session && (
-            <form onSubmit={handleSubmitComment} className="mt-4 flex gap-2">
-              <input
+            <form onSubmit={handleSubmitComment} className="mt-4 flex gap-2 items-end">
+              <textarea
                 ref={inputRef}
-                type="text"
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    submitComment();
+                  }
+                }}
                 placeholder={parentId ? t("postDetail.replyPlaceholder") : t("postDetail.commentPlaceholder")}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                aria-label={parentId ? t("postDetail.replyPlaceholder") : t("postDetail.commentPlaceholder")}
+                rows={2}
+                // This was previously a single-line <input> - a comment
+                // of any real length scrolled horizontally out of view
+                // as you typed, with no way to see or review it before
+                // posting (the exact complaint this fixes). text-base
+                // (16px) also avoids iOS Safari's auto-zoom-on-focus for
+                // any input under 16px, which was its own contributor to
+                // "hard to see what I'm typing" on mobile.
+                className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base resize-none overflow-y-auto max-h-52"
               />
               <button
                 type="submit"
                 disabled={submitting || !commentContent.trim()}
-                className="px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
+                className="flex-shrink-0 px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
               >
                 {submitting ? t("postDetail.sending") : t("postDetail.reply")}
               </button>
