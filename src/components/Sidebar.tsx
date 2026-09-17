@@ -52,16 +52,46 @@ export default function Sidebar() {
   // same reason) keeps both flyouts fully visible at every width.
   const langButtonRef = useRef<HTMLButtonElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
-  const [langMenuPos, setLangMenuPos] = useState<{ left: number; bottom: number } | null>(null);
+  const [langMenuPos, setLangMenuPos] = useState<{ left: number; bottom: number; maxHeight: number } | null>(null);
   const [moreMenuPos, setMoreMenuPos] = useState<{ left: number; bottom: number } | null>(null);
 
+  // This flyout is anchored by its bottom edge (it opens upward, since
+  // the trigger sits near the bottom of the rail) and, with 25
+  // languages, is taller than the space between the trigger and the top
+  // of the screen on most viewports. Without a height bound tied to
+  // that actual available space, the top rows render above y=0 with no
+  // way to reach them. maxHeight is recomputed on every open (and kept
+  // in sync with resize/orientation-change while open) rather than
+  // hardcoded, so it stays correct across iPad split-screen, browser
+  // chrome changes, and orientation changes.
+  const positionLangMenu = () => {
+    if (!langButtonRef.current) return;
+    const rect = langButtonRef.current.getBoundingClientRect();
+    setLangMenuPos({
+      left: rect.left,
+      bottom: window.innerHeight - rect.top + 8,
+      maxHeight: Math.max(rect.top - 16, 160),
+    });
+  };
+
   const toggleLangMenu = () => {
-    if (!langMenuOpen && langButtonRef.current) {
-      const rect = langButtonRef.current.getBoundingClientRect();
-      setLangMenuPos({ left: rect.left, bottom: window.innerHeight - rect.top + 8 });
-    }
+    if (!langMenuOpen) positionLangMenu();
     setLangMenuOpen((value) => !value);
   };
+
+  useEffect(() => {
+    if (!langMenuOpen) return;
+
+    positionLangMenu();
+    window.addEventListener("resize", positionLangMenu);
+    window.addEventListener("orientationchange", positionLangMenu);
+
+    return () => {
+      window.removeEventListener("resize", positionLangMenu);
+      window.removeEventListener("orientationchange", positionLangMenu);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [langMenuOpen]);
 
   const toggleMoreMenu = () => {
     if (!moreMenuOpen && moreButtonRef.current) {
@@ -369,12 +399,19 @@ export default function Sidebar() {
                 />
 
                 <div
-                  style={{ left: langMenuPos.left, bottom: langMenuPos.bottom }}
-                  className="fixed w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden"
+                  role="menu"
+                  aria-label={t("nav.language")}
+                  style={{
+                    left: langMenuPos.left,
+                    bottom: langMenuPos.bottom,
+                    maxHeight: langMenuPos.maxHeight,
+                  }}
+                  className="fixed w-48 overflow-y-auto overscroll-contain bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50"
                 >
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <button
                       type="button"
+                      role="menuitem"
                       key={lang.code}
                       onClick={() => {
                         setLanguage(lang.code);
