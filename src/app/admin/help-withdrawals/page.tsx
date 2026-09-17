@@ -6,6 +6,7 @@ import { Loader2, CheckCircle, XCircle, Clock, ExternalLink } from "lucide-react
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
 import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface HelpWithdrawal {
   id: string;
@@ -58,7 +59,7 @@ export default function AdminHelpWithdrawalsPage() {
       const res = await fetch(`/api/admin/help-withdrawals/${id}/${action}`, { method: "POST" });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || t("adminHelpWithdrawals.errActionFailed"));
+        throw new Error(localizeApiMessage(err.error, t) || t("adminHelpWithdrawals.errActionFailed"));
       }
       await fetchWithdrawals();
     } catch (err) {

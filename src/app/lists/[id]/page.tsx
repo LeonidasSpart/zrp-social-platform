@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { ArrowLeft, Lock, UserMinus, Trash2 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import EmptyState from "@/components/ui/EmptyState";
 import { ListChecks } from "lucide-react";
 
@@ -94,7 +95,7 @@ export default function ListDetailPage() {
         body: JSON.stringify({ username: addUsername.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || t("lists.errorAddMember"));
+      if (!res.ok) throw new Error(localizeApiMessage(data.error, t) || t("lists.errorAddMember"));
       setAddUsername("");
       loadList();
       loadFeed();

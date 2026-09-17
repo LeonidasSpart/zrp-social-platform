@@ -14,6 +14,7 @@ import AudienceGrowthTab from "@/components/AudienceGrowthTab";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 // ─── Inline components ──────────────────────────────────────────────
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -214,7 +215,7 @@ export default function CreatorDashboard() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || t("creatorDash.errFailedWithdrawal"));
+        throw new Error(localizeApiMessage(data.error, t) || t("creatorDash.errFailedWithdrawal"));
       }
       setWithdrawMessage({ type: "success", text: data.message });
       setShowWithdrawModal(false);

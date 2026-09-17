@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { Mail, X, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 export default function EmailVerificationBanner() {
   const { t } = useLanguage();
@@ -28,7 +29,7 @@ export default function EmailVerificationBanner() {
         setMessage({ type: "success", text: t("emailVerification.success") });
         await update();
       } else {
-        setMessage({ type: "error", text: data.error || t("emailVerification.errorGeneric") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("emailVerification.errorGeneric") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("emailVerification.errorCatch") });

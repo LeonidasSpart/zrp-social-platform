@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Props {
   plan: string;
@@ -47,7 +48,7 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
         body: JSON.stringify({ plan, transactionId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || t("cryptoPayment.errSubmitFailed"));
+      if (!res.ok) throw new Error(localizeApiMessage(data.error, t) || t("cryptoPayment.errSubmitFailed"));
       alert(t("cryptoPayment.successSubmitted"));
       onSuccess();
       onClose();

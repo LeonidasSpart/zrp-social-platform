@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { X } from "lucide-react";
 import { getPlanLimits } from "@/lib/limits";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface EditPostModalProps {
   post: {
@@ -48,7 +49,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || t("editPost.errUpdateFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("editPost.errUpdateFailed"));
       }
 
       onUpdate();

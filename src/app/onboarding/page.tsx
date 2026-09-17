@@ -7,6 +7,7 @@ import { Loader2, Check } from "lucide-react";
 import LocationAutocomplete from "@/components/LocationAutocomplete"; // ✅ added
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface SuggestedUser {
   id: string;
@@ -119,7 +120,7 @@ export default function OnboardingPage() {
         setStep(1);
       } catch (error: any) {
         console.error("Onboarding step 0 error:", error);
-        setError(error.message || t("onboarding.errSaveProfile"));
+        setError(localizeApiMessage(error.message, t) || t("onboarding.errSaveProfile"));
       } finally {
         setSaving(false);
       }
@@ -158,7 +159,7 @@ export default function OnboardingPage() {
         window.location.href = "/";
       } catch (error: any) {
         console.error("Onboarding step 1 error:", error);
-        setError(error.message || t("onboarding.errFollowUsers"));
+        setError(localizeApiMessage(error.message, t) || t("onboarding.errFollowUsers"));
       } finally {
         setLoading(false);
       }
@@ -184,7 +185,7 @@ export default function OnboardingPage() {
       }
     } catch (error: any) {
       console.error("Skip error:", error);
-      setError(error.message || t("onboarding.errSkip"));
+      setError(localizeApiMessage(error.message, t) || t("onboarding.errSkip"));
     }
   };
 

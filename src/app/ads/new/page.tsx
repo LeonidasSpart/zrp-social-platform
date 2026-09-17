@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Megaphone, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { parseOwnPostsResponse, type OwnPostSummary } from "@/lib/ads/parse-own-posts";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 type OwnPost = OwnPostSummary;
 
@@ -65,7 +66,7 @@ export default function NewAdCampaign() {
       if (res.ok) {
         router.push("/ads");
       } else {
-        setError(data.error || t("ads.new.errFailedCreate"));
+        setError(localizeApiMessage(data.error, t) || t("ads.new.errFailedCreate"));
       }
     } catch {
       setError(t("ads.new.errGeneric"));

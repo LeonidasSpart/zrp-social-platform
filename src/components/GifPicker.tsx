@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface GifPickerProps {
   onSelect: (url: string) => void;
@@ -39,7 +40,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
       const res = await fetch("/api/gifs/trending");
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || t("gifPicker.loadError"));
+        setError(localizeApiMessage(data.error, t) || t("gifPicker.loadError"));
         return;
       }
       setTrending(data.results || []);
@@ -58,7 +59,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
       const res = await fetch(`/api/gifs/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || t("gifPicker.searchError"));
+        setError(localizeApiMessage(data.error, t) || t("gifPicker.searchError"));
         return;
       }
       setGifs(data.results || []);

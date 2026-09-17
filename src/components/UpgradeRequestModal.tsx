@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Loader2, Building, CreditCard, Wallet } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Props {
   plan: string;
@@ -45,7 +46,7 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
           onClose();
         }, 2000);
       } else {
-        setMessage({ type: "error", text: data.error || t("upgradeRequest.errSendFailed") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("upgradeRequest.errSendFailed") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("auth.errSomethingWrong") });

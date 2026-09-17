@@ -9,6 +9,7 @@ import {
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ConfirmModal from "@/components/ConfirmModal";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface SharedMediaMessage {
   id: string;
@@ -97,7 +98,7 @@ export default function ChatContactDrawer({
         onConversationDeleted?.();
       } else {
         const err = await res.json().catch(() => null);
-        setDeleteConversationError(err?.error || t("chat.errDeleteConversation"));
+        setDeleteConversationError(localizeApiMessage(err?.error, t) || t("chat.errDeleteConversation"));
       }
     } catch (error) {
       console.error("Delete conversation error:", error);

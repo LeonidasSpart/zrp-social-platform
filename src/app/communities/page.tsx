@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, Users, Plus, X, Search } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 type Community = {
   id: string;
@@ -114,7 +115,7 @@ export default function CommunitiesPage() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || t("communities.errorCreate"));
+      if (!res.ok) throw new Error(localizeApiMessage(data.error, t) || t("communities.errorCreate"));
       setCreating(false);
       setForm({ name: "", description: "", category: "GENERAL", hashtag: "" });
       router.push(`/communities/${data.community.id}`);

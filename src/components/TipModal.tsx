@@ -5,6 +5,7 @@ import { Loader2, X, Copy, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 /*
  * ============================================================
@@ -127,7 +128,7 @@ export default function TipModal({
       }
 
       if (!response.ok) {
-        throw new Error(data?.error || t("tipModal.errSubmitFailed"));
+        throw new Error(localizeApiMessage(data?.error, t) || t("tipModal.errSubmitFailed"));
       }
 
       setSuccess(true);

@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import CommentItem from "@/components/CommentItem";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Post {
   id: string;
@@ -192,7 +193,7 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
         });
       } else {
         const err = await res.json();
-        alert(err.error || t("postDetail.errPostComment"));
+        alert(localizeApiMessage(err.error, t) || t("postDetail.errPostComment"));
       }
     } catch (error) {
       console.error("Error posting comment:", error);

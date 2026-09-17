@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { TranslationKey } from '@/lib/translations';
 import { getDateLocale } from '@/lib/dateLocale';
+import { localizeApiMessage } from '@/lib/api-error-i18n';
 
 interface Reply {
   id: string;
@@ -117,7 +118,7 @@ export default function TicketDetailPage() {
         fetchTicket();
       } else {
         const data = await res.json();
-        alert(data.error || t('support.ticketDetail.errReplyFailed'));
+        alert(localizeApiMessage(data.error, t) || t('support.ticketDetail.errReplyFailed'));
       }
     } catch (error) {
       console.error('Error sending reply', error);

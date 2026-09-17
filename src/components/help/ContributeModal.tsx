@@ -5,6 +5,7 @@ import { Loader2, X, Copy, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 /*
  * Same manual "send from your own wallet app, then paste the
@@ -80,7 +81,7 @@ export default function ContributeModal({ campaignId, campaignTitle, onClose, on
 
       const data = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(data?.error || t("help.errContributeFailed"));
+        throw new Error(localizeApiMessage(data?.error, t) || t("help.errContributeFailed"));
       }
 
       setSuccess(true);

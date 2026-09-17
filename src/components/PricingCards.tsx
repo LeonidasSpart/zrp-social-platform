@@ -8,6 +8,7 @@ import CryptoPaymentModal from "./CryptoPaymentModal";
 import NativePaymentNotice from "./NativePaymentNotice";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { isNativeStoreRestrictedPayment } from "@/lib/native-payment-policy";
 
@@ -216,7 +217,7 @@ export default function PricingCards() {
         window.location.reload();
       } else {
         const err = await res.json();
-        alert(err.error || t("pricing.upgradeFailedAlert"));
+        alert(localizeApiMessage(err.error, t) || t("pricing.upgradeFailedAlert"));
       }
     } catch {
       alert(t("pricing.somethingWentWrongAlert"));

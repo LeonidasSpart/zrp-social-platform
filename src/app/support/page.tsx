@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { localizeApiMessage } from '@/lib/api-error-i18n';
 
 export default function SupportPage() {
   const { data: session, status } = useSession();
@@ -40,7 +41,7 @@ export default function SupportPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || t('support.errCreateFailed'));
+        throw new Error(localizeApiMessage(data.error, t) || t('support.errCreateFailed'));
       }
 
       router.push('/support/tickets');

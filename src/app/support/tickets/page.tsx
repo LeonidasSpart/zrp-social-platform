@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { TranslationKey } from '@/lib/translations';
 import { getDateLocale } from '@/lib/dateLocale';
+import { localizeApiMessage } from '@/lib/api-error-i18n';
 
 interface Ticket {
   id: string;
@@ -96,7 +97,7 @@ export default function MyTicketsPage() {
         setTickets(tickets.filter((ticket) => ticket.id !== ticketId));
       } else {
         const data = await res.json();
-        alert(data.error || t('support.tickets.errDeleteFailed'));
+        alert(localizeApiMessage(data.error, t) || t('support.tickets.errDeleteFailed'));
       }
     } catch (error) {
       console.error('Error deleting ticket:', error);

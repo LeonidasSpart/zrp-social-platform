@@ -6,6 +6,7 @@ import { ImagePlus, Loader2, Send, Save, Eye, X, AlertTriangle } from "lucide-re
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 export type JournalistArticleCategory =
   | "WORLD"
@@ -182,7 +183,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || t("journalist.editor.errSaveFailed"));
+        throw new Error(localizeApiMessage(data.error, t) || t("journalist.editor.errSaveFailed"));
       }
 
       router.push("/journalist");

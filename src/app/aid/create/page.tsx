@@ -8,6 +8,7 @@ import { ArrowLeft, Loader2, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { HELP_CATEGORIES, CATEGORY_META, HELP_NEED_TYPES, NEED_TYPE_META, type HelpCategory, type HelpNeedType } from "@/lib/help";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 export default function CreateCampaignPage() {
   const { t } = useLanguage();
@@ -104,7 +105,7 @@ export default function CreateCampaignPage() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create campaign");
+      if (!res.ok) throw new Error(localizeApiMessage(data.error, t) || "Failed to create campaign");
       router.push("/aid/my-campaigns");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("help.errCreateFailed"));

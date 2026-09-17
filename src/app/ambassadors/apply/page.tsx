@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, Check, Loader2, Plus, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAllCountries, isValidCountryCode } from "@/lib/ambassadors/countries";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 /*
  * /ambassadors/apply - the real application form behind the hero's
@@ -142,7 +143,7 @@ export default function ApplyAmbassadorPage() {
       if (res.ok) {
         setSuccess(true);
       } else {
-        setError(body.error || t("ambassadors.apply.errGeneric"));
+        setError(localizeApiMessage(body.error, t) || t("ambassadors.apply.errGeneric"));
       }
     } catch {
       setError(t("ambassadors.apply.errGeneric"));

@@ -7,6 +7,7 @@ import { Loader2, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
 import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Payment {
   id: string;
@@ -71,7 +72,7 @@ export default function AdminPayments() {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || t("adminPayments.errVerifyFailed"));
+        throw new Error(localizeApiMessage(err.error, t) || t("adminPayments.errVerifyFailed"));
       }
       // Remove from list or refresh
       await fetchPayments();

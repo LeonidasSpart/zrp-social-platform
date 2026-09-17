@@ -20,6 +20,7 @@ import CategoryPickerModal from "@/components/CategoryPickerModal";
 import { categoryToTranslationKey } from "@/lib/professionalCategories";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { buttonClasses } from "@/components/ui/styles";
 import { getDateLocale } from "@/lib/dateLocale";
 
@@ -399,7 +400,7 @@ export default function SettingsPage() {
         setUsernameCooldown(30);
         setUserData(data.user);
       } else {
-        setUsernameError(data.error || t("settings.errUsernameUpdateFailed"));
+        setUsernameError(localizeApiMessage(data.error, t) || t("settings.errUsernameUpdateFailed"));
       }
     } catch (error) {
       setUsernameError(t("settings.errSomethingWrong"));
@@ -449,7 +450,7 @@ export default function SettingsPage() {
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        setPasswordError(data.error || t("settings.errPasswordUpdateFailed"));
+        setPasswordError(localizeApiMessage(data.error, t) || t("settings.errPasswordUpdateFailed"));
       }
     } catch (error) {
       setPasswordError(t("settings.errSomethingWrong"));
@@ -476,12 +477,12 @@ export default function SettingsPage() {
 
       const data = await res.json();
       if (res.ok) {
-        setEmailMessage({ type: "success", text: data.message });
+        setEmailMessage({ type: "success", text: localizeApiMessage(data.message, t) as string });
         setNewEmail("");
         setEmailPassword("");
         update();
       } else {
-        setEmailMessage({ type: "error", text: data.error || t("settings.errEmailSendFailed") });
+        setEmailMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("settings.errEmailSendFailed") });
       }
     } catch (error) {
       setEmailMessage({ type: "error", text: t("settings.errSomethingWrong") });
@@ -516,7 +517,7 @@ export default function SettingsPage() {
         await update();
         fetchUserData();
       } else {
-        setMessage({ type: "error", text: data.error || t("settings.errPrivacyUpdateFailed") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("settings.errPrivacyUpdateFailed") });
       }
     } catch (error) {
       console.error("Error updating privacy:", error);
@@ -545,7 +546,7 @@ export default function SettingsPage() {
         fetchUserData(); // refresh data
       } else {
         const data = await res.json();
-        setMessage({ type: "error", text: data.error || t("settings.errWalletUpdateFailed") });
+        setMessage({ type: "error", text: localizeApiMessage(data.error, t) || t("settings.errWalletUpdateFailed") });
       }
     } catch (error) {
       setMessage({ type: "error", text: t("settings.errSomethingWrong") });

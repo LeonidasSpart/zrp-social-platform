@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2, X, Users } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import UserMultiSelect, { type SelectableUser } from "@/components/UserMultiSelect";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 // Kept in sync with the real backend minimum in
 // src/app/api/conversations/route.ts (MIN_OTHER_PARTICIPANTS) - a
@@ -55,7 +56,7 @@ export default function NewGroupModal({ onClose, onCreated }: NewGroupModalProps
         // chat.errSendFailed already uses for message-send failures,
         // rather than a generic message that hides which real
         // constraint was actually violated.
-        setError(data?.error || t("group.create.errGeneric"));
+        setError(localizeApiMessage(data?.error, t) || t("group.create.errGeneric"));
         setSubmitting(false);
         return;
       }

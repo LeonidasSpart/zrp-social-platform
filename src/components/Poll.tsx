@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface PollProps {
   pollId: string;
@@ -42,7 +43,7 @@ export default function Poll({ pollId, question, options, votes, userVote, expir
         onVote();
       } else {
         const data = await res.json();
-        setError(data.error || t("poll.errVoteFailed"));
+        setError(localizeApiMessage(data.error, t) || t("poll.errVoteFailed"));
       }
     } catch (error) {
       setError(t("poll.errVoteFailedRetry"));

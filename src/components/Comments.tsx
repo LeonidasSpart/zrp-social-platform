@@ -10,6 +10,7 @@ import { getPlanLimits } from "@/lib/limits";
 import ReportModal from "./ReportModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ParsedContent from "@/components/ParsedContent";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Comment {
   id: string;
@@ -314,7 +315,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         setReportingCommentId(null);
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || t("comment.errReportFailed"));
+        alert(localizeApiMessage(err.error, t) || t("comment.errReportFailed"));
         // A 409 means it's already reported and pending - close the
         // modal rather than inviting a retry that would just repeat it.
         if (res.status === 409) {

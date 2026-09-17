@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronUp, Users, UserX, UserCheck, Award, Newspaper
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface User {
   id: string;
@@ -139,7 +140,7 @@ export default function AdminUsers() {
         fetchUsers();
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || t("adminUsers.errUpdateRoleFailed"));
+        alert(localizeApiMessage(err.error, t) || t("adminUsers.errUpdateRoleFailed"));
       }
     } catch (error) {
       console.error("Role update error:", error);
@@ -158,7 +159,7 @@ export default function AdminUsers() {
         fetchUsers();
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.error || t("adminUsers.errUpdateBadgeFailed"));
+        alert(localizeApiMessage(err.error, t) || t("adminUsers.errUpdateBadgeFailed"));
       }
     } catch (error) {
       console.error("Badge update error:", error);
@@ -174,7 +175,7 @@ export default function AdminUsers() {
       if (res.ok) fetchUsers();
       else {
         const err = await res.json();
-        alert(err.error || t("adminUsers.errToggleBan"));
+        alert(localizeApiMessage(err.error, t) || t("adminUsers.errToggleBan"));
       }
     } catch (error) {
       console.error("Ban toggle error:", error);
@@ -194,7 +195,7 @@ export default function AdminUsers() {
         fetchUsers();
       } else {
         const err = await res.json();
-        alert(err.error || t("adminUsers.errUpdatePlan"));
+        alert(localizeApiMessage(err.error, t) || t("adminUsers.errUpdatePlan"));
       }
     } catch (error) {
       console.error("Plan update error:", error);

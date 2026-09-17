@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ConfirmModal from "@/components/ConfirmModal";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface ConversationRowMenuProps {
   /** Used only in the confirm dialog's aria-describedby text via t(). */
@@ -45,7 +46,7 @@ export default function ConversationRowMenu({ partnerName, onDelete, className }
     setBusy(false);
     setConfirming(false);
     if (!result.success) {
-      setError(result.error || t("messages.errDeleteFailed"));
+      setError(localizeApiMessage(result.error, t) || t("messages.errDeleteFailed"));
       window.setTimeout(() => setError(null), 4000);
     }
   };
