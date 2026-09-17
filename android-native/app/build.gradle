@@ -471,8 +471,24 @@ android {
         // Chinese strings) landed on main since versionCode 29's build,
         // alongside the calling fix. No native source change here -
         // version number only.
-        versionCode 30
-        versionName "4.0.24"
+        //
+        // Bumps to versionCode 31 / versionName "4.0.25" for real native
+        // content landed on main since versionCode 30's build: the "EU
+        // Wave 1" expansion adds 10 new languages (Bulgarian, Czech,
+        // Danish, Dutch, Greek, Croatian, Hungarian, Polish, Romanian,
+        // Swedish - res/values-bg through values-sv), each a full
+        // translated strings.xml, bringing this app to 25 total
+        // languages; a follow-up adversarial i18n audit fixed several
+        // strings that were still hardcoded English (login validation,
+        // 7 other strings) across languages that shipped earlier.
+        // Alongside the language work: clickable URLs in messages/
+        // comments, real link-preview cards + copy-text for messages,
+        // and backend-tracking fixes (notification dedup, blocked-user
+        // checks, repost quota, mentions) that this app's screens
+        // already consume via the shared API. None of this changes
+        // applicationId, signing, or deep links.
+        versionCode 31
+        versionName "4.0.25"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
