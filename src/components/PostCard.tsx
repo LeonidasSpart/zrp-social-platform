@@ -1635,6 +1635,7 @@ export default function PostCard({
                     post.author.username
                   }
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               ) : (
                 getInitial()
@@ -2315,6 +2316,7 @@ export default function PostCard({
                                 ? ""
                                 : "aspect-square"
                             }`}
+                            loading="lazy"
                           />
 
                           {galleryImages.length >

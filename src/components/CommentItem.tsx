@@ -203,6 +203,7 @@ export default function CommentItem({
                 src={comment.author.avatarUrl}
                 alt={comment.author.name || comment.author.username}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
@@ -274,6 +275,7 @@ export default function CommentItem({
                     src={comment.imageUrl}
                     alt="Comment image"
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               )}

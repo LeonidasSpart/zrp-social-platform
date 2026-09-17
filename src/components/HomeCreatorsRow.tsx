@@ -105,6 +105,7 @@ export default function HomeCreatorsRow() {
                       src={user.avatarUrl}
                       alt=""
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-lg">
