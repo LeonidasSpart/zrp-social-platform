@@ -510,12 +510,17 @@ export default function Header() {
                 </button>
 
                 {langMenuOpen && (
-                  <div className="absolute end-0 mt-2 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                  <div
+                    role="menu"
+                    aria-label={t("nav.language")}
+                    className="absolute end-0 mt-2 w-44 max-h-[min(60dvh,24rem)] overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800"
+                  >
                     {SUPPORTED_LANGUAGES.map(
                       (lang) => (
                         <button
                           key={lang.code}
                           type="button"
+                          role="menuitem"
                           onClick={(e) => {
                             e.stopPropagation();
 
@@ -1352,6 +1357,7 @@ export default function Header() {
                         ? "bg-gray-100 dark:bg-gray-800"
                         : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
+                    aria-haspopup="menu"
                     aria-expanded={
                       langMenuOpen
                     }
@@ -1379,7 +1385,11 @@ export default function Header() {
                   </button>
 
                   {langMenuOpen && (
-                    <div className="mx-2 mb-2 rounded-xl bg-gray-50 dark:bg-gray-800/70 overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div
+                      role="menu"
+                      aria-label={t("nav.language")}
+                      className="mx-2 mb-2 max-h-[40dvh] overflow-y-auto overscroll-contain rounded-xl bg-gray-50 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700"
+                    >
                       {SUPPORTED_LANGUAGES.map(
                         (lang) => {
                           const selected =
@@ -1392,6 +1402,7 @@ export default function Header() {
                                 lang.code
                               }
                               type="button"
+                              role="menuitem"
                               onClick={(
                                 e
                               ) => {
