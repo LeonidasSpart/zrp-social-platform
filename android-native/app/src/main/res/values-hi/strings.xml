@@ -2231,4 +2231,11 @@
         <item quantity="one">%1$d मेंबर</item>
         <item quantity="other">%1$d मेंबर</item>
     </plurals>
+    <string name="auth_err_network">ZRP से कनेक्ट नहीं हो सका। अपना कनेक्शन जांचें और फिर से कोशिश करें।</string>
+    <string name="auth_registration_failed">पंजीकरण विफल रहा। बाद में फिर से कोशिश करें।</string>
+    <string name="auth_enter_email_username_password">अपना ईमेल या यूज़रनेम और पासवर्ड दर्ज करें।</string>
+    <string name="settings_err_fill_all_fields">कृपया सभी फ़ील्ड भरें।</string>
+    <string name="settings_err_passwords_dont_match">नए पासवर्ड मेल नहीं खाते।</string>
+    <string name="ai_service_unavailable">AI सेवा अस्थायी रूप से उपलब्ध नहीं है</string>
+    <string name="auth_username_taken_hint">वह यूज़रनेम पहले से लिया जा चुका है। नीचे दिए सुझाव में से चुनें या कोई और नाम आज़माएं।</string>
 </resources>

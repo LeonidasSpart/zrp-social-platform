@@ -2300,4 +2300,12 @@
     <string name="lists_error_load">Failed to load lists.</string>
     <string name="lists_error_create">Failed to create list.</string>
     <string name="lists_error_add_member">Failed to add member.</string>
-    <string name="lists_error_remove_member">Failed to remove member.</string></resources>
+    <string name="lists_error_remove_member">Failed to remove member.</string>
+    <string name="auth_err_network">Couldn't reach ZRP. Check your connection and try again.</string>
+    <string name="auth_registration_failed">Registration failed. Please try again later.</string>
+    <string name="auth_enter_email_username_password">Enter your email or username and password.</string>
+    <string name="settings_err_fill_all_fields">Please fill in all fields.</string>
+    <string name="settings_err_passwords_dont_match">New passwords don't match.</string>
+    <string name="ai_service_unavailable">AI service temporarily unavailable</string>
+    <string name="auth_username_taken_hint">That username is taken. Pick a suggestion below or try another.</string>
+</resources>

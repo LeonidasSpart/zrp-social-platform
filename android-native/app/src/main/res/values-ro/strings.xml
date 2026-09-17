@@ -2236,4 +2236,11 @@
     <string name="lists_error_create">Crearea listei a eșuat.</string>
     <string name="lists_error_add_member">Adăugarea membrului a eșuat.</string>
     <string name="lists_error_remove_member">Eliminarea membrului a eșuat.</string>
+    <string name="auth_err_network">Nu s-a putut realiza conexiunea cu ZRP. Verifică-ți conexiunea și încearcă din nou.</string>
+    <string name="auth_registration_failed">Înregistrarea a eșuat. Încearcă din nou mai târziu.</string>
+    <string name="auth_enter_email_username_password">Introdu emailul sau numele de utilizator și parola.</string>
+    <string name="settings_err_fill_all_fields">Te rugăm să completezi toate câmpurile.</string>
+    <string name="settings_err_passwords_dont_match">Parolele noi nu coincid.</string>
+    <string name="ai_service_unavailable">Serviciul AI este temporar indisponibil</string>
+    <string name="auth_username_taken_hint">Acest nume de utilizator este deja luat. Alege o sugestie de mai jos sau încearcă altul.</string>
 </resources>

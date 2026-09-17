@@ -2285,4 +2285,12 @@
     <string name="lists_error_load">加载列表失败。</string>
     <string name="lists_error_create">创建列表失败。</string>
     <string name="lists_error_add_member">添加成员失败。</string>
-    <string name="lists_error_remove_member">移除成员失败。</string></resources>
+    <string name="lists_error_remove_member">移除成员失败。</string>
+    <string name="auth_err_network">无法连接到 ZRP，请检查网络连接后重试。</string>
+    <string name="auth_registration_failed">注册失败，请稍后重试。</string>
+    <string name="auth_enter_email_username_password">请输入你的邮箱或用户名及密码。</string>
+    <string name="settings_err_fill_all_fields">请填写所有字段。</string>
+    <string name="settings_err_passwords_dont_match">新密码不一致。</string>
+    <string name="ai_service_unavailable">AI 服务暂时不可用</string>
+    <string name="auth_username_taken_hint">该用户名已被占用。请从下方建议中选择，或尝试其他用户名。</string>
+</resources>

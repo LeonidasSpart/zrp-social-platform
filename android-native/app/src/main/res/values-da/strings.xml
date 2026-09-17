@@ -2231,4 +2231,11 @@
     <string name="lists_error_create">Kunne ikke oprette liste.</string>
     <string name="lists_error_add_member">Kunne ikke tilføje medlem.</string>
     <string name="lists_error_remove_member">Kunne ikke fjerne medlem.</string>
+    <string name="auth_err_network">Kunne ikke oprette forbindelse til ZRP. Tjek din forbindelse, og prøv igen.</string>
+    <string name="auth_registration_failed">Registrering mislykkedes. Prøv igen senere.</string>
+    <string name="auth_enter_email_username_password">Indtast din e-mail eller dit brugernavn og adgangskode.</string>
+    <string name="settings_err_fill_all_fields">Udfyld venligst alle felter.</string>
+    <string name="settings_err_passwords_dont_match">De nye adgangskoder stemmer ikke overens.</string>
+    <string name="ai_service_unavailable">AI-tjenesten er midlertidigt utilgængelig</string>
+    <string name="auth_username_taken_hint">Det brugernavn er optaget. Vælg et forslag nedenfor, eller prøv et andet.</string>
 </resources>

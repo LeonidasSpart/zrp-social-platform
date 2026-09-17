@@ -2285,4 +2285,12 @@
     <string name="lists_error_load">فشل تحميل القوائم.</string>
     <string name="lists_error_create">فشل إنشاء القائمة.</string>
     <string name="lists_error_add_member">فشلت إضافة العضو.</string>
-    <string name="lists_error_remove_member">فشلت إزالة العضو.</string></resources>
+    <string name="lists_error_remove_member">فشلت إزالة العضو.</string>
+    <string name="auth_err_network">تعذّر الوصول إلى ZRP. تحقق من اتصالك وحاول مرة أخرى.</string>
+    <string name="auth_registration_failed">فشل التسجيل. حاول مرة أخرى لاحقًا.</string>
+    <string name="auth_enter_email_username_password">أدخل بريدك الإلكتروني أو اسم المستخدم وكلمة المرور.</string>
+    <string name="settings_err_fill_all_fields">يرجى ملء جميع الحقول.</string>
+    <string name="settings_err_passwords_dont_match">كلمتا المرور الجديدتان غير متطابقتين.</string>
+    <string name="ai_service_unavailable">خدمة الذكاء الاصطناعي غير متاحة مؤقتًا</string>
+    <string name="auth_username_taken_hint">اسم المستخدم هذا مُستخدم بالفعل. اختر اقتراحًا أدناه أو جرّب اسمًا آخر.</string>
+</resources>

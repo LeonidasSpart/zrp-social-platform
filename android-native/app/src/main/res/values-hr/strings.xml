@@ -2236,4 +2236,11 @@
     <string name="lists_error_create">Kreiranje popisa nije uspjelo.</string>
     <string name="lists_error_add_member">Dodavanje člana nije uspjelo.</string>
     <string name="lists_error_remove_member">Uklanjanje člana nije uspjelo.</string>
+    <string name="auth_err_network">Nije moguće povezati se s ZRP-om. Provjeri vezu i pokušaj ponovno.</string>
+    <string name="auth_registration_failed">Registracija nije uspjela. Pokušaj ponovno kasnije.</string>
+    <string name="auth_enter_email_username_password">Unesi svoju e-poštu ili korisničko ime i lozinku.</string>
+    <string name="settings_err_fill_all_fields">Ispuni sva polja.</string>
+    <string name="settings_err_passwords_dont_match">Nove lozinke se ne podudaraju.</string>
+    <string name="ai_service_unavailable">AI usluga trenutačno nije dostupna</string>
+    <string name="auth_username_taken_hint">To korisničko ime je zauzeto. Odaberi jedan od prijedloga ispod ili pokušaj drugo.</string>
 </resources>

@@ -2285,4 +2285,12 @@
     <string name="lists_error_load">Не удалось загрузить списки.</string>
     <string name="lists_error_create">Не удалось создать список.</string>
     <string name="lists_error_add_member">Не удалось добавить участника.</string>
-    <string name="lists_error_remove_member">Не удалось удалить участника.</string></resources>
+    <string name="lists_error_remove_member">Не удалось удалить участника.</string>
+    <string name="auth_err_network">Не удалось подключиться к ZRP. Проверьте подключение и попробуйте снова.</string>
+    <string name="auth_registration_failed">Регистрация не удалась. Попробуйте снова позже.</string>
+    <string name="auth_enter_email_username_password">Введите email или имя пользователя и пароль.</string>
+    <string name="settings_err_fill_all_fields">Пожалуйста, заполните все поля.</string>
+    <string name="settings_err_passwords_dont_match">Новые пароли не совпадают.</string>
+    <string name="ai_service_unavailable">Сервис ИИ временно недоступен</string>
+    <string name="auth_username_taken_hint">Это имя пользователя уже занято. Выберите вариант ниже или попробуйте другое.</string>
+</resources>

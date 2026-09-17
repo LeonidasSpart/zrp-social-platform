@@ -2231,4 +2231,11 @@
     <string name="lists_error_create">Det gick inte att skapa listan.</string>
     <string name="lists_error_add_member">Det gick inte att lägga till medlemmen.</string>
     <string name="lists_error_remove_member">Det gick inte att ta bort medlemmen.</string>
+    <string name="auth_err_network">Det gick inte att nå ZRP. Kontrollera din anslutning och försök igen.</string>
+    <string name="auth_registration_failed">Registreringen misslyckades. Försök igen senare.</string>
+    <string name="auth_enter_email_username_password">Ange din e-postadress eller ditt användarnamn och lösenord.</string>
+    <string name="settings_err_fill_all_fields">Fyll i alla fält.</string>
+    <string name="settings_err_passwords_dont_match">De nya lösenorden matchar inte.</string>
+    <string name="ai_service_unavailable">AI-tjänsten är tillfälligt otillgänglig</string>
+    <string name="auth_username_taken_hint">Det användarnamnet är upptaget. Välj ett förslag nedan eller prova ett annat.</string>
 </resources>

@@ -49,6 +49,14 @@ sealed interface LoginFormState {
     // own variant rather than Error(message): LoginScreen renders the
     // real, translated auth_err_google_interrupted string.
     data object GoogleInterrupted : LoginFormState
+
+    // Set by login() when either field is blank, before any network
+    // call is made - pure client-side validation with no server
+    // message to preserve. Same reasoning as SessionExpired/
+    // GoogleInterrupted above for being its own variant rather than
+    // Error(message): LoginScreen renders the real, translated
+    // auth_enter_email_username_password string.
+    data object MissingCredentials : LoginFormState
 }
 
 /**
@@ -135,7 +143,7 @@ class AuthViewModel(
 
     fun login(identifier: String, password: String) {
         if (identifier.isBlank() || password.isBlank()) {
-            _loginForm.value = LoginFormState.Error("Enter your email or username and password.")
+            _loginForm.value = LoginFormState.MissingCredentials
             return
         }
 

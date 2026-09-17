@@ -2285,4 +2285,12 @@
     <string name="lists_error_load">Dështoi ngarkimi i listave.</string>
     <string name="lists_error_create">Dështoi krijimi i listës.</string>
     <string name="lists_error_add_member">Dështoi shtimi i anëtarit.</string>
-    <string name="lists_error_remove_member">Dështoi heqja e anëtarit.</string></resources>
+    <string name="lists_error_remove_member">Dështoi heqja e anëtarit.</string>
+    <string name="auth_err_network">ZRP nuk u arrit dot. Kontrollo lidhjen dhe provo përsëri.</string>
+    <string name="auth_registration_failed">Regjistrimi dështoi. Provo përsëri më vonë.</string>
+    <string name="auth_enter_email_username_password">Shkruaj email-in ose emrin e përdoruesit dhe fjalëkalimin.</string>
+    <string name="settings_err_fill_all_fields">Ju lutemi plotësoni të gjitha fushat.</string>
+    <string name="settings_err_passwords_dont_match">Fjalëkalimet e reja nuk përputhen.</string>
+    <string name="ai_service_unavailable">Shërbimi i AI përkohësisht i padisponueshëm</string>
+    <string name="auth_username_taken_hint">Ky emër përdoruesi është i zënë. Zgjidh një sugjerim më poshtë ose provo një tjetër.</string>
+</resources>

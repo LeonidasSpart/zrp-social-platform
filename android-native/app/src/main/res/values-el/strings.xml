@@ -2231,4 +2231,11 @@
     <string name="lists_error_create">Η δημιουργία λίστας απέτυχε.</string>
     <string name="lists_error_add_member">Η προσθήκη μέλους απέτυχε.</string>
     <string name="lists_error_remove_member">Η αφαίρεση μέλους απέτυχε.</string>
+    <string name="auth_err_network">Δεν ήταν δυνατή η σύνδεση με το ZRP. Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.</string>
+    <string name="auth_registration_failed">Η εγγραφή απέτυχε. Δοκίμασε ξανά αργότερα.</string>
+    <string name="auth_enter_email_username_password">Εισήγαγε το email ή το όνομα χρήστη σου και τον κωδικό πρόσβασης.</string>
+    <string name="settings_err_fill_all_fields">Συμπλήρωσε όλα τα πεδία.</string>
+    <string name="settings_err_passwords_dont_match">Οι νέοι κωδικοί πρόσβασης δεν ταιριάζουν.</string>
+    <string name="ai_service_unavailable">Η υπηρεσία AI είναι προσωρινά μη διαθέσιμη</string>
+    <string name="auth_username_taken_hint">Αυτό το όνομα χρήστη είναι ήδη σε χρήση. Διάλεξε μια πρόταση παρακάτω ή δοκίμασε άλλο.</string>
 </resources>

@@ -2285,4 +2285,12 @@
     <string name="lists_error_load">Listeler yüklenemedi.</string>
     <string name="lists_error_create">Liste oluşturulamadı.</string>
     <string name="lists_error_add_member">Üye eklenemedi.</string>
-    <string name="lists_error_remove_member">Üye kaldırılamadı.</string></resources>
+    <string name="lists_error_remove_member">Üye kaldırılamadı.</string>
+    <string name="auth_err_network">ZRP'ye ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="auth_registration_failed">Kayıt başarısız oldu. Daha sonra tekrar deneyin.</string>
+    <string name="auth_enter_email_username_password">E-postanı veya kullanıcı adını ve şifreni gir.</string>
+    <string name="settings_err_fill_all_fields">Lütfen tüm alanları doldurun.</string>
+    <string name="settings_err_passwords_dont_match">Yeni şifreler eşleşmiyor.</string>
+    <string name="ai_service_unavailable">Yapay zeka hizmeti geçici olarak kullanılamıyor</string>
+    <string name="auth_username_taken_hint">Bu kullanıcı adı alınmış. Aşağıdaki önerilerden birini seçin veya başka bir tane deneyin.</string>
+</resources>

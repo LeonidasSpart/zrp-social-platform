@@ -2231,4 +2231,11 @@
     <string name="lists_error_create">Aanmaken van lijst mislukt.</string>
     <string name="lists_error_add_member">Toevoegen van lid mislukt.</string>
     <string name="lists_error_remove_member">Verwijderen van lid mislukt.</string>
+    <string name="auth_err_network">Kan geen verbinding maken met ZRP. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="auth_registration_failed">Registratie mislukt. Probeer het later opnieuw.</string>
+    <string name="auth_enter_email_username_password">Voer je e-mailadres of gebruikersnaam en wachtwoord in.</string>
+    <string name="settings_err_fill_all_fields">Vul alle velden in.</string>
+    <string name="settings_err_passwords_dont_match">Nieuwe wachtwoorden komen niet overeen.</string>
+    <string name="ai_service_unavailable">AI-service tijdelijk niet beschikbaar</string>
+    <string name="auth_username_taken_hint">Die gebruikersnaam is al in gebruik. Kies een suggestie hieronder of probeer een andere.</string>
 </resources>

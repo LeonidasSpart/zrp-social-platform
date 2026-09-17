@@ -2285,4 +2285,12 @@
     <string name="lists_error_load">No se pudieron cargar las listas.</string>
     <string name="lists_error_create">No se pudo crear la lista.</string>
     <string name="lists_error_add_member">No se pudo agregar al miembro.</string>
-    <string name="lists_error_remove_member">No se pudo quitar al miembro.</string></resources>
+    <string name="lists_error_remove_member">No se pudo quitar al miembro.</string>
+    <string name="auth_err_network">No se pudo conectar con ZRP. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="auth_registration_failed">El registro falló. Inténtalo de nuevo más tarde.</string>
+    <string name="auth_enter_email_username_password">Introduce tu correo o nombre de usuario y contraseña.</string>
+    <string name="settings_err_fill_all_fields">Completa todos los campos.</string>
+    <string name="settings_err_passwords_dont_match">Las nuevas contraseñas no coinciden.</string>
+    <string name="ai_service_unavailable">Servicio de IA no disponible temporalmente</string>
+    <string name="auth_username_taken_hint">Ese nombre de usuario ya está en uso. Elige una sugerencia a continuación o prueba con otro.</string>
+</resources>

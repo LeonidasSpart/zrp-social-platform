@@ -2231,4 +2231,11 @@
         <item quantity="one">%1$d membro</item>
         <item quantity="other">%1$d membros</item>
     </plurals>
+    <string name="auth_err_network">Não foi possível ligar ao ZRP. Verifique a sua ligação e tente novamente.</string>
+    <string name="auth_registration_failed">O registo falhou. Tente novamente mais tarde.</string>
+    <string name="auth_enter_email_username_password">Introduza o seu email ou nome de utilizador e a palavra-passe.</string>
+    <string name="settings_err_fill_all_fields">Preencha todos os campos.</string>
+    <string name="settings_err_passwords_dont_match">As novas palavras-passe não coincidem.</string>
+    <string name="ai_service_unavailable">Serviço de IA temporariamente indisponível</string>
+    <string name="auth_username_taken_hint">Esse nome de utilizador já está em uso. Escolhe uma sugestão abaixo ou tenta outro.</string>
 </resources>

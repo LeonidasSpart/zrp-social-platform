@@ -2285,4 +2285,12 @@
     <string name="lists_error_load">Gagal memuat daftar.</string>
     <string name="lists_error_create">Gagal membuat daftar.</string>
     <string name="lists_error_add_member">Gagal menambahkan anggota.</string>
-    <string name="lists_error_remove_member">Gagal menghapus anggota.</string></resources>
+    <string name="lists_error_remove_member">Gagal menghapus anggota.</string>
+    <string name="auth_err_network">Tidak dapat terhubung ke ZRP. Periksa koneksi Anda dan coba lagi.</string>
+    <string name="auth_registration_failed">Pendaftaran gagal. Coba lagi nanti.</string>
+    <string name="auth_enter_email_username_password">Masukkan email atau nama pengguna dan kata sandi Anda.</string>
+    <string name="settings_err_fill_all_fields">Harap isi semua kolom.</string>
+    <string name="settings_err_passwords_dont_match">Kata sandi baru tidak cocok.</string>
+    <string name="ai_service_unavailable">Layanan AI untuk sementara tidak tersedia</string>
+    <string name="auth_username_taken_hint">Nama pengguna itu sudah digunakan. Pilih saran di bawah atau coba nama lain.</string>
+</resources>

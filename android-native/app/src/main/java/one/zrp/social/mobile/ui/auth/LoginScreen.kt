@@ -157,6 +157,13 @@ fun LoginScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 12.dp),
             )
+        } else if (formState is LoginFormState.MissingCredentials) {
+            Text(
+                text = stringResource(R.string.auth_enter_email_username_password),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
 
         Button(

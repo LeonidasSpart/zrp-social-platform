@@ -2231,4 +2231,11 @@
     <string name="lists_error_create">Nem sikerült létrehozni a listát.</string>
     <string name="lists_error_add_member">Nem sikerült hozzáadni a tagot.</string>
     <string name="lists_error_remove_member">Nem sikerült eltávolítani a tagot.</string>
+    <string name="auth_err_network">Nem sikerült kapcsolódni a ZRP-hez. Ellenőrizd a kapcsolatot, és próbáld újra.</string>
+    <string name="auth_registration_failed">A regisztráció sikertelen volt. Próbáld újra később.</string>
+    <string name="auth_enter_email_username_password">Add meg az e-mail-címedet vagy felhasználóneved, valamint a jelszavad.</string>
+    <string name="settings_err_fill_all_fields">Kérjük, tölts ki minden mezőt.</string>
+    <string name="settings_err_passwords_dont_match">Az új jelszavak nem egyeznek.</string>
+    <string name="ai_service_unavailable">Az AI-szolgáltatás átmenetileg nem érhető el</string>
+    <string name="auth_username_taken_hint">Ez a felhasználónév foglalt. Válassz egy alábbi javaslatot, vagy próbálj mást.</string>
 </resources>

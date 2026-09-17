@@ -2241,4 +2241,11 @@
     <string name="lists_error_create">Nie udało się utworzyć listy.</string>
     <string name="lists_error_add_member">Nie udało się dodać członka.</string>
     <string name="lists_error_remove_member">Nie udało się usunąć członka.</string>
+    <string name="auth_err_network">Nie udało się połączyć z ZRP. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="auth_registration_failed">Rejestracja nie powiodła się. Spróbuj ponownie później.</string>
+    <string name="auth_enter_email_username_password">Wpisz swój e-mail lub nazwę użytkownika oraz hasło.</string>
+    <string name="settings_err_fill_all_fields">Wypełnij wszystkie pola.</string>
+    <string name="settings_err_passwords_dont_match">Nowe hasła nie są identyczne.</string>
+    <string name="ai_service_unavailable">Usługa AI tymczasowo niedostępna</string>
+    <string name="auth_username_taken_hint">Ta nazwa użytkownika jest zajęta. Wybierz propozycję poniżej lub spróbuj innej.</string>
 </resources>
