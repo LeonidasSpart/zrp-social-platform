@@ -95,6 +95,17 @@ describe.skipIf(!hasRealDatabaseUrl)(
         where: { userId: commentAuthor.id, fromUserId: liker.id, type: "comment_like", postId: post.id },
       });
       expect(notifAfterUnlike).toBeNull();
+
+      // A full like -> unlike -> like cycle must leave exactly one
+      // notification behind, never an orphaned first one plus a second -
+      // same invariant already proven for post-likes.
+      const relikeRes = await POST(req(comment.id), { params: Promise.resolve({ id: comment.id }) });
+      expect((await relikeRes.json()).liked).toBe(true);
+
+      const notifsAfterRelike = await prisma.notification.findMany({
+        where: { userId: commentAuthor.id, fromUserId: liker.id, type: "comment_like", commentId: comment.id },
+      });
+      expect(notifsAfterRelike).toHaveLength(1);
     });
 
     it("unliking one comment never retracts the notification for a DIFFERENT comment on the same post liked by the same user", async () => {
@@ -118,7 +129,22 @@ describe.skipIf(!hasRealDatabaseUrl)(
       getServerSession.mockResolvedValue(sessionFor(liker));
 
       await POST(req(commentA.id), { params: Promise.resolve({ id: commentA.id }) });
+
+      const notifForAAfterCreate = await prisma.notification.findFirst({
+        where: { userId: commentAuthor.id, fromUserId: liker.id, type: "comment_like", commentId: commentA.id },
+      });
+      expect(notifForAAfterCreate).toBeTruthy();
+
+      // Interacting with a DIFFERENT comment (B) must never disturb A's
+      // already-existing notification, at the moment B's is created -
+      // not just "eventually", checked here before anything is undone.
       await POST(req(commentB.id), { params: Promise.resolve({ id: commentB.id }) });
+
+      const notifForAAfterB = await prisma.notification.findFirst({
+        where: { userId: commentAuthor.id, fromUserId: liker.id, type: "comment_like", commentId: commentA.id },
+      });
+      expect(notifForAAfterB?.id).toBe(notifForAAfterCreate!.id);
+      expect(notifForAAfterB?.read).toBe(false);
 
       // Unlike comment A only.
       await POST(req(commentA.id), { params: Promise.resolve({ id: commentA.id }) });
@@ -137,6 +163,38 @@ describe.skipIf(!hasRealDatabaseUrl)(
       });
       expect(notifForB).toBeTruthy();
       expect(notifForB?.read).toBe(false);
+    });
+
+    it("a concurrent duplicate like request is idempotent, not a 500, and never produces a duplicate notification", async () => {
+      const postAuthor = await createUser("postauthor5");
+      const commentAuthor = await createUser("commentauthor5");
+      const liker = await createUser("liker5");
+
+      const post = await prisma.post.create({
+        data: { content: `post ${runId}`, authorId: postAuthor.id, status: "published" },
+      });
+      postIds.push(post.id);
+      const comment = await prisma.comment.create({
+        data: { content: `comment ${runId}`, postId: post.id, authorId: commentAuthor.id },
+      });
+      commentIds.push(comment.id);
+
+      getServerSession.mockResolvedValue(sessionFor(liker));
+
+      const [a, b] = await Promise.all([
+        POST(req(comment.id), { params: Promise.resolve({ id: comment.id }) }),
+        POST(req(comment.id), { params: Promise.resolve({ id: comment.id }) }),
+      ]);
+      expect(a.status).toBe(200);
+      expect(b.status).toBe(200);
+
+      const likes = await prisma.commentLike.findMany({ where: { commentId: comment.id, userId: liker.id } });
+      expect(likes.length).toBeLessThanOrEqual(1);
+
+      const notifs = await prisma.notification.findMany({
+        where: { userId: commentAuthor.id, fromUserId: liker.id, type: "comment_like", commentId: comment.id },
+      });
+      expect(notifs.length).toBeLessThanOrEqual(1);
     });
 
     it("liking your own comment never creates a self-notification", async () => {
