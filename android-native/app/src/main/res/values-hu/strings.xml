@@ -1759,7 +1759,7 @@
     <string name="charity_generated_note">Az adatok generálva: %1$s. Óránként frissül.</string>
     <string name="legal_load_error">Nem sikerült betölteni ezt az oldalt. Ellenőrizd a kapcsolatodat, és próbáld újra.</string>
     <string name="profile_joined">Csatlakozott</string>
-    <string name="profile_charity_note">A profit %1$s%-a jótékony célra megy</string>
+    <string name="profile_charity_note">A profit %1$s%%-a jótékony célra megy</string>
     <string name="profile_impact">Hatás: %1$s $ jótékony célra adományozva</string>
     <string name="profile_analytics">Elemzések</string>
     <string name="profile_analytics_total_views">Megtekintések összesen</string>
@@ -2142,7 +2142,7 @@
     <string name="pricing_feature_api_access">API-hozzáférés</string>
     <string name="pricing_feature_no_api_access">Nincs API</string>
     <string name="pricing_feature_support">Támogatás: %1$s</string>
-    <string name="pricing_feature_charity">%1$d% jótékony célra</string>
+    <string name="pricing_feature_charity">%1$d%% jótékony célra</string>
     <string name="pricing_analytics_basic">Alapszintű</string>
     <string name="pricing_analytics_advanced">Fejlett</string>
     <string name="pricing_analytics_full">Teljes</string>
