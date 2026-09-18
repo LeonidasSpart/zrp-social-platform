@@ -39,7 +39,7 @@ const LABELS: Record<NewsLanguage, Labels> = {
   en: {
     breaking: "BREAKING",
     developing: "DEVELOPING STORY",
-    unconfirmed: "UNCONFIRMED — reported by a single source",
+    unconfirmed: "UNCONFIRMED: reported by a single source",
     travelUpdate: "TRAVEL UPDATE",
     source: "Source",
     sources: "Sources",
@@ -49,7 +49,7 @@ const LABELS: Record<NewsLanguage, Labels> = {
   fr: {
     breaking: "ALERTE INFO",
     developing: "INFORMATION EN COURS",
-    unconfirmed: "NON CONFIRMÉ — rapporté par une seule source",
+    unconfirmed: "NON CONFIRMÉ : rapporté par une seule source",
     travelUpdate: "INFO VOYAGE",
     source: "Source",
     sources: "Sources",
@@ -59,7 +59,7 @@ const LABELS: Record<NewsLanguage, Labels> = {
   de: {
     breaking: "EILMELDUNG",
     developing: "LAUFENDE MELDUNG",
-    unconfirmed: "UNBESTÄTIGT — nur von einer Quelle gemeldet",
+    unconfirmed: "UNBESTÄTIGT: nur von einer Quelle gemeldet",
     travelUpdate: "REISE-UPDATE",
     source: "Quelle",
     sources: "Quellen",
@@ -69,7 +69,7 @@ const LABELS: Record<NewsLanguage, Labels> = {
   it: {
     breaking: "ULTIM'ORA",
     developing: "NOTIZIA IN AGGIORNAMENTO",
-    unconfirmed: "NON CONFERMATO — riportato da una sola fonte",
+    unconfirmed: "NON CONFERMATO: riportato da una sola fonte",
     travelUpdate: "AGGIORNAMENTO VIAGGI",
     source: "Fonte",
     sources: "Fonti",

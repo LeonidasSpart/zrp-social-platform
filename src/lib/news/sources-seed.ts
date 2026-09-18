@@ -130,7 +130,7 @@ export const SEED_SOURCES: SeedSource[] = [
   // ─── Established news organisations (tier 2) ─────────────────
   {
     key: "bbc-world",
-    name: "BBC News — World",
+    name: "BBC News: World",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/world/rss.xml",
     homepageUrl: "https://www.bbc.com/news/world",
@@ -141,7 +141,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "bbc-business",
-    name: "BBC News — Business",
+    name: "BBC News: Business",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/business/rss.xml",
     homepageUrl: "https://www.bbc.com/news/business",
@@ -152,7 +152,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "bbc-technology",
-    name: "BBC News — Technology",
+    name: "BBC News: Technology",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/technology/rss.xml",
     homepageUrl: "https://www.bbc.com/news/technology",
@@ -163,7 +163,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "guardian-world",
-    name: "The Guardian — World",
+    name: "The Guardian: World",
     publisher: "The Guardian",
     feedUrl: "https://www.theguardian.com/world/rss",
     homepageUrl: "https://www.theguardian.com/world",
@@ -197,7 +197,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "cbc-top-stories",
-    name: "CBC News — Top Stories",
+    name: "CBC News: Top Stories",
     publisher: "CBC News",
     feedUrl: "https://www.cbc.ca/webfeed/rss/rss-topstories",
     homepageUrl: "https://www.cbc.ca/news",
@@ -223,7 +223,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "france24-en",
-    name: "FRANCE 24 — English",
+    name: "FRANCE 24: English",
     publisher: "FRANCE 24",
     feedUrl: "https://www.france24.com/en/rss",
     homepageUrl: "https://www.france24.com/en/",
@@ -235,7 +235,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "lemonde-une",
-    name: "Le Monde — À la une",
+    name: "Le Monde: À la une",
     publisher: "Le Monde",
     feedUrl: "https://www.lemonde.fr/rss/une.xml",
     homepageUrl: "https://www.lemonde.fr/",
@@ -247,7 +247,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "dw-en-all",
-    name: "Deutsche Welle — English",
+    name: "Deutsche Welle: English",
     publisher: "Deutsche Welle",
     feedUrl: "https://rss.dw.com/rdf/rss-en-all",
     homepageUrl: "https://www.dw.com/en/",
@@ -297,7 +297,7 @@ export const SEED_SOURCES: SeedSource[] = [
   // reachable to add responsibly instead of guessing one.
   {
     key: "bbc-africa",
-    name: "BBC News — Africa",
+    name: "BBC News: Africa",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/world/africa/rss.xml",
     homepageUrl: "https://www.bbc.com/news/world/africa",
@@ -308,7 +308,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "bbc-asia",
-    name: "BBC News — Asia",
+    name: "BBC News: Asia",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/world/asia/rss.xml",
     homepageUrl: "https://www.bbc.com/news/world/asia",
@@ -319,7 +319,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "bbc-latin-america",
-    name: "BBC News — Latin America",
+    name: "BBC News: Latin America",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
     homepageUrl: "https://www.bbc.com/news/world/latin_america",
@@ -330,7 +330,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "bbc-us-canada",
-    name: "BBC News — US & Canada",
+    name: "BBC News: US & Canada",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
     homepageUrl: "https://www.bbc.com/news/world/us_and_canada",
@@ -360,7 +360,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "bbc-entertainment-arts",
-    name: "BBC News — Entertainment & Arts",
+    name: "BBC News: Entertainment & Arts",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
     homepageUrl: "https://www.bbc.com/news/entertainment_and_arts",
@@ -371,7 +371,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "bbc-science-environment",
-    name: "BBC News — Science & Environment",
+    name: "BBC News: Science & Environment",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
     homepageUrl: "https://www.bbc.com/news/science_and_environment",
@@ -382,7 +382,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "bbc-health",
-    name: "BBC News — Health",
+    name: "BBC News: Health",
     publisher: "BBC News",
     feedUrl: "https://feeds.bbci.co.uk/news/health/rss.xml",
     homepageUrl: "https://www.bbc.com/news/health",
@@ -397,7 +397,7 @@ export const SEED_SOURCES: SeedSource[] = [
   // publisher does.
   {
     key: "guardian-sport",
-    name: "The Guardian — Sport",
+    name: "The Guardian: Sport",
     publisher: "The Guardian",
     feedUrl: "https://www.theguardian.com/sport/rss",
     homepageUrl: "https://www.theguardian.com/sport",
@@ -408,7 +408,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "guardian-culture",
-    name: "The Guardian — Culture",
+    name: "The Guardian: Culture",
     publisher: "The Guardian",
     feedUrl: "https://www.theguardian.com/culture/rss",
     homepageUrl: "https://www.theguardian.com/culture",
@@ -434,7 +434,7 @@ export const SEED_SOURCES: SeedSource[] = [
    */
   {
     key: "guardian-business",
-    name: "The Guardian — Business",
+    name: "The Guardian: Business",
     publisher: "The Guardian",
     feedUrl: "https://www.theguardian.com/business/rss",
     homepageUrl: "https://www.theguardian.com/business",
@@ -445,7 +445,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "guardian-technology",
-    name: "The Guardian — Technology",
+    name: "The Guardian: Technology",
     publisher: "The Guardian",
     feedUrl: "https://www.theguardian.com/technology/rss",
     homepageUrl: "https://www.theguardian.com/technology",
@@ -476,7 +476,7 @@ export const SEED_SOURCES: SeedSource[] = [
   },
   {
     key: "admin-ch-releases",
-    name: "Swiss Federal Administration — Media releases",
+    name: "Swiss Federal Administration: Media releases",
     publisher: "Swiss Federal Administration",
     feedUrl: "https://www.admin.ch/gov/en/start/documentation/media-releases.rss.html",
     homepageUrl: "https://www.admin.ch/gov/en/start/documentation/media-releases.html",

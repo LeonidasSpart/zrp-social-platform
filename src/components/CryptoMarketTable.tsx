@@ -231,7 +231,7 @@ export default function CryptoMarketTable() {
                           : "text-red-600 dark:text-red-500",
                     ].join(" ")}
                   >
-                    {change === null ? "—" : `${changeIsUp ? "+" : ""}${change.toFixed(2)}%`}
+                    {change === null ? "-" : `${changeIsUp ? "+" : ""}${change.toFixed(2)}%`}
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
                     {formatCompactUsd(row.volume24hUsd)}

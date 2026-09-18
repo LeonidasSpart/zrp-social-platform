@@ -134,11 +134,11 @@ struct ModerationTransparencyView: View {
     /// Hours under a day, days above it - the same switch the web page
     /// makes, so the two never disagree about the headline number.
     ///
-    /// An em dash when the route reports null. That is not zero: it
-    /// means no report has ever been actioned, and printing "0h" would
+    /// A dash placeholder when the route reports null. That is not zero:
+    /// it means no report has ever been actioned, and printing "0h" would
     /// claim instant moderation of nothing.
     private func medianText(_ hours: Double?) -> String {
-        guard let hours else { return "—" }
+        guard let hours else { return "-" }
         if hours >= 24 {
             let days = Int((hours / 24).rounded())
             return L10n.string(.transparencyDaysValue, ["n": CountFormatting.exact(days)])

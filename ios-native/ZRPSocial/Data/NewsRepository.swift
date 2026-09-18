@@ -13,7 +13,7 @@ struct NewsRepository: NewsRepositoryProtocol {
         self.client = client
     }
 
-    /// `GET /api/news` — the public feed, no session required.
+    /// `GET /api/news`: the public feed, no session required.
     ///
     /// The cursor is a `publishedAt` timestamp rather than an opaque
     /// token, and the route answers 400 for one it cannot parse, so it is
@@ -42,7 +42,7 @@ struct NewsRepository: NewsRepositoryProtocol {
         )
     }
 
-    /// `GET /api/news/{slug}` — one article. Reading it is also what
+    /// `GET /api/news/{slug}`: one article. Reading it is also what
     /// increments its view count, server-side; nothing here reports a
     /// view separately.
     func article(slug: String) async throws -> NewsArticle {

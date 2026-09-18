@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 /*
- * ZRP News Network — admin console.
+ * ZRP News Network: admin console.
  *
  * ⚠️ TRANSLATION GAP (deliberate, flagged rather than papered over):
  * every other admin screen pulls its copy from src/lib/translations.ts

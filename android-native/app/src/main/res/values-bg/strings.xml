@@ -686,7 +686,7 @@
     <string name="music_shell_studio_label">Студио за музика</string>
     <string name="music_shell_studio_eyebrow">Инструменти за автори</string>
     <string name="music_shell_studio_description">Публикувай музиката си директно в ZRP.</string>
-    <string name="music_shell_gate_title">Студио за музика — изисква се статус на изпълнител или автор</string>
+    <string name="music_shell_gate_title">Студио за музика: изисква се статус на изпълнител или автор</string>
     <string name="music_shell_gate_body">Слушането на ZRP Music е отворено за всички. Публикуването на музика изисква одобрен статус „Автор“ или потвърден профил на музикален изпълнител.</string>
     <string name="music_shell_pending_verification">Профилът ти на изпълнител е изпратен и очаква потвърждение от екипа на ZRP.</string>
     <string name="music_shell_apply_intro_prefix">Създай профил на изпълнител, за да кандидатстваш за потвърждение като музикален изпълнител, или</string>
@@ -713,9 +713,9 @@
     <string name="music_shell_publishing">Публикуване...</string>
     <string name="music_shell_upload_hint">Аудиото и обложката се качват директно в съществуващото ти хранилище в ZRP.</string>
     <string name="music_shell_publish_failed_default">Публикуването бе неуспешно. Опитай отново.</string>
-    <string name="music_shell_empty_file_error">„%1$s“ не можа да бъде прочетен — може все още да се сваля от iCloud или облачния ти доставчик на съхранение. Изчакай да завърши свалянето и опитай отново.</string>
+    <string name="music_shell_empty_file_error">„%1$s“ не можа да бъде прочетен, може все още да се сваля от iCloud или облачния ти доставчик на съхранение. Изчакай да завърши свалянето и опитай отново.</string>
     <string name="music_studio_delete_track_title">Изтрий песента</string>
-    <string name="music_studio_delete_track_body">Да изтрия ли „%1$s“? Това не може да бъде отменено — песента, нейните изпълнения и харесвания ще бъдат премахнати завинаги.</string>
+    <string name="music_studio_delete_track_body">Да изтрия ли „%1$s“? Това не може да бъде отменено: песента, нейните изпълнения и харесвания ще бъдат премахнати завинаги.</string>
     <string name="music_studio_cancel">Отказ</string>
     <string name="music_studio_deleting">Изтриване...</string>
     <string name="music_studio_delete_confirm">Изтрий</string>
@@ -748,7 +748,7 @@
     <string name="music_studio_remove_from_album">Премахни от албума</string>
     <string name="music_studio_add_existing_tracks">Добави съществуващи песни</string>
     <string name="music_studio_delete_album_title">Изтрий албума</string>
-    <string name="music_studio_delete_album_body">Да изтрия ли „%1$s“? Песните в него НЯМА да бъдат изтрити — те ще останат публикувани и просто ще бъдат отделени от този албум.</string>
+    <string name="music_studio_delete_album_body">Да изтрия ли „%1$s“? Песните в него НЯМА да бъдат изтрити, те ще останат публикувани и просто ще бъдат отделени от този албум.</string>
     <string name="music_studio_album_created_msg">Албумът е създаден.</string>
     <string name="music_studio_album_updated_msg">Албумът е обновен.</string>
     <string name="music_studio_album_deleted_msg">Албумът е изтрит. Песните ти са запазени и остават достъпни.</string>
@@ -764,7 +764,7 @@
     <string name="marketplace_category_watches_jewelry">Часовници и бижута</string>
     <string name="marketplace_category_other_luxury">Други луксозни активи</string>
     <string name="marketplace_hero_title">ZRP Market Plus</string>
-    <string name="marketplace_hero_subtitle">Луксозният пазар за потвърдени членове на ZRP — екзотични автомобили, яхти, частни самолети, имоти и още.</string>
+    <string name="marketplace_hero_subtitle">Луксозният пазар за потвърдени членове на ZRP: екзотични автомобили, яхти, частни самолети, имоти и още.</string>
     <string name="marketplace_search_placeholder">Търси обяви...</string>
     <string name="marketplace_search">Търси</string>
     <string name="marketplace_browse_categories">Разгледай категориите</string>
@@ -852,7 +852,7 @@
     <string name="opportunity_back_to_opportunity">Обратно към OPPORTUNITY</string>
     <string name="opportunity_close">Затвори</string>
     <string name="opportunity_compensation_label">Възнаграждение</string>
-    <string name="opportunity_compensation_placeholder">напр. $50k-70k/година, неплатено — академични кредити</string>
+    <string name="opportunity_compensation_placeholder">напр. $50k-70k/година, неплатено, академични кредити</string>
     <string name="opportunity_cover_note_label">Придружаващо писмо (незадължително)</string>
     <string name="opportunity_cover_note_placeholder">Разкажи им защо си подходящ(а) за позицията...</string>
     <string name="opportunity_create_subtitle">Публикувай работа, стаж, стипендия, менторство или сътрудничество за общността на ZRP.</string>
@@ -868,7 +868,7 @@
     <string name="opportunity_external_url_hint">Ако е зададен, кандидатите се пренасочват към този линк, вместо да кандидатстват в ZRP.</string>
     <string name="opportunity_external_url_label">Външен линк за кандидатстване (незадължително)</string>
     <string name="opportunity_external_url_placeholder">https://...</string>
-    <string name="opportunity_hero_subtitle">Работа, дистанционна работа, стажове, стипендии, менторство, проекти на свободна практика и сътрудничество — задвижвани от общността на ZRP.</string>
+    <string name="opportunity_hero_subtitle">Работа, дистанционна работа, стажове, стипендии, менторство, проекти на свободна практика и сътрудничество, задвижвани от общността на ZRP.</string>
     <string name="opportunity_hero_title">ZRP OPPORTUNITY</string>
     <string name="opportunity_is_paid">Това е платено</string>
     <string name="opportunity_location_label">Местоположение (незадължително)</string>
@@ -1009,7 +1009,7 @@
     <string name="play_add_option">Добави опция</string>
     <string name="play_add_pair">Добави двойка</string>
     <string name="play_add_question">Добави въпрос</string>
-    <string name="play_ai_generated_note">Генерирано с изкуствен интелект — прегледай преди публикуване.</string>
+    <string name="play_ai_generated_note">Генерирано с изкуствен интелект, прегледай преди публикуване.</string>
     <string name="play_ai_tab">Генерирай с ИИ</string>
     <string name="play_ai_topic_label">Тема</string>
     <string name="play_ai_topic_placeholder">напр. филми от 80-те, столици по света, факти за космоса</string>
@@ -1049,7 +1049,7 @@
     <string name="play_finish">Завърши</string>
     <string name="play_generate">Генерирай</string>
     <string name="play_generating">Генериране...</string>
-    <string name="play_hero_subtitle">Бързи игри, дуели и дневни предизвикателства — задвижвани от общността на ZRP.</string>
+    <string name="play_hero_subtitle">Бързи игри, дуели и дневни предизвикателства, задвижвани от общността на ZRP.</string>
     <string name="play_hero_title">ZRP PLAY</string>
     <string name="play_incoming_duels">Входящи предизвикателства</string>
     <string name="play_leaderboard">Класация</string>
@@ -1181,7 +1181,7 @@
     <string name="shorts_upload_err_generic">Нещо се обърка при качването. Провери връзката си и опитай отново.</string>
     <string name="shorts_upload_err_upload_failed_detailed">Качването не завърши, вероятно поради проблем с връзката или защото файлът е твърде голям за твоя план. Провери връзката си и опитай отново.</string>
     <string name="shorts_upload_err_too_large_plan">Това видео е твърде голямо за твоя план. Опитай с по-малък файл или надгради плана си.</string>
-    <string name="shorts_upload_err_url_gen_failed">Качването не можа да започне — обикновено това е временен проблем с връзката. Опитай отново.</string>
+    <string name="shorts_upload_err_url_gen_failed">Качването не можа да започне: обикновено това е временен проблем с връзката. Опитай отново.</string>
     <string name="shorts_upload_err_internal_server">Нещо се обърка от наша страна по време на качването. Опитай отново след малко.</string>
     <string name="caption_view_more">Виж повече</string>
     <string name="caption_view_less">Виж по-малко</string>
@@ -1244,7 +1244,7 @@
     <string name="trust_account_age_label">Възраст на акаунта:</string>
     <string name="trust_account_history_title">История на акаунта</string>
     <string name="trust_additional_signals_heading">Допълнителни сигнали</string>
-    <string name="trust_additional_signals_note">Те не влияят на резултата по-горе — показани са отделно като допълнителен контекст.</string>
+    <string name="trust_additional_signals_note">Те не влияят на резултата по-горе, показани са отделно като допълнителен контекст.</string>
     <string name="trust_back_to_profile">Обратно към профила</string>
     <string name="trust_back_to_username">Обратно към @%1$s</string>
     <string name="trust_category_community">Общност</string>
@@ -1405,7 +1405,7 @@
     <string name="ai_page_subtitle">Питай каквото искаш. Получи помощ с публикации, научи повече за ZRP или просто си побъбри.</string>
     <string name="ai_discover_entry">Открий ZRP AI</string>
     <string name="settings_solana_wallet_title">Solana портфейл (за директни бакшиши)</string>
-    <string name="settings_solana_wallet_desc">Добави адреса на своя Solana портфейл, за да получаваш бакшиши директно от потребителите. Те ще изпращат USDC директно към този портфейл — без такси от платформата.</string>
+    <string name="settings_solana_wallet_desc">Добави адреса на своя Solana портфейл, за да получаваш бакшиши директно от потребителите. Те ще изпращат USDC директно към този портфейл, без такси от платформата.</string>
     <string name="settings_wallet_address">Адрес на портфейла</string>
     <string name="settings_wallet_address_placeholder">Адресът на твоя Solana портфейл (напр. 4zMMC...)</string>
     <string name="settings_wallet_address_note">Този адрес ще се показва в профила ти за директни бакшиши.</string>
@@ -1743,7 +1743,7 @@
     <string name="transparency_status_heading">Статус на доклада</string>
     <string name="transparency_action_heading">Предприети действия</string>
     <string name="transparency_appeals_heading">Обжалвания на модерация</string>
-    <string name="transparency_appeals_note">Когато потребител не е съгласен с решение за модерация, може да го обжалва. Това са обобщените резултати — никога кой е обжалвал или какво е било казано.</string>
+    <string name="transparency_appeals_note">Когато потребител не е съгласен с решение за модерация, може да го обжалва. Това са обобщените резултати: никога кой е обжалвал или какво е било казано.</string>
     <string name="transparency_generated_note">Данните са генерирани на %1$s. Обновяват се на всеки час.</string>
     <string name="charity_committed_label">Ангажирани за благотворителност</string>
     <string name="charity_committed_note">Изчислява се автоматично от завършени бакшиши и покупки на платено съдържание: 35% от таксата на ZRP за всяко от тях.</string>
@@ -1754,7 +1754,7 @@
     <string name="charity_cause_hospitals">Болници</string>
     <string name="charity_cause_climate">Климатични проекти</string>
     <string name="charity_ledger_heading">Регистър на изплащанията</string>
-    <string name="charity_no_disbursements_yet">Все още не са записани изплащания. Този регистър е реален и актуален в реално време — първият запис ще се появи тук веднага щом бъде извършено плащане.</string>
+    <string name="charity_no_disbursements_yet">Все още не са записани изплащания. Този регистър е реален и актуален в реално време, първият запис ще се появи тук веднага щом бъде извършено плащане.</string>
     <string name="charity_view_proof">Виж доказателство</string>
     <string name="charity_err_load">В момента не могат да се заредят данните за благотворителност. Опитай отново по-късно.</string>
     <string name="charity_generated_note">Данните са генерирани на %1$s. Обновяват се на всеки час.</string>
@@ -1824,7 +1824,7 @@
     <string name="admin_audit_target">Цел: %1$s %2$s</string>
     <string name="admin_audit_metadata">Подробности: %1$s</string>
     <string name="admin_storage_title">Почистване на хранилището</string>
-    <string name="admin_storage_subtitle">Открива файлове, останали в UploadThing, към които вече нищо в базата данни не сочи, и позволява да ги изтриеш. Сканирането никога не променя нищо — само отчита.</string>
+    <string name="admin_storage_subtitle">Открива файлове, останали в UploadThing, към които вече нищо в базата данни не сочи, и позволява да ги изтриеш. Сканирането никога не променя нищо, само отчита.</string>
     <string name="admin_storage_scan_button">Сканирай за изоставени файлове</string>
     <string name="admin_storage_scanning">Сканиране…</string>
     <string name="admin_storage_delete_button">Изтрий %1$s изоставени файла</string>
@@ -1837,8 +1837,8 @@
     <string name="admin_storage_stat_orphaned_size">Размер на изоставените</string>
     <string name="admin_storage_stat_held_for_review_summary">Задържани за преглед: %1$s (%2$s MB)</string>
     <string name="admin_storage_held_for_review_hint">%1$s наскоро качени файла нямат връзки, но се задържат от изтриване за 24 часа, в случай че все още се прикачват към нов запис.</string>
-    <string name="admin_storage_nothing_orphaned">Няма изоставени файлове — хранилището в UploadThing съответства на базата данни.</string>
-    <string name="admin_storage_showing_sample">Показани %1$s от %2$s — изтриването премахва всички тях, не само изброените тук.</string>
+    <string name="admin_storage_nothing_orphaned">Няма изоставени файлове, хранилището в UploadThing съответства на базата данни.</string>
+    <string name="admin_storage_showing_sample">Показани %1$s от %2$s, изтриването премахва всички тях, не само изброените тук.</string>
     <string name="admin_charity_title">Изплащания за благотворителност</string>
     <string name="admin_charity_subtitle">Реални плащания за благотворителност, извършени от ZRP. Всеки запис тук се появява и в публичния регистър за благотворителност.</string>
     <string name="admin_charity_saved">Изплащането е записано.</string>
@@ -1946,7 +1946,7 @@
     <string name="admin_news_network_no_stories">Няма новини в тази опашка.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · резултат %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d източника</string>
-    <string name="admin_news_network_flag_sensitive">Чувствителна — изисква се преглед от човек</string>
+    <string name="admin_news_network_flag_sensitive">Чувствителна: изисква се преглед от човек</string>
     <string name="admin_news_network_flag_breaking">Извънредна</string>
     <string name="admin_news_network_flag_travel">Пътувания</string>
     <string name="admin_news_network_reject">Отхвърли</string>
@@ -2022,7 +2022,7 @@
     <string name="ambassadors_hero_title1">ИЗГРАДИ СВОЯТА ОБЩНОСТ.</string>
     <string name="ambassadors_hero_title2">ПРЕДСТАВЛЯВАЙ СВОЯТА ДЪРЖАВА.</string>
     <string name="ambassadors_hero_title3">СВЪРЖИ СВЕТА.</string>
-    <string name="ambassadors_hero_subtitle">Глобалните посланици на ZRP водят общността в собствената си държава — истински хора, истински общности, едно растящо движение.</string>
+    <string name="ambassadors_hero_subtitle">Глобалните посланици на ZRP водят общността в собствената си държава: истински хора, истински общности, едно растящо движение.</string>
     <string name="ambassadors_hero_cta_primary">Стани посланик на ZRP</string>
     <string name="ambassadors_hero_cta_secondary">Разгледай света</string>
     <string name="ambassadors_hero_stat_ambassadors">Посланици</string>
@@ -2049,7 +2049,7 @@
     <string name="ambassadors_levels_title">Твоят път към глобално влияние</string>
     <string name="ambassadors_levels_subtitle">Напредъкът се печели чрез реална дейност в общността, а не просто чрез регистрация.</string>
     <string name="ambassadors_level_explorer">Изследовател</string>
-    <string name="ambassadors_level_explorer_desc">Всеки посланик започва оттук — опознавайки ZRP и общността около нея.</string>
+    <string name="ambassadors_level_explorer_desc">Всеки посланик започва оттук, опознавайки ZRP и общността около нея.</string>
     <string name="ambassadors_level_ambassador">Посланик</string>
     <string name="ambassadors_level_ambassador_desc">Одобрен(а) да представляваш своята държава и да развиваш присъствието на ZRP там.</string>
     <string name="ambassadors_level_community_leader">Лидер на общността</string>
@@ -2080,7 +2080,7 @@
     <string name="ambassadors_apply_err_motivation_required">Разкажи ни защо искаш да станеш посланик на ZRP.</string>
     <string name="ambassadors_apply_err_generic">Нещо се обърка. Моля, опитай отново.</string>
     <string name="ambassadors_apply_success_title">Кандидатурата е изпратена</string>
-    <string name="ambassadors_apply_success_body">Благодарим ти! Кандидатурата ти очаква преглед. Ще те уведомим веднага щом нашият екип вземе решение — все още не си официален посланик.</string>
+    <string name="ambassadors_apply_success_body">Благодарим ти! Кандидатурата ти очаква преглед. Ще те уведомим веднага щом нашият екип вземе решение, все още не си официален посланик.</string>
     <string name="ambassadors_dashboard_title">Табло на посланика</string>
     <string name="ambassadors_dashboard_not_applied_title">Все още не си посланик на ZRP</string>
     <string name="ambassadors_dashboard_err_load">Статусът ти на посланик не можа да бъде зареден</string>
