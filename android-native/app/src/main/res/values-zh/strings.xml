@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">头像上传失败</string>
     <string name="profile_upload_banner_failed">横幅上传失败</string>
     <string name="auth_welcome_title">ZRP 社交</string>
-    <string name="auth_about_subtitle">首个瑞士欧洲社交媒体平台</string>
+    <string name="auth_about_subtitle">瑞士欧洲社交媒体平台</string>
     <string name="auth_right_panel_footer_text">35% 的利润用于慈善事业 🧡</string>
     <string name="auth_join_community">加入社区</string>
     <string name="auth_signup_success_title">账户已创建！</string>

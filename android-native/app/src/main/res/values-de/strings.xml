@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">Avatar-Upload fehlgeschlagen</string>
     <string name="profile_upload_banner_failed">Banner-Upload fehlgeschlagen</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Die erste schweizerisch-europäische Social-Media-Plattform</string>
+    <string name="auth_about_subtitle">Die schweizerisch-europäische Social-Media-Plattform</string>
     <string name="auth_right_panel_footer_text">35 % der Gewinne gehen an wohltätige Zwecke 🧡</string>
     <string name="auth_join_community">Der Community beitreten</string>
     <string name="auth_signup_success_title">Konto erstellt!</string>

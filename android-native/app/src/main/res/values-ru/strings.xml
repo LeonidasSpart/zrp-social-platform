@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">Не удалось загрузить аватар</string>
     <string name="profile_upload_banner_failed">Не удалось загрузить баннер</string>
     <string name="auth_welcome_title">ZRP социальная</string>
-    <string name="auth_about_subtitle">Первая швейцарская европейская социальная платформа</string>
+    <string name="auth_about_subtitle">Швейцарская европейская социальная платформа</string>
     <string name="auth_right_panel_footer_text">35% прибыли направляется на благотворительность 🧡</string>
     <string name="auth_join_community">Присоединиться к сообществу</string>
     <string name="auth_signup_success_title">Аккаунт создан!</string>

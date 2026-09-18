@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">Încărcarea avatarului a eșuat</string>
     <string name="profile_upload_banner_failed">Încărcarea bannerului a eșuat</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Prima platformă europeană de socializare elvețiană</string>
+    <string name="auth_about_subtitle">Platforma europeană de socializare elvețiană</string>
     <string name="auth_right_panel_footer_text">35% din profituri merg către caritate 🧡</string>
     <string name="auth_join_community">Alătură-te comunității</string>
     <string name="auth_signup_success_title">Cont creat!</string>

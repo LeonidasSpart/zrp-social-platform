@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
 
   title: {
-    default: "ZRP Social - The First Swiss-European Social Media Platform",
+    default: "ZRP Social - Swiss-European Social Media Platform",
     template: "%s | ZRP Social",
   },
 
@@ -103,7 +103,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
 
     title:
-      "ZRP Social: The First Swiss-European Social Media Platform",
+      "ZRP Social: Swiss-European Social Media Platform",
 
     description:
       "A Swiss-European social media platform built around privacy, freedom of expression, security, and people-first communities.",
@@ -114,7 +114,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt:
-          "ZRP Social: The First Swiss-European Social Media Platform",
+          "ZRP Social: Swiss-European Social Media Platform",
       },
     ],
   },
@@ -123,7 +123,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
 
     title:
-      "ZRP Social: The First Swiss-European Social Media Platform",
+      "ZRP Social: Swiss-European Social Media Platform",
 
     description:
       "Swiss-built social media for Europe. Privacy, freedom of expression, security, and people-first communities.",
@@ -208,7 +208,7 @@ const structuredData = {
       alternateName: "ZRP",
       url: SITE_URL,
       description:
-        "The First Swiss-European Social Media Platform.",
+        "Swiss-European Social Media Platform.",
       publisher: {
         "@id": `${SITE_URL}/#organization`,
       },

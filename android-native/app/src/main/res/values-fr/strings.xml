@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">Échec du téléchargement de l\'avatar</string>
     <string name="profile_upload_banner_failed">Échec du téléchargement de la bannière</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">La première plateforme de réseau social suisse-européenne</string>
+    <string name="auth_about_subtitle">La plateforme de réseau social suisse-européenne</string>
     <string name="auth_right_panel_footer_text">35 % des bénéfices sont reversés à des associations caritatives 🧡</string>
     <string name="auth_join_community">Rejoignez la communauté</string>
     <string name="auth_signup_success_title">Compte créé !</string>

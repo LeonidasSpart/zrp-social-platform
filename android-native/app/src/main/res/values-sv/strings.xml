@@ -533,7 +533,7 @@
     <string name="profile_upload_avatar_failed">Det gick inte att ladda upp profilbilden</string>
     <string name="profile_upload_banner_failed">Det gick inte att ladda upp bannern</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Den första schweizisk-europeiska sociala medieplattformen</string>
+    <string name="auth_about_subtitle">Den schweizisk-europeiska sociala medieplattformen</string>
     <string name="auth_right_panel_footer_text">35 % av vinsten går till välgörenhet 🧡</string>
     <string name="auth_join_community">Gå med i communityn</string>
     <string name="auth_signup_success_title">Kontot har skapats!</string>

@@ -533,7 +533,7 @@
     <string name="profile_upload_avatar_failed">Nem sikerült feltölteni a profilképet</string>
     <string name="profile_upload_banner_failed">Nem sikerült feltölteni a borítót</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Az első svájci európai közösségimédia-platform</string>
+    <string name="auth_about_subtitle">A svájci európai közösségimédia-platform</string>
     <string name="auth_right_panel_footer_text">A profit 35%-a jótékony célra megy 🧡</string>
     <string name="auth_join_community">Csatlakozz a közösséghez</string>
     <string name="auth_signup_success_title">Fiók létrehozva!</string>

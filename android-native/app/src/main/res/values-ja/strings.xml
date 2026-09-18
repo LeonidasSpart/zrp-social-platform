@@ -532,7 +532,7 @@
     <string name="profile_upload_avatar_failed">アイコンのアップロードに失敗しました</string>
     <string name="profile_upload_banner_failed">バナーのアップロードに失敗しました</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">初のスイス発ヨーロピアン・ソーシャルメディアプラットフォーム</string>
+    <string name="auth_about_subtitle">スイス発ヨーロピアン・ソーシャルメディアプラットフォーム</string>
     <string name="auth_right_panel_footer_text">収益の35%を慈善団体に寄付 🧡</string>
     <string name="auth_join_community">コミュニティに参加</string>
     <string name="auth_signup_success_title">アカウントを作成しました！</string>

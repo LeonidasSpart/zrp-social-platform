@@ -533,7 +533,7 @@
     <string name="profile_upload_avatar_failed">Η μεταφόρτωση της εικόνας προφίλ απέτυχε</string>
     <string name="profile_upload_banner_failed">Η μεταφόρτωση του εξωφύλλου απέτυχε</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Η πρώτη Ελβετοευρωπαϊκή πλατφόρμα κοινωνικής δικτύωσης</string>
+    <string name="auth_about_subtitle">Η Ελβετοευρωπαϊκή πλατφόρμα κοινωνικής δικτύωσης</string>
     <string name="auth_right_panel_footer_text">Το 35% των κερδών διατίθεται σε φιλανθρωπία 🧡</string>
     <string name="auth_join_community">Γίνε μέλος της κοινότητας</string>
     <string name="auth_signup_success_title">Ο λογαριασμός δημιουργήθηκε!</string>

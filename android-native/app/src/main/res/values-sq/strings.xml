@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">Ngarkimi i fotos së profilit dështoi</string>
     <string name="profile_upload_banner_failed">Ngarkimi i banderolës dështoi</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Platforma e Parë Zvicerane Evropiane e Mediave Sociale</string>
+    <string name="auth_about_subtitle">Platforma Zvicerane Evropiane e Mediave Sociale</string>
     <string name="auth_right_panel_footer_text">35% e fitimeve shkojnë për bamirësi 🧡</string>
     <string name="auth_join_community">Bashkohuni me komunitetin</string>
     <string name="auth_signup_success_title">Llogaria u krijua!</string>
