@@ -128,6 +128,12 @@ class LocalizationCompletenessTest {
         "Powered by DeepSeek",
         "https://...", "https://…", "https://your-site.com", "https://your-website.com",
         "user@example.com", "article-slug",
+        // Third-party brand name and banking-standard field codes, same
+        // reasoning web's own completeness gate already applied to these
+        // exact three values (src/lib/__tests__/translations-completeness
+        // .test.ts) - IBAN/BIC are the literal international standard
+        // labels, not English words, so no language "translates" them.
+        "PayPal", "IBAN:", "BIC:",
         // The music explicit-content badge: an industry-standard single-
         // letter symbol (Spotify/Apple Music show it untranslated in every
         // locale), already reviewed and shipped this way on web
@@ -265,6 +271,8 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "de" to setOf(
+            // "Bank" is the same loanword in German banking terminology.
+            "upgrade_request_bank_label",
             "communities_create_name_label",
             "communities_create_hashtag_label",
             "lists_create_name_label",
@@ -672,6 +680,8 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "id" to setOf(
+            // "Bank" is the same loanword in Indonesian banking terminology.
+            "upgrade_request_bank_label",
             "action_edit",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
@@ -880,6 +890,8 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "nl" to setOf(
+            // "Bank" is the same loanword in Dutch banking terminology.
+            "upgrade_request_bank_label",
             "action_repost",
             "admin_ads_budget",
             "admin_analytics_daily_range",
@@ -989,6 +1001,8 @@ class LocalizationCompletenessTest {
             "trust_stat_posts",
         ),
         "pl" to setOf(
+            // "Bank" is the same loanword in Polish banking terminology.
+            "upgrade_request_bank_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_news_network_publication_meta",
@@ -1082,6 +1096,8 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "hu" to setOf(
+            // "Bank" is the same loanword in Hungarian banking terminology.
+            "upgrade_request_bank_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_news_network_publication_meta",
@@ -1098,6 +1114,8 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "sv" to setOf(
+            // "Bank" is the same loanword in Swedish banking terminology.
+            "upgrade_request_bank_label",
             "admin_ads_budget",
             "admin_analytics_post_counts",
             "admin_news_feedback_prefix",
@@ -1137,6 +1155,10 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "da" to setOf(
+            // "Bank" and "Reference" are the same loanwords in Danish
+            // banking terminology.
+            "upgrade_request_bank_label",
+            "upgrade_request_reference_label",
             "action_post",
             "admin_ads_budget",
             "admin_analytics_daily_range",

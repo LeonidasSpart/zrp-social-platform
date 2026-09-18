@@ -9,6 +9,8 @@ import {
   Phone,
   Video,
   Image,
+  Camera,
+  FileImage,
   Smile,
   X,
   Download,
@@ -34,6 +36,7 @@ import ChatContactDrawer from "@/components/ChatContactDrawer";
 import ConfirmModal from "@/components/ConfirmModal";
 import ParsedContent from "@/components/ParsedContent";
 import LinkPreviewCard from "@/components/LinkPreviewCard";
+import GifPicker from "@/components/GifPicker";
 import { extractFirstUrl } from "@/lib/link-preview-parse";
 
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
@@ -119,6 +122,7 @@ export default function ChatInterface({
   const { isOnline: isPartnerOnline, hasStatus, requestStatus } = usePresence();
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -195,6 +199,7 @@ export default function ChatInterface({
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -3141,7 +3146,52 @@ export default function ChatInterface({
               md:px-4
             "
           >
-            {/* IMAGE */}
+            {/* CAMERA */}
+
+            <button
+              type="button"
+              onClick={() =>
+                cameraInputRef.current?.click()
+              }
+              disabled={
+                uploadingImage
+              }
+              className="
+                flex
+                h-10
+                w-10
+                shrink-0
+                items-center
+                justify-center
+                rounded-full
+                text-gray-500
+                transition
+                hover:bg-gray-100
+                hover:text-zrp-red
+                disabled:opacity-50
+                dark:text-gray-400
+                dark:hover:bg-gray-700
+              "
+              title={t(
+                "chat.openCamera"
+              )}
+              aria-label={t(
+                "chat.openCamera"
+              )}
+            >
+              <Camera className="h-5 w-5" />
+            </button>
+
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+
+            {/* IMAGE / GALLERY */}
 
             <button
               type="button"
@@ -3305,6 +3355,42 @@ export default function ChatInterface({
               onChange={handleVideoUpload}
               className="hidden"
             />
+
+            {/* GIF */}
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowGifPicker(true)
+              }
+              disabled={
+                uploadingImage
+              }
+              className="
+                flex
+                h-10
+                w-10
+                shrink-0
+                items-center
+                justify-center
+                rounded-full
+                text-gray-500
+                transition
+                hover:bg-gray-100
+                hover:text-zrp-red
+                disabled:opacity-50
+                dark:text-gray-400
+                dark:hover:bg-gray-700
+              "
+              title={t(
+                "composer.addGif"
+              )}
+              aria-label={t(
+                "composer.addGif"
+              )}
+            >
+              <FileImage className="h-5 w-5" />
+            </button>
 
             {/* EMOJI */}
 
@@ -3555,6 +3641,20 @@ export default function ChatInterface({
             />
           </div>
         </div>
+      )}
+
+      {/* =====================================================================
+          GIF PICKER
+      ====================================================================== */}
+
+      {showGifPicker && (
+        <GifPicker
+          onSelect={(gifUrl) => {
+            setShowGifPicker(false);
+            sendMessage("", gifUrl);
+          }}
+          onClose={() => setShowGifPicker(false)}
+        />
       )}
 
       {/* =====================================================================

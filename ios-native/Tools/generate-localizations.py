@@ -3,11 +3,11 @@
 Generate the iOS app's Localizable.strings files and its L10n key enum
 from the web app's own translation dictionary.
 
-ZRP already ships 11 officially supported languages, with real human
+ZRP already ships 25 officially supported languages, with real human
 translations, in src/lib/translations.ts. Retyping any of that into iOS
 resources by hand would guarantee drift and risk quietly dropping a
 language. Instead this reads that exact file and emits, for every one of
-those 11 languages, a .lproj/Localizable.strings containing only the keys
+those 25 languages, a .lproj/Localizable.strings containing only the keys
 iOS actually uses (Tools/ios-string-keys.txt).
 
 It also emits Core/Localization/L10nKeys.swift, so every key is reachable
@@ -129,9 +129,60 @@ def load_wanted_keys() -> list[str]:
     return keys
 
 
-def load_extra_strings() -> dict[str, str]:
+def load_extra_strings() -> tuple[dict[str, str], dict[str, dict[str, str]]]:
+    """Return (English source strings, {lang: {key: translated value}}).
+
+    ``translations`` covers every non-English ZRP language. A language
+    missing from it entirely (or a key missing within one) is not a
+    fatal error here - validate_extra_translations() is what enforces
+    completeness, so the reason a gap exists is reported clearly rather
+    than surfacing as a generic KeyError.
+    """
     with open(EXTRA_FILE, encoding="utf-8") as handle:
-        return json.load(handle)["strings"]
+        doc = json.load(handle)
+    return doc["strings"], doc.get("translations", {})
+
+
+PLACEHOLDER_RE = re.compile(r"\{[a-zA-Z]+\}")
+
+
+def validate_extra_translations(
+    en_extras: dict[str, str],
+    extra_translations: dict[str, dict[str, str]],
+    languages: list[str],
+) -> None:
+    """Fail loudly if the iOS-only string set (Tools/ios-extra-strings.json)
+    is missing a translation, or has a placeholder mismatch, for any
+    non-English language - the same completeness bar the shared web
+    dictionary is held to, so this set can't silently regress back to
+    English-only for a language it once covered.
+    """
+    non_english = [lang for lang in languages if lang != DEV_LANGUAGE]
+    problems: list[str] = []
+
+    for lang in non_english:
+        lang_map = extra_translations.get(lang)
+        if lang_map is None:
+            problems.append(f"{lang}: no translations block at all for ios-extra-strings.json")
+            continue
+        missing = sorted(set(en_extras) - set(lang_map))
+        if missing:
+            problems.append(f"{lang}: missing {len(missing)} key(s): {', '.join(missing[:5])}" + (" ..." if len(missing) > 5 else ""))
+        extra = sorted(set(lang_map) - set(en_extras))
+        if extra:
+            problems.append(f"{lang}: {len(extra)} key(s) not in the English source: {', '.join(extra[:5])}")
+        for key, en_value in en_extras.items():
+            translated = lang_map.get(key)
+            if translated is None:
+                continue
+            if set(PLACEHOLDER_RE.findall(en_value)) != set(PLACEHOLDER_RE.findall(translated)):
+                problems.append(f"{lang}.{key}: placeholder mismatch (en: {en_value!r}, {lang}: {translated!r})")
+
+    if problems:
+        sys.exit(
+            "error: Tools/ios-extra-strings.json is incomplete or inconsistent:\n  "
+            + "\n  ".join(problems)
+        )
 
 
 def escape_strings_value(value: str) -> str:
@@ -171,11 +222,16 @@ def render_strings_file(
             continue
         lines.append(f'"{key}" = "{escape_strings_value(value)}";')
 
-    if language == DEV_LANGUAGE and extras:
+    if extras:
         lines.append("")
-        lines.append("/* iOS-only strings (see Tools/ios-extra-strings.json). Emitted")
-        lines.append("   into the development language only - other languages fall back")
-        lines.append("   here until these are translated. */")
+        if language == DEV_LANGUAGE:
+            lines.append("/* iOS-only strings (see Tools/ios-extra-strings.json). This is the")
+            lines.append("   development-language source; every other language emits its own")
+            lines.append("   translated values from the same file's 'translations' section. */")
+        else:
+            lines.append("/* iOS-only strings (see Tools/ios-extra-strings.json), translated for")
+            lines.append(f"   {language}. A key with no translation yet falls back to the")
+            lines.append("   development language rather than appearing here untranslated. */")
         for key, value in extras.items():
             lines.append(f'"{key}" = "{escape_strings_value(value)}";')
 
@@ -282,7 +338,7 @@ def main() -> int:
         sys.exit(f"error: development language '{DEV_LANGUAGE}' missing from translations.ts")
 
     keys = load_wanted_keys()
-    extras = load_extra_strings()
+    extras, extra_translations = load_extra_strings()
 
     missing = [key for key in keys if key not in table[DEV_LANGUAGE]]
     if missing:
@@ -299,10 +355,13 @@ def main() -> int:
             "web key instead:\n  " + "\n  ".join(overlap)
         )
 
+    validate_extra_translations(extras, extra_translations, languages)
+
     outputs: dict[str, str] = {}
     for language in languages:
         path = os.path.join(RESOURCES_DIR, f"{language}.lproj", "Localizable.strings")
-        outputs[path] = render_strings_file(language, keys, table[language], extras)
+        lang_extras = extras if language == DEV_LANGUAGE else extra_translations.get(language, {})
+        outputs[path] = render_strings_file(language, keys, table[language], lang_extras)
     outputs[SWIFT_OUT] = render_swift(keys, extras, table[DEV_LANGUAGE])
 
     stale: list[str] = []

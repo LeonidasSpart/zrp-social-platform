@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Rechercher des GIF...</string>
     <string name="action_clear">Effacer</string>
     <string name="message_attach_image_cd">Joindre une image</string>
+    <string name="message_open_camera_cd">Ouvrir l\'appareil photo</string>
     <string name="message_attach_video_cd">Joindre une vidéo</string>
     <string name="message_attach_document_cd">Joindre un document</string>
     <string name="message_record_voice_cd">Enregistrer un message vocal</string>
@@ -2205,6 +2206,27 @@
     <string name="pricing_support_priority">Prioritaire</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Les mises à niveau de forfait sont actuellement gérées sur ZRP Web.</string>
+    <string name="upgrade_request_link">Demander une approbation manuelle</string>
+    <string name="upgrade_request_title">Passer à %1$s</string>
+    <string name="upgrade_request_price_label">Prix : CHF %1$s / mois</string>
+    <string name="upgrade_request_bank_instructions_title">Instructions de virement bancaire</string>
+    <string name="upgrade_request_bank_transfer_instruction">Veuillez virer le montant sur le compte bancaire suivant :</string>
+    <string name="upgrade_request_bank_label">Banque :</string>
+    <string name="upgrade_request_account_label">Compte :</string>
+    <string name="upgrade_request_iban_label">IBAN :</string>
+    <string name="upgrade_request_bic_label">BIC :</string>
+    <string name="upgrade_request_reference_label">Référence :</string>
+    <string name="upgrade_request_payment_method_label">Mode de paiement</string>
+    <string name="upgrade_request_method_bank">Virement bancaire</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Cryptomonnaie</string>
+    <string name="upgrade_request_note_label">Note supplémentaire (facultatif)</string>
+    <string name="upgrade_request_note_placeholder">Toute demande ou commentaire particulier...</string>
+    <string name="upgrade_request_success_sent">Votre demande de mise à niveau a été envoyée. Nous vous contacterons sous peu.</string>
+    <string name="upgrade_request_err_send_failed">Échec de l\'envoi de la demande.</string>
+    <string name="upgrade_request_sending">Envoi en cours...</string>
+    <string name="upgrade_request_submit_button">Envoyer la demande</string>
+    <string name="upgrade_request_footer_note">Votre demande sera examinée par notre équipe. Nous vous contacterons par e-mail sous 24 heures.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">Aucun favori pour l\'instant. Les publications que vous enregistrez apparaîtront ici.</string>

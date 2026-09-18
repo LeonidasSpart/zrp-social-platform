@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">GIF ara...</string>
     <string name="action_clear">Temizle</string>
     <string name="message_attach_image_cd">Görsel ekle</string>
+    <string name="message_open_camera_cd">Kamerayı aç</string>
     <string name="message_attach_video_cd">Video ekle</string>
     <string name="message_attach_document_cd">Belge ekle</string>
     <string name="message_record_voice_cd">Sesli mesaj kaydet</string>
@@ -2205,6 +2206,27 @@
     <string name="pricing_support_priority">Öncelikli</string>
     <string name="pricing_support_247">7/24</string>
     <string name="pricing_upgrade_web_only">Plan yükseltmeleri şu anda yalnızca ZRP Web üzerinden yönetiliyor.</string>
+    <string name="upgrade_request_link">Bunun yerine manuel onay iste</string>
+    <string name="upgrade_request_title">%1$s planına yükselt</string>
+    <string name="upgrade_request_price_label">Fiyat: CHF %1$s / ay</string>
+    <string name="upgrade_request_bank_instructions_title">Banka Havalesi Talimatları</string>
+    <string name="upgrade_request_bank_transfer_instruction">Lütfen tutarı aşağıdaki banka hesabına transfer edin:</string>
+    <string name="upgrade_request_bank_label">Banka:</string>
+    <string name="upgrade_request_account_label">Hesap:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">Referans:</string>
+    <string name="upgrade_request_payment_method_label">Ödeme Yöntemi</string>
+    <string name="upgrade_request_method_bank">Banka Havalesi</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Kripto Para</string>
+    <string name="upgrade_request_note_label">Ek Not (isteğe bağlı)</string>
+    <string name="upgrade_request_note_placeholder">Özel istek veya yorumlar...</string>
+    <string name="upgrade_request_success_sent">Yükseltme talebiniz gönderildi. Kısa süre içinde sizinle iletişime geçeceğiz.</string>
+    <string name="upgrade_request_err_send_failed">İstek gönderilemedi.</string>
+    <string name="upgrade_request_sending">Gönderiliyor...</string>
+    <string name="upgrade_request_submit_button">İsteği Gönder</string>
+    <string name="upgrade_request_footer_note">Talebiniz ekibimiz tarafından incelenecektir. 24 saat içinde e-posta yoluyla sizinle iletişime geçeceğiz.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">Henüz yer imi yok. Kaydettiğiniz gönderiler burada görünecek.</string>

@@ -458,6 +458,38 @@ final class ConversationViewModel: ObservableObject {
         }
     }
 
+    /// A GIF is already hosted on Giphy's CDN (the same real, backend-
+    /// proxied search `GifPickerView`/`ComposeViewModel.add(gif:)` use),
+    /// so unlike `send(attachment:)` this never touches `uploads` at
+    /// all - it sends the picked URL straight through, mirroring
+    /// ChatInterface.tsx's own `sendMessage("", gifUrl)` from
+    /// GifPicker.tsx's onSelect.
+    func send(gif: GifResult) async {
+        guard !isSending else { return }
+        isSending = true
+        defer { isSending = false }
+
+        do {
+            let sent = try await repository.send(
+                to: partner.id,
+                content: "",
+                imageUrl: gif.url,
+                replyToId: nil
+            )
+            if !messages.contains(where: { $0.id == sent.id }) {
+                messages.append(sent)
+            }
+            socket.emit(
+                "send-message",
+                ["receiverId": partner.id, "content": sent.content, "messageId": sent.id]
+            )
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
+        }
+    }
+
     func edit(_ message: Message, to content: String) async {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }

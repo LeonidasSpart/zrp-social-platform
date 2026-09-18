@@ -315,6 +315,7 @@
     <string name="gif_search_placeholder">Search GIFs...</string>
     <string name="action_clear">Clear</string>
     <string name="message_attach_image_cd">Attach image</string>
+    <string name="message_open_camera_cd">Open camera</string>
     <string name="message_attach_video_cd">Attach video</string>
     <string name="message_attach_document_cd">Attach document</string>
     <string name="message_record_voice_cd">Record a voice message</string>
@@ -2218,6 +2219,27 @@
     <string name="pricing_support_priority">Priority</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Plan upgrades are currently managed on ZRP Web.</string>
+    <string name="upgrade_request_link">Request manual approval instead</string>
+    <string name="upgrade_request_title">Upgrade to %1$s</string>
+    <string name="upgrade_request_price_label">Price: CHF %1$s / month</string>
+    <string name="upgrade_request_bank_instructions_title">Bank Transfer Instructions</string>
+    <string name="upgrade_request_bank_transfer_instruction">Please transfer the amount to the following bank account:</string>
+    <string name="upgrade_request_bank_label">Bank:</string>
+    <string name="upgrade_request_account_label">Account:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">Reference:</string>
+    <string name="upgrade_request_payment_method_label">Payment Method</string>
+    <string name="upgrade_request_method_bank">Bank Transfer</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Cryptocurrency</string>
+    <string name="upgrade_request_note_label">Additional Note (optional)</string>
+    <string name="upgrade_request_note_placeholder">Any special requests or comments...</string>
+    <string name="upgrade_request_success_sent">Your upgrade request has been sent. We\'ll contact you shortly.</string>
+    <string name="upgrade_request_err_send_failed">Failed to send request.</string>
+    <string name="upgrade_request_sending">Sending...</string>
+    <string name="upgrade_request_submit_button">Submit Request</string>
+    <string name="upgrade_request_footer_note">Your request will be reviewed by our team. We\'ll contact you via email within 24 hours.</string>
 
     <!-- Localization audit fixes (2026-09) - these were hardcoded English
          literals bypassing the string-resource system entirely; now real

@@ -93,14 +93,24 @@
 	<string>ZRP uses the microphone to record voice messages you send in chat.</string>
 
 	<!--
+	  The chat composer's Camera button (ConversationView/
+	  GroupConversationView) now genuinely captures a photo with
+	  UIImagePickerController(sourceType: .camera) to send in a message -
+	  the same real capability the web composer's capture="environment"
+	  file input and Android's TakePicture() launcher gained in the same
+	  pass. iOS TERMINATES the process the moment the camera is invoked
+	  without this key, so it is not optional paperwork: removing it
+	  while CameraCapture.swift exists would take the app down the first
+	  time somebody tapped the Camera button.
+	-->
+	<key>NSCameraUsageDescription</key>
+	<string>ZRP uses the camera to let you take a photo to send in a message.</string>
+
+	<!--
 	  Still deliberately absent. Apple rejects permissions an app does
 	  not actually use, and each of these would be exactly that:
 	    NSPhotoLibraryUsageDescription  PhotosPicker is out-of-process
 	                                    and needs no permission at all
-	    NSCameraUsageDescription        no ZRP client captures from the
-	                                    camera - not the web app, not
-	                                    Android - so there is no product
-	                                    reason to ask for it here
 	    UIBackgroundModes remote-notification
 	                                    push, BLOCKED on B3
 	  See ios-native/PARITY.md.

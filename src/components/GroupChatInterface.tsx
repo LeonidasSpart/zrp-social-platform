@@ -7,6 +7,8 @@ import dynamic from "next/dynamic";
 import {
   Send,
   Image as ImageIcon,
+  Camera,
+  FileImage,
   Smile,
   X,
   Download,
@@ -34,6 +36,7 @@ import GroupInfoPanel from "@/components/GroupInfoPanel";
 import ConfirmModal from "@/components/ConfirmModal";
 import ParsedContent from "@/components/ParsedContent";
 import LinkPreviewCard from "@/components/LinkPreviewCard";
+import GifPicker from "@/components/GifPicker";
 import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { hydrateGroupSocketMessage, type RawGroupSocketMessage } from "@/lib/groupMessageHydration";
 import { describeGroupTyping } from "@/lib/groupTyping";
@@ -411,6 +414,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
   const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null);
   const [activeMessageActions, setActiveMessageActions] = useState<string | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
   const handleCopyMessage = async (id: string, content: string) => {
@@ -434,6 +438,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const isTypingRef = useRef(false);
@@ -1372,6 +1377,25 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
           <div className="flex min-w-0 items-end gap-0.5 px-2 py-2 sm:gap-1.5 sm:px-3 md:px-4">
             <button
               type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={uploadingImage}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700"
+              title={t("chat.openCamera")}
+              aria-label={t("chat.openCamera")}
+            >
+              <Camera className="h-5 w-5" />
+            </button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+
+            <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingImage}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700"
@@ -1421,6 +1445,17 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
               onChange={handleVideoUpload}
               className="hidden"
             />
+
+            <button
+              type="button"
+              onClick={() => setShowGifPicker(true)}
+              disabled={uploadingImage}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700"
+              title={t("composer.addGif")}
+              aria-label={t("composer.addGif")}
+            >
+              <FileImage className="h-5 w-5" />
+            </button>
 
             <button
               type="button"
@@ -1502,6 +1537,17 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
             <EmojiPicker onEmojiClick={handleEmojiClick} width="100%" height={380} />
           </div>
         </div>
+      )}
+
+      {/* GIF PICKER */}
+      {showGifPicker && (
+        <GifPicker
+          onSelect={(gifUrl) => {
+            setShowGifPicker(false);
+            sendGroupMessage("", gifUrl);
+          }}
+          onClose={() => setShowGifPicker(false)}
+        />
       )}
 
       {/* LIGHTBOX */}

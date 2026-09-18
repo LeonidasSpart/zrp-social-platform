@@ -47,7 +47,7 @@ enum RelativeTime {
     private static var sameYearFormatter: DateFormatter {
         formatter("sameYear") { formatter in
             // Locale-appropriate day+month ordering rather than a fixed
-            // "MMM d", which reads wrong in most of ZRP's 11 languages.
+            // "MMM d", which reads wrong in most of ZRP's 25 languages.
             formatter.setLocalizedDateFormatFromTemplate("MMMd")
         }
     }

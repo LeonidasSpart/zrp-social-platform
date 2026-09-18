@@ -923,7 +923,7 @@ export default function Header() {
                 // Not "primary": BottomNav already owns that name below
                 // lg and two landmarks with one name is worse than none.
                 // nav.more is the button that opens this panel and is
-                // already translated into all 11 languages.
+                // already translated into all 25 languages.
                 aria-label={t("nav.more")}
                 className="space-y-1"
               >

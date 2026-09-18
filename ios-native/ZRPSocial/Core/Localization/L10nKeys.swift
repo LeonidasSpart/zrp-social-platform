@@ -1732,6 +1732,8 @@ enum L10nKey: String, CaseIterable {
     case chatRecordVoiceMessage = "chat.recordVoiceMessage"
     /// en: "Upload image"
     case chatUploadImage = "chat.uploadImage"
+    /// en: "Open camera"
+    case chatOpenCamera = "chat.openCamera"
     /// en: "Download image"
     case chatDownloadImage = "chat.downloadImage"
     /// en: "Choose a video"
@@ -2686,6 +2688,8 @@ enum L10nKey: String, CaseIterable {
     case iosChatMicDenied = "ios.chat.micDenied"
     /// en: "Apply Now"
     case iosPostApplyNow = "ios.post.applyNow"
+    /// en: "Camera unavailable on this device."
+    case iosChatCameraUnavailable = "ios.chat.cameraUnavailable"
 }
 
 extension L10nKey {

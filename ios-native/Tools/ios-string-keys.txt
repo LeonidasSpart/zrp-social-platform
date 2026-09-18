@@ -905,6 +905,7 @@ chat.attachment
 chat.uploadDocument
 chat.recordVoiceMessage
 chat.uploadImage
+chat.openCamera
 chat.downloadImage
 
 # Attachment picker.

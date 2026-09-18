@@ -1132,7 +1132,7 @@ private fun ProfileHeader(
                     // squeezed the badge's remaining width so narrow that
                     // "Confiance" wrapped mid-word in French - the same
                     // failure mode this needs to avoid in every one of
-                    // the 11 supported languages, not just work around it
+                    // the 25 supported languages, not just work around it
                     // for this one string.
                     Text(
                         text = stringResource(R.string.profile_trust_passport_title),

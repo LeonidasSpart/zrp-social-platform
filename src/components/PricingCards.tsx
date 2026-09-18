@@ -6,6 +6,7 @@ import { PLANS } from "@/lib/limits";
 import { Check, X, Copy } from "lucide-react";
 import CryptoPaymentModal from "./CryptoPaymentModal";
 import NativePaymentNotice from "./NativePaymentNotice";
+import UpgradeRequestModal from "./UpgradeRequestModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
@@ -45,6 +46,7 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
   const { t } = useLanguage();
   const [showCryptoModal, setShowCryptoModal] = useState(false);
   const [showNativeNotice, setShowNativeNotice] = useState(false);
+  const [showUpgradeRequestModal, setShowUpgradeRequestModal] = useState(false);
   const planLabel = t(PLAN_LABEL_KEYS[plan] ?? "pricing.planFree");
 
   const features: Array<{ icon: "check" | "cross" | "bullet"; text: string }> = [
@@ -163,6 +165,20 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
                 {t("pricing.subscribeWithCrypto")}
               </button>
               <p className="text-xs text-gray-400 text-center">{t("pricing.payWithUsdc")}</p>
+              {/* Not gated by isNativeStoreRestrictedPayment: this submits
+                  a manual, admin-reviewed request (POST /api/upgrade-requests)
+                  with no payment processed through the app at all - the
+                  same "plan-upgrade" restriction above is specifically
+                  about the automated on-chain flow the crypto button
+                  triggers (see src/lib/native-payment-policy.ts), a
+                  different route that isn't touched here. */}
+              <button
+                type="button"
+                onClick={() => setShowUpgradeRequestModal(true)}
+                className="w-full text-xs text-gray-500 dark:text-gray-400 hover:text-zrp-red dark:hover:text-zrp-red underline text-center transition"
+              >
+                {t("pricing.requestManualUpgrade")}
+              </button>
             </>
           ) : (
             <button
@@ -192,6 +208,15 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
         <NativePaymentNotice
           messageKey="native.paymentUnavailable.planUpgradeMessage"
           onClose={() => setShowNativeNotice(false)}
+        />
+      )}
+
+      {showUpgradeRequestModal && (
+        <UpgradeRequestModal
+          plan={plan}
+          limits={limits}
+          onClose={() => setShowUpgradeRequestModal(false)}
+          onSuccess={() => setShowUpgradeRequestModal(false)}
         />
       )}
     </div>

@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 import UIKit
 
@@ -344,6 +345,30 @@ final class GroupConversationViewModel: ObservableObject {
         }
     }
 
+    /// Mirrors ConversationViewModel's own `send(gif:)` exactly - already
+    /// hosted on Giphy's CDN, so this skips `uploads` entirely and sends
+    /// the picked URL straight through.
+    func send(gif: GifResult) async {
+        guard !isSending else { return }
+        isSending = true
+        defer { isSending = false }
+
+        do {
+            let sent = try await repository.send(id: conversationId, content: "", imageUrl: gif.url)
+            if !messages.contains(where: { $0.id == sent.id }) {
+                messages.append(sent)
+            }
+            socket.emit(
+                "send-group-message",
+                ["conversationId": conversationId, "messageId": sent.id]
+            )
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+        } catch {
+            errorMessage = L10n.string(.authErrTryAgain)
+        }
+    }
+
     /// Removing yourself. The same route removes another member, but
     /// only for an OWNER - see
     /// `ConversationsRepository.removeParticipant`.
@@ -479,6 +504,10 @@ struct GroupConversationView: View {
     @State private var showingInfo = false
     @State private var confirmingLeave = false
     @StateObject private var voiceRecorder = VoiceRecorder()
+    @State private var pickerSelection: [PhotosPickerItem] = []
+    @State private var isShowingCamera = false
+    @State private var isShowingGifPicker = false
+    @State private var cameraUnavailable = false
 
     init(conversationId: String, viewerId: String?) {
         _viewModel = StateObject(
@@ -545,6 +574,38 @@ struct GroupConversationView: View {
             Button { viewModel.errorMessage = nil } label: { Text(.actionCancel) }
         } message: {
             Text(verbatim: viewModel.errorMessage ?? "")
+        }
+        .onChange(of: pickerSelection) { _, items in
+            guard let item = items.first else { return }
+            pickerSelection = []
+            Task {
+                guard let media = try? await item.loadTransferable(type: PickedMedia.self) else { return }
+                await viewModel.send(attachment: .photo(media))
+            }
+        }
+        .fullScreenCover(isPresented: $isShowingCamera) {
+            CameraCapture(
+                onCapture: { media in
+                    isShowingCamera = false
+                    Task { await viewModel.send(attachment: .photo(media)) }
+                },
+                onFailure: { isShowingCamera = false },
+                onCancel: { isShowingCamera = false }
+            )
+            .ignoresSafeArea()
+        }
+        .sheet(isPresented: $isShowingGifPicker) {
+            GifPickerView { gif in
+                Task { await viewModel.send(gif: gif) }
+            }
+        }
+        .alert(
+            Text(.iosErrorGenericTitle),
+            isPresented: $cameraUnavailable
+        ) {
+            Button { cameraUnavailable = false } label: { Text(.actionCancel) }
+        } message: {
+            Text(.iosChatCameraUnavailable)
         }
         .task { await viewModel.start() }
         .onDisappear {
@@ -654,6 +715,51 @@ struct GroupConversationView: View {
 
     private var textComposer: some View {
         HStack(alignment: .bottom, spacing: ZrpSpacing.sm) {
+            // Group threads previously had no photo affordance at all -
+            // only the video/document menu below and voice notes. This
+            // Camera/Gallery/GIF trio matches the 1-1 thread's own
+            // composer (ConversationView) and this session's audit,
+            // which found the group composer missing photos entirely.
+            Button {
+                if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                    isShowingCamera = true
+                } else {
+                    cameraUnavailable = true
+                }
+            } label: {
+                Image(systemName: "camera")
+                    .font(.title3)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
+            }
+            .disabled(viewModel.isSending)
+            .accessibilityLabel(Text(.chatOpenCamera))
+
+            PhotosPicker(
+                selection: $pickerSelection,
+                maxSelectionCount: 1,
+                matching: .images
+            ) {
+                Image(systemName: "photo")
+                    .font(.title3)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
+            }
+            .disabled(viewModel.isSending)
+            .accessibilityLabel(Text(.iosA11yAddPhoto))
+
+            Button { isShowingGifPicker = true } label: {
+                Image(systemName: "text.below.photo")
+                    .font(.title3)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
+            }
+            .disabled(viewModel.isSending)
+            .accessibilityLabel(Text(.composerAddGif))
+
             ChatAttachmentMenu(
                 onPick: { attachment in
                     Task { await viewModel.send(attachment: attachment) }
