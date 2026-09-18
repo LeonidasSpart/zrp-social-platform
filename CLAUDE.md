@@ -169,7 +169,7 @@ Single Postgres schema via Prisma. Broad shape:
   `CommunityCategory` and OWNER/ADMIN/MEMBER roles) and `List`/`ListMember` (X-style curated
   lists of users, public or private); a list's "feed" is the existing post feed filtered to
   member `authorId`s, not a parallel content system.
-- **Moderation**: `Report` — seven polymorphic targets (`postId`, `commentId`, `listingId`,
+- **Moderation**: `Report`, seven polymorphic targets (`postId`, `commentId`, `listingId`,
   `challengeId`, `opportunityId`, `campaignId`, `reportedUserId` for a bare-profile report),
   `Appeal` (one per actioned report), admin ban/plan endpoints under `src/app/api/admin/*`.
 - **Monetisation**: `CreatorProfile` (per-user monetisation settings + running balance
@@ -188,28 +188,28 @@ Single Postgres schema via Prisma. Broad shape:
 
 A mini-games layer with its own XP/level system, daily challenge, leaderboard
 (global/country/friends, the latter reusing `Follow` rather than a separate friends
-table), and 1v1 duels — all server-authoritative. Five game types exist today:
+table), and 1v1 duels, all server-authoritative. Five game types exist today:
 `TRIVIA`/`MEMORY`/`LOGIC` (knowledge/memory/logic) plus `REACTION` (bounded-plausibility
 reaction-time) and `SEQUENCE` (Simon-says memory, fully server-verifiable). This is phase 1
 of a larger planned catalogue (see the ZRP PLAY session's final report for the full
-30-game vision and roadmap) — the point of the registry below is that games #6+ slot in
+30-game vision and roadmap); the point of the registry below is that games #6+ slot in
 without a rewrite.
 
 - **Game registry** (`src/lib/play/registry.ts`): the single source of truth for "which
-  `PlayChallengeType`s exist" and "how is type X scored" — `GAME_REGISTRY`/`getGame(type)`
+  `PlayChallengeType`s exist" and "how is type X scored"; `GAME_REGISTRY`/`getGame(type)`
   dispatch to the per-type score functions in `scoring.ts`, plus metadata (category,
   estimated duration, AI-generation support + prompt instructions) used by the create page,
   the AI-generate route, and challenge browsing. Adding game #N means: one `validate`/
   `stripAnswers`/`score` branch in `scoring.ts`, one `PlayChallengeType` enum value +
   additive migration, one registry entry, one player component, and one branch each in the
-  challenge page and create page's manual-form switch — no other file needs to know a new
+  challenge page and create page's manual-form switch; no other file needs to know a new
   type exists.
 - **Content/scoring** (`src/lib/play/scoring.ts`): one JSON `content` column on
   `PlayChallenge`, shape keyed by `type` (documented in the schema and in this file).
   Validation runs on create (manual and AI-generated content both). `stripAnswers()` is what
   a challenge is served as before it's played; scoring always re-reads the real DB content,
   never the client's copy or claimed score.
-- **XP/levels** (`src/lib/play/xp.ts`): PLAY-specific, lives on `PlayProfile` (not `User`) —
+- **XP/levels** (`src/lib/play/xp.ts`): PLAY-specific, lives on `PlayProfile` (not `User`);
   do not build a second, separate XP system for a new PLAY feature. `awardXp`/
   `ensurePlayProfile` are the only writers. Anti-farming: the daily/streak bonus is gated to
   one challenge/day; a **first-solo-completion-only** rule (submit route) means replaying a
@@ -218,7 +218,7 @@ without a rewrite.
   (`submit/route.ts` never trusts a client-sent score/xp field); duel winners are determined
   from server-recorded `PlayAttempt` rows, never a client claim; `REACTION` timing is
   bounded-plausibility (impossible/too-fast taps are rejected as false starts) since a
-  human's physical reaction time can't be server-timestamped without adding network jitter —
+  human's physical reaction time can't be server-timestamped without adding network jitter,
   documented as a known limitation, not silently assumed away.
 - **Tests**: `src/lib/play/__tests__/` (pure-unit: scoring, xp, registry completeness) and
   `src/app/api/play/challenges/[id]/submit/__tests__/route.integration.test.ts`
@@ -234,16 +234,16 @@ Route groups: `(auth)` currently only supplies a `loading.tsx` for `/login`; the
 organized by resource, generally following: read the session (`getServerSession(authOptions)`
 or `getVerifiedToken as getToken` from `@/lib/auth-guards`), load/mutate via `prisma`,
 apply plan/feature checks from `lib/limits.ts` / `lib/permissions.ts` where relevant. `src/app/admin/*` is the moderation/ops UI (analytics, payments, posts, reports,
-upgrade-requests, users) — gate any new admin page/route on `session.user.role`/`isAdmin`,
+upgrade-requests, users); gate any new admin page/route on `session.user.role`/`isAdmin`,
 matching existing routes under `src/app/api/admin/*`.
 
 ### Shared client state
 
 `src/contexts/`: `AuthProvider`-adjacent NextAuth session (via `SessionProvider`, not a
-custom context), `ThemeContext` (light/dark), `LanguageContext` (i18n — see
+custom context), `ThemeContext` (light/dark), `LanguageContext` (i18n; see
 `src/lib/translations.ts`), `SolanaContext` (wallet adapter setup for
 `@solana/wallet-adapter-react`). Uploads go through UploadThing
-(`src/lib/uploadthing.ts` server config, `src/lib/uploadthing-client.ts` client hooks) —
+(`src/lib/uploadthing.ts` server config, `src/lib/uploadthing-client.ts` client hooks);
 prefer that over the raw `/api/upload` route for new upload UI.
 
 ### Path aliases

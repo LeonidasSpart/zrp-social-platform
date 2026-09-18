@@ -4,7 +4,7 @@ ZRP is built around the idea that a social platform can be safer and more
 human. That standard applies to the people building it, not only to the
 product.
 
-This Code of Conduct applies to everyone taking part in this repository —
+This Code of Conduct applies to everyone taking part in this repository:
 contributors, maintainers and anyone commenting on an issue, pull request
 or review.
 

@@ -1,4 +1,4 @@
-# ZRP Music — full native module
+# ZRP Music: full native module
 
 This is a real backend integration, not mock data.
 

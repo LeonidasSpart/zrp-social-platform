@@ -1,7 +1,7 @@
 # Contributing to ZRP Social
 
 ZRP Social is proprietary software. This repository is publicly visible,
-but it is **not an open-source contribution project** — see [LICENSE](LICENSE).
+but it is **not an open-source contribution project**: see [LICENSE](LICENSE).
 
 This document describes the development workflow expected of people who
 are authorised to work on the codebase. It is published so that the
@@ -60,7 +60,7 @@ backend. A change to one must not silently alter another:
 Database schema changes require a Prisma migration in
 `prisma/migrations/`; never edit an applied migration in place. Changes
 that alter an API response shape must be checked against the native
-clients that consume it — `ios-native/PARITY.md` records which routes
+clients that consume it; `ios-native/PARITY.md` records which routes
 each platform depends on.
 
 ## Verification before opening a pull request
@@ -98,7 +98,7 @@ A pull request should state:
 
 - What the change does, and why.
 - Which platforms and surfaces it affects.
-- How it was verified — which checks were run and what the result was.
+- How it was verified: which checks were run and what the result was.
 - Any migration, environment variable or configuration step required to
   deploy it.
 - Anything deliberately left out of scope.
@@ -120,7 +120,7 @@ correctness, security, scope, and consistency with the surrounding code.
 ## Never commit secrets
 
 No API key, database URL, signing key, service-account file, certificate
-or access token belongs in this repository — not in source, not in tests,
+or access token belongs in this repository: not in source, not in tests,
 not in a comment, not in a commit message, and not in a screenshot
 attached to a pull request.
 
@@ -153,7 +153,7 @@ permissively licensed packages. Do not copy source code from another
 project into this repository without confirming that its licence allows
 it and preserving any required notices.
 
-Adding a dependency is a decision, not a detail — justify it in the pull
+Adding a dependency is a decision, not a detail: justify it in the pull
 request.
 
 ## Code of conduct

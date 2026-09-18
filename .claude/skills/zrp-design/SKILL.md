@@ -9,7 +9,7 @@ The standard is not "prettier". The standard is: a visitor opens ZRP and
 thinks *"this is a real product, and it is not like the others."*
 
 Everything below is derived from the actual codebase. When this document
-and the source disagree, **the source wins** — update this document.
+and the source disagree, **the source wins**: update this document.
 
 ---
 
@@ -41,10 +41,10 @@ not a brand change, and is allowed. Changing the asset is never allowed.
 | `zrp-deepBlack` | `#050505` | Dark-mode page ground |
 | `zrp-charcoal` | `#0D0D0D` | Dark-mode raised surface |
 | `zrp-silver` | `#BDBDBD` | Muted metadata |
-| `zrp-blue.*` | `#3B82F6` … | **Secondary only** — trust/info surfaces, data viz, never a primary action |
+| `zrp-blue.*` | `#3B82F6` … | **Secondary only**: trust/info surfaces, data viz, never a primary action |
 
 `yellow`, `amber` and `orange` are deliberately remapped to neutral greys
-in `tailwind.config.js`. That is intentional — ZRP has no warm accent. Do
+in `tailwind.config.js`. That is intentional: ZRP has no warm accent. Do
 not reintroduce one, and do not use a raw hex to get around it.
 
 Red is the only primary action colour. If a screen has three red buttons,
@@ -53,7 +53,7 @@ two of them are wrong.
 ### Never ship fake data
 
 No invented users, posts, followers, messages, tracks, creators, trends,
-listings, notifications or statistics — not even as a "visual
+listings, notifications or statistics; not even as a "visual
 placeholder", not even temporarily.
 
 If there is no real data, **design the empty state**. An excellent empty
@@ -67,7 +67,7 @@ run the Railway CLI.
 
 Do not change backend route logic, auth logic, payment policy or security
 policy. If a frontend problem appears to need a backend change, **write it
-down in the PR** instead of changing it — unless the frontend genuinely
+down in the PR** instead of changing it, unless the frontend genuinely
 cannot function without it.
 
 `src/app/api/**` is the contract three clients depend on. Changing a
@@ -80,7 +80,7 @@ response shape breaks Android and iOS silently.
 ZRP must never read as a clone of X, Facebook, Instagram, TikTok,
 Threads, LinkedIn, Reddit, YouTube, Pinterest or Snapchat.
 
-Study them for *usability* — information hierarchy, interaction patterns,
+Study them for *usability*: information hierarchy, interaction patterns,
 responsive behaviour, motion timing. Never borrow their visual identity,
 layout signature or navigation shape.
 
@@ -103,13 +103,13 @@ it is not ZRP design.
 
 Confident, plain, human. ZRP's real positioning already exists in
 `src/lib/translations.ts` and is professionally translated into all 11
-languages — **use those keys** rather than writing new marketing copy:
+languages; **use those keys** rather than writing new marketing copy:
 
 - `about.subtitle`, `about.tagline`
-- `about.value1Title` / `value1Desc` — Freedom of Speech
-- `about.value2Title` / `value2Desc` — Privacy & Security
-- `about.value3Title` / `value3Desc` — People First
-- `rightPanel.footerText` — the charity commitment
+- `about.value1Title` / `value1Desc`: Freedom of Speech
+- `about.value2Title` / `value2Desc`: Privacy & Security
+- `about.value3Title` / `value3Desc`: People First
+- `rightPanel.footerText`: the charity commitment
 
 Adding a new user-facing string means adding it to **all 11 language
 blocks** (`en, fr, de, it, sq, es, ru, ar, zh, tr, id`) and to the
@@ -118,20 +118,20 @@ blocks** (`en, fr, de, it, sq, es, ru, ar, zh, tr, id`) and to the
 ### Type
 
 - Headings: `font-orbitron` (set globally on `h1`–`h6` in `globals.css`).
-  Orbitron is geometric and wide — it earns its place at display sizes
+  Orbitron is geometric and wide; it earns its place at display sizes
   and short lengths. Never set a paragraph in it.
 - Body/UI: `font-inter` (the `body` default).
 - Ship a real type scale. Display headlines want tight leading
   (`leading-[1.05]`–`leading-tight`); body wants `leading-relaxed`.
 - Long-form measure caps at ~65ch. `max-w-prose` or an explicit
-  `max-w-[38ch]`-style cap — never a full-width paragraph.
+  `max-w-[38ch]`-style cap: never a full-width paragraph.
 
 ### Space
 
 Use the Tailwind 4px scale. Never invent an arbitrary pixel value to make
 one screen line up.
 
-Space is the primary tool for hierarchy — reach for it before adding a
+Space is the primary tool for hierarchy: reach for it before adding a
 border, a shadow or a card. Sections breathe more on desktop than mobile:
 step the rhythm (`py-12 sm:py-16 lg:py-24`), don't scale it linearly.
 
@@ -146,14 +146,14 @@ The codebase's honest defaults:
 Radius has three jobs and should stop there: `rounded-full` (pills,
 avatars, primary actions), `rounded-xl`/`rounded-2xl` (inputs, cards,
 sheets), `rounded-md` (chips, small controls). Two adjacent fields must
-never have different radii — that is the most common drift in this
+never have different radii: that is the most common drift in this
 codebase.
 
 Shadow is for things that actually float (menus, dialogs, sheets). A card
 sitting in the page does not float; give it a hairline instead.
 
 **Budget: one focal treatment per viewport.** One gradient, or one large
-media element, or one bold type block — not all three.
+media element, or one bold type block, not all three.
 
 ### Motion
 
@@ -162,7 +162,7 @@ Motion explains state, hierarchy and continuity. It is never decoration.
 - Micro-feedback (hover, press, toggle): 120–180ms
 - Enter/exit, expand/collapse: 200–300ms
 - Page transitions: already handled globally by
-  `src/components/PageTransition.tsx` — do not add a second page-level
+  `src/components/PageTransition.tsx`: do not add a second page-level
   transition on top of it
 - Ease out for entering, ease in for leaving
 - Never animate `width`, `height`, `top` or `left`. Animate `transform`
@@ -176,7 +176,7 @@ gate variants on `useReducedMotion()`.
 
 ## 4. Responsive contract
 
-Design for these, in this order — **mobile is the primary target**, it is
+Design for these, in this order: **mobile is the primary target**, it is
 where social traffic actually is:
 
 `320 · 360 · 375 · 390 · 412 · 430 · 768 · 820 · 1024 · 1280 · 1440 · 1920+`
@@ -190,7 +190,7 @@ Rules:
 - Arabic is RTL (`RTL_LANGUAGES` in `src/lib/translations.ts`). Prefer
   logical properties (`ps-*`/`pe-*`, `start`/`end`) over `left`/`right`
   for anything directional.
-- Use `dvh`, not `vh`, for anything that should fill the mobile viewport —
+- Use `dvh`, not `vh`, for anything that should fill the mobile viewport:
   `vh` is wrong while browser chrome is showing.
 - Respect `env(safe-area-inset-*)`. The app already does this in
   `layout.tsx`, `Header.tsx` and `BottomNav.tsx`; match that pattern.
@@ -222,7 +222,7 @@ Not optional, not a later pass.
 - Semantic HTML first. A `<div onClick>` is a bug; use `<button>`.
 - **Exactly one `<main>`** per page. `layout.tsx` already provides it.
 - Every input has a real `<label>` with `htmlFor` matching the input `id`.
-  A styled `<label>` with no `htmlFor` is worse than none — it looks done.
+  A styled `<label>` with no `htmlFor` is worse than none: it looks done.
 - Errors: `role="alert"` and `aria-live="polite"`, associated to the field
   with `aria-describedby` where it belongs to one.
 - Async controls: `aria-busy` while pending; keep the accessible name
@@ -230,7 +230,7 @@ Not optional, not a later pass.
 - Visible `:focus-visible` on everything reachable by keyboard. The global
   ring uses `zrp-red`; do not remove outlines without replacing them.
 - Contrast: 4.5:1 body, 3:1 large text and UI boundaries. `text-gray-400`
-  on white fails — `text-gray-500` is the floor for metadata on white.
+  on white fails: `text-gray-500` is the floor for metadata on white.
 - Decorative imagery gets `aria-hidden="true"`; meaningful imagery gets a
   real `alt`.
 - Icon-only buttons need `aria-label`, and it must be translated via
@@ -251,18 +251,18 @@ spinner idiom.
 
 Before modifying a shared component:
 
-1. `grep -rn "ComponentName" src` — find every usage.
+1. `grep -rn "ComponentName" src`: find every usage.
 2. Read each call site's variant and responsive context.
 3. Check existing loading / empty / error states.
 4. Make the **smallest** safe change.
 5. Verify every call site still works.
 
-Highest-risk shared surfaces — treat changes to these as their own PR:
+Highest-risk shared surfaces; treat changes to these as their own PR:
 `Header`, `Sidebar`, `RightPanel`, `BottomNav`, `PageTransition`,
 `PostCard`, `PostComposer`, `layout.tsx`, `globals.css`.
 
 Duplication is the signal to extract. Two pages rendering the same block
-byte-for-byte should share a component — that is a net code *reduction*
+byte-for-byte should share a component: that is a net code *reduction*
 and it stops the two copies drifting.
 
 Do not add a dependency for a visual effect. The stack already has
@@ -274,14 +274,14 @@ Do not add a dependency for a visual effect. The stack already has
 
 Design all four, every time. Missing states are where products feel cheap.
 
-1. **Loading** — skeletons that match the real layout's shape, so nothing
+1. **Loading**: skeletons that match the real layout's shape, so nothing
    jumps when data lands. Use `ui/Skeleton.tsx`. A centred spinner on a
    blank page is a last resort.
-2. **Empty** — say what this is, why it is empty, and give the one action
+2. **Empty**: say what this is, why it is empty, and give the one action
    that fills it. Never a bare "No results".
-3. **Error** — say what failed in human language, and offer a retry.
+3. **Error**: say what failed in human language, and offer a retry.
    Never surface a raw exception string to a user.
-4. **Loaded** — the real thing, with real data.
+4. **Loaded**: the real thing, with real data.
 
 Also handle: partial data, very long strings, missing avatars, slow
 networks, and offline (`public/offline.html` and the service worker
@@ -294,14 +294,14 @@ already exist).
 Visual polish that costs speed is a net loss.
 
 - `next/image` for every raster asset, always with `sizes`. Note the brand
-  files are large on disk (`logo.png` ≈ 2.3MB, `og-image.png` ≈ 1.7MB) —
+  files are large on disk (`logo.png` ≈ 2.3MB, `og-image.png` ≈ 1.7MB):
   they must go through the optimizer, never a bare `<img>`.
 - `priority` only on the true LCP element, and never on more than one.
 - Keep `"use client"` at the leaves. A page becoming a client component to
   get one hover effect is a regression.
 - Prefer CSS transitions over JS animation; prefer `transform`/`opacity`
   over layout-triggering properties.
-- Watch re-renders in feed and message lists — those are the hot paths.
+- Watch re-renders in feed and message lists: those are the hot paths.
 
 ---
 
@@ -334,7 +334,7 @@ git diff --check
 Report only what was actually verified. If breakpoints were checked by
 reading CSS rather than in a browser, say that. If no device test was
 run, say that. **Never claim visual or device validation that did not
-happen** — a false green is worse than a known gap.
+happen**: a false green is worse than a known gap.
 
 ---
 
