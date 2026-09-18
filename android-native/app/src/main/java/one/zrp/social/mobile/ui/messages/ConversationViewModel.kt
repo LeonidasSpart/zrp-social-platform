@@ -18,6 +18,7 @@ import one.zrp.social.mobile.data.MediaUploadRepository
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.ChatMessage
+import one.zrp.social.mobile.network.GifResult
 import one.zrp.social.mobile.network.MessageReaction
 import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.network.SocketMessageDeletedPayload
@@ -622,6 +623,17 @@ class ConversationViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * The GIF picker's own selection never needs [uploadAttachment] - the
+     * GIF is already hosted on Giphy's CDN (the same real, backend-
+     * proxied search CreatePostScreen's own onGifSelected uses), so this
+     * sends the picked URL directly, mirroring ChatInterface.tsx's
+     * `sendMessage("", gifUrl)` call from GifPicker.tsx's onSelect.
+     */
+    fun onGifSelected(gif: GifResult) {
+        sendAttachment("", gif.url)
     }
 
     private fun sendAttachment(content: String, imageUrl: String) {

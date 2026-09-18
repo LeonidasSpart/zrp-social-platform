@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">ابحث عن صور GIF...</string>
     <string name="action_clear">مسح</string>
     <string name="message_attach_image_cd">إرفاق صورة</string>
+    <string name="message_open_camera_cd">فتح الكاميرا</string>
     <string name="message_attach_video_cd">إرفاق فيديو</string>
     <string name="message_attach_document_cd">إرفاق مستند</string>
     <string name="message_record_voice_cd">تسجيل رسالة صوتية</string>

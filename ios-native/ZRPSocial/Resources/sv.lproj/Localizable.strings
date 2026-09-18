@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Bifoga dokument";
 "chat.recordVoiceMessage" = "Spela in röstmeddelande";
 "chat.uploadImage" = "Ladda upp bild";
+"chat.openCamera" = "Öppna kameran";
 "chat.downloadImage" = "Ladda ner bild";
 "shorts.upload.chooseVideo" = "Välj en video";
 "transparency.heroTitle" = "Transparens i moderering";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Klar";
 "ios.chat.micDenied" = "ZRP behöver tillgång till mikrofonen för att spela in ett röstmeddelande. Du kan slå på det i Inställningar.";
 "ios.post.applyNow" = "Ansök nu";
+"ios.chat.cameraUnavailable" = "Kameran är inte tillgänglig på den här enheten.";

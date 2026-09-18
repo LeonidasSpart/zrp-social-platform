@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "附加文档";
 "chat.recordVoiceMessage" = "录制语音消息";
 "chat.uploadImage" = "上传 图片";
+"chat.openCamera" = "打开相机";
 "chat.downloadImage" = "下载 图片";
 "shorts.upload.chooseVideo" = "选择视频";
 "transparency.heroTitle" = "内容审核透明度";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "完成";
 "ios.chat.micDenied" = "ZRP 需要访问麦克风以录制语音消息。您可以在设置中开启此权限。";
 "ios.post.applyNow" = "立即申请";
+"ios.chat.cameraUnavailable" = "此设备不支持相机。";

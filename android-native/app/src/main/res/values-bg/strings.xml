@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Търси GIF файлове...</string>
     <string name="action_clear">Изчисти</string>
     <string name="message_attach_image_cd">Прикачи изображение</string>
+    <string name="message_open_camera_cd">Отвори камерата</string>
     <string name="message_attach_video_cd">Прикачи видео</string>
     <string name="message_attach_document_cd">Прикачи документ</string>
     <string name="message_record_voice_cd">Запиши гласово съобщение</string>

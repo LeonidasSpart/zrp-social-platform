@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Прикрепить документ";
 "chat.recordVoiceMessage" = "Записать голосовое сообщение";
 "chat.uploadImage" = "загрузка изображение";
+"chat.openCamera" = "Открыть камеру";
 "chat.downloadImage" = "скачивание изображение";
 "shorts.upload.chooseVideo" = "Выбрать видео";
 "transparency.heroTitle" = "Прозрачность модерации";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Готово";
 "ios.chat.micDenied" = "ZRP нужен доступ к микрофону для записи голосового сообщения. Вы можете включить его в настройках.";
 "ios.post.applyNow" = "Откликнуться";
+"ios.chat.cameraUnavailable" = "Камера недоступна на этом устройстве.";

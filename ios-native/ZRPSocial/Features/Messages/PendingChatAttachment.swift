@@ -58,12 +58,14 @@ struct PickedDocument: Equatable {
 /// 8MB for audio, 8MB for a document. Sending everything through one
 /// slug would apply the wrong limit and be refused by the server.
 enum PendingChatAttachment {
+    case photo(PickedMedia)
     case video(PickedMedia)
     case document(PickedDocument)
     case voice(url: URL, fileName: String, seconds: Int)
 
     var slug: UploadThingClient.Slug {
         switch self {
+        case .photo: return .chatImage
         case .video: return .chatVideo
         case .document: return .chatFile
         case .voice: return .chatAudio
@@ -82,6 +84,11 @@ enum PendingChatAttachment {
     /// composer beside a caption.
     var messageContent: String {
         switch self {
+        case .photo:
+            // No marker: an image needs none (see ChatAttachmentKind.of's
+            // own default case) - matching ChatInterface.tsx's own
+            // `sendMessage("", url)` for a plain image.
+            return ""
         case .video:
             return ChatAttachmentMarker.videoContent
         case .document(let document):
@@ -93,6 +100,8 @@ enum PendingChatAttachment {
 
     func asUploadCandidate() -> UploadCandidate {
         switch self {
+        case .photo(let media):
+            return media.asUploadCandidate()
         case .video(let media):
             return media.asUploadCandidate()
         case .document(let document):
@@ -115,6 +124,7 @@ enum PendingChatAttachment {
     /// Deletes the app's temporary copy once the upload is done with it.
     func discard() {
         switch self {
+        case .photo(let media): media.discard()
         case .video(let media): media.discard()
         case .document(let document): document.discard()
         case .voice(let url, _, _): try? FileManager.default.removeItem(at: url)

@@ -11,4 +11,9 @@
          a picked attachment already uses - see ConversationScreen's own
          stopAndSendRecording(). -->
     <cache-path name="voice-messages" path="voice-messages/" />
+    <!-- ConversationScreen's and GroupConversationScreen's own Camera
+         button writes the captured photo here before it goes through
+         the same real chatImage UploadThing router a gallery pick
+         already uses - see ConversationScreen's own launchCamera(). -->
+    <cache-path name="camera-photos" path="camera-photos/" />
 </paths>

@@ -304,6 +304,7 @@
     <string name="gif_search_placeholder">Pesquisar GIFs...</string>
     <string name="action_clear">Limpar</string>
     <string name="message_attach_image_cd">Anexar imagem</string>
+    <string name="message_open_camera_cd">Abrir câmara</string>
     <string name="message_attach_video_cd">Anexar vídeo</string>
     <string name="message_attach_document_cd">Anexar documento</string>
     <string name="message_record_voice_cd">Gravar uma mensagem de voz</string>

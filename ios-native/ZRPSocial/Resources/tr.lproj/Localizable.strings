@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Belge ekle";
 "chat.recordVoiceMessage" = "Sesli mesaj kaydet";
 "chat.uploadImage" = "Resim yükle";
+"chat.openCamera" = "Kamerayı aç";
 "chat.downloadImage" = "Resmi indir";
 "shorts.upload.chooseVideo" = "Bir video seçin";
 "transparency.heroTitle" = "Moderasyon Şeffaflığı";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Bitti";
 "ios.chat.micDenied" = "ZRP, sesli mesaj kaydetmek için mikrofona erişim gerektiriyor. Ayarlar'dan açabilirsiniz.";
 "ios.post.applyNow" = "Şimdi başvur";
+"ios.chat.cameraUnavailable" = "Bu cihazda kamera kullanılamıyor.";

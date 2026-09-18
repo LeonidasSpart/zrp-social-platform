@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Dokumentum csatolása";
 "chat.recordVoiceMessage" = "Hangüzenet rögzítése";
 "chat.uploadImage" = "Kép feltöltése";
+"chat.openCamera" = "Kamera megnyitása";
 "chat.downloadImage" = "Kép letöltése";
 "shorts.upload.chooseVideo" = "Válassz egy videót";
 "transparency.heroTitle" = "Moderációs átláthatóság";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Kész";
 "ios.chat.micDenied" = "A ZRP-nek hozzáférésre van szüksége a mikrofonhoz hangüzenet rögzítéséhez. Ezt a Beállításokban kapcsolhatod be.";
 "ios.post.applyNow" = "Jelentkezz most";
+"ios.chat.cameraUnavailable" = "A kamera ezen az eszközön nem érhető el.";

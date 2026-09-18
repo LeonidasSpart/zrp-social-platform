@@ -304,6 +304,7 @@
     <string name="gif_search_placeholder">GIFを検索...</string>
     <string name="action_clear">クリア</string>
     <string name="message_attach_image_cd">画像を添付</string>
+    <string name="message_open_camera_cd">カメラを開く</string>
     <string name="message_attach_video_cd">動画を添付</string>
     <string name="message_attach_document_cd">ファイルを添付</string>
     <string name="message_record_voice_cd">ボイスメッセージを録音</string>

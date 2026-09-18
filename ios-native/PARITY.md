@@ -1205,10 +1205,10 @@ make the screen look finished.
 | 4 | Navigation shell + deep links | 🔶 in-app routing done (profile / hashtag / follow lists); OS deep links pending |
 | 5 | Home feed (For You / Following) + interactions | ✅ done |
 | 6 | Profiles + social graph | ✅ done — 6b complete (edit profile, pin, all five list tabs, own-profile analytics, Trust Passport) |
-| 7 | Post composer + media upload + viewer | ✅ done — 7b complete (scheduling, polls). Camera capture was listed here in error: no ZRP client has it — not the web app, not Android — so `NSCameraUsageDescription` stays absent by decision rather than by omission |
+| 7 | Post composer + media upload + viewer | ✅ done — 7b complete (scheduling, polls). No camera capture in the post composer specifically (matches web and Android, which also only pick from the library there) |
 | 8 | Comments, replies, quotes, edit | ✅ done — 8b complete (reactions, comment repost/bookmark, reposts & quotes lists, inline translation) |
 | 9 | Stories | ✅ done |
-| 10 | Messages | ✅ done — 10b image attachments done. Conversation search was listed here in error: the website has none either (no search box on `/messages`, and no route behind one), so there is nothing to reach parity with |
+| 10 | Messages | ✅ done — 10b image attachments done. Conversation search was listed here in error: the website has none either (no search box on `/messages`, and no route behind one), so there is nothing to reach parity with. 10c: a distinct Camera button (`CameraCapture.swift`, `UIImagePickerController(sourceType: .camera)`) and a GIF button (reusing `GifPickerView`) were added to both the 1-1 and group composers, matching the same fix made to ChatInterface.tsx/GroupChatInterface.tsx and Android's ConversationScreen.kt/GroupConversationScreen.kt in the same pass - `NSCameraUsageDescription` is now declared for exactly this reason. The group composer previously had no photo affordance at all (only the video/document menu and voice notes); it now matches the 1-1 thread's Camera/Gallery/GIF trio |
 | 11 | Notifications | ✅ in-app list done — device push remains BLOCKED (B3) |
 | 12 | Search + hashtags | ✅ done |
 | 13 | Music + background player | ✅ 13a (engine, background audio, lock screen, home) and 13b (discover, artists, albums, playlists, liked, history, queue) done |

@@ -304,6 +304,7 @@
     <string name="gif_search_placeholder">GIF 검색...</string>
     <string name="action_clear">지우기</string>
     <string name="message_attach_image_cd">이미지 첨부</string>
+    <string name="message_open_camera_cd">카메라 열기</string>
     <string name="message_attach_video_cd">동영상 첨부</string>
     <string name="message_attach_document_cd">문서 첨부</string>
     <string name="message_record_voice_cd">음성 메시지 녹음</string>

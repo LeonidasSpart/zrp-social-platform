@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">搜索 GIF…</string>
     <string name="action_clear">清除</string>
     <string name="message_attach_image_cd">添加图片</string>
+    <string name="message_open_camera_cd">打开相机</string>
     <string name="message_attach_video_cd">添加视频</string>
     <string name="message_attach_document_cd">添加文档</string>
     <string name="message_record_voice_cd">录制语音消息</string>

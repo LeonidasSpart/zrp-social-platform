@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Document bijvoegen";
 "chat.recordVoiceMessage" = "Een spraakbericht opnemen";
 "chat.uploadImage" = "Afbeelding uploaden";
+"chat.openCamera" = "Camera openen";
 "chat.downloadImage" = "Afbeelding downloaden";
 "shorts.upload.chooseVideo" = "Kies een video";
 "transparency.heroTitle" = "Transparantie over moderatie";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Klaar";
 "ios.chat.micDenied" = "ZRP heeft toegang tot de microfoon nodig om een spraakbericht op te nemen. Je kunt dit inschakelen in Instellingen.";
 "ios.post.applyNow" = "Nu solliciteren";
+"ios.chat.cameraUnavailable" = "Camera niet beschikbaar op dit apparaat.";

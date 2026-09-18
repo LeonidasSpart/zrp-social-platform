@@ -177,7 +177,8 @@
     "ios.group.removePhoto": "Remove group photo",
     "ios.action.done": "Done",
     "ios.chat.micDenied": "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings.",
-    "ios.post.applyNow": "Apply Now"
+    "ios.post.applyNow": "Apply Now",
+    "ios.chat.cameraUnavailable": "Camera unavailable on this device."
   },
   "translations": {
     "fr": {
@@ -340,7 +341,8 @@
       "ios.action.done": "Terminé",
       "ios.chat.micDenied": "ZRP a besoin d'accéder au microphone pour enregistrer un message vocal. Vous pouvez l'activer dans Réglages.",
       "ios.post.applyNow": "Postuler maintenant",
-      "ios.a11y.bookmark": "Marque-page"
+      "ios.a11y.bookmark": "Marque-page",
+      "ios.chat.cameraUnavailable": "Caméra indisponible sur cet appareil."
     },
     "de": {
       "ios.a11y.bookmark": "Merken",
@@ -502,7 +504,8 @@
       "ios.group.removePhoto": "Gruppenfoto entfernen",
       "ios.action.done": "Fertig",
       "ios.chat.micDenied": "ZRP benötigt Zugriff auf das Mikrofon, um eine Sprachnachricht aufzunehmen. Du kannst dies in den Einstellungen aktivieren.",
-      "ios.post.applyNow": "Jetzt bewerben"
+      "ios.post.applyNow": "Jetzt bewerben",
+      "ios.chat.cameraUnavailable": "Kamera auf diesem Gerät nicht verfügbar."
     },
     "it": {
       "ios.a11y.bookmark": "Salva",
@@ -664,7 +667,8 @@
       "ios.group.removePhoto": "Rimuovi foto del gruppo",
       "ios.action.done": "Fatto",
       "ios.chat.micDenied": "ZRP ha bisogno dell'accesso al microfono per registrare un messaggio vocale. Puoi attivarlo nelle Impostazioni.",
-      "ios.post.applyNow": "Candidati ora"
+      "ios.post.applyNow": "Candidati ora",
+      "ios.chat.cameraUnavailable": "Fotocamera non disponibile su questo dispositivo."
     },
     "sq": {
       "ios.a11y.bookmark": "Ruaje",
@@ -826,7 +830,8 @@
       "ios.group.removePhoto": "Hiq foton e grupit",
       "ios.action.done": "U krye",
       "ios.chat.micDenied": "ZRP ka nevojë për akses te mikrofoni për të regjistruar një mesazh zanor. Mund ta aktivizosh në Cilësimet.",
-      "ios.post.applyNow": "Apliko tani"
+      "ios.post.applyNow": "Apliko tani",
+      "ios.chat.cameraUnavailable": "Kamera nuk është e disponueshme në këtë pajisje."
     },
     "es": {
       "ios.a11y.bookmark": "Guardar",
@@ -988,7 +993,8 @@
       "ios.group.removePhoto": "Quitar foto del grupo",
       "ios.action.done": "Listo",
       "ios.chat.micDenied": "ZRP necesita acceso al micrófono para grabar un mensaje de voz. Puedes activarlo en Ajustes.",
-      "ios.post.applyNow": "Postularme ahora"
+      "ios.post.applyNow": "Postularme ahora",
+      "ios.chat.cameraUnavailable": "Cámara no disponible en este dispositivo."
     },
     "ru": {
       "ios.a11y.bookmark": "Добавить в закладки",
@@ -1150,7 +1156,8 @@
       "ios.group.removePhoto": "Удалить фото группы",
       "ios.action.done": "Готово",
       "ios.chat.micDenied": "ZRP нужен доступ к микрофону для записи голосового сообщения. Вы можете включить его в настройках.",
-      "ios.post.applyNow": "Откликнуться"
+      "ios.post.applyNow": "Откликнуться",
+      "ios.chat.cameraUnavailable": "Камера недоступна на этом устройстве."
     },
     "ar": {
       "ios.a11y.bookmark": "حفظ",
@@ -1312,7 +1319,8 @@
       "ios.group.removePhoto": "إزالة صورة المجموعة",
       "ios.action.done": "تم",
       "ios.chat.micDenied": "يحتاج ZRP إلى الوصول إلى الميكروفون لتسجيل رسالة صوتية. يمكنك تفعيله من الإعدادات.",
-      "ios.post.applyNow": "قدّم الآن"
+      "ios.post.applyNow": "قدّم الآن",
+      "ios.chat.cameraUnavailable": "الكاميرا غير متاحة على هذا الجهاز."
     },
     "zh": {
       "ios.a11y.bookmark": "收藏",
@@ -1474,7 +1482,8 @@
       "ios.group.removePhoto": "移除群组头像",
       "ios.action.done": "完成",
       "ios.chat.micDenied": "ZRP 需要访问麦克风以录制语音消息。您可以在设置中开启此权限。",
-      "ios.post.applyNow": "立即申请"
+      "ios.post.applyNow": "立即申请",
+      "ios.chat.cameraUnavailable": "此设备不支持相机。"
     },
     "tr": {
       "ios.a11y.bookmark": "Kaydet",
@@ -1636,7 +1645,8 @@
       "ios.group.removePhoto": "Grup fotoğrafını kaldır",
       "ios.action.done": "Bitti",
       "ios.chat.micDenied": "ZRP, sesli mesaj kaydetmek için mikrofona erişim gerektiriyor. Ayarlar'dan açabilirsiniz.",
-      "ios.post.applyNow": "Şimdi başvur"
+      "ios.post.applyNow": "Şimdi başvur",
+      "ios.chat.cameraUnavailable": "Bu cihazda kamera kullanılamıyor."
     },
     "id": {
       "ios.a11y.bookmark": "Simpan",
@@ -1798,7 +1808,8 @@
       "ios.group.removePhoto": "Hapus foto grup",
       "ios.action.done": "Selesai",
       "ios.chat.micDenied": "ZRP memerlukan akses mikrofon untuk merekam pesan suara. Anda dapat mengaktifkannya di Pengaturan.",
-      "ios.post.applyNow": "Lamar sekarang"
+      "ios.post.applyNow": "Lamar sekarang",
+      "ios.chat.cameraUnavailable": "Kamera tidak tersedia di perangkat ini."
     },
     "pt": {
       "ios.a11y.bookmark": "Guardar",
@@ -1960,7 +1971,8 @@
       "ios.group.removePhoto": "Remover fotografia do grupo",
       "ios.action.done": "Concluído",
       "ios.chat.micDenied": "A ZRP precisa de aceder ao microfone para gravar uma mensagem de voz. Pode ativá-lo nas Definições.",
-      "ios.post.applyNow": "Candidatar-se agora"
+      "ios.post.applyNow": "Candidatar-se agora",
+      "ios.chat.cameraUnavailable": "Câmara indisponível neste dispositivo."
     },
     "ja": {
       "ios.a11y.bookmark": "ブックマーク",
@@ -2122,7 +2134,8 @@
       "ios.group.removePhoto": "グループ写真を削除",
       "ios.action.done": "完了",
       "ios.chat.micDenied": "音声メッセージを録音するには、ZRPがマイクへのアクセス許可を必要とします。設定でオンにできます。",
-      "ios.post.applyNow": "今すぐ応募"
+      "ios.post.applyNow": "今すぐ応募",
+      "ios.chat.cameraUnavailable": "このデバイスではカメラを使用できません。"
     },
     "ko": {
       "ios.a11y.bookmark": "북마크",
@@ -2284,7 +2297,8 @@
       "ios.group.removePhoto": "그룹 사진 제거",
       "ios.action.done": "완료",
       "ios.chat.micDenied": "음성 메시지를 녹음하려면 ZRP에 마이크 접근 권한이 필요합니다. 설정에서 켤 수 있습니다.",
-      "ios.post.applyNow": "지금 지원하기"
+      "ios.post.applyNow": "지금 지원하기",
+      "ios.chat.cameraUnavailable": "이 기기에서는 카메라를 사용할 수 없습니다."
     },
     "hi": {
       "ios.a11y.bookmark": "बुकमार्क करें",
@@ -2446,7 +2460,8 @@
       "ios.group.removePhoto": "ग्रुप फ़ोटो हटाएं",
       "ios.action.done": "हो गया",
       "ios.chat.micDenied": "वॉइस मैसेज रिकॉर्ड करने के लिए ZRP को माइक्रोफ़ोन एक्सेस की आवश्यकता है। आप इसे सेटिंग्स में चालू कर सकते हैं।",
-      "ios.post.applyNow": "अभी आवेदन करें"
+      "ios.post.applyNow": "अभी आवेदन करें",
+      "ios.chat.cameraUnavailable": "इस डिवाइस पर कैमरा उपलब्ध नहीं है।"
     },
     "nl": {
       "ios.a11y.bookmark": "Bewaren",
@@ -2608,7 +2623,8 @@
       "ios.group.removePhoto": "Groepsfoto verwijderen",
       "ios.action.done": "Klaar",
       "ios.chat.micDenied": "ZRP heeft toegang tot de microfoon nodig om een spraakbericht op te nemen. Je kunt dit inschakelen in Instellingen.",
-      "ios.post.applyNow": "Nu solliciteren"
+      "ios.post.applyNow": "Nu solliciteren",
+      "ios.chat.cameraUnavailable": "Camera niet beschikbaar op dit apparaat."
     },
     "pl": {
       "ios.a11y.bookmark": "Zapisz",
@@ -2770,7 +2786,8 @@
       "ios.group.removePhoto": "Usuń zdjęcie grupy",
       "ios.action.done": "Gotowe",
       "ios.chat.micDenied": "ZRP potrzebuje dostępu do mikrofonu, aby nagrać wiadomość głosową. Możesz go włączyć w Ustawieniach.",
-      "ios.post.applyNow": "Aplikuj teraz"
+      "ios.post.applyNow": "Aplikuj teraz",
+      "ios.chat.cameraUnavailable": "Aparat niedostępny na tym urządzeniu."
     },
     "ro": {
       "ios.a11y.bookmark": "Salvează",
@@ -2932,7 +2949,8 @@
       "ios.group.removePhoto": "Elimină fotografia grupului",
       "ios.action.done": "Terminat",
       "ios.chat.micDenied": "ZRP are nevoie de acces la microfon pentru a înregistra un mesaj vocal. Îl poți activa din Setări.",
-      "ios.post.applyNow": "Aplică acum"
+      "ios.post.applyNow": "Aplică acum",
+      "ios.chat.cameraUnavailable": "Camera nu este disponibilă pe acest dispozitiv."
     },
     "cs": {
       "ios.a11y.bookmark": "Uložit",
@@ -3094,7 +3112,8 @@
       "ios.group.removePhoto": "Odebrat fotku skupiny",
       "ios.action.done": "Hotovo",
       "ios.chat.micDenied": "ZRP potřebuje přístup k mikrofonu, aby mohl nahrát hlasovou zprávu. Můžete jej zapnout v Nastavení.",
-      "ios.post.applyNow": "Přihlásit se"
+      "ios.post.applyNow": "Přihlásit se",
+      "ios.chat.cameraUnavailable": "Fotoaparát na tomto zařízení není k dispozici."
     },
     "hu": {
       "ios.a11y.bookmark": "Mentés",
@@ -3256,7 +3275,8 @@
       "ios.group.removePhoto": "Csoportkép eltávolítása",
       "ios.action.done": "Kész",
       "ios.chat.micDenied": "A ZRP-nek hozzáférésre van szüksége a mikrofonhoz hangüzenet rögzítéséhez. Ezt a Beállításokban kapcsolhatod be.",
-      "ios.post.applyNow": "Jelentkezz most"
+      "ios.post.applyNow": "Jelentkezz most",
+      "ios.chat.cameraUnavailable": "A kamera ezen az eszközön nem érhető el."
     },
     "sv": {
       "ios.a11y.bookmark": "Spara",
@@ -3418,7 +3438,8 @@
       "ios.group.removePhoto": "Ta bort gruppfoto",
       "ios.action.done": "Klar",
       "ios.chat.micDenied": "ZRP behöver tillgång till mikrofonen för att spela in ett röstmeddelande. Du kan slå på det i Inställningar.",
-      "ios.post.applyNow": "Ansök nu"
+      "ios.post.applyNow": "Ansök nu",
+      "ios.chat.cameraUnavailable": "Kameran är inte tillgänglig på den här enheten."
     },
     "da": {
       "ios.a11y.bookmark": "Gem",
@@ -3580,7 +3601,8 @@
       "ios.group.removePhoto": "Fjern gruppefoto",
       "ios.action.done": "Færdig",
       "ios.chat.micDenied": "ZRP skal bruge adgang til mikrofonen for at optage en talebesked. Du kan slå det til i Indstillinger.",
-      "ios.post.applyNow": "Ansøg nu"
+      "ios.post.applyNow": "Ansøg nu",
+      "ios.chat.cameraUnavailable": "Kameraet er ikke tilgængeligt på denne enhed."
     },
     "hr": {
       "ios.a11y.bookmark": "Spremi",
@@ -3742,7 +3764,8 @@
       "ios.group.removePhoto": "Ukloni fotografiju grupe",
       "ios.action.done": "Gotovo",
       "ios.chat.micDenied": "ZRP-u je potreban pristup mikrofonu za snimanje glasovne poruke. Možete ga uključiti u Postavkama.",
-      "ios.post.applyNow": "Prijavi se sada"
+      "ios.post.applyNow": "Prijavi se sada",
+      "ios.chat.cameraUnavailable": "Kamera nije dostupna na ovom uređaju."
     },
     "bg": {
       "ios.a11y.bookmark": "Запази",
@@ -3904,7 +3927,8 @@
       "ios.group.removePhoto": "Премахни груповата снимка",
       "ios.action.done": "Готово",
       "ios.chat.micDenied": "ZRP се нуждае от достъп до микрофона, за да запише гласово съобщение. Можете да го включите в Настройки.",
-      "ios.post.applyNow": "Кандидатствай сега"
+      "ios.post.applyNow": "Кандидатствай сега",
+      "ios.chat.cameraUnavailable": "Камерата не е налична на това устройство."
     },
     "el": {
       "ios.a11y.bookmark": "Αποθήκευση",
@@ -4066,7 +4090,8 @@
       "ios.group.removePhoto": "Αφαίρεση φωτογραφίας ομάδας",
       "ios.action.done": "Ολοκληρώθηκε",
       "ios.chat.micDenied": "Το ZRP χρειάζεται πρόσβαση στο μικρόφωνο για την εγγραφή φωνητικού μηνύματος. Μπορείτε να την ενεργοποιήσετε στις Ρυθμίσεις.",
-      "ios.post.applyNow": "Υποβολή αίτησης τώρα"
+      "ios.post.applyNow": "Υποβολή αίτησης τώρα",
+      "ios.chat.cameraUnavailable": "Η κάμερα δεν είναι διαθέσιμη σε αυτή τη συσκευή."
     }
   }
 }

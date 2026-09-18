@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Zoek GIF\'s...</string>
     <string name="action_clear">Wissen</string>
     <string name="message_attach_image_cd">Afbeelding bijvoegen</string>
+    <string name="message_open_camera_cd">Camera openen</string>
     <string name="message_attach_video_cd">Video bijvoegen</string>
     <string name="message_attach_document_cd">Document bijvoegen</string>
     <string name="message_record_voice_cd">Een spraakbericht opnemen</string>

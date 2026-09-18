@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Caută GIF-uri...</string>
     <string name="action_clear">Șterge</string>
     <string name="message_attach_image_cd">Atașează imagine</string>
+    <string name="message_open_camera_cd">Deschide camera</string>
     <string name="message_attach_video_cd">Atașează video</string>
     <string name="message_attach_document_cd">Atașează document</string>
     <string name="message_record_voice_cd">Înregistrează un mesaj vocal</string>

@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Priloži dokument";
 "chat.recordVoiceMessage" = "Snimi glasovnu poruku";
 "chat.uploadImage" = "Prenesi sliku";
+"chat.openCamera" = "Otvori kameru";
 "chat.downloadImage" = "Preuzmi sliku";
 "shorts.upload.chooseVideo" = "Odaberi video";
 "transparency.heroTitle" = "Transparentnost moderiranja";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Gotovo";
 "ios.chat.micDenied" = "ZRP-u je potreban pristup mikrofonu za snimanje glasovne poruke. Možete ga uključiti u Postavkama.";
 "ios.post.applyNow" = "Prijavi se sada";
+"ios.chat.cameraUnavailable" = "Kamera nije dostupna na ovom uređaju.";

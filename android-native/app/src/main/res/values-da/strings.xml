@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Søg GIF\'er...</string>
     <string name="action_clear">Ryd</string>
     <string name="message_attach_image_cd">Vedhæft billede</string>
+    <string name="message_open_camera_cd">Åbn kameraet</string>
     <string name="message_attach_video_cd">Vedhæft video</string>
     <string name="message_attach_document_cd">Vedhæft dokument</string>
     <string name="message_record_voice_cd">Indtal en talebesked</string>

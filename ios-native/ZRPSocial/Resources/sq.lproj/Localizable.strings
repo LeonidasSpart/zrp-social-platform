@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Bashkangjit dokument";
 "chat.recordVoiceMessage" = "Regjistro një mesazh zanor";
 "chat.uploadImage" = "Ngarko imazh";
+"chat.openCamera" = "Hap kamerën";
 "chat.downloadImage" = "Shkarko imazhin";
 "shorts.upload.chooseVideo" = "Zgjidh një video";
 "transparency.heroTitle" = "Transparenca e Moderimit";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "U krye";
 "ios.chat.micDenied" = "ZRP ka nevojë për akses te mikrofoni për të regjistruar një mesazh zanor. Mund ta aktivizosh në Cilësimet.";
 "ios.post.applyNow" = "Apliko tani";
+"ios.chat.cameraUnavailable" = "Kamera nuk është e disponueshme në këtë pajisje.";

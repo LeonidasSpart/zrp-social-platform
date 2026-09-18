@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Επισύναψη εγγράφου";
 "chat.recordVoiceMessage" = "Ηχογράφησε ένα φωνητικό μήνυμα";
 "chat.uploadImage" = "Μεταφόρτωση εικόνας";
+"chat.openCamera" = "Άνοιγμα κάμερας";
 "chat.downloadImage" = "Λήψη εικόνας";
 "shorts.upload.chooseVideo" = "Επίλεξε ένα βίντεο";
 "transparency.heroTitle" = "Διαφάνεια Συντονισμού Περιεχομένου";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Ολοκληρώθηκε";
 "ios.chat.micDenied" = "Το ZRP χρειάζεται πρόσβαση στο μικρόφωνο για την εγγραφή φωνητικού μηνύματος. Μπορείτε να την ενεργοποιήσετε στις Ρυθμίσεις.";
 "ios.post.applyNow" = "Υποβολή αίτησης τώρα";
+"ios.chat.cameraUnavailable" = "Η κάμερα δεν είναι διαθέσιμη σε αυτή τη συσκευή.";

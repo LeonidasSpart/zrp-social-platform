@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Cari GIF...</string>
     <string name="action_clear">Hapus</string>
     <string name="message_attach_image_cd">Lampirkan gambar</string>
+    <string name="message_open_camera_cd">Buka kamera</string>
     <string name="message_attach_video_cd">Lampirkan video</string>
     <string name="message_attach_document_cd">Lampirkan dokumen</string>
     <string name="message_record_voice_cd">Rekam pesan suara</string>

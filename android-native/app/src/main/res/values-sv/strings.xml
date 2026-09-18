@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Sök GIF-bilder...</string>
     <string name="action_clear">Rensa</string>
     <string name="message_attach_image_cd">Bifoga bild</string>
+    <string name="message_open_camera_cd">Öppna kameran</string>
     <string name="message_attach_video_cd">Bifoga video</string>
     <string name="message_attach_document_cd">Bifoga dokument</string>
     <string name="message_record_voice_cd">Spela in röstmeddelande</string>

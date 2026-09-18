@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "문서 첨부";
 "chat.recordVoiceMessage" = "음성 메시지 녹음";
 "chat.uploadImage" = "이미지 업로드";
+"chat.openCamera" = "카메라 열기";
 "chat.downloadImage" = "이미지 다운로드";
 "shorts.upload.chooseVideo" = "동영상 선택";
 "transparency.heroTitle" = "모더레이션 투명성";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "완료";
 "ios.chat.micDenied" = "음성 메시지를 녹음하려면 ZRP에 마이크 접근 권한이 필요합니다. 설정에서 켤 수 있습니다.";
 "ios.post.applyNow" = "지금 지원하기";
+"ios.chat.cameraUnavailable" = "이 기기에서는 카메라를 사용할 수 없습니다.";

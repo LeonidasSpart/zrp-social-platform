@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Cerca GIF...</string>
     <string name="action_clear">Cancella</string>
     <string name="message_attach_image_cd">Allega immagine</string>
+    <string name="message_open_camera_cd">Apri fotocamera</string>
     <string name="message_attach_video_cd">Allega video</string>
     <string name="message_attach_document_cd">Allega documento</string>
     <string name="message_record_voice_cd">Registra un messaggio vocale</string>

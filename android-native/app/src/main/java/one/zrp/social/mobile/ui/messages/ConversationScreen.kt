@@ -39,15 +39,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.VideoLibrary
@@ -106,6 +108,7 @@ import one.zrp.social.mobile.ui.call.CallViewModel
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.ImageLightbox
 import one.zrp.social.mobile.ui.components.LinkPreviewBlock
 import one.zrp.social.mobile.ui.components.LinkifiedText
@@ -161,6 +164,7 @@ fun ConversationScreen(
     var reactingToMessageId by remember { mutableStateOf<String?>(null) }
     var showContactPopup by remember { mutableStateOf(false) }
     var isBlocked by remember { mutableStateOf(false) }
+    var showGifPicker by remember { mutableStateOf(false) }
 
     // Delete-conversation flow reached from ChatContactPopup's own "More"
     // menu (matches ChatContactDrawer.tsx's own Block/Unblock + Delete
@@ -212,6 +216,41 @@ fun ConversationScreen(
             viewModel.onImagePicked(contentResolver, uri, name, mimeType, size)
         }
     }
+
+    // The Camera button captures a fresh photo through the device camera
+    // app directly (web's equivalent is the new capture="environment"
+    // file input on ChatInterface.tsx's own Camera button), as opposed
+    // to the button above, which only ever *chooses* an existing photo.
+    // TakePicture() needs a pre-created destination Uri (unlike the
+    // gallery/video pickers above, which hand back a Uri of the caller's
+    // own content); this reuses the exact same cacheDir + FileProvider
+    // pattern stopAndSendRecording() below already uses for voice
+    // messages, then feeds the captured file through the same
+    // onImagePicked() ConversationViewModel path a gallery pick uses -
+    // same validation, same chatImage upload router.
+    var cameraPhotoFile by remember { mutableStateOf<java.io.File?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { success ->
+        val file = cameraPhotoFile
+        cameraPhotoFile = null
+        if (success && file != null && file.exists()) {
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            viewModel.onImagePicked(contentResolver, uri, file.name, "image/jpeg", file.length())
+        } else {
+            file?.delete()
+        }
+    }
+    fun launchCamera() {
+        val dir = java.io.File(context.cacheDir, "camera-photos").apply { mkdirs() }
+        val file = java.io.File(dir, "camera-photo-${System.currentTimeMillis()}.jpg")
+        cameraPhotoFile = file
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        cameraLauncher.launch(uri)
+    }
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted -> if (granted) launchCamera() }
 
     // Matches ChatInterface.tsx's own handleVideoUpload - same real
     // chatVideo UploadThing router (see ConversationViewModel.onVideoPicked).
@@ -710,12 +749,26 @@ fun ConversationScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
+                    onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+                    enabled = !state.isUploadingAttachment,
+                ) {
+                    Icon(Icons.Filled.CameraAlt, contentDescription = stringResource(R.string.message_open_camera_cd))
+                }
+
+                IconButton(
                     onClick = {
                         imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                     },
                     enabled = !state.isUploadingAttachment,
                 ) {
-                    Icon(Icons.Filled.AttachFile, contentDescription = stringResource(R.string.message_attach_image_cd))
+                    Icon(Icons.Filled.PhotoLibrary, contentDescription = stringResource(R.string.message_attach_image_cd))
+                }
+
+                IconButton(
+                    onClick = { showGifPicker = true },
+                    enabled = !state.isUploadingAttachment,
+                ) {
+                    Icon(Icons.Filled.Image, contentDescription = stringResource(R.string.composer_add_gif))
                 }
 
                 IconButton(
@@ -835,6 +888,16 @@ fun ConversationScreen(
             onSubmit = { emoji ->
                 viewModel.toggleReaction(reactingMessageId, emoji)
                 reactingToMessageId = null
+            },
+        )
+    }
+
+    if (showGifPicker) {
+        GifPickerDialog(
+            onDismiss = { showGifPicker = false },
+            onSelect = { gif ->
+                viewModel.onGifSelected(gif)
+                showGifPicker = false
             },
         )
     }

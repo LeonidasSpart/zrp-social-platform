@@ -15,6 +15,9 @@ struct ConversationView: View {
     @State private var editing: Message?
     @State private var editDraft = ""
     @State private var isConfirmingDeleteConversation = false
+    @State private var isShowingCamera = false
+    @State private var isShowingGifPicker = false
+    @State private var cameraUnavailable = false
 
     /// The reaction set the message route accepts. Any emoji is valid
     /// server-side; this is the quick palette, matching what the web
@@ -102,6 +105,31 @@ struct ConversationView: View {
             }
             .sheet(item: $editing) { message in
                 editSheet(for: message)
+            }
+            .fullScreenCover(isPresented: $isShowingCamera) {
+                CameraCapture(
+                    onCapture: { media in
+                        viewModel.pendingImage?.discard()
+                        viewModel.pendingImage = media
+                        isShowingCamera = false
+                    },
+                    onFailure: { isShowingCamera = false },
+                    onCancel: { isShowingCamera = false }
+                )
+                .ignoresSafeArea()
+            }
+            .sheet(isPresented: $isShowingGifPicker) {
+                GifPickerView { gif in
+                    Task { await viewModel.send(gif: gif) }
+                }
+            }
+            .alert(
+                Text(.iosErrorGenericTitle),
+                isPresented: $cameraUnavailable
+            ) {
+                Button { cameraUnavailable = false } label: { Text(.actionCancel) }
+            } message: {
+                Text(.iosChatCameraUnavailable)
             }
             .alert(
                 Text(.iosErrorGenericTitle),
@@ -288,6 +316,28 @@ struct ConversationView: View {
                 .padding(.vertical, ZrpSpacing.sm)
             } else {
                 HStack(alignment: .bottom, spacing: ZrpSpacing.md) {
+                    // Takes a fresh photo through the device camera,
+                    // distinct from the library picker below - the same
+                    // distinction ChatInterface.tsx's new Camera button
+                    // and Android's CameraAlt button draw from this
+                    // session's own audit (a single ambiguous "photo"
+                    // icon was the reported confusion).
+                    Button {
+                        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                            isShowingCamera = true
+                        } else {
+                            cameraUnavailable = true
+                        }
+                    } label: {
+                        Image(systemName: "camera")
+                            .font(.title3)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                            .contentShape(Rectangle())
+                    }
+                    .disabled(viewModel.isSending)
+                    .accessibilityLabel(Text(.chatOpenCamera))
+
                     // One picture per message: the route stores a single
                     // `imageUrl`, so offering a multi-select would promise
                     // something it cannot keep.
@@ -304,6 +354,16 @@ struct ConversationView: View {
                     }
                     .disabled(viewModel.isSending)
                     .accessibilityLabel(Text(.iosA11yAddPhoto))
+
+                    Button { isShowingGifPicker = true } label: {
+                        Image(systemName: "text.below.photo")
+                            .font(.title3)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                            .contentShape(Rectangle())
+                    }
+                    .disabled(viewModel.isSending)
+                    .accessibilityLabel(Text(.composerAddGif))
 
                     ChatAttachmentMenu(
                         onPick: { attachment in

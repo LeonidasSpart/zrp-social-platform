@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Αναζήτησε GIF...</string>
     <string name="action_clear">Καθαρισμός</string>
     <string name="message_attach_image_cd">Επισύναψη εικόνας</string>
+    <string name="message_open_camera_cd">Άνοιγμα κάμερας</string>
     <string name="message_attach_video_cd">Επισύναψη βίντεο</string>
     <string name="message_attach_document_cd">Επισύναψη εγγράφου</string>
     <string name="message_record_voice_cd">Ηχογράφησε ένα φωνητικό μήνυμα</string>

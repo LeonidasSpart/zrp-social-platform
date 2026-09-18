@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Přiložit dokument";
 "chat.recordVoiceMessage" = "Nahrát hlasovou zprávu";
 "chat.uploadImage" = "Nahrát obrázek";
+"chat.openCamera" = "Otevřít fotoaparát";
 "chat.downloadImage" = "Stáhnout obrázek";
 "shorts.upload.chooseVideo" = "Vyber video";
 "transparency.heroTitle" = "Transparentnost moderování";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Hotovo";
 "ios.chat.micDenied" = "ZRP potřebuje přístup k mikrofonu, aby mohl nahrát hlasovou zprávu. Můžete jej zapnout v Nastavení.";
 "ios.post.applyNow" = "Přihlásit se";
+"ios.chat.cameraUnavailable" = "Fotoaparát na tomto zařízení není k dispozici.";

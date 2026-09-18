@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Lampirkan dokumen";
 "chat.recordVoiceMessage" = "Rekam pesan suara";
 "chat.uploadImage" = "Unggah gambar";
+"chat.openCamera" = "Buka kamera";
 "chat.downloadImage" = "Unduh gambar";
 "shorts.upload.chooseVideo" = "Pilih video";
 "transparency.heroTitle" = "Transparansi Moderasi";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Selesai";
 "ios.chat.micDenied" = "ZRP memerlukan akses mikrofon untuk merekam pesan suara. Anda dapat mengaktifkannya di Pengaturan.";
 "ios.post.applyNow" = "Lamar sekarang";
+"ios.chat.cameraUnavailable" = "Kamera tidak tersedia di perangkat ini.";

@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Pretraži GIF-ove...</string>
     <string name="action_clear">Obriši</string>
     <string name="message_attach_image_cd">Priloži sliku</string>
+    <string name="message_open_camera_cd">Otvori kameru</string>
     <string name="message_attach_video_cd">Priloži video</string>
     <string name="message_attach_document_cd">Priloži dokument</string>
     <string name="message_record_voice_cd">Snimi glasovnu poruku</string>

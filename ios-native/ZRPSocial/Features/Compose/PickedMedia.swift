@@ -33,7 +33,11 @@ struct PickedMedia: Transferable, Identifiable, Equatable {
         }
     }
 
-    private init(copying source: URL, isVideo: Bool) throws {
+    /// Internal rather than `private`: `CameraCapture.swift` reuses this
+    /// exact copy-and-classify step for a freshly-written camera JPEG,
+    /// the same way this type's own `Transferable` closures above reuse
+    /// it for a `PhotosPickerItem` - one real init, two real sources.
+    init(copying source: URL, isVideo: Bool) throws {
         let destination = FileManager.default.temporaryDirectory
             .appendingPathComponent("zrp-picked-\(UUID().uuidString)")
             .appendingPathExtension(source.pathExtension)

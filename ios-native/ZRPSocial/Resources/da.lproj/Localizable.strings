@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Vedhæft dokument";
 "chat.recordVoiceMessage" = "Indtal en talebesked";
 "chat.uploadImage" = "Upload billede";
+"chat.openCamera" = "Åbn kameraet";
 "chat.downloadImage" = "Download billede";
 "shorts.upload.chooseVideo" = "Vælg en video";
 "transparency.heroTitle" = "Gennemsigtighed om moderation";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Færdig";
 "ios.chat.micDenied" = "ZRP skal bruge adgang til mikrofonen for at optage en talebesked. Du kan slå det til i Indstillinger.";
 "ios.post.applyNow" = "Ansøg nu";
+"ios.chat.cameraUnavailable" = "Kameraet er ikke tilgængeligt på denne enhed.";

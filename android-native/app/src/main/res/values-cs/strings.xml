@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Hledat GIFy...</string>
     <string name="action_clear">Vymazat</string>
     <string name="message_attach_image_cd">Přiložit obrázek</string>
+    <string name="message_open_camera_cd">Otevřít fotoaparát</string>
     <string name="message_attach_video_cd">Přiložit video</string>
     <string name="message_attach_document_cd">Přiložit dokument</string>
     <string name="message_record_voice_cd">Nahrát hlasovou zprávu</string>

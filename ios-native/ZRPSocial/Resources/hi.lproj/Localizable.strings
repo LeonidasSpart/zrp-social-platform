@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "डॉक्यूमेंट अटैच करें";
 "chat.recordVoiceMessage" = "वॉइस मैसेज रिकॉर्ड करें";
 "chat.uploadImage" = "इमेज अपलोड करें";
+"chat.openCamera" = "कैमरा खोलें";
 "chat.downloadImage" = "इमेज डाउनलोड करें";
 "shorts.upload.chooseVideo" = "वीडियो चुनें";
 "transparency.heroTitle" = "मॉडरेशन पारदर्शिता";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "हो गया";
 "ios.chat.micDenied" = "वॉइस मैसेज रिकॉर्ड करने के लिए ZRP को माइक्रोफ़ोन एक्सेस की आवश्यकता है। आप इसे सेटिंग्स में चालू कर सकते हैं।";
 "ios.post.applyNow" = "अभी आवेदन करें";
+"ios.chat.cameraUnavailable" = "इस डिवाइस पर कैमरा उपलब्ध नहीं है।";

@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">GIF-ek keresése...</string>
     <string name="action_clear">Törlés</string>
     <string name="message_attach_image_cd">Kép csatolása</string>
+    <string name="message_open_camera_cd">Kamera megnyitása</string>
     <string name="message_attach_video_cd">Videó csatolása</string>
     <string name="message_attach_document_cd">Dokumentum csatolása</string>
     <string name="message_record_voice_cd">Hangüzenet rögzítése</string>

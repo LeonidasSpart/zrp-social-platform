@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Atașează document";
 "chat.recordVoiceMessage" = "Înregistrează un mesaj vocal";
 "chat.uploadImage" = "Încarcă imagine";
+"chat.openCamera" = "Deschide camera";
 "chat.downloadImage" = "Descarcă imaginea";
 "shorts.upload.chooseVideo" = "Alege un videoclip";
 "transparency.heroTitle" = "Transparența moderării";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Terminat";
 "ios.chat.micDenied" = "ZRP are nevoie de acces la microfon pentru a înregistra un mesaj vocal. Îl poți activa din Setări.";
 "ios.post.applyNow" = "Aplică acum";
+"ios.chat.cameraUnavailable" = "Camera nu este disponibilă pe acest dispozitiv.";

@@ -1,8 +1,10 @@
 package one.zrp.social.mobile.ui.messages
 
+import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.semantics.Role
@@ -30,9 +32,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -80,6 +84,7 @@ import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.LinkPreviewBlock
 import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
@@ -127,6 +132,7 @@ fun GroupConversationScreen(
     var deletingMessageId by remember { mutableStateOf<String?>(null) }
     var isDeletingMessage by remember { mutableStateOf(false) }
     var reactingToMessageId by remember { mutableStateOf<String?>(null) }
+    var showGifPicker by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
     var pendingScrollIndex by remember { mutableStateOf<Int?>(null) }
@@ -140,6 +146,33 @@ fun GroupConversationScreen(
             viewModel.onImagePicked(contentResolver, uri, name, mimeType, size)
         }
     }
+
+    // Matches ConversationScreen's own Camera button exactly - see that
+    // screen's launchCamera() KDoc for why TakePicture() needs a
+    // pre-created destination Uri, unlike the gallery picker above.
+    var cameraPhotoFile by remember { mutableStateOf<java.io.File?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { success ->
+        val file = cameraPhotoFile
+        cameraPhotoFile = null
+        if (success && file != null && file.exists()) {
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            viewModel.onImagePicked(contentResolver, uri, file.name, "image/jpeg", file.length())
+        } else {
+            file?.delete()
+        }
+    }
+    fun launchCamera() {
+        val dir = java.io.File(context.cacheDir, "camera-photos").apply { mkdirs() }
+        val file = java.io.File(dir, "camera-photo-${System.currentTimeMillis()}.jpg")
+        cameraPhotoFile = file
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        cameraLauncher.launch(uri)
+    }
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted -> if (granted) launchCamera() }
 
     if (state.leftConversation) {
         onBack()
@@ -354,10 +387,24 @@ fun GroupConversationScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(
+                onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+                enabled = !state.isUploadingAttachment,
+            ) {
+                Icon(Icons.Filled.CameraAlt, contentDescription = stringResource(R.string.message_open_camera_cd))
+            }
+
+            IconButton(
                 onClick = { imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                 enabled = !state.isUploadingAttachment,
             ) {
-                Icon(Icons.Filled.AttachFile, contentDescription = stringResource(R.string.message_attach_image_cd))
+                Icon(Icons.Filled.PhotoLibrary, contentDescription = stringResource(R.string.message_attach_image_cd))
+            }
+
+            IconButton(
+                onClick = { showGifPicker = true },
+                enabled = !state.isUploadingAttachment,
+            ) {
+                Icon(Icons.Filled.Image, contentDescription = stringResource(R.string.composer_add_gif))
             }
 
             OutlinedTextField(
@@ -430,6 +477,16 @@ fun GroupConversationScreen(
             onSubmit = { emoji ->
                 viewModel.toggleReaction(reactingMessageId, emoji)
                 reactingToMessageId = null
+            },
+        )
+    }
+
+    if (showGifPicker) {
+        GifPickerDialog(
+            onDismiss = { showGifPicker = false },
+            onSelect = { gif ->
+                viewModel.onGifSelected(gif)
+                showGifPicker = false
             },
         )
     }

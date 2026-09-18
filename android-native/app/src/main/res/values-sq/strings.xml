@@ -305,6 +305,7 @@
     <string name="gif_search_placeholder">Kërko GIF...</string>
     <string name="action_clear">Pastro</string>
     <string name="message_attach_image_cd">Bashkangjit imazh</string>
+    <string name="message_open_camera_cd">Hap kamerën</string>
     <string name="message_attach_video_cd">Bashkangjit video</string>
     <string name="message_attach_document_cd">Bashkangjit dokument</string>
     <string name="message_record_voice_cd">Regjistro një mesazh zanor</string>

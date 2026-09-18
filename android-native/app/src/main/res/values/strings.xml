@@ -315,6 +315,7 @@
     <string name="gif_search_placeholder">Search GIFs...</string>
     <string name="action_clear">Clear</string>
     <string name="message_attach_image_cd">Attach image</string>
+    <string name="message_open_camera_cd">Open camera</string>
     <string name="message_attach_video_cd">Attach video</string>
     <string name="message_attach_document_cd">Attach document</string>
     <string name="message_record_voice_cd">Record a voice message</string>

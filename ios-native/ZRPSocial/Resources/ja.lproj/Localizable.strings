@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "ファイルを添付";
 "chat.recordVoiceMessage" = "ボイスメッセージを録音";
 "chat.uploadImage" = "画像をアップロード";
+"chat.openCamera" = "カメラを開く";
 "chat.downloadImage" = "画像をダウンロード";
 "shorts.upload.chooseVideo" = "動画を選択";
 "transparency.heroTitle" = "モデレーションの透明性";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "完了";
 "ios.chat.micDenied" = "音声メッセージを録音するには、ZRPがマイクへのアクセス許可を必要とします。設定でオンにできます。";
 "ios.post.applyNow" = "今すぐ応募";
+"ios.chat.cameraUnavailable" = "このデバイスではカメラを使用できません。";

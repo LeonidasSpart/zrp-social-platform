@@ -304,6 +304,7 @@
     <string name="gif_search_placeholder">GIF खोजें...</string>
     <string name="action_clear">साफ़ करें</string>
     <string name="message_attach_image_cd">इमेज अटैच करें</string>
+    <string name="message_open_camera_cd">कैमरा खोलें</string>
     <string name="message_attach_video_cd">वीडियो अटैच करें</string>
     <string name="message_attach_document_cd">दस्तावेज़ अटैच करें</string>
     <string name="message_record_voice_cd">वॉइस मैसेज रिकॉर्ड करें</string>

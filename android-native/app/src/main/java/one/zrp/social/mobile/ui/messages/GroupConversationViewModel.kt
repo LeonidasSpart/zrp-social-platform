@@ -19,6 +19,7 @@ import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.ChatMessage
 import one.zrp.social.mobile.network.ConversationDetail
+import one.zrp.social.mobile.network.GifResult
 import one.zrp.social.mobile.network.MessageReaction
 import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.network.SocketGroupMessagePreview
@@ -442,6 +443,15 @@ class GroupConversationViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * The GIF picker's own selection never needs [uploadAttachment] - the
+     * GIF is already hosted on Giphy's CDN, so this sends the picked URL
+     * directly, mirroring [ConversationViewModel.onGifSelected].
+     */
+    fun onGifSelected(gif: GifResult) {
+        sendAttachment(gif.url)
     }
 
     private fun sendAttachment(imageUrl: String) {

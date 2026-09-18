@@ -862,6 +862,7 @@
 "chat.uploadDocument" = "Załącz dokument";
 "chat.recordVoiceMessage" = "Nagraj wiadomość głosową";
 "chat.uploadImage" = "Prześlij zdjęcie";
+"chat.openCamera" = "Otwórz aparat";
 "chat.downloadImage" = "Pobierz zdjęcie";
 "shorts.upload.chooseVideo" = "Wybierz wideo";
 "transparency.heroTitle" = "Przejrzystość moderacji";
@@ -1343,3 +1344,4 @@
 "ios.action.done" = "Gotowe";
 "ios.chat.micDenied" = "ZRP potrzebuje dostępu do mikrofonu, aby nagrać wiadomość głosową. Możesz go włączyć w Ustawieniach.";
 "ios.post.applyNow" = "Aplikuj teraz";
+"ios.chat.cameraUnavailable" = "Aparat niedostępny na tym urządzeniu.";
