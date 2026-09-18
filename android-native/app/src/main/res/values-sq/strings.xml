@@ -2205,6 +2205,27 @@
     <string name="pricing_support_priority">Prioritare</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Përmirësimet e planit aktualisht menaxhohen në ZRP Web.</string>
+    <string name="upgrade_request_link">Kërko miratim manual</string>
+    <string name="upgrade_request_title">Kalo te %1$s</string>
+    <string name="upgrade_request_price_label">Çmimi: CHF %1$s / muaj</string>
+    <string name="upgrade_request_bank_instructions_title">Udhëzime për transfertën bankare</string>
+    <string name="upgrade_request_bank_transfer_instruction">Ju lutemi transferoni shumën në llogarinë bankare më poshtë:</string>
+    <string name="upgrade_request_bank_label">Banka:</string>
+    <string name="upgrade_request_account_label">Llogaria:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">Referenca:</string>
+    <string name="upgrade_request_payment_method_label">Metoda e pagesës</string>
+    <string name="upgrade_request_method_bank">Transfertë bankare</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Kriptomonedhë</string>
+    <string name="upgrade_request_note_label">Shënim shtesë (opsionale)</string>
+    <string name="upgrade_request_note_placeholder">Kërkesa ose komente të veçanta...</string>
+    <string name="upgrade_request_success_sent">Kërkesa jote për përmirësim u dërgua. Do të të kontaktojmë së shpejti.</string>
+    <string name="upgrade_request_err_send_failed">Dërgimi i kërkesës dështoi.</string>
+    <string name="upgrade_request_sending">Duke dërguar...</string>
+    <string name="upgrade_request_submit_button">Dërgo kërkesën</string>
+    <string name="upgrade_request_footer_note">Kërkesa jote do të shqyrtohet nga ekipi ynë. Do të të kontaktojmë me email brenda 24 orëve.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">Ende nuk ka të preferuar. Postimet që ruani do të shfaqen këtu.</string>

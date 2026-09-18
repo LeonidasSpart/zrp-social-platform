@@ -361,12 +361,13 @@ The most recent expansion (10 EU languages: Dutch, Polish, Romanian,
 Czech, Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek) shipped
 on Web and Android with full key parity, and on iOS with full parity on
 every key sourced from the shared web dictionary (1,176 keys, verified
-by `ios-native/Tools/generate-localizations.py --check`). A separate,
-smaller set of iOS-only strings with no web counterpart (mostly
-VoiceOver/accessibility labels, ~160 keys) is not yet translated in any
-non-English language and falls back to English — see
+by `ios-native/Tools/generate-localizations.py --check`). iOS also has
+a small set of iOS-only strings with no web counterpart (mostly
+VoiceOver/accessibility labels, 160 keys, `ios-native/Tools/ios-extra-strings.json`)
+— these are now translated into all 24 non-English languages too, with
+completeness enforced by the same `--check` step; see
 [`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap--25-language-parity)
-for that backlog.
+for the verification detail.
 
 Arabic is rendered right-to-left. The web dictionary in
 `src/lib/translations.ts` is the single source of truth: the iOS
@@ -684,10 +685,7 @@ Direction, not a delivery commitment. Dates are not promised.
 - Add Content-Security-Policy and Permissions-Policy after a
   domain-by-domain audit.
 - Continue expanding localization coverage beyond the current 25
-  languages as new markets are prioritized; translate the remaining
-  iOS-only accessibility strings (see
-  [Internationalization](#internationalization)) into all 24
-  non-English languages.
+  languages as new markets are prioritized.
 - Keep tagging Web releases and publishing GitHub Releases going
   forward — see [Versioning and releases](#versioning-and-releases).
 

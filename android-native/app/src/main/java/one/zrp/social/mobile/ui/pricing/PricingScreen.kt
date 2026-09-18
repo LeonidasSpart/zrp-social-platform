@@ -23,12 +23,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -42,12 +46,19 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * isNativeStoreRestrictedPayment() + NativePaymentNotice inside a native
  * app context (see PricingCards.tsx), under the same standing policy
  * that keeps tips, premium-post unlocking and campaign contributions out
- * of this app - so this screen shows that same real message inline for
- * every plan the viewer isn't already on, instead of a button that would
- * only pop the same notice anyway.
+ * of this app. What this screen *does* offer, for every plan the viewer
+ * isn't already on, is the same manual/admin-reviewed request web itself
+ * offers via UpgradeRequestModal.tsx (POST /api/upgrade-requests) - see
+ * [PricingViewModel] and [UpgradeRequestDialog]. That route isn't a
+ * payment at all (no wallet, no on-chain transaction, no charge through
+ * this app), so it isn't one of the flows the native-store policy above
+ * restricts.
  */
 @Composable
 fun PricingScreen(currentPlan: String?, onBack: () -> Unit) {
+    val viewModel: PricingViewModel = viewModel()
+    val dialogState by viewModel.state.collectAsState()
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -81,14 +92,33 @@ fun PricingScreen(currentPlan: String?, onBack: () -> Unit) {
                 )
             }
             items(PRICING_PLANS, key = { it.key }) { plan ->
-                PricingPlanCard(plan = plan, isCurrent = plan.key == currentPlan)
+                PricingPlanCard(
+                    plan = plan,
+                    isCurrent = plan.key == currentPlan,
+                    onRequestUpgrade = { viewModel.openRequestDialog(plan.key) },
+                )
             }
+        }
+    }
+
+    if (dialogState.isOpen) {
+        val plan = PRICING_PLANS.firstOrNull { it.key == dialogState.plan }
+        if (plan != null) {
+            UpgradeRequestDialog(
+                state = dialogState,
+                planLabel = stringResource(plan.nameRes),
+                priceUsd = plan.priceUsd,
+                onPaymentMethodChange = viewModel::setPaymentMethod,
+                onNoteChange = viewModel::setNote,
+                onSubmit = viewModel::submit,
+                onDismiss = viewModel::dismissRequestDialog,
+            )
         }
     }
 }
 
 @Composable
-private fun PricingPlanCard(plan: PricingPlan, isCurrent: Boolean) {
+private fun PricingPlanCard(plan: PricingPlan, isCurrent: Boolean, onRequestUpgrade: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(Spacing.md),
         tonalElevation = if (isCurrent) 3.dp else 1.dp,
@@ -166,13 +196,16 @@ private fun PricingPlanCard(plan: PricingPlan, isCurrent: Boolean) {
                 BulletFeatureRow(stringResource(R.string.pricing_feature_charity, plan.charityContributionPercent))
             }
 
-            if (!isCurrent) {
+            if (!isCurrent && plan.key != "free") {
                 Text(
                     text = stringResource(R.string.pricing_upgrade_web_only),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = Spacing.md),
                 )
+                TextButton(onClick = onRequestUpgrade) {
+                    Text(stringResource(R.string.upgrade_request_link), style = MaterialTheme.typography.bodySmall)
+                }
             }
         }
     }

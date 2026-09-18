@@ -2205,6 +2205,27 @@
     <string name="pricing_support_priority">Prioritas</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Peningkatan paket saat ini dikelola melalui ZRP Web.</string>
+    <string name="upgrade_request_link">Minta persetujuan manual</string>
+    <string name="upgrade_request_title">Tingkatkan ke %1$s</string>
+    <string name="upgrade_request_price_label">Harga: CHF %1$s / bulan</string>
+    <string name="upgrade_request_bank_instructions_title">Petunjuk Transfer Bank</string>
+    <string name="upgrade_request_bank_transfer_instruction">Silakan transfer jumlahnya ke rekening bank berikut:</string>
+    <string name="upgrade_request_bank_label">Bank:</string>
+    <string name="upgrade_request_account_label">Rekening:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">Referensi:</string>
+    <string name="upgrade_request_payment_method_label">Metode Pembayaran</string>
+    <string name="upgrade_request_method_bank">Transfer Bank</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Mata Uang Kripto</string>
+    <string name="upgrade_request_note_label">Catatan Tambahan (opsional)</string>
+    <string name="upgrade_request_note_placeholder">Permintaan khusus atau komentar apa pun...</string>
+    <string name="upgrade_request_success_sent">Permintaan peningkatan Anda telah dikirim. Kami akan segera menghubungi Anda.</string>
+    <string name="upgrade_request_err_send_failed">Gagal mengirim permintaan.</string>
+    <string name="upgrade_request_sending">Mengirim...</string>
+    <string name="upgrade_request_submit_button">Kirim Permintaan</string>
+    <string name="upgrade_request_footer_note">Permintaan Anda akan ditinjau oleh tim kami. Kami akan menghubungi Anda melalui email dalam 24 jam.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">Belum ada bookmark. Postingan yang Anda simpan akan muncul di sini.</string>

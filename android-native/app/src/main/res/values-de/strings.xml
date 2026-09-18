@@ -2205,6 +2205,27 @@
     <string name="pricing_support_priority">Priorität</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Plan-Upgrades werden derzeit über ZRP Web verwaltet.</string>
+    <string name="upgrade_request_link">Stattdessen manuelle Genehmigung beantragen</string>
+    <string name="upgrade_request_title">Auf %1$s upgraden</string>
+    <string name="upgrade_request_price_label">Preis: CHF %1$s / Monat</string>
+    <string name="upgrade_request_bank_instructions_title">Anweisungen für die Banküberweisung</string>
+    <string name="upgrade_request_bank_transfer_instruction">Bitte überweise den Betrag auf folgendes Bankkonto:</string>
+    <string name="upgrade_request_bank_label">Bank:</string>
+    <string name="upgrade_request_account_label">Konto:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">Referenz:</string>
+    <string name="upgrade_request_payment_method_label">Zahlungsmethode</string>
+    <string name="upgrade_request_method_bank">Banküberweisung</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Kryptowährung</string>
+    <string name="upgrade_request_note_label">Zusätzliche Notiz (optional)</string>
+    <string name="upgrade_request_note_placeholder">Besondere Wünsche oder Kommentare...</string>
+    <string name="upgrade_request_success_sent">Deine Upgrade-Anfrage wurde gesendet. Wir melden uns in Kürze bei dir.</string>
+    <string name="upgrade_request_err_send_failed">Anfrage konnte nicht gesendet werden.</string>
+    <string name="upgrade_request_sending">Wird gesendet...</string>
+    <string name="upgrade_request_submit_button">Anfrage senden</string>
+    <string name="upgrade_request_footer_note">Deine Anfrage wird von unserem Team geprüft. Wir melden uns innerhalb von 24 Stunden per E-Mail bei dir.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">Noch keine Lesezeichen. Gespeicherte Beiträge werden hier angezeigt.</string>

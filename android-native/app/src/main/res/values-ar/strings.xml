@@ -2205,6 +2205,27 @@
     <string name="pricing_support_priority">أولوية</string>
     <string name="pricing_support_247">على مدار الساعة</string>
     <string name="pricing_upgrade_web_only">تتم إدارة ترقيات الخطة حاليًا عبر نسخة الويب من ZRP.</string>
+    <string name="upgrade_request_link">طلب الموافقة اليدوية بدلاً من ذلك</string>
+    <string name="upgrade_request_title">الترقية إلى %1$s</string>
+    <string name="upgrade_request_price_label">السعر: CHF %1$s / شهريًا</string>
+    <string name="upgrade_request_bank_instructions_title">تعليمات التحويل المصرفي</string>
+    <string name="upgrade_request_bank_transfer_instruction">يرجى تحويل المبلغ إلى الحساب المصرفي التالي:</string>
+    <string name="upgrade_request_bank_label">البنك:</string>
+    <string name="upgrade_request_account_label">الحساب:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">المرجع:</string>
+    <string name="upgrade_request_payment_method_label">طريقة الدفع</string>
+    <string name="upgrade_request_method_bank">تحويل مصرفي</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">عملة رقمية</string>
+    <string name="upgrade_request_note_label">ملاحظة إضافية (اختياري)</string>
+    <string name="upgrade_request_note_placeholder">أي طلبات أو تعليقات خاصة...</string>
+    <string name="upgrade_request_success_sent">تم إرسال طلب الترقية الخاص بك. سنتواصل معك قريبًا.</string>
+    <string name="upgrade_request_err_send_failed">تعذّر إرسال الطلب.</string>
+    <string name="upgrade_request_sending">جارٍ الإرسال...</string>
+    <string name="upgrade_request_submit_button">إرسال الطلب</string>
+    <string name="upgrade_request_footer_note">سيقوم فريقنا بمراجعة طلبك. سنتواصل معك عبر البريد الإلكتروني خلال 24 ساعة.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">لا توجد إشارات مرجعية بعد. ستظهر هنا المنشورات التي تحفظها.</string>

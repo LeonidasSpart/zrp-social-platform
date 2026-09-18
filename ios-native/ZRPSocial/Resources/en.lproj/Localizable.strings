@@ -1180,9 +1180,9 @@
 "lists.errorAddMember" = "Failed to add member.";
 "lists.errorRemoveMember" = "Failed to remove member.";
 
-/* iOS-only strings (see Tools/ios-extra-strings.json). Emitted
-   into the development language only - other languages fall back
-   here until these are translated. */
+/* iOS-only strings (see Tools/ios-extra-strings.json). This is the
+   development-language source; every other language emits its own
+   translated values from the same file's 'translations' section. */
 "ios.a11y.bookmark" = "Bookmark";
 "ios.a11y.removeBookmark" = "Remove bookmark";
 "ios.a11y.unlike" = "Unlike";

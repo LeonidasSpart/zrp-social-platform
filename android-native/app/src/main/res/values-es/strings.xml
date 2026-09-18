@@ -2205,6 +2205,27 @@
     <string name="pricing_support_priority">Prioritario</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Las actualizaciones de plan se gestionan actualmente en ZRP Web.</string>
+    <string name="upgrade_request_link">Solicitar aprobación manual</string>
+    <string name="upgrade_request_title">Mejorar a %1$s</string>
+    <string name="upgrade_request_price_label">Precio: CHF %1$s / mes</string>
+    <string name="upgrade_request_bank_instructions_title">Instrucciones de transferencia bancaria</string>
+    <string name="upgrade_request_bank_transfer_instruction">Transfiere el importe a la siguiente cuenta bancaria:</string>
+    <string name="upgrade_request_bank_label">Banco:</string>
+    <string name="upgrade_request_account_label">Cuenta:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">Referencia:</string>
+    <string name="upgrade_request_payment_method_label">Método de pago</string>
+    <string name="upgrade_request_method_bank">Transferencia bancaria</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Criptomoneda</string>
+    <string name="upgrade_request_note_label">Nota adicional (opcional)</string>
+    <string name="upgrade_request_note_placeholder">Cualquier solicitud especial o comentario...</string>
+    <string name="upgrade_request_success_sent">Tu solicitud de mejora ha sido enviada. Nos pondremos en contacto contigo en breve.</string>
+    <string name="upgrade_request_err_send_failed">No se pudo enviar la solicitud.</string>
+    <string name="upgrade_request_sending">Enviando...</string>
+    <string name="upgrade_request_submit_button">Enviar solicitud</string>
+    <string name="upgrade_request_footer_note">Nuestro equipo revisará tu solicitud. Te contactaremos por correo electrónico en un plazo de 24 horas.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">Todavía no hay marcadores. Las publicaciones que guardes aparecerán aquí.</string>

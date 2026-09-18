@@ -123,6 +123,7 @@ export default function AdminUpgradeRequests() {
                   <button
                     onClick={() => handleAction(req.id, "approve")}
                     disabled={processing === req.id}
+                    aria-label={t("upgradeReq.approve")}
                     className="px-3 py-1 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
                   >
                     {processing === req.id ? (
@@ -134,6 +135,7 @@ export default function AdminUpgradeRequests() {
                   <button
                     onClick={() => handleAction(req.id, "deny")}
                     disabled={processing === req.id}
+                    aria-label={t("upgradeReq.deny")}
                     className="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
                   >
                     {processing === req.id ? (

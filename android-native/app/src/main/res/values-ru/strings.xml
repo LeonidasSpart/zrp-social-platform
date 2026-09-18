@@ -2205,6 +2205,27 @@
     <string name="pricing_support_priority">Приоритетная</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Обновление тарифного плана пока доступно только в веб-версии ZRP.</string>
+    <string name="upgrade_request_link">Запросить ручное одобрение</string>
+    <string name="upgrade_request_title">Перейти на %1$s</string>
+    <string name="upgrade_request_price_label">Цена: CHF %1$s / месяц</string>
+    <string name="upgrade_request_bank_instructions_title">Инструкции по банковскому переводу</string>
+    <string name="upgrade_request_bank_transfer_instruction">Пожалуйста, переведите сумму на следующий банковский счёт:</string>
+    <string name="upgrade_request_bank_label">Банк:</string>
+    <string name="upgrade_request_account_label">Счёт:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">Назначение платежа:</string>
+    <string name="upgrade_request_payment_method_label">Способ оплаты</string>
+    <string name="upgrade_request_method_bank">Банковский перевод</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Криптовалюта</string>
+    <string name="upgrade_request_note_label">Дополнительная заметка (необязательно)</string>
+    <string name="upgrade_request_note_placeholder">Особые пожелания или комментарии...</string>
+    <string name="upgrade_request_success_sent">Ваш запрос на повышение тарифа отправлен. Мы свяжемся с вами в ближайшее время.</string>
+    <string name="upgrade_request_err_send_failed">Не удалось отправить запрос.</string>
+    <string name="upgrade_request_sending">Отправка...</string>
+    <string name="upgrade_request_submit_button">Отправить запрос</string>
+    <string name="upgrade_request_footer_note">Ваш запрос рассмотрит наша команда. Мы свяжемся с вами по электронной почте в течение 24 часов.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">Пока нет закладок. Сохранённые публикации появятся здесь.</string>

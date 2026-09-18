@@ -2205,6 +2205,27 @@
     <string name="pricing_support_priority">优先</string>
     <string name="pricing_support_247">全天候</string>
     <string name="pricing_upgrade_web_only">套餐升级目前仅通过 ZRP 网页版管理。</string>
+    <string name="upgrade_request_link">改为申请人工审核</string>
+    <string name="upgrade_request_title">升级到 %1$s</string>
+    <string name="upgrade_request_price_label">价格：CHF %1$s / 月</string>
+    <string name="upgrade_request_bank_instructions_title">银行转账说明</string>
+    <string name="upgrade_request_bank_transfer_instruction">请将款项转账至以下银行账户：</string>
+    <string name="upgrade_request_bank_label">银行：</string>
+    <string name="upgrade_request_account_label">账户：</string>
+    <string name="upgrade_request_iban_label">IBAN：</string>
+    <string name="upgrade_request_bic_label">BIC：</string>
+    <string name="upgrade_request_reference_label">备注：</string>
+    <string name="upgrade_request_payment_method_label">付款方式</string>
+    <string name="upgrade_request_method_bank">银行转账</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">加密货币</string>
+    <string name="upgrade_request_note_label">附加说明（可选）</string>
+    <string name="upgrade_request_note_placeholder">任何特殊要求或备注...</string>
+    <string name="upgrade_request_success_sent">您的升级请求已发送。我们将尽快与您联系。</string>
+    <string name="upgrade_request_err_send_failed">请求发送失败。</string>
+    <string name="upgrade_request_sending">发送中...</string>
+    <string name="upgrade_request_submit_button">提交请求</string>
+    <string name="upgrade_request_footer_note">我们的团队将审核您的请求，并在24小时内通过电子邮件与您联系。</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">暂无收藏。您保存的帖子会显示在这里。</string>

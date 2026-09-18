@@ -2205,6 +2205,27 @@
     <string name="pricing_support_priority">Prioritaria</string>
     <string name="pricing_support_247">24/7</string>
     <string name="pricing_upgrade_web_only">Gli aggiornamenti del piano sono attualmente gestiti su ZRP Web.</string>
+    <string name="upgrade_request_link">Richiedi l\'approvazione manuale</string>
+    <string name="upgrade_request_title">Passa a %1$s</string>
+    <string name="upgrade_request_price_label">Prezzo: CHF %1$s / mese</string>
+    <string name="upgrade_request_bank_instructions_title">Istruzioni per il bonifico bancario</string>
+    <string name="upgrade_request_bank_transfer_instruction">Trasferisci l\'importo sul seguente conto bancario:</string>
+    <string name="upgrade_request_bank_label">Banca:</string>
+    <string name="upgrade_request_account_label">Conto:</string>
+    <string name="upgrade_request_iban_label">IBAN:</string>
+    <string name="upgrade_request_bic_label">BIC:</string>
+    <string name="upgrade_request_reference_label">Riferimento:</string>
+    <string name="upgrade_request_payment_method_label">Metodo di pagamento</string>
+    <string name="upgrade_request_method_bank">Bonifico bancario</string>
+    <string name="upgrade_request_method_paypal">PayPal</string>
+    <string name="upgrade_request_method_crypto">Criptovaluta</string>
+    <string name="upgrade_request_note_label">Nota aggiuntiva (facoltativo)</string>
+    <string name="upgrade_request_note_placeholder">Richieste speciali o commenti...</string>
+    <string name="upgrade_request_success_sent">La tua richiesta di aggiornamento è stata inviata. Ti contatteremo a breve.</string>
+    <string name="upgrade_request_err_send_failed">Impossibile inviare la richiesta.</string>
+    <string name="upgrade_request_sending">Invio in corso...</string>
+    <string name="upgrade_request_submit_button">Invia richiesta</string>
+    <string name="upgrade_request_footer_note">La tua richiesta sarà esaminata dal nostro team. Ti contatteremo via e-mail entro 24 ore.</string>
 
     <!-- Localization audit fixes (2026-09) -->
     <string name="bookmarks_empty">Ancora nessun preferito. I post salvati appariranno qui.</string>

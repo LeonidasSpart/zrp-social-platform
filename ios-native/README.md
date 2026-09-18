@@ -78,10 +78,14 @@ python3 Tools/generate-localizations.py
 ```
 
 For the handful of strings with no web counterpart (VoiceOver labels,
-mostly), add them to `Tools/ios-extra-strings.json`. Those are emitted
-into `en.lproj` only — other languages fall back to English until they
-are translated, which is honest fallback rather than invented
-translation.
+mostly), add the English value to `Tools/ios-extra-strings.json`'s
+`strings` block, then add a translated value for it in every language
+under `translations` (`generate-localizations.py --check` fails loudly
+if any of the 24 non-English languages is missing one, or if a
+translation's `{placeholder}` tokens don't match the English source
+exactly). A key that is genuinely missing a translation falls back to
+the development language rather than appearing untranslated — that is
+honest fallback behaviour, not an excuse to skip translating a new key.
 
 ### Before pushing
 
