@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Sponsorlu";
 "ios.a11y.sponsoredPost" = "{name} tarafından sponsorlu gönderi";
 "ios.call.missedTitle" = "Cevapsız arama";
-"ios.call.missedBody" = "{name} sizi aramaya çalıştı. ZRP iPhone uygulaması henüz arama kabul edemiyor — zrp.one üzerinden yanıtlayabilirsiniz.";
+"ios.call.missedBody" = "{name} sizi aramaya çalıştı. ZRP iPhone uygulaması henüz arama kabul edemiyor; zrp.one üzerinden yanıtlayabilirsiniz.";
 "ios.call.dismiss" = "Tamam";
 "ios.call.unknownCaller" = "Biri";
 "ios.group.untitled" = "Grup";

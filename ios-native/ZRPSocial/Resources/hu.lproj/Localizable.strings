@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Szponzorált";
 "ios.a11y.sponsoredPost" = "{name} szponzorált bejegyzése";
 "ios.call.missedTitle" = "Nem fogadott hívás";
-"ios.call.missedBody" = "{name} megpróbált felhívni. A ZRP iPhone-alkalmazás még nem tudja fogadni a hívásokat — a zrp.one oldalon válaszolhatsz.";
+"ios.call.missedBody" = "{name} megpróbált felhívni. A ZRP iPhone-alkalmazás még nem tudja fogadni a hívásokat; a zrp.one oldalon válaszolhatsz.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Valaki";
 "ios.group.untitled" = "Csoport";

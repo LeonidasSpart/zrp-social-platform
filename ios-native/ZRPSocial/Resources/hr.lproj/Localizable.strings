@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Sponzorirano";
 "ios.a11y.sponsoredPost" = "Sponzorirana objava korisnika {name}";
 "ios.call.missedTitle" = "Propušten poziv";
-"ios.call.missedBody" = "{name} vas je pokušao/la nazvati. ZRP za iPhone još ne može primati pozive — možete odgovoriti na zrp.one.";
+"ios.call.missedBody" = "{name} vas je pokušao/la nazvati. ZRP za iPhone još ne može primati pozive; možete odgovoriti na zrp.one.";
 "ios.call.dismiss" = "U redu";
 "ios.call.unknownCaller" = "Netko";
 "ios.group.untitled" = "Grupa";

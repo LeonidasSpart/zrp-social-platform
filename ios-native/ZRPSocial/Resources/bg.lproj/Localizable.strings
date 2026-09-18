@@ -381,7 +381,7 @@
 "music.shell.uploadMusic" = "Качи музика";
 "music.shell.signInTitle" = "Влез, за да публикуваш музика";
 "music.shell.signInBody" = "Слушането на ZRP Music е отворено за всички. Трябва да влезеш, за да кандидатстваш за достъп за публикуване.";
-"music.shell.gateTitle" = "Студио за музика — изисква се статус на изпълнител или автор";
+"music.shell.gateTitle" = "Студио за музика - изисква се статус на изпълнител или автор";
 "music.shell.gateBody" = "Слушането на ZRP Music е отворено за всички. Публикуването на музика изисква одобрен статус „Автор“ или потвърден профил на музикален изпълнител.";
 "music.shell.pendingVerification" = "Профилът ти на изпълнител е изпратен и очаква потвърждение от екипа на ZRP.";
 "music.shell.applyIntroPrefix" = "Създай профил на изпълнител, за да кандидатстваш за потвърждение като музикален изпълнител, или";
@@ -397,22 +397,22 @@
 "music.shell.uploadHint" = "Аудиото и обложката се качват директно в съществуващото ти хранилище в ZRP.";
 "music.shell.publishFailedDefault" = "Публикуването бе неуспешно. Опитай отново.";
 "music.shell.uploadFailedDefault" = "Качването бе неуспешно. Опитай отново.";
-"music.shell.emptyFileError" = "„{name}“ не можа да бъде прочетен — може все още да се сваля от iCloud или облачния ти доставчик на съхранение. Изчакай да завърши свалянето и опитай отново.";
+"music.shell.emptyFileError" = "„{name}“ не можа да бъде прочетен - може все още да се сваля от iCloud или облачния ти доставчик на съхранение. Изчакай да завърши свалянето и опитай отново.";
 "music.shell.unreadableFileError" = "„{name}“ не можа да бъде прочетен. Може все още да се сваля или декриптира в приложението ти за облачно съхранение (Google Drive, MEGA, Dropbox, iCloud и др.). Първо отвори файла там, за да е напълно наличен офлайн, след което опитай отново.";
 "music.studio.tabTracks" = "Песни";
 "music.studio.tabAlbums" = "Албуми";
 "music.studio.tabArtist" = "Профил на изпълнител";
 "music.studio.deleteTrackTitle" = "Изтрий песента";
-"music.studio.deleteTrackBody" = "Да изтрия ли „{title}“? Това не може да бъде отменено — песента, нейните изпълнения и харесвания ще бъдат премахнати завинаги.";
+"music.studio.deleteTrackBody" = "Да изтрия ли „{title}“? Това не може да бъде отменено - песента, нейните изпълнения и харесвания ще бъдат премахнати завинаги.";
 "music.studio.cancel" = "Отказ";
 "music.studio.deleting" = "Изтриване...";
 "music.studio.deleteConfirm" = "Изтрий";
 "music.studio.deleteAlbumTitle" = "Изтрий албума";
-"music.studio.deleteAlbumBody" = "Да изтрия ли „{title}“? Песните в него НЯМА да бъдат изтрити — те ще останат публикувани и просто ще бъдат отделени от този албум.";
-"music.studio.uploadDoneRetryPublish" = "Качването ти завърши, но публикуването на песента бе неуспешно. Файлът ти е запазен — натисни „Опитай отново“, за да завършиш публикуването без ново качване.";
+"music.studio.deleteAlbumBody" = "Да изтрия ли „{title}“? Песните в него НЯМА да бъдат изтрити - те ще останат публикувани и просто ще бъдат отделени от този албум.";
+"music.studio.uploadDoneRetryPublish" = "Качването ти завърши, но публикуването на песента бе неуспешно. Файлът ти е запазен - натисни „Опитай отново“, за да завършиш публикуването без ново качване.";
 "music.studio.explicitLabel" = "Явно съдържание";
 "music.studio.retryPublish" = "Опитай публикуването отново";
-"music.studio.checkingFileHint" = "Файловете от приложения за облачно съхранение, като MEGA, може да отнемат малко повече време за подготовка — това е нормално.";
+"music.studio.checkingFileHint" = "Файловете от приложения за облачно съхранение, като MEGA, може да отнемат малко повече време за подготовка - това е нормално.";
 "music.studio.checkingFile" = "Проверка на файла...";
 "music.studio.discardUpload" = "Отхвърли и започни отначало";
 "music.studio.myTracks" = "Моите песни";
@@ -467,7 +467,7 @@
 "marketplace.statusExpired" = "Изтекла";
 "marketplace.statusRemoved" = "Премахната";
 "marketplace.heroTitle" = "ZRP Market Plus";
-"marketplace.heroSubtitle" = "Луксозният пазар за потвърдени членове на ZRP — екзотични автомобили, яхти, частни самолети, имоти и още.";
+"marketplace.heroSubtitle" = "Луксозният пазар за потвърдени членове на ZRP - екзотични автомобили, яхти, частни самолети, имоти и още.";
 "marketplace.searchPlaceholder" = "Търси обяви...";
 "marketplace.createListing" = "Създай обява";
 "marketplace.myListings" = "Моите обяви";
@@ -743,7 +743,7 @@
 "trust.trustSignalsTitle" = "Сигнали за доверие";
 "trust.trustSignalsSubtitle" = "Публични сигнали, използвани за изчисляване на този паспорт.";
 "trust.additionalSignalsHeading" = "Допълнителни сигнали";
-"trust.additionalSignalsNote" = "Те не влияят на резултата по-горе — показани са отделно като допълнителен контекст.";
+"trust.additionalSignalsNote" = "Те не влияят на резултата по-горе - показани са отделно като допълнителен контекст.";
 "trust.whatItMeansTitle" = "Какво означава Trust Passport";
 "trust.whatItMeansDesc" = "Trust Passport предоставя прозрачен изглед на положителните сигнали за акаунта, налични в ZRP. Той не е система за проверка на самоличността и не гарантира самоличността, намеренията или бъдещото поведение на дадено лице.";
 "trust.transparencyNotice" = "ZRP Trust Passport се базира на сигнали за акаунта и общността, налични в ZRP. Резултатите се преизчисляват автоматично, когато основната информация или активност на акаунта се промени. Паспортът не разкрива имейл адреси, IP адреси, лични съобщения, доклади за модерация или друга лична информация за акаунта.";
@@ -783,7 +783,7 @@
 "opportunity.organizationLabel" = "Организация (незадължително)";
 "opportunity.skillsPlaceholder" = "напр. python, дизайн, маркетинг";
 "opportunity.addSkill" = "Добави";
-"opportunity.compensationPlaceholder" = "напр. $50k-70k/година, неплатено — академични кредити";
+"opportunity.compensationPlaceholder" = "напр. $50k-70k/година, неплатено - академични кредити";
 "opportunity.externalUrlLabel" = "Външен линк за кандидатстване (незадължително)";
 "opportunity.externalUrlPlaceholder" = "https://...";
 "opportunity.externalUrlHint" = "Ако е зададен, кандидатите се пренасочват към този линк, вместо да кандидатстват в ZRP.";
@@ -828,7 +828,7 @@
 "charity.disbursedLabel" = "Изплатени досега";
 "charity.disbursedNote" = "Реални плащания, извършени от ZRP към бенефициенти, записани от нашия екип при извършването им.";
 "charity.ledgerHeading" = "Регистър на изплащанията";
-"charity.noDisbursementsYet" = "Все още не са записани изплащания. Този регистър е реален и актуален в реално време — първият запис ще се появи тук веднага щом бъде извършено плащане.";
+"charity.noDisbursementsYet" = "Все още не са записани изплащания. Този регистър е реален и актуален в реално време: първият запис ще се появи тук веднага щом бъде извършено плащане.";
 "charity.errLoad" = "В момента не могат да се заредят данните за благотворителност. Опитай отново по-късно.";
 "charity.orphanagesLabel" = "Домове за деца";
 "charity.schoolsLabel" = "Училища";
@@ -883,7 +883,7 @@
 "transparency.actionHeading" = "Предприети действия";
 "transparency.generatedNote" = "Данните са генерирани на {date}. Обновяват се на всеки час.";
 "transparency.appealsHeading" = "Обжалвания на модерация";
-"transparency.appealsNote" = "Когато потребител не е съгласен с решение за модерация, може да го обжалва. Това са обобщените резултати — никога кой е обжалвал или какво е било казано.";
+"transparency.appealsNote" = "Когато потребител не е съгласен с решение за модерация, може да го обжалва. Това са обобщените резултати - никога кой е обжалвал или какво е било казано.";
 "adminReports.statusPending" = "Чакащ";
 "adminReports.statusReviewed" = "Прегледан";
 "adminReports.statusDismissed" = "Отхвърлен";
@@ -913,7 +913,7 @@
 "ambassadors.apply.submit" = "Изпрати кандидатурата";
 "ambassadors.apply.submitting" = "Изпращане...";
 "ambassadors.apply.subtitle" = "Разкажи ни за своята държава и общност. Всяка кандидатура се разглежда от нашия екип.";
-"ambassadors.apply.successBody" = "Благодарим ти! Кандидатурата ти очаква преглед. Ще те уведомим веднага щом нашият екип вземе решение — все още не си официален посланик.";
+"ambassadors.apply.successBody" = "Благодарим ти! Кандидатурата ти очаква преглед. Ще те уведомим веднага щом нашият екип вземе решение - все още не си официален посланик.";
 "ambassadors.apply.successTitle" = "Кандидатурата е изпратена";
 "ambassadors.apply.title" = "Стани посланик на ZRP";
 "ambassadors.dashboard.codeAcceptedOn" = "Кодексът за поведение е приет";
@@ -940,7 +940,7 @@
 "ambassadors.hero.ctaPrimary" = "Стани посланик на ZRP";
 "ambassadors.hero.statAmbassadors" = "Посланици";
 "ambassadors.hero.statCountries" = "Представени държави";
-"ambassadors.hero.subtitle" = "Глобалните посланици на ZRP водят общността в собствената си държава — истински хора, истински общности, едно растящо движение.";
+"ambassadors.hero.subtitle" = "Глобалните посланици на ZRP водят общността в собствената си държава - истински хора, истински общности, едно растящо движение.";
 "ambassadors.hero.title1" = "ИЗГРАДИ СВОЯТА ОБЩНОСТ.";
 "ambassadors.hero.title2" = "ПРЕДСТАВЛЯВАЙ СВОЯТА ДЪРЖАВА.";
 "ambassadors.hero.title3" = "СВЪРЖИ СВЕТА.";
@@ -949,7 +949,7 @@
 "ambassadors.levels.communityLeader" = "Лидер на общността";
 "ambassadors.levels.communityLeaderDesc" = "Изградил(а) и поддържал(а) реална, активна общност около ZRP.";
 "ambassadors.levels.explorer" = "Изследовател";
-"ambassadors.levels.explorerDesc" = "Всеки посланик започва оттук — опознавайки ZRP и общността около нея.";
+"ambassadors.levels.explorerDesc" = "Всеки посланик започва оттук - опознавайки ZRP и общността около нея.";
 "ambassadors.levels.globalAmbassador" = "Глобален посланик";
 "ambassadors.levels.globalAmbassadorDesc" = "Признат(а) за трайно въздействие в глобалната общност на ZRP.";
 "ambassadors.levels.sectionSubtitle" = "Напредъкът се печели чрез реална дейност в общността, а не просто чрез регистрация.";
@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Спонсорирано";
 "ios.a11y.sponsoredPost" = "Спонсорирана публикация от {name}";
 "ios.call.missedTitle" = "Пропуснато обаждане";
-"ios.call.missedBody" = "{name} се опита да ви позвъни. ZRP за iPhone все още не приема обаждания — можете да отговорите на zrp.one.";
+"ios.call.missedBody" = "{name} се опита да ви позвъни. ZRP за iPhone все още не приема обаждания; можете да отговорите на zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Някой";
 "ios.group.untitled" = "Група";

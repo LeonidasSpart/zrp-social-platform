@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Sponsorizuar";
 "ios.a11y.sponsoredPost" = "Postim i sponsorizuar nga {name}";
 "ios.call.missedTitle" = "Telefonatë e humbur";
-"ios.call.missedBody" = "{name} provoi të të telefonojë. ZRP për iPhone ende nuk mund t'i marrë telefonatat — mund t'i përgjigjesh në zrp.one.";
+"ios.call.missedBody" = "{name} provoi të të telefonojë. ZRP për iPhone ende nuk mund t'i marrë telefonatat; mund t'i përgjigjesh në zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Dikush";
 "ios.group.untitled" = "Grup";

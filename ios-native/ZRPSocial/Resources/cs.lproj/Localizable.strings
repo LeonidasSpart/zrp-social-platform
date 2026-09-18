@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Sponzorováno";
 "ios.a11y.sponsoredPost" = "Sponzorovaný příspěvek od uživatele {name}";
 "ios.call.missedTitle" = "Zmeškaný hovor";
-"ios.call.missedBody" = "{name} se vám pokusil(a) dovolat. ZRP pro iPhone zatím neumí přijímat hovory — odpovědět můžete na zrp.one.";
+"ios.call.missedBody" = "{name} se vám pokusil(a) dovolat. ZRP pro iPhone zatím neumí přijímat hovory; odpovědět můžete na zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Někdo";
 "ios.group.untitled" = "Skupina";

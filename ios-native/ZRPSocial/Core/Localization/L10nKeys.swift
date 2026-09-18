@@ -2670,7 +2670,7 @@ enum L10nKey: String, CaseIterable {
     case iosA11ySponsoredPost = "ios.a11y.sponsoredPost"
     /// en: "Missed call"
     case iosCallMissedTitle = "ios.call.missedTitle"
-    /// en: "{name} tried to call you. ZRP for iPhone can't take calls yet — you can answer on zrp.one."
+    /// en: "{name} tried to call you. ZRP for iPhone can't take calls yet; you can answer on zrp.one."
     case iosCallMissedBody = "ios.call.missedBody"
     /// en: "OK"
     case iosCallDismiss = "ios.call.dismiss"

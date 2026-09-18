@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Sponsoreret";
 "ios.a11y.sponsoredPost" = "Sponsoreret opslag fra {name}";
 "ios.call.missedTitle" = "Mistet opkald";
-"ios.call.missedBody" = "{name} forsøgte at ringe til dig. ZRP til iPhone kan ikke tage imod opkald endnu — du kan svare på zrp.one.";
+"ios.call.missedBody" = "{name} forsøgte at ringe til dig. ZRP til iPhone kan ikke tage imod opkald endnu; du kan svare på zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Nogen";
 "ios.group.untitled" = "Gruppe";
