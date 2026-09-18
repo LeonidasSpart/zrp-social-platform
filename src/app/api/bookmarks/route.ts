@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getUserBookmarksPage } from "@/lib/bookmarks";
 import { parseCursorParams } from "@/lib/pagination";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -27,6 +28,22 @@ export async function GET(req: NextRequest) {
       items.forEach((b) => {
         if (b.post) {
           (b.post as any).liked = likedIds.has(b.post.id);
+        }
+      });
+    }
+
+    // ⚠️ SECURITY (N5): bookmarking a post never required purchasing it
+    // (bookmarking and buying are independent actions), so this listing
+    // returned a bookmarked premium post's full content/media to anyone
+    // who'd bookmarked it, purchased or not. See src/lib/premium-content.ts.
+    const bookmarkedPosts = items.filter((b) => b.post).map((b) => b.post!);
+    if (bookmarkedPosts.length > 0) {
+      const gatedById = new Map(
+        (await applyPremiumGating(bookmarkedPosts, userId)).map((p) => [p.id, p])
+      );
+      items.forEach((b) => {
+        if (b.post) {
+          b.post = gatedById.get(b.post.id) as typeof b.post;
         }
       });
     }

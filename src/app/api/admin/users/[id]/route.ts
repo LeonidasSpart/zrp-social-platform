@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
 import { Role } from "@prisma/client";
-import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
+import { deleteUserAccountAndFiles } from "@/lib/account-deletion";
 import { logAdminAction } from "@/lib/audit-log";
 
 const VALID_BADGE_TYPES = ["verified", "organization", "government", "team", "journalist", null];
@@ -83,35 +83,24 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
   if (!adminCheck.authorized) return adminCheck.response;
 
   try {
-    // Same full-account UploadThing cleanup as self-service account
-    // deletion (see src/app/api/user/delete/confirm/route.ts) - this is
-    // a separate code path admins/moderators use, with the identical gap.
-    const [user, posts, comments, messages, stories] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: params.id },
-        select: { avatarUrl: true, coverUrl: true },
-      }),
-      prisma.post.findMany({
-        where: { authorId: params.id },
-        select: { imageUrl: true, imageUrls: true },
-      }),
-      prisma.comment.findMany({
-        where: { authorId: params.id, imageUrl: { not: null } },
-        select: { imageUrl: true },
-      }),
-      prisma.message.findMany({
-        where: { senderId: params.id, imageUrl: { not: null } },
-        select: { imageUrl: true },
-      }),
-      prisma.story.findMany({
-        where: { userId: params.id, mediaUrl: { not: null } },
-        select: { mediaUrl: true },
-      }),
-    ]);
+    // ⚠️ SECURITY: uses the exact same account-wipe helper as
+    // self-service deletion (src/lib/account-deletion.ts) instead of a
+    // second, independently-maintained collection of "every model that
+    // can own an upload." This route used to reimplement that list
+    // itself and only covered avatar/cover/posts/comments/sent-messages/
+    // stories - silently missing music tracks/albums/artist/playlists,
+    // marketplace listings, HELP campaign images/proof, opportunity
+    // application resumes, and messages the deleted user had RECEIVED
+    // (each leaking that user's files in UploadThing forever once the
+    // owning DB rows were gone, since nothing referenced them to find
+    // them again). A single source of truth for "what does a user's
+    // account cascade delete" means a new model gaining an upload only
+    // needs updating once, here.
+    if (!(await prisma.user.findUnique({ where: { id: params.id }, select: { id: true } }))) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    await prisma.user.delete({
-      where: { id: params.id },
-    });
+    await deleteUserAccountAndFiles(params.id);
 
     await logAdminAction({
       actor: adminCheck.session,
@@ -119,18 +108,6 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
       targetType: "User",
       targetId: params.id,
     });
-
-    // p.imageUrl is always a copy of p.imageUrls[0] (see POST /api/posts)
-    // - deleteUploadsIfUnreferenced dedupes that and skips anything
-    // still referenced by another row before deleting.
-    await deleteUploadsIfUnreferenced([
-      user?.avatarUrl,
-      user?.coverUrl,
-      ...posts.flatMap((p) => [p.imageUrl, ...p.imageUrls]),
-      ...comments.map((c) => c.imageUrl),
-      ...messages.map((m) => m.imageUrl),
-      ...stories.map((s) => s.mediaUrl),
-    ]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -20,23 +20,43 @@ export async function POST(req: NextRequest) {
 
     const userId = token.id as string;
     const body = await req.json();
-    const { amount, walletAddress } = body;
+    const { amount } = body;
 
     if (!amount || typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
       return NextResponse.json({ error: "Invalid withdrawal details." }, { status: 400 });
     }
 
-    if (!walletAddress || typeof walletAddress !== "string") {
-      return NextResponse.json({ error: "Invalid withdrawal details." }, { status: 400 });
-    }
-
-    const profile = await prisma.creatorProfile.findUnique({
-      where: { userId },
-    });
+    // ⚠️ SECURITY: the destination wallet is never taken from the
+    // request body. It used to be (`body.walletAddress`, stored as-is
+    // and later paid out verbatim by the admin approval route's
+    // sendUsdc() call), which meant anyone who could make one
+    // authenticated POST here - a stolen session, an XSS payload, a
+    // compromised device - could redirect a creator's entire earned
+    // balance to an address of their choosing, with no further check
+    // at approval time. The sibling HELP-campaign withdrawal route
+    // (src/app/api/help/[id]/withdraw/route.ts) already gets this
+    // right: it reads the organizer's cryptographically verified wallet
+    // (linked via /api/wallet/link-challenge + link-verify, which
+    // requires a real ed25519 signature over a single-use nonce - see
+    // src/lib/wallet-link.ts) and uses that as the sole destination.
+    // This route now does the same for creator withdrawals.
+    const [profile, user] = await Promise.all([
+      prisma.creatorProfile.findUnique({ where: { userId } }),
+      prisma.user.findUnique({ where: { id: userId }, select: { verifiedSolanaWallet: true } }),
+    ]);
 
     if (!profile) {
       return NextResponse.json({ error: "Creator profile not found." }, { status: 404 });
     }
+
+    if (!user?.verifiedSolanaWallet) {
+      return NextResponse.json(
+        { error: "Link and verify a Solana wallet before withdrawing." },
+        { status: 400 }
+      );
+    }
+
+    const walletAddress = user.verifiedSolanaWallet;
 
     // ⚠️ CORRECTNESS: convert once, at the boundary, to a Prisma.Decimal
     // and use that same value everywhere below - the balance comparison,

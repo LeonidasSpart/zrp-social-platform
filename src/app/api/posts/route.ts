@@ -715,20 +715,91 @@ export async function POST(
       poll.options &&
       poll.options.length > 1
     ) {
+      // ⚠️ SECURITY (N8): the only check here used to be "more than one
+      // option" - no upper bound on the number of options, no length
+      // limit on the question or any individual option, no duplicate
+      // check, and no validation that a client-supplied expiresAt was
+      // even a real date, let alone in the future. A client could
+      // submit thousands of options (each arbitrarily long) straight
+      // into a String[] column with no server-side cap, or an
+      // already-expired/garbage expiresAt.
+      //
+      // The bounds below (2-6 options, 200-char question, 60-char
+      // option) match this repo's OWN existing product limits -
+      // PostComposer.tsx's pollMaxOptions/pollQuestionMaxLength/
+      // pollOptionMaxLength already enforce exactly these numbers
+      // client-side (falling back to them since no plan in limits.ts
+      // currently overrides them) - this just makes them authoritative
+      // rather than trust-the-client.
+      const MAX_POLL_OPTIONS = 6;
+      const MAX_QUESTION_LENGTH = 200;
+      const MAX_OPTION_LENGTH = 60;
+
+      if (
+        typeof poll.question !== "string" ||
+        poll.question.trim().length === 0 ||
+        poll.question.length > MAX_QUESTION_LENGTH
+      ) {
+        return NextResponse.json(
+          { error: `Poll question must be 1-${MAX_QUESTION_LENGTH} characters.` },
+          { status: 400 }
+        );
+      }
+
+      if (
+        !Array.isArray(poll.options) ||
+        poll.options.length < 2 ||
+        poll.options.length > MAX_POLL_OPTIONS
+      ) {
+        return NextResponse.json(
+          { error: `A poll must have between 2 and ${MAX_POLL_OPTIONS} options.` },
+          { status: 400 }
+        );
+      }
+
+      const trimmedOptions = poll.options.map((o: unknown) =>
+        typeof o === "string" ? o.trim() : ""
+      );
+
+      if (trimmedOptions.some((o: string) => o.length === 0 || o.length > MAX_OPTION_LENGTH)) {
+        return NextResponse.json(
+          { error: `Each poll option must be 1-${MAX_OPTION_LENGTH} characters.` },
+          { status: 400 }
+        );
+      }
+
+      if (new Set(trimmedOptions).size !== trimmedOptions.length) {
+        return NextResponse.json(
+          { error: "Poll options must be unique." },
+          { status: 400 }
+        );
+      }
+
+      let resolvedExpiresAt: Date | null = null;
+      if (poll.expiresAt) {
+        resolvedExpiresAt = resolveScheduledAt(
+          poll.expiresAt,
+          poll.expiresAtOffsetMinutes
+        );
+        if (
+          Number.isNaN(resolvedExpiresAt.getTime()) ||
+          resolvedExpiresAt.getTime() <= Date.now()
+        ) {
+          return NextResponse.json(
+            { error: "Poll expiry must be a valid time in the future." },
+            { status: 400 }
+          );
+        }
+      }
+
       const newPoll =
         await prisma.poll.create({
           data: {
             question:
-              poll.question,
+              poll.question.trim(),
             options:
-              poll.options,
-            expiresAt:
-              poll.expiresAt
-                ? resolveScheduledAt(
-                    poll.expiresAt,
-                    poll.expiresAtOffsetMinutes
-                  )
-                : null,
+              trimmedOptions,
+            expiresAt: resolvedExpiresAt,
           },
         });
 

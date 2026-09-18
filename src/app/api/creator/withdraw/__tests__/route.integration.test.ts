@@ -77,12 +77,20 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/creator/withdraw (integration, r
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   });
 
-  async function createProfile(balance: number) {
+  async function createProfile(balance: number, opts: { verifiedSolanaWallet?: string | null } = {}) {
     const user = await prisma.user.create({
       data: {
         email: `withdraw-${randomUUID().slice(0, 8)}@withdrawtest.example`,
         username: `wdraw${randomUUID().slice(0, 8)}`,
         password: "x",
+        // Default to a linked wallet so tests not specifically about
+        // the binding requirement don't have to think about it -
+        // matches a real creator who has already completed
+        // /api/wallet/link-challenge + link-verify.
+        verifiedSolanaWallet:
+          opts.verifiedSolanaWallet === undefined
+            ? `Verified${randomUUID().replace(/-/g, "").slice(0, 32)}`
+            : opts.verifiedSolanaWallet,
       },
     });
     userIds.push(user.id);
@@ -102,7 +110,7 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/creator/withdraw (integration, r
     // check, the decrement, and the stored amount each independently
     // converted this raw number to a Decimal, any tiny inconsistency
     // between them would show up here.
-    const res = await call(user.id, { amount: 33.33, walletAddress: "SomeWallet111" });
+    const res = await call(user.id, { amount: 33.33 });
     expect(res.status).toBe(200);
 
     const finalProfile = await prisma.creatorProfile.findUniqueOrThrow({ where: { id: profile.id } });
@@ -132,7 +140,7 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/creator/withdraw (integration, r
       .spyOn(prisma.withdrawalRequest, "create")
       .mockRejectedValueOnce(new Error("simulated create failure"));
 
-    const res = await call(user.id, { amount: 12.7, walletAddress: "SomeWallet222" });
+    const res = await call(user.id, { amount: 12.7 });
     expect(res.status).toBe(500);
     createSpy.mockRestore();
 
@@ -144,13 +152,64 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/creator/withdraw (integration, r
     const { user, profile } = await createProfile(10);
 
     const [resA, resB] = await Promise.all([
-      call(user.id, { amount: 8, walletAddress: "SomeWallet333" }),
-      call(user.id, { amount: 8, walletAddress: "SomeWallet333" }),
+      call(user.id, { amount: 8 }),
+      call(user.id, { amount: 8 }),
     ]);
     const statuses = [resA.status, resB.status].sort();
     expect(statuses).toEqual([200, 400]);
 
     const finalProfile = await prisma.creatorProfile.findUniqueOrThrow({ where: { id: profile.id } });
     expect(finalProfile.balance.toString()).toBe("2");
+  });
+
+  /*
+   * Regression coverage for N1: the withdrawal destination used to come
+   * straight from the request body (`body.walletAddress`), stored
+   * as-is and later paid out verbatim by the admin approval route's
+   * sendUsdc() call - no check that it matched anything the requesting
+   * user had proven they controlled. Anyone who could make one
+   * authenticated POST here could redirect a creator's balance to an
+   * arbitrary address. The fix: the destination is always the user's
+   * own cryptographically verified wallet (User.verifiedSolanaWallet,
+   * set only via a real signature check in /api/wallet/link-verify -
+   * see src/lib/wallet-link.ts), never a client-supplied value.
+   */
+  describe("withdrawal destination is bound to the verified wallet (N1)", () => {
+    it("stores the withdrawal against the user's verified wallet, not a client-supplied address", async () => {
+      const { user, profile } = await createProfile(20);
+      const res = await call(user.id, { amount: 5 });
+      expect(res.status).toBe(200);
+
+      const dbUser = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+      const withdrawal = await prisma.withdrawalRequest.findFirstOrThrow({ where: { creatorProfileId: profile.id } });
+      expect(withdrawal.walletAddress).toBe(dbUser.verifiedSolanaWallet);
+    });
+
+    it("a client-supplied walletAddress in the request body is ignored, not used as the destination", async () => {
+      const { user, profile } = await createProfile(20);
+      const attackerWallet = "AttackerControlledWallet11111111";
+
+      const res = await call(user.id, { amount: 5, walletAddress: attackerWallet });
+      expect(res.status).toBe(200);
+
+      const dbUser = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+      const withdrawal = await prisma.withdrawalRequest.findFirstOrThrow({ where: { creatorProfileId: profile.id } });
+      expect(withdrawal.walletAddress).toBe(dbUser.verifiedSolanaWallet);
+      expect(withdrawal.walletAddress).not.toBe(attackerWallet);
+    });
+
+    it("rejects the withdrawal (and reserves nothing) when the user has no verified wallet linked", async () => {
+      const { user, profile } = await createProfile(20, { verifiedSolanaWallet: null });
+
+      const res = await call(user.id, { amount: 5 });
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toMatch(/link and verify a solana wallet/i);
+
+      // No balance should have been reserved for a request that was
+      // always going to be rejected.
+      const finalProfile = await prisma.creatorProfile.findUniqueOrThrow({ where: { id: profile.id } });
+      expect(finalProfile.balance.toString()).toBe("20");
+    });
   });
 });

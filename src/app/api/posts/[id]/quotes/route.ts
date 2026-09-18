@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -68,7 +69,13 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       quotes.forEach(p => (p as any).liked = likedIds.has(p.id));
     }
 
-    return NextResponse.json({ items: quotes, nextCursor });
+    // ⚠️ SECURITY (N5): a quote-post is itself an ordinary Post and can
+    // be independently premium-gated by its own author - this listing
+    // returned quote-posts' full content/media regardless of purchase
+    // status. See src/lib/premium-content.ts.
+    const gatedQuotes = await applyPremiumGating(quotes, viewerId);
+
+    return NextResponse.json({ items: gatedQuotes, nextCursor });
   } catch (error) {
     console.error("Error fetching quotes:", error);
     return NextResponse.json({ error: "Failed to fetch quotes" }, { status: 500 });

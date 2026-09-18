@@ -107,10 +107,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (verification.amount + AMOUNT_EPSILON < premiumPost.price.toNumber()) {
+    // ⚠️ CORRECTNESS: a premium post is a fixed-price item (unlike a tip
+    // or a HELP contribution, both intentionally variable-amount) - the
+    // check below used to be one-sided (`verification.amount >= price`),
+    // which accepted an overpayment without recording it anywhere: the
+    // PremiumPurchase row, the platform/creator fee split, and the
+    // post's totalRevenue all use `premiumPost.price` unconditionally a
+    // few lines down, never `verification.amount`. Real USDC that
+    // landed in the platform wallet above the listed price would vanish
+    // from every ledger row that exists to account for it - the
+    // platform's actual on-chain balance would silently exceed the sum
+    // of everything the database says it collected, with no purchase,
+    // fee, or revenue record explaining the gap. Requiring the amount
+    // to match the price (within the same USDC-precision epsilon
+    // already used for underpayment) closes that off deterministically,
+    // with no new refund/credit mechanism and its own replay surface.
+    if (Math.abs(verification.amount - premiumPost.price.toNumber()) > AMOUNT_EPSILON) {
       return NextResponse.json(
         {
-          error: `Transaction amount (${verification.amount} USDC) does not cover the required price (${premiumPost.price} USDC).`,
+          error: `Transaction amount (${verification.amount} USDC) does not match the required price (${premiumPost.price} USDC).`,
         },
         { status: 400 }
       );
