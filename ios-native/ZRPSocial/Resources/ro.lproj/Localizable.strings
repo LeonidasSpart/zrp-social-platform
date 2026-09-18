@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Sponsorizat";
 "ios.a11y.sponsoredPost" = "Postare sponsorizată de {name}";
 "ios.call.missedTitle" = "Apel pierdut";
-"ios.call.missedBody" = "{name} a încercat să te sune. ZRP pentru iPhone nu poate primi apeluri încă — poți răspunde pe zrp.one.";
+"ios.call.missedBody" = "{name} a încercat să te sune. ZRP pentru iPhone nu poate primi apeluri încă; poți răspunde pe zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Cineva";
 "ios.group.untitled" = "Grup";

@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "広告";
 "ios.a11y.sponsoredPost" = "{name}による広告投稿";
 "ios.call.missedTitle" = "不在着信";
-"ios.call.missedBody" = "{name}さんから着信がありました。ZRP for iPhoneはまだ通話に対応していません — zrp.oneで応答できます。";
+"ios.call.missedBody" = "{name}さんから着信がありました。ZRP for iPhoneはまだ通話に対応していません。zrp.oneで応答できます。";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "不明な発信者";
 "ios.group.untitled" = "グループ";

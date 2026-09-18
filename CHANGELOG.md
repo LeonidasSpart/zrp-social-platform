@@ -5,7 +5,7 @@ All notable changes to ZRP Social are documented in this file.
 This is the **first** version of this changelog. It starts from this
 commit forward; it does not retroactively transcribe every commit in
 this repository's prior history. That history is real, complete, and
-already available via `git log` — this file summarizes the meaningful
+already available via `git log`; this file summarizes the meaningful
 changes rather than duplicating it.
 
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/),
@@ -34,7 +34,7 @@ iOS has no build shipped yet.
 
 ### Localization
 
-- **Localization expanded from 15 to 25 languages** ("EU Wave 1") — Dutch,
+- **Localization expanded from 15 to 25 languages** ("EU Wave 1"): Dutch,
   Polish, Romanian, Czech, Hungarian, Swedish, Danish, Croatian, Bulgarian
   and Greek added with full key parity across Web, Android and iOS
   (#361). iOS's `.strings`/`L10nKey` generation and Android's
@@ -82,13 +82,13 @@ iOS has no build shipped yet.
 
 ### Features
 
-- **ZRP Discover** — a new vertical, swipeable, ranked video feed
+- **ZRP Discover**: a new vertical, swipeable, ranked video feed
   (`/discover`, Web), reusing Shorts' existing video posts with
   server-side ranking, a creator-diversity pass, viewer-state gating and
   its own watch-signal analytics (#347, #351). Followed by a sound-
   preference unification with Shorts and new transparency controls
   ("Why am I seeing this") (#353). Web-only; not yet on Android or iOS.
-- **Subscription lifecycle** — a real, time-bounded `Subscription` model
+- **Subscription lifecycle**: a real, time-bounded `Subscription` model
   with payment-to-entitlement, expiration and renewal-reminder engines,
   replacing a plan flag that never expired on its own, plus an admin
   Subscriptions & Billing dashboard (#354).
@@ -109,7 +109,7 @@ iOS has no build shipped yet.
 - Lazy-loaded `simple-peer` (WebRTC signalling) so it is no longer
   shipped on every page load, only when a call is actually placed or
   received (#365).
-- Lazy-loaded per-item images in scrollable lists — avatars, story
+- Lazy-loaded per-item images in scrollable lists: avatars, story
   previews, gallery tiles (#366).
 
 ### Accessibility
@@ -125,10 +125,10 @@ iOS has no build shipped yet.
 
 ---
 
-## [1.0.0] — 2026-09-13
+## [1.0.0] (2026-09-13)
 
 First tagged, released version of the ZRP Web application. This marks
-the point where ZRP adopted SemVer + GitHub Releases going forward — it
+the point where ZRP adopted SemVer + GitHub Releases going forward; it
 is not a claim that the platform went live on this date; the web
 application has been in continuous production deployment from `main`
 before this changelog or any release process existed (see
@@ -138,27 +138,27 @@ merged GitHub history at the time of this release.
 
 ### Added
 
-- **Communities and Lists** across Web, Android and iOS — hashtag-driven
+- **Communities and Lists** across Web, Android and iOS: hashtag-driven
   topic communities with roles, and X-style curated user lists, public or
   private (#299).
-- **Report-on-profile** across Web, Android and iOS — a bare-account
+- **Report-on-profile** across Web, Android and iOS: a bare-account
   report (harassment, impersonation, fake account) with no post/comment
   attached, using a new `reportedUserId` target on `Report` distinct from
   the action-only `targetUserId` (#318). See
   [docs/zrp-front-agent-mission-audit.md](docs/zrp-front-agent-mission-audit.md)
   for the full audit behind this change.
-- **Localization expanded from 11 to 15 languages** — Portuguese,
+- **Localization expanded from 11 to 15 languages**: Portuguese,
   Japanese, Korean and Hindi added with full key parity across Web,
   Android and iOS, plus a permanent CI completeness gate on both Web
   (`translations-completeness.test.ts`) and Android
   (`LocalizationCompletenessTest.kt`) (#308, #310).
-- **ZRP Global Ambassadors** — a complete world-map program feature
+- **ZRP Global Ambassadors**: a complete world-map program feature
   (#267).
 - Native (Android and/or iOS) feature build-out reaching parity with
   several web surfaces this period, including: group chat (schema,
   backend, Socket.IO, Web UI, Android UI) (#197, #200, #201); Trust
   Passport, Journalist tools, Creator Studio and an AI chat assistant on
-  native (#104, #105, #102, #106); native Admin parity — dashboard, reports,
+  native (#104, #105, #102, #106); native Admin parity: dashboard, reports,
   users, posts, and later seven additional moderation/verification
   queues (Appeals, Ads, Marketplace, Opportunity, HELP, Journalists,
   Music Artists) plus a Support Tickets admin (#116, #211, #210); native
@@ -179,7 +179,7 @@ merged GitHub history at the time of this release.
 ### Changed
 
 - **Web responsive shell**: `Sidebar` now renders a compact icon-only
-  rail from `md` (768px), full labeled rail from `lg` (1024px) — closing
+  rail from `md` (768px), full labeled rail from `lg` (1024px), closing
   a gap where every viewport between phone and 1024px fell back to full
   phone UI. `RightPanel` now renders from `lg` (narrower) instead of only
   from `xl`, closing a second gap where the 1024–1280px range had a
@@ -202,7 +202,7 @@ merged GitHub history at the time of this release.
 ### Fixed
 
 - Socket.IO had no Redis adapter at all, meaning realtime events would
-  not reach other replicas once the app scaled beyond one instance — a
+  not reach other replicas once the app scaled beyond one instance; a
   Redis adapter was wired in (#302), and a follow-up pass fixed
   distributed WebRTC call state and stale socket identity issues that
   the adapter surfaced (#307).
@@ -270,7 +270,7 @@ merged GitHub history at the time of this release.
 
 ## Earlier history
 
-Everything before the [1.0.0](#100--2026-09-13) entry above is fully
+Everything before the [1.0.0](#100-2026-09-13) entry above is fully
 preserved in this repository's Git history (`git log`) and in the merged
 pull requests on GitHub, including the initial build-out of every native
 (Android and iOS) product module, the original ZRP News Network

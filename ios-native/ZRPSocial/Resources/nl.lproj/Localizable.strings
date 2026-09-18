@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Gesponsord";
 "ios.a11y.sponsoredPost" = "Gesponsord bericht van {name}";
 "ios.call.missedTitle" = "Gemiste oproep";
-"ios.call.missedBody" = "{name} probeerde je te bellen. ZRP voor iPhone kan nog geen oproepen aannemen — je kunt antwoorden op zrp.one.";
+"ios.call.missedBody" = "{name} probeerde je te bellen. ZRP voor iPhone kan nog geen oproepen aannemen; je kunt antwoorden op zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Iemand";
 "ios.group.untitled" = "Groep";

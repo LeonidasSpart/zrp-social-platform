@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Реклама";
 "ios.a11y.sponsoredPost" = "Спонсируемая публикация от {name}";
 "ios.call.missedTitle" = "Пропущенный звонок";
-"ios.call.missedBody" = "{name} пытался(лась) позвонить вам. ZRP для iPhone пока не может принимать звонки — вы можете ответить на zrp.one.";
+"ios.call.missedBody" = "{name} пытался(лась) позвонить вам. ZRP для iPhone пока не может принимать звонки; вы можете ответить на zrp.one.";
 "ios.call.dismiss" = "ОК";
 "ios.call.unknownCaller" = "Кто-то";
 "ios.group.untitled" = "Группа";

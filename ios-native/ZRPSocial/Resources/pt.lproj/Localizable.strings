@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Patrocinado";
 "ios.a11y.sponsoredPost" = "Publicação patrocinada por {name}";
 "ios.call.missedTitle" = "Chamada perdida";
-"ios.call.missedBody" = "{name} tentou ligar-lhe. A ZRP para iPhone ainda não consegue atender chamadas — pode responder em zrp.one.";
+"ios.call.missedBody" = "{name} tentou ligar-lhe. A ZRP para iPhone ainda não consegue atender chamadas; pode responder em zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Alguém";
 "ios.group.untitled" = "Grupo";

@@ -1,4 +1,4 @@
-# ZRP Social — Native iOS
+# ZRP Social: Native iOS
 
 The genuine Swift / SwiftUI ZRP Social app.
 
@@ -9,7 +9,7 @@ of those; CI asserts that.
 
 ## What it talks to
 
-The same REST API the ZRP website itself calls — `src/app/api/**` in this
+The same REST API the ZRP website itself calls, `src/app/api/**` in this
 repository. There is no mobile backend, no gateway, and no parallel
 contract, and no endpoint here was invented. Authenticated requests
 replay the token from `POST /api/mobile/auth/login` as the exact cookie
@@ -60,7 +60,7 @@ A view never builds a request; a repository never knows about SwiftUI.
 open ios-native/ZRPSocial.xcodeproj
 ```
 
-Adding a Swift file anywhere under `ZRPSocial/` is enough — the project
+Adding a Swift file anywhere under `ZRPSocial/` is enough: the project
 uses a synchronized root group, so there is no project file to edit and
 no merge conflict to resolve when two people add files at once.
 
@@ -84,7 +84,7 @@ under `translations` (`generate-localizations.py --check` fails loudly
 if any of the 24 non-English languages is missing one, or if a
 translation's `{placeholder}` tokens don't match the English source
 exactly). A key that is genuinely missing a translation falls back to
-the development language rather than appearing untranslated — that is
+the development language rather than appearing untranslated; that is
 honest fallback behaviour, not an excuse to skip translating a new key.
 
 ### Before pushing

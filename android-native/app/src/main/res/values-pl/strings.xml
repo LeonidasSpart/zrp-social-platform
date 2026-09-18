@@ -694,7 +694,7 @@
     <string name="music_shell_studio_label">Studio Muzyczne</string>
     <string name="music_shell_studio_eyebrow">Narzędzia dla twórców</string>
     <string name="music_shell_studio_description">Publikuj swoją muzykę bezpośrednio w ZRP.</string>
-    <string name="music_shell_gate_title">Music Studio — wymagany status Artysty lub Twórcy</string>
+    <string name="music_shell_gate_title">Music Studio: wymagany status Artysty lub Twórcy</string>
     <string name="music_shell_gate_body">Słuchanie ZRP Music jest dostępne dla wszystkich. Publikowanie muzyki wymaga zatwierdzonego statusu Twórcy lub zweryfikowanego profilu Artysty Muzycznego.</string>
     <string name="music_shell_pending_verification">Twój profil artysty został przesłany i oczekuje na weryfikację przez personel ZRP.</string>
     <string name="music_shell_apply_intro_prefix">Utwórz profil artysty, aby ubiegać się o weryfikację Artysty Muzycznego, lub</string>
@@ -721,9 +721,9 @@
     <string name="music_shell_publishing">Publikowanie...</string>
     <string name="music_shell_upload_hint">Audio i okładka są przesyłane bezpośrednio do Twojej istniejącej pamięci ZRP.</string>
     <string name="music_shell_publish_failed_default">Publikowanie nie powiodło się. Spróbuj ponownie.</string>
-    <string name="music_shell_empty_file_error">Nie udało się odczytać pliku „%1$s” — być może wciąż pobiera się z iCloud lub innego dostawcy chmury. Poczekaj, aż pobieranie się zakończy, a następnie spróbuj ponownie.</string>
+    <string name="music_shell_empty_file_error">Nie udało się odczytać pliku „%1$s”, być może wciąż pobiera się z iCloud lub innego dostawcy chmury. Poczekaj, aż pobieranie się zakończy, a następnie spróbuj ponownie.</string>
     <string name="music_studio_delete_track_title">Usuń utwór</string>
-    <string name="music_studio_delete_track_body">Usunąć „%1$s”? Tej czynności nie można cofnąć — utwór, jego odtworzenia i polubienia zostaną trwale usunięte.</string>
+    <string name="music_studio_delete_track_body">Usunąć „%1$s”? Tej czynności nie można cofnąć: utwór, jego odtworzenia i polubienia zostaną trwale usunięte.</string>
     <string name="music_studio_cancel">Anuluj</string>
     <string name="music_studio_deleting">Usuwanie...</string>
     <string name="music_studio_delete_confirm">Usuń</string>
@@ -756,7 +756,7 @@
     <string name="music_studio_remove_from_album">Usuń z albumu</string>
     <string name="music_studio_add_existing_tracks">Dodaj istniejące utwory</string>
     <string name="music_studio_delete_album_title">Usuń album</string>
-    <string name="music_studio_delete_album_body">Usunąć „%1$s”? Jego utwory NIE zostaną usunięte — pozostaną opublikowane i po prostu przestaną być przypisane do tego albumu.</string>
+    <string name="music_studio_delete_album_body">Usunąć „%1$s”? Jego utwory NIE zostaną usunięte, pozostaną opublikowane i po prostu przestaną być przypisane do tego albumu.</string>
     <string name="music_studio_album_created_msg">Album utworzony.</string>
     <string name="music_studio_album_updated_msg">Album zaktualizowany.</string>
     <string name="music_studio_album_deleted_msg">Album usunięty. Twoje utwory zostały zachowane i są nadal dostępne.</string>
@@ -772,7 +772,7 @@
     <string name="marketplace_category_watches_jewelry">Zegarki i biżuteria</string>
     <string name="marketplace_category_other_luxury">Inne dobra luksusowe</string>
     <string name="marketplace_hero_title">ZRP Market Plus</string>
-    <string name="marketplace_hero_subtitle">Luksusowy rynek dla zweryfikowanych członków ZRP — egzotyczne samochody, jachty, prywatne odrzutowce, nieruchomości i wiele więcej.</string>
+    <string name="marketplace_hero_subtitle">Luksusowy rynek dla zweryfikowanych członków ZRP: egzotyczne samochody, jachty, prywatne odrzutowce, nieruchomości i wiele więcej.</string>
     <string name="marketplace_search_placeholder">Szukaj ogłoszeń...</string>
     <string name="marketplace_search">Szukaj</string>
     <string name="marketplace_browse_categories">Przeglądaj kategorie</string>
@@ -860,7 +860,7 @@
     <string name="opportunity_back_to_opportunity">Wróć do OPPORTUNITY</string>
     <string name="opportunity_close">Zamknij</string>
     <string name="opportunity_compensation_label">Wynagrodzenie</string>
-    <string name="opportunity_compensation_placeholder">np. 200-300 tys. PLN/rok, bezpłatne — punkty ECTS</string>
+    <string name="opportunity_compensation_placeholder">np. 200-300 tys. PLN/rok, bezpłatne, punkty ECTS</string>
     <string name="opportunity_cover_note_label">Notatka wprowadzająca (opcjonalnie)</string>
     <string name="opportunity_cover_note_placeholder">Powiedz, dlaczego świetnie się nadajesz...</string>
     <string name="opportunity_create_subtitle">Opublikuj ofertę pracy, stażu, stypendium, mentoringu lub współpracy dla społeczności ZRP.</string>
@@ -876,7 +876,7 @@
     <string name="opportunity_external_url_hint">Jeśli ustawione, kandydaci zostaną przekierowani na ten link zamiast aplikować w ZRP.</string>
     <string name="opportunity_external_url_label">Zewnętrzny link do aplikowania (opcjonalnie)</string>
     <string name="opportunity_external_url_placeholder">https://...</string>
-    <string name="opportunity_hero_subtitle">Praca, praca zdalna, staże, stypendia, mentoring, projekty freelance i współpraca — tworzone przez społeczność ZRP.</string>
+    <string name="opportunity_hero_subtitle">Praca, praca zdalna, staże, stypendia, mentoring, projekty freelance i współpraca, tworzone przez społeczność ZRP.</string>
     <string name="opportunity_hero_title">ZRP OPPORTUNITY</string>
     <string name="opportunity_is_paid">To jest płatne</string>
     <string name="opportunity_location_label">Lokalizacja (opcjonalnie)</string>
@@ -1017,7 +1017,7 @@
     <string name="play_add_option">Dodaj opcję</string>
     <string name="play_add_pair">Dodaj parę</string>
     <string name="play_add_question">Dodaj pytanie</string>
-    <string name="play_ai_generated_note">Wygenerowane przez AI — sprawdź przed publikacją.</string>
+    <string name="play_ai_generated_note">Wygenerowane przez AI, sprawdź przed publikacją.</string>
     <string name="play_ai_tab">Generuj za pomocą AI</string>
     <string name="play_ai_topic_label">Temat</string>
     <string name="play_ai_topic_placeholder">np. filmy z lat 80., stolice świata, ciekawostki o kosmosie</string>
@@ -1057,7 +1057,7 @@
     <string name="play_finish">Zakończ</string>
     <string name="play_generate">Generuj</string>
     <string name="play_generating">Generowanie...</string>
-    <string name="play_hero_subtitle">Szybkie gry, pojedynki i codzienne wyzwania — tworzone przez społeczność ZRP.</string>
+    <string name="play_hero_subtitle">Szybkie gry, pojedynki i codzienne wyzwania, tworzone przez społeczność ZRP.</string>
     <string name="play_hero_title">ZRP PLAY</string>
     <string name="play_incoming_duels">Przychodzące wyzwania</string>
     <string name="play_leaderboard">Ranking</string>
@@ -1189,7 +1189,7 @@
     <string name="shorts_upload_err_generic">Coś poszło nie tak podczas przesyłania. Sprawdź połączenie i spróbuj ponownie.</string>
     <string name="shorts_upload_err_upload_failed_detailed">Przesyłanie nie zostało zakończone, prawdopodobnie z powodu problemu z połączeniem lub zbyt dużego pliku jak na Twój plan. Sprawdź połączenie i spróbuj ponownie.</string>
     <string name="shorts_upload_err_too_large_plan">To wideo jest za duże jak na Twój plan. Spróbuj mniejszego pliku lub zmień plan na wyższy.</string>
-    <string name="shorts_upload_err_url_gen_failed">Nie udało się rozpocząć przesyłania — zwykle jest to tymczasowy problem z połączeniem. Spróbuj ponownie.</string>
+    <string name="shorts_upload_err_url_gen_failed">Nie udało się rozpocząć przesyłania: zwykle jest to tymczasowy problem z połączeniem. Spróbuj ponownie.</string>
     <string name="shorts_upload_err_internal_server">Coś poszło nie tak po naszej stronie podczas przesyłania. Spróbuj ponownie za chwilę.</string>
     <string name="caption_view_more">Pokaż więcej</string>
     <string name="caption_view_less">Pokaż mniej</string>
@@ -1252,7 +1252,7 @@
     <string name="trust_account_age_label">Wiek konta:</string>
     <string name="trust_account_history_title">Historia konta</string>
     <string name="trust_additional_signals_heading">Dodatkowe sygnały</string>
-    <string name="trust_additional_signals_note">Nie wpływają one na powyższy wynik — są pokazane osobno jako dodatkowy kontekst.</string>
+    <string name="trust_additional_signals_note">Nie wpływają one na powyższy wynik, są pokazane osobno jako dodatkowy kontekst.</string>
     <string name="trust_back_to_profile">Wróć do profilu</string>
     <string name="trust_back_to_username">Wróć do @%1$s</string>
     <string name="trust_category_community">Społeczność</string>
@@ -1413,7 +1413,7 @@
     <string name="ai_page_subtitle">Zapytaj o cokolwiek. Uzyskaj pomoc z postami, dowiedz się więcej o ZRP lub po prostu porozmawiaj.</string>
     <string name="ai_discover_entry">Odkrywaj ZRP AI</string>
     <string name="settings_solana_wallet_title">Portfel Solana (do bezpośrednich napiwków)</string>
-    <string name="settings_solana_wallet_desc">Dodaj adres swojego portfela Solana, aby otrzymywać napiwki bezpośrednio od użytkowników. Użytkownicy wyślą USDC bezpośrednio na ten portfel — bez opłat platformy.</string>
+    <string name="settings_solana_wallet_desc">Dodaj adres swojego portfela Solana, aby otrzymywać napiwki bezpośrednio od użytkowników. Użytkownicy wyślą USDC bezpośrednio na ten portfel, bez opłat platformy.</string>
     <string name="settings_wallet_address">Adres portfela</string>
     <string name="settings_wallet_address_placeholder">Adres Twojego portfela Solana (np. 4zMMC...)</string>
     <string name="settings_wallet_address_note">Ten adres będzie wyświetlany na Twoim profilu do bezpośrednich napiwków.</string>
@@ -1751,7 +1751,7 @@
     <string name="transparency_status_heading">Status zgłoszenia</string>
     <string name="transparency_action_heading">Podjęte działania</string>
     <string name="transparency_appeals_heading">Odwołania od moderacji</string>
-    <string name="transparency_appeals_note">Gdy użytkownik nie zgadza się z decyzją moderacyjną, może się od niej odwołać. Są to zbiorcze wyniki — nigdy informacja o tym, kto się odwołał ani co zostało powiedziane.</string>
+    <string name="transparency_appeals_note">Gdy użytkownik nie zgadza się z decyzją moderacyjną, może się od niej odwołać. Są to zbiorcze wyniki: nigdy informacja o tym, kto się odwołał ani co zostało powiedziane.</string>
     <string name="transparency_generated_note">Dane wygenerowano %1$s. Aktualizacja co godzinę.</string>
     <string name="charity_committed_label">Zadeklarowane na cele charytatywne</string>
     <string name="charity_committed_note">Obliczane automatycznie na podstawie zrealizowanych napiwków i zakupów treści premium: 35% opłaty platformy ZRP od każdej transakcji.</string>
@@ -1832,7 +1832,7 @@
     <string name="admin_audit_target">Cel: %1$s %2$s</string>
     <string name="admin_audit_metadata">Szczegóły: %1$s</string>
     <string name="admin_storage_title">Porządkowanie pamięci</string>
-    <string name="admin_storage_subtitle">Znajduje pliki wciąż znajdujące się w UploadThing, do których nic w bazie danych już nie wskazuje, i pozwala je usunąć. Skanowanie nigdy niczego nie zmienia — jedynie raportuje.</string>
+    <string name="admin_storage_subtitle">Znajduje pliki wciąż znajdujące się w UploadThing, do których nic w bazie danych już nie wskazuje, i pozwala je usunąć. Skanowanie nigdy niczego nie zmienia, jedynie raportuje.</string>
     <string name="admin_storage_scan_button">Skanuj w poszukiwaniu osieroconych plików</string>
     <string name="admin_storage_scanning">Skanowanie…</string>
     <string name="admin_storage_delete_button">Usuń %1$s osierocony(-e) plik(i)</string>
@@ -1845,8 +1845,8 @@
     <string name="admin_storage_stat_orphaned_size">Rozmiar osieroconych</string>
     <string name="admin_storage_stat_held_for_review_summary">Wstrzymane do weryfikacji: %1$s (%2$s MB)</string>
     <string name="admin_storage_held_for_review_hint">%1$s niedawno przesłanych plików jest niepowiązanych, ale wstrzymanych przed usunięciem przez 24 godziny na wypadek, gdyby wciąż były przypisywane do nowego rekordu.</string>
-    <string name="admin_storage_nothing_orphaned">Brak osieroconych plików — pamięć UploadThing zgadza się z bazą danych.</string>
-    <string name="admin_storage_showing_sample">Wyświetlono %1$s z %2$s — usuwanie usuwa wszystkie, nie tylko wymienione tutaj.</string>
+    <string name="admin_storage_nothing_orphaned">Brak osieroconych plików, pamięć UploadThing zgadza się z bazą danych.</string>
+    <string name="admin_storage_showing_sample">Wyświetlono %1$s z %2$s, usuwanie usuwa wszystkie, nie tylko wymienione tutaj.</string>
     <string name="admin_charity_title">Wypłaty charytatywne</string>
     <string name="admin_charity_subtitle">Rzeczywiste wypłaty charytatywne dokonane przez ZRP. Każdy zapis pojawia się także w publicznym rejestrze charytatywnym.</string>
     <string name="admin_charity_saved">Wypłata zarejestrowana.</string>
@@ -1954,7 +1954,7 @@
     <string name="admin_news_network_no_stories">Brak historii w tej kolejce.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · wynik %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d źródeł</string>
-    <string name="admin_news_network_flag_sensitive">Wrażliwe — wymagana weryfikacja przez człowieka</string>
+    <string name="admin_news_network_flag_sensitive">Wrażliwe: wymagana weryfikacja przez człowieka</string>
     <string name="admin_news_network_flag_breaking">Pilne</string>
     <string name="admin_news_network_flag_travel">Podróże</string>
     <string name="admin_news_network_reject">Odrzuć</string>
@@ -2030,7 +2030,7 @@
     <string name="ambassadors_hero_title1">ZBUDUJ SWOJĄ SPOŁECZNOŚĆ.</string>
     <string name="ambassadors_hero_title2">REPREZENTUJ SWÓJ KRAJ.</string>
     <string name="ambassadors_hero_title3">POŁĄCZ ŚWIAT.</string>
-    <string name="ambassadors_hero_subtitle">Globalni Ambasadorzy ZRP prowadzą społeczność w swoim kraju — prawdziwi ludzie, prawdziwe społeczności, jeden rosnący ruch.</string>
+    <string name="ambassadors_hero_subtitle">Globalni Ambasadorzy ZRP prowadzą społeczność w swoim kraju: prawdziwi ludzie, prawdziwe społeczności, jeden rosnący ruch.</string>
     <string name="ambassadors_hero_cta_primary">Zostań Ambasadorem ZRP</string>
     <string name="ambassadors_hero_cta_secondary">Odkrywaj świat</string>
     <string name="ambassadors_hero_stat_ambassadors">Ambasadorzy</string>
@@ -2057,7 +2057,7 @@
     <string name="ambassadors_levels_title">Twoja droga do globalnego wpływu</string>
     <string name="ambassadors_levels_subtitle">Awans zdobywa się dzięki realnej aktywności w społeczności, a nie przez samo zapisanie się.</string>
     <string name="ambassadors_level_explorer">Odkrywca</string>
-    <string name="ambassadors_level_explorer_desc">Każdy ambasador zaczyna tutaj — poznając ZRP i społeczność wokół niego.</string>
+    <string name="ambassadors_level_explorer_desc">Każdy ambasador zaczyna tutaj, poznając ZRP i społeczność wokół niego.</string>
     <string name="ambassadors_level_ambassador">Ambasador</string>
     <string name="ambassadors_level_ambassador_desc">Zatwierdzony(a) do reprezentowania swojego kraju i rozwijania obecności ZRP w nim.</string>
     <string name="ambassadors_level_community_leader">Lider społeczności</string>
@@ -2088,7 +2088,7 @@
     <string name="ambassadors_apply_err_motivation_required">Napisz, dlaczego chcesz zostać Ambasadorem ZRP.</string>
     <string name="ambassadors_apply_err_generic">Coś poszło nie tak. Spróbuj ponownie.</string>
     <string name="ambassadors_apply_success_title">Zgłoszenie wysłane</string>
-    <string name="ambassadors_apply_success_body">Dziękujemy! Twoje zgłoszenie oczekuje na rozpatrzenie. Poinformujemy Cię, gdy tylko nasz zespół podejmie decyzję — nie jesteś jeszcze oficjalnym ambasadorem.</string>
+    <string name="ambassadors_apply_success_body">Dziękujemy! Twoje zgłoszenie oczekuje na rozpatrzenie. Poinformujemy Cię, gdy tylko nasz zespół podejmie decyzję, nie jesteś jeszcze oficjalnym ambasadorem.</string>
     <string name="ambassadors_dashboard_title">Panel Ambasadora</string>
     <string name="ambassadors_dashboard_not_applied_title">Nie jesteś jeszcze Ambasadorem ZRP</string>
     <string name="ambassadors_dashboard_err_load">Nie udało się wczytać Twojego statusu ambasadora</string>

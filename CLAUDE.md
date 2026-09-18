@@ -12,22 +12,22 @@ and an admin backoffice for moderation and payment approval.
 
 ## Commands
 
-- `npm run dev` — starts the app via `server.js` (NOT `next dev`). This is required because
+- `npm run dev`: starts the app via `server.js` (NOT `next dev`). This is required because
   Socket.IO is attached to the raw HTTP server in `server.js`; using `next dev` directly will
   not wire up realtime features.
-- `npm run build` — `next build`.
-- `npm run start` — production start, also via `server.js` (`NODE_ENV=production node server.js`).
-- `npm run lint` — `next lint`.
-- `npm test` — Vitest (`src/**/*.test.ts`). Pure unit tests always run; the
+- `npm run build`: `next build`.
+- `npm run start`: production start, also via `server.js` (`NODE_ENV=production node server.js`).
+- `npm run lint`: `next lint`.
+- `npm test`: Vitest (`src/**/*.test.ts`). Pure unit tests always run; the
   `*.integration.test.ts` files need a real Postgres at `DATABASE_URL` and skip themselves
   otherwise. Never delete or weaken an existing test to make a change pass.
-- `npx tsc --noEmit` — typecheck (run `rm -rf .next` first after switching branches).
-- `npx prisma generate` — regenerate the Prisma client after schema changes (also runs
+- `npx tsc --noEmit`: typecheck (run `rm -rf .next` first after switching branches).
+- `npx prisma generate`: regenerate the Prisma client after schema changes (also runs
   automatically as `postinstall`).
-- `npx prisma migrate dev --name <name>` — create/apply a migration during development.
+- `npx prisma migrate dev --name <name>`: create/apply a migration during development.
   Production migrations must be expand → backfill → verify → switch; never
   `prisma migrate reset` or any destructive statement against production data.
-- `npx prisma studio` — inspect the database.
+- `npx prisma studio`: inspect the database.
 
 `.npmrc` sets `legacy-peer-deps=true`; use plain `npm install`, not `npm ci` with strict
 peer resolution.
@@ -39,30 +39,30 @@ The full list the code reads is in README.md ("Configuration"). Required for loc
 plus the UploadThing credentials for uploads.
 
 Other features read these when present (all fail soft/are optional at runtime):
-- `REDIS_URL` / `REDIS_PUBLIC_URL` — rate limiting and caching (`src/lib/redis.ts`,
+- `REDIS_URL` / `REDIS_PUBLIC_URL`: rate limiting and caching (`src/lib/redis.ts`,
   `src/lib/rate-limit.ts`). Without Redis, an in-process limiter is used instead; limits
   are never skipped (they fail closed).
-- `TRUSTED_PROXY_HOPS` — number of trusted reverse proxies in front of the app, used to
+- `TRUSTED_PROXY_HOPS`: number of trusted reverse proxies in front of the app, used to
   pick the real client IP from `X-Forwarded-For` (rightmost trusted entry). Defaults to 1
   (Railway's edge). Never read the first XFF entry directly - it is client-controlled.
-- `ALLOWED_MEDIA_HOSTS` — extra hosts accepted as post/chat media in addition to
+- `ALLOWED_MEDIA_HOSTS`: extra hosts accepted as post/chat media in addition to
   UploadThing and GIPHY (`src/lib/media-url.ts`).
-- `LEGACY_PASSWORD_MIGRATION=off` — skips the boot-time plaintext→bcrypt password
+- `LEGACY_PASSWORD_MIGRATION=off`: skips the boot-time plaintext→bcrypt password
   migration in `server.js` (only for a process that must not write, e.g. a replica).
 - `SOLANA_RPC_URL` / `NEXT_PUBLIC_SOLANA_RPC_URL`, `SOLANA_PRIVATE_KEY`,
-  `NEXT_PUBLIC_SOLANA_WALLET_ADDRESS` / `NEXT_PUBLIC_PLATFORM_WALLET`, `NEXT_PUBLIC_USDC_MINT` —
+  `NEXT_PUBLIC_SOLANA_WALLET_ADDRESS` / `NEXT_PUBLIC_PLATFORM_WALLET`, `NEXT_PUBLIC_USDC_MINT`:
   Solana/USDC tipping, premium posts, withdrawals (`src/lib/solana.ts`, `src/contexts/SolanaContext.tsx`).
-- `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `NEXT_PUBLIC_VAPID_PUBLIC_KEY` — Web Push.
-- `RESEND_API_KEY` — transactional email via Resend (`src/lib/email.ts`).
-- `GIPHY_API_KEY` — GIF search/trending endpoints.
-- `CRON_SECRET` — auth for `/api/cron/*` endpoints (scheduled post publishing).
-- `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_ORG` / `SENTRY_PROJECT` / `SENTRY_AUTH_TOKEN` —
+- `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: Web Push.
+- `RESEND_API_KEY`: transactional email via Resend (`src/lib/email.ts`).
+- `GIPHY_API_KEY`: GIF search/trending endpoints.
+- `CRON_SECRET`: auth for `/api/cron/*` endpoints (scheduled post publishing).
+- `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_ORG` / `SENTRY_PROJECT` / `SENTRY_AUTH_TOKEN`:
   error tracking, wired in `next.config.js` via `withSentryConfig` and `src/sentry.*.config.ts`.
-- `METERED_API_KEY` / `METERED_APP_NAME` — TURN credentials for WebRTC calls, issued
+- `METERED_API_KEY` / `METERED_APP_NAME`: TURN credentials for WebRTC calls, issued
   server-side by `/api/turn-credentials` (never shipped to the client as env vars).
-- `SOCKET_ALLOWED_ORIGINS` — comma-separated CORS origins for the Socket.IO server
+- `SOCKET_ALLOWED_ORIGINS`: comma-separated CORS origins for the Socket.IO server
   (falls back to `NEXTAUTH_URL`).
-- `PORT` — HTTP port for `server.js` (defaults to 8080).
+- `PORT`: HTTP port for `server.js` (defaults to 8080).
 
 ## Architecture
 
@@ -72,9 +72,9 @@ Production and dev both boot through `server.js`, not the Next.js CLI. It create
 Node `http` server, hands page/API requests to Next's request handler, and attaches a
 Socket.IO server at path `/api/socket.io`. Socket events cover: room join per userId,
 online/offline presence broadcast, direct messaging (`send-message`/`receive-message`,
-persisted via a separate REST call — the socket layer itself does not write messages to
+persisted via a separate REST call; the socket layer itself does not write messages to
 the DB except for `mark-read`), typing indicators, and WebRTC call signaling
-(`call-user`/`accept-call`/`reject-call`/`end-call`, via `simple-peer` on the client —
+(`call-user`/`accept-call`/`reject-call`/`end-call`, via `simple-peer` on the client;
 see `src/components/CallComponent.tsx` and `src/lib/socket-client.ts`).
 
 The handshake verifies the NextAuth JWT from the cookie and checks the ban flag in the
@@ -91,7 +91,7 @@ the data is clean, batched in-place hashing otherwise. It never logs a password 
 ### Auth (`src/lib/auth.ts`, `src/lib/auth-state.ts`, `src/lib/auth-guards.ts`, `src/middleware.ts`)
 
 NextAuth with Credentials, Google and Apple providers, JWT session strategy (no DB
-sessions table). `verifyCredentials()` accepts bcrypt hashes only — there is no plaintext
+sessions table). `verifyCredentials()` accepts bcrypt hashes only; there is no plaintext
 fallback (any legacy plaintext row is hashed in place by the boot-time migration above).
 Login is blocked until `emailVerified` is set.
 
@@ -100,7 +100,7 @@ overlaid from the database on every read via `getUserAuthState()` in `auth-state
 (30 s per-instance cache); any route that changes a user's role, plan or ban must call
 `invalidateUserAuthState(userId)`. A banned or deleted account gets no session at all
 (the session callback returns null). Routes that read the raw JWT import
-`getVerifiedToken as getToken` from `auth-guards.ts` — never `getToken` from
+`getVerifiedToken as getToken` from `auth-guards.ts`; never `getToken` from
 `next-auth/jwt` directly. Admin/moderator checks (`src/lib/admin.ts`) always read fresh
 from the database; the JWT is identity proof only. Reusable request guards
 (`requireAuthenticatedUser`, `requireActiveUser`, `requireAdmin`, `requireModerator`,
@@ -116,7 +116,7 @@ users with `onboardingCompleted === false` to `/onboarding`; and gates `/setting
 `/api/team`, `/settings/api-keys`, `/api/api-keys` behind plan features.
 
 API routes that aren't covered by session auth (external integrations) use bearer-token
-auth instead — see `src/lib/api-auth.ts` (`validateApiKey`, SHA-256-hashed keys; keys
+auth instead: see `src/lib/api-auth.ts` (`validateApiKey`, SHA-256-hashed keys; keys
 always expire, 365 days by default and at most; a banned owner's keys are rejected) and
 the `src/app/api/external/*` routes.
 
@@ -149,38 +149,38 @@ return `{ allowed, message, limit }` and are called from the relevant API routes
 JWT, and DB-backed team membership helpers (`isTeamMember`, `isTeamAdmin`, `getTeamMembers`).
 When adding a new paid feature, add it to `PlanLimits` in `limits.ts`, wire a helper in
 `permissions.ts`, and gate the route/UI off `session.user.features` (client) or a fresh
-`getFeatureStatus()` call (server) — don't hand-roll plan checks elsewhere.
+`getFeatureStatus()` call (server); don't hand-roll plan checks elsewhere.
 
 ### Data model (`prisma/schema.prisma`)
 
 Single Postgres schema via Prisma. Broad shape:
 - **Social graph**: `User`, `Follow`, `Mute`, `Blocked`.
 - **Content**: `Post` (has a `type`: `POST`/`RECRUITMENT`/`ARTICLE`, each with its own
-  extra fields on the same model — recruitment uses `company`/`location`/`applyUrl`,
+  extra fields on the same model: recruitment uses `company`/`location`/`applyUrl`,
   articles use `body`), `Comment` (self-referential for replies via `parentId`), `Poll`/
   `PollVote`, `Story`/`StoryView` (24h expiry set in application code, not DB-enforced),
   quote-posts (`Post.quotePostId` self-relation), and reactions/likes/reposts/bookmarks
   duplicated as parallel tables for both `Post` and `Comment` (e.g. `Like` vs `CommentLike`,
-  `Repost` vs `CommentRepost`, `Bookmark` vs `CommentBookmark`) — there is no shared
+  `Repost` vs `CommentRepost`, `Bookmark` vs `CommentBookmark`); there is no shared
   polymorphic "reactable" table, so new reaction-like features typically need both variants.
 - **Messaging/notifications**: `Message` (DM, persisted independent of the socket layer),
   `Notification`, `PushSubscription`.
 - **Communities & Lists**: `Community`/`CommunityMember` (hashtag-driven topic feeds with a
   `CommunityCategory` and OWNER/ADMIN/MEMBER roles) and `List`/`ListMember` (X-style curated
-  lists of users, public or private) — a list's "feed" is the existing post feed filtered to
+  lists of users, public or private); a list's "feed" is the existing post feed filtered to
   member `authorId`s, not a parallel content system.
-- **Moderation**: `Report` — seven polymorphic targets (`postId`, `commentId`, `listingId`,
+- **Moderation**: `Report`, seven polymorphic targets (`postId`, `commentId`, `listingId`,
   `challengeId`, `opportunityId`, `campaignId`, `reportedUserId` for a bare-profile report),
   `Appeal` (one per actioned report), admin ban/plan endpoints under `src/app/api/admin/*`.
 - **Monetisation**: `CreatorProfile` (per-user monetisation settings + running balance
   totals), `Tip`, `PremiumPost`/`PremiumPurchase` (pay-to-view posts), `WithdrawalRequest`
   (payout to a Solana wallet address). All of these carry a `platformFee`/`charityAmount`/
-  `creatorAmount` split (platform takes a cut, a fixed portion of that goes to charity —
+  `creatorAmount` split (platform takes a cut, a fixed portion of that goes to charity;
   see `charityContribution` in `PLANS`) and a `TransactionStatus`/`WithdrawalStatus` enum.
 - **Team/API accounts**: `TeamMember` (role-based, tied to a Business/Enterprise account
   owner via `accountId`), `ApiKey` (hashed, revocable, expirable).
 - **Upgrades/payments**: `UpgradeRequest` (manual plan upgrade requests, admin-approved) and
-  `PaymentRequest` (crypto payment claims, admin-verified) — these are the legacy/manual
+  `PaymentRequest` (crypto payment claims, admin-verified); these are the legacy/manual
   path alongside the newer direct Solana flow in `src/lib/solana.ts` and
   `src/app/api/payment/crypto`.
 
@@ -188,28 +188,28 @@ Single Postgres schema via Prisma. Broad shape:
 
 A mini-games layer with its own XP/level system, daily challenge, leaderboard
 (global/country/friends, the latter reusing `Follow` rather than a separate friends
-table), and 1v1 duels — all server-authoritative. Five game types exist today:
+table), and 1v1 duels, all server-authoritative. Five game types exist today:
 `TRIVIA`/`MEMORY`/`LOGIC` (knowledge/memory/logic) plus `REACTION` (bounded-plausibility
 reaction-time) and `SEQUENCE` (Simon-says memory, fully server-verifiable). This is phase 1
 of a larger planned catalogue (see the ZRP PLAY session's final report for the full
-30-game vision and roadmap) — the point of the registry below is that games #6+ slot in
+30-game vision and roadmap); the point of the registry below is that games #6+ slot in
 without a rewrite.
 
 - **Game registry** (`src/lib/play/registry.ts`): the single source of truth for "which
-  `PlayChallengeType`s exist" and "how is type X scored" — `GAME_REGISTRY`/`getGame(type)`
+  `PlayChallengeType`s exist" and "how is type X scored"; `GAME_REGISTRY`/`getGame(type)`
   dispatch to the per-type score functions in `scoring.ts`, plus metadata (category,
   estimated duration, AI-generation support + prompt instructions) used by the create page,
   the AI-generate route, and challenge browsing. Adding game #N means: one `validate`/
   `stripAnswers`/`score` branch in `scoring.ts`, one `PlayChallengeType` enum value +
   additive migration, one registry entry, one player component, and one branch each in the
-  challenge page and create page's manual-form switch — no other file needs to know a new
+  challenge page and create page's manual-form switch; no other file needs to know a new
   type exists.
 - **Content/scoring** (`src/lib/play/scoring.ts`): one JSON `content` column on
   `PlayChallenge`, shape keyed by `type` (documented in the schema and in this file).
   Validation runs on create (manual and AI-generated content both). `stripAnswers()` is what
   a challenge is served as before it's played; scoring always re-reads the real DB content,
   never the client's copy or claimed score.
-- **XP/levels** (`src/lib/play/xp.ts`): PLAY-specific, lives on `PlayProfile` (not `User`) —
+- **XP/levels** (`src/lib/play/xp.ts`): PLAY-specific, lives on `PlayProfile` (not `User`);
   do not build a second, separate XP system for a new PLAY feature. `awardXp`/
   `ensurePlayProfile` are the only writers. Anti-farming: the daily/streak bonus is gated to
   one challenge/day; a **first-solo-completion-only** rule (submit route) means replaying a
@@ -218,7 +218,7 @@ without a rewrite.
   (`submit/route.ts` never trusts a client-sent score/xp field); duel winners are determined
   from server-recorded `PlayAttempt` rows, never a client claim; `REACTION` timing is
   bounded-plausibility (impossible/too-fast taps are rejected as false starts) since a
-  human's physical reaction time can't be server-timestamped without adding network jitter —
+  human's physical reaction time can't be server-timestamped without adding network jitter,
   documented as a known limitation, not silently assumed away.
 - **Tests**: `src/lib/play/__tests__/` (pure-unit: scoring, xp, registry completeness) and
   `src/app/api/play/challenges/[id]/submit/__tests__/route.integration.test.ts`
@@ -234,16 +234,16 @@ Route groups: `(auth)` currently only supplies a `loading.tsx` for `/login`; the
 organized by resource, generally following: read the session (`getServerSession(authOptions)`
 or `getVerifiedToken as getToken` from `@/lib/auth-guards`), load/mutate via `prisma`,
 apply plan/feature checks from `lib/limits.ts` / `lib/permissions.ts` where relevant. `src/app/admin/*` is the moderation/ops UI (analytics, payments, posts, reports,
-upgrade-requests, users) — gate any new admin page/route on `session.user.role`/`isAdmin`,
+upgrade-requests, users); gate any new admin page/route on `session.user.role`/`isAdmin`,
 matching existing routes under `src/app/api/admin/*`.
 
 ### Shared client state
 
 `src/contexts/`: `AuthProvider`-adjacent NextAuth session (via `SessionProvider`, not a
-custom context), `ThemeContext` (light/dark), `LanguageContext` (i18n — see
+custom context), `ThemeContext` (light/dark), `LanguageContext` (i18n; see
 `src/lib/translations.ts`), `SolanaContext` (wallet adapter setup for
 `@solana/wallet-adapter-react`). Uploads go through UploadThing
-(`src/lib/uploadthing.ts` server config, `src/lib/uploadthing-client.ts` client hooks) —
+(`src/lib/uploadthing.ts` server config, `src/lib/uploadthing-client.ts` client hooks);
 prefer that over the raw `/api/upload` route for new upload UI.
 
 ### Path aliases

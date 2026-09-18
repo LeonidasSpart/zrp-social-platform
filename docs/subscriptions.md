@@ -1,4 +1,4 @@
-# ZRP Subscriptions — Time-bounded entitlement lifecycle
+# ZRP Subscriptions: Time-bounded entitlement lifecycle
 
 Before this feature, ZRP knew WHICH plan a user was on (`User.plan`) but
 had no time-bounded record of that entitlement at all: no purchased

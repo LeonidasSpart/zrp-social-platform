@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "प्रायोजित";
 "ios.a11y.sponsoredPost" = "{name} द्वारा प्रायोजित पोस्ट";
 "ios.call.missedTitle" = "मिस्ड कॉल";
-"ios.call.missedBody" = "{name} ने आपको कॉल करने की कोशिश की। ZRP फ़ॉर iPhone अभी कॉल नहीं ले सकता — आप zrp.one पर जवाब दे सकते हैं।";
+"ios.call.missedBody" = "{name} ने आपको कॉल करने की कोशिश की। ZRP फ़ॉर iPhone अभी कॉल नहीं ले सकता, आप zrp.one पर जवाब दे सकते हैं।";
 "ios.call.dismiss" = "ठीक है";
 "ios.call.unknownCaller" = "कोई";
 "ios.group.untitled" = "ग्रुप";

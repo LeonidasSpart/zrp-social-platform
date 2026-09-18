@@ -9,17 +9,17 @@ The standard is not "prettier". A person opens ZRP and thinks *"this is a
 real product, and it is not like the others."*
 
 Everything here is derived from the actual code in this repository. **When
-this document and the source disagree, the source wins** — fix this
+this document and the source disagree, the source wins**: fix this
 document.
 
 **Relationship to other skills in this repo**
-- `zrp-design` — the earlier, web-only version of this document. This file
+- `zrp-design`: the earlier, web-only version of this document. This file
   supersedes it. If both load, this one governs.
-- `frontend-design` (official Anthropic) — general aesthetic judgement.
+- `frontend-design` (official Anthropic): general aesthetic judgement.
   Read it for *how to make a distinctive choice*; read this for *what ZRP
   has already decided*. Where they conflict, ZRP's fixed brand and tokens
   win, because they are already shipped.
-- `webapp-testing` (official Anthropic) — Playwright harness. Use it to
+- `webapp-testing` (official Anthropic): Playwright harness. Use it to
   actually look at the web app instead of guessing.
 
 ---
@@ -52,7 +52,7 @@ palette, and they already agree:
 | `zrp-deepBlack` / `ZrpDeepBlack` | `#050505` | Dark ground |
 | `zrp-charcoal` / `ZrpCharcoal` | `#0D0D0D` | Dark raised surface |
 | `zrp-silver` / `ZrpSilver` | `#BDBDBD` | Muted metadata |
-| `zrp-blue.*` / `ZrpBlue` | `#3B82F6` | **Secondary only** — trust/info, data viz, never a primary action |
+| `zrp-blue.*` / `ZrpBlue` | `#3B82F6` | **Secondary only**: trust/info, data viz, never a primary action |
 | `ZrpGreen` | `#22C55E` | Repost / success only |
 
 `yellow`, `amber` and `orange` are deliberately remapped to neutral greys
@@ -65,15 +65,15 @@ means two are wrong.
 ### Never ship fake data or fake functionality
 
 No invented users, posts, followers, counts, messages, tracks, creators,
-trends, listings, notifications or statistics — not as a placeholder, not
+trends, listings, notifications or statistics; not as a placeholder, not
 temporarily, not to make a screenshot look better.
 
 No control that implies a capability the product does not have. Two real
 examples from this repo, both correct decisions:
 
-- Shorts' Share action carries **no count** — there is no share metric on
+- Shorts' Share action carries **no count**: there is no share metric on
   the backend, so inventing one would be a lie.
-- The conversation header shows **no partner-presence dot** —
+- The conversation header shows **no partner-presence dot**:
   `state.socketConnected` is *this device's* socket, not whether the other
   person is online. `server.js` does track real presence, but nothing
   exposes it to the client.
@@ -86,7 +86,7 @@ is a feature; a fake feed is a lie that ships.
 ## 2. What ZRP is not
 
 Never a clone of X, Facebook, Instagram, TikTok, Threads, LinkedIn,
-Reddit, YouTube, Pinterest or Snapchat. Study them for *usability* —
+Reddit, YouTube, Pinterest or Snapchat. Study them for *usability*:
 hierarchy, interaction patterns, responsive behaviour, motion timing.
 Never borrow their visual identity, layout signature or navigation shape.
 
@@ -99,7 +99,7 @@ these are the ones that keep appearing here):
 - tracked-out ALL-CAPS eyebrow labels above every heading
 - gradient washes and glass panels used as decoration
 - fade-and-slide-up on every section, hover transition on every card
-- **numbered markers (01 / 02 / 03) on content that is not a sequence** —
+- **numbered markers (01 / 02 / 03) on content that is not a sequence**:
   a list of three values is a list, not a process. Check before reaching
   for them.
 
@@ -108,7 +108,7 @@ it is not ZRP design.
 
 ---
 
-## 3. Tokens — use them, don't respell them
+## 3. Tokens: use them, don't respell them
 
 ### Native (`android-native/.../ui/theme/`)
 
@@ -124,7 +124,7 @@ it is not ZRP design.
 `RoundedCornerShape` call sites** (4, 6, 8, 10, 12, 14, 16, 18, 20 plus
 the `50` pill) against a three-step scale used barely at all outside
 `Shapes.kt`. Do not add to it: in any file you touch, prefer the token.
-Do not launch a blind 138-site radius migration either — that changes
+Do not launch a blind 138-site radius migration either: that changes
 real visual values app-wide and needs someone able to look at a build.
 
 ### Web (`tailwind.config.js`, `src/app/globals.css`)
@@ -132,7 +132,7 @@ real visual values app-wide and needs someone able to look at a build.
 Tailwind's 4px scale. Never invent an arbitrary pixel value to make one
 screen line up. Radius has three jobs: `rounded-full` (pills, avatars,
 primary actions), `rounded-xl`/`2xl` (inputs, cards, sheets), `rounded-md`
-(chips). **Two adjacent fields must never have different radii** — that
+(chips). **Two adjacent fields must never have different radii**: that
 is the single most common drift in the web codebase.
 
 ---
@@ -140,16 +140,16 @@ is the single most common drift in the web codebase.
 ## 4. Type and space
 
 - Headings: `font-orbitron` (web, set globally on `h1`–`h6`). Orbitron is
-  geometric and wide — it earns its place at display sizes and short
+  geometric and wide; it earns its place at display sizes and short
   lengths. Never set a paragraph in it.
 - Body/UI: `font-inter` / the Material type scale on native.
 - Long-form measure caps around 65–80 characters. Never a full-width
   paragraph.
-- Space is the primary tool for hierarchy — reach for it before a border,
+- Space is the primary tool for hierarchy: reach for it before a border,
   a shadow or a card. Step the rhythm across breakpoints
   (`py-12 sm:py-16 lg:py-24`), don't scale it linearly.
 - Shadow is for things that actually float (menus, dialogs, sheets). A
-  card sitting in the page does not float — give it a hairline.
+  card sitting in the page does not float: give it a hairline.
 - **One focal treatment per viewport.** One gradient, or one large media
   element, or one bold type block. Not all three.
 
@@ -183,7 +183,7 @@ keeps its name through the whole flow.
 
 ## 6. Responsive contract
 
-Design for these, mobile first — that is where social traffic is:
+Design for these, mobile first; that is where social traffic is:
 
 `320 · 360 · 375 · 390 · 412 · 430 · 768 · 820 · 1024 · 1280 · 1440 · 1920`
 
@@ -219,11 +219,11 @@ Respect `env(safe-area-inset-*)` on web the way `layout.tsx`,
   `lg`, full labeled rail from `lg` up); `RightPanel` renders from
   `lg:`+ (a narrower `w-72` rail from `lg` to `xl`, full `w-80` from
   `xl` up) so there's no dead zone between the two breakpoints.
-  `BottomNav` is `md:hidden` and returns `null` when signed out — but
+  `BottomNav` is `md:hidden` and returns `null` when signed out, but
   the app shell pads for it **unconditionally**, so public/auth pages
   carry dead bottom space on mobile. Don't stack `min-h-screen` on top
   of that.
-- Native `ZrpBottomBar` has no route gating — it renders on every route,
+- Native `ZrpBottomBar` has no route gating: it renders on every route,
   Shorts included.
 
 ---
@@ -233,7 +233,7 @@ Respect `env(safe-area-inset-*)` on web the way `layout.tsx`,
 Not a later pass.
 
 - Semantic HTML first; `<div onClick>` is a bug. Exactly one `<main>` per
-  page — `layout.tsx` already provides it.
+  page: `layout.tsx` already provides it.
 - Every input has a real `<label>` with `htmlFor` matching the input `id`.
   A styled label with no `htmlFor` is worse than none: it looks done.
 - Errors: `role="alert"` + `aria-live="polite"`. A failed submit that
@@ -242,7 +242,7 @@ Not a later pass.
 - Visible `:focus-visible` on everything keyboard-reachable. The global
   ring is `zrp-red`; never remove an outline without replacing it.
 - Native: a tappable thing gets `Role.Button` and a click label, not a
-  bare `clickable()` — a bare one announces as plain text.
+  bare `clickable()`: a bare one announces as plain text.
 - Contrast 4.5:1 body, 3:1 large text and UI boundaries. `text-gray-400`
   on white fails; `text-gray-500` is the floor for metadata.
 - Icon-only buttons need a **translated** `aria-label`/`contentDescription`.
@@ -255,16 +255,16 @@ Not a later pass.
 
 Design all four. Missing states are where a product feels cheap.
 
-1. **Loading** — skeletons shaped like the real layout so nothing jumps.
+1. **Loading**: skeletons shaped like the real layout so nothing jumps.
    Web: `ui/Skeleton.tsx`. Native: `ui/components/PostSkeleton.kt`. A
    centred spinner on a blank page is a last resort.
-2. **Empty** — say what this is, why it is empty, and give the one action
+2. **Empty**: say what this is, why it is empty, and give the one action
    that fills it. Native: `ui/components/ZrpEmptyState.kt`. Never a bare
    "No results".
-3. **Error** — human language plus a retry. Never a raw exception string.
+3. **Error**: human language plus a retry. Never a raw exception string.
    "Nothing here yet" and "loading failed" must not be the same sentence
    in a different colour.
-4. **Loaded** — the real thing, with real data.
+4. **Loaded**: the real thing, with real data.
 
 Also handle: partial data, very long strings, missing avatars, slow
 networks, offline.
@@ -295,7 +295,7 @@ component, not the caller. `VerifiedBadge` is the worked example: its
 leading gap was left to 32 call sites and produced 2dp, 3dp, 4dp, 6dp and
 none. It is now a `leadingGap` parameter with one default.
 
-Highest-risk shared surfaces — treat changes as their own PR: web
+Highest-risk shared surfaces; treat changes as their own PR: web
 `Header`, `Sidebar`, `RightPanel`, `BottomNav`, `PageTransition`,
 `PostCard`, `PostComposer`, `layout.tsx`, `globals.css`; native
 `ZrpNavHost`, `PostCard.kt`, `Avatar.kt`, `VerifiedBadge.kt`, theme files.
@@ -314,7 +314,7 @@ Motion explains state, hierarchy and continuity. It is never decoration.
   in leaving.
 - Never animate `width`, `height`, `top`, `left`. Animate `transform` and
   `opacity`.
-- Web page transitions are already global in `PageTransition.tsx` — do not
+- Web page transitions are already global in `PageTransition.tsx`; do not
   add a second one on top.
 - One orchestrated moment beats scattered effects.
 
@@ -335,7 +335,7 @@ the Railway CLI.
 If a visual fix appears to need one of those, write the dependency down in
 the PR and stop that part rather than reaching across the boundary.
 
-**Protected functionality** — a design change must never break:
+**Protected functionality**; a design change must never break:
 authentication, email verification, Google/Apple sign-in, account
 deletion, posting, media upload, Stories, Shorts, messaging,
 notifications, Music, playlists, Creator Studio, reporting, blocking,
@@ -375,7 +375,7 @@ inside a `RowScope`/`ColumnScope`.
 ### Honesty rule
 
 Report only what was actually verified. Headless Chromium at set viewport
-sizes is real rendering — it is **not** device testing, and saying so is
+sizes is real rendering; it is **not** device testing, and saying so is
 mandatory. If no device was used, say no device was used. If a native
 change was only compiled by CI, say that. **Never claim visual or device
-validation that did not happen** — a false green is worse than a known gap.
+validation that did not happen**: a false green is worse than a known gap.

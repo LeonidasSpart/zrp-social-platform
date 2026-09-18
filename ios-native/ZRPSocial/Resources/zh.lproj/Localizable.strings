@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "广告";
 "ios.a11y.sponsoredPost" = "{name} 发布的赞助内容";
 "ios.call.missedTitle" = "未接来电";
-"ios.call.missedBody" = "{name} 尝试给您打电话。ZRP iPhone 版暂不支持接听通话——您可以在 zrp.one 上接听。";
+"ios.call.missedBody" = "{name} 尝试给您打电话。ZRP iPhone 版暂不支持接听通话，您可以在 zrp.one 上接听。";
 "ios.call.dismiss" = "确定";
 "ios.call.unknownCaller" = "某人";
 "ios.group.untitled" = "群组";

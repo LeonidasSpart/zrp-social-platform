@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Bersponsor";
 "ios.a11y.sponsoredPost" = "Postingan bersponsor dari {name}";
 "ios.call.missedTitle" = "Panggilan tak terjawab";
-"ios.call.missedBody" = "{name} mencoba meneleponmu. ZRP untuk iPhone belum dapat menerima panggilan — Anda dapat menjawab di zrp.one.";
+"ios.call.missedBody" = "{name} mencoba meneleponmu. ZRP untuk iPhone belum dapat menerima panggilan; Anda dapat menjawab di zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Seseorang";
 "ios.group.untitled" = "Grup";

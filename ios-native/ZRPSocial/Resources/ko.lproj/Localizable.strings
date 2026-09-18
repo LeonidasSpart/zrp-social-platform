@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "광고";
 "ios.a11y.sponsoredPost" = "{name}의 광고 게시물";
 "ios.call.missedTitle" = "부재중 전화";
-"ios.call.missedBody" = "{name}님이 전화를 시도했습니다. ZRP for iPhone은 아직 통화를 받을 수 없습니다 — zrp.one에서 응답할 수 있습니다.";
+"ios.call.missedBody" = "{name}님이 전화를 시도했습니다. ZRP for iPhone은 아직 통화를 받을 수 없습니다. zrp.one에서 응답할 수 있습니다.";
 "ios.call.dismiss" = "확인";
 "ios.call.unknownCaller" = "알 수 없음";
 "ios.group.untitled" = "그룹";

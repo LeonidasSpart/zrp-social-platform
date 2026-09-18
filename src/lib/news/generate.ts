@@ -143,7 +143,7 @@ export function buildSystemPrompt(language: NewsLanguage, context: GenerationCon
 
   const travelGuidance = context.isTravel
     ? `
-This is a ZRP Travel update. Where — and only where — the source material actually states them, cover: the affected location, the affected services, the expected duration, and the official advice for travellers. Omit any of those the sources do not mention. Never guess at a duration or an advisory.`
+This is a ZRP Travel update. Where, and only where, the source material actually states them, cover: the affected location, the affected services, the expected duration, and the official advice for travellers. Omit any of those the sources do not mention. Never guess at a duration or an advisory.`
     : "";
 
   const confidenceGuidance =
@@ -169,7 +169,7 @@ ${confidenceGuidance}${travelGuidance}
 FORMAT:
 Return a JSON object: {"headline": string, "body": string}
 - "headline": a clear factual headline in ${languageName}, at most 110 characters, no publisher name, no clickbait.
-- "body": 2 to 4 short paragraphs of natural ${languageName}, separated by blank lines, ${MAX_BODY_LENGTH} characters maximum in total. Write idiomatic ${languageName} — this is an original summary for ${languageName} readers, not a word-for-word translation.
+- "body": 2 to 4 short paragraphs of natural ${languageName}, separated by blank lines, ${MAX_BODY_LENGTH} characters maximum in total. Write idiomatic ${languageName}: this is an original summary for ${languageName} readers, not a word-for-word translation.
 Return ONLY the JSON object.`;
 }
 

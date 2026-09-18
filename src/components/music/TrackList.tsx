@@ -173,7 +173,7 @@ export default function TrackList({
                 }}
                 className={`hidden md:block w-32 lg:w-40 shrink-0 truncate text-xs text-gray-500 ${track.album?.id ? "hover:underline hover:text-gray-900 dark:hover:text-white" : ""}`}
               >
-                {track.album?.title || "—"}
+                {track.album?.title || "-"}
               </Link>
             )}
 

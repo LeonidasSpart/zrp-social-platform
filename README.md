@@ -16,7 +16,7 @@ connected platform, served to a web client and to native Android and iOS
 clients from a single backend.
 
 This repository contains the source of that platform. It is publicly
-visible but **not open source** — see [Licence and intellectual property](#licence-and-intellectual-property).
+visible but **not open source**: see [Licence and intellectual property](#licence-and-intellectual-property).
 
 ---
 
@@ -75,18 +75,18 @@ single-purpose social application.
 
 ZRP is developed as a multi-platform ecosystem sharing one backend:
 
-- **Web application** — Next.js, the primary and most complete client.
-- **Native Android application** — Kotlin / Jetpack Compose
+- **Web application**: Next.js, the primary and most complete client.
+- **Native Android application**: Kotlin / Jetpack Compose
   (`android-native/`), in active development.
-- **Native iOS application** — Swift / SwiftUI (`ios-native/`), in active
+- **Native iOS application**: Swift / SwiftUI (`ios-native/`), in active
   development.
-- **Capacitor shells** — `android/` and `ios/`, which wrap the web
+- **Capacitor shells**: `android/` and `ios/`, which wrap the web
   application and are being superseded by the native clients.
-- **Shared REST API** — `src/app/api/**`, consumed by every client.
-- **Realtime service** — Socket.IO, hosted by the custom server in
+- **Shared REST API**: `src/app/api/**`, consumed by every client.
+- **Realtime service**: Socket.IO, hosted by the custom server in
   `server.js`.
-- **PostgreSQL database** — accessed through Prisma.
-- **Cloud media storage** — UploadThing.
+- **PostgreSQL database**: accessed through Prisma.
+- **Cloud media storage**: UploadThing.
 
 The native clients call the same REST API the website calls. There is no
 separate mobile backend and no parallel API contract.
@@ -146,7 +146,7 @@ achievements and player profiles.
 
 **Communities** are hashtag-driven topic feeds (Travel, Photography,
 Nature, Technology, Health & Fitness, Art & Design, General) with
-OWNER/ADMIN/MEMBER roles — a community's feed is the existing post feed
+OWNER/ADMIN/MEMBER roles; a community's feed is the existing post feed
 filtered to its own hashtag, not a parallel content system. **Lists**
 are X-style curated lists of people, public or private, whose "feed" is
 likewise the existing post feed filtered to the list's member accounts.
@@ -188,7 +188,7 @@ It covers:
 - Cloud audio and artwork storage through a dedicated UploadThing route
 
 Music data is stored through the ZRP backend using Prisma/PostgreSQL.
-There is no seeded or mock catalogue — the catalogue is whatever artists
+There is no seeded or mock catalogue; the catalogue is whatever artists
 have actually published.
 
 ---
@@ -205,7 +205,7 @@ platform:
 - Tips, premium posts and withdrawal requests
 
 Some monetization surfaces are deliberately restricted inside the native
-apps — see [Payments in the native apps](#payments-in-the-native-apps).
+apps: see [Payments in the native apps](#payments-in-the-native-apps).
 
 ---
 
@@ -224,7 +224,7 @@ server-side.
 ## ZRP News Network
 
 An automated editorial system that publishes concise original news
-summaries through openly-labelled ZRP news desks — ZRP News World, ZRP
+summaries through openly-labelled ZRP news desks: ZRP News World, ZRP
 News Switzerland, ZRP Travel and so on.
 
 Each desk is a normal ZRP account flagged as an editorial feed, so news
@@ -237,7 +237,7 @@ password, so no sign-in flow can authenticate as one.
 The pipeline polls publishers' own syndication feeds (obeying robots.txt,
 using conditional GETs, backing off on failure), collapses the same event
 reported by several outlets into one story with several attributions,
-writes an original summary — never a copy of an article — and publishes
+writes an original summary (never a copy of an article) and publishes
 it with the source named and linked. Travel news is produced natively in
 English, French, German and Italian.
 
@@ -267,7 +267,7 @@ campaign.
 ## Opportunities
 
 An opportunity ecosystem connecting users with professional and
-career-related listings — opportunity discovery, applications, saved
+career-related listings: opportunity discovery, applications, saved
 listings, professional profiles, and the employer-side workflows behind
 them.
 
@@ -297,7 +297,7 @@ it:
   surface
 - An appeals process for moderation decisions
 - An audit log for administrative actions
-- Trust Passport — a per-profile trust signal, separate from identity
+- Trust Passport: a per-profile trust signal, separate from identity
   verification and from follower count
 - A public transparency surface reporting moderation volumes and outcomes
 - Rate limiting and abuse prevention on sensitive endpoints
@@ -318,9 +318,9 @@ it:
 Requesting deletion schedules the account for removal **30 days** later,
 and the request can be cancelled during that window by requesting deletion
 again. On confirmed deletion the platform collects every media file the
-account owns — post images, comment images, message media, stories, music
+account owns (post images, comment images, message media, stories, music
 tracks, albums, artist artwork, playlist covers, marketplace listing media
-and campaign media — deletes those files from cloud storage, and then
+and campaign media), deletes those files from cloud storage, and then
 removes the user record, which cascades the associated database rows.
 
 ---
@@ -364,7 +364,7 @@ every key sourced from the shared web dictionary (1,176 keys, verified
 by `ios-native/Tools/generate-localizations.py --check`). iOS also has
 a small set of iOS-only strings with no web counterpart (mostly
 VoiceOver/accessibility labels, 160 keys, `ios-native/Tools/ios-extra-strings.json`)
-— these are now translated into all 24 non-English languages too, with
+; these are now translated into all 24 non-English languages too, with
 completeness enforced by the same `--check` step; see
 [`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap--25-language-parity)
 for the verification detail.
@@ -500,11 +500,11 @@ All configuration is supplied through environment variables at runtime;
 no secret is committed to this repository. The variables the code reads
 include:
 
-- **Database and cache** — `DATABASE_URL`, `REDIS_URL`,
+- **Database and cache**: `DATABASE_URL`, `REDIS_URL`,
   `REDIS_PUBLIC_URL`
-- **Auth** — `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`,
+- **Auth**: `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`,
   `GOOGLE_CLIENT_SECRET`, `GOOGLE_MOBILE_CLIENT_ID` (required for native
-  Android Google Sign-In specifically — see
+  Android Google Sign-In specifically; see
   `src/app/api/mobile/auth/google/route.ts`; a separate Web-type OAuth
   client from `GOOGLE_CLIENT_ID`, created in the same Google Cloud
   project as the Android app's registered OAuth clients, because
@@ -514,19 +514,19 @@ include:
   though `GOOGLE_CLIENT_ID`/web Google login work fine), `APPLE_CLIENT_ID`,
   `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`,
   `APPLE_NATIVE_CLIENT_ID`
-- **Email** — `RESEND_API_KEY`, `EMAIL_FROM`
-- **Push** — `FIREBASE_SERVICE_ACCOUNT_JSON`, `VAPID_PUBLIC_KEY`,
+- **Email**: `RESEND_API_KEY`, `EMAIL_FROM`
+- **Push**: `FIREBASE_SERVICE_ACCOUNT_JSON`, `VAPID_PUBLIC_KEY`,
   `VAPID_PRIVATE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
-- **AI** — `DEEPSEEK_API_KEY`
-- **Realtime and calling** — `SOCKET_ALLOWED_ORIGINS`, `METERED_API_KEY`,
+- **AI**: `DEEPSEEK_API_KEY`
+- **Realtime and calling**: `SOCKET_ALLOWED_ORIGINS`, `METERED_API_KEY`,
   `METERED_APP_NAME`
-- **Blockchain** — `SOLANA_RPC_URL`, `NEXT_PUBLIC_SOLANA_RPC_URL`,
+- **Blockchain**: `SOLANA_RPC_URL`, `NEXT_PUBLIC_SOLANA_RPC_URL`,
   `SOLANA_WALLET_ADDRESS`, `SOLANA_PRIVATE_KEY`, `NEXT_PUBLIC_USDC_MINT`
-- **Observability and misc** — `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`,
+- **Observability and misc**: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`,
   `CRON_SECRET`, `GIPHY_API_KEY`
-- **Security tuning (optional)** — `TRUSTED_PROXY_HOPS` (number of
+- **Security tuning (optional)**: `TRUSTED_PROXY_HOPS` (number of
   trusted reverse proxies in front of the app for client-IP resolution;
-  defaults to `1`, Railway's edge — only change it if another trusted
+  defaults to `1`, Railway's edge; only change it if another trusted
   proxy/CDN is placed in front), `ALLOWED_MEDIA_HOSTS` (comma-separated
   extra hosts, exact or `.suffix`, accepted as post media in addition to
   UploadThing and GIPHY), `LEGACY_PASSWORD_MIGRATION=off` (skips the
@@ -534,7 +534,7 @@ include:
   runs after listening; leave unset in production)
 
 Behaviour that depends on an unset variable degrades rather than crashing
-where the code allows it — for example, the Apple provider is registered
+where the code allows it: for example, the Apple provider is registered
 only when its credentials are present.
 
 ---
@@ -618,7 +618,7 @@ repository secrets.
 
 `ios-native/` is a Swift / SwiftUI application targeting iOS 17, built in
 Xcode 16 with no third-party dependencies. Its architecture is
-one-directional — `View → ViewModel → Repository → ApiClient → backend` —
+one-directional (`View → ViewModel → Repository → ApiClient → backend`);
 sessions are stored in the Keychain, and Sign in with Apple is native and
 verified server-side.
 
@@ -630,8 +630,8 @@ is not counted there as implementation.
 
 ### Payments in the native apps
 
-Certain crypto-payment surfaces — tips, the crypto plan-upgrade flow,
-premium-post purchase and Help contributions — are disabled inside the
+Certain crypto-payment surfaces (tips, the crypto plan-upgrade flow,
+premium-post purchase and Help contributions) are disabled inside the
 native apps, conservatively, to stay within Apple and Google store payment
 policy. The restriction is applied both by hiding the triggering UI and by
 rejecting the request server-side. Marketplace and creator withdrawals are
@@ -658,7 +658,7 @@ withdrawal is a payout rather than a purchase.
   `X-Content-Type-Options`, `Referrer-Policy` and
   `Strict-Transport-Security` are set globally.
   Content-Security-Policy and Permissions-Policy are deliberately not set
-  yet — getting either wrong would silently break WebRTC calling, uploads
+  yet; getting either wrong would silently break WebRTC calling, uploads
   or realtime, and both need a domain-by-domain audit first.
 - **No secrets in the repository.** Configuration is injected at runtime;
   environment files and signing material are excluded by `.gitignore`.
@@ -687,7 +687,7 @@ Direction, not a delivery commitment. Dates are not promised.
 - Continue expanding localization coverage beyond the current 25
   languages as new markets are prioritized.
 - Keep tagging Web releases and publishing GitHub Releases going
-  forward — see [Versioning and releases](#versioning-and-releases).
+  forward: see [Versioning and releases](#versioning-and-releases).
 
 ---
 
@@ -701,7 +701,7 @@ Direction, not a delivery commitment. Dates are not promised.
 - `main` is the source of truth. Development happens on branches and is
   merged through pull requests after review.
 - This repository is publicly readable for transparency. It does not
-  accept unsolicited external contributions — see
+  accept unsolicited external contributions: see
   [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
@@ -715,9 +715,9 @@ Direction, not a delivery commitment. Dates are not promised.
 - Git tag: [`v1.0.0`](https://github.com/LeonidasSpart/zrp-social-platform/releases/tag/v1.0.0)
 - GitHub Release: see the tag above for the published release notes
 - `package.json`'s `"version"` field matches: `1.0.0`
-- Full contents: [CHANGELOG.md](CHANGELOG.md#100--2026-09-13)
+- Full contents: [CHANGELOG.md](CHANGELOG.md#100-2026-09-13)
 
-This is the **first** tagged, released version of the Web application —
+This is the **first** tagged, released version of the Web application;
 it marks the point ZRP adopted SemVer + GitHub Releases, not a claim
 that the platform went live on this date. The web application was
 already in continuous production deployment from `main` before this
@@ -738,14 +738,14 @@ release cadence:
 
 - `android-native/` increments `versionCode`/`versionName` in
   `app/build.gradle` on every change destined for a real upload,
-  documented inline at each bump — currently versionCode 31,
+  documented inline at each bump; currently versionCode 31,
   versionName 4.0.25. It has an **Internal Testing** listing on Google
   Play, not a public release.
 - `android/` (the Capacitor shell being superseded) is still at its
   original placeholder `versionCode 1` / `versionName "1.0"`.
 - `ios-native/` is at its Xcode project's default
   `MARKETING_VERSION 1.0.0` / `CURRENT_PROJECT_VERSION 1`, never bumped,
-  because it has **no App Store listing** yet — see
+  because it has **no App Store listing** yet: see
   [Native applications](#native-applications).
 
 A future release's notes should cross-reference the Android/iOS version
@@ -756,12 +756,12 @@ version number.
 ### Prior state (before this release)
 
 Before `v1.0.0`, the repository had **no GitHub Releases** and
-effectively **no release tags** — the only tag that existed,
+effectively **no release tags** (the only tag that existed,
 `before-nextjs-upgrade`, was a one-off pre-migration checkpoint, not a
-version marker — and `package.json`'s `"version"` field was still
+version marker), and `package.json`'s `"version"` field was still
 `0.1.0`, the default Next.js scaffold value, never bumped. That gap is
 what this release closes for the Web application specifically; it does
-not retroactively make any past commit "version 1.0.0" — only the
+not retroactively make any past commit "version 1.0.0"; only the
 commit this tag actually points to.
 
 ---
@@ -785,15 +785,15 @@ Full terms: [LICENSE](LICENSE).
 
 ## Project documents
 
-- [LICENSE](LICENSE) — proprietary licence terms
-- [SECURITY.md](SECURITY.md) — vulnerability reporting
-- [CONTRIBUTING.md](CONTRIBUTING.md) — development workflow
-- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — participation standards
-- [CHANGELOG.md](CHANGELOG.md) — notable changes over time
-- [`docs/zrp-news-network.md`](docs/zrp-news-network.md) — ZRP News
+- [LICENSE](LICENSE): proprietary licence terms
+- [SECURITY.md](SECURITY.md): vulnerability reporting
+- [CONTRIBUTING.md](CONTRIBUTING.md): development workflow
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md): participation standards
+- [CHANGELOG.md](CHANGELOG.md): notable changes over time
+- [`docs/zrp-news-network.md`](docs/zrp-news-network.md): ZRP News
   Network architecture and operations
-- [`docs/database-migration-deployment.md`](docs/database-migration-deployment.md) —
+- [`docs/database-migration-deployment.md`](docs/database-migration-deployment.md):
   database migration/deployment procedure
-- [`ios-native/README.md`](ios-native/README.md) — native iOS module
-- [`ios-native/PARITY.md`](ios-native/PARITY.md) — cross-platform parity
+- [`ios-native/README.md`](ios-native/README.md): native iOS module
+- [`ios-native/PARITY.md`](ios-native/PARITY.md): cross-platform parity
   matrix

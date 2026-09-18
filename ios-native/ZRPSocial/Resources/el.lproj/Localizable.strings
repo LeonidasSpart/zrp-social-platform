@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Χορηγούμενο";
 "ios.a11y.sponsoredPost" = "Χορηγούμενη ανάρτηση από τον/την {name}";
 "ios.call.missedTitle" = "Αναπάντητη κλήση";
-"ios.call.missedBody" = "Ο/Η {name} προσπάθησε να σας καλέσει. Το ZRP για iPhone δεν μπορεί ακόμα να δεχτεί κλήσεις — μπορείτε να απαντήσετε στο zrp.one.";
+"ios.call.missedBody" = "Ο/Η {name} προσπάθησε να σας καλέσει. Το ZRP για iPhone δεν μπορεί ακόμα να δεχτεί κλήσεις; μπορείτε να απαντήσετε στο zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Κάποιος";
 "ios.group.untitled" = "Ομάδα";

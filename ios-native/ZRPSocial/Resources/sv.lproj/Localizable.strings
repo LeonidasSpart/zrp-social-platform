@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "Sponsrat";
 "ios.a11y.sponsoredPost" = "Sponsrat inlägg från {name}";
 "ios.call.missedTitle" = "Missat samtal";
-"ios.call.missedBody" = "{name} försökte ringa dig. ZRP för iPhone kan inte ta emot samtal än — du kan svara på zrp.one.";
+"ios.call.missedBody" = "{name} försökte ringa dig. ZRP för iPhone kan inte ta emot samtal än; du kan svara på zrp.one.";
 "ios.call.dismiss" = "OK";
 "ios.call.unknownCaller" = "Någon";
 "ios.group.untitled" = "Grupp";

@@ -1335,7 +1335,7 @@
 "ios.ads.sponsored" = "إعلان ممول";
 "ios.a11y.sponsoredPost" = "منشور ممول من {name}";
 "ios.call.missedTitle" = "مكالمة فائتة";
-"ios.call.missedBody" = "حاول {name} الاتصال بك. لا يمكن لتطبيق ZRP على iPhone استقبال المكالمات بعد — يمكنك الرد على zrp.one.";
+"ios.call.missedBody" = "حاول {name} الاتصال بك. لا يمكن لتطبيق ZRP على iPhone استقبال المكالمات بعد، يمكنك الرد على zrp.one.";
 "ios.call.dismiss" = "حسنًا";
 "ios.call.unknownCaller" = "شخص ما";
 "ios.group.untitled" = "مجموعة";

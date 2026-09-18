@@ -34,9 +34,9 @@ else, with no parallel social system and no exemptions.
 
 | Rule | Where it lives |
 | --- | --- |
-| Never invent a fact, figure, quote or link | `grounding.ts` — every rendition is validated before it can publish; a failure is `FAILED`, never a fallback summary |
-| One event, one post — not fifteen | `dedupe.ts` (exact fingerprint + fuzzy match) and the unique `idempotencyKey` on `NewsPublication` |
-| Never publish the same story twice | `idempotencyKeyFor(storyId, language)` under a UNIQUE constraint — a database guarantee, not a planner promise |
+| Never invent a fact, figure, quote or link | `grounding.ts`: every rendition is validated before it can publish; a failure is `FAILED`, never a fallback summary |
+| One event, one post, not fifteen | `dedupe.ts` (exact fingerprint + fuzzy match) and the unique `idempotencyKey` on `NewsPublication` |
+| Never publish the same story twice | `idempotencyKeyFor(storyId, language)` under a UNIQUE constraint: a database guarantee, not a planner promise |
 | Never reproduce an article | Only the headline and the publisher's own syndicated abstract are ever stored, capped at 600 characters; the article page is never fetched |
 | Respect robots.txt, rate limits, ETags | `robots.ts`, `ingest.ts` (conditional GET, one request per source per cycle, exponential backoff) |
 | Never reuse an image without permission | `NewsSource.allowImages` defaults false; the post publishes as text plus source link |
@@ -52,7 +52,7 @@ else, with no parallel social system and no exemptions.
 
 Provisioned from the roster in `src/lib/news/feeds.ts`: global desks,
 regional desks, travel desks and one desk per country in
-`src/lib/news/config.ts` — 100+ in total.
+`src/lib/news/config.ts`: 100+ in total.
 
 Every one of them:
 
@@ -63,7 +63,7 @@ Every one of them:
 - has **no password**, and an email in the RFC 2606 `.invalid` TLD, so no
   sign-in flow can ever authenticate as one
 - uses the **existing** official ZRP assets (`/icon-512.png`,
-  `/og-image.png`) unmodified — no ZRP logo is created, recoloured or
+  `/og-image.png`) unmodified: no ZRP logo is created, recoloured or
   regenerated anywhere in this system
 - is created **disabled**
 
@@ -122,14 +122,14 @@ hourly-runner.ts`, started from `src/instrumentation.ts`): the app runs
 hour, and its distributed lock plus per-publication idempotency keys make
 an overlapping run a no-op rather than a double post. This replaced an
 earlier design where `.github/workflows/cron-news-pipeline.yml` alone
-drove the cycle — measured against that workflow's own run history it
+drove the cycle; measured against that workflow's own run history it
 delivered roughly 43% of its scheduled runs (one every ~4.7 hours against
 a nominal schedule, with gaps up to 6.6 hours).
 
 The GitHub Actions workflow still exists and now fires twice an hour
 (`0 * * * *` and `30 * * * *`) as a backup, safe for the same
 lock/idempotency reasons. Either trigger calls the same cron route; that
-is the *cycle* cadence, not a per-feed one — each cycle spreads its
+is the *cycle* cadence, not a per-feed one: each cycle spreads its
 publications across the following interval, and every feed still has its
 own gap and cap.
 
@@ -140,7 +140,7 @@ own gap and cap.
 | `prisma migrate deploy` (or `db push`) for `20260908220000_zrp_news_network` | new tables and the `User.isEditorialFeed` column |
 | `CRON_SECRET` set on the app **and** as a repository secret | the cron route fails closed without it |
 | `DEEPSEEK_API_KEY` | summarisation and localisation |
-| `REDIS_URL` | the pipeline lock. **Without Redis the pipeline refuses to run** — see `lock.ts` for why this fails closed. A transient Redis outage now heals on its own: the client recovers and the next cycle runs, with no redeploy |
+| `REDIS_URL` | the pipeline lock. **Without Redis the pipeline refuses to run**: see `lock.ts` for why this fails closed. A transient Redis outage now heals on its own: the client recovers and the next cycle runs, with no redeploy |
 | Nothing else | no new npm dependency was added |
 
 ---
@@ -150,17 +150,17 @@ own gap and cap.
 Do this in order. Do not skip to step 7.
 
 1. **Deploy** the migration and confirm the app starts.
-2. **Seed sources** — Sources tab → *Install the starter source list*.
-3. **Verify every source** — press *Verify* on each one. It performs a
+2. **Seed sources**: Sources tab → *Install the starter source list*.
+3. **Verify every source**: press *Verify* on each one. It performs a
    single live fetch and reports the item count and whether robots.txt
    permits it, **without publishing anything**. Disable or correct
    whatever fails. ⚠️ The seeded feed URLs were never reachable from the
    build environment, so treat all of them as unverified until this step
    passes.
-4. **Provision pilot feeds** — Feeds tab → *Provision pilot feeds*. This
+4. **Provision pilot feeds**: Feeds tab → *Provision pilot feeds*. This
    creates ZRP News World, ZRP News Switzerland / France / Germany /
    Italy and ZRP Travel, all **disabled**.
-5. **Enable one feed only** — ZRP News World. Leave the rest off.
+5. **Enable one feed only**: ZRP News World. Leave the rest off.
 6. **Run one cycle manually** and read the results: the editorial queue
    (does the summary match the sources?), the publication (is attribution
    present and correct?), the post itself in the real feed.
@@ -177,7 +177,7 @@ the first.
 
 ## Validation status
 
-Validated against real backing services — a real Redis server, real HTTP
+Validated against real backing services: a real Redis server, real HTTP
 origin servers, the real `openai` SDK over real sockets, and real
 Postgres:
 
@@ -198,11 +198,11 @@ Postgres:
 1. A real request to `api.deepseek.com` with the production key. The
    build environment's network policy denies every external host, so the
    model integration was validated against a local OpenAI-compatible
-   endpoint using the production client factory — the wire protocol,
+   endpoint using the production client factory: the wire protocol,
    timeouts and error handling are covered, the upstream service is not.
 2. A real connection to Railway's Redis instance.
 3. Every seeded feed URL. None has ever been fetched. Run the admin
-   verify action on each one first — see the pilot steps below.
+   verify action on each one first: see the pilot steps below.
 
 ## Tests
 
@@ -217,7 +217,7 @@ backoff, the roster's safety properties, and cron authorization.
 Integration coverage (real Postgres): idempotency under a retried cycle,
 publication into a real `Post`, refusal to publish through a disabled feed
 or a banned account, takedown, visible corrections, provisioning
-idempotency and username protection — plus an end-to-end cycle proving
+idempotency and username protection, plus an end-to-end cycle proving
 that three outlets reporting one event produce **one** post with three
 attributions, and that a failed source, a failed summary or a quiet hour
 produces nothing at all.

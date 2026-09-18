@@ -28,7 +28,7 @@ details.
 A report is easiest to act on when it contains:
 
 - A description of the vulnerability and the impact you believe it has.
-- The affected surface — the web application, the API (`src/app/api/**`),
+- The affected surface: the web application, the API (`src/app/api/**`),
   the native Android app (`android-native/`), the native iOS app
   (`ios-native/`), the Capacitor shells (`android/`, `ios/`), or the
   realtime server (`server.js`).
@@ -36,7 +36,7 @@ A report is easiest to act on when it contains:
   you know it.
 - Step-by-step reproduction instructions, and a minimal proof of concept
   if you have one.
-- What an attacker could achieve — for example reading another user's
+- What an attacker could achieve: for example reading another user's
   private data, acting on their behalf, bypassing an authorisation check,
   or escalating to admin.
 - Any logs, request/response captures or screenshots that help, with
@@ -79,7 +79,7 @@ The following are generally not treated as vulnerabilities on their own:
 - Reports about third-party services or dependencies that are not
   exploitable through ZRP. Please report those to the upstream project,
   and tell us if ZRP is affected.
-- Rate limits, spam or abuse-handling opinions with no security impact —
+- Rate limits, spam or abuse-handling opinions with no security impact;
   use the in-product reporting flows instead.
 - Vulnerabilities that require a rooted, jailbroken or otherwise
   attacker-controlled device on which the attacker is already the user.

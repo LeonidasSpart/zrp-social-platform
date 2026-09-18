@@ -4,12 +4,12 @@ Audit of how the Prisma schema reaches production and what happens when a
 migration is added, fails, or runs against a database in an unknown state.
 Every conclusion below is tagged with how it was established:
 
-- **PROVEN FROM CODE** — read directly from files in this repository.
-- **PROVEN FROM MIGRATION TEST** — reproduced against a disposable local
+- **PROVEN FROM CODE**: read directly from files in this repository.
+- **PROVEN FROM MIGRATION TEST**: reproduced against a disposable local
   PostgreSQL 16 instance (`prisma/schema.prisma` + `prisma/migrations/`
   unmodified).
-- **PROVEN FROM CI CONFIGURATION** — read directly from `.github/workflows/`.
-- **REQUIRES RAILWAY VERIFICATION** — cannot be determined from the
+- **PROVEN FROM CI CONFIGURATION**: read directly from `.github/workflows/`.
+- **REQUIRES RAILWAY VERIFICATION**: cannot be determined from the
   repository; must be checked in the Railway dashboard / against the live
   production database.
 
@@ -19,7 +19,7 @@ Every conclusion below is tagged with how it was established:
   PROVEN FROM CODE: `package.json` only wires `postinstall` → `prisma
   generate` (schema.prisma:1, package.json:11); `npm start` runs
   `NODE_ENV=production node server.js` and nothing in `server.js` touches
-  the schema engine — its only Prisma calls are ordinary query-layer calls
+  the schema engine; its only Prisma calls are ordinary query-layer calls
   plus the legacy plaintext→bcrypt password migration
   (`legacy-passwords.js`, unrelated to schema). Confirmed by `grep -n
   "prisma\|migrate" server.js`: only `prisma.<model>.*` queries and
@@ -34,12 +34,12 @@ Every conclusion below is tagged with how it was established:
   listing). That means Railway has been building this service purely by
   Nixpacks auto-detection from `package.json` (`npm install` → `npm start`)
   with whatever build/start/pre-deploy commands are set in the Railway
-  **dashboard** — none of that is visible from GitHub.
+  **dashboard**; none of that is visible from GitHub.
 - **The only documented migration step is a manual, human-run command** in
   `README.md:438` (`npx prisma migrate deploy`, part of the *local dev
   setup* instructions, not a production runbook) and
   `README-ZRP-MUSIC.md:26`. `docs/zrp-news-network.md:128` documents a
-  production requirement as **"`prisma migrate deploy` (or `db push`)"** —
+  production requirement as **"`prisma migrate deploy` (or `db push`)"**:
   i.e. the two are treated as interchangeable in existing project
   documentation. Section 3 below shows why that is dangerous.
 
@@ -48,23 +48,23 @@ entirely manual, undocumented, unenforced step performed by whoever has
 `DATABASE_URL` and remembers to run it, at a point in the deploy relative
 to the app boot that isn't fixed by any config. There is currently no
 mechanism by which two Railway instances could run a migration
-concurrently, because *nothing* runs a migration automatically — but that
+concurrently, because *nothing* runs a migration automatically, but that
 also means there is no gate preventing a new application version from
 starting against an old/partial schema.
 
 ## 2. `migration_lock.toml` was missing
 
 PROVEN FROM CODE / git history: `git log --all -- prisma/migrations/migration_lock.toml`
-returns nothing — the file has never existed in this repository, and it is
+returns nothing; the file has never existed in this repository, and it is
 not in `.gitignore`. This is the file Prisma uses to pin the migration
 history to one provider (`postgresql`) and refuse to apply migrations
 generated for a different one. Its absence didn't break `prisma migrate
 deploy` in testing (Prisma tolerates a missing lock file at deploy time),
-but it removes a real safety net and is non-standard — every project
+but it removes a real safety net and is non-standard; every project
 created or maintained with `prisma migrate dev` has one. **Fixed** in this
 change (see Section 6).
 
-## 3. The migration history does not reproduce the schema — the core finding
+## 3. The migration history does not reproduce the schema: the core finding
 
 PROVEN FROM MIGRATION TEST. `prisma/schema.prisma` defines **82 models**.
 `prisma/migrations/` contains **11 migrations** as of this update (2 added
@@ -77,7 +77,7 @@ creates `User` or `Post`):
 `add_ambassador_program`, `play_reaction_sequence_types`,
 `add_consumed_payment_transaction`, `ambassador_code_of_conduct_acceptance`,
 `add_conversation_clearance`. None of them contains `CREATE
-TABLE "User"` or `CREATE TABLE "Post"` (checked directly — `grep -rl
+TABLE "User"` or `CREATE TABLE "Post"` (checked directly: `grep -rl
 'CREATE TABLE "User"' prisma/migrations/` matches nothing), and the first
 migration's own SQL (`ALTER TABLE "MusicArtist" ADD CONSTRAINT ...
 REFERENCES "User"("id")`) assumes `User` already exists.
@@ -93,7 +93,7 @@ Database error: ERROR: relation "User" does not exist
 
 **This means the migration history, on its own, cannot build the current
 schema on a truly fresh database.** It only ever "worked" on top of a
-database that already had the ~73 tables the migrations don't create —
+database that already had the ~73 tables the migrations don't create,
 which is only possible if those tables were created some other way (most
 likely `prisma db push`, which `docs/zrp-news-network.md` itself lists as
 an accepted alternative to `migrate deploy`).
@@ -106,7 +106,7 @@ to tell which one is true:
   operator ran `prisma migrate resolve --applied <name>` for each migration
   at some point, without that action being recorded anywhere in
   git). In this case `prisma migrate deploy` works correctly going forward
-  — reproduced below.
+  reproduced below.
 - **Production has never had `_prisma_migrations` baselined**, and its
   ~73 pre-existing tables were synced purely with `db push`. In this case
   the *very first* `prisma migrate deploy` run against it will fail
@@ -121,12 +121,12 @@ to tell which one is true:
   existing production database: https://pris.ly/d/migrate-baseline
   ```
 
-  This fails *closed* (no partial/corrupting writes — Prisma refuses to
+  This fails *closed* (no partial/corrupting writes; Prisma refuses to
   touch a non-empty, untracked schema) but it does mean a production
   release could be blocked the first time anyone tries to run migrations
   through the normal path.
 
-Baselining, once done correctly, does produce a healthy ongoing state —
+Baselining, once done correctly, does produce a healthy ongoing state,
 reproduced by resolving all migrations as applied against the db-push-synced
 database above:
 
@@ -152,7 +152,7 @@ ORDER BY started_at;
   production is **not** correctly baselined, and the pre-deploy migration
   step added in this change (Section 6) **will fail on the next deploy**
   until an operator baselines it (see the two `prisma migrate resolve`
-  forms above — never `prisma migrate reset`, which is destructive).
+  forms above; never `prisma migrate reset`, which is destructive).
 - If it does, production is already in a healthy, resolvable state and no
   further action is needed before the next deploy.
 
@@ -170,8 +170,8 @@ default. Specifically:
 | `zrp_music` | New tables only, all FKs reference pre-existing tables. Safe. |
 | `music_album_track_order` | Two nullable `ADD COLUMN`s (`coverKey`, `trackNumber`). Additive, safe on any table size (Postgres 11+ adds a nullable/constant-default column as a metadata-only operation, no table rewrite). |
 | `add_fcm_token` | New table + FK to `User`. Safe. |
-| `zrp_news_network` | `ALTER TABLE "User" ADD COLUMN "isEditorialFeed" BOOLEAN NOT NULL DEFAULT false` — safe under Postgres 11+ (constant default, no rewrite/lock beyond the metadata change) plus 8 new tables. Safe. |
-| `add_group_chat_conversations` | `ALTER TABLE "Message" ... ALTER COLUMN "receiverId" DROP NOT NULL` — this *widens* a constraint (nullable), which is always safe and reversible; existing rows are untouched. New `conversationId` column added nullable, no backfill — existing DM rows correctly have no conversation, matching the feature being new. Safe. |
+| `zrp_news_network` | `ALTER TABLE "User" ADD COLUMN "isEditorialFeed" BOOLEAN NOT NULL DEFAULT false`: safe under Postgres 11+ (constant default, no rewrite/lock beyond the metadata change) plus 8 new tables. Safe. |
+| `add_group_chat_conversations` | `ALTER TABLE "Message" ... ALTER COLUMN "receiverId" DROP NOT NULL`: this *widens* a constraint (nullable), which is always safe and reversible; existing rows are untouched. New `conversationId` column added nullable, no backfill; existing DM rows correctly have no conversation, matching the feature being new. Safe. |
 | `news_gaming_category` | `ALTER TYPE ... ADD VALUE IF NOT EXISTS` on two enums, no use of the new value in the same migration (which Postgres would reject inside one transaction). `IF NOT EXISTS` makes it idempotent/safe to re-run. Safe. |
 | `add_ambassador_program` | New table + two FKs to `User`. Safe. |
 | `play_reaction_sequence_types` | Same `ADD VALUE IF NOT EXISTS` pattern as above. Safe. |
@@ -180,7 +180,7 @@ default. Specifically:
 | `add_conversation_clearance` | New table + two FKs to `User`, plus one unique and one non-unique index. Safe. |
 
 **Conclusion: no destructive or unsafe operation exists in the tracked
-migrations themselves.** The entire P0 risk is in Section 3 — the
+migrations themselves.** The entire P0 risk is in Section 3: the
 migration *history* is incomplete relative to the schema, not that any
 individual migration is badly written.
 
@@ -201,35 +201,35 @@ Two things follow from this:
    leaves a half-applied migration's DDL in place.
 2. But the **migration history itself is left "dirty"**: the row is
    neither `finished_at` (succeeded) nor `rolled_back_at` (acknowledged
-   as rolled back). Every subsequent `prisma migrate deploy` — including
-   an identical retry — fails immediately with the same `P3018` without
+   as rolled back). Every subsequent `prisma migrate deploy` (including
+   an identical retry) fails immediately with the same `P3018` without
    attempting anything, until an operator explicitly runs `prisma migrate
    resolve --rolled-back <name>` (safe, since Postgres already rolled the
    DDL back) or fixes the root cause and runs `--applied` if it actually
    did apply outside a transaction. **This is a manual, human recovery
-   step — there is no automatic self-heal.**
+   step; there is no automatic self-heal.**
 
 With the pre-deploy command added in Section 6, this failure mode blocks
 the deploy (Railway does not cut traffic to the new release if its
 pre-deploy command exits non-zero) rather than starting a new app instance
-against a half-migrated schema — but an operator must still intervene to
+against a half-migrated schema, but an operator must still intervene to
 unstick the migration history before the *next* deploy attempt can even
 try again.
 
 ## 6. What was changed, and why
 
 Per the brief, the fix is **not** "add `prisma migrate deploy` to `npm
-start`" — that would run the schema engine on every instance on every
+start`": that would run the schema engine on every instance on every
 boot, with no concurrency protection if Railway ever scales this service
 beyond one instance, and no way to stop a broken app version from starting
 merely because its migration attempt failed after the fact. Instead:
 
-1. **`prisma/migrations/migration_lock.toml`** (new file) — restores the
+1. **`prisma/migrations/migration_lock.toml`** (new file): restores the
    provider lock (`provider = "postgresql"`) that should exist per Prisma's
    own convention and was missing (Section 2). Verified it doesn't change
    `prisma validate` / `prisma migrate status` output.
 
-2. **`railway.json`** (new file) — declares a Railway **pre-deploy
+2. **`railway.json`** (new file): declares a Railway **pre-deploy
    command**: `npx prisma migrate deploy`. This is Railway's dedicated
    release-phase mechanism, distinct from the app's start command: it runs
    once, in a single ephemeral container, *before* the new deployment's
@@ -237,7 +237,7 @@ merely because its migration attempt failed after the fact. Instead:
    traffic if it fails. That satisfies the requirements in the brief that
    don't fit a startup hook: one execution per deploy (not per instance,
    so no concurrent-migration race even if this service is scaled to N
-   replicas), and a hard gate — a failed migration blocks the rollout
+   replicas), and a hard gate: a failed migration blocks the rollout
    instead of shipping a new app version against an incomplete schema.
 
    **REQUIRES RAILWAY VERIFICATION**, and this is important enough to
@@ -254,10 +254,10 @@ merely because its migration attempt failed after the fact. Instead:
      Deploy tab after this merges, and that a deliberate failing run (e.g.
      temporarily pointing at a bad `DATABASE_URL` in a preview
      environment) actually blocks traffic cutover as described.
-   - The `_prisma_migrations` baseline state from Section 3 — do this
+   - The `_prisma_migrations` baseline state from Section 3: do this
      **before** merging/deploying this change, since an unbaselined
      production database will make the very next deploy's pre-deploy step
-     fail (safely — the old release keeps serving — but the deploy won't
+     fail (safely: the old release keeps serving, but the deploy won't
      go out until it's fixed).
 
 3. **This document.**
@@ -266,7 +266,7 @@ Nothing else was touched: `server.js`, `package.json` scripts, the
 existing migration files, and `prisma/schema.prisma` are all unmodified.
 `docs/zrp-news-network.md`'s "`prisma migrate deploy` (or `db push`)" line
 is News Network documentation (out of this task's scope) but is flagged
-here because Section 3 shows those two are not interchangeable — that
+here because Section 3 shows those two are not interchangeable; that
 line should be corrected by whoever owns that surface.
 
 ## 7. Commands run and results
@@ -292,7 +292,7 @@ Database schema is up to date!
 
 $ npx prisma validate && npx prisma migrate status   # with migration_lock.toml restored
 The schema at prisma/schema.prisma is valid 🚀
-(status output unchanged — file has no effect on deploy-time behavior)
+(status output unchanged: file has no effect on deploy-time behavior)
 ```
 
 All tests ran against a disposable local PostgreSQL 16 instance created
@@ -302,12 +302,12 @@ connected to.
 ## 8. Open items (not resolved by this change)
 
 - **REQUIRES RAILWAY VERIFICATION**: the `_prisma_migrations` baseline
-  state in production (Section 3) — this determines whether the next
+  state in production (Section 3): this determines whether the next
   deploy's pre-deploy command succeeds or blocks.
 - **REQUIRES RAILWAY VERIFICATION**: whether `railway.json` config-as-code
   is actually honored by this service's Railway project, and Railway's
   current, live-documented behavior for `preDeployCommand` (could not be
-  re-checked against `docs.railway.com` from this sandbox — see Section 6).
+  re-checked against `docs.railway.com` from this sandbox; see Section 6).
 - **NOT VERIFIED**: whether Railway currently runs multiple instances
   (replicas) of this service. If it does today and a migration were ever
   invoked from application startup instead of the pre-deploy step added
@@ -319,24 +319,24 @@ connected to.
   entirely on the unverified production state above; writing one blind,
   from a sandbox with no access to the real schema or its data, risks
   doing the wrong thing to a database I cannot inspect. This should be
-  done — if it turns out to be needed at all — by whoever performs the
+  done, if it turns out to be needed at all, by whoever performs the
   Railway verification in Section 3, using `prisma migrate diff` against
   the real production database once its state is known.
 
 ## 9. Prisma connection pool footprint (final closure-pass addendum)
 
 PROVEN FROM CODE. Every process this application runs is `node server.js`
-(`npm start`/`npm run dev` both boot through it — see CLAUDE.md), and
+(`npm start`/`npm run dev` both boot through it; see CLAUDE.md), and
 exactly two `PrismaClient` instances exist per such process, confirmed by
 `grep -rn "new PrismaClient" --include=*.js --include=*.ts .` outside
 `node_modules`:
 
 1. **`server.js`'s own client** (its `const prisma = new PrismaClient({
    adapter: new PrismaPg({ connectionString: ..., connectionTimeoutMillis:
-   5000 }) })`) — used for socket-relay authorization queries and the
+   5000 }) })`): used for socket-relay authorization queries and the
    boot-time legacy-password migration. **No `max` is set on its `PrismaPg`
    adapter**, so it takes `pg`'s own `Pool` default, which is **10**.
-2. **`src/lib/db.ts`'s singleton** (`globalForPrisma.prisma`) — used by
+2. **`src/lib/db.ts`'s singleton** (`globalForPrisma.prisma`): used by
    every Next.js API route (~220 handlers) via the same process, since
    `server.js` hands API requests to Next's own request handler in-process
    rather than spawning a separate server. Its adapter sets `max: 20`
@@ -344,7 +344,7 @@ exactly two `PrismaClient` instances exist per such process, confirmed by
 
 **Worst case per process (per Railway replica): 10 + 20 = 30 concurrent
 Postgres connections**, if both pools are simultaneously saturated. This
-is the number that matters — not "singleton", which is true of each
+is the number that matters, not "singleton", which is true of each
 client individually but says nothing about the combined footprint of the
 two that coexist in the same process.
 
@@ -363,7 +363,7 @@ than a lower per-plan cap.
 scales linearly with it: `30 × N`. N=3 (90 connections) already consumes
 nearly the entire default 100-connection budget before any other consumer
 (an admin running Studio, a one-off script, a second service sharing the
-same database) is counted — at that point either the two pools' `max`
+same database) is counted: at that point either the two pools' `max`
 values need to shrink, or the database's own `max_connections` needs to
 be confirmed to exceed the actual replica count's total. This is a real,
 quantifiable constraint on how far this service can scale horizontally
