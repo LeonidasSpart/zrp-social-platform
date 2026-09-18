@@ -153,6 +153,17 @@
     <string name="settings_city">Город</string>
     <string name="settings_country">Страна</string>
     <string name="settings_website">Веб-сайт</string>
+    <string name="settings_professional_profile_title">Профессиональный профиль</string>
+    <string name="settings_professional_profile_hint">Отображается в вашем профиле рядом с категорией отрасли.</string>
+    <string name="settings_headline">Профессиональный заголовок</string>
+    <string name="settings_headline_placeholder">например, продукт-дизайнер в Acme</string>
+    <string name="settings_company">Компания</string>
+    <string name="settings_company_placeholder">Компания или организация</string>
+    <string name="settings_position">Должность</string>
+    <string name="settings_position_placeholder">Ваша роль или должность</string>
+    <string name="settings_skills">Навыки</string>
+    <string name="settings_skills_placeholder">например, дизайн, маркетинг, продажи</string>
+    <string name="settings_skills_hint">Разделяйте навыки запятыми</string>
     <string name="settings_update_profile">Обновить профиль</string>
     <string name="settings_saving">Сохранение...</string>
     <string name="settings_change_password_title">Изменить пароль</string>

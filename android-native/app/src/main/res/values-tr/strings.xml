@@ -153,6 +153,17 @@
     <string name="settings_city">Şehir</string>
     <string name="settings_country">Ülke</string>
     <string name="settings_website">Web Sitesi</string>
+    <string name="settings_professional_profile_title">Profesyonel profil</string>
+    <string name="settings_professional_profile_hint">Profilinizde sektör kategorinizle birlikte gösterilir.</string>
+    <string name="settings_headline">Profesyonel Unvan</string>
+    <string name="settings_headline_placeholder">örn. Acme\'de Ürün Tasarımcısı</string>
+    <string name="settings_company">Şirket</string>
+    <string name="settings_company_placeholder">Şirket veya kuruluş</string>
+    <string name="settings_position">Pozisyon</string>
+    <string name="settings_position_placeholder">Rolünüz veya unvanınız</string>
+    <string name="settings_skills">Yetenekler</string>
+    <string name="settings_skills_placeholder">örn. Tasarım, Pazarlama, Satış</string>
+    <string name="settings_skills_hint">Yetenekleri virgülle ayırın</string>
     <string name="settings_update_profile">Profili Güncelle</string>
     <string name="settings_saving">Kaydediliyor...</string>
     <string name="settings_change_password_title">Şifreyi Değiştir</string>

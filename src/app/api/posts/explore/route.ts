@@ -5,11 +5,14 @@ import { prisma } from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
 import { viewablePostAuthorFilter } from "@/lib/permissions";
 import { applyPremiumGating } from "@/lib/premium-content";
+import { applyGeoBoost } from "@/lib/feed/geo-boost";
 
 export const dynamic = 'force-dynamic';
 
-// ─── Score = engagement / age_in_hours (capped to avoid Infinity) ──
-function calculateScore(post: any) {
+// ─── Score = engagement / age_in_hours (capped to avoid Infinity),
+// with a modest same-country boost folded in - see
+// src/lib/feed/geo-boost.ts for why this is additive, not a filter. ──
+function calculateScore(post: any, viewerCountryCode: string | null) {
   const likes = post._count?.likes || 0;
   const comments = post._count?.comments || 0;
   const reposts = post._count?.reposts || 0;
@@ -22,7 +25,8 @@ function calculateScore(post: any) {
   const ageHours = Math.max(0.001, ageMs / (1000 * 60 * 60));
 
   // New posts get a huge score, older posts get proportionally lower
-  return engagement / ageHours;
+  const baseScore = engagement / ageHours;
+  return applyGeoBoost(baseScore, viewerCountryCode, post.author?.countryCode ?? null);
 }
 
 // "Trending" (the Explore tab of that name) is a genuinely different
@@ -45,8 +49,23 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
+    // Read once per request, never cached across users - see the cache
+    // key below, which is already scoped per userId, so a viewer's own
+    // countryCode naturally can't leak into another viewer's cached
+    // ranked list.
+    const viewerCountryCode = userId
+      ? (await prisma.user.findUnique({ where: { id: userId }, select: { countryCode: true } }))
+          ?.countryCode ?? null
+      : null;
+
     const { searchParams } = new URL(req.url);
     const sort = searchParams.get("sort") === "trending" ? "trending" : "forYou";
+    // National trending (Phase 10): an explicit, opt-in scope on top of
+    // "Trending", not a blend into its score - a viewer who doesn't ask
+    // for it always sees the same global leaderboard as before. Only
+    // meaningful for sort=trending; "For You" already carries the
+    // same-country signal via calculateScore's modest boost instead.
+    const scope = sort === "trending" && searchParams.get("scope") === "national" ? "national" : "global";
     const cursorParam = searchParams.get("cursor");
     // Cursor here is a numeric offset into the ranked list, since ranking
     // is score-based (engagement/age), not something a DB cursor can walk
@@ -95,100 +114,139 @@ export async function GET(req: NextRequest) {
     // deliberately excluding votes_user for the same reason `liked`
     // above isn't cached: the viewer's own vote must never wait out the
     // 5-minute cache window to show up.
-    const cacheKey = `explore:${userId || 'anon'}:${sort}:v7`;
-    let ranked: any[] | null = await getCached(cacheKey);
+    // Bumped v7 -> v8: "For You" scoring now folds in the same-country
+    // boost (author.countryCode), so a v7 entry cached before this
+    // change would keep serving a ranking computed without it for up to
+    // 5 minutes - treated as a distinct cache generation instead.
+    const cacheKey = `explore:${userId || 'anon'}:${sort}:${scope}:v8`;
+    // Cached as {ranked, scopeFallback} rather than a bare array so a
+    // national-scope fallback decision (see below) survives a cache
+    // hit too, not just the request that first computed it.
+    const cachedEntry = await getCached<{ ranked: any[]; scopeFallback: boolean }>(cacheKey);
+    let ranked: any[] | null = cachedEntry?.ranked ?? null;
+    // Only true when a national-scope request had too little local
+    // activity and fell back to the global leaderboard instead -
+    // "insufficient data" per Phase 10, never a silently empty result.
+    let scopeFallback = cachedEntry?.scopeFallback ?? false;
 
     if (!ranked) {
+      const MIN_NATIONAL_CANDIDATES = 5;
+      const nationalFilter =
+        scope === "national" && viewerCountryCode ? { author: { countryCode: viewerCountryCode } } : {};
+
       // ─── Fetch a wider candidate pool so pagination has real depth ──
-      const posts = await prisma.post.findMany({
-        take: 200,
-        orderBy: { createdAt: "desc" },
-        where: {
-          authorId: { notIn: excludedAuthorIds },
-          status: "published",
-          scheduledAt: null,
-          author: viewablePostAuthorFilter(userId),
-          ...(sort === "trending"
-            ? { createdAt: { gte: new Date(Date.now() - TRENDING_WINDOW_HOURS * 60 * 60 * 1000) } }
-            : {}),
-        },
-        select: {
-          id: true,
-          authorId: true,
-          content: true,
-          imageUrl: true,
-          // imageUrls (plural, the multi-image array) was missing here
-          // entirely - this is the route the default "For You" tab
-          // actually calls (page.tsx uses /api/posts/explore for
-          // "for-you" and only /api/posts for "following"), so every
-          // post returned here always had imageUrls undefined,
-          // regardless of how many images it actually had. PostCard's
-          // grid-vs-single-image check depends entirely on this field
-          // being present, so it silently fell back to rendering just
-          // the first image via the legacy singular imageUrl every time.
-          imageUrls: true,
-          mediaType: true,
-          createdAt: true,
-          views: true,
-          isPoll: true,
-          poll: {
-            select: {
-              id: true,
-              question: true,
-              options: true,
-              votes: true,
-              expiresAt: true,
+      const fetchCandidates = (countryFiltered: boolean) =>
+        prisma.post.findMany({
+          take: 200,
+          orderBy: { createdAt: "desc" },
+          where: {
+            authorId: { notIn: excludedAuthorIds },
+            status: "published",
+            scheduledAt: null,
+            author: {
+              ...viewablePostAuthorFilter(userId),
+              ...(countryFiltered ? nationalFilter.author : {}),
             },
+            ...(sort === "trending"
+              ? { createdAt: { gte: new Date(Date.now() - TRENDING_WINDOW_HOURS * 60 * 60 * 1000) } }
+              : {}),
           },
-          author: {
-            select: {
-              id: true,
-              username: true,
-              name: true,
-              avatarUrl: true,
-              badgeType: true,
-            },
-          },
-          quotePost: {
-            select: {
-              id: true,
-              content: true,
-              imageUrl: true,
-              imageUrls: true,
-              mediaType: true,
-              createdAt: true,
-              author: {
-                select: {
-                  id: true,
-                  username: true,
-                  name: true,
-                  avatarUrl: true,
-                  badgeType: true,
-                },
-              },
-              _count: {
-                select: {
-                  likes: true,
-                  comments: true,
-                  reposts: true,
-                  quotedBy: true,
-                },
+          select: {
+            id: true,
+            authorId: true,
+            content: true,
+            imageUrl: true,
+            // imageUrls (plural, the multi-image array) was missing here
+            // entirely - this is the route the default "For You" tab
+            // actually calls (page.tsx uses /api/posts/explore for
+            // "for-you" and only /api/posts for "following"), so every
+            // post returned here always had imageUrls undefined,
+            // regardless of how many images it actually had. PostCard's
+            // grid-vs-single-image check depends entirely on this field
+            // being present, so it silently fell back to rendering just
+            // the first image via the legacy singular imageUrl every time.
+            imageUrls: true,
+            mediaType: true,
+            createdAt: true,
+            views: true,
+            isPoll: true,
+            poll: {
+              select: {
+                id: true,
+                question: true,
+                options: true,
+                votes: true,
+                expiresAt: true,
               },
             },
-          },
-          _count: {
-            select: {
-              likes: true,
-              comments: true,
-              reposts: true,
-              quotedBy: true,
+            author: {
+              select: {
+                id: true,
+                username: true,
+                name: true,
+                avatarUrl: true,
+                badgeType: true,
+                countryCode: true,
+              },
+            },
+            quotePost: {
+              select: {
+                id: true,
+                content: true,
+                imageUrl: true,
+                imageUrls: true,
+                mediaType: true,
+                createdAt: true,
+                author: {
+                  select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    avatarUrl: true,
+                    badgeType: true,
+                  },
+                },
+                _count: {
+                  select: {
+                    likes: true,
+                    comments: true,
+                    reposts: true,
+                    quotedBy: true,
+                  },
+                },
+              },
+            },
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                reposts: true,
+                quotedBy: true,
+              },
             },
           },
-        },
-      });
+        });
+
+      let posts = await fetchCandidates(scope === "national");
+      if (scope === "national" && posts.length < MIN_NATIONAL_CANDIDATES) {
+        // Not enough local activity to build a real national ranking -
+        // fall back to the global candidate pool rather than showing a
+        // near-empty or misleadingly thin "national trending" list.
+        posts = await fetchCandidates(false);
+        scopeFallback = true;
+      }
 
       // ─── Compute scores and sort ─────────────────────────────────────
-      const scoreFn = sort === "trending" ? calculateTrendingScore : calculateScore;
+      // "Trending" deliberately stays a raw, unpersonalized engagement
+      // leaderboard - no geo boost here. The same-country signal only
+      // applies to "For You" (calculateScore); a distinct, explicit
+      // national/local trending view is `?sort=trending&scope=national`
+      // below, which filters the candidate pool instead of reweighting
+      // this global one.
+      const scoreFn =
+        sort === "trending"
+          ? (post: any) => calculateTrendingScore(post)
+          : (post: any) => calculateScore(post, viewerCountryCode);
       ranked = posts
         .map((post) => ({
           ...post,
@@ -197,7 +255,7 @@ export async function GET(req: NextRequest) {
         .sort((a, b) => b.score - a.score);
 
       // ─── Cache the full ranked list for 5 minutes ────────────────────
-      await setCached(cacheKey, ranked, 300);
+      await setCached(cacheKey, { ranked, scopeFallback }, 300);
     }
 
     let page = ranked.slice(offset, offset + limit);
@@ -248,7 +306,7 @@ export async function GET(req: NextRequest) {
     // the cached payload itself.
     page = await applyPremiumGating(page, userId);
 
-    return NextResponse.json({ posts: page, nextCursor });
+    return NextResponse.json({ posts: page, nextCursor, scope, scopeFallback });
   } catch (error) {
     console.error("Explore error:", error);
     return NextResponse.json({ error: "Failed to fetch explore posts" }, { status: 500 });

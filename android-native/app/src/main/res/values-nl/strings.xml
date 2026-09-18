@@ -153,6 +153,17 @@
     <string name="settings_city">Stad</string>
     <string name="settings_country">Land</string>
     <string name="settings_website">Website</string>
+    <string name="settings_professional_profile_title">Professioneel profiel</string>
+    <string name="settings_professional_profile_hint">Wordt getoond op je profiel naast je branche.</string>
+    <string name="settings_headline">Professionele functietitel</string>
+    <string name="settings_headline_placeholder">bijv. Product Designer bij Acme</string>
+    <string name="settings_company">Bedrijf</string>
+    <string name="settings_company_placeholder">Bedrijf of organisatie</string>
+    <string name="settings_position">Functie</string>
+    <string name="settings_position_placeholder">Je functie of titel</string>
+    <string name="settings_skills">Vaardigheden</string>
+    <string name="settings_skills_placeholder">bijv. Design, Marketing, Sales</string>
+    <string name="settings_skills_hint">Scheid vaardigheden met komma\'s</string>
     <string name="settings_update_profile">Profiel bijwerken</string>
     <string name="settings_saving">Opslaan...</string>
     <string name="settings_change_password_title">Wachtwoord wijzigen</string>

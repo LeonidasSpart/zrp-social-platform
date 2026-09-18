@@ -710,6 +710,17 @@ settings.websitePlaceholder
 settings.city
 settings.country
 settings.countryPlaceholder
+settings.professionalProfileTitle
+settings.professionalProfileHint
+settings.headline
+settings.headlinePlaceholder
+settings.company
+settings.companyPlaceholder
+settings.position
+settings.positionPlaceholder
+settings.skills
+settings.skillsPlaceholder
+settings.skillsHint
 settings.profilePicture
 settings.successProfileUpdated
 settings.errProfileUpdateFailed

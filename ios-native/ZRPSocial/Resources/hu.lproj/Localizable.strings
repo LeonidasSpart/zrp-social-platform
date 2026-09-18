@@ -675,6 +675,17 @@
 "settings.city" = "Város";
 "settings.country" = "Ország";
 "settings.countryPlaceholder" = "Ország";
+"settings.professionalProfileTitle" = "Szakmai profil";
+"settings.professionalProfileHint" = "A profilodon jelenik meg az iparági kategóriáddal együtt.";
+"settings.headline" = "Szakmai cím";
+"settings.headlinePlaceholder" = "pl. Product Designer az Acme-nél";
+"settings.company" = "Cég";
+"settings.companyPlaceholder" = "Cég vagy szervezet";
+"settings.position" = "Beosztás";
+"settings.positionPlaceholder" = "A szereped vagy beosztásod";
+"settings.skills" = "Készségek";
+"settings.skillsPlaceholder" = "pl. Design, Marketing, Értékesítés";
+"settings.skillsHint" = "Válaszd el a készségeket vesszővel";
 "settings.profilePicture" = "Profilkép";
 "settings.successProfileUpdated" = "A profil sikeresen frissült!";
 "settings.errProfileUpdateFailed" = "Nem sikerült frissíteni a profilt";

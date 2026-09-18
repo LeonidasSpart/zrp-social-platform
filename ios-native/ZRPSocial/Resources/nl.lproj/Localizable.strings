@@ -675,6 +675,17 @@
 "settings.city" = "Stad";
 "settings.country" = "Land";
 "settings.countryPlaceholder" = "Land";
+"settings.professionalProfileTitle" = "Professioneel profiel";
+"settings.professionalProfileHint" = "Wordt getoond op je profiel naast je branche.";
+"settings.headline" = "Professionele functietitel";
+"settings.headlinePlaceholder" = "bijv. Product Designer bij Acme";
+"settings.company" = "Bedrijf";
+"settings.companyPlaceholder" = "Bedrijf of organisatie";
+"settings.position" = "Functie";
+"settings.positionPlaceholder" = "Je functie of titel";
+"settings.skills" = "Vaardigheden";
+"settings.skillsPlaceholder" = "bijv. Design, Marketing, Sales";
+"settings.skillsHint" = "Scheid vaardigheden met komma's";
 "settings.profilePicture" = "Profielfoto";
 "settings.successProfileUpdated" = "Profiel bijgewerkt!";
 "settings.errProfileUpdateFailed" = "Bijwerken van profiel mislukt";

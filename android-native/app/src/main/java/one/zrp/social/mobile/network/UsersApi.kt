@@ -52,6 +52,13 @@ data class UserProfile(
     val solanaWallet: String?,
     val category: String?,
     val showCategory: Boolean,
+    // Professional profile fields (category above is the existing
+    // industry taxonomy, these four are new) - see
+    // docs/user-geography-and-acquisition.md on the backend repo.
+    val headline: String? = null,
+    val company: String? = null,
+    val position: String? = null,
+    val skills: List<String> = emptyList(),
     val creatorProfile: CreatorProfileInfo?,
     val _count: ProfileCounts,
     val isFollowing: Boolean,

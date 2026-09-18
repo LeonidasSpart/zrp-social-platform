@@ -675,6 +675,17 @@
 "settings.city" = "市区町村";
 "settings.country" = "国";
 "settings.countryPlaceholder" = "国";
+"settings.professionalProfileTitle" = "プロフェッショナルプロフィール";
+"settings.professionalProfileHint" = "業種カテゴリーと共にプロフィールに表示されます。";
+"settings.headline" = "肩書き";
+"settings.headlinePlaceholder" = "例：Acme プロダクトデザイナー";
+"settings.company" = "会社";
+"settings.companyPlaceholder" = "会社または組織";
+"settings.position" = "役職";
+"settings.positionPlaceholder" = "あなたの役職";
+"settings.skills" = "スキル";
+"settings.skillsPlaceholder" = "例：デザイン、マーケティング、営業";
+"settings.skillsHint" = "スキルはカンマで区切ってください";
 "settings.profilePicture" = "プロフィール写真";
 "settings.successProfileUpdated" = "プロフィールを更新しました！";
 "settings.errProfileUpdateFailed" = "プロフィールの更新に失敗しました";

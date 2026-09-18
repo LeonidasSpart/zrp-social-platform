@@ -152,6 +152,17 @@
     <string name="settings_city">शहर</string>
     <string name="settings_country">देश</string>
     <string name="settings_website">वेबसाइट</string>
+    <string name="settings_professional_profile_title">प्रोफेशनल प्रोफ़ाइल</string>
+    <string name="settings_professional_profile_hint">यह आपकी इंडस्ट्री कैटेगरी के साथ आपकी प्रोफ़ाइल पर दिखाया जाता है।</string>
+    <string name="settings_headline">प्रोफेशनल हेडलाइन</string>
+    <string name="settings_headline_placeholder">जैसे, Acme में प्रोडक्ट डिज़ाइनर</string>
+    <string name="settings_company">कंपनी</string>
+    <string name="settings_company_placeholder">कंपनी या संगठन</string>
+    <string name="settings_position">पद</string>
+    <string name="settings_position_placeholder">आपकी भूमिका या पद</string>
+    <string name="settings_skills">स्किल्स</string>
+    <string name="settings_skills_placeholder">जैसे, डिज़ाइन, मार्केटिंग, सेल्स</string>
+    <string name="settings_skills_hint">स्किल्स को कॉमा से अलग करें</string>
     <string name="settings_update_profile">प्रोफ़ाइल अपडेट करें</string>
     <string name="settings_saving">सेव हो रहा है...</string>
     <string name="settings_change_password_title">पासवर्ड बदलें</string>

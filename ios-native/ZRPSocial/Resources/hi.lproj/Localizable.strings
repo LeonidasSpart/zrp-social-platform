@@ -675,6 +675,17 @@
 "settings.city" = "शहर";
 "settings.country" = "देश";
 "settings.countryPlaceholder" = "देश";
+"settings.professionalProfileTitle" = "प्रोफेशनल प्रोफ़ाइल";
+"settings.professionalProfileHint" = "यह आपकी इंडस्ट्री कैटेगरी के साथ आपकी प्रोफ़ाइल पर दिखाया जाता है।";
+"settings.headline" = "प्रोफेशनल हेडलाइन";
+"settings.headlinePlaceholder" = "जैसे, Acme में प्रोडक्ट डिज़ाइनर";
+"settings.company" = "कंपनी";
+"settings.companyPlaceholder" = "कंपनी या संगठन";
+"settings.position" = "पद";
+"settings.positionPlaceholder" = "आपकी भूमिका या पद";
+"settings.skills" = "स्किल्स";
+"settings.skillsPlaceholder" = "जैसे, डिज़ाइन, मार्केटिंग, सेल्स";
+"settings.skillsHint" = "स्किल्स को कॉमा से अलग करें";
 "settings.profilePicture" = "प्रोफ़ाइल फ़ोटो";
 "settings.successProfileUpdated" = "प्रोफ़ाइल सफलतापूर्वक अपडेट हो गई!";
 "settings.errProfileUpdateFailed" = "प्रोफ़ाइल अपडेट नहीं हो सकी";

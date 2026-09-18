@@ -675,6 +675,17 @@
 "settings.city" = "المدينة";
 "settings.country" = "الدولة";
 "settings.countryPlaceholder" = "الدولة";
+"settings.professionalProfileTitle" = "الملف المهني";
+"settings.professionalProfileHint" = "يظهر في ملفك الشخصي بجانب فئة الصناعة الخاصة بك.";
+"settings.headline" = "العنوان المهني";
+"settings.headlinePlaceholder" = "مثال: مصمم منتجات في Acme";
+"settings.company" = "الشركة";
+"settings.companyPlaceholder" = "الشركة أو المؤسسة";
+"settings.position" = "المنصب";
+"settings.positionPlaceholder" = "دورك أو منصبك";
+"settings.skills" = "المهارات";
+"settings.skillsPlaceholder" = "مثال: التصميم، التسويق، المبيعات";
+"settings.skillsHint" = "افصل بين المهارات بفواصل";
 "settings.profilePicture" = "صورة الملف الشخصي";
 "settings.successProfileUpdated" = "تم تحديث الملف الشخصي بنجاح!";
 "settings.errProfileUpdateFailed" = "تعذّر تحديث الملف الشخصي";

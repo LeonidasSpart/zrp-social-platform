@@ -675,6 +675,17 @@
 "settings.city" = "Město";
 "settings.country" = "Země";
 "settings.countryPlaceholder" = "Země";
+"settings.professionalProfileTitle" = "Profesní profil";
+"settings.professionalProfileHint" = "Zobrazuje se na tvém profilu spolu s kategorií odvětví.";
+"settings.headline" = "Profesní nadpis";
+"settings.headlinePlaceholder" = "např. Product Designer ve společnosti Acme";
+"settings.company" = "Společnost";
+"settings.companyPlaceholder" = "Společnost nebo organizace";
+"settings.position" = "Pozice";
+"settings.positionPlaceholder" = "Tvoje role nebo pozice";
+"settings.skills" = "Dovednosti";
+"settings.skillsPlaceholder" = "např. Design, Marketing, Prodej";
+"settings.skillsHint" = "Odděl dovednosti čárkami";
 "settings.profilePicture" = "Profilový obrázek";
 "settings.successProfileUpdated" = "Profil byl úspěšně aktualizován!";
 "settings.errProfileUpdateFailed" = "Aktualizace profilu se nezdařila";

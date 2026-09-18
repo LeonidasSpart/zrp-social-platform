@@ -153,6 +153,17 @@
     <string name="settings_city">Stadt</string>
     <string name="settings_country">Land</string>
     <string name="settings_website">Website</string>
+    <string name="settings_professional_profile_title">Berufliches Profil</string>
+    <string name="settings_professional_profile_hint">Wird auf deinem Profil neben deiner Branche angezeigt.</string>
+    <string name="settings_headline">Berufsbezeichnung</string>
+    <string name="settings_headline_placeholder">z. B. Product Designer bei Acme</string>
+    <string name="settings_company">Unternehmen</string>
+    <string name="settings_company_placeholder">Unternehmen oder Organisation</string>
+    <string name="settings_position">Stelle</string>
+    <string name="settings_position_placeholder">Deine Rolle oder dein Titel</string>
+    <string name="settings_skills">Fähigkeiten</string>
+    <string name="settings_skills_placeholder">z. B. Design, Marketing, Vertrieb</string>
+    <string name="settings_skills_hint">Trenne Fähigkeiten mit Kommas</string>
     <string name="settings_update_profile">Profil aktualisieren</string>
     <string name="settings_saving">Wird gespeichert...</string>
     <string name="settings_change_password_title">Passwort ändern</string>

@@ -21,7 +21,14 @@ struct EditProfileView: View {
     @State private var name = ""
     @State private var bio = ""
     @State private var location = ""
+    @State private var country = ""
     @State private var website = ""
+    @State private var headline = ""
+    @State private var company = ""
+    @State private var position = ""
+    /// Edited as one comma-separated field, same convention as the web
+    /// settings page - split into the real array only in `save()`.
+    @State private var skillsInput = ""
     @State private var avatarUrl: String?
     @State private var coverUrl: String?
 
@@ -67,7 +74,12 @@ struct EditProfileView: View {
             name = profile.name ?? ""
             bio = profile.bio ?? ""
             location = profile.location ?? ""
+            country = profile.country ?? ""
             website = profile.website ?? ""
+            headline = profile.headline ?? ""
+            company = profile.company ?? ""
+            position = profile.position ?? ""
+            skillsInput = profile.skills.joined(separator: ", ")
             avatarUrl = profile.avatarUrl
             coverUrl = profile.coverUrl
             loadState = .loaded
@@ -84,11 +96,31 @@ struct EditProfileView: View {
                 labelled(.settingsDisplayName) { field(.settingsDisplayName, text: $name) }
                 labelled(.settingsBio) { multiline(.settingsBioPlaceholder, text: $bio) }
                 labelled(.settingsCity) { field(.settingsCityPlaceholder, text: $location) }
+                labelled(.settingsCountry) { field(.settingsCountryPlaceholder, text: $country) }
                 labelled(.settingsWebsite) {
                     field(.settingsWebsitePlaceholder, text: $website)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                }
+
+                Text(.settingsProfessionalProfileTitle)
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.top, ZrpSpacing.sm)
+                Text(.settingsProfessionalProfileHint)
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+
+                labelled(.settingsHeadline) { field(.settingsHeadlinePlaceholder, text: $headline) }
+                labelled(.settingsCompany) { field(.settingsCompanyPlaceholder, text: $company) }
+                labelled(.settingsPosition) { field(.settingsPositionPlaceholder, text: $position) }
+                labelled(.settingsSkills) {
+                    VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
+                        field(.settingsSkillsPlaceholder, text: $skillsInput)
+                        Text(.settingsSkillsHint)
+                            .font(.caption2)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    }
                 }
 
                 if let message {
@@ -203,12 +235,22 @@ struct EditProfileView: View {
             isSaving = true
             defer { isSaving = false }
             do {
+                let skills = skillsInput
+                    .split(separator: ",")
+                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                    .filter { !$0.isEmpty }
+
                 try await users.updateProfile(
                     ProfileUpdateRequest(
                         name: name.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
                         bio: bio.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
                         location: location.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
-                        website: website.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+                        country: country.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+                        website: website.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+                        headline: headline.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+                        company: company.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+                        position: position.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+                        skills: skills
                     )
                 )
                 message = SettingsMessage(text: L10n.string(.settingsSuccessProfileUpdated), isError: false)

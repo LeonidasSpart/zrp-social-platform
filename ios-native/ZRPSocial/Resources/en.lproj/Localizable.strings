@@ -675,6 +675,17 @@
 "settings.city" = "City";
 "settings.country" = "Country";
 "settings.countryPlaceholder" = "Country";
+"settings.professionalProfileTitle" = "Professional profile";
+"settings.professionalProfileHint" = "Shown on your profile alongside your industry category.";
+"settings.headline" = "Professional headline";
+"settings.headlinePlaceholder" = "e.g. Product Designer at Acme";
+"settings.company" = "Company";
+"settings.companyPlaceholder" = "Company or organization";
+"settings.position" = "Position";
+"settings.positionPlaceholder" = "Your role or title";
+"settings.skills" = "Skills";
+"settings.skillsPlaceholder" = "e.g. Design, Marketing, Sales";
+"settings.skillsHint" = "Separate skills with commas";
 "settings.profilePicture" = "Profile Picture";
 "settings.successProfileUpdated" = "Profile updated successfully!";
 "settings.errProfileUpdateFailed" = "Failed to update profile";

@@ -153,6 +153,17 @@
     <string name="settings_city">Град</string>
     <string name="settings_country">Държава</string>
     <string name="settings_website">Уебсайт</string>
+    <string name="settings_professional_profile_title">Професионален профил</string>
+    <string name="settings_professional_profile_hint">Показва се в профила ти заедно с категорията на индустрията ти.</string>
+    <string name="settings_headline">Професионално заглавие</string>
+    <string name="settings_headline_placeholder">напр. продуктов дизайнер в Acme</string>
+    <string name="settings_company">Компания</string>
+    <string name="settings_company_placeholder">Компания или организация</string>
+    <string name="settings_position">Длъжност</string>
+    <string name="settings_position_placeholder">Твоята роля или длъжност</string>
+    <string name="settings_skills">Умения</string>
+    <string name="settings_skills_placeholder">напр. Дизайн, Маркетинг, Продажби</string>
+    <string name="settings_skills_hint">Раздели уменията със запетаи</string>
     <string name="settings_update_profile">Актуализирай профила</string>
     <string name="settings_saving">Запазване...</string>
     <string name="settings_change_password_title">Смени паролата</string>

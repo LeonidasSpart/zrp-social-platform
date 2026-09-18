@@ -20,12 +20,23 @@ export async function GET(req: NextRequest) {
 
     // Minimal targeting: an untargeted campaign (targetCountries: [])
     // shows to everyone; a targeted one only shows to a signed-in viewer
-    // whose own User.country - already collected for the world map and
-    // country stats, not new data collection - is in the list. A
-    // logged-out viewer only ever sees untargeted campaigns, since their
-    // country isn't known without asking for it.
+    // whose normalized `User.countryCode` (ISO 3166-1 alpha-2, derived
+    // from the free-text `country` via src/lib/geo/country.ts) is in
+    // the list. A logged-out viewer only ever sees untargeted
+    // campaigns, since their country isn't known without asking for it.
+    //
+    // ⚠️ This used to match `targetCountries` against the free-text
+    // `User.country` field directly - since `targetCountries` is
+    // documented/populated as ISO codes but `country` is whatever a
+    // user typed ("Switzerland"/"Suisse"/"CH"/...), that comparison
+    // would silently never match for the vast majority of profiles.
+    // Nothing in the app currently writes `targetCountries` yet, so
+    // this was latent rather than actively broken in production, but
+    // any future admin UI that sets it must write ISO codes and rely on
+    // this route comparing against `countryCode`, not `country`.
     const viewerCountry = viewerId
-      ? (await prisma.user.findUnique({ where: { id: viewerId }, select: { country: true } }))?.country
+      ? (await prisma.user.findUnique({ where: { id: viewerId }, select: { countryCode: true } }))
+          ?.countryCode
       : null;
 
     const now = new Date();

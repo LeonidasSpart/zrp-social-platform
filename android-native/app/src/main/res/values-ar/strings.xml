@@ -153,6 +153,17 @@
     <string name="settings_city">المدينة</string>
     <string name="settings_country">الدولة</string>
     <string name="settings_website">الموقع الإلكتروني</string>
+    <string name="settings_professional_profile_title">الملف المهني</string>
+    <string name="settings_professional_profile_hint">يظهر في ملفك الشخصي بجانب فئة الصناعة الخاصة بك.</string>
+    <string name="settings_headline">العنوان المهني</string>
+    <string name="settings_headline_placeholder">مثال: مصمم منتجات في Acme</string>
+    <string name="settings_company">الشركة</string>
+    <string name="settings_company_placeholder">الشركة أو المؤسسة</string>
+    <string name="settings_position">المنصب</string>
+    <string name="settings_position_placeholder">دورك أو منصبك</string>
+    <string name="settings_skills">المهارات</string>
+    <string name="settings_skills_placeholder">مثال: التصميم، التسويق، المبيعات</string>
+    <string name="settings_skills_hint">افصل بين المهارات بفواصل</string>
     <string name="settings_update_profile">تحديث الملف الشخصي</string>
     <string name="settings_saving">جارٍ الحفظ...</string>
     <string name="settings_change_password_title">تغيير كلمة المرور</string>
