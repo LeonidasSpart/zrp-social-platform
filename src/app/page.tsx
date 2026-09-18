@@ -1011,7 +1011,7 @@ export default function HomePage() {
             "@type": "WebPage",
             "@id": "https://zrp.one/#webpage",
             url: "https://zrp.one",
-            name: "ZRP Social: The First Swiss-European Social Media Platform",
+            name: "ZRP Social: Swiss-European Social Media Platform",
             description:
               "ZRP Social is a Swiss-European social media platform built in Switzerland around privacy, freedom of expression, security, and people-first communities.",
             isPartOf: { "@id": "https://zrp.one/#website" },

@@ -533,7 +533,7 @@
     <string name="profile_upload_avatar_failed">Качването на аватара бе неуспешно</string>
     <string name="profile_upload_banner_failed">Качването на банера бе неуспешно</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Първата швейцарска европейска платформа за социални медии</string>
+    <string name="auth_about_subtitle">Швейцарската европейска платформа за социални медии</string>
     <string name="auth_right_panel_footer_text">35% от печалбата отиват за благотворителност 🧡</string>
     <string name="auth_join_community">Присъедини се към общността</string>
     <string name="auth_signup_success_title">Акаунтът е създаден!</string>

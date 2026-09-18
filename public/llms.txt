@@ -1,6 +1,6 @@
 # ZRP Social
 
-> ZRP Social is the first Swiss-European social media platform, built around free speech, privacy, and security. 35% of platform profits go to charities supporting orphans, schools, hospitals, and climate relief.
+> ZRP Social is a Swiss-European social media platform, built around free speech, privacy, and security. 35% of platform profits go to charities supporting orphans, schools, hospitals, and climate relief.
 
 ## Docs
 

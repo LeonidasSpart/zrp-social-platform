@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">Prijenos profilne slike nije uspio</string>
     <string name="profile_upload_banner_failed">Prijenos naslovne slike nije uspio</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Prva švicarska europska platforma društvenih mreža</string>
+    <string name="auth_about_subtitle">Švicarska europska platforma društvenih mreža</string>
     <string name="auth_right_panel_footer_text">35% dobiti ide u dobrotvorne svrhe 🧡</string>
     <string name="auth_join_community">Pridruži se zajednici</string>
     <string name="auth_signup_success_title">Račun je kreiran!</string>

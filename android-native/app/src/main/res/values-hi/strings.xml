@@ -532,7 +532,7 @@
     <string name="profile_upload_avatar_failed">अवतार अपलोड नहीं हो सका</string>
     <string name="profile_upload_banner_failed">बैनर अपलोड नहीं हो सका</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">पहला स्विस यूरोपीय सोशल मीडिया प्लेटफ़ॉर्म</string>
+    <string name="auth_about_subtitle">स्विस यूरोपीय सोशल मीडिया प्लेटफ़ॉर्म</string>
     <string name="auth_right_panel_footer_text">मुनाफ़े का 35% चैरिटी में जाता है 🧡</string>
     <string name="auth_join_community">समुदाय से जुड़ें</string>
     <string name="auth_signup_success_title">खाता बन गया!</string>

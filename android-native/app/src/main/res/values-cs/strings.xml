@@ -537,7 +537,7 @@
     <string name="profile_upload_avatar_failed">Nahrání profilového obrázku se nezdařilo</string>
     <string name="profile_upload_banner_failed">Nahrání banneru se nezdařilo</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">První švýcarská evropská sociální síť</string>
+    <string name="auth_about_subtitle">Švýcarská evropská sociální síť</string>
     <string name="auth_right_panel_footer_text">35 % zisku jde na charitu 🧡</string>
     <string name="auth_join_community">Připoj se ke komunitě</string>
     <string name="auth_signup_success_title">Účet byl vytvořen!</string>

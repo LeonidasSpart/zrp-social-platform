@@ -532,7 +532,7 @@
     <string name="profile_upload_avatar_failed">아바타 업로드에 실패했어요</string>
     <string name="profile_upload_banner_failed">배너 업로드에 실패했어요</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">최초의 스위스 유럽 소셜 미디어 플랫폼</string>
+    <string name="auth_about_subtitle">스위스 유럽 소셜 미디어 플랫폼</string>
     <string name="auth_right_panel_footer_text">수익의 35%가 자선단체에 기부돼요 🧡</string>
     <string name="auth_join_community">커뮤니티에 참여하세요</string>
     <string name="auth_signup_success_title">계정이 생성되었어요!</string>

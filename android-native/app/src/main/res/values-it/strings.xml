@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">Caricamento avatar non riuscito</string>
     <string name="profile_upload_banner_failed">Caricamento copertina non riuscito</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">La prima piattaforma social svizzero-europea</string>
+    <string name="auth_about_subtitle">La piattaforma social svizzero-europea</string>
     <string name="auth_right_panel_footer_text">Il 35% dei profitti va in beneficenza 🧡</string>
     <string name="auth_join_community">Unisciti alla community</string>
     <string name="auth_signup_success_title">Account creato!</string>

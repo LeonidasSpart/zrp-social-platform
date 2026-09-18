@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">تعذّر رفع الصورة الرمزية</string>
     <string name="profile_upload_banner_failed">تعذّر رفع الغلاف</string>
     <string name="auth_welcome_title">ZRP اجتماعي</string>
-    <string name="auth_about_subtitle">أول منصة تواصل اجتماعي سويسرية أوروبية</string>
+    <string name="auth_about_subtitle">منصة تواصل اجتماعي سويسرية أوروبية</string>
     <string name="auth_right_panel_footer_text">يذهب 35% من الأرباح إلى الأعمال الخيرية 🧡</string>
     <string name="auth_join_community">انضم إلى المجتمع</string>
     <string name="auth_signup_success_title">تم إنشاء الحساب!</string>

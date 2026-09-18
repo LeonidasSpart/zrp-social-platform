@@ -533,7 +533,7 @@
     <string name="profile_upload_avatar_failed">Uploaden van avatar mislukt</string>
     <string name="profile_upload_banner_failed">Uploaden van banner mislukt</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">Het eerste Zwitsers-Europese socialemediaplatform</string>
+    <string name="auth_about_subtitle">Het Zwitsers-Europese socialemediaplatform</string>
     <string name="auth_right_panel_footer_text">35% van de winst gaat naar het goede doel 🧡</string>
     <string name="auth_join_community">Word lid van de community</string>
     <string name="auth_signup_success_title">Account aangemaakt!</string>

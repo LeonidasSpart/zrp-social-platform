@@ -535,7 +535,7 @@
     <string name="profile_upload_avatar_failed">Profil fotoğrafı yüklenemedi</string>
     <string name="profile_upload_banner_failed">Kapak fotoğrafı yüklenemedi</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">İlk İsviçre Avrupa Sosyal Medya Platformu</string>
+    <string name="auth_about_subtitle">İsviçre Avrupa Sosyal Medya Platformu</string>
     <string name="auth_right_panel_footer_text">Kârın %35\'i hayır kurumlarına gidiyor 🧡</string>
     <string name="auth_join_community">Topluluğa katılın</string>
     <string name="auth_signup_success_title">Hesap oluşturuldu!</string>

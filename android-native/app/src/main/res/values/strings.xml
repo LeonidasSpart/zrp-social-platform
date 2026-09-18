@@ -545,7 +545,7 @@
     <string name="profile_upload_avatar_failed">Failed to upload avatar</string>
     <string name="profile_upload_banner_failed">Failed to upload banner</string>
     <string name="auth_welcome_title">ZRP Social</string>
-    <string name="auth_about_subtitle">The First Swiss European Social Media Platform</string>
+    <string name="auth_about_subtitle">Swiss European Social Media Platform</string>
     <string name="auth_right_panel_footer_text">35% of profits go to charity 🧡</string>
     <string name="auth_join_community">Join the community</string>
     <string name="auth_signup_success_title">Account created!</string>
