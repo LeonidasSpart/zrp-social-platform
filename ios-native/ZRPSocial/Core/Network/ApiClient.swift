@@ -207,6 +207,14 @@ final class ApiClient: @unchecked Sendable {
         // never an identity claim - the real boundary stays server-side.
         request.setValue("1", forHTTPHeaderField: "x-zrp-native-app")
 
+        // Lets the backend distinguish this iOS app from Android or the
+        // website - unlike x-zrp-native-app above, this actually
+        // disambiguates *which* native platform. Only consumed today by
+        // POST /api/auth/register to attribute a signup's platform (see
+        // docs/user-geography-and-acquisition.md on the web repo), but
+        // sent on every request the same way the store-policy header is.
+        request.setValue("ios", forHTTPHeaderField: "X-Zrp-Platform")
+
         if let body = endpoint.body {
             request.httpBody = body
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

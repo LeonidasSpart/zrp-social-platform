@@ -675,6 +675,17 @@
 "settings.city" = "By";
 "settings.country" = "Land";
 "settings.countryPlaceholder" = "Land";
+"settings.professionalProfileTitle" = "Professionel profil";
+"settings.professionalProfileHint" = "Vises på din profil sammen med din branchekategori.";
+"settings.headline" = "Professionel overskrift";
+"settings.headlinePlaceholder" = "f.eks. Product Designer hos Acme";
+"settings.company" = "Virksomhed";
+"settings.companyPlaceholder" = "Virksomhed eller organisation";
+"settings.position" = "Stilling";
+"settings.positionPlaceholder" = "Din rolle eller titel";
+"settings.skills" = "Kompetencer";
+"settings.skillsPlaceholder" = "f.eks. Design, Marketing, Salg";
+"settings.skillsHint" = "Adskil kompetencer med kommaer";
 "settings.profilePicture" = "Profilbillede";
 "settings.successProfileUpdated" = "Profil opdateret!";
 "settings.errProfileUpdateFailed" = "Kunne ikke opdatere profil";

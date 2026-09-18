@@ -22,6 +22,13 @@ data class ProfileUpdateRequest(
     val location: String,
     val country: String,
     val website: String,
+    // Professional profile fields (industry reuses the existing
+    // `category` picker, not modeled here) - defaulted so any other
+    // existing call site that doesn't set them keeps compiling.
+    val headline: String = "",
+    val company: String = "",
+    val position: String = "",
+    val skills: List<String> = emptyList(),
 )
 
 data class ProfileUpdateResponse(
@@ -30,6 +37,10 @@ data class ProfileUpdateResponse(
     val location: String?,
     val country: String?,
     val website: String?,
+    val headline: String? = null,
+    val company: String? = null,
+    val position: String? = null,
+    val skills: List<String>? = null,
 )
 
 // ─── Solana receiving wallet (PUT /user, solanaWallet-only body) ────

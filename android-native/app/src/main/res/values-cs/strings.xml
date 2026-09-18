@@ -153,6 +153,17 @@
     <string name="settings_city">Město</string>
     <string name="settings_country">Země</string>
     <string name="settings_website">Web</string>
+    <string name="settings_professional_profile_title">Profesní profil</string>
+    <string name="settings_professional_profile_hint">Zobrazuje se na tvém profilu spolu s kategorií odvětví.</string>
+    <string name="settings_headline">Profesní nadpis</string>
+    <string name="settings_headline_placeholder">např. Product Designer ve společnosti Acme</string>
+    <string name="settings_company">Společnost</string>
+    <string name="settings_company_placeholder">Společnost nebo organizace</string>
+    <string name="settings_position">Pozice</string>
+    <string name="settings_position_placeholder">Tvoje role nebo pozice</string>
+    <string name="settings_skills">Dovednosti</string>
+    <string name="settings_skills_placeholder">např. Design, Marketing, Prodej</string>
+    <string name="settings_skills_hint">Odděl dovednosti čárkami</string>
     <string name="settings_update_profile">Aktualizovat profil</string>
     <string name="settings_saving">Ukládání...</string>
     <string name="settings_change_password_title">Změnit heslo</string>

@@ -116,7 +116,44 @@ struct ProfileUpdateRequest: Encodable, Equatable {
     let name: String?
     let bio: String?
     let location: String?
+    /// Was missing entirely on iOS - Android's ProfileEditScreen has
+    /// always had this field (network/SettingsApi.kt's own
+    /// ProfileUpdateRequest), so an iOS user could never set their
+    /// country from the app at all, only via the website. Fixed
+    /// alongside the geography/acquisition work in
+    /// docs/user-geography-and-acquisition.md, since PUT /api/user
+    /// normalizes this into countryCode on every write.
+    let country: String?
     let website: String?
+    /// New professional-profile fields, all defaulted so the existing
+    /// onboarding call site (which never sets these) doesn't need to
+    /// change.
+    let headline: String?
+    let company: String?
+    let position: String?
+    let skills: [String]?
+
+    init(
+        name: String?,
+        bio: String?,
+        location: String?,
+        country: String? = nil,
+        website: String?,
+        headline: String? = nil,
+        company: String? = nil,
+        position: String? = nil,
+        skills: [String]? = nil
+    ) {
+        self.name = name
+        self.bio = bio
+        self.location = location
+        self.country = country
+        self.website = website
+        self.headline = headline
+        self.company = company
+        self.position = position
+        self.skills = skills
+    }
 
     /// Explicit nulls: the route writes each field it is given, so an
     /// emptied box has to arrive as null rather than being dropped.
@@ -125,11 +162,16 @@ struct ProfileUpdateRequest: Encodable, Equatable {
         try container.encode(name, forKey: .name)
         try container.encode(bio, forKey: .bio)
         try container.encode(location, forKey: .location)
+        try container.encode(country, forKey: .country)
         try container.encode(website, forKey: .website)
+        try container.encode(headline, forKey: .headline)
+        try container.encode(company, forKey: .company)
+        try container.encode(position, forKey: .position)
+        try container.encode(skills, forKey: .skills)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case name, bio, location, website
+        case name, bio, location, country, website, headline, company, position, skills
     }
 }
 

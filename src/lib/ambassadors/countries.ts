@@ -423,7 +423,7 @@ export function flagEmoji(code: string): string {
  * common-usage synonyms only, sourced from the country's own current
  * or previous official English short name.
  */
-const SEARCH_ALIASES: Record<string, string[]> = {
+export const SEARCH_ALIASES: Record<string, string[]> = {
   US: ["usa", "america", "united states"],
   GB: ["uk", "britain", "great britain"],
   CI: ["ivory coast"],

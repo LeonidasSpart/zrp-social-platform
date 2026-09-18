@@ -59,6 +59,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         solanaWallet: true, // ✅ added
         category: true,
         showCategory: true,
+        headline: true,
+        company: true,
+        position: true,
+        skills: true,
         creatorProfile: {
           select: {
             tipsEnabled: true,
@@ -101,14 +105,19 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         solanaWallet: string | null; // ✅ added
         category: string | null;
         showCategory: boolean;
+        headline: string | null;
+        company: string | null;
+        position: string | null;
+        skills: string[];
       }>>`
-        SELECT 
-          id, username, "customUrl", name, bio, "avatarUrl", "coverUrl", 
-          location, country, website, "createdAt", "usernameChangedAt", 
+        SELECT
+          id, username, "customUrl", name, bio, "avatarUrl", "coverUrl",
+          location, country, website, "createdAt", "usernameChangedAt",
           "isPrivate", "badgeType", "isAdmin", "pinnedPostId",
           "banned",
           "publicLikes", "publicFollowing",
-          "solanaWallet", "category", "showCategory"
+          "solanaWallet", "category", "showCategory",
+          "headline", "company", "position", "skills"
         FROM "User"
         WHERE username ILIKE ${slug} OR "customUrl" ILIKE ${slug}
         LIMIT 1
@@ -155,6 +164,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         solanaWallet: raw.solanaWallet, // ✅ added
         category: raw.category,
         showCategory: raw.showCategory,
+        headline: raw.headline,
+        company: raw.company,
+        position: raw.position,
+        skills: raw.skills,
         creatorProfile,
         _count: {
           posts: postsCount,

@@ -675,6 +675,17 @@
 "settings.city" = "Grad";
 "settings.country" = "Država";
 "settings.countryPlaceholder" = "Država";
+"settings.professionalProfileTitle" = "Profesionalni profil";
+"settings.professionalProfileHint" = "Prikazuje se na tvom profilu uz kategoriju tvoje industrije.";
+"settings.headline" = "Profesionalni naslov";
+"settings.headlinePlaceholder" = "npr. Product Designer u Acmeu";
+"settings.company" = "Tvrtka";
+"settings.companyPlaceholder" = "Tvrtka ili organizacija";
+"settings.position" = "Pozicija";
+"settings.positionPlaceholder" = "Tvoja uloga ili titula";
+"settings.skills" = "Vještine";
+"settings.skillsPlaceholder" = "npr. Dizajn, Marketing, Prodaja";
+"settings.skillsHint" = "Odvoji vještine zarezima";
 "settings.profilePicture" = "Profilna slika";
 "settings.successProfileUpdated" = "Profil uspješno ažuriran!";
 "settings.errProfileUpdateFailed" = "Ažuriranje profila nije uspjelo";

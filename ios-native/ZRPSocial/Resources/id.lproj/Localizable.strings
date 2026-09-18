@@ -675,6 +675,17 @@
 "settings.city" = "Kota";
 "settings.country" = "Negara";
 "settings.countryPlaceholder" = "Negara";
+"settings.professionalProfileTitle" = "Profil profesional";
+"settings.professionalProfileHint" = "Ditampilkan di profil Anda beserta kategori industri Anda.";
+"settings.headline" = "Headline Profesional";
+"settings.headlinePlaceholder" = "mis. Product Designer di Acme";
+"settings.company" = "Perusahaan";
+"settings.companyPlaceholder" = "Perusahaan atau organisasi";
+"settings.position" = "Posisi";
+"settings.positionPlaceholder" = "Peran atau jabatan Anda";
+"settings.skills" = "Keahlian";
+"settings.skillsPlaceholder" = "mis. Desain, Pemasaran, Penjualan";
+"settings.skillsHint" = "Pisahkan keahlian dengan koma";
 "settings.profilePicture" = "Foto Profil";
 "settings.successProfileUpdated" = "Profil berhasil diperbarui!";
 "settings.errProfileUpdateFailed" = "Gagal memperbarui profil";

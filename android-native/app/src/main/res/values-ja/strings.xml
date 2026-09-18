@@ -152,6 +152,17 @@
     <string name="settings_city">市区町村</string>
     <string name="settings_country">国</string>
     <string name="settings_website">ウェブサイト</string>
+    <string name="settings_professional_profile_title">プロフェッショナルプロフィール</string>
+    <string name="settings_professional_profile_hint">業種カテゴリーと共にプロフィールに表示されます。</string>
+    <string name="settings_headline">肩書き</string>
+    <string name="settings_headline_placeholder">例：Acme プロダクトデザイナー</string>
+    <string name="settings_company">会社</string>
+    <string name="settings_company_placeholder">会社または組織</string>
+    <string name="settings_position">役職</string>
+    <string name="settings_position_placeholder">あなたの役職</string>
+    <string name="settings_skills">スキル</string>
+    <string name="settings_skills_placeholder">例：デザイン、マーケティング、営業</string>
+    <string name="settings_skills_hint">スキルはカンマで区切ってください</string>
     <string name="settings_update_profile">プロフィールを更新</string>
     <string name="settings_saving">保存中...</string>
     <string name="settings_change_password_title">パスワードを変更</string>

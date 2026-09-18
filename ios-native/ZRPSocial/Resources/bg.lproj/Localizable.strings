@@ -675,6 +675,17 @@
 "settings.city" = "Град";
 "settings.country" = "Държава";
 "settings.countryPlaceholder" = "Държава";
+"settings.professionalProfileTitle" = "Професионален профил";
+"settings.professionalProfileHint" = "Показва се в профила ти заедно с категорията на индустрията ти.";
+"settings.headline" = "Професионално заглавие";
+"settings.headlinePlaceholder" = "напр. продуктов дизайнер в Acme";
+"settings.company" = "Компания";
+"settings.companyPlaceholder" = "Компания или организация";
+"settings.position" = "Длъжност";
+"settings.positionPlaceholder" = "Твоята роля или длъжност";
+"settings.skills" = "Умения";
+"settings.skillsPlaceholder" = "напр. Дизайн, Маркетинг, Продажби";
+"settings.skillsHint" = "Раздели уменията със запетаи";
 "settings.profilePicture" = "Профилна снимка";
 "settings.successProfileUpdated" = "Профилът бе успешно обновен!";
 "settings.errProfileUpdateFailed" = "Обновяването на профила бе неуспешно";

@@ -675,6 +675,17 @@
 "settings.city" = "Qyteti";
 "settings.country" = "Shteti";
 "settings.countryPlaceholder" = "Shteti";
+"settings.professionalProfileTitle" = "Profili profesional";
+"settings.professionalProfileHint" = "Shfaqet në profilin tënd së bashku me kategorinë e industrisë.";
+"settings.headline" = "Titulli profesional";
+"settings.headlinePlaceholder" = "p.sh. Product Designer në Acme";
+"settings.company" = "Kompania";
+"settings.companyPlaceholder" = "Kompania ose organizata";
+"settings.position" = "Pozicioni";
+"settings.positionPlaceholder" = "Roli ose titulli juaj";
+"settings.skills" = "Aftësitë";
+"settings.skillsPlaceholder" = "p.sh. Dizajn, Marketing, Shitje";
+"settings.skillsHint" = "Ndaj aftësitë me presje";
 "settings.profilePicture" = "Foto e profilit";
 "settings.successProfileUpdated" = "Profili u përditësua me sukses!";
 "settings.errProfileUpdateFailed" = "Përditësimi i profilit dështoi";

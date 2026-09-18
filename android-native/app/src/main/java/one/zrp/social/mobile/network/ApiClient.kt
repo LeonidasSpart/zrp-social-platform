@@ -82,8 +82,23 @@ object ApiClient {
         chain.proceed(request)
     }
 
+    // Lets the backend distinguish this Android app from a browser
+    // request without device-fingerprinting - only used today by
+    // POST /api/auth/register to attribute a signup's platform (see
+    // docs/user-geography-and-acquisition.md and src/app/api/auth/
+    // register/route.ts on the web repo), but attached to every request
+    // rather than only registration so any future route can rely on it
+    // the same way the existing session-cookie header is always present.
+    private val platformHeaderInterceptor = okhttp3.Interceptor { chain ->
+        val request = chain.request().newBuilder()
+            .addHeader("X-Zrp-Platform", "android")
+            .build()
+        chain.proceed(request)
+    }
+
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(sessionCookieInterceptor)
+        .addInterceptor(platformHeaderInterceptor)
         .addInterceptor(loggingInterceptor)
         .build()
 

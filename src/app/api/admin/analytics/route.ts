@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { parseAnalyticsRange, resolveDateRange } from "@/lib/date-range";
 
 export async function GET(req: NextRequest) {
   const adminCheck = await requireAdmin();
   if (!adminCheck.authorized) return adminCheck.response;
 
   try {
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const range = parseAnalyticsRange(new URL(req.url).searchParams.get("range"));
+    const { from: rangeStart, to: now } = resolveDateRange(range);
+    // "all" resolves to no lower bound; the daily time-series query below
+    // still needs a concrete cutoff, so it falls back to the account's
+    // own earliest row for that one query only - the summary counts
+    // above are genuinely all-time regardless.
+    const dailySeriesStart = rangeStart ?? new Date(0);
 
     // ─── 1. Aggregates ──────────────────────────────────────────────
     const [usersCount, postsCount, commentsCount, likesCount, repostsCount] = await Promise.all([
@@ -20,7 +25,7 @@ export async function GET(req: NextRequest) {
       prisma.repost.count(),
     ]);
 
-    // ─── 2. Daily stats (last 30 days) ──────────────────────────────
+    // ─── 2. Daily stats (selected range) ────────────────────────────
     // Two real bugs fixed here:
     // 1. The old query unioned all 5 tables into one bare `id` column
     //    with no source-table tag, then ran the identical
@@ -47,15 +52,15 @@ export async function GET(req: NextRequest) {
         COUNT(*) FILTER (WHERE source = 'like')::int as likes,
         COUNT(*) FILTER (WHERE source = 'repost')::int as reposts
       FROM (
-        SELECT id, "createdAt", 'user' as source FROM "User" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'user' as source FROM "User" WHERE "createdAt" >= ${dailySeriesStart}
         UNION ALL
-        SELECT id, "createdAt", 'post' as source FROM "Post" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'post' as source FROM "Post" WHERE "createdAt" >= ${dailySeriesStart}
         UNION ALL
-        SELECT id, "createdAt", 'comment' as source FROM "Comment" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'comment' as source FROM "Comment" WHERE "createdAt" >= ${dailySeriesStart}
         UNION ALL
-        SELECT id, "createdAt", 'like' as source FROM "Like" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'like' as source FROM "Like" WHERE "createdAt" >= ${dailySeriesStart}
         UNION ALL
-        SELECT id, "createdAt", 'repost' as source FROM "Repost" WHERE "createdAt" >= ${thirtyDaysAgo}
+        SELECT id, "createdAt", 'repost' as source FROM "Repost" WHERE "createdAt" >= ${dailySeriesStart}
       ) t
       GROUP BY DATE("createdAt")
       ORDER BY date ASC
@@ -114,6 +119,7 @@ export async function GET(req: NextRequest) {
     const avgCommentsPerPost = totalPosts > 0 ? (totalComments / totalPosts).toFixed(1) : 0;
 
     return NextResponse.json({
+      range,
       summary: {
         users: usersCount,
         posts: postsCount,

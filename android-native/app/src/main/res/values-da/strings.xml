@@ -153,6 +153,17 @@
     <string name="settings_city">By</string>
     <string name="settings_country">Land</string>
     <string name="settings_website">Websted</string>
+    <string name="settings_professional_profile_title">Professionel profil</string>
+    <string name="settings_professional_profile_hint">Vises på din profil sammen med din branchekategori.</string>
+    <string name="settings_headline">Professionel overskrift</string>
+    <string name="settings_headline_placeholder">f.eks. Product Designer hos Acme</string>
+    <string name="settings_company">Virksomhed</string>
+    <string name="settings_company_placeholder">Virksomhed eller organisation</string>
+    <string name="settings_position">Stilling</string>
+    <string name="settings_position_placeholder">Din rolle eller titel</string>
+    <string name="settings_skills">Kompetencer</string>
+    <string name="settings_skills_placeholder">f.eks. Design, Marketing, Salg</string>
+    <string name="settings_skills_hint">Adskil kompetencer med kommaer</string>
     <string name="settings_update_profile">Opdater profil</string>
     <string name="settings_saving">Gemmer...</string>
     <string name="settings_change_password_title">Skift adgangskode</string>

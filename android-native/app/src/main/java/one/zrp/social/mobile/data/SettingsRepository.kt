@@ -67,8 +67,14 @@ class SettingsRepository {
         location: String,
         country: String,
         website: String,
+        headline: String = "",
+        company: String = "",
+        position: String = "",
+        skills: List<String> = emptyList(),
     ): Result<ProfileUpdateResponse> = safeCall("Couldn't save your profile. Please try again.") {
-        ApiClient.settingsApi.updateProfile(ProfileUpdateRequest(name, bio, location, country, website))
+        ApiClient.settingsApi.updateProfile(
+            ProfileUpdateRequest(name, bio, location, country, website, headline, company, position, skills)
+        )
     }
 
     /**

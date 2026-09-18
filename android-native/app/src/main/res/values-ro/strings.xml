@@ -153,6 +153,17 @@
     <string name="settings_city">Oraș</string>
     <string name="settings_country">Țară</string>
     <string name="settings_website">Site web</string>
+    <string name="settings_professional_profile_title">Profil profesional</string>
+    <string name="settings_professional_profile_hint">Afișat pe profilul tău alături de categoria industriei tale.</string>
+    <string name="settings_headline">Titlu profesional</string>
+    <string name="settings_headline_placeholder">ex. Product Designer la Acme</string>
+    <string name="settings_company">Companie</string>
+    <string name="settings_company_placeholder">Companie sau organizație</string>
+    <string name="settings_position">Poziție</string>
+    <string name="settings_position_placeholder">Rolul sau titlul tău</string>
+    <string name="settings_skills">Competențe</string>
+    <string name="settings_skills_placeholder">ex. Design, Marketing, Vânzări</string>
+    <string name="settings_skills_hint">Separă competențele prin virgule</string>
     <string name="settings_update_profile">Actualizează profilul</string>
     <string name="settings_saving">Se salvează...</string>
     <string name="settings_change_password_title">Schimbă parola</string>

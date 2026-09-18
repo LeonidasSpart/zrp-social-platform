@@ -675,6 +675,17 @@
 "settings.city" = "Şehir";
 "settings.country" = "Ülke";
 "settings.countryPlaceholder" = "Ülke";
+"settings.professionalProfileTitle" = "Profesyonel profil";
+"settings.professionalProfileHint" = "Profilinizde sektör kategorinizle birlikte gösterilir.";
+"settings.headline" = "Profesyonel Unvan";
+"settings.headlinePlaceholder" = "örn. Acme'de Ürün Tasarımcısı";
+"settings.company" = "Şirket";
+"settings.companyPlaceholder" = "Şirket veya kuruluş";
+"settings.position" = "Pozisyon";
+"settings.positionPlaceholder" = "Rolünüz veya unvanınız";
+"settings.skills" = "Yetenekler";
+"settings.skillsPlaceholder" = "örn. Tasarım, Pazarlama, Satış";
+"settings.skillsHint" = "Yetenekleri virgülle ayırın";
 "settings.profilePicture" = "Profil Fotoğrafı";
 "settings.successProfileUpdated" = "Profil başarıyla güncellendi!";
 "settings.errProfileUpdateFailed" = "Profil güncellenemedi";

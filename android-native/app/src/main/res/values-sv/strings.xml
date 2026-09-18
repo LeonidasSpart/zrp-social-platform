@@ -153,6 +153,17 @@
     <string name="settings_city">Stad</string>
     <string name="settings_country">Land</string>
     <string name="settings_website">Webbplats</string>
+    <string name="settings_professional_profile_title">Yrkesprofil</string>
+    <string name="settings_professional_profile_hint">Visas på din profil tillsammans med din bransch.</string>
+    <string name="settings_headline">Yrkesrubrik</string>
+    <string name="settings_headline_placeholder">t.ex. Produktdesigner på Acme</string>
+    <string name="settings_company">Företag</string>
+    <string name="settings_company_placeholder">Företag eller organisation</string>
+    <string name="settings_position">Befattning</string>
+    <string name="settings_position_placeholder">Din roll eller titel</string>
+    <string name="settings_skills">Kompetenser</string>
+    <string name="settings_skills_placeholder">t.ex. Design, Marknadsföring, Försäljning</string>
+    <string name="settings_skills_hint">Separera kompetenser med kommatecken</string>
     <string name="settings_update_profile">Uppdatera profil</string>
     <string name="settings_saving">Sparar...</string>
     <string name="settings_change_password_title">Byt lösenord</string>

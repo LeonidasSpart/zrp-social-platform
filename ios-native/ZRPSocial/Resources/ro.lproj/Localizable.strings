@@ -675,6 +675,17 @@
 "settings.city" = "Oraș";
 "settings.country" = "Țară";
 "settings.countryPlaceholder" = "Țară";
+"settings.professionalProfileTitle" = "Profil profesional";
+"settings.professionalProfileHint" = "Afișat pe profilul tău alături de categoria industriei tale.";
+"settings.headline" = "Titlu profesional";
+"settings.headlinePlaceholder" = "ex. Product Designer la Acme";
+"settings.company" = "Companie";
+"settings.companyPlaceholder" = "Companie sau organizație";
+"settings.position" = "Poziție";
+"settings.positionPlaceholder" = "Rolul sau titlul tău";
+"settings.skills" = "Competențe";
+"settings.skillsPlaceholder" = "ex. Design, Marketing, Vânzări";
+"settings.skillsHint" = "Separă competențele prin virgule";
 "settings.profilePicture" = "Poză de profil";
 "settings.successProfileUpdated" = "Profil actualizat cu succes!";
 "settings.errProfileUpdateFailed" = "Actualizarea profilului a eșuat";

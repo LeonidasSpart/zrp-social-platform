@@ -153,6 +153,17 @@
     <string name="settings_city">Qyteti</string>
     <string name="settings_country">Shteti</string>
     <string name="settings_website">Uebsajti</string>
+    <string name="settings_professional_profile_title">Profili profesional</string>
+    <string name="settings_professional_profile_hint">Shfaqet në profilin tënd së bashku me kategorinë e industrisë.</string>
+    <string name="settings_headline">Titulli profesional</string>
+    <string name="settings_headline_placeholder">p.sh. Product Designer në Acme</string>
+    <string name="settings_company">Kompania</string>
+    <string name="settings_company_placeholder">Kompania ose organizata</string>
+    <string name="settings_position">Pozicioni</string>
+    <string name="settings_position_placeholder">Roli ose titulli juaj</string>
+    <string name="settings_skills">Aftësitë</string>
+    <string name="settings_skills_placeholder">p.sh. Dizajn, Marketing, Shitje</string>
+    <string name="settings_skills_hint">Ndaj aftësitë me presje</string>
     <string name="settings_update_profile">Përditëso profilin</string>
     <string name="settings_saving">Duke ruajtur...</string>
     <string name="settings_change_password_title">Ndrysho fjalëkalimin</string>

@@ -17,6 +17,26 @@ const nextConfig = {
     optimizeCss: true,
   },
 
+  // geoip-lite (src/lib/geo/ip-lookup.ts, used by POST /api/auth/register)
+  // locates its .dat data files via path.resolve(__dirname, '../data/') -
+  // correct for a plain `require("geoip-lite")` against the real
+  // node_modules layout, but if webpack bundles the package's source into
+  // the route's server chunk (the default), __dirname at runtime becomes
+  // the chunk's own location under .next/server/, not node_modules/geoip-
+  // lite/lib/, and that relative path resolves to a directory that was
+  // never built - failing the production build at "Collecting page data"
+  // with ENOENT on geoip-country.dat. Marking the package external keeps
+  // it a real require against node_modules, where __dirname (and the data
+  // files next to it) are exactly where geoip-lite expects.
+  serverExternalPackages: ["geoip-lite"],
+  // Belt-and-suspenders for the standalone/serverless output Railway
+  // deploys: ensures the (now-external, so trace-visible) data files are
+  // actually copied into that trimmed output, not just left resolvable
+  // in this full node_modules tree.
+  outputFileTracingIncludes: {
+    "/api/**/*": ["./node_modules/geoip-lite/data/**/*"],
+  },
+
   async headers() {
     return [
       {

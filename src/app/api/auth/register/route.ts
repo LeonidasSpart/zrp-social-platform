@@ -3,8 +3,60 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/email";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, getRequestIp } from "@/lib/rate-limit";
 import { hashToken } from "@/lib/tokens";
+import { resolveCountryFromIp } from "@/lib/geo/ip-lookup";
+import { SUPPORTED_LANGUAGES } from "@/lib/translations";
+
+// ─── Signup acquisition classification (Phase 5/6 of the geo/acquisition
+// mission - see docs/user-geography-and-acquisition.md) ─────────────
+//
+// Determined once, here, and never touched again - see the
+// signupSource/signupCampaign/signupPlatform comments on the User model
+// in prisma/schema.prisma for why this must be immutable.
+//
+// DIRECT is not a guess: it specifically means "no ref/utm parameter
+// was present on this registration request" - a real, measurable fact,
+// not an assumption about how the person actually found ZRP (that
+// would require session-referrer tracking this app doesn't have, and
+// this function never invents it). "Organic" (arrived via a search
+// engine) and "direct" (typed the URL) are collapsed into this one
+// DIRECT bucket for exactly that reason - ZRP cannot honestly tell them
+// apart today.
+type SignupAttribution = { source: "DIRECT" | "REFERRAL" | "CAMPAIGN"; campaign: string | null };
+
+async function classifySignupAttribution(
+  ref: unknown,
+  utmSource: unknown,
+  utmCampaign: unknown
+): Promise<SignupAttribution> {
+  if (typeof ref === "string" && ref.trim()) {
+    const trimmedRef = ref.trim();
+    const ambassador = await prisma.ambassadorProfile.findUnique({
+      where: { invitationCode: trimmedRef },
+      select: { id: true },
+    });
+    if (ambassador) {
+      return { source: "REFERRAL", campaign: trimmedRef };
+    }
+    // An unrecognized `ref` value (typo'd, expired, or fabricated) must
+    // NOT silently fall through to DIRECT - that would misclassify a
+    // failed referral attempt as "no attribution attempted". CAMPAIGN
+    // captures "something drove this signup, we just can't identify
+    // exactly what" honestly, distinct from both REFERRAL and DIRECT.
+    return { source: "CAMPAIGN", campaign: trimmedRef };
+  }
+
+  const campaignValue =
+    (typeof utmCampaign === "string" && utmCampaign.trim()) ||
+    (typeof utmSource === "string" && utmSource.trim()) ||
+    null;
+  if (campaignValue) {
+    return { source: "CAMPAIGN", campaign: campaignValue };
+  }
+
+  return { source: "DIRECT", campaign: null };
+}
 
 export async function POST(req: NextRequest) {
   // Account creation had no rate limit at all - every signup also
@@ -15,7 +67,15 @@ export async function POST(req: NextRequest) {
   if (!limit.success) return limit.response;
 
   try {
-    const { name, username, email: rawEmail, password } = await req.json();
+    const {
+      name,
+      username,
+      email: rawEmail,
+      password,
+      ref,
+      utmSource,
+      utmCampaign,
+    } = await req.json();
 
     // ─── Validation ──────────────────────────────────────────────
     if (!rawEmail || !password || !username) {
@@ -65,6 +125,35 @@ export async function POST(req: NextRequest) {
     const token = crypto.randomBytes(32).toString("hex");
     const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
+    // ─── Immutable signup snapshot ──────────────────────────────
+    // signupCountryCode: local, in-process IP->country lookup - the raw
+    // IP resolved by getRequestIp() is used for this one lookup and is
+    // never written to the row below. See src/lib/geo/ip-lookup.ts.
+    const requestIp = getRequestIp(req);
+    const signupCountryCode = resolveCountryFromIp(requestIp);
+
+    const attribution = await classifySignupAttribution(ref, utmSource, utmCampaign);
+
+    // signupPlatform: native apps (Android/iOS) identify themselves via
+    // this header on every request (see ApiClient.kt / ApiClient.swift);
+    // its absence means the call came through the web app, the only
+    // other caller of this route.
+    const platformHeader = req.headers.get("x-zrp-platform");
+    const signupPlatform =
+      platformHeader === "android" || platformHeader === "ios" ? platformHeader : "web";
+
+    // ─── Language (mutable going forward, best-effort at signup) ────
+    // The `zrp-lang` cookie is set client-side by LanguageContext before
+    // the signup form ever submits, so it's already present on this
+    // request when the visitor changed language pre-signup. It's a
+    // plain, non-httpOnly cookie a client could in principle tamper
+    // with, so it's validated against the real supported-language list
+    // rather than trusted as-is.
+    const rawLangCookie = req.cookies.get("zrp-lang")?.value;
+    const langCookie = SUPPORTED_LANGUAGES.some((l) => l.code === rawLangCookie)
+      ? rawLangCookie
+      : null;
+
     // ─── Create user (explicitly set role) ─────────────────────
     const user = await prisma.user.create({
       data: {
@@ -75,6 +164,11 @@ export async function POST(req: NextRequest) {
         role: "USER", // ✅ explicit default
         verificationToken: hashToken(token),
         verificationTokenExpiry: expiry,
+        signupCountryCode,
+        signupSource: attribution.source,
+        signupCampaign: attribution.campaign,
+        signupPlatform,
+        languageCode: langCookie || null,
       },
     });
 

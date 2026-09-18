@@ -153,6 +153,17 @@
     <string name="settings_city">Πόλη</string>
     <string name="settings_country">Χώρα</string>
     <string name="settings_website">Ιστότοπος</string>
+    <string name="settings_professional_profile_title">Επαγγελματικό προφίλ</string>
+    <string name="settings_professional_profile_hint">Εμφανίζεται στο προφίλ σου μαζί με την κατηγορία κλάδου σου.</string>
+    <string name="settings_headline">Επαγγελματικός τίτλος</string>
+    <string name="settings_headline_placeholder">π.χ. Product Designer στην Acme</string>
+    <string name="settings_company">Εταιρεία</string>
+    <string name="settings_company_placeholder">Εταιρεία ή οργανισμός</string>
+    <string name="settings_position">Θέση</string>
+    <string name="settings_position_placeholder">Ο ρόλος ή ο τίτλος σου</string>
+    <string name="settings_skills">Δεξιότητες</string>
+    <string name="settings_skills_placeholder">π.χ. Σχεδιασμός, Μάρκετινγκ, Πωλήσεις</string>
+    <string name="settings_skills_hint">Διαχώρισε τις δεξιότητες με κόμμα</string>
     <string name="settings_update_profile">Ενημέρωση Προφίλ</string>
     <string name="settings_saving">Αποθήκευση...</string>
     <string name="settings_change_password_title">Αλλαγή Κωδικού Πρόσβασης</string>

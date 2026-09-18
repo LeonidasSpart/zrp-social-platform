@@ -675,6 +675,17 @@
 "settings.city" = "Ciudad";
 "settings.country" = "País";
 "settings.countryPlaceholder" = "País";
+"settings.professionalProfileTitle" = "Perfil profesional";
+"settings.professionalProfileHint" = "Se muestra en tu perfil junto a tu categoría de industria.";
+"settings.headline" = "Titular profesional";
+"settings.headlinePlaceholder" = "p. ej. Diseñador de Producto en Acme";
+"settings.company" = "Empresa";
+"settings.companyPlaceholder" = "Empresa u organización";
+"settings.position" = "Puesto";
+"settings.positionPlaceholder" = "Tu cargo o título";
+"settings.skills" = "Habilidades";
+"settings.skillsPlaceholder" = "p. ej. Diseño, Marketing, Ventas";
+"settings.skillsHint" = "Separa las habilidades con comas";
 "settings.profilePicture" = "Foto de perfil";
 "settings.successProfileUpdated" = "¡Perfil actualizado correctamente!";
 "settings.errProfileUpdateFailed" = "Error al actualizar el perfil";

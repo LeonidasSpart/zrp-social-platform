@@ -28,6 +28,13 @@ struct UserProfile: Decodable, Identifiable, Equatable {
     let publicFollowing: Bool
     let category: String?
     let showCategory: Bool
+    /// Professional profile fields (Phase 12/14 of
+    /// docs/user-geography-and-acquisition.md) - `category` above is the
+    /// existing industry taxonomy, these four are new.
+    let headline: String?
+    let company: String?
+    let position: String?
+    let skills: [String]
     /// `var` because the follow route returns only the resulting flag,
     /// not a refreshed profile - so a successful follow adjusts these two
     /// locally rather than leaving a visibly stale count or spending a
@@ -72,7 +79,8 @@ struct UserProfile: Decodable, Identifiable, Equatable {
         case id, username, customUrl, name, bio, avatarUrl, coverUrl
         case location, country, website, createdAt, isPrivate, badgeType
         case pinnedPostId, banned, publicLikes, publicFollowing
-        case category, showCategory, isFollowing, isBlocked
+        case category, showCategory, headline, company, position, skills
+        case isFollowing, isBlocked
         case charityContributionUsdc, milestones
         case counts = "_count"
     }

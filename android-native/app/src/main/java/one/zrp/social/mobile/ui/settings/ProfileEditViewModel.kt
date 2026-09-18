@@ -16,6 +16,12 @@ data class ProfileEditUiState(
     val location: String = "",
     val country: String = "",
     val website: String = "",
+    val headline: String = "",
+    val company: String = "",
+    val position: String = "",
+    // Edited as one comma-separated field, same convention as web and
+    // iOS - split into the real list only in save().
+    val skillsInput: String = "",
     val isSaving: Boolean = false,
     val error: String? = null,
     val saved: Boolean = false,
@@ -60,6 +66,10 @@ class ProfileEditViewModel(private val repository: SettingsRepository) : ViewMod
                             location = profile.location.orEmpty(),
                             country = profile.country.orEmpty(),
                             website = profile.website.orEmpty(),
+                            headline = profile.headline.orEmpty(),
+                            company = profile.company.orEmpty(),
+                            position = profile.position.orEmpty(),
+                            skillsInput = profile.skills.joinToString(", "),
                             solanaWallet = profile.solanaWallet.orEmpty(),
                         )
                     }
@@ -75,13 +85,28 @@ class ProfileEditViewModel(private val repository: SettingsRepository) : ViewMod
     fun onLocationChange(value: String) = _state.update { it.copy(location = value) }
     fun onCountryChange(value: String) = _state.update { it.copy(country = value) }
     fun onWebsiteChange(value: String) = _state.update { it.copy(website = value) }
+    fun onHeadlineChange(value: String) = _state.update { it.copy(headline = value) }
+    fun onCompanyChange(value: String) = _state.update { it.copy(company = value) }
+    fun onPositionChange(value: String) = _state.update { it.copy(position = value) }
+    fun onSkillsInputChange(value: String) = _state.update { it.copy(skillsInput = value) }
 
     fun save() {
         val current = _state.value
         if (current.isSaving) return
         _state.update { it.copy(isSaving = true, error = null, saved = false) }
+        val skills = current.skillsInput.split(",").map { it.trim() }.filter { it.isNotEmpty() }
         viewModelScope.launch {
-            repository.updateProfile(current.name, current.bio, current.location, current.country, current.website)
+            repository.updateProfile(
+                current.name,
+                current.bio,
+                current.location,
+                current.country,
+                current.website,
+                current.headline,
+                current.company,
+                current.position,
+                skills,
+            )
                 .onSuccess { _state.update { it.copy(isSaving = false, saved = true) } }
                 .onFailure { error -> _state.update { it.copy(isSaving = false, error = error.message) } }
         }

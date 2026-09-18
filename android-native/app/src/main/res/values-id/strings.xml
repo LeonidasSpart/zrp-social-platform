@@ -153,6 +153,17 @@
     <string name="settings_city">Kota</string>
     <string name="settings_country">Negara</string>
     <string name="settings_website">Situs Web</string>
+    <string name="settings_professional_profile_title">Profil profesional</string>
+    <string name="settings_professional_profile_hint">Ditampilkan di profil Anda beserta kategori industri Anda.</string>
+    <string name="settings_headline">Headline Profesional</string>
+    <string name="settings_headline_placeholder">mis. Product Designer di Acme</string>
+    <string name="settings_company">Perusahaan</string>
+    <string name="settings_company_placeholder">Perusahaan atau organisasi</string>
+    <string name="settings_position">Posisi</string>
+    <string name="settings_position_placeholder">Peran atau jabatan Anda</string>
+    <string name="settings_skills">Keahlian</string>
+    <string name="settings_skills_placeholder">mis. Desain, Pemasaran, Penjualan</string>
+    <string name="settings_skills_hint">Pisahkan keahlian dengan koma</string>
     <string name="settings_update_profile">Perbarui Profil</string>
     <string name="settings_saving">Menyimpan...</string>
     <string name="settings_change_password_title">Ubah Kata Sandi</string>

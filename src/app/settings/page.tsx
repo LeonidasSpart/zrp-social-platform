@@ -136,6 +136,13 @@ export default function SettingsPage() {
   const [category, setCategory] = useState<string | null>(null);
   const [showCategory, setShowCategory] = useState(true);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [headline, setHeadline] = useState("");
+  const [company, setCompany] = useState("");
+  const [position, setPosition] = useState("");
+  // Edited as a single comma-separated text field, matching every other
+  // free-text profile input on this form - split into the real
+  // string[] only when submitting (see handleUpdateProfile).
+  const [skillsInput, setSkillsInput] = useState("");
   const [newUsername, setNewUsername] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -217,6 +224,10 @@ export default function SettingsPage() {
         setWebsite(data.website || "");
         setCategory(data.category || null);
         setShowCategory(data.showCategory !== undefined ? data.showCategory : true);
+        setHeadline(data.headline || "");
+        setCompany(data.company || "");
+        setPosition(data.position || "");
+        setSkillsInput(Array.isArray(data.skills) ? data.skills.join(", ") : "");
         setNewUsername(data.username || "");
         setAvatarPreview(data.avatarUrl || null);
         setPublicLikes(data.publicLikes !== undefined ? data.publicLikes : true);
@@ -346,6 +357,13 @@ export default function SettingsPage() {
           location,
           country,
           website,
+          headline,
+          company,
+          position,
+          skills: skillsInput
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
         }),
       });
 
@@ -1033,20 +1051,78 @@ export default function SettingsPage() {
 
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                      Professional profile
+                      {t("settings.professionalProfileTitle")}
                     </h3>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
-                      Add a category to describe your account, like X's professional profiles.
+                      {t("settings.professionalProfileHint")}
                     </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          {t("settings.headline")}
+                        </label>
+                        <input
+                          type="text"
+                          value={headline}
+                          onChange={(e) => setHeadline(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          placeholder={t("settings.headlinePlaceholder")}
+                          maxLength={220}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          {t("settings.company")}
+                        </label>
+                        <input
+                          type="text"
+                          value={company}
+                          onChange={(e) => setCompany(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          placeholder={t("settings.companyPlaceholder")}
+                          maxLength={100}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          {t("settings.position")}
+                        </label>
+                        <input
+                          type="text"
+                          value={position}
+                          onChange={(e) => setPosition(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          placeholder={t("settings.positionPlaceholder")}
+                          maxLength={100}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          {t("settings.skills")}
+                        </label>
+                        <input
+                          type="text"
+                          value={skillsInput}
+                          onChange={(e) => setSkillsInput(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          placeholder={t("settings.skillsPlaceholder")}
+                        />
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t("settings.skillsHint")}</p>
+                      </div>
+                    </div>
 
                     <button
                       type="button"
                       onClick={() => setShowCategoryPicker(true)}
                       className="w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                     >
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Category</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{t("settings.category")}</span>
                       <span className="text-sm text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                        {category ? t(categoryToTranslationKey(category)) : "None"}
+                        {category ? t(categoryToTranslationKey(category)) : t("settings.categoryNone")}
                         <ChevronRight className="w-4 h-4 rtl:-scale-x-100" />
                       </span>
                     </button>
@@ -1054,7 +1130,7 @@ export default function SettingsPage() {
                     {category && (
                       <div className="flex items-center justify-between px-4 py-2.5 mt-2">
                         <span className="text-sm text-gray-700 dark:text-gray-300">
-                          Show category on profile
+                          {t("settings.showCategoryOnProfile")}
                         </span>
                         <button
                           type="button"

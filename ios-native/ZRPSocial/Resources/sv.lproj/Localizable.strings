@@ -675,6 +675,17 @@
 "settings.city" = "Stad";
 "settings.country" = "Land";
 "settings.countryPlaceholder" = "Land";
+"settings.professionalProfileTitle" = "Yrkesprofil";
+"settings.professionalProfileHint" = "Visas på din profil tillsammans med din bransch.";
+"settings.headline" = "Yrkesrubrik";
+"settings.headlinePlaceholder" = "t.ex. Produktdesigner på Acme";
+"settings.company" = "Företag";
+"settings.companyPlaceholder" = "Företag eller organisation";
+"settings.position" = "Befattning";
+"settings.positionPlaceholder" = "Din roll eller titel";
+"settings.skills" = "Kompetenser";
+"settings.skillsPlaceholder" = "t.ex. Design, Marknadsföring, Försäljning";
+"settings.skillsHint" = "Separera kompetenser med kommatecken";
 "settings.profilePicture" = "Profilbild";
 "settings.successProfileUpdated" = "Profilen har uppdaterats!";
 "settings.errProfileUpdateFailed" = "Det gick inte att uppdatera profilen";

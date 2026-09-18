@@ -153,6 +153,17 @@
     <string name="settings_city">Város</string>
     <string name="settings_country">Ország</string>
     <string name="settings_website">Weboldal</string>
+    <string name="settings_professional_profile_title">Szakmai profil</string>
+    <string name="settings_professional_profile_hint">A profilodon jelenik meg az iparági kategóriáddal együtt.</string>
+    <string name="settings_headline">Szakmai cím</string>
+    <string name="settings_headline_placeholder">pl. Product Designer az Acme-nél</string>
+    <string name="settings_company">Cég</string>
+    <string name="settings_company_placeholder">Cég vagy szervezet</string>
+    <string name="settings_position">Beosztás</string>
+    <string name="settings_position_placeholder">A szereped vagy beosztásod</string>
+    <string name="settings_skills">Készségek</string>
+    <string name="settings_skills_placeholder">pl. Design, Marketing, Értékesítés</string>
+    <string name="settings_skills_hint">Válaszd el a készségeket vesszővel</string>
     <string name="settings_update_profile">Profil frissítése</string>
     <string name="settings_saving">Mentés...</string>
     <string name="settings_change_password_title">Jelszó módosítása</string>

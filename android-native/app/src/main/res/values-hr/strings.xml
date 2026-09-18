@@ -153,6 +153,17 @@
     <string name="settings_city">Grad</string>
     <string name="settings_country">Država</string>
     <string name="settings_website">Web stranica</string>
+    <string name="settings_professional_profile_title">Profesionalni profil</string>
+    <string name="settings_professional_profile_hint">Prikazuje se na tvom profilu uz kategoriju tvoje industrije.</string>
+    <string name="settings_headline">Profesionalni naslov</string>
+    <string name="settings_headline_placeholder">npr. Product Designer u Acmeu</string>
+    <string name="settings_company">Tvrtka</string>
+    <string name="settings_company_placeholder">Tvrtka ili organizacija</string>
+    <string name="settings_position">Pozicija</string>
+    <string name="settings_position_placeholder">Tvoja uloga ili titula</string>
+    <string name="settings_skills">Vještine</string>
+    <string name="settings_skills_placeholder">npr. Dizajn, Marketing, Prodaja</string>
+    <string name="settings_skills_hint">Odvoji vještine zarezima</string>
     <string name="settings_update_profile">Ažuriraj profil</string>
     <string name="settings_saving">Spremanje...</string>
     <string name="settings_change_password_title">Promijeni lozinku</string>

@@ -152,6 +152,17 @@
     <string name="settings_city">도시</string>
     <string name="settings_country">국가</string>
     <string name="settings_website">웹사이트</string>
+    <string name="settings_professional_profile_title">전문 프로필</string>
+    <string name="settings_professional_profile_hint">업종 카테고리와 함께 프로필에 표시됩니다.</string>
+    <string name="settings_headline">전문 헤드라인</string>
+    <string name="settings_headline_placeholder">예: Acme 프로덕트 디자이너</string>
+    <string name="settings_company">회사</string>
+    <string name="settings_company_placeholder">회사 또는 단체</string>
+    <string name="settings_position">직책</string>
+    <string name="settings_position_placeholder">담당 역할 또는 직책</string>
+    <string name="settings_skills">스킬</string>
+    <string name="settings_skills_placeholder">예: 디자인, 마케팅, 영업</string>
+    <string name="settings_skills_hint">스킬은 쉼표로 구분하세요</string>
     <string name="settings_update_profile">프로필 업데이트</string>
     <string name="settings_saving">저장하는 중...</string>
     <string name="settings_change_password_title">비밀번호 변경</string>

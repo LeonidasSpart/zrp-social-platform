@@ -675,6 +675,17 @@
 "settings.city" = "도시";
 "settings.country" = "국가";
 "settings.countryPlaceholder" = "국가";
+"settings.professionalProfileTitle" = "전문 프로필";
+"settings.professionalProfileHint" = "업종 카테고리와 함께 프로필에 표시됩니다.";
+"settings.headline" = "전문 헤드라인";
+"settings.headlinePlaceholder" = "예: Acme 프로덕트 디자이너";
+"settings.company" = "회사";
+"settings.companyPlaceholder" = "회사 또는 단체";
+"settings.position" = "직책";
+"settings.positionPlaceholder" = "담당 역할 또는 직책";
+"settings.skills" = "스킬";
+"settings.skillsPlaceholder" = "예: 디자인, 마케팅, 영업";
+"settings.skillsHint" = "스킬은 쉼표로 구분하세요";
 "settings.profilePicture" = "프로필 사진";
 "settings.successProfileUpdated" = "프로필이 업데이트되었습니다!";
 "settings.errProfileUpdateFailed" = "프로필 업데이트에 실패했습니다";

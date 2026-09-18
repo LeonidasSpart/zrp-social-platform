@@ -402,6 +402,79 @@ model User {
   website           String?
   usernameChangedAt DateTime?
 
+  // ⚠️ Normalized ISO 3166-1 alpha-2 mirror of the free-text `country`
+  // above, derived via src/lib/geo/country.ts every time `country` is
+  // written (PUT /api/user). `country` stays free text for display/
+  // back-compat with existing profiles; every query that needs to
+  // compare countries (analytics, ad targeting, feed ranking, "people
+  // near you") must use `countryCode`, never `country` - a free-text
+  // "Switzerland"/"Suisse"/"Schweiz"/"CH" would otherwise never match
+  // each other. Null until the user's country is set/re-saved once
+  // this field exists (existing rows need the backfill script in
+  // scripts/backfill-country-codes.ts).
+  countryCode String?
+
+  // ─── Immutable signup snapshot (Phase 6: historical integrity) ─────
+  // Set exactly once, in POST /api/auth/register, and never touched by
+  // any other route - so a later profile country change (e.g. someone
+  // relocates from Switzerland to France) never rewrites the history of
+  // where signups actually came from. `createdAt` above already serves
+  // as the immutable signup timestamp; these fields are its geographic/
+  // acquisition counterparts. See docs/user-geography-and-acquisition.md.
+  //
+  // signupCountryCode: derived from the registering request's IP via a
+  // local (no external network call, no raw-IP retention) lookup in
+  // src/lib/geo/ip-lookup.ts - the raw IP itself is never persisted
+  // here, only the resolved two-letter code. Null when resolution
+  // fails (e.g. localhost/private-range IP in dev) - never guessed.
+  signupCountryCode String?
+
+  // signupSource: DIRECT (no ref/utm param present at registration) |
+  // REFERRAL (a `ref` param matched a real AmbassadorProfile
+  // invitationCode) | CAMPAIGN (a utm_source/utm_campaign param was
+  // present) | UNKNOWN. Never "ORGANIC" - see the module doc on
+  // src/app/api/auth/register/route.ts for why that distinction isn't
+  // measurable today and is never guessed.
+  //
+  // The DB default below is deliberately "UNKNOWN", not "DIRECT": it
+  // only ever applies to rows created before this column existed, whose
+  // real acquisition source is genuinely unknown - defaulting them to
+  // DIRECT would fabricate history that was never observed. Every row
+  // created through POST /api/auth/register from here on always sets
+  // this explicitly (DIRECT/REFERRAL/CAMPAIGN), never relying on the
+  // column default.
+  signupSource String @default("UNKNOWN")
+
+  // Raw utm_source/utm_campaign or ambassador invitationCode value that
+  // produced the signupSource above, kept for admin drill-down. Null
+  // when signupSource is DIRECT or UNKNOWN.
+  signupCampaign String?
+
+  // "web" | "android" | "ios" | "UNKNOWN", read from the new
+  // X-Zrp-Platform header native clients send (absent => "web").
+  // Immutable once set. Same reasoning as signupSource above: the
+  // column default is "UNKNOWN" so pre-migration rows aren't
+  // fabricated as "web"; every new registration sets this explicitly.
+  signupPlatform String @default("UNKNOWN")
+
+  // ─── Language (mutable) ─────────────────────────────────────────
+  // Synced from the client's chosen UI language (the same value already
+  // held client-side in the `zrp-lang` cookie / LanguageContext) via
+  // PUT /api/user and captured once at registration from that cookie
+  // when present. Unlike signup* above this is NOT immutable - it
+  // reflects the user's current language preference, for admin
+  // analytics and (future) language-aware ranking.
+  languageCode String?
+
+  // ─── Professional profile (Phase 12/14) ─────────────────────────
+  // `category` (existing field, see src/lib/professionalCategories.ts)
+  // already serves as the industry taxonomy - deliberately not
+  // duplicated here. These four are the genuinely missing fields.
+  headline String? @db.Text
+  company  String?
+  position String?
+  skills   String[] @default([])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -586,6 +659,14 @@ model User {
   // plan directly on User, since a legacy-paid user may have no
   // Subscription row yet - see docs/subscriptions.md "Legacy users").
   @@index([plan])
+
+  // Geography/acquisition analytics + feed geo-relevance + ad targeting
+  // all groupBy/filter on these - see docs/user-geography-and-acquisition.md.
+  @@index([countryCode])
+  @@index([signupCountryCode])
+  @@index([signupSource])
+  @@index([signupPlatform])
+  @@index([languageCode])
 }
 
 model JournalistProfile {
@@ -1937,8 +2018,10 @@ model AdCampaign {
   adminNote String? @db.Text
 
   // Minimal, privacy-respecting targeting: ISO-3166-1 alpha-2 codes,
-  // matched against User.country (already collected for the world map/
-  // country stats - not new data collection). Empty means untargeted/all
+  // matched against the normalized User.countryCode (never the
+  // free-text User.country, which a user could type as "Switzerland"/
+  // "Suisse"/"CH" - see src/lib/geo/country.ts and
+  // docs/user-geography-and-acquisition.md). Empty means untargeted/all
   // countries.
   targetCountries String[] @default([])
 

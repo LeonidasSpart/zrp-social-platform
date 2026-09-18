@@ -149,6 +149,72 @@ private fun ProfileEditForm(state: ProfileEditUiState, viewModel: ProfileEditVie
                 .padding(top = Spacing.md),
         )
 
+        Text(
+            text = stringResource(R.string.settings_professional_profile_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = Spacing.lg),
+        )
+        Text(
+            text = stringResource(R.string.settings_professional_profile_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+
+        OutlinedTextField(
+            value = state.headline,
+            onValueChange = viewModel::onHeadlineChange,
+            label = { Text(stringResource(R.string.settings_headline)) },
+            placeholder = { Text(stringResource(R.string.settings_headline_placeholder)) },
+            singleLine = true,
+            enabled = !state.isSaving,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.md),
+        )
+
+        OutlinedTextField(
+            value = state.company,
+            onValueChange = viewModel::onCompanyChange,
+            label = { Text(stringResource(R.string.settings_company)) },
+            placeholder = { Text(stringResource(R.string.settings_company_placeholder)) },
+            singleLine = true,
+            enabled = !state.isSaving,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.md),
+        )
+
+        OutlinedTextField(
+            value = state.position,
+            onValueChange = viewModel::onPositionChange,
+            label = { Text(stringResource(R.string.settings_position)) },
+            placeholder = { Text(stringResource(R.string.settings_position_placeholder)) },
+            singleLine = true,
+            enabled = !state.isSaving,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.md),
+        )
+
+        OutlinedTextField(
+            value = state.skillsInput,
+            onValueChange = viewModel::onSkillsInputChange,
+            label = { Text(stringResource(R.string.settings_skills)) },
+            placeholder = { Text(stringResource(R.string.settings_skills_placeholder)) },
+            singleLine = true,
+            enabled = !state.isSaving,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.md),
+        )
+        Text(
+            text = stringResource(R.string.settings_skills_hint),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp),
+        )
+
         if (state.error != null) {
             Text(
                 text = localizedError(state.error) ?: "",

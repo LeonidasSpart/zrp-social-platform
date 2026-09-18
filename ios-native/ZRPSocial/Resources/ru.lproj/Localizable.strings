@@ -675,6 +675,17 @@
 "settings.city" = "Город";
 "settings.country" = "Страна";
 "settings.countryPlaceholder" = "Страна";
+"settings.professionalProfileTitle" = "Профессиональный профиль";
+"settings.professionalProfileHint" = "Отображается в вашем профиле рядом с категорией отрасли.";
+"settings.headline" = "Профессиональный заголовок";
+"settings.headlinePlaceholder" = "например, продукт-дизайнер в Acme";
+"settings.company" = "Компания";
+"settings.companyPlaceholder" = "Компания или организация";
+"settings.position" = "Должность";
+"settings.positionPlaceholder" = "Ваша роль или должность";
+"settings.skills" = "Навыки";
+"settings.skillsPlaceholder" = "например, дизайн, маркетинг, продажи";
+"settings.skillsHint" = "Разделяйте навыки запятыми";
 "settings.profilePicture" = "Фото профиля";
 "settings.successProfileUpdated" = "Профиль успешно обновлён!";
 "settings.errProfileUpdateFailed" = "Не удалось в обновить профиль";

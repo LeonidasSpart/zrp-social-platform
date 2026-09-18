@@ -675,6 +675,17 @@
 "settings.city" = "城市";
 "settings.country" = "国家";
 "settings.countryPlaceholder" = "国家";
+"settings.professionalProfileTitle" = "专业资料";
+"settings.professionalProfileHint" = "与你的行业类别一起显示在个人资料中。";
+"settings.headline" = "专业头衔";
+"settings.headlinePlaceholder" = "例如：Acme 的产品设计师";
+"settings.company" = "公司";
+"settings.companyPlaceholder" = "公司或组织";
+"settings.position" = "职位";
+"settings.positionPlaceholder" = "你的职务或头衔";
+"settings.skills" = "技能";
+"settings.skillsPlaceholder" = "例如：设计、市场营销、销售";
+"settings.skillsHint" = "用逗号分隔各项技能";
 "settings.profilePicture" = "头像";
 "settings.successProfileUpdated" = "个人资料更新成功！";
 "settings.errProfileUpdateFailed" = "资料更新失败";

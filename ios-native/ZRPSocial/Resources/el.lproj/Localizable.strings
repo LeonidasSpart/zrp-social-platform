@@ -675,6 +675,17 @@
 "settings.city" = "Πόλη";
 "settings.country" = "Χώρα";
 "settings.countryPlaceholder" = "Χώρα";
+"settings.professionalProfileTitle" = "Επαγγελματικό προφίλ";
+"settings.professionalProfileHint" = "Εμφανίζεται στο προφίλ σου μαζί με την κατηγορία κλάδου σου.";
+"settings.headline" = "Επαγγελματικός τίτλος";
+"settings.headlinePlaceholder" = "π.χ. Product Designer στην Acme";
+"settings.company" = "Εταιρεία";
+"settings.companyPlaceholder" = "Εταιρεία ή οργανισμός";
+"settings.position" = "Θέση";
+"settings.positionPlaceholder" = "Ο ρόλος ή ο τίτλος σου";
+"settings.skills" = "Δεξιότητες";
+"settings.skillsPlaceholder" = "π.χ. Σχεδιασμός, Μάρκετινγκ, Πωλήσεις";
+"settings.skillsHint" = "Διαχώρισε τις δεξιότητες με κόμμα";
 "settings.profilePicture" = "Εικόνα προφίλ";
 "settings.successProfileUpdated" = "Το προφίλ ενημερώθηκε με επιτυχία!";
 "settings.errProfileUpdateFailed" = "Η ενημέρωση του προφίλ απέτυχε";

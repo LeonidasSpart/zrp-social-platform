@@ -153,6 +153,17 @@
     <string name="settings_city">城市</string>
     <string name="settings_country">国家</string>
     <string name="settings_website">网站</string>
+    <string name="settings_professional_profile_title">专业资料</string>
+    <string name="settings_professional_profile_hint">与你的行业类别一起显示在个人资料中。</string>
+    <string name="settings_headline">专业头衔</string>
+    <string name="settings_headline_placeholder">例如：Acme 的产品设计师</string>
+    <string name="settings_company">公司</string>
+    <string name="settings_company_placeholder">公司或组织</string>
+    <string name="settings_position">职位</string>
+    <string name="settings_position_placeholder">你的职务或头衔</string>
+    <string name="settings_skills">技能</string>
+    <string name="settings_skills_placeholder">例如：设计、市场营销、销售</string>
+    <string name="settings_skills_hint">用逗号分隔各项技能</string>
     <string name="settings_update_profile">更新资料</string>
     <string name="settings_saving">保存中...</string>
     <string name="settings_change_password_title">修改密码</string>
