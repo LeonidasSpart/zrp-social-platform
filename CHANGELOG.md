@@ -26,7 +26,102 @@ Web is.
 
 ## [Unreleased]
 
-Nothing yet.
+Changes merged to `main` since `v1.0.0` (2026-09-13), not yet tagged in a
+Web release. Web deploys continuously from `main`, so these are live in
+production; Android is versioned independently (see
+[README.md](README.md#android-and-ios-versioning-independent-of-web)) and
+iOS has no build shipped yet.
+
+### Localization
+
+- **Localization expanded from 15 to 25 languages** ("EU Wave 1") — Dutch,
+  Polish, Romanian, Czech, Hungarian, Swedish, Danish, Croatian, Bulgarian
+  and Greek added with full key parity across Web, Android and iOS
+  (#361). iOS's `.strings`/`L10nKey` generation and Android's
+  `LocalizationCompletenessTest.kt` gate were both re-verified clean
+  against all 25 languages as part of this change.
+- Fixed a systemic pattern of hardcoded, untranslated English strings in
+  API error/status responses (Web) and in Android's Repository layer,
+  found during an adversarial audit of the EU Wave 1 change before merge
+  (#361).
+- Fixed `hashtag.postCount` reusing a verb translation as a noun at
+  count = 1 ("1 post" rendering incorrectly in languages where the two
+  differ) (#361).
+- Bumped the Android release to versionCode 31 / versionName 4.0.25 to
+  ship the EU Wave 1 languages on Android's Internal Testing track (#367).
+
+### Bug Fixes
+
+- Fixed the language selector menu overflowing the viewport with no way
+  to scroll to it once the list reached 25 entries, on the desktop
+  header dropdown, the mobile drawer, and the sidebar flyout (Web) (#363).
+- Fixed like-count rollback math and stale-derived-state gaps that could
+  leave a post's displayed like count wrong after a failed or raced
+  like/unlike (#362).
+- Fixed notification deduplication and blocked-user-check gaps, and added
+  a repost quota and `@mention` support to social interactions (#356).
+- Enforced blocked-user checks on likes, comments and reposts (previously
+  only enforced for follows and messages), and fully hardened the
+  comment-repost route with the same protections every sibling toggle
+  route already had (#359).
+- Added `Notification.commentId` to fix an ambiguity where a
+  `comment_like`/`comment_repost` notification could not be reliably
+  retracted (#360).
+- Fixed the admin Subscriptions & Billing dashboard silently returning
+  wrong or empty data for its KPIs, search and filters (#355), and fixed
+  the same page's table being unreadable/squeezed and showing broken
+  avatars on mobile (#357).
+- Fixed the Ads campaign-creation crash caused by
+  `/users/[username]/posts` returning `{items}` while the caller expected
+  `{posts}` (#346).
+- Fixed a Discover 500 error when `getDiscoverReason` ran against a
+  cache-hit post (#353).
+- Fixed the Android build failing over a bogus `matchParentSize` import,
+  and fixed iOS's localization generator drifting on the `action.copy`
+  key (#350).
+
+### Features
+
+- **ZRP Discover** — a new vertical, swipeable, ranked video feed
+  (`/discover`, Web), reusing Shorts' existing video posts with
+  server-side ranking, a creator-diversity pass, viewer-state gating and
+  its own watch-signal analytics (#347, #351). Followed by a sound-
+  preference unification with Shorts and new transparency controls
+  ("Why am I seeing this") (#353). Web-only; not yet on Android or iOS.
+- **Subscription lifecycle** — a real, time-bounded `Subscription` model
+  with payment-to-entitlement, expiration and renewal-reminder engines,
+  replacing a plan flag that never expired on its own, plus an admin
+  Subscriptions & Billing dashboard (#354).
+- Made URLs inside messages and comments real, tappable links, with link
+  previews and a copy-text action for message bubbles (#348, #350).
+- Surfaced the existing repost quota to users in the UI instead of only
+  enforcing it silently server-side (#358).
+
+### Improvements
+
+- Removed a client-side session wait that delayed the home feed's first
+  load, and fixed comment composers to support multi-line text (#364).
+- Comment composers now auto-grow with content instead of a fixed height
+  (`useAutoGrowTextarea`, #364).
+
+### Performance
+
+- Lazy-loaded `simple-peer` (WebRTC signalling) so it is no longer
+  shipped on every page load, only when a call is actually placed or
+  received (#365).
+- Lazy-loaded per-item images in scrollable lists — avatars, story
+  previews, gallery tiles (#366).
+
+### Accessibility
+
+- Added `role="menu"`/`role="menuitem"` and matching `aria-haspopup` to
+  all three language-selector implementations so they're identifiable as
+  menus to assistive technology, as part of the scroll-overflow fix
+  above (#363).
+
+### Documentation
+
+- Linked the Child Safety Standards page from the site footer (#345).
 
 ---
 

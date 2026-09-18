@@ -20,7 +20,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
  * AI already have their own entry points in Header/Sidebar/BottomNav
  * and don't belong in a footer.
  *
- * Every label already existed in all 11 languages (the footer.*, nav.*
+ * Every label already existed in all 25 languages (the footer.*, nav.*
  * and help.footer.* namespaces the Header and Help Center use) - this
  * adds no new translation keys, and every href resolves to a real page
  * under src/app.
@@ -104,7 +104,7 @@ export default function Footer() {
         {/*
           Language-neutral by construction - a symbol, the brand name and
           a flag - so it needs no translation key and reads the same in
-          all 11 languages. The year comes from the clock rather than
+          all 25 languages. The year comes from the clock rather than
           being written into the source, so this line cannot quietly go
           stale.
         */}

@@ -1025,7 +1025,7 @@ export default function HomePage() {
           home does not need one - but the document still needs a
           heading, and this page had none at all, so a screen reader had
           no way to identify it. Reuses the existing nav.home string,
-          already translated into all 11 languages. */}
+          already translated into all 25 languages. */}
       <h1 className="sr-only">{t("nav.home")}</h1>
 
       <div className="relative max-w-2xl mx-auto px-3 sm:px-4 pt-0 pb-3 sm:pb-5">

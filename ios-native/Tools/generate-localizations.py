@@ -3,11 +3,11 @@
 Generate the iOS app's Localizable.strings files and its L10n key enum
 from the web app's own translation dictionary.
 
-ZRP already ships 11 officially supported languages, with real human
+ZRP already ships 25 officially supported languages, with real human
 translations, in src/lib/translations.ts. Retyping any of that into iOS
 resources by hand would guarantee drift and risk quietly dropping a
 language. Instead this reads that exact file and emits, for every one of
-those 11 languages, a .lproj/Localizable.strings containing only the keys
+those 25 languages, a .lproj/Localizable.strings containing only the keys
 iOS actually uses (Tools/ios-string-keys.txt).
 
 It also emits Core/Localization/L10nKeys.swift, so every key is reachable

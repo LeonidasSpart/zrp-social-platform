@@ -67,7 +67,7 @@ no merge conflict to resolve when two people add files at once.
 ### User-facing strings
 
 Never write a literal in a view. ZRP already ships human translations for
-11 languages in `src/lib/translations.ts`; the iOS `.strings` files and
+25 languages in `src/lib/translations.ts`; the iOS `.strings` files and
 the `L10nKey` enum are generated from that exact file:
 
 ```bash

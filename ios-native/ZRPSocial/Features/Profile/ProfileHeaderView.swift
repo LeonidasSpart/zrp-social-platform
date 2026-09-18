@@ -14,7 +14,7 @@ struct ProfileHeaderView: View {
     private static let joinedFormatter: DateFormatter = {
         let formatter = DateFormatter()
         // Locale-appropriate month + year ordering rather than a fixed
-        // format, which reads wrong in most of ZRP's 11 languages.
+        // format, which reads wrong in most of ZRP's 25 languages.
         formatter.setLocalizedDateFormatFromTemplate("MMMMy")
         return formatter
     }()

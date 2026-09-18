@@ -169,7 +169,7 @@ struct PostDetailView: View {
     ///
     /// The count sits beside a plain title rather than inside a phrase.
     /// The shared dictionary carries only `{n} reposts` and `{n} quotes`,
-    /// with no singular form in any of the 11 languages, so composing a
+    /// with no singular form in any of the 25 languages, so composing a
     /// sentence from them would print "1 reposts".
     @ViewBuilder
     private func engagementLinks(for post: Post) -> some View {

@@ -125,6 +125,18 @@ Dedicated discovery surfaces for trending hashtags, suggested people,
 trending content, search, explore feeds and hashtag feeds. Discovery reads
 real platform data; there is no seeded or placeholder catalogue.
 
+**ZRP Discover** (`/discover`, Web) is a separate, vertical swipeable
+video feed in the style of a ranked short-form feed. It reuses the same
+video `Post` rows Shorts already serves rather than a parallel content
+type, and ranks them server-side (`GET /api/discover`,
+`src/lib/discover/`) by a freshness-weighted engagement score with a
+creator-repeat-limiting diversity pass, viewer-state gating (liked /
+saved / reposted / followed, premium gating) and its own watch-signal
+analytics (`DiscoverEvent`: impression/start/25/50/75/complete/skip).
+See [docs/discover-backend.md](docs/discover-backend.md) for the full
+architecture. This is currently Web-only; it has not shipped on Android
+or iOS.
+
 ### Play
 
 A challenge and duel experience with challenges, attempts, leaderboards,
@@ -335,14 +347,26 @@ onboarding gating and plan-gated routes.
 
 ## Internationalization
 
-The interface ships human translations for **15 languages**, verified in
+The interface ships human translations for **25 languages**, verified in
 source (`src/lib/translations.ts`) and present with full key parity
 across Web, `android-native/` (`values-*/strings.xml`) and `ios-native/`
 (`*.lproj`):
 
 English, French, German, Italian, Albanian, Spanish, Russian, Arabic,
 Chinese, Turkish, Bahasa Indonesia, Portuguese (European Portuguese
-usage), Japanese, Korean and Hindi.
+usage), Japanese, Korean, Hindi, Dutch, Polish, Romanian, Czech,
+Hungarian, Swedish, Danish, Croatian, Bulgarian and Greek.
+
+The most recent expansion (10 EU languages: Dutch, Polish, Romanian,
+Czech, Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek) shipped
+on Web and Android with full key parity, and on iOS with full parity on
+every key sourced from the shared web dictionary (1,176 keys, verified
+by `ios-native/Tools/generate-localizations.py --check`). A separate,
+smaller set of iOS-only strings with no web counterpart (mostly
+VoiceOver/accessibility labels, ~160 keys) is not yet translated in any
+non-English language and falls back to English — see
+[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap--25-language-parity)
+for that backlog.
 
 Arabic is rendered right-to-left. The web dictionary in
 `src/lib/translations.ts` is the single source of truth: the iOS
@@ -659,8 +683,11 @@ Direction, not a delivery commitment. Dates are not promised.
 - Broaden ZRP Music, Creator Studio and Opportunities.
 - Add Content-Security-Policy and Permissions-Policy after a
   domain-by-domain audit.
-- Continue expanding localization coverage beyond the current 15
-  languages as new markets are prioritized.
+- Continue expanding localization coverage beyond the current 25
+  languages as new markets are prioritized; translate the remaining
+  iOS-only accessibility strings (see
+  [Internationalization](#internationalization)) into all 24
+  non-English languages.
 - Keep tagging Web releases and publishing GitHub Releases going
   forward — see [Versioning and releases](#versioning-and-releases).
 
@@ -713,8 +740,8 @@ release cadence:
 
 - `android-native/` increments `versionCode`/`versionName` in
   `app/build.gradle` on every change destined for a real upload,
-  documented inline at each bump — currently versionCode 22,
-  versionName 4.0.16. It has an **Internal Testing** listing on Google
+  documented inline at each bump — currently versionCode 31,
+  versionName 4.0.25. It has an **Internal Testing** listing on Google
   Play, not a public release.
 - `android/` (the Capacitor shell being superseded) is still at its
   original placeholder `versionCode 1` / `versionName "1.0"`.

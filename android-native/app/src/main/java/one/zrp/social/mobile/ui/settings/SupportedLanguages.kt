@@ -1,7 +1,7 @@
 package one.zrp.social.mobile.ui.settings
 
 /**
- * The same 15 official ZRP languages as src/lib/translations.ts's
+ * The same 25 official ZRP languages as src/lib/translations.ts's
  * SUPPORTED_LANGUAGES - same codes, same native-script labels (a
  * language's own name is never itself translated, on web or here).
  * "pt" is European/International Portuguese (the same variant web/iOS

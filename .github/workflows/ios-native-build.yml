@@ -75,7 +75,7 @@ jobs:
       # The iOS app's .strings files and its L10nKey enum are generated
       # from the web app's own translation dictionary
       # (src/lib/translations.ts), which is the single source of truth for
-      # ZRP copy in all 11 supported languages. This fails if the
+      # ZRP copy in all 25 supported languages. This fails if the
       # committed output no longer matches that source - which is exactly
       # what would happen if a key were renamed on web, or if someone
       # hand-edited a generated file.

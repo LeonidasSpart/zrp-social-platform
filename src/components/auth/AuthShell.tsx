@@ -19,7 +19,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
  *    first screen was a bare sign-in form with no product story at all.
  *
  * Every string here already exists in src/lib/translations.ts and is
- * already translated into all 11 supported languages - no new keys, no
+ * already translated into all 25 supported languages - no new keys, no
  * invented marketing copy, and nothing that isn't already published on
  * the About page.
  */

@@ -358,7 +358,7 @@ called and the real response being handled.
 | Data export | `GET /api/settings/export-data` | ✅ | ⬜ | ✅ downloaded to a file and handed to the share sheet | IMPLEMENTED |
 | Account (email, username) | `GET/PUT /api/user/username`, `PUT /api/user/email` | ✅ | ✅ | ✅ 30-day username cooldown surfaced before typing; email change states that it needs verification | IMPLEMENTED |
 | Email preferences | `GET`/`PUT /api/user/email-preferences` — six booleans; `PUT` merges what it is given and refuses any unknown key with a 400 | ⬜ **no web UI** (correcting an earlier error in this matrix: nothing in `src/` calls the route) | ⬜ | ✅ | IMPLEMENTED (iOS-only today) |
-| Language (11 languages, `ar` RTL) | client-side preference | ✅ | ✅ | ✅ in-app picker, generated from the web's `SUPPORTED_LANGUAGES`; sets locale and layout direction | IMPLEMENTED |
+| Language (25 languages, `ar` RTL) | client-side preference | ✅ | ✅ | ✅ in-app picker, generated from the web's `SUPPORTED_LANGUAGES` (all 25, verified by `Tools/generate-localizations.py --check`); sets locale and layout direction. A separate ~160-key set of iOS-only accessibility strings with no web counterpart is not yet translated beyond English — see [iOS localization roadmap](#ios-localization-roadmap--25-language-parity) | IMPLEMENTED (core 25-language parity); iOS-only accessibility strings PARTIAL |
 | Plan / limits | `GET /api/user/plan`, `src/lib/limits.ts` | ✅ | ✅ | 🔶 composer and listing forms pre-check what the server enforces; the server's own limit message is shown verbatim | PARTIAL (by design) |
 | Plan upgrade / monetisation / wallet surfaces | web billing | ✅ | ✅ | ❌ deliberately absent — see [Store policy constraint](#store-policy-constraint) | OUT OF SCOPE |
 
@@ -488,7 +488,7 @@ Android has no ambassador surface at all; iOS is now ahead of it here.
 | Submit for review | `submit: true` on PATCH, `status` on POST | ✅ | ⬜ | ✅ offered **only to a VERIFIED journalist**, which the route enforces with a 403. POST takes `status` and PATCH takes `submit`, and sending the wrong one is not cosmetic: PATCH ignores `status` entirely, so a submit sent that way would silently save a draft and nobody would know | IMPLEMENTED |
 | Delete an article | `DELETE /api/journalist/articles/{id}` | ✅ | ⬜ | ✅ **drafts only**. Anything ever submitted stays for the editorial record; the control is absent rather than refused | IMPLEMENTED |
 | Cover image upload | UploadThing `newsCoverImage` | ✅ | ⬜ | ✅ the same router entry the web editor uses, with its own server-side cap | IMPLEMENTED |
-| `GAMING` news category | `NewsArticleCategory.GAMING` | ✅ | ✅ | ✅ **fixed here** — the iOS enum never listed it, so a GAMING article decoded as `unknown` and rendered with no category label at all, and the editor could not select it. `newsCategory.gaming` was already translated in all eleven languages | IMPLEMENTED |
+| `GAMING` news category | `NewsArticleCategory.GAMING` | ✅ | ✅ | ✅ **fixed here** — the iOS enum never listed it, so a GAMING article decoded as `unknown` and rendered with no category label at all, and the editor could not select it. `newsCategory.gaming` was already translated in all 25 languages | IMPLEMENTED |
 
 Android has no journalist surface; iOS is ahead of it here too.
 
@@ -522,7 +522,7 @@ Android has neither surface.
 | Investors | ✅ sidebar | ⬜ | ✅ **added** | IMPLEMENTED |
 | Press Kit | ✅ sidebar | ⬜ | ✅ **added** — labelled "Press Kit" as the website labels it, though the route is `/press` | IMPLEMENTED |
 
-All eleven are the same shape: public, static, long-form, already written and already translated into all eleven languages on zrp.one. They open in `SFSafariViewController` rather than being reimplemented natively, because a second copy of a Terms or Privacy page is a compliance risk the moment Legal edits a paragraph. Android reached the same conclusion for the six it has.
+All eleven are the same shape: public, static, long-form, already written and already translated into all 25 languages on zrp.one. They open in `SFSafariViewController` rather than being reimplemented natively, because a second copy of a Terms or Privacy page is a compliance risk the moment Legal edits a paragraph. Android reached the same conclusion for the six it has.
 
 **This corrects an earlier row in this file** that listed Careers, Investors and Press as deliberately web-only. They are in the website's own sidebar, so users genuinely had them and iOS did not; "no JSON route to read" was never the right test for a page that is read, not queried.
 
@@ -1215,7 +1215,117 @@ make the screen look finished.
 | 14 | Music Studio | ✅ gate, apply, artist profile, upload/publish, track + album management, reorder |
 | 15 | Marketplace | ✅ browse, detail, favorites, create/edit/delete, my listings, contact seller |
 | 16 | Settings, moderation, account deletion | ✅ settings hub, privacy, password, blocked/muted lists, reporting, data export, account deletion (both paths) |
-| 17 | Localization (11 languages) + accessibility | ✅ in-app language picker (11 languages, RTL), locale-aware formatting, Dynamic Type pass with a CI rule |
+| 17 | Localization (25 languages) + accessibility | ✅ in-app language picker (25 languages, RTL), locale-aware formatting, Dynamic Type pass with a CI rule — 17b (translate ~160 iOS-only accessibility strings beyond English) not started, see [iOS localization roadmap](#ios-localization-roadmap--25-language-parity) |
 | 18 | Performance + security pass | ✅ downsampling image loader with a decoded cache, path-segment escaping, no silent URL fallback; logging/Keychain/ATS audited clean |
 | 19 | App Store preparation | 🔶 archive + bundle verification in CI, privacy manifest corrected and CI-enforced, export options ready — signing BLOCKED (S1), bundle id needs a decision (S2) |
 | 20 | Final parity audit | ✅ this matrix is machine-checked in CI (`Tools/audit-parity.py`): every route it names exists, every IMPLEMENTED row is backed by a real iOS call site |
+
+---
+
+## iOS localization roadmap — 25-language parity
+
+**Shared ZRP language target: 25 languages** (`src/lib/translations.ts`
+`SUPPORTED_LANGUAGES`): en, fr, de, it, sq, es, ru, ar, zh, tr, id, pt,
+ja, ko, hi, nl, pl, ro, cs, hu, sv, da, hr, bg, el.
+
+**iOS implementation: 25/25 on the shared surface.** Verified directly
+from source, not from this document's prior (stale) claim of 11:
+
+- `ios-native/ZRPSocial/Core/Localization/L10nKeys.swift`'s
+  `ZrpLanguage.all` lists all 25 codes, in the same order as web's
+  `SUPPORTED_LANGUAGES`, and `LanguagePickerView.swift` renders that
+  list directly — nothing is hardcoded to a smaller set.
+- All 25 `*.lproj` directories exist under `ios-native/ZRPSocial/Resources/`.
+- `python3 Tools/generate-localizations.py --check` reports
+  **"localizations up to date (25 languages, 1176 shared keys)"** — every
+  key sourced from the web dictionary is present, complete and
+  regenerated-clean in all 25 languages.
+- RTL: `L10nKey.rightToLeftLanguageCodes` is `["ar"]`, matching web's
+  `RTL_LANGUAGES` exactly — no EU Wave 1 language introduced an RTL
+  requirement.
+- `Tools/audit-parity.py` passes: 234 rows marked IMPLEMENTED, every one
+  backed by a real iOS call site.
+
+### 1. Languages already implemented
+
+All 25, on the shared 1,176-key surface: English, French, German,
+Italian, Albanian, Spanish, Russian, Arabic, Chinese, Turkish, Bahasa
+Indonesia, Portuguese, Japanese, Korean, Hindi, Dutch, Polish, Romanian,
+Czech, Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek.
+
+### 2. Languages missing
+
+None. There is no language on web's `SUPPORTED_LANGUAGES` that iOS does
+not also ship.
+
+### 3. Translation/resource work required
+
+**A real, verified gap, distinct from the 25-language question above:**
+`ios-native/Tools/ios-extra-strings.json` documents **160 iOS-only
+strings** (mostly VoiceOver/accessibility labels — e.g.
+`ios.a11y.bookmark`, `ios.a11y.avatarOf`, `ios.a11y.postOptions` — plus
+some iOS-specific auth/compose/error copy) that have no counterpart in
+web's translation dictionary, so the generator cannot source them from
+anywhere. They are emitted into `en.lproj` only, by design, and every
+other locale's `.strings` file — **including the original 11
+languages, not only the 10 EU Wave 1 additions** — is missing all 160
+of them. `L10n.string(_:)` falls back to the development language
+(English) for any key missing from the active language, so this never
+renders a raw key or crashes; a non-English reader currently sees these
+~160 strings in English inside an otherwise-fully-localized app. This
+predates the EU Wave 1 expansion — it is Phase 17's own "17b" item, not
+a regression introduced by it.
+
+Required: professional (not machine) translation of the 160 keys in
+`Tools/ios-extra-strings.json` into all 24 non-English languages
+(3,840 individual strings), added to that JSON file, then
+`python3 Tools/generate-localizations.py` re-run to emit them.
+
+### 4. Language selector work
+
+None required. `LanguagePickerView.swift` already lists all 25
+languages with native-script names and codes, keyboard/VoiceOver
+accessible, with a working "System default" option. No further
+selector work is blocked on the 25-language target.
+
+### 5. RTL requirements
+
+None outstanding. Arabic is the only RTL language on the shared target
+and is already correctly flagged (`rightToLeftLanguageCodes = ["ar"]`)
+and exercised throughout the app via `L10n.isRightToLeft`.
+
+### 6. Pluralization/formatting requirements
+
+Not separately audited in this pass. `L10n.swift`'s placeholder
+substitution uses named `{token}` substitution (not `printf`
+specifiers) specifically so word order can vary by language without
+breaking a positional argument — see the doc comment at the top of
+`L10n.swift`. A dedicated plural-rule audit (i.e. whether any of the 10
+new EU languages need CLDR plural categories beyond one/other that the
+current key set doesn't already handle) was not performed as part of
+this documentation-synchronization pass and should be tracked
+separately if a translator flags it during the 17b work above.
+
+### 7. QA requirements
+
+- Visual QA pass on at least one Cyrillic-script language (Bulgarian)
+  and one language with more compact diacritics (Croatian, Czech) for
+  truncation/wrapping regressions, matching the visual QA already done
+  for web/Android during EU Wave 1.
+- After 17b lands: spot-check that the newly-translated accessibility
+  strings are actually read correctly by VoiceOver in at least two of
+  the 24 non-English languages (a translated string can still be wrong
+  for a screen reader in ways `generate-localizations.py --check` — a
+  structural completeness check — cannot catch).
+- Re-run `Tools/generate-localizations.py --check` and
+  `Tools/audit-parity.py` after any localization change; both are also
+  enforced in CI (`.github/workflows/ios-native-build.yml`).
+
+### 8. Final 25-language parity milestone
+
+**Reached, for the shared-dictionary surface.** The only remaining item
+before iOS localization can be called fully complete (not just at
+parity with web's 25-language target) is 17b: translating the 160
+iOS-only accessibility strings out of English for all 24 non-English
+languages. No new language needs to be added to hit the 25-language
+target — that work is already done and CI-verified.

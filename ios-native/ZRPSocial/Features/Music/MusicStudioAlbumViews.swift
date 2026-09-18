@@ -616,7 +616,7 @@ struct MusicCoverPickerRow: View {
 /// Track counts, in the right plural form.
 ///
 /// The web dictionary ships `music.count.tracksOne` and
-/// `music.count.tracksOther` for all 11 languages, so the singular is
+/// `music.count.tracksOther` for all 25 languages, so the singular is
 /// used where it belongs rather than rendering "1 tracks".
 enum MusicCount {
     static func tracks(_ count: Int) -> String {

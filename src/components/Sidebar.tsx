@@ -178,7 +178,7 @@ export default function Sidebar() {
   // The column is 14 rows of identical shape. These two hairlines cut
   // it into feed/discovery, the verticals, and what belongs to you -
   // grouping only, so nothing is reordered and no new label copy is
-  // introduced that would need translating into all 11 languages.
+  // introduced that would need translating into all 25 languages.
   const GROUP_BREAK_AFTER = new Set(["/news", "/aid"]);
 
   const isActive = (href: string) => {
