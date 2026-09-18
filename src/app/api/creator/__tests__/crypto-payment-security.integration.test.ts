@@ -461,6 +461,61 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(await prisma.tip.findUnique({ where: { transactionId: txId } })).toBeNull();
     });
 
+    /*
+     * N3: premium-purchase is a fixed-price item (unlike a tip or a HELP
+     * contribution, both intentionally variable-amount) - it used to
+     * accept `verification.amount >= premiumPost.price` and then record
+     * ONLY premiumPost.price everywhere (the PremiumPurchase row, the
+     * platform/creator fee split, the post's totalRevenue). An
+     * overpayment landed for real on the platform's on-chain wallet with
+     * no corresponding ledger row anywhere explaining the excess. Fixed
+     * to require the verified amount to match the price (within the
+     * same USDC-precision epsilon already used for underpayment).
+     */
+    it("premium purchase: an on-chain overpayment above the listed price is refused, not silently absorbed", async () => {
+      const buyer = await createUser("overpayer1");
+      const { profile: creatorProfile, user: creatorUser } = await createCreator("premiumcreator-overpay1");
+      const premiumPost = await createPremiumPost(creatorProfile.id, creatorUser.id, 10);
+      const txId = `tx-overpay-${randomUUID()}`;
+      // Price is 10 - buyer's transaction actually moved 15 on-chain.
+      verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15 }));
+      asUser(buyer.id);
+
+      const res = await premiumPurchase(
+        req("https://zrp.one/api/creator/premium-purchase", {
+          premiumPostId: premiumPost.id,
+          transactionId: txId,
+        })
+      );
+
+      expect(res.status).toBe(400);
+      // Nothing was credited, and the transaction was never claimed -
+      // the buyer (or a retry with the correct claimed price) can still
+      // resolve this rather than having 5 USDC vanish from every ledger.
+      expect(await prisma.premiumPurchase.findUnique({ where: { transactionId: txId } })).toBeNull();
+      expect(await prisma.consumedPaymentTransaction.findUnique({ where: { transactionId: txId } })).toBeNull();
+    });
+
+    it("premium purchase: an exact on-chain payment matching the listed price succeeds", async () => {
+      const buyer = await createUser("exactpayer1");
+      const { profile: creatorProfile, user: creatorUser } = await createCreator("premiumcreator-exact1");
+      const premiumPost = await createPremiumPost(creatorProfile.id, creatorUser.id, 10);
+      const txId = `tx-exact-${randomUUID()}`;
+      verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 10 }));
+      asUser(buyer.id);
+
+      const res = await premiumPurchase(
+        req("https://zrp.one/api/creator/premium-purchase", {
+          premiumPostId: premiumPost.id,
+          transactionId: txId,
+        })
+      );
+
+      expect(res.status).toBe(200);
+      const purchase = await prisma.premiumPurchase.findUnique({ where: { transactionId: txId } });
+      expect(purchase?.amount.toString()).toBe("10");
+    });
+
     // ─── Malformed / nonexistent transaction ──────────────────────
 
     it("malformed/nonexistent transaction: a verification failure is a clean 400, not a credited entitlement", async () => {

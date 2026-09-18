@@ -79,22 +79,41 @@ export function getConnection(): Connection {
     return connection;
   }
 
-  const rpcUrl =
+  const configuredRpcUrl =
     process.env.SOLANA_RPC_URL ||
-    process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
-    DEFAULT_RPC_URL;
+    process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+
+  if (!configuredRpcUrl) {
+    // Every real payment (tips, premium purchases, HELP contributions,
+    // ad campaigns) is verified against whatever cluster this
+    // connection points at - a silent fallback to the public Devnet
+    // endpoint here would mean a misconfigured production deploy (a
+    // missing SOLANA_RPC_URL) verifies transactions against the wrong
+    // network instead of failing loudly, the same fail-closed posture
+    // rate-limit.ts already applies when Redis is unavailable. Devnet
+    // stays available, but only as an explicit, visible non-production
+    // fallback - never silently substituted in.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "SOLANA_RPC_URL (or NEXT_PUBLIC_SOLANA_RPC_URL) must be configured in production. Refusing to fall back to the public Devnet endpoint for payment verification."
+      );
+    }
+
+    connection = new Connection(DEFAULT_RPC_URL, "confirmed");
+    return connection;
+  }
 
   if (
-    !rpcUrl.startsWith("http://") &&
-    !rpcUrl.startsWith("https://")
+    !configuredRpcUrl.startsWith("http://") &&
+    !configuredRpcUrl.startsWith("https://")
   ) {
     throw new Error(
-      `Invalid Solana RPC URL: ${rpcUrl}`
+      `Invalid Solana RPC URL: ${configuredRpcUrl}`
     );
   }
 
   connection = new Connection(
-    rpcUrl,
+    configuredRpcUrl,
     "confirmed"
   );
 

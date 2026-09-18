@@ -362,9 +362,31 @@ export const authOptions: NextAuthOptions = {
     // Apple profile() mapping at all) and never provides an avatar image -
     // both already fall back to null exactly like an incomplete Google
     // profile would.
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider === "google" || account?.provider === "apple") {
         if (!user.email) return false;
+
+        // ⚠️ SECURITY: reject a provider profile that explicitly claims
+        // its email is NOT verified, before it can link to (or create)
+        // any ZRP account by that email address. NextAuth's built-in
+        // GoogleProvider.profile() mapping (what becomes `user` here)
+        // drops the OIDC `email_verified` claim entirely - only the raw
+        // `profile` argument still carries it - so this callback used to
+        // have no way to see it at all and would link/log a user in
+        // purely on the provider's claimed email string. The mobile
+        // Google sign-in endpoint (POST /api/mobile/auth/google) already
+        // makes this exact check against the same claim on its own
+        // verified id_token; this brings the web OAuth flow to parity.
+        // Checked for `=== false` specifically (never on
+        // missing/undefined) so a provider that doesn't surface this
+        // claim at all - Apple's shape has historically been
+        // inconsistent here - never gets blocked by an absent field
+        // rather than a genuine "unverified" signal.
+        const emailVerifiedClaim = (profile as { email_verified?: unknown } | undefined)?.email_verified;
+        if (emailVerifiedClaim === false || emailVerifiedClaim === "false") {
+          return false;
+        }
+
         const result = await findOrCreateOAuthUser(user.email, user.name, user.image);
         return result !== null;
       }

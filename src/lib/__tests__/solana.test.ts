@@ -212,3 +212,64 @@ describe("verifyUsdcTransaction", () => {
     expect(mockGetTransaction).toHaveBeenCalledWith("sig", expect.objectContaining({ commitment: "confirmed" }));
   });
 });
+
+/*
+ * Regression coverage for H1: getConnection() used to fall back to the
+ * public Devnet RPC endpoint (`https://api.devnet.solana.com`) whenever
+ * SOLANA_RPC_URL/NEXT_PUBLIC_SOLANA_RPC_URL were both unset, with no
+ * distinction between production and local development. A production
+ * deploy missing that one environment variable would silently start
+ * verifying every tip/premium-purchase/HELP-contribution/ad-campaign
+ * payment against the wrong network instead of failing loudly - the
+ * exact "fails quietly in a confusing way" posture this codebase
+ * otherwise avoids (see rate-limit.ts's fail-closed behavior when Redis
+ * is unavailable). Devnet remains available as an explicit non-production
+ * fallback; production now requires the RPC URL to be configured.
+ */
+describe("getConnection", () => {
+  const originalNodeEnv = process.env.NODE_ENV;
+
+  beforeEach(() => {
+    delete process.env.SOLANA_RPC_URL;
+    delete process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+  });
+
+  afterEach(() => {
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: originalNodeEnv,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  it("[fail closed] throws in production when no RPC URL is configured, instead of silently using Devnet", async () => {
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "production",
+      configurable: true,
+      writable: true,
+    });
+    const { getConnection } = await import("../solana");
+    expect(() => getConnection()).toThrow(/SOLANA_RPC_URL.*must be configured in production/i);
+  });
+
+  it("[dev fallback preserved] falls back to Devnet outside production when no RPC URL is configured", async () => {
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "development",
+      configurable: true,
+      writable: true,
+    });
+    const { getConnection } = await import("../solana");
+    expect(() => getConnection()).not.toThrow();
+  });
+
+  it("[explicit config wins] uses the configured RPC URL in production when one is set", async () => {
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "production",
+      configurable: true,
+      writable: true,
+    });
+    process.env.SOLANA_RPC_URL = "https://example-mainnet-rpc.invalid";
+    const { getConnection } = await import("../solana");
+    expect(() => getConnection()).not.toThrow();
+  });
+});

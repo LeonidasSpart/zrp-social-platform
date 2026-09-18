@@ -1785,8 +1785,9 @@ model PremiumPurchase {
 model ConsumedPaymentTransaction {
   transactionId String @id
 
-  // "tip" | "premium_purchase" | "help_contribution" - which table
-  // actually holds the payment record, purely for diagnostics/audit.
+  // "tip" | "premium_purchase" | "help_contribution" | "ad_campaign" -
+  // which table actually holds the payment record, purely for
+  // diagnostics/audit.
   paymentType String
 
   // id of the Tip/PremiumPurchase/HelpContribution row this accompanies.

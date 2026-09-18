@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { viewablePostAuthorFilter } from "@/lib/permissions";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("q") || "";
@@ -135,7 +136,12 @@ export async function GET(req: NextRequest) {
           },
         },
       });
-      results.posts = posts;
+      // ⚠️ SECURITY (N5): search was reading Post rows directly and
+      // returning them unredacted - a matched (or quoted) premium post's
+      // full content/media was fully readable via search regardless of
+      // purchase status, and even to logged-out visitors. See
+      // src/lib/premium-content.ts.
+      results.posts = await applyPremiumGating(posts, userId);
     }
 
     return NextResponse.json(results);
