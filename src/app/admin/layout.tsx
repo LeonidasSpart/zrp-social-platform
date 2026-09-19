@@ -166,12 +166,8 @@ export default function AdminLayout({
             icon: DollarSign,
           },
           {
-            // Literal label, same escape hatch used by "ZRP News Network"
-            // above - a new staff-only surface, not yet in the shared
-            // 15-language dictionary. See src/app/admin/subscriptions/
-            // page.tsx's own comment for the full rationale.
             href: "/admin/subscriptions",
-            label: "Subscriptions & Billing",
+            labelKey: "adminSubscriptions.title" as TranslationKey,
             icon: CreditCard,
           },
           {

@@ -6,14 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Search, TrendingUp, AlertTriangle, Users, DollarSign, RefreshCw, ChevronRight } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/lib/translations";
+
+type Translate = (key: TranslationKey, params?: Record<string, string | number>) => string;
 
 /*
  * Admin > Subscriptions & Billing.
- *
- * ⚠️ TRANSLATION GAP (deliberate, same as admin/news-network/page.tsx):
- * this is a staff-only surface and its copy lives here in English rather
- * than in the shared 15-language dictionary, for the same reason - see
- * that file's comment for the full rationale.
  *
  * Every number here comes from GET /api/admin/subscriptions, which reads
  * the real User + Subscription/SubscriptionPayment tables - nothing is
@@ -36,38 +35,6 @@ import VerifiedBadge from "@/components/VerifiedBadge";
  * breakpoints - it scrolls horizontally past that width instead of
  * re-compressing.
  */
-
-const COPY = {
-  title: "Subscriptions & Billing",
-  subtitle: "The authoritative record of every user's paid entitlement - never just User.plan.",
-  searchPlaceholder: "Search username, name or email...",
-  filters: { plan: "Plan", status: "Status", interval: "Interval", expiring: "Expiring", all: "All" },
-  statusOptions: [
-    { value: "ALL", label: "All" },
-    { value: "PAID", label: "Paid (currently entitled)" },
-    { value: "FREE", label: "Free (currently not entitled)" },
-    { value: "ACTIVE", label: "Active subscription" },
-    { value: "EXPIRED", label: "Expired" },
-    { value: "CANCELED", label: "Canceled" },
-    { value: "PENDING", label: "Pending" },
-    { value: "NO_SUBSCRIPTION", label: "Paid, needs reconciliation" },
-  ],
-  expiringOptions: { any: "Any time", d7: "Within 7 days", d30: "Within 30 days" },
-  table: {
-    user: "User",
-    plan: "Plan",
-    status: "Status",
-    period: "Current period",
-    daysRemaining: "Days left",
-    lastPayment: "Last payment",
-    reminder: "Reminder",
-    actions: "Actions",
-    legacy: "Legacy",
-  },
-  empty: "No subscriptions match these filters.",
-  prev: "Previous",
-  next: "Next",
-};
 
 interface OverviewData {
   active: number;
@@ -126,6 +93,49 @@ function formatDate(iso: string | null) {
 export default function AdminSubscriptionsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
+
+  const COPY = {
+    title: t("adminSubscriptions.title"),
+    subtitle: t("adminSubscriptions.subtitle"),
+    searchPlaceholder: t("adminSubscriptions.searchPlaceholder"),
+    filters: {
+      plan: t("adminSubscriptions.filterPlan"),
+      status: t("adminSubscriptions.filterStatus"),
+      interval: t("adminSubscriptions.filterInterval"),
+      expiring: t("adminSubscriptions.filterExpiring"),
+      all: t("adminSubscriptions.filterAll"),
+    },
+    statusOptions: [
+      { value: "ALL", label: t("adminSubscriptions.statusAll") },
+      { value: "PAID", label: t("adminSubscriptions.statusPaid") },
+      { value: "FREE", label: t("adminSubscriptions.statusFree") },
+      { value: "ACTIVE", label: t("adminSubscriptions.statusActive") },
+      { value: "EXPIRED", label: t("adminSubscriptions.statusExpired") },
+      { value: "CANCELED", label: t("adminSubscriptions.statusCanceled") },
+      { value: "PENDING", label: t("adminSubscriptions.statusPending") },
+      { value: "NO_SUBSCRIPTION", label: t("adminSubscriptions.statusNoSubscription") },
+    ],
+    expiringOptions: {
+      any: t("adminSubscriptions.expiringAny"),
+      d7: t("adminSubscriptions.expiring7d"),
+      d30: t("adminSubscriptions.expiring30d"),
+    },
+    table: {
+      user: t("adminSubscriptions.colUser"),
+      plan: t("adminSubscriptions.colPlan"),
+      status: t("adminSubscriptions.colStatus"),
+      period: t("adminSubscriptions.colPeriod"),
+      daysRemaining: t("adminSubscriptions.colDaysRemaining"),
+      lastPayment: t("adminSubscriptions.colLastPayment"),
+      reminder: t("adminSubscriptions.colReminder"),
+      actions: t("adminSubscriptions.colActions"),
+      legacy: t("adminSubscriptions.legacy"),
+    },
+    empty: t("adminSubscriptions.empty"),
+    prev: t("adminSubscriptions.prev"),
+    next: t("adminSubscriptions.next"),
+  };
 
   const search = searchParams.get("search") || "";
   const plan = searchParams.get("plan") || "ALL";
@@ -188,8 +198,8 @@ export default function AdminSubscriptionsPage() {
   // Debounce typed search into the URL only - filter selects apply immediately.
   useEffect(() => {
     if (searchInput === search) return;
-    const t = setTimeout(() => setParam("search", searchInput), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setParam("search", searchInput), 300);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput]);
 
@@ -214,28 +224,28 @@ export default function AdminSubscriptionsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <StatCard
             icon={<Users className="w-5 h-5" />}
-            label="Paid users"
+            label={t("adminSubscriptions.kpiPaidUsers")}
             value={overview.paidUsers}
             href={kpiHref({ status: "PAID" })}
             active={isActiveKpi({ status: "PAID" })}
           />
           <StatCard
             icon={<Users className="w-5 h-5" />}
-            label="Free users"
+            label={t("adminSubscriptions.kpiFreeUsers")}
             value={overview.freeUsers}
             href={kpiHref({ status: "FREE" })}
             active={isActiveKpi({ status: "FREE" })}
           />
           <StatCard
             icon={<Users className="w-5 h-5" />}
-            label="Active"
+            label={t("adminSubscriptions.kpiActive")}
             value={overview.active}
             href={kpiHref({ status: "ACTIVE" })}
             active={isActiveKpi({ status: "ACTIVE" })}
           />
           <StatCard
             icon={<AlertTriangle className="w-5 h-5" />}
-            label="Expiring in 7d"
+            label={t("adminSubscriptions.kpiExpiring7d")}
             value={overview.expiringWithin7Days}
             href={kpiHref({ status: "ACTIVE", expiringWithin: "7" })}
             active={isActiveKpi({ status: "ACTIVE", expiringWithin: "7" })}
@@ -243,52 +253,52 @@ export default function AdminSubscriptionsPage() {
           />
           <StatCard
             icon={<AlertTriangle className="w-5 h-5" />}
-            label="Expiring in 30d"
+            label={t("adminSubscriptions.kpiExpiring30d")}
             value={overview.expiringWithin30Days}
             href={kpiHref({ status: "ACTIVE", expiringWithin: "30" })}
             active={isActiveKpi({ status: "ACTIVE", expiringWithin: "30" })}
           />
           <StatCard
             icon={<TrendingUp className="w-5 h-5" />}
-            label="Expired"
+            label={t("adminSubscriptions.kpiExpired")}
             value={overview.expired}
             href={kpiHref({ status: "EXPIRED" })}
             active={isActiveKpi({ status: "EXPIRED" })}
           />
           <StatCard
             icon={<TrendingUp className="w-5 h-5" />}
-            label="Canceled"
+            label={t("adminSubscriptions.kpiCanceled")}
             value={overview.canceled}
             href={kpiHref({ status: "CANCELED" })}
             active={isActiveKpi({ status: "CANCELED" })}
           />
           <StatCard
             icon={<AlertTriangle className="w-5 h-5" />}
-            label="Needs reconciliation"
+            label={t("adminSubscriptions.kpiNeedsReconciliation")}
             value={overview.needsReconciliation}
             href={kpiHref({ status: "NO_SUBSCRIPTION" })}
             active={isActiveKpi({ status: "NO_SUBSCRIPTION" })}
             warn
-            title="Paid per the legacy plan field but has no Subscription record yet - run scripts/backfill-subscriptions.ts or grant manually."
+            title={t("adminSubscriptions.kpiNeedsReconciliationTitle")}
           />
           <StatCard
             icon={<AlertTriangle className="w-5 h-5" />}
-            label="Failed payments"
+            label={t("adminSubscriptions.kpiFailedPayments")}
             value={overview.failedPayments}
             href="/admin/payments"
             warn
-            title="Rejected PaymentRequests aren't tied to a Subscription record - opens the Payments queue instead."
+            title={t("adminSubscriptions.kpiFailedPaymentsTitle")}
           />
           <StatCard
             icon={<DollarSign className="w-5 h-5" />}
-            label="Revenue (all-time, this feature)"
+            label={t("adminSubscriptions.kpiRevenue")}
             value={`$${overview.revenueByPlan.reduce((sum, r) => sum + r.totalAmount, 0).toFixed(2)}`}
           />
         </div>
       )}
       {overview && (
         <p className="text-xs text-gray-400 mb-6">
-          Revenue figures cover {overview.revenueDataAvailableSince}.
+          {t("adminSubscriptions.revenueNote", { since: overview.revenueDataAvailableSince })}
         </p>
       )}
 
@@ -340,16 +350,16 @@ export default function AdminSubscriptionsPage() {
             onClick={() => router.push("/admin/subscriptions")}
             className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white"
           >
-            Clear filters
+            {t("adminSubscriptions.clearFilters")}
           </button>
         )}
       </div>
 
       {error ? (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-4 flex items-center justify-between gap-4">
-          <span>{error} - this is a request failure, not an empty result.</span>
+          <span>{t("adminSubscriptions.requestFailedNote", { error })}</span>
           <button onClick={load} className="inline-flex items-center gap-1 text-sm font-medium underline shrink-0">
-            <RefreshCw className="w-3.5 h-3.5" /> Retry
+            <RefreshCw className="w-3.5 h-3.5" /> {t("adminSubscriptions.retry")}
           </button>
         </div>
       ) : null}
@@ -369,7 +379,7 @@ export default function AdminSubscriptionsPage() {
               give the table the chance to do that at all. */}
           <div className="md:hidden space-y-3">
             {rows.map((row) => (
-              <MobileUserCard key={row.userId} row={row} />
+              <MobileUserCard key={row.userId} row={row} t={t} />
             ))}
           </div>
 
@@ -398,10 +408,10 @@ export default function AdminSubscriptionsPage() {
                       <UserCell user={row.user} />
                     </td>
                     <td className="px-4 py-3">
-                      <PlanCell row={row} />
+                      <PlanCell row={row} t={t} />
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={row.status} />
+                      <StatusBadge status={row.status} legacyLabel={COPY.table.legacy} />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                       {formatDate(row.currentPeriodStart)} &rarr; {formatDate(row.currentPeriodEnd)}
@@ -410,13 +420,13 @@ export default function AdminSubscriptionsPage() {
                     <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
                       <LastPaymentCell row={row} />
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{row.reminderSentAt ? "Sent" : "-"}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{row.reminderSentAt ? t("adminSubscriptions.sentStatus") : "-"}</td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/admin/subscriptions/${row.userId}`}
                         className="inline-flex items-center gap-0.5 text-xs font-medium text-zrp-red hover:underline"
                       >
-                        View <ChevronRight className="w-3.5 h-3.5" />
+                        {t("adminSubscriptions.view")} <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     </td>
                   </tr>
@@ -430,8 +440,11 @@ export default function AdminSubscriptionsPage() {
       {!error && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between mt-4 text-sm">
           <p className="text-gray-500 dark:text-gray-400">
-            Showing {(pagination.page - 1) * pagination.limit + 1}
-            &ndash;{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} users
+            {t("adminSubscriptions.showingRange", {
+              start: String((pagination.page - 1) * pagination.limit + 1),
+              end: String(Math.min(pagination.page * pagination.limit, pagination.total)),
+              total: String(pagination.total),
+            })}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -487,7 +500,7 @@ function UserCell({ user }: { user: SubscriptionRow["user"] }) {
   );
 }
 
-function PlanCell({ row }: { row: SubscriptionRow }) {
+function PlanCell({ row, t }: { row: SubscriptionRow; t: Translate }) {
   return (
     <div className="flex flex-col gap-1">
       <span className="capitalize font-medium text-gray-900 dark:text-white">{row.plan}</span>
@@ -495,12 +508,12 @@ function PlanCell({ row }: { row: SubscriptionRow }) {
       <div className="flex flex-wrap gap-1">
         {row.isLegacyBackfill && (
           <span className="text-[10px] uppercase text-gray-400 border border-gray-300 dark:border-gray-600 rounded px-1 py-px">
-            {COPY.table.legacy}
+            {t("adminSubscriptions.legacy")}
           </span>
         )}
         {row.needsReconciliation && (
           <span className="text-[10px] uppercase text-amber-600 border border-amber-300 dark:border-amber-700 rounded px-1 py-px">
-            Needs reconciliation
+            {t("adminSubscriptions.needsReconciliationBadge")}
           </span>
         )}
       </div>
@@ -508,10 +521,10 @@ function PlanCell({ row }: { row: SubscriptionRow }) {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, legacyLabel }: { status: string; legacyLabel: string }) {
   return (
     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[status] || ""}`}>
-      {status === "NO_SUBSCRIPTION" ? "Legacy" : status}
+      {status === "NO_SUBSCRIPTION" ? legacyLabel : status}
     </span>
   );
 }
@@ -527,44 +540,44 @@ function LastPaymentCell({ row }: { row: SubscriptionRow }) {
   );
 }
 
-function MobileUserCard({ row }: { row: SubscriptionRow }) {
+function MobileUserCard({ row, t }: { row: SubscriptionRow; t: Translate }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
       <div className="flex items-start justify-between gap-2 mb-3">
         <UserCell user={row.user} />
-        <StatusBadge status={row.status} />
+        <StatusBadge status={row.status} legacyLabel={t("adminSubscriptions.legacy")} />
       </div>
       <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
         <div>
-          <div className="text-gray-400 dark:text-gray-500 mb-0.5">Plan</div>
-          <PlanCell row={row} />
+          <div className="text-gray-400 dark:text-gray-500 mb-0.5">{t("adminSubscriptions.colPlan")}</div>
+          <PlanCell row={row} t={t} />
         </div>
         <div>
-          <div className="text-gray-400 dark:text-gray-500 mb-0.5">Days left</div>
+          <div className="text-gray-400 dark:text-gray-500 mb-0.5">{t("adminSubscriptions.colDaysRemaining")}</div>
           <div className="text-gray-700 dark:text-gray-300 tabular-nums">{row.daysRemaining ?? "-"}</div>
         </div>
         <div className="col-span-2">
-          <div className="text-gray-400 dark:text-gray-500 mb-0.5">Current period</div>
+          <div className="text-gray-400 dark:text-gray-500 mb-0.5">{t("adminSubscriptions.colPeriod")}</div>
           <div className="text-gray-700 dark:text-gray-300">
             {formatDate(row.currentPeriodStart)} &rarr; {formatDate(row.currentPeriodEnd)}
           </div>
         </div>
         <div>
-          <div className="text-gray-400 dark:text-gray-500 mb-0.5">Last payment</div>
+          <div className="text-gray-400 dark:text-gray-500 mb-0.5">{t("adminSubscriptions.colLastPayment")}</div>
           <div className="text-gray-700 dark:text-gray-300">
             <LastPaymentCell row={row} />
           </div>
         </div>
         <div>
-          <div className="text-gray-400 dark:text-gray-500 mb-0.5">Reminder</div>
-          <div className="text-gray-700 dark:text-gray-300">{row.reminderSentAt ? "Sent" : "-"}</div>
+          <div className="text-gray-400 dark:text-gray-500 mb-0.5">{t("adminSubscriptions.colReminder")}</div>
+          <div className="text-gray-700 dark:text-gray-300">{row.reminderSentAt ? t("adminSubscriptions.sentStatus") : "-"}</div>
         </div>
       </div>
       <Link
         href={`/admin/subscriptions/${row.userId}`}
         className="mt-3 inline-flex items-center justify-center gap-1 w-full py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-zrp-red hover:bg-red-50 dark:hover:bg-red-900/10"
       >
-        View billing detail <ChevronRight className="w-4 h-4" />
+        {t("adminSubscriptions.viewBillingDetail")} <ChevronRight className="w-4 h-4" />
       </Link>
     </div>
   );
