@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Fjern synes godt om historie</string>
     <string name="story_mute_cd">Dæmp historiens lyd</string>
     <string name="story_unmute_cd">Fjern dæmpning af historiens lyd</string>
+    <string name="story_reply_placeholder">Svar på historie...</string>
+    <string name="story_reply_send_cd">Send svar</string>
+    <string name="story_reply_sent">Sendt!</string>
     <string name="comment_repost_cd">Del igen</string>
     <string name="comment_undo_repost_cd">Fortryd deling</string>
     <string name="createpost_media_count_cd">%1$d/%2$d medier</string>

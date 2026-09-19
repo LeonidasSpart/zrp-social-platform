@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Fjern likerklikk på historien</string>
     <string name="story_mute_cd">Slå av lyd i historien</string>
     <string name="story_unmute_cd">Slå på lyd i historien</string>
+    <string name="story_reply_placeholder">Svar på historie...</string>
+    <string name="story_reply_send_cd">Send svar</string>
+    <string name="story_reply_sent">Sendt!</string>
     <string name="comment_repost_cd">Repost</string>
     <string name="comment_undo_repost_cd">Angre repost</string>
     <string name="createpost_media_count_cd">%1$d/%2$d medier</string>

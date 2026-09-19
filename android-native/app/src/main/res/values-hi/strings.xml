@@ -344,6 +344,9 @@
     <string name="story_unlike_cd">स्टोरी लाइक हटाएं</string>
     <string name="story_mute_cd">स्टोरी ऑडियो म्यूट करें</string>
     <string name="story_unmute_cd">स्टोरी ऑडियो अनम्यूट करें</string>
+    <string name="story_reply_placeholder">स्टोरी का जवाब दें...</string>
+    <string name="story_reply_send_cd">जवाब भेजें</string>
+    <string name="story_reply_sent">भेज दिया गया!</string>
     <string name="comment_repost_cd">रीपोस्ट करें</string>
     <string name="comment_undo_repost_cd">रीपोस्ट पूर्ववत करें</string>
     <string name="createpost_media_count_cd">%1$d/%2$d मीडिया</string>

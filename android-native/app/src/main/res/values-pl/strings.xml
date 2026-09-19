@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Cofnij polubienie relacji</string>
     <string name="story_mute_cd">Wycisz dźwięk relacji</string>
     <string name="story_unmute_cd">Wyłącz wyciszenie dźwięku relacji</string>
+    <string name="story_reply_placeholder">Odpowiedz na relację...</string>
+    <string name="story_reply_send_cd">Wyślij odpowiedź</string>
+    <string name="story_reply_sent">Wysłano!</string>
     <string name="comment_repost_cd">Repostuj</string>
     <string name="comment_undo_repost_cd">Cofnij repost</string>
     <string name="createpost_media_count_cd">%1$d/%2$d multimediów</string>

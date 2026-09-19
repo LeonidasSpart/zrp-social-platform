@@ -347,6 +347,9 @@
     <string name="story_mute_cd">Silenciar el sonido de la historia</string>
 
     <string name="story_unmute_cd">Activar el sonido de la historia</string>
+    <string name="story_reply_placeholder">Responder a la historia...</string>
+    <string name="story_reply_send_cd">Enviar respuesta</string>
+    <string name="story_reply_sent">¡Enviado!</string>
     <string name="comment_repost_cd">Republicar</string>
     <string name="comment_undo_repost_cd">Deshacer republicación</string>
     <string name="createpost_media_count_cd">%1$d/%2$d multimedia</string>

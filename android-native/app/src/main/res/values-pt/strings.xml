@@ -344,6 +344,9 @@
     <string name="story_unlike_cd">Retirar gosto da story</string>
     <string name="story_mute_cd">Silenciar áudio da story</string>
     <string name="story_unmute_cd">Ativar áudio da story</string>
+    <string name="story_reply_placeholder">Responder à história...</string>
+    <string name="story_reply_send_cd">Enviar resposta</string>
+    <string name="story_reply_sent">Enviado!</string>
     <string name="comment_repost_cd">Republicar</string>
     <string name="comment_undo_repost_cd">Anular republicação</string>
     <string name="createpost_media_count_cd">%1$d/%2$d multimédia</string>

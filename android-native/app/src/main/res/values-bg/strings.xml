@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Премахни харесването на историята</string>
     <string name="story_mute_cd">Заглуши звука на историята</string>
     <string name="story_unmute_cd">Отглуши звука на историята</string>
+    <string name="story_reply_placeholder">Отговори на историята...</string>
+    <string name="story_reply_send_cd">Изпрати отговор</string>
+    <string name="story_reply_sent">Изпратено!</string>
     <string name="comment_repost_cd">Препубликувай</string>
     <string name="comment_undo_repost_cd">Отмени препубликуването</string>
     <string name="createpost_media_count_cd">%1$d/%2$d медия</string>
