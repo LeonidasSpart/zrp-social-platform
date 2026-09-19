@@ -32,30 +32,61 @@ function normalize(value: string): string {
 
 const REGISTERED_LOCALES = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id"] as const;
 
-// One normalized-name -> code lookup built once from every official name
-// in all 11 registered languages plus SEARCH_ALIASES, keyed by the same
-// case/diacritic-insensitive `normalize()` used above - so "Turkiye"
-// (no diacritic) and "Türkiye" (the official ISO short name) resolve to
-// the same code, the same way "Switzerland"/"Suisse"/"Schweiz" do.
-// i18n-iso-countries' own getAlpha2Code() only does an exact literal
-// match, which misses exactly that diacritic case, so this module
-// builds its own normalized index rather than relying on it directly.
+// One normalized-name -> code lookup built once from every name variant
+// (official AND common short form - `select: "all"`) in all 11
+// registered languages plus SEARCH_ALIASES, keyed by the same case/
+// diacritic-insensitive `normalize()` used above - so "Turkiye" (no
+// diacritic) and "Türkiye" (the official ISO short name) resolve to the
+// same code, the same way "Switzerland"/"Suisse"/"Schweiz" do.
+//
+// `select: "all"` matters, not just "official": for a country whose
+// official long name differs from its common short name (e.g. North
+// Macedonia's official name is "The Republic of North Macedonia"), a
+// user who typed the short, everyday name would otherwise never match
+// anything and be left unresolved despite typing a real, unambiguous
+// country name - `select: "all"` returns both forms per country
+// (verified: always an array, one entry per known name variant),
+// closing that gap without weakening the "exact match only" guarantee
+// below. i18n-iso-countries' own getAlpha2Code() only does an exact
+// literal match against the input's own casing/diacritics, which misses
+// the diacritic-insensitive case, so this module still builds its own
+// normalized index rather than relying on it directly.
 let nameLookupCache: Map<string, string> | null = null;
 
 function getNameLookup(): Map<string, string> {
   if (nameLookupCache) return nameLookupCache;
-  const map = new Map<string, string>();
+
+  // Build key -> set of candidate codes first, rather than a straight
+  // key -> code map: `select: "all"` widens the name pool enough that a
+  // handful of bare short names are genuinely ambiguous across two real
+  // countries (e.g. "Congo" alone is used for both CG and CD; "Shën
+  // Martin" in Albanian names both MF and SX). A plain Map.set() would
+  // silently let whichever locale is processed last win - exactly the
+  // "confident wrong answer" this module exists to avoid. Any name that
+  // resolves to more than one distinct code is dropped from the index
+  // entirely below, left for the caller to see as unresolved rather than
+  // guessed.
+  const candidates = new Map<string, Set<string>>();
+  const addCandidate = (name: string, code: string) => {
+    const key = normalize(name);
+    if (!candidates.has(key)) candidates.set(key, new Set());
+    candidates.get(key)!.add(code);
+  };
+
   for (const locale of REGISTERED_LOCALES) {
-    const names = iso.getNames(locale, { select: "official" });
-    for (const [code, name] of Object.entries(names)) {
-      map.set(normalize(name), code);
+    const names = iso.getNames(locale, { select: "all" });
+    for (const [code, variants] of Object.entries(names)) {
+      for (const name of variants) addCandidate(name, code);
     }
   }
   for (const [code, aliases] of Object.entries(SEARCH_ALIASES)) {
-    for (const alias of aliases) {
-      map.set(normalize(alias), code);
-    }
+    for (const alias of aliases) addCandidate(alias, code);
   }
+
+  const map = new Map<string, string>();
+  candidates.forEach((codes, key) => {
+    if (codes.size === 1) map.set(key, codes.values().next().value as string);
+  });
   nameLookupCache = map;
   return map;
 }
