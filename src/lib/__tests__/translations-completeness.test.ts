@@ -255,6 +255,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "poll.totalVotePlural",
     "poll.optionVoteCount",
     "emailPreferences.prefMentions",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.sourceHealth",
+    "adminNewsNetwork.tabSources",
+    "adminNewsNetwork.tabPublications",
+    "adminNewsNetwork.sourcesUnit",
+    "adminSubscriptions.colActions",
+    "adminSubscriptionDetail.colDate",
+    "adminNewsNetwork.scoreLabel",
   ],
   de: [
     "adminNews.urlPlaceholder",
@@ -347,6 +355,18 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     // "Bank" is the same word in German.
     "upgradeRequest.bankLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.tabFeeds",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.colPlan",
   ],
   it: [
     "hashtag.postSingular",
@@ -438,6 +458,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.categoryZrp",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptionDetail.no",
   ],
   sq: [
     "adminNews.urlPlaceholder",
@@ -495,6 +518,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount",
     "trust.categoryZrp",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   es: [
     "adminNews.slugLabel",
@@ -581,6 +607,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.categoryZrp",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.tabFeeds",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.no",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.colPlan",
   ],
   ru: [
     "adminNews.urlPlaceholder",
@@ -630,6 +665,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount",
     "trust.categoryZrp",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   ar: [
     "adminNews.urlPlaceholder",
@@ -660,6 +697,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount",
     "trust.categoryZrp",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   zh: [
     "adminNews.urlPlaceholder",
@@ -687,6 +726,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount",
     "trust.categoryZrp",
     "trust.outOf100",
+    "adminNewsNetwork.title",
   ],
   tr: [
     "adminNews.urlPlaceholder",
@@ -749,6 +789,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.categoryZrp",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.colPlan",
   ],
   id: [
     "adminNews.slugLabel",
@@ -852,6 +900,16 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     // "Bank" is a standard Indonesian loanword, same spelling as English.
     "upgradeRequest.bankLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.filterInterval",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colInterval",
   ],
   pt: [
     "adminNews.slugLabel",
@@ -903,6 +961,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.hoursValue",
     "transparency.reasonSpam",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.tabFeeds",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   ja: [
     "ads.dashboard.ctr",
@@ -928,6 +989,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "press.emailBadge",
     "tipModal.charCount",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   ko: [
     "group.lastMessagePrefix",
@@ -938,6 +1001,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "press.emailBadge",
     "tipModal.charCount",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   hi: [
     "adminPayments.tx",
@@ -950,6 +1015,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "pricing.support247",
     "tipModal.charCount",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   nl: [
     "hashtag.postSingular",
@@ -1157,6 +1224,19 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "trust.statPosts",
     "upgradeRequest.bankLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.tabFeeds",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.postsUnit",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.filterInterval",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colInterval",
+    "adminNewsNetwork.scoreLabel",
   ],
   pl: [
     "hashtag.postSingular",
@@ -1224,6 +1304,17 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.headerTitle",
     "trust.outOf100",
     "upgradeRequest.bankLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.colPlan",
+    "adminSubscriptionDetail.actorSystem",
   ],
   ro: [
     "adminMarketplace.title",
@@ -1332,6 +1423,22 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.headerTitle",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.filterInterval",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptions.kpiActive",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colPlan",
+    "adminSubscriptionDetail.colInterval",
   ],
   cs: [
     "adminJournalists.portfolio",
@@ -1395,6 +1502,12 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.headerTitle",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterInterval",
+    "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colInterval",
   ],
   hu: [
     "adminNews.slugLabel",
@@ -1444,6 +1557,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.headerTitle",
     "trust.outOf100",
     "upgradeRequest.bankLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   sv: [
     "adminJournalists.portfolio",
@@ -1539,6 +1655,18 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.headerTitle",
     "trust.outOf100",
     "upgradeRequest.bankLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.colPlan",
+    "adminSubscriptionDetail.actorSystem",
   ],
   da: [
     "action.post",
@@ -1669,6 +1797,24 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "upgradeRequest.bankLabel",
     "upgradeRequest.referenceLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.tabFeeds",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.filterInterval",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colPlan",
+    "adminSubscriptionDetail.colInterval",
+    "adminSubscriptionDetail.actorSystem",
+    "adminNewsNetwork.scoreLabel",
   ],
   hr: [
     "adminJournalists.portfolio",
@@ -1727,6 +1873,21 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "transparency.reasonSpam",
     "trust.headerTitle",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.filterInterval",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colPlan",
+    "adminSubscriptionDetail.colInterval",
   ],
   bg: [
     "adminNews.slugLabel",
@@ -1762,6 +1923,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount",
     "trust.headerTitle",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   el: [
     "adminJournalists.portfolio",
@@ -1815,6 +1978,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount",
     "trust.headerTitle",
     "trust.outOf100",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
   // Norwegian, Serbian (Latin), Bosnian and Macedonian: each list below
   // was computed from the real diff against English and hand-reviewed -
@@ -1845,6 +2010,13 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "music.duration.minutes", "music.studio.explicitBadge", "music.track.columnAlbum",
     "music.albumDetail.eyebrow", "tipModal.charCount", "professionalCategory.restaurant",
     "professionalCategory.catering", "upgradeRequest.bankLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.actorSystem",
   ],
   sr: [
     "nav.admin", "settings.video", "chat.contactVideo", "group.lastMessagePrefix",
@@ -1861,6 +2033,16 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "help.heroTitle", "nav.aiAssistant", "music.shell.studioLabel", "music.duration.minutes",
     "music.studio.explicitBadge", "music.track.columnAlbum", "music.albumDetail.eyebrow",
     "tipModal.charCount",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.filterInterval",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colInterval",
   ],
   bs: [
     "settings.video", "chat.contactVideo", "group.lastMessagePrefix", "adminPayments.tx",
@@ -1882,6 +2064,21 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "music.shell.studioLabel", "music.duration.minutes", "music.studio.explicitBadge",
     "music.track.columnAlbum", "music.albumDetail.eyebrow", "tipModal.charCount",
     "professionalCategory.blockchain", "communities.create.hashtagLabel",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.pilotOnly",
+    "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterPlan",
+    "adminSubscriptions.filterStatus",
+    "adminSubscriptions.filterInterval",
+    "adminSubscriptions.colPlan",
+    "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldPlan",
+    "adminSubscriptionDetail.fieldStatus",
+    "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.planLabel",
+    "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colPlan",
+    "adminSubscriptionDetail.colInterval",
   ],
   mk: [
     "group.lastMessagePrefix", "investors.platform2Title", "press.emailBadge",
@@ -1891,6 +2088,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "ads.dashboard.ctr", "trust.outOf100", "play.heroTitle", "play.xp",
     "opportunity.heroTitle", "help.heroTitle", "nav.aiAssistant", "music.shell.studioLabel",
     "tipModal.charCount",
+    "adminNewsNetwork.title",
+    "adminNewsNetwork.verificationFailedNamed",
   ],
 };
 
@@ -2036,5 +2235,45 @@ describe("translations dictionary completeness (localization CI gate)", () => {
         `${code} has placeholder mismatches: ${mismatches.slice(0, 20).join("; ")}`
       ).toHaveLength(0);
     }
+  });
+
+  it("no admin page bypasses the shared dictionary with a local English-only COPY object", () => {
+    // Regression guard: src/app/admin/news-network/page.tsx and
+    // src/app/admin/subscriptions/{page,[userId]/page}.tsx once carried an
+    // explicit "TRANSLATION GAP (deliberate)" comment and a hardcoded
+    // English-only COPY object instead of the shared dictionary - exactly
+    // the bug a Macedonian-language screenshot caught (Admin rendered in
+    // English while the rest of the app was translated). Every admin page
+    // must pull its copy from useLanguage()/translations.ts; a future page
+    // that reaches for a local COPY object instead should fail here before
+    // it ships, not get caught by another screenshot.
+    const fs = require("fs") as typeof import("fs");
+    const path = require("path") as typeof import("path");
+    const adminDir = path.join(__dirname, "..", "..", "app", "admin");
+
+    function walk(dir: string): string[] {
+      return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) return entry.name === "__tests__" ? [] : walk(full);
+        return entry.name.endsWith(".tsx") ? [full] : [];
+      });
+    }
+
+    const files = walk(adminDir);
+    expect(files.length).toBeGreaterThan(0);
+
+    const failures: string[] = [];
+    for (const file of files) {
+      const source = fs.readFileSync(file, "utf8");
+      const relative = path.relative(adminDir, file);
+      if (/TRANSLATION GAP/.test(source)) {
+        failures.push(`${relative} still carries a "TRANSLATION GAP" marker`);
+      }
+      const usesTranslationContext = /from ["']@\/contexts\/LanguageContext["']/.test(source);
+      if (!usesTranslationContext) {
+        failures.push(`${relative} does not import useLanguage from @/contexts/LanguageContext`);
+      }
+    }
+    expect(failures, failures.join("\n")).toHaveLength(0);
   });
 });

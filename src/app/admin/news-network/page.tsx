@@ -13,97 +13,15 @@ import {
   Rss,
   Trash2,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /*
  * ZRP News Network: admin console.
- *
- * ⚠️ TRANSLATION GAP (deliberate, flagged rather than papered over):
- * every other admin screen pulls its copy from src/lib/translations.ts
- * in all 11 ZRP languages. The strings below are English-only and live
- * in this file instead. Adding them to the shared dictionary means
- * writing 11 translations of each, and machine-translating six of those
- * languages to fill the gap is exactly what the ZRP design system
- * forbids. They are collected in one COPY object so moving them into
- * the dictionary later is a mechanical change, once real translations
- * exist. This is a staff-only surface, so the gap is contained.
  *
  * Every number on this screen is a live count from
  * /api/admin/news-network/status. Nothing here is estimated, cached or
  * placeholder data.
  */
-
-const COPY = {
-  title: "ZRP News Network",
-  subtitle:
-    "Automated editorial feeds. Every post is an original summary with its sources attributed and linked.",
-  running: "Running",
-  paused: "Paused",
-  pause: "Pause automation",
-  resume: "Resume automation",
-  runNow: "Run a cycle now",
-  lastCycle: "Last cycle",
-  nextCycle: "Next cycle",
-  never: "Never",
-  activeFeeds: "Active feeds",
-  publicationsToday: "Publications today",
-  travelToday: "Travel publications",
-  scheduled: "Queued to publish",
-  failedJobs: "Failed publications",
-  failedRenditions: "Failed summaries today",
-  duplicatesPrevented: "Duplicate stories prevented",
-  awaitingReview: "Sensitive stories awaiting review",
-  readyStories: "Validated stories ready",
-  sourceHealth: "Sources",
-  healthy: "Healthy",
-  warning: "Warning",
-  failed: "Failed",
-  disabled: "Disabled",
-  languages: "Languages published today",
-  enabledLanguages: "Languages",
-  countries: "Countries published today",
-  topics: "Categories published today",
-  noneYet: "Nothing published yet today.",
-  tabs: {
-    overview: "Overview",
-    feeds: "Feeds",
-    sources: "Sources",
-    queue: "Editorial queue",
-    publications: "Publications",
-  },
-  loadError: "Could not load the news network status. Check your connection and try again.",
-  retry: "Try again",
-  provisionPilot: "Provision pilot feeds",
-  provisionAll: "Provision the full roster",
-  provisionNote:
-    "Feeds are always created disabled. Provisioning creates accounts; it never publishes anything.",
-  seedSources: "Install the starter source list",
-  verify: "Verify",
-  enable: "Enable",
-  disable: "Disable",
-  setAvatar: "Set avatar",
-  setCover: "Set banner",
-  imageHint: "JPEG, PNG, GIF or WebP, max 5MB. This is the only way to change these - the account has no password and can never sign in to do it itself.",
-  clearBackoff: "Clear backoff",
-  allowImages: "Allow images",
-  blockImages: "Block images",
-  remove: "Remove",
-  removePrompt: "Why is this post being removed?",
-  rejectPrompt: "Why is this story being rejected?",
-  correctPrompt: "Correction note (shown on every post for this story):",
-  correct: "Add correction",
-  reject: "Reject",
-  noFeeds:
-    "No editorial feeds have been provisioned yet. Start with the pilot feeds, verify them, then expand.",
-  noSources:
-    "No sources yet. Install the starter list, then verify each one before enabling the automation.",
-  noStories: "No stories in this queue.",
-  noPublications: "Nothing has been published yet.",
-  confirmProvisionAll:
-    "Provision the full editorial roster? This creates 100+ editorial accounts, all disabled. Nothing will publish until you enable feeds individually.",
-  pilotOnly: "Pilot",
-  sources: "sources",
-  posts: "posts",
-} as const;
 
 // ─── API shapes ──────────────────────────────────────────────────────
 
@@ -203,12 +121,12 @@ interface PublicationRow {
   story: { id: string; title: string; topic: string; confidence: string; correctionNote: string | null };
 }
 
-type Tab = keyof typeof COPY.tabs;
+type Tab = "overview" | "feeds" | "sources" | "queue" | "publications";
 
 // ─── Presentational helpers ──────────────────────────────────────────
 
-function formatDateTime(value: string | null): string {
-  if (!value) return COPY.never;
+function formatDateTime(value: string | null, neverLabel: string): string {
+  if (!value) return neverLabel;
   return new Date(value).toLocaleString();
 }
 
@@ -246,6 +164,77 @@ function SourceStatusPill({ status }: { status: SourceRow["status"] }) {
 // ─── Page ────────────────────────────────────────────────────────────
 
 export default function AdminNewsNetworkPage() {
+  const { t } = useLanguage();
+  const COPY = {
+    title: t("adminNewsNetwork.title"),
+    subtitle: t("adminNewsNetwork.subtitle"),
+    running: t("adminNewsNetwork.running"),
+    paused: t("adminNewsNetwork.paused"),
+    pause: t("adminNewsNetwork.pause"),
+    resume: t("adminNewsNetwork.resume"),
+    runNow: t("adminNewsNetwork.runNow"),
+    lastCycle: t("adminNewsNetwork.lastCycle"),
+    nextCycle: t("adminNewsNetwork.nextCycle"),
+    never: t("adminNewsNetwork.never"),
+    activeFeeds: t("adminNewsNetwork.activeFeeds"),
+    publicationsToday: t("adminNewsNetwork.publicationsToday"),
+    travelToday: t("adminNewsNetwork.travelToday"),
+    scheduled: t("adminNewsNetwork.scheduled"),
+    failedJobs: t("adminNewsNetwork.failedJobs"),
+    failedRenditions: t("adminNewsNetwork.failedRenditions"),
+    duplicatesPrevented: t("adminNewsNetwork.duplicatesPrevented"),
+    awaitingReview: t("adminNewsNetwork.awaitingReview"),
+    readyStories: t("adminNewsNetwork.readyStories"),
+    sourceHealth: t("adminNewsNetwork.sourceHealth"),
+    healthy: t("adminNewsNetwork.healthy"),
+    warning: t("adminNewsNetwork.warning"),
+    failed: t("adminNewsNetwork.failed"),
+    disabled: t("adminNewsNetwork.disabled"),
+    languages: t("adminNewsNetwork.languages"),
+    enabledLanguages: t("adminNewsNetwork.enabledLanguages"),
+    countries: t("adminNewsNetwork.countries"),
+    topics: t("adminNewsNetwork.topics"),
+    noneYet: t("adminNewsNetwork.noneYet"),
+    tabs: {
+      overview: t("adminNewsNetwork.tabOverview"),
+      feeds: t("adminNewsNetwork.tabFeeds"),
+      sources: t("adminNewsNetwork.tabSources"),
+      queue: t("adminNewsNetwork.tabQueue"),
+      publications: t("adminNewsNetwork.tabPublications"),
+    },
+    loadError: t("adminNewsNetwork.loadError"),
+    retry: t("adminNewsNetwork.retry"),
+    provisionPilot: t("adminNewsNetwork.provisionPilot"),
+    provisionAll: t("adminNewsNetwork.provisionAll"),
+    provisionNote: t("adminNewsNetwork.provisionNote"),
+    seedSources: t("adminNewsNetwork.seedSources"),
+    verify: t("adminNewsNetwork.verify"),
+    enable: t("adminNewsNetwork.enable"),
+    disable: t("adminNewsNetwork.disable"),
+    setAvatar: t("adminNewsNetwork.setAvatar"),
+    setCover: t("adminNewsNetwork.setCover"),
+    imageHint: t("adminNewsNetwork.imageHint"),
+    clearBackoff: t("adminNewsNetwork.clearBackoff"),
+    allowImages: t("adminNewsNetwork.allowImages"),
+    blockImages: t("adminNewsNetwork.blockImages"),
+    remove: t("adminNewsNetwork.remove"),
+    removePrompt: t("adminNewsNetwork.removePrompt"),
+    rejectPrompt: t("adminNewsNetwork.rejectPrompt"),
+    correctPrompt: t("adminNewsNetwork.correctPrompt"),
+    correct: t("adminNewsNetwork.correct"),
+    reject: t("adminNewsNetwork.reject"),
+    noFeeds: t("adminNewsNetwork.noFeeds"),
+    noSources: t("adminNewsNetwork.noSources"),
+    noStories: t("adminNewsNetwork.noStories"),
+    noPublications: t("adminNewsNetwork.noPublications"),
+    confirmProvisionAll: t("adminNewsNetwork.confirmProvisionAll"),
+    pilotOnly: t("adminNewsNetwork.pilotOnly"),
+    sources: t("adminNewsNetwork.sourcesUnit"),
+    posts: t("adminNewsNetwork.postsUnit"),
+    enabledStatus: t("adminNewsNetwork.enabledStatus"),
+    view: t("adminNewsNetwork.view"),
+  };
+
   const [tab, setTab] = useState<Tab>("overview");
 
   const [status, setStatus] = useState<StatusResponse | null>(null);
@@ -316,14 +305,14 @@ export default function AdminNewsNetworkPage() {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || data.success === false) {
-          notify("error", data.error || "That action failed.");
+          notify("error", data.error || t("adminNewsNetwork.toastActionFailed"));
           return false;
         }
         notify("success", successText);
         await loadAll();
         return true;
       } catch {
-        notify("error", "That action failed. Check your connection and try again.");
+        notify("error", t("adminNewsNetwork.toastActionFailedRetry"));
         return false;
       } finally {
         setBusy(null);
@@ -349,13 +338,13 @@ export default function AdminNewsNetworkPage() {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || data.success === false) {
-          notify("error", data.error || "That upload failed.");
+          notify("error", data.error || t("adminNewsNetwork.toastUploadFailed"));
           return;
         }
-        notify("success", kind === "avatarFile" ? "Avatar updated." : "Banner updated.");
+        notify("success", kind === "avatarFile" ? t("adminNewsNetwork.toastAvatarUpdated") : t("adminNewsNetwork.toastBannerUpdated"));
         await loadAll();
       } catch {
-        notify("error", "That upload failed. Check your connection and try again.");
+        notify("error", t("adminNewsNetwork.toastUploadFailedRetry"));
       } finally {
         setBusy(null);
       }
@@ -367,7 +356,7 @@ export default function AdminNewsNetworkPage() {
   if (loading && !status) {
     return (
       <div className="flex h-64 items-center justify-center" aria-busy="true">
-        <Loader2 className="h-8 w-8 animate-spin text-zrp-red" aria-label="Loading" />
+        <Loader2 className="h-8 w-8 animate-spin text-zrp-red" aria-label={t("adminNewsNetwork.loadingAriaLabel")} />
       </div>
     );
   }
@@ -412,7 +401,7 @@ export default function AdminNewsNetworkPage() {
                 "pause",
                 "/api/admin/news-network/settings",
                 { method: "PATCH", body: JSON.stringify({ paused: !paused }) },
-                paused ? "Automation resumed." : "Automation paused."
+                paused ? t("adminNewsNetwork.toastAutomationResumed") : t("adminNewsNetwork.toastAutomationPaused")
               )
             }
             className="inline-flex items-center gap-2 rounded-full bg-zrp-red px-4 py-2 text-sm font-medium text-white transition hover:bg-zrp-darkRed disabled:opacity-60"
@@ -432,7 +421,7 @@ export default function AdminNewsNetworkPage() {
             disabled={busy === "run"}
             aria-busy={busy === "run"}
             onClick={() =>
-              act("run", "/api/admin/news-network/run", { method: "POST" }, "Cycle finished.")
+              act("run", "/api/admin/news-network/run", { method: "POST" }, t("adminNewsNetwork.toastCycleFinished"))
             }
             className="inline-flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
           >
@@ -475,10 +464,10 @@ export default function AdminNewsNetworkPage() {
               {paused ? COPY.paused : COPY.running}
             </span>
             <span className="text-gray-500 dark:text-gray-400">
-              {COPY.lastCycle}: {formatDateTime(status.status.lastCycleAt)}
+              {COPY.lastCycle}: {formatDateTime(status.status.lastCycleAt, COPY.never)}
             </span>
             <span className="text-gray-500 dark:text-gray-400">
-              {COPY.nextCycle}: {formatDateTime(status.status.nextCycleAt)}
+              {COPY.nextCycle}: {formatDateTime(status.status.nextCycleAt, COPY.never)}
             </span>
             <span className="text-gray-500 dark:text-gray-400">
               {COPY.enabledLanguages}:{" "}
@@ -488,14 +477,14 @@ export default function AdminNewsNetworkPage() {
 
           {status.lastRun?.status === "FAILED" && status.lastRun.error && (
             <p className="mt-3 rounded-lg bg-red-50 p-2 text-xs text-red-700 dark:bg-red-900/20 dark:text-red-400">
-              Last cycle failed: {status.lastRun.error}
+              {t("adminNewsNetwork.lastCycleFailed", { error: status.lastRun.error })}
             </p>
           )}
         </div>
       )}
 
       {/* ─── Tabs ───────────────────────────────────────────────── */}
-      <nav aria-label="News network sections" className="mb-4 flex flex-wrap gap-2">
+      <nav aria-label={t("adminNewsNetwork.sectionsAriaLabel")} className="mb-4 flex flex-wrap gap-2">
         {(Object.keys(COPY.tabs) as Tab[]).map((key) => (
           <button
             key={key}
@@ -601,7 +590,7 @@ export default function AdminNewsNetworkPage() {
                   "provision-pilot",
                   "/api/admin/news-network/feeds/provision",
                   { method: "POST", body: JSON.stringify({ scope: "pilot" }) },
-                  "Pilot feeds provisioned (disabled)."
+                  t("adminNewsNetwork.toastPilotProvisioned")
                 )
               }
               className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -617,7 +606,7 @@ export default function AdminNewsNetworkPage() {
                   "provision-all",
                   "/api/admin/news-network/feeds/provision",
                   { method: "POST", body: JSON.stringify({ scope: "all" }) },
-                  "Full roster provisioned (all disabled)."
+                  t("adminNewsNetwork.toastFullRosterProvisioned")
                 );
               }}
               className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -652,7 +641,7 @@ export default function AdminNewsNetworkPage() {
                         {feed.enabled ? (
                           <CheckCircle2
                             className="h-4 w-4 flex-shrink-0 text-green-600"
-                            aria-label="Enabled"
+                            aria-label={COPY.enabledStatus}
                           />
                         ) : null}
                       </div>
@@ -666,8 +655,8 @@ export default function AdminNewsNetworkPage() {
                       </Link>
                       <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                         {feed.language.toUpperCase()} · {feed.country ?? feed.region} ·{" "}
-                        {feed._count.publications} {COPY.posts} · max {feed.maxPostsPerDay}/day ·{" "}
-                        {feed.minMinutesBetweenPosts} min gap
+                        {feed._count.publications} {COPY.posts} · {t("adminNewsNetwork.maxPerDay", { n: feed.maxPostsPerDay })} ·{" "}
+                        {t("adminNewsNetwork.minGap", { n: feed.minMinutesBetweenPosts })}
                       </p>
                     </div>
 
@@ -681,7 +670,7 @@ export default function AdminNewsNetworkPage() {
                             feed.id,
                             `/api/admin/news-network/feeds/${feed.id}`,
                             { method: "PATCH", body: JSON.stringify({ enabled: !feed.enabled }) },
-                            feed.enabled ? "Feed disabled." : "Feed enabled."
+                            feed.enabled ? t("adminNewsNetwork.toastFeedDisabled") : t("adminNewsNetwork.toastFeedEnabled")
                           )
                         }
                         className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
@@ -744,7 +733,7 @@ export default function AdminNewsNetworkPage() {
                 "seed",
                 "/api/admin/news-network/sources/seed",
                 { method: "POST" },
-                "Starter sources installed. Verify each one before enabling automation."
+                t("adminNewsNetwork.toastStarterSourcesInstalled")
               )
             }
             className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -771,15 +760,15 @@ export default function AdminNewsNetworkPage() {
                         </p>
                         <SourceStatusPill status={source.status} />
                         <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                          tier {source.trustTier}
+                          {t("adminNewsNetwork.tierLabel", { tier: source.trustTier })}
                         </span>
                       </div>
                       <p className="mt-0.5 break-all text-xs text-gray-500 dark:text-gray-400">
                         {source.feedUrl}
                       </p>
                       <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                        {source._count.references} {COPY.sources} ingested · last success{" "}
-                        {formatDateTime(source.lastSuccessAt)}
+                        {source._count.references} {COPY.sources} {t("adminNewsNetwork.ingestedLabel")} &middot; {t("adminNewsNetwork.lastSuccessLabel")}{" "}
+                        {formatDateTime(source.lastSuccessAt, COPY.never)}
                       </p>
                       {source.lastError && (
                         <p className="mt-1 text-xs text-zrp-red">{source.lastError}</p>
@@ -803,15 +792,17 @@ export default function AdminNewsNetworkPage() {
                             if (data.ok) {
                               notify(
                                 "success",
-                                `${source.name}: ${data.itemCount} items parsed, robots.txt ${
-                                  data.robotsAllowed ? "allows" : "disallows"
-                                } this feed.`
+                                t("adminNewsNetwork.verificationResult", {
+                                  name: source.name,
+                                  count: data.itemCount,
+                                  robots: data.robotsAllowed ? t("adminNewsNetwork.robotsAllows") : t("adminNewsNetwork.robotsDisallows"),
+                                })
                               );
                             } else {
-                              notify("error", `${source.name}: ${data.error ?? "verification failed"}`);
+                              notify("error", t("adminNewsNetwork.verificationFailedNamed", { name: source.name, error: data.error ?? t("adminNewsNetwork.verificationFailedGeneric") }));
                             }
                           } catch {
-                            notify("error", "Verification failed.");
+                            notify("error", t("adminNewsNetwork.verificationFailedGeneric"));
                           } finally {
                             setBusy(null);
                           }
@@ -830,7 +821,7 @@ export default function AdminNewsNetworkPage() {
                               source.id,
                               `/api/admin/news-network/sources/${source.id}`,
                               { method: "PATCH", body: JSON.stringify({ clearBackoff: true }) },
-                              "Backoff cleared."
+                              t("adminNewsNetwork.toastBackoffCleared")
                             )
                           }
                           className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
@@ -843,13 +834,13 @@ export default function AdminNewsNetworkPage() {
                         type="button"
                         disabled={busy === `images-${source.id}`}
                         aria-busy={busy === `images-${source.id}`}
-                        title="Only enable once you've confirmed this publisher's terms allow reusing its images."
+                        title={t("adminNewsNetwork.imageEnableTitle")}
                         onClick={() =>
                           act(
                             `images-${source.id}`,
                             `/api/admin/news-network/sources/${source.id}`,
                             { method: "PATCH", body: JSON.stringify({ allowImages: !source.allowImages }) },
-                            source.allowImages ? "Images blocked for this source." : "Images allowed for this source."
+                            source.allowImages ? t("adminNewsNetwork.toastImagesBlocked") : t("adminNewsNetwork.toastImagesAllowed")
                           )
                         }
                         className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
@@ -865,7 +856,7 @@ export default function AdminNewsNetworkPage() {
                             source.id,
                             `/api/admin/news-network/sources/${source.id}`,
                             { method: "PATCH", body: JSON.stringify({ enabled: !source.enabled }) },
-                            source.enabled ? "Source disabled." : "Source enabled."
+                            source.enabled ? t("adminNewsNetwork.toastSourceDisabled") : t("adminNewsNetwork.toastSourceEnabled")
                           )
                         }
                         className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
@@ -899,16 +890,16 @@ export default function AdminNewsNetworkPage() {
                     {story.title}
                   </h3>
                   <span className="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
-                    {story.status} · {story.confidence} · score {story.importance.toFixed(2)}
+                    {story.status} · {story.confidence} · {t("adminNewsNetwork.scoreLabel", { score: story.importance.toFixed(2) })}
                   </span>
                 </div>
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {story.topic} · {story.country ?? story.region} · {story.sourceCount}{" "}
                   {COPY.sources}
-                  {story.sensitive ? " · sensitive (human review required)" : ""}
-                  {story.isBreaking ? " · breaking" : ""}
-                  {story.isTravel ? " · travel" : ""}
+                  {story.sensitive ? ` · ${t("adminNewsNetwork.sensitiveTag")}` : ""}
+                  {story.isBreaking ? ` · ${t("adminNewsNetwork.breakingTag")}` : ""}
+                  {story.isTravel ? ` · ${t("adminNewsNetwork.travelTag")}` : ""}
                 </p>
 
                 <ul className="mt-2 space-y-1">
@@ -960,7 +951,7 @@ export default function AdminNewsNetworkPage() {
                         story.id,
                         `/api/admin/news-network/stories/${story.id}`,
                         { method: "PATCH", body: JSON.stringify({ action: "reject", reason }) },
-                        "Story rejected."
+                        t("adminNewsNetwork.toastStoryRejected")
                       );
                     }}
                     className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
@@ -977,7 +968,7 @@ export default function AdminNewsNetworkPage() {
                         story.id,
                         `/api/admin/news-network/stories/${story.id}`,
                         { method: "PATCH", body: JSON.stringify({ action: "correct", note }) },
-                        "Correction published."
+                        t("adminNewsNetwork.toastCorrectionPublished")
                       );
                     }}
                     className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"
@@ -1012,11 +1003,11 @@ export default function AdminNewsNetworkPage() {
                     <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                       {publication.feed.displayName} · {publication.language.toUpperCase()} ·{" "}
                       {publication.status} ·{" "}
-                      {formatDateTime(publication.publishedAt ?? publication.scheduledFor)}
+                      {formatDateTime(publication.publishedAt ?? publication.scheduledFor, COPY.never)}
                     </p>
                     {publication.story.correctionNote && (
                       <p className="mt-1 text-xs text-gray-700 dark:text-gray-200">
-                        Correction: {publication.story.correctionNote}
+                        {t("adminNewsNetwork.correctionLabel", { note: publication.story.correctionNote })}
                       </p>
                     )}
                     {publication.error && (
@@ -1033,7 +1024,7 @@ export default function AdminNewsNetworkPage() {
                         className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm transition hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
                       >
                         <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                        View
+                        {COPY.view}
                       </Link>
                     )}
                     {publication.status === "PUBLISHED" && (
@@ -1047,7 +1038,7 @@ export default function AdminNewsNetworkPage() {
                             publication.id,
                             `/api/admin/news-network/publications/${publication.id}`,
                             { method: "DELETE", body: JSON.stringify({ reason }) },
-                            "Post removed."
+                            t("adminNewsNetwork.toastPostRemoved")
                           );
                         }}
                         className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-zrp-red transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-600 dark:hover:bg-gray-700"

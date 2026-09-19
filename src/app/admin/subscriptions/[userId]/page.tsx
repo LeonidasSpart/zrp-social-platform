@@ -5,9 +5,9 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, ArrowLeft } from "lucide-react";
 import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-// Per-user billing detail + admin controls (Step 7). Same deliberate
-// English-only copy as the list page - see its comment for why.
+// Per-user billing detail + admin controls (Step 7).
 
 interface Detail {
   user: { id: string; username: string; email: string; name: string | null; plan: string; badgeType: string | null; createdAt: string };
@@ -33,6 +33,7 @@ interface Detail {
 }
 
 export default function AdminSubscriptionDetailPage() {
+  const { t } = useLanguage();
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
   const [data, setData] = useState<Detail | null>(null);
@@ -47,13 +48,14 @@ export default function AdminSubscriptionDetailPage() {
     setError(null);
     try {
       const res = await fetch(`/api/admin/subscriptions/${userId}`);
-      if (!res.ok) throw new Error("Failed to load subscription detail");
+      if (!res.ok) throw new Error(t("adminSubscriptionDetail.loadFailed"));
       setData(await res.json());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("adminSubscriptionDetail.somethingWrong"));
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   useEffect(() => {
@@ -70,11 +72,11 @@ export default function AdminSubscriptionDetailPage() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Action failed");
+        throw new Error(err.error || t("adminSubscriptionDetail.actionFailed"));
       }
       await load();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Action failed");
+      alert(err instanceof Error ? err.message : t("adminSubscriptionDetail.actionFailed"));
     } finally {
       setBusy(false);
     }
@@ -89,7 +91,7 @@ export default function AdminSubscriptionDetailPage() {
   }
 
   if (error || !data) {
-    return <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">{error || "Not found"}</div>;
+    return <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">{error || t("adminSubscriptionDetail.notFound")}</div>;
   }
 
   const sub = data.subscription;
@@ -97,7 +99,7 @@ export default function AdminSubscriptionDetailPage() {
   return (
     <div className="max-w-5xl">
       <Link href="/admin/subscriptions" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:underline mb-4">
-        <ArrowLeft className="w-4 h-4" /> Back to Subscriptions & Billing
+        <ArrowLeft className="w-4 h-4" /> {t("adminSubscriptionDetail.backToList")}
       </Link>
 
       <div className="mb-6">
@@ -105,50 +107,50 @@ export default function AdminSubscriptionDetailPage() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
-        <h2 className="font-semibold mb-3">Current subscription</h2>
+        <h2 className="font-semibold mb-3">{t("adminSubscriptionDetail.currentSubscription")}</h2>
         {sub ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <Field label="Plan" value={sub.plan} />
-            <Field label="Status" value={sub.status} />
-            <Field label="Interval" value={sub.billingInterval || "-"} />
-            <Field label="Days remaining" value={sub.daysRemaining ?? "-"} />
-            <Field label="Period start" value={sub.currentPeriodStart ? new Date(sub.currentPeriodStart).toLocaleString() : "-"} />
-            <Field label="Period end" value={sub.currentPeriodEnd ? new Date(sub.currentPeriodEnd).toLocaleString() : "-"} />
-            <Field label="Last payment" value={sub.lastPaymentAt ? new Date(sub.lastPaymentAt).toLocaleString() : "-"} />
-            <Field label="Reminder sent" value={sub.reminderSentAt ? new Date(sub.reminderSentAt).toLocaleString() : "Not yet"} />
-            <Field label="Canceled at" value={sub.canceledAt ? new Date(sub.canceledAt).toLocaleString() : "-"} />
-            <Field label="Expired at" value={sub.expiredAt ? new Date(sub.expiredAt).toLocaleString() : "-"} />
-            <Field label="Legacy backfill" value={sub.isLegacyBackfill ? "Yes" : "No"} />
+            <Field label={t("adminSubscriptionDetail.fieldPlan")} value={sub.plan} />
+            <Field label={t("adminSubscriptionDetail.fieldStatus")} value={sub.status} />
+            <Field label={t("adminSubscriptionDetail.fieldInterval")} value={sub.billingInterval || "-"} />
+            <Field label={t("adminSubscriptionDetail.fieldDaysRemaining")} value={sub.daysRemaining ?? "-"} />
+            <Field label={t("adminSubscriptionDetail.fieldPeriodStart")} value={sub.currentPeriodStart ? new Date(sub.currentPeriodStart).toLocaleString() : "-"} />
+            <Field label={t("adminSubscriptionDetail.fieldPeriodEnd")} value={sub.currentPeriodEnd ? new Date(sub.currentPeriodEnd).toLocaleString() : "-"} />
+            <Field label={t("adminSubscriptionDetail.fieldLastPayment")} value={sub.lastPaymentAt ? new Date(sub.lastPaymentAt).toLocaleString() : "-"} />
+            <Field label={t("adminSubscriptionDetail.fieldReminderSent")} value={sub.reminderSentAt ? new Date(sub.reminderSentAt).toLocaleString() : t("adminSubscriptionDetail.notYet")} />
+            <Field label={t("adminSubscriptionDetail.fieldCanceledAt")} value={sub.canceledAt ? new Date(sub.canceledAt).toLocaleString() : "-"} />
+            <Field label={t("adminSubscriptionDetail.fieldExpiredAt")} value={sub.expiredAt ? new Date(sub.expiredAt).toLocaleString() : "-"} />
+            <Field label={t("adminSubscriptionDetail.fieldLegacyBackfill")} value={sub.isLegacyBackfill ? t("adminSubscriptionDetail.yes") : t("adminSubscriptionDetail.no")} />
           </div>
         ) : data.user.plan !== "free" ? (
           <p className="text-sm text-amber-600 dark:text-amber-400">
-            Needs reconciliation - <code className="text-xs">User.plan</code> is currently{" "}
-            <span className="font-medium">{data.user.plan}</span>, but no Subscription record exists yet. This
-            user is still receiving that plan&apos;s features (the app enforces access via the legacy plan field),
-            but it has no tracked period, payment history or expiration here. Use &quot;Grant / extend&quot; below
-            to create an authoritative record, or run <code className="text-xs">scripts/backfill-subscriptions.ts</code>.
+            {t("adminSubscriptionDetail.needsReconciliationNote", {
+              planField: "User.plan",
+              plan: data.user.plan,
+              script: "scripts/backfill-subscriptions.ts",
+            })}
           </p>
         ) : (
-          <p className="text-sm text-gray-500">No subscription record - this user has never had a paid entitlement tracked by this system.</p>
+          <p className="text-sm text-gray-500">{t("adminSubscriptionDetail.noSubscriptionRecord")}</p>
         )}
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
-        <h2 className="font-semibold mb-3">Admin controls</h2>
+        <h2 className="font-semibold mb-3">{t("adminSubscriptionDetail.adminControls")}</h2>
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Plan</label>
+            <label className="block text-xs text-gray-500 mb-1">{t("adminSubscriptionDetail.planLabel")}</label>
             <select value={grantPlan} onChange={(e) => setGrantPlan(e.target.value)} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-              <option value="pro">Pro</option>
-              <option value="business">Business</option>
-              <option value="enterprise">Enterprise</option>
+              <option value="pro">{t("adminSubscriptionDetail.planPro")}</option>
+              <option value="business">{t("adminSubscriptionDetail.planBusiness")}</option>
+              <option value="enterprise">{t("adminSubscriptionDetail.planEnterprise")}</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Interval</label>
+            <label className="block text-xs text-gray-500 mb-1">{t("adminSubscriptionDetail.intervalLabel")}</label>
             <select value={grantInterval} onChange={(e) => setGrantInterval(e.target.value)} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
+              <option value="monthly">{t("adminSubscriptionDetail.intervalMonthly")}</option>
+              <option value="yearly">{t("adminSubscriptionDetail.intervalYearly")}</option>
             </select>
           </div>
           <button
@@ -156,18 +158,18 @@ export default function AdminSubscriptionDetailPage() {
             onClick={() => runAction("grant", { plan: grantPlan, billingInterval: grantInterval })}
             className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50"
           >
-            Grant / extend
+            {t("adminSubscriptionDetail.grantExtend")}
           </button>
           {sub?.status === "ACTIVE" && (
             <button
               disabled={busy}
               onClick={() => {
-                const reason = window.prompt("Reason for cancellation (optional):") || undefined;
+                const reason = window.prompt(t("adminSubscriptionDetail.cancelReasonPrompt")) || undefined;
                 runAction("cancel", { reason });
               }}
               className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50"
             >
-              Cancel remaining time
+              {t("adminSubscriptionDetail.cancelRemaining")}
             </button>
           )}
           {sub?.status === "CANCELED" && (
@@ -176,29 +178,27 @@ export default function AdminSubscriptionDetailPage() {
               onClick={() => runAction("restore")}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
             >
-              Restore
+              {t("adminSubscriptionDetail.restore")}
             </button>
           )}
         </div>
         <p className="text-xs text-gray-400 mt-3">
-          "Grant / extend" mirrors a real payment: it extends the user's existing period if one is
-          still active for the same plan, otherwise it starts a fresh period from today. No money moves -
-          it's recorded as an admin_grant in the payment history below.
+          {t("adminSubscriptionDetail.grantExtendNote")}
         </p>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
-        <h2 className="font-semibold mb-3">Payment history</h2>
+        <h2 className="font-semibold mb-3">{t("adminSubscriptionDetail.paymentHistory")}</h2>
         {sub && sub.payments.length > 0 ? (
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase text-gray-500 border-b border-gray-200 dark:border-gray-700">
-                <th className="py-2 pr-3">Date</th>
-                <th className="py-2 pr-3">Plan</th>
-                <th className="py-2 pr-3">Interval</th>
-                <th className="py-2 pr-3">Amount</th>
-                <th className="py-2 pr-3">Method</th>
-                <th className="py-2 pr-3">Period granted</th>
+                <th className="py-2 pr-3">{t("adminSubscriptionDetail.colDate")}</th>
+                <th className="py-2 pr-3">{t("adminSubscriptionDetail.colPlan")}</th>
+                <th className="py-2 pr-3">{t("adminSubscriptionDetail.colInterval")}</th>
+                <th className="py-2 pr-3">{t("adminSubscriptionDetail.colAmount")}</th>
+                <th className="py-2 pr-3">{t("adminSubscriptionDetail.colMethod")}</th>
+                <th className="py-2 pr-3">{t("adminSubscriptionDetail.colPeriodGranted")}</th>
               </tr>
             </thead>
             <tbody>
@@ -219,36 +219,35 @@ export default function AdminSubscriptionDetailPage() {
             </tbody>
           </table>
         ) : (
-          <p className="text-sm text-gray-500">No payments recorded.</p>
+          <p className="text-sm text-gray-500">{t("adminSubscriptionDetail.noPayments")}</p>
         )}
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
-        <h2 className="font-semibold mb-3">Billing audit log</h2>
+        <h2 className="font-semibold mb-3">{t("adminSubscriptionDetail.billingAuditLog")}</h2>
         {sub && sub.events.length > 0 ? (
           <ul className="space-y-2 text-sm">
             {sub.events.map((e) => (
               <li key={e.id} className="flex items-start justify-between border-b border-gray-100 dark:border-gray-700/50 pb-2">
                 <div>
                   <span className="font-medium">{e.action}</span>
-                  {e.actorUsername && <span className="text-gray-400"> by {e.actorUsername}</span>}
-                  {!e.actorUsername && <span className="text-gray-400"> (system)</span>}
+                  {e.actorUsername && <span className="text-gray-400"> {t("adminSubscriptionDetail.actorBy", { username: e.actorUsername })}</span>}
+                  {!e.actorUsername && <span className="text-gray-400"> {t("adminSubscriptionDetail.actorSystem")}</span>}
                 </div>
                 <span className="text-xs text-gray-400 whitespace-nowrap">{new Date(e.createdAt).toLocaleString()}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-gray-500">No billing events recorded yet.</p>
+          <p className="text-sm text-gray-500">{t("adminSubscriptionDetail.noBillingEvents")}</p>
         )}
       </div>
 
       {(data.legacyPaymentRequests.length > 0 || data.legacyUpgradeRequests.length > 0) && (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <h2 className="font-semibold mb-3">Legacy manual requests</h2>
+          <h2 className="font-semibold mb-3">{t("adminSubscriptionDetail.legacyRequests")}</h2>
           <p className="text-xs text-gray-400 mb-3">
-            Shown for context only - these no longer grant entitlement on their own; approving/verifying one
-            now also creates the Subscription period above.
+            {t("adminSubscriptionDetail.legacyRequestsNote")}
           </p>
           <ul className="space-y-1 text-sm">
             {data.legacyPaymentRequests.map((p) => (
