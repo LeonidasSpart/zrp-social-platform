@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Podržane su samo slike i videozapisi.";
 "stories.errEmptyContent" = "Dodajte neki sadržaj ili medijsku datoteku.";
 "stories.errCreateFailed" = "Kreiranje priče nije uspjelo. Pokušajte ponovo.";
+"stories.replyPlaceholder" = "Odgovori na priču...";
+"stories.replySent" = "Poslano!";
 "messages.title" = "Poruke";
 "messages.noMessagesYet" = "Još nema poruka.";
 "messages.startConversation" = "Započnite razgovor s nekim!";

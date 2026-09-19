@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Yalnızca resimler ve videolar desteklenir.";
 "stories.errEmptyContent" = "Lütfen içerik veya bir medya dosyası ekleyin.";
 "stories.errCreateFailed" = "Hikaye oluşturulamadı. Lütfen tekrar deneyin.";
+"stories.replyPlaceholder" = "Hikayeye yanıt ver...";
+"stories.replySent" = "Gönderildi!";
 "messages.title" = "Mesajlar";
 "messages.noMessagesYet" = "Henüz mesaj yok.";
 "messages.startConversation" = "Biriyle sohbete başlayın!";

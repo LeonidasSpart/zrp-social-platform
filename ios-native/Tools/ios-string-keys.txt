@@ -258,6 +258,8 @@ stories.errFileTooLarge
 stories.errUnsupportedType
 stories.errEmptyContent
 stories.errCreateFailed
+stories.replyPlaceholder
+stories.replySent
 
 # ── Messages (Phase 10) ─────────────────────────────────────────────
 messages.title

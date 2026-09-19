@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Kun billeder og videoer understøttes.";
 "stories.errEmptyContent" = "Tilføj venligst noget indhold eller en mediefil.";
 "stories.errCreateFailed" = "Kunne ikke oprette historie. Prøv igen.";
+"stories.replyPlaceholder" = "Svar på historie...";
+"stories.replySent" = "Sendt!";
 "messages.title" = "Beskeder";
 "messages.noMessagesYet" = "Ingen beskeder endnu.";
 "messages.startConversation" = "Start en samtale med nogen!";

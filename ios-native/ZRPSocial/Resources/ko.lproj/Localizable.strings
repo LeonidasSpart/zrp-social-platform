@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "이미지와 동영상만 지원됩니다.";
 "stories.errEmptyContent" = "내용이나 미디어 파일을 추가해 주세요.";
 "stories.errCreateFailed" = "스토리 생성에 실패했습니다. 다시 시도해 주세요.";
+"stories.replyPlaceholder" = "스토리에 답장...";
+"stories.replySent" = "전송됨!";
 "messages.title" = "메시지";
 "messages.noMessagesYet" = "아직 메시지가 없습니다.";
 "messages.startConversation" = "누군가와 대화를 시작해 보세요!";

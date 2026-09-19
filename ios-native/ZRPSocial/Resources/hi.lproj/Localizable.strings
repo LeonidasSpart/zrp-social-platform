@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "केवल तस्वीरें और वीडियो ही समर्थित हैं।";
 "stories.errEmptyContent" = "कृपया कुछ कंटेंट या मीडिया फ़ाइल जोड़ें।";
 "stories.errCreateFailed" = "स्टोरी बनाई नहीं जा सकी। कृपया फिर से कोशिश करें।";
+"stories.replyPlaceholder" = "स्टोरी का जवाब दें...";
+"stories.replySent" = "भेज दिया गया!";
 "messages.title" = "मैसेज";
 "messages.noMessagesYet" = "अभी तक कोई मैसेज नहीं है।";
 "messages.startConversation" = "किसी के साथ बातचीत शुरू करें!";

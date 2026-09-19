@@ -329,13 +329,13 @@ struct StoryViewerView: View {
                     .font(.caption)
                     .foregroundStyle(ZrpColor.red)
             } else if replySent {
-                Text(.iosStoriesReplySent)
+                Text(.storiesReplySent)
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.8))
             }
 
             HStack(spacing: ZrpSpacing.sm) {
-                TextField(L10n.string(.iosStoriesReplyPlaceholder), text: $replyDraft, axis: .vertical)
+                TextField(L10n.string(.storiesReplyPlaceholder), text: $replyDraft, axis: .vertical)
                     .focused($isReplyFocused)
                     .lineLimit(1...4)
                     .foregroundStyle(.white)
@@ -357,7 +357,7 @@ struct StoryViewerView: View {
                 }
                 .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
                 .disabled(isSendingReply || replyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                .accessibilityLabel(Text(.iosA11ySendStoryReply))
+                .accessibilityLabel(Text(.iosA11ySendMessage))
             }
         }
         .padding(.horizontal, ZrpSpacing.lg)

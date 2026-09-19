@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Endast bilder och videor stöds.";
 "stories.errEmptyContent" = "Lägg till innehåll eller en mediafil.";
 "stories.errCreateFailed" = "Det gick inte att skapa storyn. Försök igen.";
+"stories.replyPlaceholder" = "Svara på storyn...";
+"stories.replySent" = "Skickat!";
 "messages.title" = "Meddelanden";
 "messages.noMessagesYet" = "Inga meddelanden än.";
 "messages.startConversation" = "Starta en konversation med någon!";

@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "يتم دعم الصور ومقاطع الفيديو فقط.";
 "stories.errEmptyContent" = "يرجى إضافة محتوى أو ملف وسائط.";
 "stories.errCreateFailed" = "فشل إنشاء القصة. يرجى المحاولة مرة أخرى.";
+"stories.replyPlaceholder" = "الرد على القصة...";
+"stories.replySent" = "تم الإرسال!";
 "messages.title" = "الرسائل";
 "messages.noMessagesYet" = "لا رسائل بعد.";
 "messages.startConversation" = "ابدأ محادثة مع شخص ما!";

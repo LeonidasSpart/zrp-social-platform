@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Only images and videos are supported.";
 "stories.errEmptyContent" = "Please add some content or a media file.";
 "stories.errCreateFailed" = "Failed to create story. Please try again.";
+"stories.replyPlaceholder" = "Reply to story...";
+"stories.replySent" = "Sent!";
 "messages.title" = "Messages";
 "messages.noMessagesYet" = "No messages yet.";
 "messages.startConversation" = "Start a conversation with someone!";
@@ -1256,9 +1258,6 @@
 "ios.a11y.likeStory" = "Like story";
 "ios.a11y.unlikeStory" = "Unlike story";
 "ios.stories.viewCount" = "{n} views";
-"ios.stories.replyPlaceholder" = "Reply to story...";
-"ios.a11y.sendStoryReply" = "Send reply";
-"ios.stories.replySent" = "Sent!";
 "ios.chat.messagePlaceholder" = "Message";
 "ios.chat.edited" = "Edited";
 "ios.chat.replyingTo" = "Replying to {name}";
