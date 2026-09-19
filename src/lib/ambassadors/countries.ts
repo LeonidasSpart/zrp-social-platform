@@ -10,6 +10,10 @@ import ar from "i18n-iso-countries/langs/ar.json";
 import zh from "i18n-iso-countries/langs/zh.json";
 import tr from "i18n-iso-countries/langs/tr.json";
 import id from "i18n-iso-countries/langs/id.json";
+import no from "i18n-iso-countries/langs/no.json";
+import sr from "i18n-iso-countries/langs/sr.json";
+import bs from "i18n-iso-countries/langs/bs.json";
+import mk from "i18n-iso-countries/langs/mk.json";
 import type { Language } from "@/lib/translations";
 
 /*
@@ -61,6 +65,10 @@ function ensureLocalesRegistered() {
   iso.registerLocale(zh);
   iso.registerLocale(tr);
   iso.registerLocale(id);
+  iso.registerLocale(no);
+  iso.registerLocale(sr);
+  iso.registerLocale(bs);
+  iso.registerLocale(mk);
   registered = true;
 }
 ensureLocalesRegistered();
@@ -363,7 +371,7 @@ export interface AmbassadorCountry {
   region: ZrpRegion;
 }
 
-const LOCALE_CODES: Language[] = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id"];
+const LOCALE_CODES: Language[] = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "no", "sr", "bs", "mk"];
 
 /**
  * The full, unfiltered list of all 250 countries/territories, localized

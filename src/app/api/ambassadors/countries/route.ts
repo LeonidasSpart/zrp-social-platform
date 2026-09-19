@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAllCountries } from "@/lib/ambassadors/countries";
 import type { Language } from "@/lib/translations";
 
-const SUPPORTED_LANGUAGES: Language[] = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id"];
+const SUPPORTED_LANGUAGES: Language[] = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "no", "sr", "bs", "mk"];
 
 /**
  * GET /api/ambassadors/countries?lang=en

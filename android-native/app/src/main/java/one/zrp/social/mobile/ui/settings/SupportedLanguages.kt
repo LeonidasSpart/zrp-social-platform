@@ -1,12 +1,14 @@
 package one.zrp.social.mobile.ui.settings
 
 /**
- * The same 25 official ZRP languages as src/lib/translations.ts's
+ * The same 29 official ZRP languages as src/lib/translations.ts's
  * SUPPORTED_LANGUAGES - same codes, same native-script labels (a
  * language's own name is never itself translated, on web or here).
  * "pt" is European/International Portuguese (the same variant web/iOS
  * ship) - Android has no separate pt-PT vs pt-BR resource split here
- * since ZRP only ever ships the one Portuguese translation.
+ * since ZRP only ever ships the one Portuguese translation. "sr"
+ * (Serbian) ships in Latin script only, matching its "Srpski" label -
+ * ZRP does not ship a separate Cyrillic Serbian variant.
  */
 data class SupportedLanguage(val code: String, val label: String)
 
@@ -36,4 +38,8 @@ val SUPPORTED_LANGUAGES = listOf(
     SupportedLanguage("hr", "Hrvatski"),
     SupportedLanguage("bg", "Български"),
     SupportedLanguage("el", "Ελληνικά"),
+    SupportedLanguage("no", "Norsk"),
+    SupportedLanguage("sr", "Srpski"),
+    SupportedLanguage("bs", "Bosanski"),
+    SupportedLanguage("mk", "Македонски"),
 )

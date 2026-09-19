@@ -30,7 +30,7 @@ function normalize(value: string): string {
   return value.normalize("NFD").replace(DIACRITIC_MARK_PATTERN, "").toLowerCase().trim();
 }
 
-const REGISTERED_LOCALES = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id"] as const;
+const REGISTERED_LOCALES = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "no", "sr", "bs", "mk"] as const;
 
 // One normalized-name -> code lookup built once from every name variant
 // (official AND common short form - `select: "all"`) in all 11
