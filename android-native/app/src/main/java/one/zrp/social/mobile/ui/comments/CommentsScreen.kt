@@ -301,8 +301,12 @@ private fun List<Comment>.findInTree(id: String?): Comment? {
     return null
 }
 
+// Internal, not private: reused as-is by PostDetailScreen (same
+// per-comment like/repost/bookmark/edit/delete/reply rendering, just
+// composed under a post header instead of this screen's own bare
+// comments-only Column) - see PostDetailScreen.kt.
 @Composable
-private fun CommentThread(
+internal fun CommentThread(
     comment: Comment,
     depth: Int,
     ownUserId: String?,

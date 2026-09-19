@@ -89,6 +89,7 @@ import one.zrp.social.mobile.ui.legal.LegalScreen
 import one.zrp.social.mobile.ui.pricing.PricingScreen
 import one.zrp.social.mobile.ui.bookmarks.BookmarksScreen
 import one.zrp.social.mobile.ui.comments.CommentsScreen
+import one.zrp.social.mobile.ui.postdetail.PostDetailScreen
 import one.zrp.social.mobile.ui.communities.CommunitiesScreen
 import one.zrp.social.mobile.ui.communities.CommunityDetailScreen
 import one.zrp.social.mobile.ui.lists.ListDetailScreen
@@ -221,6 +222,13 @@ fun ZrpNavHost(
     val goToNewGroup: () -> Unit = { navController.navigate("messages/new-group") }
     val goToGroupInfo: (conversationId: String) -> Unit = { id -> navController.navigate("messages/group/$id/info") }
     val goToComments: (String) -> Unit = { postId -> navController.navigate("post/$postId/comments") }
+    // The real post-detail destination (PostDetailScreen: post + its
+    // comments below, one scroll) - distinct from goToComments' bare
+    // comments-only screen above. Reached today only from a "like"/
+    // "repost" notification tap (NotificationsScreen's onOpenPost) and
+    // the matching push deep link registered on this route below; every
+    // other existing goToComments call site is untouched.
+    val goToPost: (String) -> Unit = { postId -> navController.navigate("post/$postId") }
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
     val goToMusic: () -> Unit = { navController.navigate("music") }
@@ -616,6 +624,7 @@ fun ZrpNavHost(
             ) {
                 NotificationsScreen(
                     onAuthorClick = goToProfile,
+                    onOpenPost = goToPost,
                     onOpenComments = goToComments,
                     onOpenMessage = goToConversation,
                     onOpenAppeals = goToAppeals,
@@ -1695,19 +1704,41 @@ fun ZrpNavHost(
             composable(
                 route = "post/{postId}/comments",
                 arguments = listOf(navArgument("postId") { type = NavType.StringType }),
-                // Matches the real "/post/{postId}" path
-                // src/lib/push-notifications.ts's sendPushNotification
-                // callers already send as the FCM `url` data field for a
-                // like or comment notification (see
-                // ZrpFirebaseMessagingService's own deep-link tap intent)
-                // - this is the screen web's own /post/{postId} route
-                // opens to, same as every other real goToComments call
-                // elsewhere in this NavHost.
-                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/post/{postId}" }),
             ) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId")
                 if (postId != null) {
                     CommentsScreen(
+                        postId = postId,
+                        onBack = { navController.popBackStack() },
+                        onAuthorClick = goToProfile,
+                        onOpenHashtag = goToHashtag,
+                    )
+                }
+            }
+            composable(
+                route = "post/{postId}",
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+                // Matches the real "/post/{postId}" path
+                // src/lib/push-notifications.ts's sendPushNotification
+                // callers already send as the FCM `url` data field for
+                // EVERY notification type that references a post (like,
+                // repost, comment, reply, mention alike - see
+                // ZrpFirebaseMessagingService's own deep-link tap intent)
+                // - the payload carries no type, only this bare URL, so
+                // there is no way to route a push tap by type the way
+                // NotificationsScreen's in-app onOpenPost/onOpenComments
+                // split can. PostDetailScreen (post + comments below, one
+                // scroll) is the one destination that's correct for every
+                // possible originating type, matching how the website's
+                // own /post/{postId} route and the iOS app's identical
+                // deep-link resolution both already behave - so the
+                // deep link lives here now, not on the comments-only
+                // route above.
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/post/{postId}" }),
+            ) { backStackEntry ->
+                val postId = backStackEntry.arguments?.getString("postId")
+                if (postId != null) {
+                    PostDetailScreen(
                         postId = postId,
                         onBack = { navController.popBackStack() },
                         onAuthorClick = goToProfile,
