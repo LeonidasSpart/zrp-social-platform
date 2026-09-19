@@ -72,15 +72,24 @@ import one.zrp.social.mobile.util.localizedError
  * The Notifications tab: the same real list the website's
  * /notifications page shows - grouped the same way (like/repost/follow
  * collapse into one row), filterable the same way (All/Verified/
- * Follows), routed to the same real destination per type (a post's
- * comments, a profile, or a conversation - not always a profile, which
- * this screen got wrong before), and offering the same real "Follow
- * back" action. No fake activity.
+ * Follows), routed to the same real destination per type (a post
+ * itself for like/repost, its comments for comment, a profile, or a
+ * conversation - not always a profile, which this screen got wrong
+ * before), and offering the same real "Follow back" action. No fake
+ * activity.
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NotificationsScreen(
     onAuthorClick: (String) -> Unit,
+    // ⚠️ A "like"/"repost" notification is a post-level action - it has
+    // nothing to do with any comment - so it opens the real post
+    // (PostDetailScreen) here, not the comments thread. "comment" (and
+    // any other type this screen doesn't special-case) keeps going to
+    // onOpenComments exactly as before; that's unrelated, pre-existing
+    // behavior this fix doesn't touch. See PostDetailScreen.kt's own
+    // doc comment for why only like/repost are redirected.
+    onOpenPost: (String) -> Unit = {},
     onOpenComments: (String) -> Unit = {},
     onOpenMessage: (partnerId: String, partnerUsername: String) -> Unit = { _, _ -> },
     onOpenAppeals: () -> Unit = {},
@@ -110,6 +119,7 @@ fun NotificationsScreen(
             // existed natively.
             g.type == "appeal_resolved" -> onOpenAppeals()
             g.type == "listing_approved" || g.type == "listing_rejected" || g.type == "listing_removed" -> onOpenMyListings()
+            (g.type == "like" || g.type == "repost") && g.postId != null -> onOpenPost(g.postId)
             g.postId != null -> onOpenComments(g.postId)
             else -> onAuthorClick(primary.username)
         }
