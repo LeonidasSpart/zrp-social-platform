@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Ukloni oznaku sviđanja sa priče</string>
     <string name="story_mute_cd">Isključi zvuk priče</string>
     <string name="story_unmute_cd">Uključi zvuk priče</string>
+    <string name="story_reply_placeholder">Odgovori na priču...</string>
+    <string name="story_reply_send_cd">Pošalji odgovor</string>
+    <string name="story_reply_sent">Poslato!</string>
     <string name="comment_repost_cd">Ponovo objavi</string>
     <string name="comment_undo_repost_cd">Poništi repost</string>
     <string name="createpost_media_count_cd">%1$d/%2$d medija</string>

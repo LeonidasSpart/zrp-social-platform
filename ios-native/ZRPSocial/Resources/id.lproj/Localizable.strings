@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Hanya gambar dan video yang didukung.";
 "stories.errEmptyContent" = "Silakan tambahkan konten atau file media.";
 "stories.errCreateFailed" = "Gagal membuat kisah. Silakan coba lagi.";
+"stories.replyPlaceholder" = "Balas kisah...";
+"stories.replySent" = "Terkirim!";
 "messages.title" = "Pesan";
 "messages.noMessagesYet" = "Belum ada pesan.";
 "messages.startConversation" = "Mulai percakapan dengan seseorang!";

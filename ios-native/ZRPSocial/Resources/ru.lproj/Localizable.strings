@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Поддерживаются только изображения и видео.";
 "stories.errEmptyContent" = "Добавьте текст или медиафайл.";
 "stories.errCreateFailed" = "Не удалось создать историю. Попробуйте ещё раз.";
+"stories.replyPlaceholder" = "Ответить на историю...";
+"stories.replySent" = "Отправлено!";
 "messages.title" = "Сообщения";
 "messages.noMessagesYet" = "Нет сообщения пока.";
 "messages.startConversation" = "Начните разговор с кем-нибудь!";

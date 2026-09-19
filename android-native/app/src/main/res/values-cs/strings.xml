@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Zrušit Líbí se mi u příběhu</string>
     <string name="story_mute_cd">Ztlumit zvuk příběhu</string>
     <string name="story_unmute_cd">Zrušit ztlumení zvuku příběhu</string>
+    <string name="story_reply_placeholder">Odpovědět na příběh...</string>
+    <string name="story_reply_send_cd">Odeslat odpověď</string>
+    <string name="story_reply_sent">Odesláno!</string>
     <string name="comment_repost_cd">Sdílet</string>
     <string name="comment_undo_repost_cd">Zrušit sdílení</string>
     <string name="createpost_media_count_cd">%1$d/%2$d médií</string>

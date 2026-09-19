@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Υποστηρίζονται μόνο εικόνες και βίντεο.";
 "stories.errEmptyContent" = "Πρόσθεσε κάποιο περιεχόμενο ή αρχείο πολυμέσων.";
 "stories.errCreateFailed" = "Η δημιουργία της ιστορίας απέτυχε. Δοκίμασε ξανά.";
+"stories.replyPlaceholder" = "Απάντηση στην ιστορία...";
+"stories.replySent" = "Στάλθηκε!";
 "messages.title" = "Μηνύματα";
 "messages.noMessagesYet" = "Δεν υπάρχουν μηνύματα ακόμα.";
 "messages.startConversation" = "Ξεκίνα μια συνομιλία με κάποιον!";

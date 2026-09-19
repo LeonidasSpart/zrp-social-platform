@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Sono supportati solo immagini e video.";
 "stories.errEmptyContent" = "Aggiungi del contenuto o un file multimediale.";
 "stories.errCreateFailed" = "Impossibile creare la storia. Riprova.";
+"stories.replyPlaceholder" = "Rispondi alla storia...";
+"stories.replySent" = "Inviato!";
 "messages.title" = "Messaggi";
 "messages.noMessagesYet" = "Ancora nessun messaggio.";
 "messages.startConversation" = "Inizia una conversazione con qualcuno!";

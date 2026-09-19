@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Κατάργηση «Μου αρέσει» ιστορίας</string>
     <string name="story_mute_cd">Σίγαση ήχου ιστορίας</string>
     <string name="story_unmute_cd">Κατάργηση σίγασης ήχου ιστορίας</string>
+    <string name="story_reply_placeholder">Απάντηση στην ιστορία...</string>
+    <string name="story_reply_send_cd">Αποστολή απάντησης</string>
+    <string name="story_reply_sent">Στάλθηκε!</string>
     <string name="comment_repost_cd">Αναδημοσίευση</string>
     <string name="comment_undo_repost_cd">Αναίρεση αναδημοσίευσης</string>
     <string name="createpost_media_count_cd">%1$d/%2$d πολυμέσα</string>

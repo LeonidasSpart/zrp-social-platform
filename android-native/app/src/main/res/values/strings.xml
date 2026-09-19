@@ -357,6 +357,9 @@
     <string name="story_mute_cd">Mute story audio</string>
 
     <string name="story_unmute_cd">Unmute story audio</string>
+    <string name="story_reply_placeholder">Reply to story...</string>
+    <string name="story_reply_send_cd">Send reply</string>
+    <string name="story_reply_sent">Sent!</string>
     <string name="comment_repost_cd">Repost</string>
     <string name="comment_undo_repost_cd">Undo repost</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>

@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Поддржани се само слики и видеа.";
 "stories.errEmptyContent" = "Додај содржина или медиумска датотека.";
 "stories.errCreateFailed" = "Создавањето на сторијата не успеа. Обиди се повторно.";
+"stories.replyPlaceholder" = "Одговори на сторијата...";
+"stories.replySent" = "Испратено!";
 "messages.title" = "Пораки";
 "messages.noMessagesYet" = "Сè уште нема пораки.";
 "messages.startConversation" = "Започни разговор со некого!";

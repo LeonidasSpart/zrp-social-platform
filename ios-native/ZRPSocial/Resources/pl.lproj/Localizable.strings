@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Obsługiwane są tylko zdjęcia i filmy.";
 "stories.errEmptyContent" = "Dodaj treść lub plik multimedialny.";
 "stories.errCreateFailed" = "Nie udało się utworzyć relacji. Spróbuj ponownie.";
+"stories.replyPlaceholder" = "Odpowiedz na relację...";
+"stories.replySent" = "Wysłano!";
 "messages.title" = "Wiadomości";
 "messages.noMessagesYet" = "Brak wiadomości.";
 "messages.startConversation" = "Rozpocznij rozmowę z kimś!";

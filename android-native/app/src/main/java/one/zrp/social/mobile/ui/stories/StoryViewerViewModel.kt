@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.StoriesRepository
 import one.zrp.social.mobile.network.StoryAuthor
 import one.zrp.social.mobile.network.StoryItem
@@ -17,6 +18,13 @@ data class StoryViewerUiState(
     val isOwnStories: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null,
+    // Reply-composer state - a story reply is a private DM to the
+    // author (POST /messages with storyId), not a public comment, so
+    // it never touches `stories`/`author` above.
+    val replyDraft: String = "",
+    val isSendingReply: Boolean = false,
+    val replyError: String? = null,
+    val replySent: Boolean = false,
 )
 
 /**
@@ -28,6 +36,7 @@ data class StoryViewerUiState(
 class StoryViewerViewModel(
     private val repository: StoriesRepository,
     private val userId: String,
+    private val messagesRepository: MessagesRepository = MessagesRepository(),
 ) : ViewModel() {
     private val _state = MutableStateFlow(StoryViewerUiState())
     val state: StateFlow<StoryViewerUiState> = _state.asStateFlow()
@@ -91,6 +100,34 @@ class StoryViewerViewModel(
         viewModelScope.launch {
             repository.toggleLike(storyId).onFailure {
                 _state.update { it.copy(stories = previousStories) }
+            }
+        }
+    }
+
+    fun onReplyDraftChange(text: String) {
+        _state.update { it.copy(replyDraft = text, replySent = false) }
+    }
+
+    fun sendReply(storyId: String) {
+        val current = _state.value
+        val content = current.replyDraft.trim()
+        val authorId = current.author?.id
+        if (content.isEmpty() || current.isSendingReply || authorId == null) return
+
+        _state.update { it.copy(isSendingReply = true, replyError = null) }
+        viewModelScope.launch {
+            messagesRepository.sendMessage(
+                receiverId = authorId,
+                content = content,
+                storyId = storyId,
+            ).onSuccess {
+                _state.update {
+                    it.copy(isSendingReply = false, replyDraft = "", replySent = true)
+                }
+            }.onFailure { error ->
+                _state.update {
+                    it.copy(isSendingReply = false, replyError = error.message ?: "Couldn't send this reply. Please try again.")
+                }
             }
         }
     }

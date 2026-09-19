@@ -347,6 +347,9 @@
     <string name="story_mute_cd">Story-Ton stummschalten</string>
 
     <string name="story_unmute_cd">Story-Ton aktivieren</string>
+    <string name="story_reply_placeholder">Auf Story antworten...</string>
+    <string name="story_reply_send_cd">Antwort senden</string>
+    <string name="story_reply_sent">Gesendet!</string>
     <string name="comment_repost_cd">Repost</string>
     <string name="comment_undo_repost_cd">Repost rückgängig machen</string>
     <string name="createpost_media_count_cd">%1$d/%2$d Medien</string>

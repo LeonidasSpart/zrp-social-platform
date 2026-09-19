@@ -347,6 +347,9 @@
     <string name="story_mute_cd">Bisukan suara story</string>
 
     <string name="story_unmute_cd">Aktifkan suara story</string>
+    <string name="story_reply_placeholder">Balas kisah...</string>
+    <string name="story_reply_send_cd">Kirim balasan</string>
+    <string name="story_reply_sent">Terkirim!</string>
     <string name="comment_repost_cd">Posting ulang</string>
     <string name="comment_undo_repost_cd">Batalkan posting ulang</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>

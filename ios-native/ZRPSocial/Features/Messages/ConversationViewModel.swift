@@ -365,7 +365,8 @@ final class ConversationViewModel: ObservableObject {
                 to: partner.id,
                 content: content,
                 imageUrl: uploadedImageUrl,
-                replyToId: replyTarget?.id
+                replyToId: replyTarget?.id,
+                storyId: nil
             )
             // Appended from the route's own 201 response rather than
             // refetching the whole thread.
@@ -442,7 +443,8 @@ final class ConversationViewModel: ObservableObject {
                 to: partner.id,
                 content: attachment.messageContent,
                 imageUrl: uploadedUrl,
-                replyToId: nil
+                replyToId: nil,
+                storyId: nil
             )
             if !messages.contains(where: { $0.id == sent.id }) {
                 messages.append(sent)
@@ -474,7 +476,8 @@ final class ConversationViewModel: ObservableObject {
                 to: partner.id,
                 content: "",
                 imageUrl: gif.url,
-                replyToId: nil
+                replyToId: nil,
+                storyId: nil
             )
             if !messages.contains(where: { $0.id == sent.id }) {
                 messages.append(sent)

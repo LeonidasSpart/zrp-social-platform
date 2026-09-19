@@ -39,10 +39,13 @@ class MessagesRepository {
         content: String,
         replyToId: String? = null,
         imageUrl: String? = null,
+        storyId: String? = null,
     ): Result<ChatMessage> {
         return try {
             Result.success(
-                ApiClient.messagesApi.sendMessage(SendMessageRequest(content, receiverId, imageUrl, replyToId)),
+                ApiClient.messagesApi.sendMessage(
+                    SendMessageRequest(content, receiverId, imageUrl, replyToId, storyId),
+                ),
             )
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Couldn't send this message. Please try again."))

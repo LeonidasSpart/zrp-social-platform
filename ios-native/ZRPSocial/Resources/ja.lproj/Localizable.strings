@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "対応しているのは画像と動画のみです。";
 "stories.errEmptyContent" = "コンテンツまたはメディアファイルを追加してください。";
 "stories.errCreateFailed" = "ストーリーの作成に失敗しました。もう一度お試しください。";
+"stories.replyPlaceholder" = "ストーリーに返信...";
+"stories.replySent" = "送信しました!";
 "messages.title" = "メッセージ";
 "messages.noMessagesYet" = "まだメッセージがありません。";
 "messages.startConversation" = "誰かと会話を始めましょう！";

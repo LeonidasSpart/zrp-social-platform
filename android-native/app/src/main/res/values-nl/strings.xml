@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Story niet meer leuk vinden</string>
     <string name="story_mute_cd">Storyaudio dempen</string>
     <string name="story_unmute_cd">Storyaudio dempen opheffen</string>
+    <string name="story_reply_placeholder">Reageer op story...</string>
+    <string name="story_reply_send_cd">Reactie verzenden</string>
+    <string name="story_reply_sent">Verzonden!</string>
     <string name="comment_repost_cd">Repost</string>
     <string name="comment_undo_repost_cd">Repost ongedaan maken</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>

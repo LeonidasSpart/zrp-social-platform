@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Sluta gilla story</string>
     <string name="story_mute_cd">Tysta storyns ljud</string>
     <string name="story_unmute_cd">Sluta tysta storyns ljud</string>
+    <string name="story_reply_placeholder">Svara på storyn...</string>
+    <string name="story_reply_send_cd">Skicka svar</string>
+    <string name="story_reply_sent">Skickat!</string>
     <string name="comment_repost_cd">Reposta</string>
     <string name="comment_undo_repost_cd">Ångra repost</string>
     <string name="createpost_media_count_cd">%1$d/%2$d media</string>

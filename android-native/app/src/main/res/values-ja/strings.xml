@@ -344,6 +344,9 @@
     <string name="story_unlike_cd">ストーリーのいいねを取り消す</string>
     <string name="story_mute_cd">ストーリーの音声をミュート</string>
     <string name="story_unmute_cd">ストーリーの音声のミュートを解除</string>
+    <string name="story_reply_placeholder">ストーリーに返信...</string>
+    <string name="story_reply_send_cd">返信を送信</string>
+    <string name="story_reply_sent">送信しました!</string>
     <string name="comment_repost_cd">リポスト</string>
     <string name="comment_undo_repost_cd">リポストを取り消す</string>
     <string name="createpost_media_count_cd">メディア %1$d/%2$d</string>

@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Alleen afbeeldingen en video's worden ondersteund.";
 "stories.errEmptyContent" = "Voeg wat content of een mediabestand toe.";
 "stories.errCreateFailed" = "Aanmaken van story mislukt. Probeer het opnieuw.";
+"stories.replyPlaceholder" = "Reageer op story...";
+"stories.replySent" = "Verzonden!";
 "messages.title" = "Berichten";
 "messages.noMessagesYet" = "Nog geen berichten.";
 "messages.startConversation" = "Begin een gesprek met iemand!";

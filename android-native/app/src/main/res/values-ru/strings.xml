@@ -347,6 +347,9 @@
     <string name="story_mute_cd">Выключить звук истории</string>
 
     <string name="story_unmute_cd">Включить звук истории</string>
+    <string name="story_reply_placeholder">Ответить на историю...</string>
+    <string name="story_reply_send_cd">Отправить ответ</string>
+    <string name="story_reply_sent">Отправлено!</string>
     <string name="comment_repost_cd">Репост</string>
     <string name="comment_undo_repost_cd">Отменить репост</string>
     <string name="createpost_media_count_cd">%1$d/%2$d медиафайлов</string>

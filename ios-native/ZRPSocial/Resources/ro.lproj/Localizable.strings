@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Sunt acceptate doar imagini și videoclipuri.";
 "stories.errEmptyContent" = "Te rugăm să adaugi conținut sau un fișier media.";
 "stories.errCreateFailed" = "Crearea story-ului a eșuat. Te rugăm să încerci din nou.";
+"stories.replyPlaceholder" = "Răspunde la story...";
+"stories.replySent" = "Trimis!";
 "messages.title" = "Mesaje";
 "messages.noMessagesYet" = "Niciun mesaj încă.";
 "messages.startConversation" = "Începe o conversație cu cineva!";

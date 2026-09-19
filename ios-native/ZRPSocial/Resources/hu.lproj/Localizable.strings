@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Csak képek és videók támogatottak.";
 "stories.errEmptyContent" = "Adj hozzá tartalmat vagy egy médiafájlt.";
 "stories.errCreateFailed" = "Nem sikerült létrehozni a történetet. Próbáld újra.";
+"stories.replyPlaceholder" = "Válasz a történetre...";
+"stories.replySent" = "Elküldve!";
 "messages.title" = "Üzenetek";
 "messages.noMessagesYet" = "Még nincsenek üzenetek.";
 "messages.startConversation" = "Kezdeményezz egy beszélgetést valakivel!";

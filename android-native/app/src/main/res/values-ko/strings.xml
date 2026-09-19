@@ -344,6 +344,9 @@
     <string name="story_unlike_cd">스토리 좋아요 취소</string>
     <string name="story_mute_cd">스토리 소리 음소거</string>
     <string name="story_unmute_cd">스토리 소리 음소거 해제</string>
+    <string name="story_reply_placeholder">스토리에 답장...</string>
+    <string name="story_reply_send_cd">답장 보내기</string>
+    <string name="story_reply_sent">전송됨!</string>
     <string name="comment_repost_cd">리포스트</string>
     <string name="comment_undo_repost_cd">리포스트 취소</string>
     <string name="createpost_media_count_cd">미디어 %1$d/%2$d</string>

@@ -22,6 +22,14 @@ const MESSAGE_INCLUDE = {
       },
     },
   },
+  // Present only on a story-reply message (see storyId on Message) - lets
+  // the chat UI render a quoted "Replied to your story" preview the same
+  // way it already renders a replyTo quote. A Story is never
+  // hard-deleted, so this stays populated for the life of the message;
+  // the FK is SetNull rather than Cascade purely for defense in depth.
+  story: {
+    select: { id: true, mediaUrl: true, mediaType: true, content: true },
+  },
   reactions: {
     include: {
       user: { select: { id: true, username: true, name: true, avatarUrl: true } },

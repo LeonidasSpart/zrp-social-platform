@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Anulează aprecierea story-ului</string>
     <string name="story_mute_cd">Silențiază sunetul story-ului</string>
     <string name="story_unmute_cd">Anulează silențierea sunetului story-ului</string>
+    <string name="story_reply_placeholder">Răspunde la story...</string>
+    <string name="story_reply_send_cd">Trimite răspunsul</string>
+    <string name="story_reply_sent">Trimis!</string>
     <string name="comment_repost_cd">Redistribuie</string>
     <string name="comment_undo_repost_cd">Anulează redistribuirea</string>
     <string name="createpost_media_count_cd">%1$d/%2$d conținut media</string>

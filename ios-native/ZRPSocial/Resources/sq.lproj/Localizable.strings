@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Mbështeten vetëm imazhet dhe videot.";
 "stories.errEmptyContent" = "Ju lutemi shtoni përmbajtje ose një skedar media.";
 "stories.errCreateFailed" = "Krijimi i storjes dështoi. Ju lutemi provoni përsëri.";
+"stories.replyPlaceholder" = "Përgjigju storjes...";
+"stories.replySent" = "U dërgua!";
 "messages.title" = "Mesazhet";
 "messages.noMessagesYet" = "Nuk ka mesazhe ende.";
 "messages.startConversation" = "Filloni një bisedë me dikë!";

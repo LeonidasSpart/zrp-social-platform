@@ -39,7 +39,18 @@ data class ChatMessage(
     val sender: PostAuthor?,
     val receiver: PostAuthor?,
     val replyTo: ChatMessage?,
+    // Present only on a story-reply message (see storyId on Message) -
+    // lets the conversation UI show a "Replied to your story" quote,
+    // mirroring how replyTo is rendered.
+    val story: MessageStoryRef? = null,
     val reactions: List<MessageReaction> = emptyList(),
+)
+
+data class MessageStoryRef(
+    val id: String,
+    val mediaUrl: String?,
+    val mediaType: String?,
+    val content: String?,
 )
 
 // The minimal shape server.js's send-message handler actually relays
@@ -123,6 +134,13 @@ data class SendMessageRequest(
     val receiverId: String,
     val imageUrl: String? = null,
     val replyToId: String? = null,
+    // Set when this message is a reply to a Story - see storyId on the
+    // Message model (prisma/schema.prisma). The server derives the real
+    // recipient from the Story's own owner, so receiverId above is
+    // ignored server-side whenever this is set; it's still required by
+    // this DTO's non-null receiverId field, so callers keep passing the
+    // story author's id (StoryItem's group author) for clarity.
+    val storyId: String? = null,
 )
 
 data class EditMessageRequest(val content: String)

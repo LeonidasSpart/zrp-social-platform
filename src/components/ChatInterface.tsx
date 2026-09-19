@@ -81,6 +81,15 @@ interface Message {
     imageUrl?: string | null;
     sender: MessageAuthor;
   } | null;
+  // Present only when this message is a reply to the receiver's Story
+  // (see Message.storyId in prisma/schema.prisma) - a private DM sent
+  // through this same channel, never a public comment on the story.
+  story?: {
+    id: string;
+    mediaUrl?: string | null;
+    mediaType?: string | null;
+    content?: string | null;
+  } | null;
   reactions?: Reaction[];
 }
 
@@ -2347,6 +2356,53 @@ export default function ChatInterface({
                               )}
                             </div>
                           </>
+                        )}
+
+                        {/* STORY REPLY BADGE - shown instead of the
+                            generic reply preview below, since a story
+                            reply doesn't reference another Message, it
+                            references a Story that isn't part of this
+                            thread and can't be scrolled to. */}
+
+                        {message.story && (
+                          <div
+                            className={`
+                              mb-1.5
+                              flex
+                              w-full
+                              min-w-0
+                              items-center
+                              gap-2
+                              rounded-lg
+                              border-l-2
+                              px-2.5
+                              py-1.5
+                              text-left
+                              text-xs
+                              ${
+                                isOwn
+                                  ? "border-white/50 bg-white/10 text-white/80"
+                                  : "border-gray-400 bg-black/5 text-gray-600 dark:border-gray-500 dark:bg-white/5 dark:text-gray-300"
+                              }
+                            `}
+                          >
+                            {message.story.mediaUrl && (
+                              <div className="h-8 w-8 shrink-0 overflow-hidden rounded-md bg-black/20">
+                                {message.story.mediaType === "video" ? (
+                                  <video src={message.story.mediaUrl} className="h-full w-full object-cover" muted />
+                                ) : (
+                                  <img
+                                    src={message.story.mediaUrl}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                  />
+                                )}
+                              </div>
+                            )}
+                            <p className="min-w-0 truncate">
+                              {isOwn ? "Replied to their story" : "Replied to your story"}
+                            </p>
+                          </div>
                         )}
 
                         {/* REPLY PREVIEW */}

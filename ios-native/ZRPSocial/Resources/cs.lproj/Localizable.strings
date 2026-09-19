@@ -233,6 +233,8 @@
 "stories.errUnsupportedType" = "Podporovány jsou pouze obrázky a videa.";
 "stories.errEmptyContent" = "Přidej prosím nějaký obsah nebo mediální soubor.";
 "stories.errCreateFailed" = "Vytvoření příběhu se nezdařilo. Zkus to prosím znovu.";
+"stories.replyPlaceholder" = "Odpovědět na příběh...";
+"stories.replySent" = "Odesláno!";
 "messages.title" = "Zprávy";
 "messages.noMessagesYet" = "Zatím žádné zprávy.";
 "messages.startConversation" = "Začni konverzaci s někým!";

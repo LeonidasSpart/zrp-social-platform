@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Történet kedvelésének visszavonása</string>
     <string name="story_mute_cd">Történet hangjának némítása</string>
     <string name="story_unmute_cd">Történet hangjának némítás-feloldása</string>
+    <string name="story_reply_placeholder">Válasz a történetre...</string>
+    <string name="story_reply_send_cd">Válasz küldése</string>
+    <string name="story_reply_sent">Elküldve!</string>
     <string name="comment_repost_cd">Megosztás</string>
     <string name="comment_undo_repost_cd">Megosztás visszavonása</string>
     <string name="createpost_media_count_cd">%1$d/%2$d média</string>

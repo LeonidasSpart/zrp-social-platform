@@ -345,6 +345,9 @@
     <string name="story_unlike_cd">Отстрани допаѓање од сторијата</string>
     <string name="story_mute_cd">Исклучи го звукот на сторијата</string>
     <string name="story_unmute_cd">Вклучи го звукот на сторијата</string>
+    <string name="story_reply_placeholder">Одговори на сторијата...</string>
+    <string name="story_reply_send_cd">Испрати одговор</string>
+    <string name="story_reply_sent">Испратено!</string>
     <string name="comment_repost_cd">Повторно објави</string>
     <string name="comment_undo_repost_cd">Поништи ја повторната објава</string>
     <string name="createpost_media_count_cd">%1$d/%2$d медиуми</string>
