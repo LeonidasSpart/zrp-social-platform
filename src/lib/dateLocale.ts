@@ -39,6 +39,19 @@ const DATE_LOCALE_MAP: Record<Language, string> = {
   hr: "hr-HR",
   bg: "bg-BG",
   el: "el-GR",
+  // Norwegian ships as the "no" macrolanguage code (matching every other
+  // ZRP language being a bare top-level code), but "no-NO" itself has
+  // inconsistent ICU/CLDR month-name coverage across runtimes - "nb-NO"
+  // (Bokmål, the variant ZRP actually translates) formats dates reliably
+  // everywhere and is the standard fallback for a bare "no" tag.
+  no: "nb-NO",
+  // Serbian ships Latin script only (see SUPPORTED_LANGUAGES) - "sr-Latn-RS"
+  // keeps date formatting (month/weekday names) in Latin script too,
+  // rather than "sr-RS" defaulting to Cyrillic and contradicting the
+  // rest of the UI.
+  sr: "sr-Latn-RS",
+  bs: "bs-BA",
+  mk: "mk-MK",
 };
 
 /** BCP-47 tag for `toLocaleDateString`/`toLocaleTimeString`/`toLocaleString`. */

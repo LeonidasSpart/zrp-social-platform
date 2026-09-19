@@ -347,7 +347,7 @@ onboarding gating and plan-gated routes.
 
 ## Internationalization
 
-The interface ships human translations for **25 languages**, verified in
+The interface ships human translations for **29 languages**, verified in
 source (`src/lib/translations.ts`) and present with full key parity
 across Web, `android-native/` (`values-*/strings.xml`) and `ios-native/`
 (`*.lproj`):
@@ -355,7 +355,8 @@ across Web, `android-native/` (`values-*/strings.xml`) and `ios-native/`
 English, French, German, Italian, Albanian, Spanish, Russian, Arabic,
 Chinese, Turkish, Bahasa Indonesia, Portuguese (European Portuguese
 usage), Japanese, Korean, Hindi, Dutch, Polish, Romanian, Czech,
-Hungarian, Swedish, Danish, Croatian, Bulgarian and Greek.
+Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek, Norwegian,
+Serbian (Latin script), Bosnian and Macedonian.
 
 The most recent expansion (10 EU languages: Dutch, Polish, Romanian,
 Czech, Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek) shipped

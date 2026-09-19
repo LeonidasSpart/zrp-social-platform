@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The same 25 official ZRP languages as SupportedLanguages.kt's
+<!-- The same 29 official ZRP languages as SupportedLanguages.kt's
      SUPPORTED_LANGUAGES. Lets the OS's own Settings > Apps > ZRP Social >
      Language screen offer the same language list and stay in sync with
      whatever LanguageSettingsScreen sets via AppCompatDelegate, instead of
@@ -30,4 +30,8 @@
     <locale android:name="hr" />
     <locale android:name="bg" />
     <locale android:name="el" />
+    <locale android:name="no" />
+    <locale android:name="sr" />
+    <locale android:name="bs" />
+    <locale android:name="mk" />
 </locale-config>
