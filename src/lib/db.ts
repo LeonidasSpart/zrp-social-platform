@@ -24,11 +24,24 @@ const globalForPrisma = globalThis as unknown as {
 //   and observed production concurrency before relying on this number
 //   long-term - it is deliberately generous, not derived from a
 //   production measurement.
+// - statement_timeout / query_timeout: neither was set before, so a
+//   query that gets stuck (lock contention, an unexpectedly expensive
+//   plan under load) held its connection - and therefore a pool slot -
+//   indefinitely, with nothing to fail it fast. statement_timeout is
+//   enforced by Postgres itself (killed server-side even if the app
+//   process is somehow not reading the socket); query_timeout is the
+//   `pg` client's own belt-and-braces client-side backstop. 10s is well
+//   under server.js's keepAliveTimeout/headersTimeout (65s/66s) and
+//   under this adapter's own connectionTimeoutMillis budget, so a killed
+//   query surfaces as a normal caught error/500 well before any
+//   proxy-level timeout would otherwise turn it into a hung request.
 function createPrismaClient() {
   const adapter = new PrismaPg({
     connectionString: process.env.DATABASE_URL,
     connectionTimeoutMillis: 5000,
     max: 20,
+    statement_timeout: 10_000,
+    query_timeout: 10_000,
   });
   return new PrismaClient({ adapter });
 }

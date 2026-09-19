@@ -159,6 +159,61 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(foundY.poll.votes_user).toEqual([]);
     });
 
+    /*
+     * ⚠️ PERFORMANCE regression coverage: viewerCountryCode used to be
+     * resolved via prisma.user.findUnique() unconditionally, BEFORE the
+     * cache lookup, on every single authenticated request - including
+     * a cache hit (where the ranking was already computed and cached)
+     * and plain global "Trending" (whose scoring never reads it at
+     * all). That was one extra Postgres round trip on the hottest read
+     * route in the app for no benefit most of the time it ran. It's
+     * now resolved only inside the cache-miss branch, and only when
+     * "For You" scoring or the national-scope filter can actually use
+     * it.
+     */
+    it("[perf] does not look up viewerCountryCode for a plain global Trending request", async () => {
+      const author = await createUser("trendauth");
+      const post = await prisma.post.create({
+        data: { id: randomUUID(), content: "trending post", authorId: author.id, status: "published" },
+      });
+      postIds.push(post.id);
+
+      const viewer = await createUser("trendviewer");
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+
+      const findUniqueSpy = vi.spyOn(prisma.user, "findUnique");
+      const res = await GET(req({ sort: "trending" }));
+      expect(res.status).toBe(200);
+      expect(findUniqueSpy).not.toHaveBeenCalled();
+      findUniqueSpy.mockRestore();
+    });
+
+    it("[perf] looks up viewerCountryCode on a For You cache MISS but not on a subsequent cache HIT", async () => {
+      const author = await createUser("foryouauth");
+      const post = await prisma.post.create({
+        data: { id: randomUUID(), content: "for you post", authorId: author.id, status: "published" },
+      });
+      postIds.push(post.id);
+
+      const viewer = await createUser("foryouviewer");
+
+      const findUniqueSpy = vi.spyOn(prisma.user, "findUnique");
+
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+      const res1 = await GET(req());
+      expect(res1.status).toBe(200);
+      expect(findUniqueSpy).toHaveBeenCalledTimes(1);
+
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+      const res2 = await GET(req());
+      expect(res2.status).toBe(200);
+      // Still exactly 1 - the second call hit the 5-minute cache and
+      // never needed to re-resolve the viewer's country.
+      expect(findUniqueSpy).toHaveBeenCalledTimes(1);
+
+      findUniqueSpy.mockRestore();
+    });
+
     it("a vote cast after the ranked list is already cached still shows up immediately, unlike `liked` never waiting out the cache either", async () => {
       const author = await createUser("polld");
       const voter = await createUser("voterd");

@@ -42,6 +42,42 @@ let lastConnectFailureAt = 0;
 // on. Nothing about the mid-life recovery guarantee changes.
 const INITIAL_CONNECT_TIMEOUT_MS = 8_000;
 
+// ⚠️ RELIABILITY: bounds a single command on an ALREADY-connected,
+// already-"ready" client. Before this, `getCached`/`setCached` could
+// hang for as long as a "ready but slow" Redis takes to answer one
+// GET/SET - node-redis has no default per-command timeout, and nothing
+// here previously wrapped one. A degraded (not fully down) Redis - high
+// latency, a slow command queue - would silently turn a normal page
+// request into an indefinite hang instead of the fast, catchable
+// failure every other Redis error path here already produces. 300ms is
+// generous for a same-region cache hit/miss and short enough that a
+// caller falls back to Postgres well within the request's overall
+// budget rather than anywhere near a proxy-level timeout.
+const COMMAND_TIMEOUT_MS = 300;
+
+class RedisCommandTimeoutError extends Error {
+  constructor() {
+    super("Redis command timed out");
+    this.name = "RedisCommandTimeoutError";
+  }
+}
+
+function withCommandTimeout<T>(promise: Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new RedisCommandTimeoutError()), COMMAND_TIMEOUT_MS);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
+
 // ─── Load Redis only at runtime ──────────────────────────────────────
 async function loadRedis() {
   if (redisModule) {
@@ -182,7 +218,7 @@ export async function getCached<T>(
   }
 
   try {
-    const data = await redis.get(key);
+    const data = await withCommandTimeout<string | null>(redis.get(key));
 
     if (!data) {
       return null;
@@ -208,12 +244,14 @@ export async function setCached(
   }
 
   try {
-    await redis.set(
-      key,
-      JSON.stringify(data),
-      {
-        EX: ttl,
-      }
+    await withCommandTimeout<unknown>(
+      redis.set(
+        key,
+        JSON.stringify(data),
+        {
+          EX: ttl,
+        }
+      )
     );
   } catch (err) {
     console.error("Redis set error:", err);
@@ -231,10 +269,10 @@ export async function invalidateCache(
   }
 
   try {
-    const keys = await redis.keys(pattern);
+    const keys = await withCommandTimeout<string[]>(redis.keys(pattern));
 
     if (keys.length > 0) {
-      await redis.del(keys);
+      await withCommandTimeout<unknown>(redis.del(keys));
     }
   } catch (err) {
     console.error("Redis invalidate error:", err);

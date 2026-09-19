@@ -65,16 +65,19 @@ const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 // Prisma 7+ requires an explicit driver adapter - see src/lib/db.ts for
-// why connectionTimeoutMillis is set explicitly (the `pg` driver has no
-// default connection timeout). This is a separate PrismaClient instance
-// from src/lib/db.ts's, matching this file's existing pre-Prisma-7
-// architecture: server.js has always run its own client for socket
-// authorization and the boot-time password migration, independent of
-// the Next.js API routes' client.
+// why connectionTimeoutMillis/statement_timeout/query_timeout are set
+// explicitly (the `pg` driver has no default connection timeout, and
+// nothing bounds a stuck query's hold on a connection otherwise). This
+// is a separate PrismaClient instance from src/lib/db.ts's, matching
+// this file's existing pre-Prisma-7 architecture: server.js has always
+// run its own client for socket authorization and the boot-time
+// password migration, independent of the Next.js API routes' client.
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
     connectionString: process.env.DATABASE_URL,
     connectionTimeoutMillis: 5000,
+    statement_timeout: 10_000,
+    query_timeout: 10_000,
   }),
 });
 
@@ -148,6 +151,24 @@ app.prepare().then(async () => {
     const parsedUrl = parse(req.url, true);
     handle(req, res, parsedUrl);
   });
+
+  // ⚠️ RELIABILITY: Node's http.Server defaults to a 5s keepAliveTimeout.
+  // Behind any reverse proxy (Railway's edge included) whose own
+  // connection idle timeout is longer than that - the common case - the
+  // proxy can keep reusing a connection this server already silently
+  // closed on its side: the next request sent down that stale socket
+  // gets no response and hangs until the proxy's own timeout fires,
+  // surfacing to the browser as an intermittent, unexplained "timeout"
+  // on an otherwise ordinary request. This is a well-documented class of
+  // bug for Node behind a proxy (Heroku/ALB/nginx all hit the same
+  // failure shape), not specific to any one route - it explains a
+  // general "sometimes times out when navigating" symptom, not just one
+  // slow endpoint. Raising keepAliveTimeout above typical proxy idle
+  // windows closes the race; headersTimeout must stay above it per
+  // Node's own requirement (a request that has fully sent its headers
+  // should never be cut by the keep-alive timer meant for idle sockets).
+  server.keepAliveTimeout = 65_000;
+  server.headersTimeout = 66_000;
 
   const io = new Server(server, {
     path: "/api/socket.io",

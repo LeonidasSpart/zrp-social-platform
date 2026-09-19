@@ -49,15 +49,6 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
 
-    // Read once per request, never cached across users - see the cache
-    // key below, which is already scoped per userId, so a viewer's own
-    // countryCode naturally can't leak into another viewer's cached
-    // ranked list.
-    const viewerCountryCode = userId
-      ? (await prisma.user.findUnique({ where: { id: userId }, select: { countryCode: true } }))
-          ?.countryCode ?? null
-      : null;
-
     const { searchParams } = new URL(req.url);
     const sort = searchParams.get("sort") === "trending" ? "trending" : "forYou";
     // National trending (Phase 10): an explicit, opt-in scope on top of
@@ -130,6 +121,23 @@ export async function GET(req: NextRequest) {
     let scopeFallback = cachedEntry?.scopeFallback ?? false;
 
     if (!ranked) {
+      // ⚠️ PERFORMANCE: only resolved on an actual cache miss, and only
+      // when the ranking/filter logic below can actually use it - "For
+      // You" scoring (calculateScore) and the national-scope filter.
+      // This used to run unconditionally, before the cache lookup, on
+      // EVERY request including cache hits (the common case for a
+      // 5-minute-cached, per-user/sort/scope key) and for plain global
+      // "Trending" (which never reads it at all) - one extra Postgres
+      // round trip on the hottest read route in the app for no benefit
+      // most of the time it ran. Never cached across users - the cache
+      // key above is already scoped per userId, so a viewer's own
+      // countryCode still can't leak into another viewer's cached list.
+      const viewerCountryCode =
+        userId && (sort !== "trending" || scope === "national")
+          ? (await prisma.user.findUnique({ where: { id: userId }, select: { countryCode: true } }))
+              ?.countryCode ?? null
+          : null;
+
       const MIN_NATIONAL_CANDIDATES = 5;
       const nationalFilter =
         scope === "national" && viewerCountryCode ? { author: { countryCode: viewerCountryCode } } : {};
@@ -261,30 +269,36 @@ export async function GET(req: NextRequest) {
     let page = ranked.slice(offset, offset + limit);
     const nextCursor = offset + limit < ranked.length ? String(offset + limit) : null;
 
-    // ─── Add liked status for this page only (always fresh, never cached) ──
-    if (userId && page.length > 0) {
-      const likes = await prisma.like.findMany({
-        where: {
-          userId: userId,
-          postId: { in: page.map((p: any) => p.id) },
-        },
-        select: { postId: true },
-      });
-      const likedIds = new Set(likes.map(l => l.postId));
-      page.forEach((p: any) => (p.liked = likedIds.has(p.id)));
-    }
-
-    // ─── Add the viewer's own poll vote for this page only (always
-    // fresh, never cached - same reasoning as `liked` above) ──────────
+    // ─── Add liked status and the viewer's own poll vote for this page
+    // only (always fresh, never cached) ──────────────────────────────
+    // These two lookups are fully independent - different tables,
+    // different id sets, each only mutating its own field on `page` -
+    // so they run concurrently instead of one waiting on the other.
     if (userId && page.length > 0) {
       const pollIds = page
         .filter((p: any) => p.poll)
         .map((p: any) => p.poll.id);
+
+      const [likes, votes] = await Promise.all([
+        prisma.like.findMany({
+          where: {
+            userId: userId,
+            postId: { in: page.map((p: any) => p.id) },
+          },
+          select: { postId: true },
+        }),
+        pollIds.length > 0
+          ? prisma.pollVote.findMany({
+              where: { userId, pollId: { in: pollIds } },
+              select: { pollId: true, optionIndex: true },
+            })
+          : Promise.resolve([]),
+      ]);
+
+      const likedIds = new Set(likes.map(l => l.postId));
+      page.forEach((p: any) => (p.liked = likedIds.has(p.id)));
+
       if (pollIds.length > 0) {
-        const votes = await prisma.pollVote.findMany({
-          where: { userId, pollId: { in: pollIds } },
-          select: { pollId: true, optionIndex: true },
-        });
         const votesByPoll = new Map(votes.map(v => [v.pollId, v]));
         page.forEach((p: any) => {
           if (p.poll) {
