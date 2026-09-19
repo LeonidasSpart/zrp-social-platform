@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { content, receiverId, imageUrl, replyToId } = await req.json();
+    const { content, receiverId, imageUrl, replyToId, storyId } = await req.json();
 
     // Allow empty content only if there is an image
     if ((!content || content.trim().length === 0) && !imageUrl) {
@@ -72,13 +72,61 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!receiverId) {
+    if (!receiverId && !storyId) {
+      return NextResponse.json({ error: "Receiver ID required" }, { status: 400 });
+    }
+
+    // ─── Story reply: resolve + authorize against the real DB row ─────
+    // A story reply is an ordinary private DM tagged with which Story
+    // prompted it (see Message.storyId) - deliberately not a separate
+    // messaging system. The recipient is always derived from the
+    // Story's own userId, never trusted from the client, so a caller
+    // can't send storyId plus an unrelated receiverId to redirect a
+    // "story reply" notification/label onto someone else's inbox.
+    let resolvedReceiverId: string = receiverId;
+    let validStoryId: string | null = null;
+    if (storyId) {
+      const story = await prisma.story.findUnique({
+        where: { id: storyId },
+        select: { id: true, userId: true, expiresAt: true },
+      });
+      if (!story) {
+        return NextResponse.json({ error: "Story not found" }, { status: 404 });
+      }
+      if (story.expiresAt <= new Date()) {
+        // Matches GET /api/stories, which only ever serves
+        // non-expired stories - once a story is no longer actively
+        // shown to anyone, a new reply to it can't be authored either
+        // (existing replies made before expiry are untouched - Message
+        // rows are never deleted just because the Story they reference
+        // expires later, see Message.storyId's own comment).
+        return NextResponse.json({ error: "This story is no longer available" }, { status: 410 });
+      }
+      if (story.userId === session.user.id) {
+        return NextResponse.json({ error: "You can't reply to your own story" }, { status: 400 });
+      }
+      // Same audience GET /api/stories computes (self + people you
+      // follow) - a story is never shown to a non-follower, so a reply
+      // from one must be rejected the same way, independent of
+      // anything the client claims about visibility.
+      const following = await prisma.follow.findUnique({
+        where: { followerId_followingId: { followerId: session.user.id, followingId: story.userId } },
+        select: { id: true },
+      });
+      if (!following) {
+        return NextResponse.json({ error: "You can't reply to this story" }, { status: 403 });
+      }
+      resolvedReceiverId = story.userId;
+      validStoryId = story.id;
+    }
+
+    if (!resolvedReceiverId) {
       return NextResponse.json({ error: "Receiver ID required" }, { status: 400 });
     }
 
     // ─── Verify receiver exists ──────────────────────────────────────
     const receiver = await prisma.user.findUnique({
-      where: { id: receiverId },
+      where: { id: resolvedReceiverId },
       select: { id: true, username: true },
     });
     if (!receiver) {
@@ -90,13 +138,15 @@ export async function POST(req: NextRequest) {
     // blocked could still message them freely, and (the less obvious
     // half) so could someone the SENDER themselves had blocked, since
     // blocking someone doesn't stop them from still being able to reach
-    // you unless both directions are checked.
-    if (receiverId !== session.user.id) {
+    // you unless both directions are checked. Applies identically to a
+    // story reply - blocking is always symmetric-effect wherever a DM
+    // could otherwise be sent.
+    if (resolvedReceiverId !== session.user.id) {
       const blockExists = await prisma.blocked.findFirst({
         where: {
           OR: [
-            { blockerId: session.user.id, blockedId: receiverId },
-            { blockerId: receiverId, blockedId: session.user.id },
+            { blockerId: session.user.id, blockedId: resolvedReceiverId },
+            { blockerId: resolvedReceiverId, blockedId: session.user.id },
           ],
         },
       });
@@ -115,7 +165,7 @@ export async function POST(req: NextRequest) {
       const belongsToConversation =
         target &&
         [target.senderId, target.receiverId].includes(session.user.id) &&
-        [target.senderId, target.receiverId].includes(receiverId);
+        [target.senderId, target.receiverId].includes(resolvedReceiverId);
       if (belongsToConversation) validReplyToId = replyToId;
     }
 
@@ -124,9 +174,10 @@ export async function POST(req: NextRequest) {
       data: {
         content: content?.trim() || "",
         senderId: session.user.id,
-        receiverId,
+        receiverId: resolvedReceiverId,
         imageUrl: imageUrl || null,
         replyToId: validReplyToId,
+        storyId: validStoryId,
       },
       include: {
         sender: {
@@ -154,6 +205,9 @@ export async function POST(req: NextRequest) {
             },
           },
         },
+        story: {
+          select: { id: true, mediaUrl: true, mediaType: true, content: true },
+        },
         reactions: true,
       },
     });
@@ -163,11 +217,15 @@ export async function POST(req: NextRequest) {
     // most people never grant permission for - so if push failed or
     // wasn't set up, there was no trace of the message anywhere in the
     // Notifications page at all. Now a durable in-app notification is
-    // always created too, matching every other notification type.
-    if (receiverId !== session.user.id) {
+    // always created too, matching every other notification type. A
+    // story reply reuses this exact same "message" notification (in-app
+    // + push) rather than inventing a second notification type/path -
+    // only the push copy is worded differently so the recipient knows
+    // it was prompted by their story.
+    if (resolvedReceiverId !== session.user.id) {
       try {
         await createNotification({
-          userId: receiverId,
+          userId: resolvedReceiverId,
           type: "message",
           fromUserId: session.user.id,
         });
@@ -176,12 +234,15 @@ export async function POST(req: NextRequest) {
       }
 
       try {
-        const notificationMessage = imageUrl
-          ? `${session.user.name || session.user.username} sent you an image.`
-          : `${session.user.name || session.user.username} sent you a message.`;
+        const senderName = session.user.name || session.user.username;
+        const notificationMessage = validStoryId
+          ? `${senderName} replied to your story.`
+          : imageUrl
+          ? `${senderName} sent you an image.`
+          : `${senderName} sent you a message.`;
         await sendPushNotification(
-          receiverId,
-          "New Message",
+          resolvedReceiverId,
+          validStoryId ? "New Story Reply" : "New Message",
           notificationMessage,
           `/messages/${session.user.username}`
         );

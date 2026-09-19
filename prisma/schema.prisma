@@ -1060,6 +1060,17 @@ model Message {
   replyTo   Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
   replies   Message[] @relation("MessageReplies")
 
+  // Set when this message is a reply to someone's Story, sent through
+  // this same DM channel rather than a separate story-reply system -
+  // the story is never publicly commented on, only privately replied to
+  // its owner, mirroring StoryLike's private/per-viewer shape. SetNull
+  // (not Cascade), same reasoning as replyToId: a Story is never
+  // hard-deleted by any job in this codebase (it just stops being
+  // served once expired), but if it ever is removed, the reply itself
+  // is a real conversation message and must survive that.
+  storyId String?
+  story   Story?  @relation(fields: [storyId], references: [id], onDelete: SetNull)
+
   reactions MessageReaction[]
 
   @@index([senderId])
@@ -1068,6 +1079,7 @@ model Message {
   @@index([senderId, receiverId])
   @@index([replyToId])
   @@index([conversationId, createdAt])
+  @@index([storyId])
 }
 
 enum ConversationType {
@@ -1649,8 +1661,9 @@ model Story {
   createdAt DateTime @default(now())
   expiresAt DateTime
 
-  views StoryView[]
-  likes StoryLike[]
+  views   StoryView[]
+  likes   StoryLike[]
+  replies Message[]
 
   @@index([userId])
   @@index([createdAt])

@@ -30,6 +30,18 @@ struct StoryViewerView: View {
     @State private var isPaused = false
     @State private var player: AVPlayer?
 
+    // Reply composer - a real private DM to the story's author (POST
+    // /messages with storyId), never a public comment on the story.
+    // Deliberately view-local rather than added to StoriesViewModel:
+    // sending a message is not a stories concern, the same separation
+    // MessagesRepository already keeps from StoriesRepository elsewhere.
+    private let messagesRepository: MessagesRepositoryProtocol = MessagesRepository()
+    @State private var replyDraft = ""
+    @State private var isSendingReply = false
+    @State private var replyError: String?
+    @State private var replySent = false
+    @FocusState private var isReplyFocused: Bool
+
     /// The real length of the current video story, once its asset has
     /// reported one. `nil` for an image or text story, and for a video
     /// whose duration has not loaded yet.
@@ -83,6 +95,14 @@ struct StoryViewerView: View {
                 }
         )
         .task(id: "\(index)-\(isPaused)-\(videoDuration ?? 0)") { await runTimer() }
+        // Typing a reply pauses playback exactly like the press-and-hold
+        // gesture does - the field itself is the "hold".
+        .onChange(of: isReplyFocused) { _, focused in setPaused(focused) }
+        .safeAreaInset(edge: .bottom) {
+            if let viewerId, group.user.id != viewerId, let story {
+                replyComposer(for: story)
+            }
+        }
     }
 
     // MARK: - Media
@@ -298,6 +318,75 @@ struct StoryViewerView: View {
         }
         .padding(.horizontal, ZrpSpacing.lg)
         .padding(.bottom, ZrpSpacing.lg)
+    }
+
+    // MARK: - Reply composer
+
+    private func replyComposer(for story: Story) -> some View {
+        VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
+            if let replyError {
+                Text(verbatim: replyError)
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.red)
+            } else if replySent {
+                Text(.iosStoriesReplySent)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+
+            HStack(spacing: ZrpSpacing.sm) {
+                TextField(L10n.string(.iosStoriesReplyPlaceholder), text: $replyDraft, axis: .vertical)
+                    .focused($isReplyFocused)
+                    .lineLimit(1...4)
+                    .foregroundStyle(.white)
+                    .tint(.white)
+                    .padding(ZrpSpacing.md)
+                    .background(.white.opacity(0.15), in: RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous))
+                    .disabled(isSendingReply)
+
+                Button {
+                    Task { await sendReply(to: story) }
+                } label: {
+                    if isSendingReply {
+                        ProgressView().tint(.white)
+                    } else {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.white)
+                    }
+                }
+                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                .disabled(isSendingReply || replyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .accessibilityLabel(Text(.iosA11ySendStoryReply))
+            }
+        }
+        .padding(.horizontal, ZrpSpacing.lg)
+        .padding(.vertical, ZrpSpacing.sm)
+    }
+
+    private func sendReply(to story: Story) async {
+        let content = replyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !content.isEmpty, !isSendingReply else { return }
+
+        isSendingReply = true
+        replyError = nil
+        defer { isSendingReply = false }
+
+        do {
+            _ = try await messagesRepository.send(
+                to: group.user.id,
+                content: content,
+                imageUrl: nil,
+                replyToId: nil,
+                storyId: story.id
+            )
+            replyDraft = ""
+            replySent = true
+        } catch let error as ApiError {
+            replyError = error.userFacingMessage
+        } catch {
+            replyError = L10n.string(.authErrTryAgain)
+        }
     }
 
     // MARK: - Playback

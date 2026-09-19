@@ -11,7 +11,8 @@ protocol MessagesRepositoryProtocol: Sendable {
         to userId: String,
         content: String,
         imageUrl: String?,
-        replyToId: String?
+        replyToId: String?,
+        storyId: String?
     ) async throws -> Message
     func edit(messageId: String, content: String) async throws -> Message
     func delete(messageId: String) async throws
@@ -33,6 +34,11 @@ struct MessagesRepository: MessagesRepositoryProtocol {
         let content: String
         let imageUrl: String?
         let replyToId: String?
+        /// Set on a story reply - see storyId on Message. The server
+        /// derives the real recipient from the Story's own owner and
+        /// ignores `receiverId` when this is set; it is still sent so
+        /// the request stays self-describing.
+        let storyId: String?
     }
 
     private struct EditRequest: Encodable {
@@ -94,7 +100,8 @@ struct MessagesRepository: MessagesRepositoryProtocol {
         to userId: String,
         content: String,
         imageUrl: String?,
-        replyToId: String?
+        replyToId: String?,
+        storyId: String? = nil
     ) async throws -> Message {
         try await client.send(
             try Endpoint.post(
@@ -103,7 +110,8 @@ struct MessagesRepository: MessagesRepositoryProtocol {
                     receiverId: userId,
                     content: content,
                     imageUrl: imageUrl,
-                    replyToId: replyToId
+                    replyToId: replyToId,
+                    storyId: storyId
                 )
             )
         )

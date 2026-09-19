@@ -18,16 +18,19 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
@@ -35,6 +38,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -51,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -58,6 +64,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -394,39 +401,108 @@ fun StoryViewerScreen(
                     }
                 }
 
-                // ── Bottom chrome: add-another-story (own stories) + like ──
-                Row(
+                // ── Bottom chrome: add-another-story (own stories) + like,
+                // plus (not on your own story) a reply bar - a real
+                // private DM to the author (POST /messages with
+                // storyId), never a public comment. imePadding() lifts
+                // this whole column above the keyboard when the reply
+                // field is focused - this screen otherwise never opens
+                // the IME, so nothing else on it relied on that inset. ──
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomEnd)
                         .navigationBarsPadding()
+                        .imePadding()
                         .padding(20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom,
                 ) {
-                    if (state.isOwnStories) {
-                        IconButton(onClick = onAddStory) {
-                            Icon(
-                                imageVector = Icons.Filled.AddCircle,
-                                contentDescription = stringResource(R.string.stories_add_story),
-                                tint = Color.White,
-                                modifier = Modifier.size(32.dp),
+                    if (!state.isOwnStories) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            OutlinedTextField(
+                                value = state.replyDraft,
+                                onValueChange = { viewModel.onReplyDraftChange(it) },
+                                placeholder = { Text(stringResource(R.string.story_reply_placeholder)) },
+                                enabled = !state.isSendingReply,
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    focusedBorderColor = Color.White.copy(alpha = 0.6f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                                    cursorColor = Color.White,
+                                    focusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
+                                    unfocusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
+                                ),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .onFocusChanged { paused = it.isFocused },
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(
+                                onClick = { viewModel.sendReply(story.id) },
+                                enabled = state.replyDraft.isNotBlank() && !state.isSendingReply,
+                            ) {
+                                if (state.isSendingReply) {
+                                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Filled.Send,
+                                        contentDescription = stringResource(R.string.story_reply_send_cd),
+                                        tint = Color.White,
+                                    )
+                                }
+                            }
+                        }
+                        if (state.replyError != null) {
+                            Text(
+                                text = state.replyError.orEmpty(),
+                                color = ZrpRed,
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                        } else if (state.replySent) {
+                            Text(
+                                text = stringResource(R.string.story_reply_sent),
+                                color = Color.White.copy(alpha = 0.8f),
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(bottom = 8.dp),
                             )
                         }
-                    } else {
-                        Spacer(modifier = Modifier.width(1.dp))
                     }
 
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        IconButton(onClick = { viewModel.toggleLike(story.id) }) {
-                            Icon(
-                                imageVector = if (story.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                                contentDescription = stringResource(if (story.liked) R.string.story_unlike_cd else R.string.story_like_cd),
-                                tint = if (story.liked) ZrpRed else Color.White,
-                                modifier = Modifier.size(28.dp),
-                            )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        if (state.isOwnStories) {
+                            IconButton(onClick = onAddStory) {
+                                Icon(
+                                    imageVector = Icons.Filled.AddCircle,
+                                    contentDescription = stringResource(R.string.stories_add_story),
+                                    tint = Color.White,
+                                    modifier = Modifier.size(32.dp),
+                                )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.width(1.dp))
                         }
-                        Text(text = story.likeCount.toString(), color = Color.White, style = MaterialTheme.typography.labelSmall)
+
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            IconButton(onClick = { viewModel.toggleLike(story.id) }) {
+                                Icon(
+                                    imageVector = if (story.liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                    contentDescription = stringResource(if (story.liked) R.string.story_unlike_cd else R.string.story_like_cd),
+                                    tint = if (story.liked) ZrpRed else Color.White,
+                                    modifier = Modifier.size(28.dp),
+                                )
+                            }
+                            Text(text = story.likeCount.toString(), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                        }
                     }
                 }
             }

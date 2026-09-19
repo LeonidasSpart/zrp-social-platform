@@ -2,8 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { X, Eye, Heart } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { X, Eye, Heart, Send } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+// Mirrors MAX_MESSAGE_LENGTH in src/app/api/messages/route.ts - a story
+// reply is a real DM, so it's bound by the same content limit as every
+// other message rather than a new invented cap. Enforced authoritatively
+// server-side either way; this only avoids a doomed request.
+const MAX_REPLY_LENGTH = 10000;
 
 interface Props {
   group: {
@@ -25,11 +32,28 @@ interface Props {
 
 export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
   const { t } = useLanguage();
+  const { data: session } = useSession();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const [burstKey, setBurstKey] = useState(0); // remounts the heart-burst animation each tap
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Replying to your own story makes no sense (there's no DM channel to
+  // yourself) - the server rejects it too (see POST /api/messages), this
+  // just keeps the input from ever being offered in the first place.
+  const isOwnStory = !!session?.user?.id && session.user.id === group.user.id;
+  const [replyText, setReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
+  const [replyError, setReplyError] = useState<string | null>(null);
+  const [replySent, setReplySent] = useState(false);
+  const replySentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (replySentTimeoutRef.current) clearTimeout(replySentTimeoutRef.current);
+    };
+  }, []);
 
   // Liked/likeCount are tracked per-story locally so switching between
   // stories in the group shows each one's own state correctly, and so
@@ -119,6 +143,41 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
       }
     },
     [likedMap]
+  );
+
+  const sendReply = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const trimmed = replyText.trim();
+      if (!trimmed || sendingReply) return;
+
+      setSendingReply(true);
+      setReplyError(null);
+      try {
+        const res = await fetch("/api/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            receiverId: group.user.id,
+            content: trimmed,
+            storyId: story.id,
+          }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          throw new Error(data?.error || "Failed to send reply");
+        }
+        setReplyText("");
+        setReplySent(true);
+        if (replySentTimeoutRef.current) clearTimeout(replySentTimeoutRef.current);
+        replySentTimeoutRef.current = setTimeout(() => setReplySent(false), 2000);
+      } catch (err) {
+        setReplyError(err instanceof Error ? err.message : "Failed to send reply");
+      } finally {
+        setSendingReply(false);
+      }
+    },
+    [replyText, sendingReply, group.user.id, story.id]
   );
 
   // Double-tap-to-like on the middle third of the screen - the left and
@@ -297,6 +356,51 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
           <Eye className="w-3 h-3" />
           <span>{story.viewCount ?? 0}</span>
         </div>
+
+        {/* Reply bar, Instagram-style - a real private DM to the story
+            owner (POST /api/messages with storyId), not a public comment.
+            Hidden on your own story: there's no one to DM. Sits left of
+            the like button (right-20 leaves it clear) at the same
+            z-20 tier so it isn't swallowed by the full-height nav zones
+            below; focusing it pauses the story exactly like the
+            press-and-hold middle zone already does. */}
+        {!isOwnStory && (
+          <form
+            onSubmit={sendReply}
+            className="absolute bottom-6 left-4 right-20 z-20 flex items-center gap-2"
+          >
+            <input
+              type="text"
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              onFocus={() => setPaused(true)}
+              onBlur={() => setPaused(false)}
+              maxLength={MAX_REPLY_LENGTH}
+              placeholder={t("stories.replyPlaceholder") || "Reply to story..."}
+              aria-label={t("stories.replyPlaceholder") || "Reply to story"}
+              disabled={sendingReply}
+              className="min-w-0 flex-1 rounded-full border border-white/30 bg-black/30 px-4 py-2 text-sm text-white placeholder-white/60 outline-none backdrop-blur-sm focus:border-white/60 disabled:opacity-60"
+            />
+            <button
+              type="submit"
+              disabled={sendingReply || !replyText.trim()}
+              aria-label="Send reply"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30 disabled:opacity-40"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </form>
+        )}
+        {!isOwnStory && (replyError || replySent) && (
+          <div
+            className={`absolute bottom-[4.25rem] left-4 right-20 z-20 rounded-lg px-3 py-1.5 text-xs text-white ${
+              replyError ? "bg-red-600/90" : "bg-black/60"
+            }`}
+            role="status"
+          >
+            {replyError || t("stories.replySent")}
+          </div>
+        )}
 
         {/* Like button, bottom right, TikTok-style vertical action rail */}
         <button

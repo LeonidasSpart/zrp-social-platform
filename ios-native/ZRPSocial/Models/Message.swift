@@ -27,6 +27,12 @@ struct Message: Decodable, Identifiable, Equatable {
     /// non-recursive type for the same reason `QuotedPost` is.
     let replyTo: RepliedMessage?
 
+    /// Present only when this message is a reply to the receiver's Story
+    /// (see `Message.storyId` in prisma/schema.prisma) - a private DM
+    /// sent through this same channel, never a public comment on the
+    /// story. Never both `replyTo` and `story` at once.
+    let story: RepliedStory?
+
     /// `var` so the reaction route's own returned list can be swapped in
     /// without refetching the thread. Everything else about a message is
     /// replaced wholesale by the edit route's response.
@@ -34,7 +40,7 @@ struct Message: Decodable, Identifiable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case id, content, imageUrl, senderId, receiverId, read, edited
-        case createdAt, sender, replyTo, reactions
+        case createdAt, sender, replyTo, story, reactions
     }
 
     init(from decoder: Decoder) throws {
@@ -51,8 +57,18 @@ struct Message: Decodable, Identifiable, Equatable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         sender = try container.decodeIfPresent(PostAuthor.self, forKey: .sender)
         replyTo = try container.decodeIfPresent(RepliedMessage.self, forKey: .replyTo)
+        story = try container.decodeIfPresent(RepliedStory.self, forKey: .story)
         reactions = try container.decodeIfPresent([MessageReaction].self, forKey: .reactions)
     }
+}
+
+/// The Story a reply points at - the same `{id, mediaUrl, mediaType,
+/// content}` shape both messages API routes select.
+struct RepliedStory: Decodable, Identifiable, Equatable {
+    let id: String
+    let mediaUrl: String?
+    let mediaType: String?
+    let content: String?
 }
 
 /// The message a reply points at.

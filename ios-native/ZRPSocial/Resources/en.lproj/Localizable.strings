@@ -1256,6 +1256,9 @@
 "ios.a11y.likeStory" = "Like story";
 "ios.a11y.unlikeStory" = "Unlike story";
 "ios.stories.viewCount" = "{n} views";
+"ios.stories.replyPlaceholder" = "Reply to story...";
+"ios.a11y.sendStoryReply" = "Send reply";
+"ios.stories.replySent" = "Sent!";
 "ios.chat.messagePlaceholder" = "Message";
 "ios.chat.edited" = "Edited";
 "ios.chat.replyingTo" = "Replying to {name}";
