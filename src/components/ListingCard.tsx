@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Heart, MapPin, Eye, PlayCircle } from "lucide-react";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import {
   CATEGORY_META,
   STATUS_LABEL_KEYS,
@@ -19,14 +20,9 @@ interface ListingCardProps {
   showStatus?: boolean;
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function ListingCard({ listing, favorited, onToggleFavorite, showStatus }: ListingCardProps) {
   const { t, language } = useLanguage();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
   const coverImage = listing.imageUrls[0];
   const meta = CATEGORY_META[listing.category];
 

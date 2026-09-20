@@ -11,6 +11,7 @@ import {
   REGION_BY_CODE,
   REGIONS,
 } from "../countries";
+import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 
 /*
  * Mandatory completeness coverage for the Ambassadors world dataset
@@ -90,8 +91,8 @@ describe("REGION_BY_CODE covers every country exactly once", () => {
   });
 });
 
-describe("Localization - all 11 ZRP languages", () => {
-  const LANGS = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id"] as const;
+describe("Localization - all 29 ZRP languages", () => {
+  const LANGS = SUPPORTED_LANGUAGES.map((l) => l.code);
 
   it.each(LANGS)("returns a full, complete list in %s with no missing names", (lang) => {
     const list = getAllCountries(lang);

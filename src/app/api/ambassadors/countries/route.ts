@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAllCountries } from "@/lib/ambassadors/countries";
-import type { Language } from "@/lib/translations";
+import { SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
 
-const SUPPORTED_LANGUAGES: Language[] = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "no", "sr", "bs", "mk"];
+// Every ZRP-supported language has a registered locale in
+// src/lib/ambassadors/countries.ts (via i18n-iso-countries), so this
+// validates the `lang` query param against the same canonical catalog
+// the rest of the app uses instead of maintaining a second list here.
+const SUPPORTED_LANGUAGE_CODES: Language[] = SUPPORTED_LANGUAGES.map((l) => l.code);
 
 /**
  * GET /api/ambassadors/countries?lang=en
@@ -27,7 +31,7 @@ export async function GET(request: NextRequest) {
   try {
     const langParam = request.nextUrl.searchParams.get("lang") as Language | null;
     const language: Language =
-      langParam && SUPPORTED_LANGUAGES.includes(langParam) ? langParam : "en";
+      langParam && SUPPORTED_LANGUAGE_CODES.includes(langParam) ? langParam : "en";
 
     const [countries, grouped] = await Promise.all([
       Promise.resolve(getAllCountries(language)),

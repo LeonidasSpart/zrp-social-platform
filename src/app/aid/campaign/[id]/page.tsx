@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, MapPin, HeartHandshake, Inbox, Flag } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ContributeModal from "@/components/help/ContributeModal";
 import ReportModal from "@/components/ReportModal";
@@ -19,16 +20,11 @@ interface CampaignDetail extends HelpCampaignSummary {
   proofUrls: string[];
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function CampaignDetailPage() {
   const { t, language } = useLanguage();
   const { data: session } = useSession();
   const params = useParams<{ id: string }>();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
 
   const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);

@@ -10,11 +10,25 @@ import ar from "i18n-iso-countries/langs/ar.json";
 import zh from "i18n-iso-countries/langs/zh.json";
 import tr from "i18n-iso-countries/langs/tr.json";
 import id from "i18n-iso-countries/langs/id.json";
+import pt from "i18n-iso-countries/langs/pt.json";
+import ja from "i18n-iso-countries/langs/ja.json";
+import ko from "i18n-iso-countries/langs/ko.json";
+import hi from "i18n-iso-countries/langs/hi.json";
+import nl from "i18n-iso-countries/langs/nl.json";
+import pl from "i18n-iso-countries/langs/pl.json";
+import ro from "i18n-iso-countries/langs/ro.json";
+import cs from "i18n-iso-countries/langs/cs.json";
+import hu from "i18n-iso-countries/langs/hu.json";
+import sv from "i18n-iso-countries/langs/sv.json";
+import da from "i18n-iso-countries/langs/da.json";
+import hr from "i18n-iso-countries/langs/hr.json";
+import bg from "i18n-iso-countries/langs/bg.json";
+import el from "i18n-iso-countries/langs/el.json";
 import no from "i18n-iso-countries/langs/no.json";
 import sr from "i18n-iso-countries/langs/sr.json";
 import bs from "i18n-iso-countries/langs/bs.json";
 import mk from "i18n-iso-countries/langs/mk.json";
-import type { Language } from "@/lib/translations";
+import { SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
 
 /*
  * The complete ZRP Global Ambassadors country dataset.
@@ -42,13 +56,14 @@ import type { Language } from "@/lib/translations";
  * src/lib/ambassadors/__tests__/countries.test.ts asserts its size and
  * shape against this same package on every run.
  *
- * i18n-iso-countries natively ships localized official names for all
- * 11 ZRP languages (en/fr/de/it/sq/es/ru/ar/zh/tr/id) - registered
- * once, below, module-wide. getName() already returns the current ISO
- * short name (e.g. "Turkiye", not the older "Turkey") in every
- * language ZRP supports, including the "Etats-Unis d'Amerique" /
- * "Turquie" style local names the ambassador search is required to
- * understand - no ZRP-specific translation work was needed for this.
+ * i18n-iso-countries natively ships localized official names for
+ * every one of ZRP's 29 supported languages (see SUPPORTED_LANGUAGES
+ * in src/lib/translations.ts) - registered once, below, module-wide.
+ * getName() already returns the current ISO short name (e.g.
+ * "Turkiye", not the older "Turkey") in every language ZRP supports,
+ * including the "Etats-Unis d'Amerique" / "Turquie" style local names
+ * the ambassador search is required to understand - no ZRP-specific
+ * translation work was needed for this.
  */
 
 let registered = false;
@@ -65,6 +80,20 @@ function ensureLocalesRegistered() {
   iso.registerLocale(zh);
   iso.registerLocale(tr);
   iso.registerLocale(id);
+  iso.registerLocale(pt);
+  iso.registerLocale(ja);
+  iso.registerLocale(ko);
+  iso.registerLocale(hi);
+  iso.registerLocale(nl);
+  iso.registerLocale(pl);
+  iso.registerLocale(ro);
+  iso.registerLocale(cs);
+  iso.registerLocale(hu);
+  iso.registerLocale(sv);
+  iso.registerLocale(da);
+  iso.registerLocale(hr);
+  iso.registerLocale(bg);
+  iso.registerLocale(el);
   iso.registerLocale(no);
   iso.registerLocale(sr);
   iso.registerLocale(bs);
@@ -371,7 +400,7 @@ export interface AmbassadorCountry {
   region: ZrpRegion;
 }
 
-const LOCALE_CODES: Language[] = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "no", "sr", "bs", "mk"];
+const LOCALE_CODES: Language[] = SUPPORTED_LANGUAGES.map((l) => l.code);
 
 /**
  * The full, unfiltered list of all 250 countries/territories, localized

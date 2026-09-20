@@ -9,13 +9,13 @@
 "nav.messages" = "Poruke";
 "nav.profile" = "Profil";
 "nav.bookmarks" = "Zabilješke";
-"nav.creatorStudio" = "Creator Studio";
+"nav.creatorStudio" = "Studio za kreatore";
 "nav.shorts" = "Shorts";
 "nav.news" = "Vijesti";
 "nav.aiAssistant" = "ZRP AI";
-"nav.help" = "Help";
-"nav.opportunity" = "Opportunity";
-"nav.play" = "Play";
+"nav.help" = "Pomoć";
+"nav.opportunity" = "Prilike";
+"nav.play" = "Igre";
 "play.todaysChallenge" = "Današnji izazov";
 "play.trending" = "Izazovi u trendu";
 "play.noTrendingYet" = "Još nema izazova u trendu. Budite prvi koji će ga kreirati!";
@@ -323,7 +323,7 @@
 "rightPanel.trending" = "U trendu";
 "rightPanel.noTrending" = "Još nema hashtagova u trendu.";
 "nav.explore" = "Istraži";
-"nav.music" = "Music";
+"nav.music" = "Muzika";
 "music.common.play" = "Pusti";
 "music.common.pause" = "Pauziraj";
 "music.common.next" = "Sljedeća";
@@ -765,7 +765,7 @@
 "trust.unavailableTitle" = "Pasoš povjerenja nije dostupan";
 "trust.notFoundFallback" = "Ovaj nalog nije pronađen.";
 "trust.errUnableToLoad" = "Nije moguće učitati ovaj pasoš povjerenja.";
-"creatorDash.studioTitle" = "Creator Studio";
+"creatorDash.studioTitle" = "Studio za kreatore";
 "creatorDash.tabContent" = "Sadržaj";
 "creatorDash.tabAudience" = "Publika";
 "contentPerf.views" = "Pregledi";
@@ -982,7 +982,7 @@
 "ambassadors.region.northAmerica" = "Sjeverna Amerika";
 "ambassadors.region.oceania" = "Okeanija";
 "ambassadors.region.southAmerica" = "Južna Amerika";
-"newsCategory.gaming" = "Gaming";
+"newsCategory.gaming" = "Gejming";
 "journalist.editor.category" = "Kategorija";
 "journalist.editor.content" = "Sadržaj";
 "journalist.editor.contentPlaceholder" = "Ovdje napišite cijeli članak…";
