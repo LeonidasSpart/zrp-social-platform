@@ -297,6 +297,7 @@
     <string name="post_add_reaction_cd">रिएक्शन जोड़ें</string>
     <string name="post_close_image_cd">इमेज बंद करें</string>
     <string name="post_repost_options_cd">रीपोस्ट विकल्प</string>
+    <string name="post_send_in_message">मैसेज में भेजें</string>
     <string name="post_delete_confirm_title">पोस्ट हटाएं?</string>
     <string name="post_delete_confirm_body">इसे पूर्ववत नहीं किया जा सकता।</string>
     <string name="comment_edit_cd">टिप्पणी संपादित करें</string>

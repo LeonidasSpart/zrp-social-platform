@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Додај реакција</string>
     <string name="post_close_image_cd">Затвори ја сликата</string>
     <string name="post_repost_options_cd">Опции за повторна објава</string>
+    <string name="post_send_in_message">Испрати во порака</string>
     <string name="post_delete_confirm_title">Да ја избришеме објавата?</string>
     <string name="post_delete_confirm_body">Ова не може да се врати.</string>
     <string name="comment_edit_cd">Уреди коментар</string>

@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Legg til reaksjon</string>
     <string name="post_close_image_cd">Lukk bildet</string>
     <string name="post_repost_options_cd">Repost-valg</string>
+    <string name="post_send_in_message">Send i melding</string>
     <string name="post_delete_confirm_title">Slette innlegget?</string>
     <string name="post_delete_confirm_body">Dette kan ikke angres.</string>
     <string name="comment_edit_cd">Rediger kommentar</string>

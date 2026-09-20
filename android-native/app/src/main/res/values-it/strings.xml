@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Aggiungi reazione</string>
     <string name="post_close_image_cd">Chiudi immagine</string>
     <string name="post_repost_options_cd">Opzioni di repost</string>
+    <string name="post_send_in_message">Invia in un messaggio</string>
     <string name="post_delete_confirm_title">Eliminare il post?</string>
     <string name="post_delete_confirm_body">Questa azione non può essere annullata.</string>
     <string name="comment_edit_cd">Modifica commento</string>

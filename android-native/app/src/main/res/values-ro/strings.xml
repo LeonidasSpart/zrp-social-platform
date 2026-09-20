@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Adaugă reacție</string>
     <string name="post_close_image_cd">Închide imaginea</string>
     <string name="post_repost_options_cd">Opțiuni de redistribuire</string>
+    <string name="post_send_in_message">Trimite într-un mesaj</string>
     <string name="post_delete_confirm_title">Ștergi postarea?</string>
     <string name="post_delete_confirm_body">Această acțiune nu poate fi anulată.</string>
     <string name="comment_edit_cd">Editează comentariul</string>

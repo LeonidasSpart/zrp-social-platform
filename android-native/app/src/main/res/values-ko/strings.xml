@@ -297,6 +297,7 @@
     <string name="post_add_reaction_cd">반응 추가</string>
     <string name="post_close_image_cd">이미지 닫기</string>
     <string name="post_repost_options_cd">리포스트 옵션</string>
+    <string name="post_send_in_message">메시지로 보내기</string>
     <string name="post_delete_confirm_title">게시물을 삭제하시겠어요?</string>
     <string name="post_delete_confirm_body">이 작업은 되돌릴 수 없어요.</string>
     <string name="comment_edit_cd">댓글 수정</string>

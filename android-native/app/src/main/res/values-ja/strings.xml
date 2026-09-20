@@ -297,6 +297,7 @@
     <string name="post_add_reaction_cd">リアクションを追加</string>
     <string name="post_close_image_cd">画像を閉じる</string>
     <string name="post_repost_options_cd">リポストのオプション</string>
+    <string name="post_send_in_message">メッセージで送信</string>
     <string name="post_delete_confirm_title">投稿を削除しますか？</string>
     <string name="post_delete_confirm_body">この操作は取り消せません。</string>
     <string name="comment_edit_cd">コメントを編集</string>

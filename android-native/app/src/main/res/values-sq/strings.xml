@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Shto reagim</string>
     <string name="post_close_image_cd">Mbyll imazhin</string>
     <string name="post_repost_options_cd">Opsionet e ripostimit</string>
+    <string name="post_send_in_message">Dërgo në mesazh</string>
     <string name="post_delete_confirm_title">Të fshihet postimi?</string>
     <string name="post_delete_confirm_body">Kjo nuk mund të zhbëhet.</string>
     <string name="comment_edit_cd">Ndrysho komentin</string>

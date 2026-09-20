@@ -19,9 +19,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -29,17 +32,22 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,7 +55,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,9 +72,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -77,6 +89,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostViewRepository
@@ -84,6 +97,8 @@ import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.Poll
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.ReactionToggleRequest
+import one.zrp.social.mobile.network.SearchUser
+import one.zrp.social.mobile.network.SendMessageRequest
 import one.zrp.social.mobile.network.TranslateRequest
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
@@ -182,15 +197,24 @@ private fun isVideoPost(post: Post): Boolean {
  * backend response.
  *
  * Localization audit note: every visible string in this file was
- * cross-referenced against the real PostCard.tsx. None need a
+ * cross-referenced against the real PostCard.tsx. Most need no
  * translated resource - each one is either a byte-for-byte match of
  * web's own hardcoded, untranslated copy (Pin/Unpin, Show original/
  * Show translation, Translation unavailable, Undo Repost/Repost/Quote,
  * the reposts/quotes counts) or a native-only accessibility label
- * (Edit/Delete/Report post, Comments, Add reaction, Like/Unlike,
- * Bookmark, Repost options) that web's own icon-only buttons have no
- * aria-label/title for either - confirmed by reading the component
- * directly rather than assumed.
+ * (Comments, Add reaction, Like/Unlike, Bookmark, Repost options) that
+ * web's own icon-only buttons have no aria-label/title for either -
+ * confirmed by reading the component directly rather than assumed. The
+ * one exception is the overflow menu added for post sharing (see
+ * [PostActionsMenu]): Edit/Delete/Report/Pin/Unpin now double as real,
+ * translated menu item labels rather than icon-only content
+ * descriptions, for the web PR's own Post Share feature (PR #383),
+ * which had no native equivalent before this. Of that menu's own two
+ * new items, Copy link/Copied/Send/Sent all reuse other screens' real
+ * translated strings for the same real meanings (see
+ * [PostActionsMenu]'s and [SendInMessageDialog]'s own KDoc for exactly
+ * which); only "Send in Message" itself is a genuinely new translated
+ * string, added to every locale.
  */
 @Composable
 fun PostCard(
@@ -394,52 +418,28 @@ fun PostCard(
                         )
                     }
 
-                    // The website's shared PostCard.tsx shows Edit+Delete
-                    // for the post's own author and Report for everyone
-                    // else, on every screen it renders on (Home, Profile,
-                    // Bookmarks, Search, post detail, hashtag, explore) -
-                    // isOwnPost mirrors that same isAuthor check
-                    // everywhere this PostCard is used too, each screen's
+                    // Consolidated three-dot overflow menu - matches the
+                    // web Post Share PR (#383): Copy link and Send in
+                    // Message always appear first, followed by whichever
+                    // of the website's own author-only Pin/Edit/Delete or
+                    // everyone-else Report action applied to this post
+                    // before (isOwnPost mirrors that same isAuthor check
+                    // everywhere this PostCard is used, each screen's
                     // ViewModel resolving the signed-in user's real id via
                     // GET /auth/session the same way ProfileViewModel
-                    // already did.
-                    if (isOwnPost) {
-                        if (showPinOption) {
-                            IconButton(onClick = { onPinClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
-                                Icon(
-                                    imageVector = if (isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-                                    contentDescription = stringResource(if (isPinned) R.string.post_unpin_cd else R.string.post_pin_cd),
-                                    tint = if (isPinned) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(IconSize.sm),
-                                )
-                            }
-                        }
-                        IconButton(onClick = { onEditClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = stringResource(R.string.post_edit_cd),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(IconSize.sm),
-                            )
-                        }
-                        IconButton(onClick = { onDeleteClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
-                            Icon(
-                                imageVector = Icons.Filled.DeleteOutline,
-                                contentDescription = stringResource(R.string.post_delete_cd),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(IconSize.sm),
-                            )
-                        }
-                    } else {
-                        IconButton(onClick = { onReportClick(post.id) }, modifier = Modifier.size(TouchTarget.min)) {
-                            Icon(
-                                imageVector = Icons.Filled.Flag,
-                                contentDescription = stringResource(R.string.post_report_cd),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(IconSize.sm),
-                            )
-                        }
-                    }
+                    // already did) - previously these were separate
+                    // always-visible icon buttons; see PostActionsMenu's
+                    // own KDoc.
+                    PostActionsMenu(
+                        post = post,
+                        isOwnPost = isOwnPost,
+                        showPinOption = showPinOption,
+                        isPinned = isPinned,
+                        onPinClick = onPinClick,
+                        onEditClick = onEditClick,
+                        onDeleteClick = onDeleteClick,
+                        onReportClick = onReportClick,
+                    )
                 }
 
                 if (post.content.isNotBlank()) {
@@ -923,6 +923,344 @@ private fun RepostStat(
                     onViewQuotes()
                 },
             )
+        }
+    }
+}
+
+// The native equivalent of the website's Post Share overflow menu
+// (PR #383, src/components/PostCard.tsx's three-dot menu): Copy link and
+// Send in Message always appear first, using the same canonical
+// `https://zrp.one/post/<id>` URL web uses (inlined the same way
+// ShortsScreen.kt/CommentsScreen.kt already build the identical URL for
+// their own share actions - no shared helper exists anywhere in
+// android-native yet). Whatever Pin/Edit/Delete or Report action already
+// applied to this post is then folded into the same menu instead of
+// staying separate always-visible icon buttons, matching the web PR.
+// Copy link deliberately does NOT close the menu on tap - it swaps its
+// own label to api_keys_copied ("Copied!") for 3 seconds first, the
+// exact same local boolean-plus-delayed-reset copied-label pattern
+// ApiKeysScreen.kt's own copy button uses (reusing that real string
+// too, rather than inventing a new one), since this app has no
+// app-wide Snackbar host (confirmed in ZrpNavHost's Scaffold) to show
+// a toast-style confirmation instead. "More options"/"Copy link"/
+// "Send"/"Sent" below are likewise reused, already-translated strings
+// (profile_more_actions, ambassadors_dashboard_copy_link,
+// chat_send_voice_message_cd, story_reply_sent) rather than new keys -
+// only "Send in Message" itself is a genuinely new phrase with no
+// existing translation to reuse.
+@Composable
+private fun PostActionsMenu(
+    post: Post,
+    isOwnPost: Boolean,
+    showPinOption: Boolean,
+    isPinned: Boolean,
+    onPinClick: (String) -> Unit,
+    onEditClick: (String) -> Unit,
+    onDeleteClick: (String) -> Unit,
+    onReportClick: (String) -> Unit,
+) {
+    var menuOpen by remember(post.id) { mutableStateOf(false) }
+    var linkCopied by remember(post.id) { mutableStateOf(false) }
+    var showSendInMessage by remember(post.id) { mutableStateOf(false) }
+    val clipboard = LocalClipboardManager.current
+    val shareUrl = remember(post.id) { "https://zrp.one/post/${post.id}" }
+
+    LaunchedEffect(linkCopied) {
+        if (linkCopied) {
+            delay(3000)
+            linkCopied = false
+        }
+    }
+
+    Box {
+        IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(TouchTarget.min)) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                // Reuses ProfileScreen.kt's own real translated string for
+                // its identical MoreVert overflow trigger, rather than a
+                // new key for the same real meaning.
+                contentDescription = stringResource(R.string.profile_more_actions),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(IconSize.sm),
+            )
+        }
+
+        DropdownMenu(
+            expanded = menuOpen,
+            onDismissRequest = {
+                menuOpen = false
+                linkCopied = false
+            },
+        ) {
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.ContentCopy,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                // Reuses AmbassadorDashboardScreen.kt's own real "Copy
+                // link" string, and ApiKeysScreen.kt's own real
+                // "Copied!" swap-label, rather than new keys for the
+                // same real meanings.
+                text = { Text(stringResource(if (linkCopied) R.string.api_keys_copied else R.string.ambassadors_dashboard_copy_link)) },
+                onClick = {
+                    clipboard.setText(AnnotatedString(shareUrl))
+                    linkCopied = true
+                },
+            )
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Send,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                text = { Text(stringResource(R.string.post_send_in_message)) },
+                onClick = {
+                    menuOpen = false
+                    linkCopied = false
+                    showSendInMessage = true
+                },
+            )
+
+            if (isOwnPost) {
+                if (showPinOption) {
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = if (isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                                contentDescription = null,
+                                tint = if (isPinned) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        text = { Text(stringResource(if (isPinned) R.string.post_unpin_cd else R.string.post_pin_cd)) },
+                        onClick = {
+                            menuOpen = false
+                            onPinClick(post.id)
+                        },
+                    )
+                }
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    text = { Text(stringResource(R.string.post_edit_cd)) },
+                    onClick = {
+                        menuOpen = false
+                        onEditClick(post.id)
+                    },
+                )
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.DeleteOutline,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    text = { Text(stringResource(R.string.post_delete_cd)) },
+                    onClick = {
+                        menuOpen = false
+                        onDeleteClick(post.id)
+                    },
+                )
+            } else {
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Flag,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    text = { Text(stringResource(R.string.post_report_cd)) },
+                    onClick = {
+                        menuOpen = false
+                        onReportClick(post.id)
+                    },
+                )
+            }
+        }
+    }
+
+    if (showSendInMessage) {
+        SendInMessageDialog(shareUrl = shareUrl, onDismiss = { showSendInMessage = false })
+    }
+}
+
+// Per-recipient send state for SendInMessageDialog below - a plain enum
+// rather than a sealed class since no variant carries extra data (unlike,
+// say, a network error needing its own message: every failure here is
+// the same real "couldn't reach the server" case, shown as a retry
+// affordance rather than a specific error string).
+private enum class SendInMessageState { IDLE, SENDING, SENT, ERROR }
+
+// The "Send in Message" half of the web Post Share PR (#383) - a small,
+// self-contained recipient picker modeled on ChatContactPopup.kt's own
+// pattern (its own rememberCoroutineScope() + coroutineScope.launch {
+// runCatching { ApiClient.xxxApi.call() } } per action, no ViewModel).
+// Recipient search reuses the exact same real GET /search?type=all
+// SearchScreen itself uses (ApiClient.searchApi.search); sending reuses
+// the exact same real POST /messages ConversationScreen uses
+// (ApiClient.messagesApi.sendMessage), with the shared post URL as the
+// message content - no new backend work, and no client-side invented
+// recipient list. Each row tracks and shows its own send state
+// independently, so sending to one person never blocks or hides the
+// others.
+@Composable
+private fun SendInMessageDialog(shareUrl: String, onDismiss: () -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+    var query by remember { mutableStateOf("") }
+    var results by remember { mutableStateOf<List<SearchUser>>(emptyList()) }
+    var isSearching by remember { mutableStateOf(false) }
+    var sendStates by remember { mutableStateOf<Map<String, SendInMessageState>>(emptyMap()) }
+
+    // Matches UserMultiSelectField.kt's own real-search convention: a
+    // 300ms debounce and a 2-character minimum before hitting the
+    // network, rather than searching on every keystroke.
+    LaunchedEffect(query) {
+        val trimmed = query.trim()
+        if (trimmed.length < 2) {
+            results = emptyList()
+            isSearching = false
+            return@LaunchedEffect
+        }
+        isSearching = true
+        delay(300)
+        results = try {
+            ApiClient.searchApi.search(trimmed, type = "all").users
+        } catch (e: Exception) {
+            emptyList()
+        }
+        isSearching = false
+    }
+
+    fun sendTo(user: SearchUser) {
+        sendStates = sendStates + (user.id to SendInMessageState.SENDING)
+        coroutineScope.launch {
+            runCatching { ApiClient.messagesApi.sendMessage(SendMessageRequest(content = shareUrl, receiverId = user.id)) }
+                .onSuccess { sendStates = sendStates + (user.id to SendInMessageState.SENT) }
+                .onFailure { sendStates = sendStates + (user.id to SendInMessageState.ERROR) }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.post_send_in_message)) },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    placeholder = { Text(stringResource(R.string.group_search_people_placeholder)) },
+                    trailingIcon = {
+                        if (isSearching) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        }
+                    },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                when {
+                    results.isNotEmpty() -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(240.dp)
+                                .padding(top = Spacing.sm),
+                        ) {
+                            items(results, key = { it.id }) { user ->
+                                SendInMessageRow(
+                                    user = user,
+                                    state = sendStates[user.id] ?: SendInMessageState.IDLE,
+                                    onSend = { sendTo(user) },
+                                )
+                            }
+                        }
+                    }
+                    query.trim().length >= 2 && !isSearching -> {
+                        Text(
+                            text = stringResource(R.string.group_search_people_empty),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = Spacing.md),
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun SendInMessageRow(user: SearchUser, state: SendInMessageState, onSend: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Avatar(url = user.avatarUrl, name = user.name ?: user.username, size = 36.dp)
+        Column(
+            modifier = Modifier
+                .padding(start = Spacing.sm)
+                .weight(1f),
+        ) {
+            Text(
+                text = user.name ?: user.username,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = "@${user.username}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(modifier = Modifier.width(Spacing.sm))
+        when (state) {
+            // Reuses CommentsScreen.kt's own real "Send" content-description
+            // string (chat_send_voice_message_cd is genuinely just the word
+            // "Send" in every locale, the same as this button needs) and
+            // StoryViewerScreen.kt's own real "Sent!" string, rather than
+            // new keys for the same real meanings; action_retry below is
+            // the existing app-wide retry label.
+            SendInMessageState.IDLE -> TextButton(onClick = onSend) {
+                Text(stringResource(R.string.chat_send_voice_message_cd))
+            }
+            SendInMessageState.SENDING -> CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            SendInMessageState.SENT -> Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = ZrpGreen,
+                    modifier = Modifier.size(IconSize.sm),
+                )
+                Text(
+                    text = stringResource(R.string.story_reply_sent),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ZrpGreen,
+                    modifier = Modifier.padding(start = 4.dp),
+                )
+            }
+            SendInMessageState.ERROR -> TextButton(onClick = onSend) {
+                Text(stringResource(R.string.action_retry), color = MaterialTheme.colorScheme.error)
+            }
         }
     }
 }

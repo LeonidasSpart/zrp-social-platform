@@ -308,6 +308,7 @@
     <string name="post_add_reaction_cd">Add reaction</string>
     <string name="post_close_image_cd">Close image</string>
     <string name="post_repost_options_cd">Repost options</string>
+    <string name="post_send_in_message">Send in Message</string>
     <string name="post_delete_confirm_title">Delete post?</string>
     <string name="post_delete_confirm_body">This can\'t be undone.</string>
     <string name="comment_edit_cd">Edit comment</string>

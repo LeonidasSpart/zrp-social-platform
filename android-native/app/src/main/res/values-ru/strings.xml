@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Добавить реакцию</string>
     <string name="post_close_image_cd">Закрыть изображение</string>
     <string name="post_repost_options_cd">Параметры репоста</string>
+    <string name="post_send_in_message">Отправить в сообщении</string>
     <string name="post_delete_confirm_title">Удалить пост?</string>
     <string name="post_delete_confirm_body">Это действие нельзя отменить.</string>
     <string name="comment_edit_cd">Редактировать комментарий</string>
