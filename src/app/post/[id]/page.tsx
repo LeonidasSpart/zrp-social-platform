@@ -4,12 +4,14 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, useMemo, use } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, FileImage, Loader2, X } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import CommentItem from "@/components/CommentItem";
+import GifPicker from "@/components/GifPicker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { useAutoGrowTextarea } from "@/hooks/useAutoGrowTextarea";
+import { uploadFiles } from "@/lib/uploadthing-client";
 
 interface Post {
   id: string;
@@ -72,6 +74,34 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
   const [sortBy, setSortBy] = useState<"recent" | "relevant" | "likes">("recent");
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const inputRef = useAutoGrowTextarea(commentContent);
+
+  // ─── Attach an image or GIF to a comment ────────────────────────────
+  // Comment.imageUrl already existed in the schema and was already
+  // rendered by every comment surface (CommentItem.tsx) - no composer
+  // anywhere ever wrote to it. This is the first one that does.
+  const [attachedImageUrl, setAttachedImageUrl] = useState<string | null>(null);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [attachError, setAttachError] = useState<string | null>(null);
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const attachmentFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAttachmentFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAttachError(null);
+    setUploadingAttachment(true);
+    try {
+      const result = await uploadFiles("commentImage", { files: [file] });
+      if (!result || result.length === 0) throw new Error("No file returned from upload");
+      setAttachedImageUrl(result[0].ufsUrl);
+    } catch (err) {
+      console.error("Comment image upload error:", err);
+      setAttachError(t("comment.attachmentUploadFailed"));
+    } finally {
+      setUploadingAttachment(false);
+      if (attachmentFileInputRef.current) attachmentFileInputRef.current.value = "";
+    }
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -162,7 +192,7 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
 
   // ─── Submit comment ──────────────────────────────────────────────
   const submitComment = async () => {
-    if (!commentContent.trim() || !session) return;
+    if ((!commentContent.trim() && !attachedImageUrl) || !session) return;
 
     setSubmitting(true);
     try {
@@ -172,11 +202,14 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
         body: JSON.stringify({
           content: commentContent,
           parentId: parentId || undefined,
+          imageUrl: attachedImageUrl || undefined,
         }),
       });
       if (res.ok) {
         setCommentContent("");
         setParentId(null);
+        setAttachedImageUrl(null);
+        setAttachError(null);
         fetchComments();
         // Update post comment count
         setPost((prev) => {
@@ -261,37 +294,105 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
         <>
           {/* ─── Comment Composer ────────────────────────────────────── */}
           {session && (
-            <form onSubmit={handleSubmitComment} className="mt-4 flex gap-2 items-end">
-              <textarea
-                ref={inputRef}
-                value={commentContent}
-                onChange={(e) => setCommentContent(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    submitComment();
-                  }
-                }}
-                placeholder={parentId ? t("postDetail.replyPlaceholder") : t("postDetail.commentPlaceholder")}
-                aria-label={parentId ? t("postDetail.replyPlaceholder") : t("postDetail.commentPlaceholder")}
-                rows={2}
-                // This was previously a single-line <input> - a comment
-                // of any real length scrolled horizontally out of view
-                // as you typed, with no way to see or review it before
-                // posting (the exact complaint this fixes). text-base
-                // (16px) also avoids iOS Safari's auto-zoom-on-focus for
-                // any input under 16px, which was its own contributor to
-                // "hard to see what I'm typing" on mobile.
-                className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base resize-none overflow-y-auto max-h-52"
-              />
-              <button
-                type="submit"
-                disabled={submitting || !commentContent.trim()}
-                className="flex-shrink-0 px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
-              >
-                {submitting ? t("postDetail.sending") : t("postDetail.reply")}
-              </button>
+            <form onSubmit={handleSubmitComment} className="mt-4">
+              {attachedImageUrl && (
+                <div className="relative mb-2 inline-block">
+                  <img
+                    src={attachedImageUrl}
+                    alt=""
+                    className="max-h-40 rounded-xl border border-gray-200 dark:border-gray-700 object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setAttachedImageUrl(null)}
+                    aria-label={t("comment.removeAttachment")}
+                    className="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+              {attachError && (
+                <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-1">
+                  {attachError}
+                </p>
+              )}
+              <div className="flex gap-2 items-end">
+                <textarea
+                  ref={inputRef}
+                  value={commentContent}
+                  onChange={(e) => setCommentContent(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      submitComment();
+                    }
+                  }}
+                  placeholder={parentId ? t("postDetail.replyPlaceholder") : t("postDetail.commentPlaceholder")}
+                  aria-label={parentId ? t("postDetail.replyPlaceholder") : t("postDetail.commentPlaceholder")}
+                  rows={2}
+                  // This was previously a single-line <input> - a comment
+                  // of any real length scrolled horizontally out of view
+                  // as you typed, with no way to see or review it before
+                  // posting (the exact complaint this fixes). text-base
+                  // (16px) also avoids iOS Safari's auto-zoom-on-focus for
+                  // any input under 16px, which was its own contributor to
+                  // "hard to see what I'm typing" on mobile.
+                  className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base resize-none overflow-y-auto max-h-52"
+                />
+
+                <label
+                  className={`flex-shrink-0 p-2 transition ${
+                    uploadingAttachment || !!attachedImageUrl
+                      ? "cursor-not-allowed opacity-40"
+                      : "cursor-pointer text-gray-500 dark:text-gray-400 hover:text-zrp-red"
+                  }`}
+                  title={t("comment.addImage")}
+                >
+                  <input
+                    ref={attachmentFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAttachmentFileChange}
+                    disabled={uploadingAttachment || !!attachedImageUrl}
+                    className="hidden"
+                  />
+                  {uploadingAttachment ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <ImageIcon className="w-5 h-5" />
+                  )}
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => setShowGifPicker(true)}
+                  disabled={uploadingAttachment || !!attachedImageUrl}
+                  title={t("composer.addGif")}
+                  className="flex-shrink-0 p-2 text-gray-500 dark:text-gray-400 hover:text-zrp-red disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  <FileImage className="w-5 h-5" />
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submitting || (!commentContent.trim() && !attachedImageUrl)}
+                  className="flex-shrink-0 px-4 py-2 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
+                >
+                  {submitting ? t("postDetail.sending") : t("postDetail.reply")}
+                </button>
+              </div>
             </form>
+          )}
+
+          {showGifPicker && (
+            <GifPicker
+              onSelect={(url) => {
+                setAttachedImageUrl(url);
+                setShowGifPicker(false);
+              }}
+              onClose={() => setShowGifPicker(false)}
+            />
           )}
 
           {/* ─── Reply sorting ────────────────────────────────────────── */}

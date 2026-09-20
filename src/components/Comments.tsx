@@ -1,21 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark, Flag, Globe, Loader2 } from "lucide-react";
+import { Send, Pencil, Trash2, X, Check, Reply, Heart, Repeat, Bookmark, Flag, Globe, Loader2, Image as ImageIcon, FileImage } from "lucide-react";
 import VerifiedBadge from "./VerifiedBadge";
 import { timeAgo } from "@/lib/utils";
 import { getPlanLimits } from "@/lib/limits";
 import ReportModal from "./ReportModal";
+import GifPicker from "./GifPicker";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ParsedContent from "@/components/ParsedContent";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { useAutoGrowTextarea, sizeTextareaToContent } from "@/hooks/useAutoGrowTextarea";
+import { uploadFiles } from "@/lib/uploadthing-client";
 
 interface Comment {
   id: string;
   content: string;
+  imageUrl?: string | null;
   createdAt: string;
   author: {
     id: string;
@@ -82,6 +85,45 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+
+  // ─── Attach an image or GIF to a comment ────────────────────────────
+  // Comment.imageUrl already existed in the schema and was already
+  // rendered wherever a comment showed up (once added to this
+  // component's own render below) - no composer anywhere ever wrote to
+  // it. Single (non-map) state is correct for both: only one top-level
+  // composer exists, and only one reply box can be open at a time
+  // (replyingTo is a single id, not a set).
+  const [newCommentImageUrl, setNewCommentImageUrl] = useState<string | null>(null);
+  const [newCommentUploading, setNewCommentUploading] = useState(false);
+  const [newCommentAttachError, setNewCommentAttachError] = useState<string | null>(null);
+  const [showNewCommentGifPicker, setShowNewCommentGifPicker] = useState(false);
+  const newCommentFileInputRef = useRef<HTMLInputElement>(null);
+
+  const [replyImageUrl, setReplyImageUrl] = useState<string | null>(null);
+  const [replyUploading, setReplyUploading] = useState(false);
+  const [replyAttachError, setReplyAttachError] = useState<string | null>(null);
+  const [showReplyGifPicker, setShowReplyGifPicker] = useState(false);
+  const replyFileInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadCommentAttachment = async (
+    file: File,
+    setUrl: (url: string) => void,
+    setUploading: (v: boolean) => void,
+    setError: (v: string | null) => void
+  ) => {
+    setError(null);
+    setUploading(true);
+    try {
+      const result = await uploadFiles("commentImage", { files: [file] });
+      if (!result || result.length === 0) throw new Error("No file returned from upload");
+      setUrl(result[0].ufsUrl);
+    } catch (err) {
+      console.error("Comment image upload error:", err);
+      setError(t("comment.attachmentUploadFailed"));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
@@ -172,19 +214,24 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   // ─── Add top‑level comment ──────────────────────────────────────
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault(); // ✅ Prevents page refresh
-    if (!newComment.trim() || !session) return;
+    if ((!newComment.trim() && !newCommentImageUrl) || !session) return;
 
     setSubmitting(true);
     try {
       const res = await fetch(`/api/posts/${postId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: newComment.trim() }),
+        body: JSON.stringify({
+          content: newComment.trim(),
+          imageUrl: newCommentImageUrl || undefined,
+        }),
       });
 
       if (res.ok) {
         const created = await res.json();
         setNewComment("");
+        setNewCommentImageUrl(null);
+        setNewCommentAttachError(null);
         // Prepend directly instead of refetching - a full refetch would
         // reset pagination and drop any "load more" pages already loaded.
         setComments((prev) => [{ ...created, replies: created.replies || [] }, ...prev]);
@@ -201,7 +248,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
 
   // ─── Add reply to a comment ──────────────────────────────────────
   const handleReply = async (parentId: string) => {
-    if (!replyContent.trim() || !session) return;
+    if ((!replyContent.trim() && !replyImageUrl) || !session) return;
 
     try {
       const res = await fetch(`/api/posts/${postId}/comments`, {
@@ -210,6 +257,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         body: JSON.stringify({
           content: replyContent.trim(),
           parentId,
+          imageUrl: replyImageUrl || undefined,
         }),
       });
 
@@ -217,6 +265,8 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         const created = await res.json();
         setReplyContent("");
         setReplyingTo(null);
+        setReplyImageUrl(null);
+        setReplyAttachError(null);
         updateCommentInTree(parentId, (c) => ({
           ...c,
           replies: [...(c.replies || []), { ...created, replies: [] }],
@@ -549,9 +599,23 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               </button>
             </div>
           ) : (
-            <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5 whitespace-pre-wrap break-words">
-              <ParsedContent content={comment.content} urlClassName="text-zrp-red hover:underline break-all" />
-            </p>
+            <>
+              {comment.content && (
+                <p className="text-sm text-gray-800 dark:text-gray-200 mt-0.5 whitespace-pre-wrap break-words">
+                  <ParsedContent content={comment.content} urlClassName="text-zrp-red hover:underline break-all" />
+                </p>
+              )}
+              {comment.imageUrl && (
+                <div className="mt-2 rounded-lg overflow-hidden max-h-64 inline-block">
+                  <img
+                    src={comment.imageUrl}
+                    alt=""
+                    className="max-h-64 w-auto object-cover rounded-lg"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+            </>
           )}
 
           {/* ─── Translate comment ─────────────────────────────────── */}
@@ -588,6 +652,8 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 onClick={() => {
                   setReplyingTo(replyingTo === comment.id ? null : comment.id);
                   setReplyContent("");
+                  setReplyImageUrl(null);
+                  setReplyAttachError(null);
                 }}
                 className="text-xs text-gray-400 hover:text-zrp-red transition flex items-center gap-1 whitespace-nowrap"
               >
@@ -639,7 +705,30 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           )}
 
           {isReplying && (
-            <div className="mt-2 flex items-end gap-2">
+            <div className="mt-2">
+              {replyImageUrl && (
+                <div className="relative mb-2 inline-block">
+                  <img
+                    src={replyImageUrl}
+                    alt=""
+                    className="max-h-32 rounded-xl border border-gray-200 dark:border-gray-700 object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setReplyImageUrl(null)}
+                    aria-label={t("comment.removeAttachment")}
+                    className="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+              {replyAttachError && (
+                <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-1">
+                  {replyAttachError}
+                </p>
+              )}
+              <div className="flex items-end gap-2">
               <textarea
                 ref={(el) => sizeTextareaToContent(el)}
                 value={replyContent}
@@ -660,9 +749,44 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                   }
                 }}
               />
+              <label
+                className={`flex-shrink-0 p-1.5 transition ${
+                  replyUploading || !!replyImageUrl
+                    ? "cursor-not-allowed opacity-40"
+                    : "cursor-pointer text-gray-400 hover:text-zrp-red"
+                }`}
+                title={t("comment.addImage")}
+              >
+                <input
+                  ref={replyFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadCommentAttachment(file, setReplyImageUrl, setReplyUploading, setReplyAttachError);
+                    if (replyFileInputRef.current) replyFileInputRef.current.value = "";
+                  }}
+                  disabled={replyUploading || !!replyImageUrl}
+                  className="hidden"
+                />
+                {replyUploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ImageIcon className="w-4 h-4" />
+                )}
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowReplyGifPicker(true)}
+                disabled={replyUploading || !!replyImageUrl}
+                title={t("composer.addGif")}
+                className="flex-shrink-0 p-1.5 text-gray-400 hover:text-zrp-red disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                <FileImage className="w-4 h-4" />
+              </button>
               <button
                 onClick={() => handleReply(comment.id)}
-                disabled={!replyContent.trim()}
+                disabled={!replyContent.trim() && !replyImageUrl}
                 className="flex-shrink-0 whitespace-nowrap px-3 py-1.5 bg-zrp-red text-white rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 transition"
               >
                 {t("action.reply")}
@@ -671,11 +795,23 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 onClick={() => {
                   setReplyingTo(null);
                   setReplyContent("");
+                  setReplyImageUrl(null);
+                  setReplyAttachError(null);
                 }}
                 className="flex-shrink-0 whitespace-nowrap text-gray-400 hover:text-gray-600 text-sm"
               >
                 {t("action.cancel")}
               </button>
+              </div>
+              {showReplyGifPicker && (
+                <GifPicker
+                  onSelect={(url) => {
+                    setReplyImageUrl(url);
+                    setShowReplyGifPicker(false);
+                  }}
+                  onClose={() => setShowReplyGifPicker(false)}
+                />
+              )}
             </div>
           )}
         </div>
@@ -725,7 +861,30 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
       )}
 
       {session && !replyingTo && (
-        <form onSubmit={handleSubmit} className="mt-3 flex gap-2 items-end">
+        <form onSubmit={handleSubmit} className="mt-3">
+          {newCommentImageUrl && (
+            <div className="relative mb-2 inline-block">
+              <img
+                src={newCommentImageUrl}
+                alt=""
+                className="max-h-40 rounded-xl border border-gray-200 dark:border-gray-700 object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => setNewCommentImageUrl(null)}
+                aria-label={t("comment.removeAttachment")}
+                className="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          {newCommentAttachError && (
+            <p role="alert" aria-live="polite" className="text-xs text-red-500 mb-1">
+              {newCommentAttachError}
+            </p>
+          )}
+          <div className="flex gap-2 items-end">
           <textarea
             ref={newCommentRef}
             value={newComment}
@@ -747,15 +906,61 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-y-auto max-h-52"
             maxLength={limits.postLength}
           />
+          <label
+            className={`flex-shrink-0 p-2 transition ${
+              newCommentUploading || !!newCommentImageUrl
+                ? "cursor-not-allowed opacity-40"
+                : "cursor-pointer text-gray-500 dark:text-gray-400 hover:text-zrp-red"
+            }`}
+            title={t("comment.addImage")}
+          >
+            <input
+              ref={newCommentFileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) uploadCommentAttachment(file, setNewCommentImageUrl, setNewCommentUploading, setNewCommentAttachError);
+                if (newCommentFileInputRef.current) newCommentFileInputRef.current.value = "";
+              }}
+              disabled={newCommentUploading || !!newCommentImageUrl}
+              className="hidden"
+            />
+            {newCommentUploading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <ImageIcon className="w-5 h-5" />
+            )}
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowNewCommentGifPicker(true)}
+            disabled={newCommentUploading || !!newCommentImageUrl}
+            title={t("composer.addGif")}
+            className="flex-shrink-0 p-2 text-gray-500 dark:text-gray-400 hover:text-zrp-red disabled:opacity-40 disabled:cursor-not-allowed transition"
+          >
+            <FileImage className="w-5 h-5" />
+          </button>
           <button
             type="submit"
-            disabled={!newComment.trim() || submitting}
+            disabled={(!newComment.trim() && !newCommentImageUrl) || submitting}
             className="flex-shrink-0 whitespace-nowrap bg-zrp-red text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-1"
           >
             <Send className="w-4 h-4" />
             {t("action.reply")}
           </button>
+          </div>
         </form>
+      )}
+
+      {showNewCommentGifPicker && (
+        <GifPicker
+          onSelect={(url) => {
+            setNewCommentImageUrl(url);
+            setShowNewCommentGifPicker(false);
+          }}
+          onClose={() => setShowNewCommentGifPicker(false)}
+        />
       )}
 
       {showDeleteModal && (
