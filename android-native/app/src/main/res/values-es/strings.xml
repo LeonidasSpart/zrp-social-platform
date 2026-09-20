@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Añadir reacción</string>
     <string name="post_close_image_cd">Cerrar imagen</string>
     <string name="post_repost_options_cd">Opciones de republicación</string>
+    <string name="post_send_in_message">Enviar en un mensaje</string>
     <string name="post_delete_confirm_title">¿Eliminar publicación?</string>
     <string name="post_delete_confirm_body">Esta acción no se puede deshacer.</string>
     <string name="comment_edit_cd">Editar comentario</string>

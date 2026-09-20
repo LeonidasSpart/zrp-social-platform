@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Reakció hozzáadása</string>
     <string name="post_close_image_cd">Kép bezárása</string>
     <string name="post_repost_options_cd">Megosztási lehetőségek</string>
+    <string name="post_send_in_message">Küldés üzenetben</string>
     <string name="post_delete_confirm_title">Törlöd a bejegyzést?</string>
     <string name="post_delete_confirm_body">Ez nem vonható vissza.</string>
     <string name="comment_edit_cd">Megjegyzés szerkesztése</string>

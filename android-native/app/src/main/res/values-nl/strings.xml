@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Reactie toevoegen</string>
     <string name="post_close_image_cd">Afbeelding sluiten</string>
     <string name="post_repost_options_cd">Repostopties</string>
+    <string name="post_send_in_message">Versturen in bericht</string>
     <string name="post_delete_confirm_title">Post verwijderen?</string>
     <string name="post_delete_confirm_body">Dit kan niet ongedaan worden gemaakt.</string>
     <string name="comment_edit_cd">Reactie bewerken</string>

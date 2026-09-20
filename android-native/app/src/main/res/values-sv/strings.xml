@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Lägg till reaktion</string>
     <string name="post_close_image_cd">Stäng bild</string>
     <string name="post_repost_options_cd">Repostalternativ</string>
+    <string name="post_send_in_message">Skicka i meddelande</string>
     <string name="post_delete_confirm_title">Ta bort inlägg?</string>
     <string name="post_delete_confirm_body">Det här kan inte ångras.</string>
     <string name="comment_edit_cd">Redigera kommentar</string>

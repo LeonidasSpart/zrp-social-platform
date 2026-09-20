@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Добави реакция</string>
     <string name="post_close_image_cd">Затвори изображението</string>
     <string name="post_repost_options_cd">Опции за препубликуване</string>
+    <string name="post_send_in_message">Изпрати в съобщение</string>
     <string name="post_delete_confirm_title">Да изтрия ли публикацията?</string>
     <string name="post_delete_confirm_body">Това не може да бъде отменено.</string>
     <string name="comment_edit_cd">Редактирай коментара</string>

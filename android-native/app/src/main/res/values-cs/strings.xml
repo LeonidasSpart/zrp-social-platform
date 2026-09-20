@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Přidat reakci</string>
     <string name="post_close_image_cd">Zavřít obrázek</string>
     <string name="post_repost_options_cd">Možnosti sdílení</string>
+    <string name="post_send_in_message">Odeslat ve zprávě</string>
     <string name="post_delete_confirm_title">Smazat příspěvek?</string>
     <string name="post_delete_confirm_body">Tuto akci nelze vrátit zpět.</string>
     <string name="comment_edit_cd">Upravit komentář</string>

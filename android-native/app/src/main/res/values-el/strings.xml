@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Προσθήκη αντίδρασης</string>
     <string name="post_close_image_cd">Κλείσιμο εικόνας</string>
     <string name="post_repost_options_cd">Επιλογές αναδημοσίευσης</string>
+    <string name="post_send_in_message">Αποστολή σε μήνυμα</string>
     <string name="post_delete_confirm_title">Διαγραφή ανάρτησης;</string>
     <string name="post_delete_confirm_body">Αυτό δεν μπορεί να αναιρεθεί.</string>
     <string name="comment_edit_cd">Επεξεργασία σχολίου</string>

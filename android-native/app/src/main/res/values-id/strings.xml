@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Tambahkan reaksi</string>
     <string name="post_close_image_cd">Tutup gambar</string>
     <string name="post_repost_options_cd">Opsi posting ulang</string>
+    <string name="post_send_in_message">Kirim dalam pesan</string>
     <string name="post_delete_confirm_title">Hapus postingan?</string>
     <string name="post_delete_confirm_body">Tindakan ini tidak dapat dibatalkan.</string>
     <string name="comment_edit_cd">Edit komentar</string>

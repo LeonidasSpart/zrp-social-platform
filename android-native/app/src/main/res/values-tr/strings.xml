@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Tepki ekle</string>
     <string name="post_close_image_cd">Görseli kapat</string>
     <string name="post_repost_options_cd">Yeniden paylaşım seçenekleri</string>
+    <string name="post_send_in_message">Mesaj olarak gönder</string>
     <string name="post_delete_confirm_title">Gönderi silinsin mi?</string>
     <string name="post_delete_confirm_body">Bu işlem geri alınamaz.</string>
     <string name="comment_edit_cd">Yorumu düzenle</string>

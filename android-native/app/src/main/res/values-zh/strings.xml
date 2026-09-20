@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">添加表情回应</string>
     <string name="post_close_image_cd">关闭图片</string>
     <string name="post_repost_options_cd">转发选项</string>
+    <string name="post_send_in_message">通过私信发送</string>
     <string name="post_delete_confirm_title">删除这条帖子？</string>
     <string name="post_delete_confirm_body">此操作无法撤销。</string>
     <string name="comment_edit_cd">编辑评论</string>

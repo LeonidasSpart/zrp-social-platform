@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Dodaj reakciju</string>
     <string name="post_close_image_cd">Zatvori sliku</string>
     <string name="post_repost_options_cd">Opcije reposta</string>
+    <string name="post_send_in_message">Pošalji u poruci</string>
     <string name="post_delete_confirm_title">Obrisati objavu?</string>
     <string name="post_delete_confirm_body">Ovo se ne može poništiti.</string>
     <string name="comment_edit_cd">Uredi komentar</string>

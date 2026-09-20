@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">Tilføj reaktion</string>
     <string name="post_close_image_cd">Luk billede</string>
     <string name="post_repost_options_cd">Delingsmuligheder</string>
+    <string name="post_send_in_message">Send i besked</string>
     <string name="post_delete_confirm_title">Slet opslag?</string>
     <string name="post_delete_confirm_body">Dette kan ikke fortrydes.</string>
     <string name="comment_edit_cd">Rediger kommentar</string>

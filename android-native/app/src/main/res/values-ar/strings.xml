@@ -298,6 +298,7 @@
     <string name="post_add_reaction_cd">إضافة تفاعل</string>
     <string name="post_close_image_cd">إغلاق الصورة</string>
     <string name="post_repost_options_cd">خيارات إعادة النشر</string>
+    <string name="post_send_in_message">إرسال في رسالة</string>
     <string name="post_delete_confirm_title">هل تريد حذف المنشور؟</string>
     <string name="post_delete_confirm_body">لا يمكن التراجع عن هذا الإجراء.</string>
     <string name="comment_edit_cd">تعديل التعليق</string>
