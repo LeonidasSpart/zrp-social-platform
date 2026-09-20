@@ -129,6 +129,12 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
   const [editContent, setEditContent] = useState("");
   const [editing, setEditing] = useState(false);
 
+  // Comment image viewer - the URL alone, same pattern as
+  // ChatInterface.tsx's lightboxImage (this component renders every
+  // comment inline rather than as separate CommentItem instances, so
+  // there's one viewer for the whole tree, not one per row).
+  const [viewingImageUrl, setViewingImageUrl] = useState<string | null>(null);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
 
@@ -606,14 +612,22 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 </p>
               )}
               {comment.imageUrl && (
-                <div className="mt-2 rounded-lg overflow-hidden max-h-64 inline-block">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewingImageUrl(comment.imageUrl!);
+                  }}
+                  className="mt-2 block rounded-lg overflow-hidden max-h-64 inline-block cursor-zoom-in"
+                  aria-label={t("comment.viewImage")}
+                >
                   <img
                     src={comment.imageUrl}
                     alt=""
                     className="max-h-64 w-auto object-cover rounded-lg"
                     loading="lazy"
                   />
-                </div>
+                </button>
               )}
             </>
           )}
@@ -1001,6 +1015,37 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         }}
         onSubmit={handleReportComment}
       />
+
+      {/* ─── Comment image viewer ──────────────────────────────────── */}
+      {/* A fixed overlay, not a route change - closing it leaves this
+          page's scroll position and comment tree untouched, matching
+          the same pattern PostCard.tsx and ChatInterface.tsx already
+          use for post/message image lightboxes. */}
+      {viewingImageUrl && (
+        <div
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 p-3 sm:p-6"
+          onClick={() => setViewingImageUrl(null)}
+        >
+          <div
+            className="relative flex h-full max-h-[92vh] w-full max-w-5xl items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={viewingImageUrl}
+              alt="Comment image"
+              className="max-h-full max-w-full rounded-lg object-contain"
+            />
+            <button
+              type="button"
+              onClick={() => setViewingImageUrl(null)}
+              className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 sm:right-2 sm:top-2"
+              aria-label={t("comment.closeImage")}
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

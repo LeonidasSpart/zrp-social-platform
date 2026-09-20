@@ -98,6 +98,13 @@ export default function CommentItem({
   const editContentRef = useAutoGrowTextarea(editContent);
   const [savingEdit, setSavingEdit] = useState(false);
 
+  // ─── Comment image lightbox ─────────────────────────────────────
+  // Comments carry at most one image, so a boolean is enough - unlike
+  // PostCard.tsx's multi-image gallery (index-based) or
+  // ChatInterface.tsx's per-message lightbox (keyed by URL), there's
+  // never more than one image to distinguish here.
+  const [showImageViewer, setShowImageViewer] = useState(false);
+
   const isAuthor = session?.user?.id === comment.author.id;
 
   // ─── Translation ─────────────────────────────────────────────────
@@ -321,14 +328,22 @@ export default function CommentItem({
                 <ParsedContent content={comment.content} />
               </p>
               {comment.imageUrl && (
-                <div className="mt-2 rounded-lg overflow-hidden max-h-40">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowImageViewer(true);
+                  }}
+                  className="mt-2 block rounded-lg overflow-hidden max-h-40 cursor-zoom-in"
+                  aria-label={t("comment.viewImage")}
+                >
                   <img
                     src={comment.imageUrl}
                     alt="Comment image"
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                </div>
+                </button>
               )}
 
               {/* ─── Translate comment ─────────────────────────────── */}
@@ -446,6 +461,37 @@ export default function CommentItem({
               isReply={true}
             />
           ))}
+        </div>
+      )}
+
+      {/* ─── Comment image viewer ──────────────────────────────────── */}
+      {/* A fixed overlay, not a route change - closing it leaves this
+          comment's DOM node (and the page's scroll position) untouched,
+          matching the same pattern PostCard.tsx and ChatInterface.tsx
+          already use for post/message image lightboxes. */}
+      {showImageViewer && comment.imageUrl && (
+        <div
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 p-3 sm:p-6"
+          onClick={() => setShowImageViewer(false)}
+        >
+          <div
+            className="relative flex h-full max-h-[92vh] w-full max-w-5xl items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={comment.imageUrl}
+              alt="Comment image"
+              className="max-h-full max-w-full rounded-lg object-contain"
+            />
+            <button
+              type="button"
+              onClick={() => setShowImageViewer(false)}
+              className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 sm:right-2 sm:top-2"
+              aria-label={t("comment.closeImage")}
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
         </div>
       )}
     </div>
