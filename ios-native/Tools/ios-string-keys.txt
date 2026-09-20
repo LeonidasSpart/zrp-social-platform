@@ -284,6 +284,7 @@ notifications.empty
 notifications.emptyDesc
 notifications.likedPostSuffix
 notifications.commentedPostSuffix
+notifications.repliedCommentSuffix
 notifications.startedFollowingSuffix
 notifications.repostedPostSuffix
 notifications.appealResolvedSuffix

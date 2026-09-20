@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Kur dikush të ndërveprojë me ju, do të shfaqet këtu";
 "notifications.likedPostSuffix" = "pëlqeu postimin tuaj";
 "notifications.commentedPostSuffix" = "komentoi në postimin tuaj";
+"notifications.repliedCommentSuffix" = "iu përgjigj komentit tuaj";
 "notifications.startedFollowingSuffix" = "filloi t'ju ndjekë";
 "notifications.repostedPostSuffix" = "ripublikoi postimin tuaj";
 "notifications.appealResolvedSuffix" = "vendosi për ankesën tuaj të moderimit";

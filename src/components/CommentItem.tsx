@@ -184,7 +184,13 @@ export default function CommentItem({
   };
 
   const handleShare = () => {
-    const url = `${window.location.origin}/post/${comment.postId}?comment=${comment.id}`;
+    // ?commentId= is the one cross-platform target format: the post
+    // page's own scroll-to-comment logic reads it (see
+    // src/app/post/[id]/page.tsx), it's what comment/reply push
+    // notifications carry, and - unlike a #hash fragment - it's what
+    // Android's and iOS's native deep-link matchers can actually pattern
+    // against.
+    const url = `${window.location.origin}/post/${comment.postId}?commentId=${comment.id}`;
     if (navigator.share) {
       navigator.share({ title: "Comment on ZRP", text: comment.content, url });
     } else {
@@ -226,7 +232,12 @@ export default function CommentItem({
   };
 
   return (
-    <div className="relative">
+    // id is the single authoritative scroll/highlight target for this
+    // comment at ANY depth - a reply rendered here recursively (see
+    // below) gets its own id the same way, unlike the old approach
+    // which only ever registered a ref for a top-level comment in the
+    // parent page and left every reply unreachable by id.
+    <div className="relative" id={`comment-${comment.id}`}>
       <div
         className={`
           flex items-start gap-3 py-3

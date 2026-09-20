@@ -13,8 +13,8 @@ struct RouteDestinationView: View {
 
     var body: some View {
         switch route {
-        case .postDetail(let postId, let preloaded):
-            PostDetailView(postId: postId, preloaded: preloaded)
+        case .postDetail(let postId, let preloaded, let targetCommentId):
+            PostDetailView(postId: postId, preloaded: preloaded, targetCommentId: targetCommentId)
         case .profile(let username):
             ProfileView(username: username)
         case .hashtag(let tag):

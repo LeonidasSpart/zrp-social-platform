@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Кога некој ќе комуницира со тебе, ќе се појави тука";
 "notifications.likedPostSuffix" = "му се допадна твојата објава";
 "notifications.commentedPostSuffix" = "ја коментираше твојата објава";
+"notifications.repliedCommentSuffix" = "одговори на твојот коментар";
 "notifications.startedFollowingSuffix" = "почна да те следи";
 "notifications.repostedPostSuffix" = "ја објави повторно твојата објава";
 "notifications.appealResolvedSuffix" = "ја реши твојата жалба на модерацијата";

@@ -18,6 +18,10 @@ struct AppNotification: Decodable, Identifiable, Equatable {
     let createdAt: Date
     let fromUser: PostAuthor?
     let post: NotificationPostRef?
+    /// Set only on a "comment"/"reply" notification - the exact comment
+    /// or reply that triggered it, so a tap can jump straight to it
+    /// instead of opening the post at the top of its comment list.
+    let commentId: String?
 
     var kind: NotificationKind { NotificationKind(rawValue: type) ?? .unknown }
 }
@@ -41,6 +45,7 @@ struct NotificationPostRef: Decodable, Identifiable, Equatable {
 enum NotificationKind: String {
     case like
     case comment
+    case reply
     case follow
     case followRequest = "follow_request"
     case repost
@@ -57,6 +62,7 @@ enum NotificationKind: String {
         switch self {
         case .like: return .notificationsLikedPostSuffix
         case .comment: return .notificationsCommentedPostSuffix
+        case .reply: return .notificationsRepliedCommentSuffix
         case .follow: return .notificationsStartedFollowingSuffix
         case .followRequest: return .iosNotificationsFollowRequestSuffix
         case .repost: return .notificationsRepostedPostSuffix
@@ -72,7 +78,7 @@ enum NotificationKind: String {
     var systemImage: String {
         switch self {
         case .like: return "heart.fill"
-        case .comment: return "bubble.left.fill"
+        case .comment, .reply: return "bubble.left.fill"
         case .follow, .followRequest: return "person.badge.plus"
         case .repost: return "arrow.2.squarepath"
         case .message: return "envelope.fill"

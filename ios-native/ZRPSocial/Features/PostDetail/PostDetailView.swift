@@ -10,6 +10,11 @@ struct PostDetailView: View {
     /// spinner over data the app is holding.
     let preloaded: Post?
 
+    /// Set only when this screen was reached from a comment/reply
+    /// notification (or an equivalent push/universal-link tap): the one
+    /// comment to scroll to and briefly highlight once loaded.
+    let targetCommentId: String?
+
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var interactions: PostInteractionStore
     @EnvironmentObject private var navigator: Navigator
@@ -19,10 +24,13 @@ struct PostDetailView: View {
     @FocusState private var isComposerFocused: Bool
     @State private var editingComment: Comment?
     @State private var editDraft: String = ""
+    @State private var highlightedCommentId: String?
+    @State private var hasScrolledToTarget = false
 
-    init(postId: String, preloaded: Post? = nil) {
+    init(postId: String, preloaded: Post? = nil, targetCommentId: String? = nil) {
         self.postId = postId
         self.preloaded = preloaded
+        self.targetCommentId = targetCommentId
         _viewModel = StateObject(wrappedValue: PostDetailViewModel(postId: postId))
     }
 
@@ -32,7 +40,9 @@ struct PostDetailView: View {
             .navigationTitle(Text(.iosPostDetailTitle))
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) { composer }
-            .task { await viewModel.loadIfNeeded(preloaded: preloaded) }
+            .task {
+                await viewModel.loadIfNeeded(preloaded: preloaded, targetCommentId: targetCommentId)
+            }
             .sheet(item: $editingComment) { comment in
                 editSheet(for: comment)
             }
@@ -74,36 +84,70 @@ struct PostDetailView: View {
     }
 
     private func thread(_ post: Post) -> some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                PostCardView(
-                    post: post,
-                    interaction: interactions.interaction(for: post),
-                    isOwnPost: post.author.id == session.currentUser?.id,
-                    onLike: { Task { await interactions.toggleLike(post) } },
-                    onRepost: { Task { await interactions.toggleRepost(post) } },
-                    onBookmark: { Task { await interactions.toggleBookmark(post) } },
-                    onDelete: { Task { await interactions.deletePost(post) } },
-                    onTranslate: translateAction(for: post)
-                )
-                .onAppear { interactions.countView(post) }
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    PostCardView(
+                        post: post,
+                        interaction: interactions.interaction(for: post),
+                        isOwnPost: post.author.id == session.currentUser?.id,
+                        onLike: { Task { await interactions.toggleLike(post) } },
+                        onRepost: { Task { await interactions.toggleRepost(post) } },
+                        onBookmark: { Task { await interactions.toggleBookmark(post) } },
+                        onDelete: { Task { await interactions.deletePost(post) } },
+                        onTranslate: translateAction(for: post)
+                    )
+                    .onAppear { interactions.countView(post) }
 
-                // Reactions live on the detail screen rather than every
-                // feed card: each post costs its own request for the
-                // rows, which a timeline should not pay per card.
-                PostReactionsView(postId: post.id, viewerId: session.currentUser?.id)
-                    .padding(.horizontal, ZrpSpacing.lg)
-                    .padding(.bottom, ZrpSpacing.md)
+                    // Reactions live on the detail screen rather than every
+                    // feed card: each post costs its own request for the
+                    // rows, which a timeline should not pay per card.
+                    PostReactionsView(postId: post.id, viewerId: session.currentUser?.id)
+                        .padding(.horizontal, ZrpSpacing.lg)
+                        .padding(.bottom, ZrpSpacing.md)
 
-                engagementLinks(for: post)
+                    engagementLinks(for: post)
 
-                commentsSection
+                    commentsSection
+                }
+                .frame(maxWidth: ZrpMetrics.contentMaxWidth)
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: ZrpMetrics.contentMaxWidth)
-            .frame(maxWidth: .infinity)
+            .refreshable { await viewModel.refresh() }
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: viewModel.commentsPhase) { _, phase in
+                guard phase == .loaded else { return }
+                scrollToTargetCommentIfNeeded(using: proxy)
+            }
         }
-        .refreshable { await viewModel.refresh() }
-        .scrollDismissesKeyboard(.interactively)
+    }
+
+    /// Jumps to and briefly highlights `targetCommentId`, once and only
+    /// once its row exists in `viewModel.flattenedComments`. Runs on
+    /// every `commentsPhase` transition to `.loaded` because the target
+    /// may only appear a few pages in (`ensureCommentLoaded` in the view
+    /// model keeps fetching until it does, or the thread runs out) - a
+    /// no-op the rest of the time, and a permanent no-op once the target
+    /// has been deleted, is on a post no longer visible to this viewer,
+    /// or is simply never found after paging through everything.
+    private func scrollToTargetCommentIfNeeded(using proxy: ScrollViewProxy) {
+        guard
+            let targetCommentId,
+            !hasScrolledToTarget,
+            viewModel.flattenedComments.contains(where: { $0.comment.id == targetCommentId })
+        else { return }
+
+        hasScrolledToTarget = true
+        withAnimation {
+            proxy.scrollTo(targetCommentId, anchor: .center)
+        }
+        highlightedCommentId = targetCommentId
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            if highlightedCommentId == targetCommentId {
+                highlightedCommentId = nil
+            }
+        }
     }
 
     @ViewBuilder
@@ -231,31 +275,7 @@ struct PostDetailView: View {
     private var commentRows: some View {
         Group {
             ForEach(viewModel.flattenedComments, id: \.comment.id) { entry in
-                CommentRowView(
-                    comment: entry.comment,
-                    depth: entry.depth,
-                    interaction: viewModel.interaction(for: entry.comment),
-                    isOwnComment: entry.comment.author.id == session.currentUser?.id,
-                    onLike: { Task { await viewModel.toggleLike(entry.comment) } },
-                    onReply: {
-                        viewModel.beginReply(to: entry.comment)
-                        isComposerFocused = true
-                    },
-                    onEdit: {
-                        editDraft = entry.comment.content
-                        editingComment = entry.comment
-                    },
-                    onDelete: { Task { await viewModel.delete(entry.comment) } },
-                    onRepost: { Task { await viewModel.toggleRepost(entry.comment) } },
-                    onBookmark: { Task { await viewModel.toggleBookmark(entry.comment) } },
-                    onTranslate: translateAction(for: entry.comment)
-                )
-                .task {
-                    // Paging is by top-level thread, so only a root
-                    // comment nearing the end asks for more.
-                    guard entry.depth == 0 else { return }
-                    await viewModel.loadMoreCommentsIfNeeded(current: entry.comment)
-                }
+                commentRow(for: entry)
             }
 
             if viewModel.isLoadingMoreComments {
@@ -263,6 +283,41 @@ struct PostDetailView: View {
                     .tint(ZrpColor.onSurfaceMuted)
                     .padding(ZrpSpacing.lg)
             }
+        }
+    }
+
+    // Split out of `commentRows` so each row is its own function call
+    // rather than one line inside the ForEach closure: with
+    // `isHighlighted` added, the inlined version was too much for the
+    // type checker to solve in reasonable time (a real Swift limit on
+    // very large single expressions, not a logic issue).
+    private func commentRow(for entry: (comment: Comment, depth: Int)) -> some View {
+        CommentRowView(
+            comment: entry.comment,
+            depth: entry.depth,
+            interaction: viewModel.interaction(for: entry.comment),
+            isOwnComment: entry.comment.author.id == session.currentUser?.id,
+            isHighlighted: highlightedCommentId == entry.comment.id,
+            onLike: { Task { await viewModel.toggleLike(entry.comment) } },
+            onReply: {
+                viewModel.beginReply(to: entry.comment)
+                isComposerFocused = true
+            },
+            onEdit: {
+                editDraft = entry.comment.content
+                editingComment = entry.comment
+            },
+            onDelete: { Task { await viewModel.delete(entry.comment) } },
+            onRepost: { Task { await viewModel.toggleRepost(entry.comment) } },
+            onBookmark: { Task { await viewModel.toggleBookmark(entry.comment) } },
+            onTranslate: translateAction(for: entry.comment)
+        )
+        .id(entry.comment.id)
+        .task {
+            // Paging is by top-level thread, so only a root comment
+            // nearing the end asks for more.
+            guard entry.depth == 0 else { return }
+            await viewModel.loadMoreCommentsIfNeeded(current: entry.comment)
         }
     }
 

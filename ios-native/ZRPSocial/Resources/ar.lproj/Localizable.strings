@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "عندما يتفاعل شخص ما معك، سيظهر ذلك هنا";
 "notifications.likedPostSuffix" = "أُعجب بمنشورك";
 "notifications.commentedPostSuffix" = "علّق على منشورك";
+"notifications.repliedCommentSuffix" = "رد على تعليقك";
 "notifications.startedFollowingSuffix" = "بدأ بمتابعتك";
 "notifications.repostedPostSuffix" = "أعاد نشر منشورك";
 "notifications.appealResolvedSuffix" = "بتّ في طعن الإشراف الخاص بك";

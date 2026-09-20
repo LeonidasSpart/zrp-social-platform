@@ -15,7 +15,7 @@ struct ProfileReplyRow: View {
 
     var body: some View {
         Button {
-            navigator.push(.postDetail(postId: reply.postId, preloaded: nil))
+            navigator.push(.postDetail(postId: reply.postId, preloaded: nil, targetCommentId: nil))
         } label: {
             VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
                 if let target = reply.replyTo {

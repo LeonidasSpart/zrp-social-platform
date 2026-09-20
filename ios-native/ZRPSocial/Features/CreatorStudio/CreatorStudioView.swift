@@ -122,7 +122,7 @@ struct CreatorStudioView: View {
 
     private func topPostRow(rank: Int, post: CreatorTopPost) -> some View {
         Button {
-            navigator.push(.postDetail(postId: post.id, preloaded: nil))
+            navigator.push(.postDetail(postId: post.id, preloaded: nil, targetCommentId: nil))
         } label: {
             HStack(alignment: .top, spacing: ZrpSpacing.md) {
                 Text(verbatim: CountFormatting.exact(rank))

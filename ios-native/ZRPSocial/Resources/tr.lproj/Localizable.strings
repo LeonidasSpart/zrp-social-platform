@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Biri sizinle etkileşime geçtiğinde burada görünecek";
 "notifications.likedPostSuffix" = "gönderinizi beğendi";
 "notifications.commentedPostSuffix" = "gönderinize yorum yaptı";
+"notifications.repliedCommentSuffix" = "yorumunuza yanıt verdi";
 "notifications.startedFollowingSuffix" = "sizi takip etmeye başladı";
 "notifications.repostedPostSuffix" = "gönderinizi yeniden paylaştı";
 "notifications.appealResolvedSuffix" = "moderasyon itirazınızı karara bağladı";

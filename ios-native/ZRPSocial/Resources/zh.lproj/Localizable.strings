@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "当有人与你互动时，会显示在这里";
 "notifications.likedPostSuffix" = "赞了你的帖子";
 "notifications.commentedPostSuffix" = "评论了你的帖子";
+"notifications.repliedCommentSuffix" = "回复了你的评论";
 "notifications.startedFollowingSuffix" = "开始关注你";
 "notifications.repostedPostSuffix" = "转发了你的帖子";
 "notifications.appealResolvedSuffix" = "处理了您的内容审核申诉";

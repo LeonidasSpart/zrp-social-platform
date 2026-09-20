@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "जब कोई आपसे इंटरैक्ट करेगा, तो वह यहां दिखेगा";
 "notifications.likedPostSuffix" = "ने आपकी पोस्ट लाइक की";
 "notifications.commentedPostSuffix" = "ने आपकी पोस्ट पर कमेंट किया";
+"notifications.repliedCommentSuffix" = "ने आपकी टिप्पणी का जवाब दिया";
 "notifications.startedFollowingSuffix" = "ने आपको फॉलो करना शुरू किया";
 "notifications.repostedPostSuffix" = "ने आपकी पोस्ट रीपोस्ट की";
 "notifications.appealResolvedSuffix" = "ने आपकी मॉडरेशन अपील का समाधान कर दिया";

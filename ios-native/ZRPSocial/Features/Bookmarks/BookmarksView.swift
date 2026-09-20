@@ -193,7 +193,7 @@ struct BookmarksView: View {
         } else if let comment = item.comment {
             BookmarkedCommentRow(
                 comment: comment,
-                onOpen: { navigator.push(.postDetail(postId: comment.postId, preloaded: nil)) },
+                onOpen: { navigator.push(.postDetail(postId: comment.postId, preloaded: nil, targetCommentId: nil)) },
                 onUnbookmark: { Task { await viewModel.unbookmark(comment) } }
             )
         }

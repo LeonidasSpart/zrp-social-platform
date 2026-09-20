@@ -224,11 +224,16 @@ fun ZrpNavHost(
     val goToComments: (String) -> Unit = { postId -> navController.navigate("post/$postId/comments") }
     // The real post-detail destination (PostDetailScreen: post + its
     // comments below, one scroll) - distinct from goToComments' bare
-    // comments-only screen above. Reached today only from a "like"/
-    // "repost" notification tap (NotificationsScreen's onOpenPost) and
-    // the matching push deep link registered on this route below; every
-    // other existing goToComments call site is untouched.
-    val goToPost: (String) -> Unit = { postId -> navController.navigate("post/$postId") }
+    // comments-only screen above. Reached from a "like"/"repost"/
+    // "comment"/"reply" notification tap (NotificationsScreen's
+    // onOpenPost) and the matching push deep link registered on this
+    // route below; every other existing goToComments call site is
+    // untouched. commentId is optional - when present (a comment/reply
+    // notification), PostDetailScreen scrolls straight to that exact
+    // comment instead of opening at the top of the list.
+    val goToPost: (postId: String, commentId: String?) -> Unit = { postId, commentId ->
+        navController.navigate(if (commentId != null) "post/$postId?commentId=$commentId" else "post/$postId")
+    }
     val goToStoryViewer: (String) -> Unit = { userId -> navController.navigate("stories/$userId") }
     val goToCreateStory: () -> Unit = { navController.navigate("create-story") }
     val goToMusic: () -> Unit = { navController.navigate("music") }
@@ -1716,15 +1721,28 @@ fun ZrpNavHost(
                 }
             }
             composable(
-                route = "post/{postId}",
-                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
-                // Matches the real "/post/{postId}" path
+                route = "post/{postId}?commentId={commentId}",
+                arguments = listOf(
+                    navArgument("postId") { type = NavType.StringType },
+                    // Optional - a comment/reply notification's exact
+                    // target, so PostDetailScreen can scroll straight to
+                    // it instead of opening at the top of the comment
+                    // list. Same optional-query-arg pattern already used
+                    // by e.g. "music/discover?genre={genre}" above.
+                    navArgument("commentId") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                ),
+                // Matches the real "/post/{postId}" path (with an
+                // optional "?commentId={commentId}") that
                 // src/lib/push-notifications.ts's sendPushNotification
                 // callers already send as the FCM `url` data field for
                 // EVERY notification type that references a post (like,
                 // repost, comment, reply, mention alike - see
                 // ZrpFirebaseMessagingService's own deep-link tap intent)
-                // - the payload carries no type, only this bare URL, so
+                // - the payload carries no type, only this URL, so
                 // there is no way to route a push tap by type the way
                 // NotificationsScreen's in-app onOpenPost/onOpenComments
                 // split can. PostDetailScreen (post + comments below, one
@@ -1733,13 +1751,17 @@ fun ZrpNavHost(
                 // own /post/{postId} route and the iOS app's identical
                 // deep-link resolution both already behave - so the
                 // deep link lives here now, not on the comments-only
-                // route above.
-                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/post/{postId}" }),
+                // route above. A URL with no ?commentId= (every type but
+                // comment/reply) still matches this same pattern, with
+                // the arg resolving to its null default.
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/post/{postId}?commentId={commentId}" }),
             ) { backStackEntry ->
                 val postId = backStackEntry.arguments?.getString("postId")
+                val commentId = backStackEntry.arguments?.getString("commentId")
                 if (postId != null) {
                     PostDetailScreen(
                         postId = postId,
+                        targetCommentId = commentId,
                         onBack = { navController.popBackStack() },
                         onAuthorClick = goToProfile,
                         onOpenHashtag = goToHashtag,

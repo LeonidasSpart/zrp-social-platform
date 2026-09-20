@@ -28,6 +28,10 @@ interface Notification {
     id: string;
     content: string;
   };
+  // Set only on "comment"/"reply" notifications - the exact comment or
+  // reply that triggered this notification, so a tap can jump straight
+  // to it instead of opening the post at the top of its comment list.
+  commentId?: string | null;
 }
 
 // ─── A grouped row: one or more original notifications of the same type,
@@ -39,6 +43,10 @@ interface GroupedNotification {
   latestDate: string;
   postId?: string;
   postContent?: string;
+  // Only ever set on an ungrouped "comment"/"reply" row (see
+  // GROUPABLE_TYPES below - those two types never merge into a group of
+  // several people, so this always identifies one exact comment).
+  commentId?: string | null;
   read: boolean;
   // Every underlying Notification.id this row represents - a click marks
   // ALL of them read (not just the group's synthetic key), since one row
@@ -61,6 +69,7 @@ function groupNotifications(list: Notification[]): GroupedNotification[] {
         latestDate: n.createdAt,
         postId: n.post?.id,
         postContent: n.post?.content,
+        commentId: n.commentId,
         read: n.read,
         ids: [n.id],
       });
@@ -370,7 +379,9 @@ export default function NotificationsPage() {
                 : (g.type as string) === "listing_approved" || (g.type as string) === "listing_rejected" || (g.type as string) === "listing_removed"
                   ? "/marketplace/my-listings"
                   : g.postId
-                    ? `/post/${g.postId}`
+                    ? g.commentId
+                      ? `/post/${g.postId}?commentId=${g.commentId}`
+                      : `/post/${g.postId}`
                     : `/profile/${primaryUser.username}`;
 
             return (

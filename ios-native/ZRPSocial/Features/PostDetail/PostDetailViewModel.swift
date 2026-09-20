@@ -106,7 +106,7 @@ final class PostDetailViewModel: ObservableObject {
 
     // MARK: - Loading
 
-    func loadIfNeeded(preloaded: Post?) async {
+    func loadIfNeeded(preloaded: Post?, targetCommentId: String? = nil) async {
         guard case .loading = phase else { return }
 
         // Coming from a timeline, the post is already in hand - showing
@@ -119,6 +119,26 @@ final class PostDetailViewModel: ObservableObject {
         async let postResult: Void = loadPost(showLoading: preloaded == nil)
         async let commentsResult: Void = loadComments(replacingExisting: true)
         _ = await (postResult, commentsResult)
+
+        if let targetCommentId {
+            await ensureCommentLoaded(targetCommentId)
+        }
+    }
+
+    /// A comment/reply notification names one exact comment to land on,
+    /// but comments page by top-level thread - a deep enough target may
+    /// not be on the first page. Keeps requesting more pages until it
+    /// shows up or the thread runs out, bounded so a stale, deleted, or
+    /// tampered-with commentId (the route still only ever returns
+    /// comments this viewer is allowed to see) can't loop forever.
+    private func ensureCommentLoaded(_ targetId: String) async {
+        var attempts = 0
+        while hasMoreComments,
+              attempts < 25,
+              !flattenedComments.contains(where: { $0.comment.id == targetId }) {
+            await loadComments(replacingExisting: false)
+            attempts += 1
+        }
     }
 
     func refresh() async {

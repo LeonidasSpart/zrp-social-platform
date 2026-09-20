@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Wanneer iemand met je interacteert, verschijnt dat hier";
 "notifications.likedPostSuffix" = "vindt je post leuk";
 "notifications.commentedPostSuffix" = "heeft gereageerd op je post";
+"notifications.repliedCommentSuffix" = "heeft geantwoord op je reactie";
 "notifications.startedFollowingSuffix" = "volgt je nu";
 "notifications.repostedPostSuffix" = "heeft je post gerepost";
 "notifications.appealResolvedSuffix" = "heeft je moderatieberoep afgehandeld";
