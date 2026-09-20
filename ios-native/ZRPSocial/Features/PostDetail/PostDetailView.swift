@@ -297,6 +297,7 @@ struct PostDetailView: View {
             depth: entry.depth,
             interaction: viewModel.interaction(for: entry.comment),
             isOwnComment: entry.comment.author.id == session.currentUser?.id,
+            isHighlighted: highlightedCommentId == entry.comment.id,
             onLike: { Task { await viewModel.toggleLike(entry.comment) } },
             onReply: {
                 viewModel.beginReply(to: entry.comment)
@@ -309,8 +310,7 @@ struct PostDetailView: View {
             onDelete: { Task { await viewModel.delete(entry.comment) } },
             onRepost: { Task { await viewModel.toggleRepost(entry.comment) } },
             onBookmark: { Task { await viewModel.toggleBookmark(entry.comment) } },
-            onTranslate: translateAction(for: entry.comment),
-            isHighlighted: highlightedCommentId == entry.comment.id
+            onTranslate: translateAction(for: entry.comment)
         )
         .id(entry.comment.id)
         .task {

@@ -3,6 +3,7 @@ package one.zrp.social.mobile.ui.comments
 import android.content.Intent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.relocation.BringIntoViewRequester
@@ -327,6 +328,7 @@ private fun List<Comment>.findInTree(id: String?): Comment? {
 // could never have reached one anyway. BringIntoViewRequester instead
 // asks the enclosing LazyColumn to scroll this exact row into view
 // regardless of how deep it's nested, which is what actually works here.
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun CommentThread(
     comment: Comment,
