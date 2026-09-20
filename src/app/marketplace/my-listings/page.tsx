@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Plus, Pencil, Trash2, Eye, Heart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import {
   CATEGORY_META,
   STATUS_LABEL_KEYS,
@@ -14,16 +15,11 @@ import {
   type ListingSummary,
 } from "@/lib/marketplace";
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function MyListingsPage() {
   const { t, language } = useLanguage();
   const { status } = useSession();
   const router = useRouter();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
 
   const [listings, setListings] = useState<ListingSummary[]>([]);
   const [loading, setLoading] = useState(true);

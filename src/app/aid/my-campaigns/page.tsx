@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import { CATEGORY_META, STATUS_LABEL_KEYS, STATUS_STYLES, formatCampaignAmount, type HelpCampaignSummary } from "@/lib/help";
 
 interface MyCampaign extends HelpCampaignSummary {
@@ -13,14 +14,9 @@ interface MyCampaign extends HelpCampaignSummary {
   _count?: { contributions: number; offers: number };
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function MyCampaignsPage() {
   const { t, language } = useLanguage();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
   const [campaigns, setCampaigns] = useState<MyCampaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [withdrawId, setWithdrawId] = useState<string | null>(null);

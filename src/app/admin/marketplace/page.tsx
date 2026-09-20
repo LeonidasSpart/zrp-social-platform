@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Store, ExternalLink, CheckCircle, XCircle, ShieldOff, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import { CATEGORY_META, formatListingPrice, type ListingSummary } from "@/lib/marketplace";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 
@@ -11,14 +12,9 @@ interface AdminListing extends ListingSummary {
   seller: { id: string; username: string; name: string | null; avatarUrl: string | null; badgeType: string | null };
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function AdminMarketplacePage() {
   const { t, language } = useLanguage();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
 
   const [listings, setListings] = useState<AdminListing[]>([]);
   const [loading, setLoading] = useState(true);

@@ -13,9 +13,9 @@
 "nav.shorts" = "Shorts";
 "nav.news" = "Vesti";
 "nav.aiAssistant" = "ZRP AI";
-"nav.help" = "Help";
-"nav.opportunity" = "Opportunity";
-"nav.play" = "Play";
+"nav.help" = "Pomoć";
+"nav.opportunity" = "Prilike";
+"nav.play" = "Igre";
 "play.todaysChallenge" = "Današnji izazov";
 "play.trending" = "Popularni izazovi";
 "play.noTrendingYet" = "Još nema popularnih izazova. Budite prvi koji će ga napraviti!";

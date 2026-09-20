@@ -192,12 +192,12 @@
     <string name="nav_search">Pretraga</string>
     <string name="nav_explore">Istraži</string>
     <string name="nav_communities">Zajednice</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">Igre</string>
     <string name="nav_news">Vesti</string>
     <string name="nav_music">Muzika</string>
     <string name="nav_marketplace">Market</string>
-    <string name="nav_opportunity">Opportunity</string>
-    <string name="nav_aid">Help</string>
+    <string name="nav_opportunity">Prilike</string>
+    <string name="nav_aid">Pomoć</string>
     <string name="nav_ambassadors">Globalni ambasadori</string>
     <string name="nav_ai">ZRP AI</string>
     <string name="nav_creator_studio">Studio za kreatore</string>

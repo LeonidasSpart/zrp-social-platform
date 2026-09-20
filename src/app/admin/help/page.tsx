@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { HeartHandshake, ExternalLink, CheckCircle, XCircle, ShieldOff, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import { CATEGORY_META, formatCampaignAmount, type HelpCampaignSummary } from "@/lib/help";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 
@@ -12,14 +13,9 @@ interface AdminCampaign extends HelpCampaignSummary {
   organizer: { id: string; username: string; name: string | null; avatarUrl: string | null; badgeType: string | null };
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function AdminHelpPage() {
   const { t, language } = useLanguage();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
 
   const [campaigns, setCampaigns] = useState<AdminCampaign[]>([]);
   const [loading, setLoading] = useState(true);

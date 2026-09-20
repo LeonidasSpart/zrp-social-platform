@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { CATEGORY_META, NEED_TYPE_META, formatCampaignAmount, campaignProgress, type HelpCampaignSummary } from "@/lib/help";
 
@@ -10,14 +11,9 @@ interface CampaignCardProps {
   campaign: HelpCampaignSummary;
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function CampaignCard({ campaign }: CampaignCardProps) {
   const { t, language } = useLanguage();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
   const meta = CATEGORY_META[campaign.category];
   const coverImage = campaign.imageUrls[0];
   const progress = campaignProgress(campaign.raisedAmount, campaign.goalAmount);

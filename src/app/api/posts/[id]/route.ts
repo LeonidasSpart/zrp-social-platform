@@ -7,6 +7,7 @@ import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 import { canViewPrivateContent } from "@/lib/permissions";
 import { validateMediaUrls } from "@/lib/media-url";
 import { applyPremiumGating } from "@/lib/premium-content";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 
 // GET a single post (with all data for the post page)
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -72,8 +73,31 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
+    const isOwnPost = session?.user?.id === post.author.id;
+
+    // ─── Scheduled/unpublished posts: author only ─────────────────────
+    // The feed/list endpoints already filter to status: "published"
+    // (see /api/posts/route.ts); this single-post route fetched by id
+    // regardless of status, which - now that a post's own URL is an
+    // actively shared, canonical link rather than an internal detail -
+    // meant a scheduled post's content was directly fetchable before
+    // its scheduled time by anyone who had (or guessed) its id.
+    if (post.status !== "published" && !isOwnPost) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
     // ─── Private accounts: only the owner or an approved follower ────
     if (!(await canViewPrivateContent(session?.user?.id, post.author.id, post.author.isPrivate))) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    // ─── Blocked (either direction): same as the feed's exclusion ─────
+    // /api/posts/route.ts (the feed) already excludes a blocked-either-
+    // way author's posts entirely; this route fetched a post by id with
+    // no such check, so a direct link (again, now an actively promoted
+    // share target) bypassed a block that would hide the same content
+    // in-app.
+    if (!isOwnPost && session?.user?.id && (await isBlockedEitherWay(session.user.id, post.author.id))) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 

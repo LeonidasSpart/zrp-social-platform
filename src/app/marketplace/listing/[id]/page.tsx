@@ -16,6 +16,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDateLocale } from "@/lib/dateLocale";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import ReportModal from "@/components/ReportModal";
@@ -45,17 +46,12 @@ interface ListingDetail {
   _count: { favorites: number };
 }
 
-const LOCALE_MAP: Record<string, string> = {
-  en: "en-US", fr: "fr-FR", de: "de-DE", it: "it-IT", sq: "sq-AL",
-  es: "es-ES", ru: "ru-RU", ar: "ar-SA", zh: "zh-CN", tr: "tr-TR", id: "id-ID",
-};
-
 export default function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { t, language } = useLanguage();
   const { data: session } = useSession();
   const router = useRouter();
-  const locale = LOCALE_MAP[language] || "en-US";
+  const locale = getDateLocale(language);
 
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loading, setLoading] = useState(true);

@@ -231,8 +231,26 @@ export async function middleware(req: NextRequest) {
   }
 
   // ─── REQUIRE AUTHENTICATION ──────────────────────────────────────
+  //
+  // A canonical post link (see src/app/post/[id]/page.tsx) is meant to
+  // be shareable with someone who may not have a ZRP account at all -
+  // the whole point of the Share feature. It was previously redirected
+  // to /login unconditionally by this blanket gate before the page ever
+  // got a chance to decide visibility itself, which is the actual
+  // reason "recipient can open the exact post" never worked for a
+  // logged-out recipient. GET /api/posts/[id] already enforces real
+  // visibility (private account, blocked, unpublished - see that
+  // route), so this only widens WHO reaches the page, not what it can
+  // see. Deliberately narrower than adding "/post" to PUBLIC_PATHS
+  // above: this only bypasses the no-token case, so the banned-user
+  // check (which runs before this point) and the onboarding check
+  // (right below, for anyone who does have a token) are both untouched.
+  const PUBLIC_WHEN_LOGGED_OUT_PATHS = ["/post"];
 
   if (!token) {
+    if (pathMatches(path, PUBLIC_WHEN_LOGGED_OUT_PATHS)) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(
       new URL("/login", req.url)
     );
