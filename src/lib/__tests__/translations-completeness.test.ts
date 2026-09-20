@@ -1022,6 +1022,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "hashtag.postSingular",
     "hashtag.postPlural",
     "action.repost",
+    "sharePost.recentChats",
     "adminAds.budgetSummary",
     "adminDash.admins",
     "adminDash.moderators",
@@ -1670,6 +1671,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   ],
   da: [
     "action.post",
+    "sharePost.send",
     "adminAds.budgetSummary",
     "adminAmbassadors.motivationLabel",
     "adminDash.title",
@@ -1987,6 +1989,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   // Market Plus/Shorts), a short admin/nav label, or a format-only value
   // (e.g. "/ 100", "{count}/1000", "{name}: {msg}", "24/7", "CTR").
   no: [
+    "sharePost.send",
     "nav.admin", "action.repost", "settings.video", "chat.sendVoiceMessage",
     "chat.contactVideo", "group.lastMessagePrefix", "adminPayments.tx",
     "analytics.platformAndroid", "analytics.platformIos", "adminUsers.roleModerator",

@@ -15,6 +15,9 @@ import {
   BarChart3,
   Pin,
   PinOff,
+  MoreVertical,
+  Copy,
+  Send,
   X,
   ZoomIn,
   Plus,
@@ -51,6 +54,8 @@ import Poll from "./Poll";
 import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
+import { getPostUrl } from "@/lib/postUrl";
+import SharePostModal from "./SharePostModal";
 
 interface PostCardProps {
   post: {
@@ -380,6 +385,10 @@ export default function PostCard({
 
   const [showDeleteConfirm, setShowDeleteConfirm] =
     useState(false);
+
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [copyNotice, setCopyNotice] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const [showReportModal, setShowReportModal] =
     useState(false);
@@ -1255,34 +1264,44 @@ export default function PostCard({
   // SHARE
   // ─────────────────────────────────────────────────────────────
 
-  const handleShare =
-    async () => {
-      const url =
-        window.location.href;
+  // Was previously `window.location.href` - correct only when PostCard
+  // happened to be rendered on the post's own page, and silently wrong
+  // everywhere else (the feed, a profile, search results), which is
+  // exactly the bug this whole feature was built to fix: sharing a post
+  // from the feed shared the feed's URL, not the post's.
+  const handleShare = async () => {
+    const url = getPostUrl(post.id);
 
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: `Post by ${
-              post.author.name ||
-              post.author.username
-            }`,
-            text: post.content,
-            url,
-          });
-        } catch {}
-      } else {
-        try {
-          await navigator.clipboard.writeText(
-            url
-          );
-
-          alert(
-            "Link copied to clipboard!"
-          );
-        } catch {}
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: t("shorts.sharePostBy", {
+            name: post.author.name || post.author.username,
+          }),
+          text: post.content,
+          url,
+        });
+      } catch {
+        // AbortError on user-cancel, or share unsupported for this
+        // payload - either way there's nothing useful to show the user.
       }
-    };
+    } else {
+      await handleCopyLink();
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(getPostUrl(post.id));
+      setCopyNotice(true);
+      setTimeout(() => setCopyNotice(false), 3000);
+    } catch {
+      // Clipboard permission denied or unavailable (e.g. insecure
+      // context) - no reliable fallback exists, so this fails silently
+      // rather than showing a confusing "copied" confirmation for
+      // something that didn't happen.
+    }
+  };
 
   // ─────────────────────────────────────────────────────────────
   // DELETE
@@ -1744,82 +1763,135 @@ export default function PostCard({
                 )}
               </div>
 
-              {isAuthor ? (
-                <div className="flex items-center gap-1">
-
-                  {showPinOption && (
-                    <button
-                      onClick={
-                        handlePinToggle
-                      }
-                      disabled={
-                        pinLoading
-                      }
-                      className={`transition p-1 rounded-full ${
-                        isPinned
-                          ? "text-blue-500 hover:text-blue-600"
-                          : "text-gray-500 hover:text-blue-500"
-                      }`}
-                      aria-label={
-                        isPinned
-                          ? t("post.unpinFromProfile")
-                          : t("post.pinToProfile")
-                      }
-                      aria-pressed={isPinned}
-                      title={
-                        isPinned
-                          ? t("post.unpinFromProfile")
-                          : t("post.pinToProfile")
-                      }
-                    >
-                      {isPinned ? (
-                        <PinOff className="w-4 h-4" />
-                      ) : (
-                        <Pin className="w-4 h-4" />
-                      )}
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() =>
-                      setShowEditModal(
-                        true
-                      )
-                    }
-                    aria-label={t("action.edit")}
-                    title={t("action.edit")}
-                    className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition p-1 rounded-full"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      setShowDeleteConfirm(
-                        true
-                      )
-                    }
-                    aria-label={t("action.delete")}
-                    title={t("action.delete")}
-                    className="text-gray-500 hover:text-red-500 transition p-1 rounded-full"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
+              <div
+                className="relative flex-shrink-0"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button
-                  onClick={() =>
-                    setShowReportModal(
-                      true
-                    )
-                  }
-                  aria-label={t("report.modalTitle")}
-                  title={t("report.modalTitle")}
-                  className="text-gray-500 hover:text-red-500 transition p-1 rounded-full"
+                  type="button"
+                  onClick={() => setShowMoreMenu((v) => !v)}
+                  aria-label={t("post.moreOptions")}
+                  aria-haspopup="menu"
+                  aria-expanded={showMoreMenu}
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition p-1 rounded-full"
                 >
-                  <Flag className="w-4 h-4" />
+                  <MoreVertical className="w-4 h-4" />
                 </button>
-              )}
+
+                {showMoreMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowMoreMenu(false)}
+                    />
+                    <div
+                      role="menu"
+                      className="absolute end-0 top-full mt-1 z-50 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setShowMoreMenu(false);
+                          handleCopyLink();
+                        }}
+                        className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <Copy className="w-4 h-4" />
+                        {t("post.copyLink")}
+                      </button>
+
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setShowMoreMenu(false);
+                          setShowShareModal(true);
+                        }}
+                        className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <Send className="w-4 h-4" />
+                        {t("post.sendInMessage")}
+                      </button>
+
+                      {isAuthor ? (
+                        <>
+                          {showPinOption && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                setShowMoreMenu(false);
+                                handlePinToggle();
+                              }}
+                              disabled={pinLoading}
+                              className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            >
+                              {isPinned ? (
+                                <PinOff className="w-4 h-4" />
+                              ) : (
+                                <Pin className="w-4 h-4" />
+                              )}
+                              {isPinned
+                                ? t("post.unpinFromProfile")
+                                : t("post.pinToProfile")}
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setShowMoreMenu(false);
+                              setShowEditModal(true);
+                            }}
+                            className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                          >
+                            <Pencil className="w-4 h-4" />
+                            {t("action.edit")}
+                          </button>
+
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setShowMoreMenu(false);
+                              setShowDeleteConfirm(true);
+                            }}
+                            className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            {t("action.delete")}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setShowMoreMenu(false);
+                            setShowReportModal(true);
+                          }}
+                          className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          <Flag className="w-4 h-4" />
+                          {t("report.modalTitle")}
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {copyNotice && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="absolute end-0 top-full mt-1 w-40 px-3 py-2 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs shadow-lg z-20"
+                  >
+                    {t("post.linkCopied")}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* REPOST INFO */}
@@ -2765,8 +2837,8 @@ export default function PostCard({
                   onClick={
                     handleShare
                   }
-                  aria-label={t("shorts.share")}
-                  title={t("shorts.share")}
+                  aria-label={t("post.share")}
+                  title={t("post.share")}
                   className="p-2 rounded-full transition text-gray-500 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 focus-visible:text-blue-500"
                 >
                   <Share2 className="w-[18px] h-[18px]" />
@@ -2928,6 +3000,14 @@ export default function PostCard({
           handleReport
         }
       />
+
+      {/* SEND IN MESSAGE */}
+      {showShareModal && (
+        <SharePostModal
+          postId={post.id}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
 
       {/* IMAGE LIGHTBOX */}
       {lightboxOpen &&

@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, useMemo, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Image as ImageIcon, FileImage, Loader2, X } from "lucide-react";
@@ -62,7 +61,6 @@ interface Comment {
 export default function PostPage(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params);
   const { data: session, status } = useSession();
-  const router = useRouter();
   const { t } = useLanguage();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -103,17 +101,17 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
     }
   };
 
+  // Deliberately does NOT redirect logged-out visitors to /login - a
+  // shared post link is exactly the case where the recipient may not
+  // have a ZRP account yet, and /api/posts/[id] already returns a
+  // public post to an anonymous request (see canViewPrivateContent).
+  // Only a private-account post 404s below, same as it would for a
+  // signed-in non-follower.
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    if (session) {
+    if (status !== "loading") {
       fetchPost();
     }
-  }, [params.id, session]);
+  }, [params.id, status]);
 
   const fetchPost = async () => {
     try {
