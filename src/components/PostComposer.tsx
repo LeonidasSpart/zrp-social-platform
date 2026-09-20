@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import {
   Image,
@@ -28,6 +28,7 @@ const EmojiPicker = dynamic(
 
 import { uploadFiles } from "@/lib/uploadthing-client";
 import { getPlanLimits } from "@/lib/limits";
+import { computeKeyboardScrollAdjustment } from "@/lib/keyboardVisibility";
 import { useLanguage } from "@/contexts/LanguageContext";
 import MentionAutocomplete from "./MentionAutocomplete";
 
@@ -379,6 +380,90 @@ export default function PostComposer({
       textareaRef.current.style.height = "";
     }
   }, [isOpen]);
+
+  /*
+   * Keeps the actively-typed text visible above the on-screen keyboard.
+   * The textarea auto-grows with content up to 280px (handleContentChange
+   * below) and sits in normal document flow, not a fixed/modal sheet - so
+   * neither the browser's one-time "scroll the focused element into view"
+   * on focus, nor the keyboard opening on its own, reliably keeps a caret
+   * near the bottom of a tall, still-growing textarea inside what a real
+   * mobile keyboard leaves visible. This measures the shortfall against
+   * `visualViewport` (the keyboard-aware viewport on iOS Safari 13+ and
+   * Android Chrome, falling back to `window.innerHeight` where it's
+   * unsupported) and nudges the page by exactly that much - never more -
+   * whenever the textarea grows or the keyboard resizes the viewport.
+   */
+  const keepTypedTextVisible =
+    useCallback(() => {
+      const textarea =
+        textareaRef.current;
+
+      if (
+        !textarea ||
+        document.activeElement !==
+          textarea
+      ) {
+        return;
+      }
+
+      const viewportHeight =
+        window.visualViewport
+          ?.height ??
+        window.innerHeight;
+
+      const adjustment =
+        computeKeyboardScrollAdjustment(
+          textarea.getBoundingClientRect()
+            .bottom,
+          viewportHeight
+        );
+
+      if (adjustment > 0) {
+        window.scrollBy({
+          top: adjustment,
+          behavior: "smooth",
+        });
+      }
+    }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const viewport =
+      window.visualViewport;
+
+    if (!viewport) return;
+
+    viewport.addEventListener(
+      "resize",
+      keepTypedTextVisible
+    );
+
+    return () =>
+      viewport.removeEventListener(
+        "resize",
+        keepTypedTextVisible
+      );
+  }, [
+    isOpen,
+    keepTypedTextVisible,
+  ]);
+
+  /*
+   * Attaching or removing media doesn't move the textarea itself (the
+   * preview renders below it), but it does change the page's total
+   * height, which can shift how much of the still-focused textarea a
+   * scroll position from before the attach now leaves visible.
+   */
+  useEffect(() => {
+    requestAnimationFrame(
+      keepTypedTextVisible
+    );
+  }, [
+    imageUrls.length,
+    keepTypedTextVisible,
+  ]);
 
   /*
    * Collapse again on a click outside, not on blur: every toolbar
@@ -995,6 +1080,13 @@ export default function PostComposer({
       e.target.scrollHeight,
       280
     )}px`;
+
+    // Runs after the height above has actually been committed to the
+    // layout, so the overflow this measures reflects the just-grown box,
+    // not the one from before this keystroke.
+    requestAnimationFrame(
+      keepTypedTextVisible
+    );
   };
 
   // ─────────────────────────────────────────────────────────────
