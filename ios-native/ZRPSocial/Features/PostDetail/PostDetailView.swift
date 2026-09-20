@@ -275,33 +275,7 @@ struct PostDetailView: View {
     private var commentRows: some View {
         Group {
             ForEach(viewModel.flattenedComments, id: \.comment.id) { entry in
-                CommentRowView(
-                    comment: entry.comment,
-                    depth: entry.depth,
-                    interaction: viewModel.interaction(for: entry.comment),
-                    isOwnComment: entry.comment.author.id == session.currentUser?.id,
-                    onLike: { Task { await viewModel.toggleLike(entry.comment) } },
-                    onReply: {
-                        viewModel.beginReply(to: entry.comment)
-                        isComposerFocused = true
-                    },
-                    onEdit: {
-                        editDraft = entry.comment.content
-                        editingComment = entry.comment
-                    },
-                    onDelete: { Task { await viewModel.delete(entry.comment) } },
-                    onRepost: { Task { await viewModel.toggleRepost(entry.comment) } },
-                    onBookmark: { Task { await viewModel.toggleBookmark(entry.comment) } },
-                    onTranslate: translateAction(for: entry.comment),
-                    isHighlighted: highlightedCommentId == entry.comment.id
-                )
-                .id(entry.comment.id)
-                .task {
-                    // Paging is by top-level thread, so only a root
-                    // comment nearing the end asks for more.
-                    guard entry.depth == 0 else { return }
-                    await viewModel.loadMoreCommentsIfNeeded(current: entry.comment)
-                }
+                commentRow(for: entry)
             }
 
             if viewModel.isLoadingMoreComments {
@@ -309,6 +283,41 @@ struct PostDetailView: View {
                     .tint(ZrpColor.onSurfaceMuted)
                     .padding(ZrpSpacing.lg)
             }
+        }
+    }
+
+    // Split out of `commentRows` so each row is its own function call
+    // rather than one line inside the ForEach closure: with
+    // `isHighlighted` added, the inlined version was too much for the
+    // type checker to solve in reasonable time (a real Swift limit on
+    // very large single expressions, not a logic issue).
+    private func commentRow(for entry: (comment: Comment, depth: Int)) -> some View {
+        CommentRowView(
+            comment: entry.comment,
+            depth: entry.depth,
+            interaction: viewModel.interaction(for: entry.comment),
+            isOwnComment: entry.comment.author.id == session.currentUser?.id,
+            onLike: { Task { await viewModel.toggleLike(entry.comment) } },
+            onReply: {
+                viewModel.beginReply(to: entry.comment)
+                isComposerFocused = true
+            },
+            onEdit: {
+                editDraft = entry.comment.content
+                editingComment = entry.comment
+            },
+            onDelete: { Task { await viewModel.delete(entry.comment) } },
+            onRepost: { Task { await viewModel.toggleRepost(entry.comment) } },
+            onBookmark: { Task { await viewModel.toggleBookmark(entry.comment) } },
+            onTranslate: translateAction(for: entry.comment),
+            isHighlighted: highlightedCommentId == entry.comment.id
+        )
+        .id(entry.comment.id)
+        .task {
+            // Paging is by top-level thread, so only a root comment
+            // nearing the end asks for more.
+            guard entry.depth == 0 else { return }
+            await viewModel.loadMoreCommentsIfNeeded(current: entry.comment)
         }
     }
 
