@@ -42,12 +42,28 @@ enum DeepLink {
     /// host is somebody else's page and is never claimed.
     static func target(for url: URL) -> DeepLinkTarget? {
         guard url.scheme?.lowercased() == "https", isZrpHost(url) else { return nil }
-        return target(forPath: url.path)
+        return target(forPath: url.path, commentId: commentId(from: url))
+    }
+
+    /// `?commentId=` off a `/post/{id}` link - the one cross-platform
+    /// format a comment/reply notification, its push payload, and a
+    /// shared comment link all use (see `CommentItem.tsx`'s `handleShare`
+    /// and `sendPushNotification`'s callers on the website). Ignored for
+    /// every other path; `target(forPath:)` below only reads it for
+    /// `"post"`.
+    private static func commentId(from url: URL) -> String? {
+        URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?
+            .first { $0.name == "commentId" }?
+            .value
     }
 
     /// Split out so the same mapping can be applied to a bare path - what
     /// a notification payload carries - without inventing a URL for it.
-    static func target(forPath path: String) -> DeepLinkTarget? {
+    /// `commentId` is only ever set by `target(for:)` above, which pulls
+    /// it out of the full URL's `?commentId=` query before the query
+    /// string is discarded down to a bare path.
+    static func target(forPath path: String, commentId: String? = nil) -> DeepLinkTarget? {
         let segments = path
             .split(separator: "/", omittingEmptySubsequences: true)
             .map { String($0).removingPercentEncoding ?? String($0) }
@@ -198,7 +214,7 @@ enum DeepLink {
 
         case "post":
             guard let id = second else { return nil }
-            return DeepLinkTarget(.home, .postDetail(postId: id, preloaded: nil))
+            return DeepLinkTarget(.home, .postDetail(postId: id, preloaded: nil, targetCommentId: commentId))
 
         case "profile":
             guard let username = second else { return nil }

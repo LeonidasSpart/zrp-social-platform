@@ -161,14 +161,26 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
     }
   }, [post]);
 
-  // ─── Scroll to comment from URL hash ──────────────────────────────
+  // ─── Scroll to comment from ?commentId= ────────────────────────────
+  // The one cross-platform target format: also what comment/reply push
+  // notifications carry and what Android's and iOS's native deep-link
+  // matchers pattern against, unlike a #hash fragment which only this
+  // tab's own JS ever sees.
+  //
+  // Reads the DOM directly rather than a ref map kept by this component:
+  // a ref map populated only in this page's own top-level .map() never
+  // covered a reply (replies render recursively inside CommentItem, one
+  // level removed from this page), so a notification/share link
+  // pointing at a reply silently failed to scroll to anything.
+  // CommentItem's own root element now carries id={`comment-${id}`} at
+  // every depth, so getElementById reaches a reply exactly the same way
+  // it reaches a top-level comment.
   useEffect(() => {
     if (comments.length === 0) return;
 
-    const hash = window.location.hash;
-    if (hash.startsWith("#comment-")) {
-      const commentId = hash.replace("#comment-", "");
-      const element = commentRefs.current[commentId];
+    const commentId = new URLSearchParams(window.location.search).get("commentId");
+    if (commentId) {
+      const element = document.getElementById(`comment-${commentId}`);
       if (element) {
         setTimeout(() => {
           element.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -415,20 +427,18 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
           {sortedComments.length > 0 && (
             <div className="mt-4 space-y-4">
               {sortedComments.map((comment) => (
-                <div
+                // No wrapper div needed for the scroll/highlight target -
+                // CommentItem's own root element now carries
+                // id={`comment-${id}`} itself (see CommentItem.tsx),
+                // which also reaches a reply nested arbitrarily deep,
+                // unlike this wrapper (which only ever existed for the
+                // top-level comment).
+                <CommentItem
                   key={comment.id}
-                  ref={(el) => {
-                    commentRefs.current[comment.id] = el;
-                  }}
-                  id={`comment-${comment.id}`}
-                  className="rounded-lg transition-colors duration-500"
-                >
-                  <CommentItem
-                    comment={comment}
-                    onReply={handleReply}
-                    onUpdate={fetchComments}
-                  />
-                </div>
+                  comment={comment}
+                  onReply={handleReply}
+                  onUpdate={fetchComments}
+                />
               ))}
             </div>
           )}

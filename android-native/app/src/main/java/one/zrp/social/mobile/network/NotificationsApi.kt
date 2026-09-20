@@ -15,6 +15,10 @@ data class AppNotification(
     val createdAt: String,
     val fromUser: PostAuthor?,
     val post: NotificationPostRef?,
+    // Set only on a "comment"/"reply" notification - the exact comment
+    // or reply that triggered it, so a tap can jump straight to it
+    // instead of opening the post at the top of its comment list.
+    val commentId: String? = null,
 )
 
 data class MarkReadResponse(val success: Boolean)

@@ -541,7 +541,7 @@ struct PostCardView: View {
                 label: L10n.string(.actionReply),
                 disabledWhileMutating: false,
                 action: {
-                    navigator.push(.postDetail(postId: post.id, preloaded: post))
+                    navigator.push(.postDetail(postId: post.id, preloaded: post, targetCommentId: nil))
                 }
             )
 

@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Kada neko stupi u interakciju s vama, pojavit će se ovdje";
 "notifications.likedPostSuffix" = "sviđa mu/joj se vaša objava";
 "notifications.commentedPostSuffix" = "je komentirao/la vašu objavu";
+"notifications.repliedCommentSuffix" = "je odgovorio/la na vaš komentar";
 "notifications.startedFollowingSuffix" = "vas je počeo/la pratiti";
 "notifications.repostedPostSuffix" = "je proslijedio/la vašu objavu";
 "notifications.appealResolvedSuffix" = "je riješio/la vašu žalbu na moderaciju";

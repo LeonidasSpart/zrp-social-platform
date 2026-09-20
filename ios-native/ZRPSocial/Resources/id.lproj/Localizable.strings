@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Saat seseorang berinteraksi dengan Anda, akan muncul di sini";
 "notifications.likedPostSuffix" = "menyukai postingan Anda";
 "notifications.commentedPostSuffix" = "mengomentari postingan Anda";
+"notifications.repliedCommentSuffix" = "membalas komentar Anda";
 "notifications.startedFollowingSuffix" = "mulai mengikuti Anda";
 "notifications.repostedPostSuffix" = "membagikan ulang postingan Anda";
 "notifications.appealResolvedSuffix" = "memutuskan banding moderasi Anda";

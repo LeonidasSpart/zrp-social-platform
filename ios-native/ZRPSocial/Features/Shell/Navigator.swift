@@ -13,7 +13,11 @@ enum Route: Hashable {
     /// underneath, instead of showing a spinner over data the app is
     /// already holding. `nil` when arriving from somewhere that only
     /// knows the id, such as a deep link.
-    case postDetail(postId: String, preloaded: Post?)
+    /// `targetCommentId` is set only when the caller is a comment/reply
+    /// notification tap (or a push notification/universal link for one):
+    /// the exact comment to scroll to and highlight once the comment
+    /// list has loaded, instead of opening at the top of the thread.
+    case postDetail(postId: String, preloaded: Post?, targetCommentId: String?)
     case profile(username: String)
     case hashtag(tag: String)
     case userList(UserListSource)

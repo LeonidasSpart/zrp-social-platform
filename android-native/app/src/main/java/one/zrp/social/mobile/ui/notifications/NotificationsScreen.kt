@@ -84,12 +84,17 @@ fun NotificationsScreen(
     onAuthorClick: (String) -> Unit,
     // ⚠️ A "like"/"repost" notification is a post-level action - it has
     // nothing to do with any comment - so it opens the real post
-    // (PostDetailScreen) here, not the comments thread. "comment" (and
-    // any other type this screen doesn't special-case) keeps going to
-    // onOpenComments exactly as before; that's unrelated, pre-existing
-    // behavior this fix doesn't touch. See PostDetailScreen.kt's own
-    // doc comment for why only like/repost are redirected.
-    onOpenPost: (String) -> Unit = {},
+    // (PostDetailScreen) here, not the comments thread. "comment"/"reply"
+    // now also opens PostDetailScreen (with a target commentId) rather
+    // than the comments-only screen below: PostDetailScreen is where the
+    // new scroll-to-comment support lives, and it's already the one
+    // destination a push-notification tap resolves to for every type
+    // (see ZrpNavHost.kt's own comment on the post/{postId} route), so
+    // this makes the in-app tap and the push tap land on the same
+    // screen/behavior instead of two separate, now-diverging ones.
+    // "mention" (and anything else this screen doesn't special-case)
+    // keeps going to onOpenComments exactly as before - untouched.
+    onOpenPost: (postId: String, commentId: String?) -> Unit = { _, _ -> },
     onOpenComments: (String) -> Unit = {},
     onOpenMessage: (partnerId: String, partnerUsername: String) -> Unit = { _, _ -> },
     onOpenAppeals: () -> Unit = {},
@@ -119,7 +124,8 @@ fun NotificationsScreen(
             // existed natively.
             g.type == "appeal_resolved" -> onOpenAppeals()
             g.type == "listing_approved" || g.type == "listing_rejected" || g.type == "listing_removed" -> onOpenMyListings()
-            (g.type == "like" || g.type == "repost") && g.postId != null -> onOpenPost(g.postId)
+            (g.type == "like" || g.type == "repost") && g.postId != null -> onOpenPost(g.postId, null)
+            (g.type == "comment" || g.type == "reply") && g.postId != null -> onOpenPost(g.postId, g.commentId)
             g.postId != null -> onOpenComments(g.postId)
             else -> onAuthorClick(primary.username)
         }

@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "누군가 회원님과 상호작용하면 이곳에 표시됩니다";
 "notifications.likedPostSuffix" = "님이 회원님의 게시물을 좋아합니다";
 "notifications.commentedPostSuffix" = "님이 회원님의 게시물에 댓글을 남겼습니다";
+"notifications.repliedCommentSuffix" = "님이 회원님의 댓글에 답글을 달았습니다";
 "notifications.startedFollowingSuffix" = "님이 회원님을 팔로우하기 시작했습니다";
 "notifications.repostedPostSuffix" = "님이 회원님의 게시물을 리포스트했습니다";
 "notifications.appealResolvedSuffix" = "님이 회원님의 제재 이의 제기를 처리했습니다";

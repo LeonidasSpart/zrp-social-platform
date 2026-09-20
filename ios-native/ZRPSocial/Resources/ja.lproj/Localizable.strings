@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "誰かがあなたと関わると、ここに表示されます";
 "notifications.likedPostSuffix" = "があなたの投稿にいいねしました";
 "notifications.commentedPostSuffix" = "があなたの投稿にコメントしました";
+"notifications.repliedCommentSuffix" = "があなたのコメントに返信しました";
 "notifications.startedFollowingSuffix" = "にフォローされました";
 "notifications.repostedPostSuffix" = "があなたの投稿をリポストしました";
 "notifications.appealResolvedSuffix" = "があなたのモデレーション異議申し立てを解決しました";

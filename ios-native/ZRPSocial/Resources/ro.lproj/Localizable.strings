@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Când cineva interacționează cu tine, va apărea aici";
 "notifications.likedPostSuffix" = "a apreciat postarea ta";
 "notifications.commentedPostSuffix" = "a comentat la postarea ta";
+"notifications.repliedCommentSuffix" = "a răspuns la comentariul tău";
 "notifications.startedFollowingSuffix" = "a început să te urmărească";
 "notifications.repostedPostSuffix" = "a redistribuit postarea ta";
 "notifications.appealResolvedSuffix" = "ți-a soluționat contestația de moderare";

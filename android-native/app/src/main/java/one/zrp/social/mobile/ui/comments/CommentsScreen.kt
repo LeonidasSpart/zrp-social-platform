@@ -1,7 +1,12 @@
 package one.zrp.social.mobile.ui.comments
 
 import android.content.Intent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +42,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,11 +50,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.CommentsRepository
 import one.zrp.social.mobile.network.Comment
@@ -92,7 +100,11 @@ fun CommentsScreen(
     var isDeletingComment by remember { mutableStateOf(false) }
 
     fun shareComment(comment: Comment) {
-        val url = "https://zrp.one/post/$postId?comment=${comment.id}"
+        // Matches the "post/{postId}?commentId={commentId}" deep link
+        // registered on ZrpNavHost - a link built with the old
+        // "?comment=" param name never matched that route at all and
+        // silently opened the post with no comment target.
+        val url = "https://zrp.one/post/$postId?commentId=${comment.id}"
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, url)
@@ -305,6 +317,16 @@ private fun List<Comment>.findInTree(id: String?): Comment? {
 // per-comment like/repost/bookmark/edit/delete/reply rendering, just
 // composed under a post header instead of this screen's own bare
 // comments-only Column) - see PostDetailScreen.kt.
+//
+// targetCommentId: the exact comment a notification/deep link pointed
+// at (see PostDetailScreen's own targetCommentId param). Threaded
+// through every recursive call so it reaches a reply at any depth, not
+// just a top-level comment - replies render as nested Columns inside
+// this same composable (see the recursive call below), never as their
+// own separate LazyColumn item, so a plain LazyListState.scrollToItem
+// could never have reached one anyway. BringIntoViewRequester instead
+// asks the enclosing LazyColumn to scroll this exact row into view
+// regardless of how deep it's nested, which is what actually works here.
 @Composable
 internal fun CommentThread(
     comment: Comment,
@@ -319,22 +341,58 @@ internal fun CommentThread(
     onDeleteClick: (String) -> Unit,
     onAuthorClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    targetCommentId: String? = null,
 ) {
     Column(modifier = Modifier.padding(start = (depth * 24).dp)) {
-        CommentRow(
-            comment = comment,
-            isOwnComment = ownUserId != null && comment.author.id == ownUserId,
-            onLikeClick = { onLikeClick(comment.id) },
-            onRepostClick = { onRepostClick(comment.id) },
-            onBookmarkClick = { onBookmarkClick(comment.id) },
-            onReplyClick = { onReplyClick(comment.id, comment.author.username) },
-            onShareClick = { onShareClick(comment) },
-            onEditClick = { onEditClick(comment.id) },
-            onDeleteClick = { onDeleteClick(comment.id) },
-            onAuthorClick = { onAuthorClick(comment.author.username) },
-            onMentionClick = onAuthorClick,
-            onHashtagClick = onHashtagClick,
-        )
+        if (targetCommentId != null && targetCommentId == comment.id) {
+            val bringIntoViewRequester = remember { BringIntoViewRequester() }
+            var highlighted by remember { mutableStateOf(true) }
+            val highlightColor by animateColorAsState(
+                targetValue = if (highlighted) ZrpRed.copy(alpha = 0.12f) else Color.Transparent,
+                animationSpec = tween(durationMillis = 500),
+                label = "commentHighlight",
+            )
+            LaunchedEffect(comment.id) {
+                bringIntoViewRequester.bringIntoView()
+                delay(2000)
+                highlighted = false
+            }
+            Box(
+                modifier = Modifier
+                    .bringIntoViewRequester(bringIntoViewRequester)
+                    .background(highlightColor),
+            ) {
+                CommentRow(
+                    comment = comment,
+                    isOwnComment = ownUserId != null && comment.author.id == ownUserId,
+                    onLikeClick = { onLikeClick(comment.id) },
+                    onRepostClick = { onRepostClick(comment.id) },
+                    onBookmarkClick = { onBookmarkClick(comment.id) },
+                    onReplyClick = { onReplyClick(comment.id, comment.author.username) },
+                    onShareClick = { onShareClick(comment) },
+                    onEditClick = { onEditClick(comment.id) },
+                    onDeleteClick = { onDeleteClick(comment.id) },
+                    onAuthorClick = { onAuthorClick(comment.author.username) },
+                    onMentionClick = onAuthorClick,
+                    onHashtagClick = onHashtagClick,
+                )
+            }
+        } else {
+            CommentRow(
+                comment = comment,
+                isOwnComment = ownUserId != null && comment.author.id == ownUserId,
+                onLikeClick = { onLikeClick(comment.id) },
+                onRepostClick = { onRepostClick(comment.id) },
+                onBookmarkClick = { onBookmarkClick(comment.id) },
+                onReplyClick = { onReplyClick(comment.id, comment.author.username) },
+                onShareClick = { onShareClick(comment) },
+                onEditClick = { onEditClick(comment.id) },
+                onDeleteClick = { onDeleteClick(comment.id) },
+                onAuthorClick = { onAuthorClick(comment.author.username) },
+                onMentionClick = onAuthorClick,
+                onHashtagClick = onHashtagClick,
+            )
+        }
         comment.replies?.forEach { reply ->
             CommentThread(
                 comment = reply,
@@ -349,6 +407,7 @@ internal fun CommentThread(
                 onDeleteClick = onDeleteClick,
                 onAuthorClick = onAuthorClick,
                 onHashtagClick = onHashtagClick,
+                targetCommentId = targetCommentId,
             )
         }
     }

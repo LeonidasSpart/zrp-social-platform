@@ -298,7 +298,7 @@ private struct ShortPageView: View {
                 tint: .white,
                 label: .actionReply
             ) {
-                navigator.push(.postDetail(postId: post.id, preloaded: post))
+                navigator.push(.postDetail(postId: post.id, preloaded: post, targetCommentId: nil))
             }
 
             if let shareURL {

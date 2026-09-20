@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Når nogen interagerer med dig, vises det her";
 "notifications.likedPostSuffix" = "synes godt om dit opslag";
 "notifications.commentedPostSuffix" = "kommenterede på dit opslag";
+"notifications.repliedCommentSuffix" = "svarede på din kommentar";
 "notifications.startedFollowingSuffix" = "begyndte at følge dig";
 "notifications.repostedPostSuffix" = "delte dit opslag igen";
 "notifications.appealResolvedSuffix" = "afgjorde din moderationsanke";

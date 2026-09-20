@@ -271,6 +271,11 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         type: "comment",
         fromUserId: session.user.id,
         postId: postId,
+        // Without this, the notification only ever pointed at the post,
+        // never the specific comment that triggered it - tapping it
+        // opened the post at the top of a possibly long comment list
+        // instead of jumping straight to the new comment.
+        commentId: comment.id,
       });
 
       if (notified) {
@@ -278,7 +283,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
           postAuthor.authorId,
           "New Comment",
           `${session.user.name || session.user.username} commented on your post.`,
-          `/post/${postId}`
+          `/post/${postId}?commentId=${comment.id}`
         );
       }
     }
@@ -299,6 +304,10 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         type: "reply",
         fromUserId: session.user.id,
         postId: postId,
+        // Points at the new reply itself, not the parent comment being
+        // replied to - that's the exact thing the recipient wants to
+        // land on.
+        commentId: comment.id,
       });
 
       if (notifiedReply) {
@@ -306,7 +315,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
           parentAuthorId,
           "New Reply",
           `${session.user.name || session.user.username} replied to your comment.`,
-          `/post/${postId}`
+          `/post/${postId}?commentId=${comment.id}`
         );
       }
     }

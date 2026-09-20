@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Όταν κάποιος αλληλεπιδράσει μαζί σου, θα εμφανιστεί εδώ";
 "notifications.likedPostSuffix" = "έκανε «Μου αρέσει» στην ανάρτησή σου";
 "notifications.commentedPostSuffix" = "σχολίασε την ανάρτησή σου";
+"notifications.repliedCommentSuffix" = "απάντησε στο σχόλιό σου";
 "notifications.startedFollowingSuffix" = "άρχισε να σε ακολουθεί";
 "notifications.repostedPostSuffix" = "αναδημοσίευσε την ανάρτησή σου";
 "notifications.appealResolvedSuffix" = "επίλυσε την ένσταση συντονισμού που υπέβαλες";

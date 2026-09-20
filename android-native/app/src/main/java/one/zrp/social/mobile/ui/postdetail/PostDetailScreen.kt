@@ -77,6 +77,11 @@ fun PostDetailScreen(
     onBack: () -> Unit,
     onAuthorClick: (String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
+    // The exact comment/reply a "someone commented"/"someone replied"
+    // notification (or a shared comment link) pointed at - see
+    // CommentThread's own doc comment for how this reaches a reply at
+    // any depth, not just a top-level comment.
+    targetCommentId: String? = null,
 ) {
     val postViewModel: PostDetailViewModel = viewModel(
         factory = remember(postId) { PostDetailViewModelFactory(PostsRepository(), postId) },
@@ -97,7 +102,11 @@ fun PostDetailScreen(
     var isDeletingComment by remember { mutableStateOf(false) }
 
     fun shareComment(comment: Comment) {
-        val url = "https://zrp.one/post/$postId?comment=${comment.id}"
+        // Matches the "post/{postId}?commentId={commentId}" deep link
+        // registered on ZrpNavHost - a link built with the old
+        // "?comment=" param name never matched that route at all and
+        // silently opened the post with no comment target.
+        val url = "https://zrp.one/post/$postId?commentId=${comment.id}"
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, url)
@@ -196,6 +205,7 @@ fun PostDetailScreen(
                                 onDeleteClick = { id -> deletingCommentId = id },
                                 onAuthorClick = onAuthorClick,
                                 onHashtagClick = onOpenHashtag,
+                                targetCommentId = targetCommentId,
                             )
                             HorizontalDivider()
                         }

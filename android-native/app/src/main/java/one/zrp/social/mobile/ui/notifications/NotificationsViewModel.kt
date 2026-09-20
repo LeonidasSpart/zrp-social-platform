@@ -26,6 +26,10 @@ data class GroupedNotification(
     val latestCreatedAt: String,
     val postId: String?,
     val postContent: String?,
+    // Only ever set on an ungrouped "comment"/"reply" row (those two
+    // types are never in GROUPABLE_TYPES below, so this always
+    // identifies exactly one comment, never several merged rows).
+    val commentId: String?,
     val read: Boolean,
 )
 
@@ -66,6 +70,7 @@ private fun groupNotifications(list: List<AppNotification>): List<GroupedNotific
                     latestCreatedAt = n.createdAt,
                     postId = n.post?.id,
                     postContent = n.post?.content,
+                    commentId = n.commentId,
                     read = n.read,
                 ),
             )
@@ -88,6 +93,7 @@ private fun groupNotifications(list: List<AppNotification>): List<GroupedNotific
                     latestCreatedAt = n.createdAt,
                     postId = n.post?.id,
                     postContent = n.post?.content,
+                    commentId = null,
                     read = n.read,
                 ),
             )

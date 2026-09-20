@@ -284,7 +284,7 @@ struct NotificationsView: View {
     private func tint(for kind: NotificationKind) -> Color {
         switch kind {
         case .like: return ZrpColor.red
-        case .comment: return ZrpColor.blue
+        case .comment, .reply: return ZrpColor.blue
         case .follow, .followRequest, .repost: return ZrpColor.green
         default: return ZrpColor.onSurfaceMuted
         }
@@ -294,9 +294,12 @@ struct NotificationsView: View {
     /// for it yet.
     private func destination(for notification: AppNotification) -> Route? {
         switch notification.kind {
-        case .like, .comment, .repost:
+        case .like, .repost:
             guard let post = notification.post else { return nil }
-            return .postDetail(postId: post.id, preloaded: nil)
+            return .postDetail(postId: post.id, preloaded: nil, targetCommentId: nil)
+        case .comment, .reply:
+            guard let post = notification.post else { return nil }
+            return .postDetail(postId: post.id, preloaded: nil, targetCommentId: notification.commentId)
         case .follow, .followRequest:
             guard let author = notification.fromUser else { return nil }
             return .profile(username: author.username)

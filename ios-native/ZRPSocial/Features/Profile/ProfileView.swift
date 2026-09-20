@@ -284,7 +284,7 @@ struct ProfileView: View {
 
             ForEach(stats.posts) { row in
                 Button {
-                    navigator.push(.postDetail(postId: row.id, preloaded: nil))
+                    navigator.push(.postDetail(postId: row.id, preloaded: nil, targetCommentId: nil))
                 } label: {
                     VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
                         Text(verbatim: row.content)

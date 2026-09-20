@@ -75,6 +75,11 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(notifs).toHaveLength(1);
       expect(notifs[0].type).toBe("comment");
       expect(notifs[0].userId).toBe(author.id);
+      // The notification must carry the exact comment it's about, not
+      // just the post - that's what a tap needs to jump straight to it
+      // instead of opening the post at the top of its comment list.
+      const created = await res.json();
+      expect(notifs[0].commentId).toBe(created.id);
     });
 
     it("a reply notifies BOTH the post author (comment) and the parent comment's author (reply) when they're different people", async () => {
@@ -93,16 +98,21 @@ describe.skipIf(!hasRealDatabaseUrl)(
         { params: Promise.resolve({ id: post.id }) }
       );
       expect(reply.status).toBe(201);
+      const replyComment = await reply.json();
 
       const postNotif = await prisma.notification.findFirst({
         where: { userId: author.id, fromUserId: replier.id, type: "comment", postId: post.id },
       });
       expect(postNotif).toBeTruthy();
+      // Points at the new reply itself, never the top-level comment it
+      // replied to - the post author wants to land on the actual reply.
+      expect(postNotif?.commentId).toBe(replyComment.id);
 
       const replyNotif = await prisma.notification.findFirst({
         where: { userId: firstCommenter.id, fromUserId: replier.id, type: "reply", postId: post.id },
       });
       expect(replyNotif).toBeTruthy();
+      expect(replyNotif?.commentId).toBe(replyComment.id);
     });
 
     it("a reply to your OWN post's top-level comment does not double-notify you (comment + reply for the same action)", async () => {

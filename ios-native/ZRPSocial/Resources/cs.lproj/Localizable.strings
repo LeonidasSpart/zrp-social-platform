@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Když s tebou někdo bude interagovat, objeví se to zde";
 "notifications.likedPostSuffix" = "olajkoval(a) tvůj příspěvek";
 "notifications.commentedPostSuffix" = "okomentoval(a) tvůj příspěvek";
+"notifications.repliedCommentSuffix" = "odpověděl(a) na tvůj komentář";
 "notifications.startedFollowingSuffix" = "tě začal(a) sledovat";
 "notifications.repostedPostSuffix" = "sdílel(a) tvůj příspěvek";
 "notifications.appealResolvedSuffix" = "vyřešil(a) tvoje odvolání proti moderování";

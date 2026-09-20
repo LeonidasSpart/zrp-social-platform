@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Ha valaki kapcsolatba lép veled, itt fog megjelenni";
 "notifications.likedPostSuffix" = "kedvelte a bejegyzésedet";
 "notifications.commentedPostSuffix" = "megjegyzést fűzött a bejegyzésedhez";
+"notifications.repliedCommentSuffix" = "válaszolt a megjegyzésedre";
 "notifications.startedFollowingSuffix" = "követni kezdett téged";
 "notifications.repostedPostSuffix" = "megosztotta a bejegyzésedet";
 "notifications.appealResolvedSuffix" = "elbírálta a moderációs fellebbezésedet";

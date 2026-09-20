@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Когато някой взаимодейства с теб, това ще се появи тук";
 "notifications.likedPostSuffix" = "хареса публикацията ти";
 "notifications.commentedPostSuffix" = "коментира публикацията ти";
+"notifications.repliedCommentSuffix" = "отговори на коментара ти";
 "notifications.startedFollowingSuffix" = "те последва";
 "notifications.repostedPostSuffix" = "препубликува публикацията ти";
 "notifications.appealResolvedSuffix" = "разгледа обжалването ти";

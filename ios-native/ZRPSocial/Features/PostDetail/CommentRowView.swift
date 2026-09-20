@@ -12,6 +12,11 @@ struct CommentRowView: View {
     let depth: Int
     let interaction: CommentInteraction
     let isOwnComment: Bool
+    /// True for the ~2 seconds after a comment/reply notification tap
+    /// scrolls this row into view - the same brief highlight-then-fade
+    /// the website and Android give the same target, so it's findable
+    /// among possibly many other comments on screen.
+    var isHighlighted: Bool = false
 
     var onLike: () -> Void
     var onReply: () -> Void
@@ -59,6 +64,8 @@ struct CommentRowView: View {
         }
         .padding(.horizontal, ZrpSpacing.lg)
         .padding(.vertical, ZrpSpacing.md)
+        .background(isHighlighted ? ZrpColor.red.opacity(0.12) : Color.clear)
+        .animation(.easeOut(duration: 0.6), value: isHighlighted)
         .overlay(alignment: .bottom) {
             Rectangle().fill(ZrpColor.outlineFaint).frame(height: 0.5)
         }

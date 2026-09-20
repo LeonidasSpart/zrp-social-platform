@@ -255,6 +255,7 @@
 "notifications.emptyDesc" = "Quando alguém interagir consigo, vai aparecer aqui";
 "notifications.likedPostSuffix" = "gostou da sua publicação";
 "notifications.commentedPostSuffix" = "comentou a sua publicação";
+"notifications.repliedCommentSuffix" = "respondeu ao seu comentário";
 "notifications.startedFollowingSuffix" = "começou a seguir o seu perfil";
 "notifications.repostedPostSuffix" = "republicou a sua publicação";
 "notifications.appealResolvedSuffix" = "resolveu o seu recurso de moderação";

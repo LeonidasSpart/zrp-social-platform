@@ -142,7 +142,7 @@ struct SponsoredPostCard: View {
     @MainActor
     private func open(_ destination: String?) {
         guard let destination, !destination.isEmpty else {
-            navigator.push(.postDetail(postId: ad.post.id, preloaded: nil))
+            navigator.push(.postDetail(postId: ad.post.id, preloaded: nil, targetCommentId: nil))
             return
         }
 
@@ -153,13 +153,13 @@ struct SponsoredPostCard: View {
             if let target = DeepLink.target(forPath: destination), let route = target.route {
                 navigator.push(route)
             } else {
-                navigator.push(.postDetail(postId: ad.post.id, preloaded: nil))
+                navigator.push(.postDetail(postId: ad.post.id, preloaded: nil, targetCommentId: nil))
             }
             return
         }
 
         guard let url = URL(string: destination), url.scheme != nil else {
-            navigator.push(.postDetail(postId: ad.post.id, preloaded: nil))
+            navigator.push(.postDetail(postId: ad.post.id, preloaded: nil, targetCommentId: nil))
             return
         }
 
