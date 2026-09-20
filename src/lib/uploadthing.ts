@@ -449,6 +449,45 @@ export const ourFileRouter = {
     ),
 
   // ───────────────────────────────────────────────────────────
+  // COMMENT IMAGE - same shape as chatImage: one image, 4MB, any
+  // authenticated user. Comments always carried an imageUrl field
+  // (rendered by CommentItem.tsx/Comments.tsx) but nothing ever wrote
+  // to it - no upload endpoint existed for a comment composer to use.
+  // ───────────────────────────────────────────────────────────
+  commentImage: f({
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const session =
+        await getServerSession(authOptions);
+
+      if (!session?.user) {
+        throw new UploadThingError(
+          "Unauthorized"
+        );
+      }
+
+      return {
+        userId: session.user.id,
+      };
+    })
+    .onUploadComplete(
+      async ({ metadata, file }) => {
+        console.log(
+          "Comment image uploaded:",
+          file.ufsUrl
+        );
+
+        return {
+          url: file.ufsUrl,
+        };
+      }
+    ),
+
+  // ───────────────────────────────────────────────────────────
   // CHAT DOCUMENT
   // ───────────────────────────────────────────────────────────
   chatFile: f({

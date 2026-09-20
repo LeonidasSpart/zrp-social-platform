@@ -9,6 +9,7 @@ import { checkPostLength } from "@/lib/limits";
 import { canViewPrivateContent } from "@/lib/permissions";
 import { notifyMentionedUsers } from "@/lib/mentions";
 import { isBlockedEitherWay } from "@/lib/auth-guards";
+import { isAllowedMediaUrl } from "@/lib/media-url";
 
 // ─── GET: Fetch a page of threaded comments with counts and status ──
 // Paginates by top-level comment (cursor + limit), then loads only the
@@ -155,16 +156,32 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
   }
 
   try {
-    const { content, parentId } = await req.json();
+    const { content, parentId, imageUrl } = await req.json();
     const postId = params.id;
 
-    if (!content?.trim()) {
+    // A comment may carry only an image (matching how a post/message is
+    // allowed to be image-only) - content is only required when there is
+    // no attachment.
+    if (!content?.trim() && !imageUrl) {
       return NextResponse.json({ error: "Comment cannot be empty" }, { status: 400 });
+    }
+
+    // ⚠️ SECURITY: same rule as post/message media - a comment image must
+    // come from ZRP's own upload storage or the GIF picker, never an
+    // arbitrary client-supplied host or scheme. Comment.imageUrl already
+    // existed in the schema and was already rendered by every comment UI;
+    // no composer ever wrote to it, so this was previously unreachable
+    // rather than unvalidated - still checked the same way regardless.
+    if (imageUrl && !isAllowedMediaUrl(imageUrl)) {
+      return NextResponse.json(
+        { error: "Comment images must be uploaded through ZRP or chosen from the GIF picker." },
+        { status: 400 }
+      );
     }
 
     // Validate against the commenter's actual plan limit - previously
     // this had no server-side length check at all.
-    const lengthCheck = checkPostLength(content.length, (session.user as any).plan || "free");
+    const lengthCheck = checkPostLength((content?.length as number) || 0, (session.user as any).plan || "free");
     if (!lengthCheck.allowed) {
       return NextResponse.json({ error: lengthCheck.message }, { status: 400 });
     }
@@ -215,7 +232,8 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     // ─── Create comment ──────────────────────────────────────────────
     const comment = await prisma.comment.create({
       data: {
-        content: content.trim(),
+        content: content?.trim() || "",
+        imageUrl: imageUrl || null,
         postId,
         authorId: session.user.id,
         parentId: parentId || null,
@@ -300,7 +318,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     // person you're replying to doesn't also fire a redundant
     // "mentioned you" notification.
     await notifyMentionedUsers({
-      content: content.trim(),
+      content: content?.trim() || "",
       authorId: session.user.id,
       postId,
       excludeUserIds: [postAuthor?.authorId, parentAuthorId].filter(

@@ -12,6 +12,8 @@ import {
   Trash2,
   X,
   Check,
+  Globe,
+  Loader2,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge"; // ✅ import
@@ -97,6 +99,44 @@ export default function CommentItem({
   const [savingEdit, setSavingEdit] = useState(false);
 
   const isAuthor = session?.user?.id === comment.author.id;
+
+  // ─── Translation ─────────────────────────────────────────────────
+  // Same /api/translate flow PostCard.tsx and Comments.tsx already use -
+  // this component (used by the post detail page, src/app/post/[id])
+  // never had it, so a reply there had no "Show translation" affordance
+  // even though the parent post and every other comment surface did.
+  const [translatedText, setTranslatedText] = useState<string | null>(null);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const [translateError, setTranslateError] = useState(false);
+
+  const handleTranslate = async () => {
+    if (translatedText) {
+      setShowTranslation(!showTranslation);
+      return;
+    }
+    setTranslating(true);
+    setTranslateError(false);
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: comment.content, targetLang: language }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTranslatedText(data.translatedText);
+        setShowTranslation(true);
+      } else {
+        setTranslateError(true);
+      }
+    } catch (error) {
+      console.error("Translate error:", error);
+      setTranslateError(true);
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   const handleLike = async () => {
     if (!session || loading.like) return;
@@ -277,6 +317,34 @@ export default function CommentItem({
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
+                </div>
+              )}
+
+              {/* ─── Translate comment ─────────────────────────────── */}
+              {comment.content.trim().length > 0 && (
+                <div className="mt-1">
+                  <button
+                    onClick={handleTranslate}
+                    disabled={translating}
+                    className="inline-flex items-center gap-1 text-xs text-zrp-red hover:underline disabled:opacity-60"
+                  >
+                    {translating ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Globe className="w-3 h-3" />
+                    )}
+                    {showTranslation ? t("comment.showOriginal") : t("comment.showTranslation")}
+                  </button>
+                  {translateError && (
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                      {t("comment.translationUnavailable")}
+                    </p>
+                  )}
+                  {showTranslation && translatedText && (
+                    <p className="text-sm text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words border-l-2 border-gray-200 dark:border-gray-700 pl-2">
+                      {translatedText}
+                    </p>
+                  )}
                 </div>
               )}
             </>
