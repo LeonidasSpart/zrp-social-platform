@@ -3,18 +3,29 @@ package one.zrp.social.mobile.ui.admin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.AdminRepository
+import one.zrp.social.mobile.network.AdminAnalyticsGeographyResponse
 import one.zrp.social.mobile.network.AdminAnalyticsResponse
 
 data class AdminAnalyticsUiState(
     val isLoading: Boolean = true,
     val analytics: AdminAnalyticsResponse? = null,
     val failed: Boolean = false,
+    // The geography/acquisition/platform/language breakdown is a
+    // separate call (GET /admin/analytics/geography) and, deliberately,
+    // a separate failure domain from `failed` above: a request failure
+    // here never blanks out the core analytics this screen already
+    // loaded successfully, it just leaves this section absent. null
+    // means "hasn't loaded (yet, or failed)" - there's no dedicated
+    // loading flag for it since it's fetched alongside the core call and
+    // this screen's single isLoading spinner already covers both.
+    val geography: AdminAnalyticsGeographyResponse? = null,
     val error: String? = null,
 )
 
@@ -43,9 +54,24 @@ class AdminAnalyticsViewModel(private val repository: AdminRepository) : ViewMod
     fun load() {
         _state.update { it.copy(isLoading = true, failed = false, error = null) }
         viewModelScope.launch {
-            repository.getAnalytics()
+            // Fetched in parallel, exactly like the website's own
+            // Promise.all([analytics, geography]) - see AdminAnalyticsUiState's
+            // own note on why a geography failure doesn't touch `failed`.
+            val analyticsDeferred = async { repository.getAnalytics() }
+            val geographyDeferred = async { repository.getAnalyticsGeography() }
+            val analyticsResult = analyticsDeferred.await()
+            val geographyResult = geographyDeferred.await()
+
+            analyticsResult
                 .onSuccess { response ->
-                    _state.update { it.copy(isLoading = false, analytics = response, failed = false) }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            analytics = response,
+                            failed = false,
+                            geography = geographyResult.getOrNull(),
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoading = false, failed = true, error = error.message) }

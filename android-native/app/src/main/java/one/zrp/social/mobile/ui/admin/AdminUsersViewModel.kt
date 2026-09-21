@@ -124,6 +124,37 @@ class AdminUsersViewModel(private val repository: AdminRepository) : ViewModel()
         }
     }
 
+    // Ported from src/app/admin/users/page.tsx's own setBadge(): the
+    // website applies every badge change - including clearing it back to
+    // null - straight off the dropdown, with no confirm dialog at all.
+    // This screen matches that exactly rather than adding a narrower
+    // confirm-on-clear step: unlike a plan change (real billing impact)
+    // or a delete (irreversible data loss), a badge is fully and
+    // instantly reversible from this same dropdown - re-selecting the
+    // same badge type grants it right back - which is exactly the
+    // "reversible toggle" reasoning this screen's own ban control
+    // already documents for skipping a confirm dialog. A confirm dialog
+    // here would also need its own translated copy with no existing
+    // website string to reuse (web never asks either), and this
+    // project's localization policy is to never machine-translate a
+    // new string to fill that gap - so the right fix is matching web's
+    // real UX, not inventing unreviewed copy.
+    fun changeBadge(userId: String, badgeType: String?) {
+        _state.update { it.copy(busyUserId = userId, error = null) }
+        viewModelScope.launch {
+            repository.updateUserBadge(userId, badgeType)
+                .onSuccess { updated ->
+                    _state.update { current ->
+                        current.copy(
+                            busyUserId = null,
+                            users = current.users.map { if (it.id == userId) it.copy(badgeType = updated.badgeType) else it },
+                        )
+                    }
+                }
+                .onFailure { error -> _state.update { it.copy(busyUserId = null, error = error.message) } }
+        }
+    }
+
     fun requestPlanChange(userId: String, plan: String) =
         _state.update { it.copy(pendingPlanUserId = userId, pendingPlan = plan) }
 

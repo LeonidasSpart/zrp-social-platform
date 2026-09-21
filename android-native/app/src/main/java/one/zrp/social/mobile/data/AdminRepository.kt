@@ -2,7 +2,10 @@ package one.zrp.social.mobile.data
 
 import android.content.ContentResolver
 import android.net.Uri
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import one.zrp.social.mobile.network.AdminAdsResponse
+import one.zrp.social.mobile.network.AdminAnalyticsGeographyResponse
 import one.zrp.social.mobile.network.AdminAnalyticsResponse
 import one.zrp.social.mobile.network.AdminAppealsResponse
 import one.zrp.social.mobile.network.AdminAuditLogResponse
@@ -31,6 +34,8 @@ import one.zrp.social.mobile.network.AdminStats
 import one.zrp.social.mobile.network.AdminStorageCleanupResult
 import one.zrp.social.mobile.network.AdminStorageScan
 import one.zrp.social.mobile.network.AdminSupportStats
+import one.zrp.social.mobile.network.AdminSubscriptionDetailResponse
+import one.zrp.social.mobile.network.AdminSubscriptionsResponse
 import one.zrp.social.mobile.network.AdminSupportTicketDetail
 import one.zrp.social.mobile.network.AdminSupportTicketsResponse
 import one.zrp.social.mobile.network.AdminTicketReply
@@ -41,7 +46,9 @@ import one.zrp.social.mobile.network.AdminUserPlanResponse
 import one.zrp.social.mobile.network.AdminUsersResponse
 import one.zrp.social.mobile.network.AdminWithdrawal
 import one.zrp.social.mobile.network.ApiClient
+import one.zrp.social.mobile.network.CancelSubscriptionRequest
 import one.zrp.social.mobile.network.GrantJournalistRequest
+import one.zrp.social.mobile.network.GrantSubscriptionRequest
 import one.zrp.social.mobile.network.JournalistActionRequest
 import one.zrp.social.mobile.network.NewsStoryActionRequest
 import one.zrp.social.mobile.network.ProvisionNewsFeedsRequest
@@ -53,6 +60,7 @@ import one.zrp.social.mobile.network.ReviewAdRequest
 import one.zrp.social.mobile.network.ReviewNewsArticleRequest
 import one.zrp.social.mobile.network.ReviewSubmissionRequest
 import one.zrp.social.mobile.network.SaveNewsArticleRequest
+import one.zrp.social.mobile.network.SubscriptionActionResponse
 import one.zrp.social.mobile.network.ToggleBanResponse
 import one.zrp.social.mobile.network.UpdateNewsAutomationRequest
 import one.zrp.social.mobile.network.UpdateNewsFeedRequest
@@ -66,6 +74,7 @@ import one.zrp.social.mobile.network.VerifyArtistRequest
 import one.zrp.social.mobile.network.VerifyPaymentRequest
 import one.zrp.social.mobile.network.buildNamedFileMultipart
 import one.zrp.social.mobile.network.zrpErrorMessage
+import org.json.JSONObject
 import retrofit2.HttpException
 
 /**
@@ -118,6 +127,25 @@ class AdminRepository {
             Result.success(ApiClient.adminApi.updateUserRole(userId, UpdateUserRoleRequest(role)))
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this user's role."))
+        } catch (e: Exception) {
+            Result.failure(Exception(ZrpErrors.NETWORK))
+        }
+    }
+
+    // badgeType is one of verified/organization/government/team/journalist,
+    // or null to clear it - see AdminApi.updateUserBadge's own KDoc for
+    // why this builds the JSON body itself (a Kotlin null has to reach
+    // the wire as a real JSON `null` to clear the badge, and the shared
+    // Gson converter never sends one). Journalist is deliberately never
+    // offered from AdminUsersScreen's own badge dropdown - see its KDoc.
+    suspend fun updateUserBadge(userId: String, badgeType: String?): Result<AdminUser> {
+        return try {
+            val json = JSONObject()
+            json.put("badgeType", badgeType ?: JSONObject.NULL)
+            val body = json.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            Result.success(ApiClient.adminApi.updateUserBadge(userId, body))
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this user's badge."))
         } catch (e: Exception) {
             Result.failure(Exception(ZrpErrors.NETWORK))
         }
@@ -357,6 +385,10 @@ class AdminRepository {
     // ─── Internal ops tooling (ADMIN only, server-side) ──────────────
     suspend fun getAnalytics(): Result<AdminAnalyticsResponse> = runCatching {
         ApiClient.adminApi.getAnalytics()
+    }
+
+    suspend fun getAnalyticsGeography(): Result<AdminAnalyticsGeographyResponse> = runCatching {
+        ApiClient.adminApi.getAnalyticsGeography()
     }
 
     // Every filter is passed straight through: null means "no filter"
@@ -600,6 +632,55 @@ class AdminRepository {
             Result.success(ApiClient.adminApi.updateUserPlan(userId, UpdateUserPlanRequest(plan)))
         } catch (e: HttpException) {
             Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to update this user's plan."))
+        } catch (e: Exception) {
+            Result.failure(Exception(ZrpErrors.NETWORK))
+        }
+    }
+
+    // ─── Subscriptions & Billing (ADMIN only, server-side) ───────────
+    suspend fun getSubscriptions(
+        search: String,
+        page: Int,
+        plan: String,
+        status: String,
+    ): Result<AdminSubscriptionsResponse> = runCatching {
+        ApiClient.adminApi.getSubscriptions(search, page, plan, status)
+    }
+
+    suspend fun getSubscriptionDetail(userId: String): Result<AdminSubscriptionDetailResponse> = runCatching {
+        ApiClient.adminApi.getSubscriptionDetail(userId)
+    }
+
+    suspend fun grantSubscription(userId: String, plan: String, billingInterval: String): Result<SubscriptionActionResponse> {
+        return try {
+            Result.success(ApiClient.adminApi.grantSubscription(userId, GrantSubscriptionRequest(plan, billingInterval)))
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to grant this subscription."))
+        } catch (e: Exception) {
+            Result.failure(Exception(ZrpErrors.NETWORK))
+        }
+    }
+
+    // 409s with "No active subscription to cancel" if another admin (or
+    // the user's own lapse) already claimed it - worth surfacing
+    // verbatim, hence zrpErrorMessage ahead of the fallback.
+    suspend fun cancelSubscription(userId: String, reason: String?): Result<SubscriptionActionResponse> {
+        return try {
+            Result.success(ApiClient.adminApi.cancelSubscription(userId, CancelSubscriptionRequest(reason)))
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to cancel this subscription."))
+        } catch (e: Exception) {
+            Result.failure(Exception(ZrpErrors.NETWORK))
+        }
+    }
+
+    // 409s with "No canceled subscription with remaining time to
+    // restore" - same reasoning as cancel above.
+    suspend fun restoreSubscription(userId: String): Result<SubscriptionActionResponse> {
+        return try {
+            Result.success(ApiClient.adminApi.restoreSubscription(userId))
+        } catch (e: HttpException) {
+            Result.failure(Exception(e.zrpErrorMessage() ?: "Failed to restore this subscription."))
         } catch (e: Exception) {
             Result.failure(Exception(ZrpErrors.NETWORK))
         }

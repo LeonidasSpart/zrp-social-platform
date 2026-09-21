@@ -2,6 +2,7 @@ package one.zrp.social.mobile.network
 
 import com.google.gson.JsonElement
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -532,6 +533,39 @@ data class AdminAnalyticsResponse(
     val engagement: AdminAnalyticsEngagement = AdminAnalyticsEngagement(),
 )
 
+// ─── Analytics geography/acquisition/platform/language breakdown
+// (GET /admin/analytics/geography) ─────────────────────────────────────
+// requireAdmin, the companion route to /admin/analytics above - see the
+// real route's own KDoc. Every bucket is a real Prisma groupBy; the
+// route itself folds any country/language cohort under
+// MIN_COHORT (3) users into a synthetic "OTHER" key before this ever
+// reaches the client (small-cohort privacy), so this screen only ever
+// displays whatever bucket keys the route already decided to name -
+// there is no unfolding logic here to keep in sync with the server's.
+// "UNKNOWN" is a real bucket key too (a null countryCode/languageCode/
+// signupSource/signupPlatform column), distinct from the synthetic
+// "OTHER" fold.
+data class AdminAnalyticsCountBucket(val key: String, val count: Int = 0)
+
+data class AdminAnalyticsGeographyBreakdown(
+    val byCountry: List<AdminAnalyticsCountBucket> = emptyList(),
+    val byRegion: List<AdminAnalyticsCountBucket> = emptyList(),
+    val newUsersByCountry: List<AdminAnalyticsCountBucket> = emptyList(),
+    val unknownCountryCount: Int = 0,
+)
+
+data class AdminAnalyticsAcquisitionBreakdown(val bySource: List<AdminAnalyticsCountBucket> = emptyList())
+data class AdminAnalyticsPlatformBreakdown(val byPlatform: List<AdminAnalyticsCountBucket> = emptyList())
+data class AdminAnalyticsLanguageBreakdown(val byLanguage: List<AdminAnalyticsCountBucket> = emptyList())
+
+data class AdminAnalyticsGeographyResponse(
+    val range: String = "30",
+    val geography: AdminAnalyticsGeographyBreakdown = AdminAnalyticsGeographyBreakdown(),
+    val acquisition: AdminAnalyticsAcquisitionBreakdown = AdminAnalyticsAcquisitionBreakdown(),
+    val platform: AdminAnalyticsPlatformBreakdown = AdminAnalyticsPlatformBreakdown(),
+    val language: AdminAnalyticsLanguageBreakdown = AdminAnalyticsLanguageBreakdown(),
+)
+
 // ─── Audit log (GET /admin/audit-log) ────────────────────────────────
 // requireAdmin. This route has no web page at all - the native screen
 // is the first UI for it on either platform. The entries are the raw
@@ -909,6 +943,161 @@ data class UpdateUserPlanRequest(val plan: String)
 // full admin user row - hence its own response type rather than reusing
 // AdminUser, whose non-null fields Gson would leave unset.
 data class AdminUserPlanResponse(val id: String, val username: String, val plan: String)
+
+// ─── Subscriptions & Billing (/admin/subscriptions) ───────────────────
+// requireAdmin - the authoritative record of a user's paid entitlement,
+// never just User.plan (see the real list route's own KDoc on why it
+// queries from User, not Subscription: a free user, or a paid user whose
+// entitlement predates this feature, may have no Subscription row at
+// all, and every filter/status value below has to account for that -
+// "NO_SUBSCRIPTION"/"PAID"/"FREE" are synthetic population values the
+// route computes, not real SubscriptionStatus enum members). Money
+// fields (SubscriptionPayment.amount) are Prisma Decimals but this route
+// answers through jsonWithDecimals, so they arrive as plain JSON numbers
+// like every other money-carrying admin route in this file.
+data class AdminSubscriptionUserSummary(
+    val id: String,
+    val username: String,
+    val email: String? = null,
+    val name: String? = null,
+    val plan: String? = null,
+    val badgeType: String? = null,
+    val avatarUrl: String? = null,
+)
+
+// The one payment a subscription row's own `payments` relation is
+// sliced to server-side (`take: 1`, newest first) - the list screen's
+// "last payment" column, not the full history (that's the detail
+// route's own `payments` list below).
+data class AdminSubscriptionLastPayment(
+    val id: String,
+    val plan: String,
+    val billingInterval: String,
+    val amount: Double = 0.0,
+    val currency: String = "USDC",
+    val paymentMethod: String,
+    val createdAt: String,
+)
+
+data class AdminSubscriptionRow(
+    // Null when this user has no Subscription record at all yet (see
+    // needsReconciliation below) - the row still represents a real user,
+    // just one this system has never tracked a period or payment for.
+    val id: String? = null,
+    val userId: String,
+    val user: AdminSubscriptionUserSummary,
+    val plan: String,
+    // A real SubscriptionStatus (ACTIVE/EXPIRED/CANCELED/PENDING) or one
+    // of the route's own synthetic values (NO_SUBSCRIPTION/FREE) when
+    // there's no Subscription row.
+    val status: String,
+    val billingInterval: String? = null,
+    val currentPeriodStart: String? = null,
+    val currentPeriodEnd: String? = null,
+    val nextBillingAt: String? = null,
+    val daysRemaining: Int? = null,
+    val canceledAt: String? = null,
+    val expiredAt: String? = null,
+    val lastPaymentAt: String? = null,
+    val reminderSentAt: String? = null,
+    val isLegacyBackfill: Boolean = false,
+    // Paid per the legacy User.plan field but with no Subscription row -
+    // the "needs backfill/reconciliation" bucket. This is the one flag
+    // this screen actually surfaces per row; the route's other KPI-only
+    // fields (revenueByPlan, the population counters) aren't ported here,
+    // since this is a search/filter/detail console, not a dashboard.
+    val needsReconciliation: Boolean = false,
+    val createdAt: String? = null,
+    val lastPayment: AdminSubscriptionLastPayment? = null,
+)
+
+data class AdminSubscriptionsPagination(val page: Int = 1, val limit: Int = 25, val total: Int = 0, val totalPages: Int = 1)
+
+data class AdminSubscriptionsResponse(
+    val subscriptions: List<AdminSubscriptionRow> = emptyList(),
+    val pagination: AdminSubscriptionsPagination = AdminSubscriptionsPagination(),
+)
+
+// ─── Subscriptions & Billing detail (/admin/subscriptions/{userId}) ──
+data class AdminSubscriptionDetailUser(
+    val id: String,
+    val username: String,
+    val email: String? = null,
+    val name: String? = null,
+    val plan: String? = null,
+    val badgeType: String? = null,
+    val createdAt: String? = null,
+)
+
+// The full payment history row - every SubscriptionPayment field the
+// model carries (see prisma/schema.prisma), unlike the list route's
+// single-most-recent AdminSubscriptionLastPayment above.
+data class AdminSubscriptionPayment(
+    val id: String,
+    val plan: String,
+    val billingInterval: String,
+    val amount: Double = 0.0,
+    val currency: String = "USDC",
+    // "crypto" | "admin_grant" | "legacy_backfill"
+    val paymentMethod: String,
+    val periodStart: String,
+    val periodEnd: String,
+    val createdAt: String,
+)
+
+// The raw Subscription row, spread verbatim by the route plus its own
+// computed daysRemaining - see AdminSubscriptionRow's own note on why a
+// user can have none of this at all. `events` (the full
+// SubscriptionEvent audit trail the route also includes) is
+// deliberately not declared here - Gson ignores fields it isn't told
+// about, and this screen doesn't surface a billing audit log.
+data class AdminSubscriptionDetail(
+    val id: String,
+    val userId: String,
+    val plan: String,
+    val status: String,
+    val billingInterval: String? = null,
+    val currentPeriodStart: String? = null,
+    val currentPeriodEnd: String? = null,
+    val nextBillingAt: String? = null,
+    val daysRemaining: Int? = null,
+    val canceledAt: String? = null,
+    val expiredAt: String? = null,
+    val lastPaymentAt: String? = null,
+    val reminderSentAt: String? = null,
+    val isLegacyBackfill: Boolean = false,
+    val payments: List<AdminSubscriptionPayment> = emptyList(),
+)
+
+// `subscription` is null exactly when this user has never had a
+// Subscription record created (needsReconciliation in the list row, or
+// a genuinely free user) - the detail screen's own empty state, not a
+// load failure.
+data class AdminSubscriptionDetailResponse(
+    val user: AdminSubscriptionDetailUser,
+    val subscription: AdminSubscriptionDetail? = null,
+)
+
+// plan is restricted to pro/business/enterprise server-side (never
+// free - see the real route's own VALID_PLANS check); billingInterval
+// is "monthly" or "yearly", defaulting to "monthly" if anything else is
+// sent, so this always sends one explicitly.
+data class GrantSubscriptionRequest(val plan: String, val billingInterval: String)
+
+// reason is genuinely optional here (unlike badgeType above): the route
+// reads an absent key as "no reason given" via `typeof body?.reason ===
+// "string" ? ... : undefined`, which is exactly what Gson omitting a
+// null field already produces - no RequestBody workaround needed.
+data class CancelSubscriptionRequest(val reason: String? = null)
+
+// The shape all three admin subscription actions (grant/cancel/restore)
+// answer with. periodEnd is only ever set by grant; cancel/restore
+// return it as null, which this client never reads for those two calls.
+data class SubscriptionActionResponse(
+    val success: Boolean = false,
+    val subscriptionId: String? = null,
+    val periodEnd: String? = null,
+)
 
 // ─── News Network (/admin/news-network) ──────────────────────────────
 // The automated editorial pipeline: RSS/source ingestion -> story
@@ -1330,6 +1519,21 @@ interface AdminApi {
     @PUT("admin/users/{id}")
     suspend fun updateUserRole(@Path("id") id: String, @Body request: UpdateUserRoleRequest): AdminUser
 
+    // The same PUT admin/users/{id} route as updateUserRole above, but for
+    // the badgeType field - a raw RequestBody rather than a Gson-backed
+    // @Body type, and that's load-bearing, not a stylistic choice: Gson
+    // omits null fields entirely (see ApiClient's default GsonConverterFactory,
+    // no serializeNulls()), so a Kotlin-null badgeType would never reach
+    // the wire as a real JSON `null` - it would simply be dropped, which
+    // the route reads as "field not present, leave badgeType untouched"
+    // (`if (badgeType !== undefined)`), not "clear the badge". Clearing a
+    // badge genuinely needs a literal JSON null on the wire, so
+    // AdminRepository.updateUserBadge() builds the body itself via
+    // org.json.JSONObject (JSONObject.NULL serialises to the bare `null`
+    // token), bypassing Gson for this one call.
+    @PUT("admin/users/{id}")
+    suspend fun updateUserBadge(@Path("id") id: String, @Body request: RequestBody): AdminUser
+
     @DELETE("admin/users/{id}")
     suspend fun deleteUser(@Path("id") id: String)
 
@@ -1459,6 +1663,13 @@ interface AdminApi {
     @GET("admin/analytics")
     suspend fun getAnalytics(): AdminAnalyticsResponse
 
+    // The companion breakdown - see AdminAnalyticsGeographyResponse's own
+    // KDoc. No range query here: this screen has no range selector (its
+    // core /admin/analytics call above doesn't either), so the route's
+    // own default window applies.
+    @GET("admin/analytics/geography")
+    suspend fun getAnalyticsGeography(): AdminAnalyticsGeographyResponse
+
     // Every filter here is nullable because this route reads an absent
     // parameter as "no filter" (`searchParams.get(...) || undefined`),
     // and Retrofit drops a null @Query instead of sending an empty one
@@ -1540,6 +1751,38 @@ interface AdminApi {
         @Path("id") id: String,
         @Body request: UpdateUserPlanRequest,
     ): AdminUserPlanResponse
+
+    // ─── Subscriptions & Billing (every route below is requireAdmin) ──
+    // search/plan/status are always sent explicitly ("" / "ALL" for "no
+    // filter", matching the route's own `params.get(...) || "ALL"`
+    // fallback), so nothing here is a nullable @Query.
+    @GET("admin/subscriptions")
+    suspend fun getSubscriptions(
+        @Query("search") search: String,
+        @Query("page") page: Int,
+        @Query("plan") plan: String,
+        @Query("status") status: String,
+    ): AdminSubscriptionsResponse
+
+    @GET("admin/subscriptions/{userId}")
+    suspend fun getSubscriptionDetail(@Path("userId") userId: String): AdminSubscriptionDetailResponse
+
+    @POST("admin/subscriptions/{userId}/grant")
+    suspend fun grantSubscription(
+        @Path("userId") userId: String,
+        @Body request: GrantSubscriptionRequest,
+    ): SubscriptionActionResponse
+
+    @POST("admin/subscriptions/{userId}/cancel")
+    suspend fun cancelSubscription(
+        @Path("userId") userId: String,
+        @Body request: CancelSubscriptionRequest,
+    ): SubscriptionActionResponse
+
+    // No body - the route takes nothing but the user id in the path,
+    // same shape as approveWithdrawal/rejectWithdrawal above.
+    @POST("admin/subscriptions/{userId}/restore")
+    suspend fun restoreSubscription(@Path("userId") userId: String): SubscriptionActionResponse
 
     // ─── News Network (the automated editorial pipeline) ─────────────
     // The five reads the console opens with, exactly as the website's

@@ -6,11 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +48,7 @@ import kotlin.math.floor
 import kotlin.math.max
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.AdminRepository
+import one.zrp.social.mobile.network.AdminAnalyticsCountBucket
 import one.zrp.social.mobile.network.AdminAnalyticsDaily
 import one.zrp.social.mobile.network.AdminAnalyticsTopPost
 import one.zrp.social.mobile.ui.theme.Spacing
@@ -175,6 +179,60 @@ fun AdminAnalyticsScreen(onBack: () -> Unit) {
                     } else {
                         analytics.topPosts.forEachIndexed { index, post ->
                             TopPostRow(rank = index + 1, post = post)
+                        }
+                    }
+
+                    // Ported from the same page.tsx's geography/acquisition/
+                    // platform/language section (GET
+                    // /admin/analytics/geography) - a separate call from
+                    // the core analytics above, so it's rendered only
+                    // once it comes back (see AdminAnalyticsUiState's own
+                    // note on why its failure is silent rather than
+                    // blanking this whole screen).
+                    state.geography?.let { geo ->
+                        AnalyticsSectionTitle(stringResource(R.string.admin_analytics_geography_title))
+
+                        AnalyticsBreakdownCard(title = stringResource(R.string.admin_analytics_users_by_country)) {
+                            BucketBarList(
+                                buckets = geo.geography.byCountry,
+                                labelFor = { countryBucketLabel(it) },
+                            )
+                            if (geo.geography.unknownCountryCount > 0) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.admin_analytics_unknown_geography_count,
+                                        geo.geography.unknownCountryCount,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = Spacing.sm),
+                                )
+                            }
+                        }
+
+                        AnalyticsBreakdownCard(title = stringResource(R.string.admin_analytics_new_users_by_country)) {
+                            BucketBarList(buckets = geo.geography.newUsersByCountry, labelFor = { countryBucketLabel(it) })
+                        }
+
+                        AnalyticsBreakdownCard(title = stringResource(R.string.admin_analytics_acquisition_title)) {
+                            BucketBarList(buckets = geo.acquisition.bySource, labelFor = { sourceBucketLabel(it) })
+                        }
+
+                        AnalyticsBreakdownCard(title = stringResource(R.string.admin_analytics_platform_title)) {
+                            BucketBarList(buckets = geo.platform.byPlatform, labelFor = { platformBucketLabel(it) })
+                        }
+
+                        AnalyticsBreakdownCard(title = stringResource(R.string.admin_analytics_language_title)) {
+                            BucketBarList(
+                                buckets = geo.language.byLanguage,
+                                labelFor = { key ->
+                                    if (key == "UNKNOWN") {
+                                        stringResource(R.string.admin_analytics_unknown_bucket)
+                                    } else {
+                                        key.uppercase(Locale.getDefault())
+                                    }
+                                },
+                            )
                         }
                     }
                 }
@@ -362,6 +420,124 @@ private fun TopPostRow(rank: Int, post: AdminAnalyticsTopPost) {
             color = ZrpRed,
         )
     }
+}
+
+/** A titled card wrapping one geography/acquisition/platform/language
+ * breakdown - the same surfaceContainerLow card shape every other
+ * section on this screen already uses. */
+@Composable
+private fun AnalyticsBreakdownCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Spacing.md)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(Spacing.md),
+    ) {
+        Text(text = title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+        Column(modifier = Modifier.padding(top = Spacing.sm)) { content() }
+    }
+}
+
+/**
+ * Ported from page.tsx's own BucketList: a label, a proportional bar
+ * and the raw count, capped at the top 10 buckets exactly like the
+ * website's own `buckets.slice(0, 10)` - the route itself already sorts
+ * every breakdown by count descending, so this never re-sorts.
+ */
+@Composable
+private fun BucketBarList(buckets: List<AdminAnalyticsCountBucket>, labelFor: @Composable (String) -> String) {
+    if (buckets.isEmpty()) {
+        Text(text = "-", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        return
+    }
+    val maxCount = (buckets.maxOfOrNull { it.count } ?: 1).coerceAtLeast(1)
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        buckets.take(10).forEach { bucket ->
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = labelFor(bucket.key),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.width(104.dp),
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(8.dp)
+                        .padding(horizontal = Spacing.xs)
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(fraction = (bucket.count.toFloat() / maxCount).coerceAtLeast(0.04f))
+                            .clip(RoundedCornerShape(50))
+                            .background(ZrpRed),
+                    )
+                }
+                Text(
+                    text = bucket.count.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.width(32.dp),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Matches page.tsx's own countryBucketLabel: "OTHER" (the route's
+ * small-cohort privacy fold) and "UNKNOWN" (a real null-countryCode
+ * bucket) are shown as plain English, unlocalized, exactly like the
+ * website's own hard-coded "Other"/"Unknown" there - not a gap unique to
+ * this port. A real ISO alpha-2 country code is localized through
+ * java.util.Locale's own bundled CLDR display-name data for the
+ * device's current locale (no bundled country-name dictionary needed
+ * here, unlike the website's i18n-iso-countries dependency), prefixed
+ * with a flag built from the regional-indicator Unicode trick, the same
+ * flags getCountryName/flagEmoji produce on web.
+ */
+private fun countryBucketLabel(key: String): String {
+    if (key == "OTHER") return "Other"
+    if (key == "UNKNOWN") return "Unknown"
+    if (key.length != 2 || !key.all { it.isLetter() }) return key
+    return try {
+        val locale = Locale.Builder().setRegion(key.uppercase(Locale.US)).build()
+        val name = locale.getDisplayCountry(Locale.getDefault())
+        if (name.isBlank() || name.equals(key, ignoreCase = true)) key else "${flagEmoji(key)} $name"
+    } catch (_: Exception) {
+        key
+    }
+}
+
+private fun flagEmoji(isoAlpha2: String): String {
+    if (isoAlpha2.length != 2) return ""
+    val regionalIndicatorBase = 0x1F1E6 - 'A'.code
+    return isoAlpha2.uppercase(Locale.US)
+        .map { c -> String(Character.toChars(regionalIndicatorBase + c.code)) }
+        .joinToString("")
+}
+
+@Composable
+private fun sourceBucketLabel(key: String): String = when (key) {
+    "REFERRAL" -> stringResource(R.string.admin_analytics_source_referral)
+    "CAMPAIGN" -> stringResource(R.string.admin_analytics_source_campaign)
+    "UNKNOWN" -> stringResource(R.string.admin_analytics_source_unknown)
+    else -> stringResource(R.string.admin_analytics_source_direct)
+}
+
+@Composable
+private fun platformBucketLabel(key: String): String = when (key) {
+    "android" -> stringResource(R.string.admin_analytics_platform_android)
+    "ios" -> stringResource(R.string.admin_analytics_platform_ios)
+    "UNKNOWN" -> stringResource(R.string.admin_analytics_platform_unknown)
+    else -> stringResource(R.string.admin_analytics_platform_web)
 }
 
 /**

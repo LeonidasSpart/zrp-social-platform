@@ -142,6 +142,10 @@ class LocalizationCompletenessTest {
         // Japanese ("露") and Korean ("19", the local content-rating
         // convention) - both of which already diverge from "E" here too.
         "E",
+        // OS/platform proper names (Subscriptions & Billing analytics'
+        // signup-platform breakdown) - never translated in any language,
+        // same reasoning as "PayPal" above.
+        "Android", "iOS",
     )
 
     /**
@@ -162,6 +166,9 @@ class LocalizationCompletenessTest {
      */
     private val perLanguageAllowlist: Map<String, Set<String>> = mapOf(
         "fr" to setOf(
+            // "Date" is the identical French word (same spelling, same
+            // meaning) - Subscriptions & Billing payment history.
+            "admin_subscription_detail_col_date",
             "communities_category_nature",
             "communities_create_description_label",
             "communities_create_hashtag_label",
@@ -271,6 +278,14 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "de" to setOf(
+            // "Plan"/"Status" are the identical German nouns (der Plan,
+            // der Status); "ZRP Team" uses "Team", an established German
+            // loanword (das Team) - same reasoning as "Bank" below.
+            // Subscriptions & Billing / badge editor.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_plan_label",
+            "admin_badge_team",
             // "Bank" is the same loanword in German banking terminology.
             "upgrade_request_bank_label",
             "communities_create_name_label",
@@ -377,6 +392,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "it" to setOf(
+            // "No" is the identical Italian word - Subscriptions & Billing
+            // detail's legacy-backfill flag.
+            "admin_subscription_detail_no",
             "communities_create_hashtag_label",
             "admin_ads_budget",
             "admin_analytics_daily_range",
@@ -503,6 +521,11 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "es" to setOf(
+            // "Plan"/"No" are the identical Spanish words - Subscriptions
+            // & Billing detail.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_no",
+            "admin_subscription_detail_plan_label",
             "communities_category_general",
             "communities_create_hashtag_label",
             "admin_analytics_daily_range",
@@ -641,6 +664,11 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "tr" to setOf(
+            // "Plan" is the identical Turkish loanword - Subscriptions &
+            // Billing detail, same reasoning as the existing
+            // admin_plan_pro/business/enterprise entries below.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_plan_label",
             "communities_create_hashtag_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
@@ -680,6 +708,12 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "id" to setOf(
+            // "Status"/"Interval" are identical Indonesian loanwords -
+            // Subscriptions & Billing detail, same reasoning as
+            // "Email"/"Bio"/"Global" already established for this language.
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_field_interval",
+            "admin_subscription_detail_interval_label",
             // "Bank" is the same loanword in Indonesian banking terminology.
             "upgrade_request_bank_label",
             "action_edit",
@@ -890,6 +924,11 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "nl" to setOf(
+            // "Status"/"Interval" are identical Dutch loanwords -
+            // Subscriptions & Billing detail.
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_field_interval",
+            "admin_subscription_detail_interval_label",
             // "Bank" is the same loanword in Dutch banking terminology.
             "upgrade_request_bank_label",
             "action_repost",
@@ -1001,6 +1040,11 @@ class LocalizationCompletenessTest {
             "trust_stat_posts",
         ),
         "pl" to setOf(
+            // "Plan"/"Status" are identical Polish loanwords -
+            // Subscriptions & Billing detail.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_plan_label",
             // "Bank" is the same loanword in Polish banking terminology.
             "upgrade_request_bank_label",
             "admin_analytics_daily_range",
@@ -1028,6 +1072,13 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "ro" to setOf(
+            // "Plan"/"Status"/"Interval" are identical Romanian cognates -
+            // Subscriptions & Billing detail.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_field_interval",
+            "admin_subscription_detail_plan_label",
+            "admin_subscription_detail_interval_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_news_feedback_prefix",
@@ -1074,6 +1125,10 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "cs" to setOf(
+            // "Interval" is the identical Czech word - Subscriptions &
+            // Billing detail.
+            "admin_subscription_detail_field_interval",
+            "admin_subscription_detail_interval_label",
             "admin_analytics_post_counts",
             "admin_news_network_publication_meta",
             "admin_news_network_verify_failed",
@@ -1114,6 +1169,11 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "sv" to setOf(
+            // "Plan"/"Status" are identical Swedish loanwords -
+            // Subscriptions & Billing detail.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_plan_label",
             // "Bank" is the same loanword in Swedish banking terminology.
             "upgrade_request_bank_label",
             "admin_ads_budget",
@@ -1155,6 +1215,13 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "da" to setOf(
+            // "Plan"/"Status"/"Interval" are identical Danish loanwords -
+            // Subscriptions & Billing detail.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_field_interval",
+            "admin_subscription_detail_plan_label",
+            "admin_subscription_detail_interval_label",
             // "Bank" and "Reference" are the same loanwords in Danish
             // banking terminology.
             "upgrade_request_bank_label",
@@ -1222,6 +1289,13 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "hr" to setOf(
+            // "Plan"/"Status"/"Interval" are identical Croatian loanwords -
+            // Subscriptions & Billing detail.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_field_interval",
+            "admin_subscription_detail_plan_label",
+            "admin_subscription_detail_interval_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_news_network_pilot",
@@ -1286,6 +1360,9 @@ class LocalizationCompletenessTest {
         // identically to English) plus the format-only/brand strings
         // already allowlisted the same way for every other language here.
         "no" to setOf(
+            // "Status" - Subscriptions & Billing detail, same established
+            // Bokmål loanword as the rest of this list's own comment above.
+            "admin_subscription_detail_field_status",
             "action_repost",
             "admin_analytics_post_counts",
             "admin_news_network_pilot",
@@ -1326,6 +1403,11 @@ class LocalizationCompletenessTest {
             "upgrade_request_bank_label",
         ),
         "sr" to setOf(
+            // "Status"/"Interval" are identical Serbian loanwords -
+            // Subscriptions & Billing detail.
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_field_interval",
+            "admin_subscription_detail_interval_label",
             "nav_shorts",
             "shorts_title",
             "music_title",
@@ -1348,6 +1430,13 @@ class LocalizationCompletenessTest {
             "admin_news_network_publication_meta",
         ),
         "bs" to setOf(
+            // "Plan"/"Status"/"Interval" are identical Bosnian loanwords -
+            // Subscriptions & Billing detail.
+            "admin_subscription_detail_field_plan",
+            "admin_subscription_detail_field_status",
+            "admin_subscription_detail_field_interval",
+            "admin_subscription_detail_plan_label",
+            "admin_subscription_detail_interval_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_news_network_pilot",

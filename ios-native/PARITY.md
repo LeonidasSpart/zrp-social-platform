@@ -565,11 +565,140 @@ not be until they exist in ZRP:
 
 ---
 
+### Admin Console (staff/moderator, phase 1)
+
+**No longer "none" - iOS now ships the content-moderation core, matching
+what `requireStaff` (ADMIN or MODERATOR) already gates on web.** The
+entry point (`Admin Console`, `lock.shield`) sits in the navigation
+menu's `More` section, hidden for anyone whose session `role` is not
+`MODERATOR`/`ADMIN` (`CurrentUser.isStaff`, checked in
+`ZrpMenuView.visibleSections`). That check is a UI convenience only: every
+one of the four routes below independently re-asks `requireStaff`/
+`requireAdmin` from the database on every request, exactly as the web
+admin console does, and a 401/403 here is handled the same way as
+anywhere else in the app (session-expired handling for 401; the server's
+own message for 403).
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Dashboard | `GET /api/admin/stats`: STAFF | ✅ | ✅ | ✅ the same seven stat cards (users, posts, comments, reports, pending reports, admins, moderators) as a landing screen, plus four rows linking to Users/Reports/Appeals/Posts. A failed stat-grid load shows nothing rather than an error banner - it is a convenience summary, not this screen's job | IMPLEMENTED |
+| Users: search + filter | `GET /api/admin/users?search=&page=&role=&badge=&status=`: STAFF | ✅ | ✅ | ✅ debounced search plus role/badge/status filters, each a real server-side query parameter (not a client-side re-filter of one page), with the same search-only stat cards (total/active/banned/admins/mods) the web page keeps stable while the table filters move | IMPLEMENTED |
+| Users: change role | `PUT /api/admin/users/{id}` `{role}`: **ADMIN only** | ✅ | ✅ | ✅ USER/MODERATOR/ADMIN picker, matching `VALID_ROLES`. `JOURNALIST` is **not** offered here, exactly as web withholds it: a user already carrying that role sees a read-only badge and a note pointing at the (web-only) Journalists admin page, since granting it needs a `JournalistProfile` this generic endpoint does not create | IMPLEMENTED |
+| Users: change badge | `PUT /api/admin/users/{id}` `{badgeType}`: **ADMIN only** | ✅ | ✅ | ✅ verified/organization/government/team/journalist, or none. Clearing a badge sends a literal JSON `null`, not an omitted field - Swift's default `Encodable` synthesis would silently omit it instead, which the route reads as "leave it unchanged", so `AdminRepository.BadgeRequest` encodes it by hand (see its own doc comment, and `AdminRepositoryTests`) | IMPLEMENTED |
+| Users: ban / unban | `POST /api/admin/users/{id}/ban`: STAFF | ✅ | ✅ | ✅ toggle, confirmed with a dialog explaining it takes effect immediately and on every device | IMPLEMENTED |
+| Users: delete | `DELETE /api/admin/users/{id}`: **ADMIN only** | ✅ | ✅ | ✅ confirmed with explicit "irreversible, cascades to everything they own" copy; the route itself uses the same `deleteUserAccountAndFiles` helper as self-service account deletion | IMPLEMENTED |
+| Reports: review queue | `GET /api/admin/reports?status=&page=`: STAFF | ✅ | ✅ | ✅ status filter (pending/reviewed/dismissed/actioned/all), defaulting to pending like web. Every one of the report's seven polymorphic targets is handled (post, comment, listing, PLAY challenge, opportunity, HELP campaign, bare-profile) - `AdminReportTarget` in `AdminApi.swift`, covered by `AdminReportTargetTests` | IMPLEMENTED |
+| Reports: dismiss / mark reviewed / record an action | `PUT /api/admin/reports/{id}` `{status, actionType?, actionNote?}`: STAFF | ✅ | ✅ | ✅ **matches web's real behaviour exactly**: `actionType` (Delete post / Warn user / Ban user / Mute user / Delete comment / Other) is a **descriptive label only** - selecting "Ban user" here does not ban anyone. Carrying out the action is a separate trip to Users (ban/delete) or Posts (delete), same as on web; this screen does not invent enforcement the backend doesn't have | IMPLEMENTED |
+| Reports: delete | `DELETE /api/admin/reports/{id}`: **ADMIN only** | ✅ | ✅ | ✅ offered only once a report has left `pending`, matching the route's own 409 for a still-pending report and for one with an appeal on file - both shown as the server's own message, not pre-guessed client-side | IMPLEMENTED |
+| Appeals: review queue | `GET /api/admin/appeals?status=&page=`: STAFF | ✅ | ✅ | ✅ status filter (pending/upheld/overturned/all), showing the original report's reason and action alongside each appeal | IMPLEMENTED |
+| Appeals: resolve | `PUT /api/admin/appeals/{id}` `{status, resolutionNote}`: STAFF | ✅ | ✅ | ✅ uphold/overturn, with a resolution note this screen makes **required** even though the route itself accepts an empty one - a decision with no stated reason is not a bar this app sets for itself. Explains, for `BAN_USER` specifically, that overturning unbans the user as part of the same call; for every other action type, that there is no automated undo (matches `AdminRepository.resolveAppeal`'s own comment on why) | IMPLEMENTED |
+| Posts: search | `GET /api/admin/posts?search=&page=`: STAFF | ✅ | ✅ | ✅ debounced content search, with author, type, counts and a preview of the content itself | IMPLEMENTED |
+| Posts: delete | `DELETE /api/admin/posts/{id}`: STAFF | ✅ | ✅ | ✅ confirmed, irreversible; the route itself cleans up now-orphaned UploadThing media, same as the user-facing delete path | IMPLEMENTED |
+
+Phase 1 covered the four-screen content-moderation core. **Phase 2a below adds nine more sections** - every review queue and payout queue the web admin console has, plus the three staff-reviewed profile types (journalists/ambassadors/music artists). Phase 2b (Support Tickets, Analytics, Audit Log, Charity Disbursements, Subscriptions/Billing, Storage cleanup) and phase 2c (News CMS, News Network automation) are tracked separately below, in that same order, so this document reflects exactly what exists at whatever point work on this pass stops.
+
+### Admin Console (phase 2a): review queues, payouts, people
+
+Three of these four screens (Marketplace, Opportunity, HELP campaigns) are
+genuinely one screen with different fields - `schema.prisma`'s own
+comments call HELP's moderation shape a mirror of Listing's, which mirrors
+AdCampaign's. iOS shares one generic implementation
+(`AdminReviewQueueView`/`AdminReviewQueueViewModel<Item>` in
+`Features/Admin/AdminReviewQueueView.swift`) across all three rather than
+three near-copies; Ads keeps its own screen because it has extra actions
+(suspend/resume/cancel) and a real lifecycle gate
+(`src/lib/ads/lifecycle.ts`). Creator and HELP withdrawals share a second
+generic implementation (`AdminWithdrawalQueueView`) the same way.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Ads: review queue | `GET /api/admin/ads?status=`: STAFF | ✅ | ✅ | ✅ full `AdCampaignStatus` filter set, campaign name/advertiser/bid/budget spent, the underlying ad post's own content | IMPLEMENTED |
+| Ads: approve/reject/suspend/resume/cancel/note | `PUT /api/admin/ads/{id}` `{action, rejectionReason?, adminNote?}`: STAFF | ✅ | ✅ | ✅ `AdminAdCampaign.availableActions` mirrors `canTransition("staff", ...)` client-side so only legal actions show for the current status - a UX guard only, the route re-validates regardless. The internal note is editable independently via its own "Save note" action, matching the web queue's separate note-save control | IMPLEMENTED |
+| Marketplace: review queue | `GET /api/admin/marketplace?status=&page=`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Marketplace: approve/reject/remove | `PUT /api/admin/marketplace/{id}` `{action, rejectionReason?}`: STAFF | ✅ | ✅ | ✅ approve/reject only from PENDING_REVIEW, remove only from ACTIVE, matching each route's own gate | IMPLEMENTED |
+| Opportunity: review queue | `GET /api/admin/opportunity?status=&page=`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Opportunity: approve/reject/remove | `PUT /api/admin/opportunity/{id}` `{action, rejectionReason?}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| HELP campaigns: review queue | `GET /api/admin/help?status=&page=`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| HELP campaigns: approve/reject/remove | `PUT /api/admin/help/{id}` `{action, rejectionReason?}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Creator withdrawals: queue | `GET /api/admin/withdrawals?status=`: **ADMIN only** | ✅ | ✅ | ✅ unpaginated (the route itself isn't), defaults to PENDING | IMPLEMENTED |
+| Creator withdrawals: approve | `POST /api/admin/withdrawals/{id}/approve`: **ADMIN only** | ✅ | ✅ | ✅ **the confirmation copy states explicitly that this sends a real on-chain USDC transfer from the platform wallet and cannot be recalled** - never undersold as a generic "approve?". The route's rare ambiguous-outcome (202) response is shown as an information alert distinct from an error, matching what the route itself is actually saying ("do not resubmit", not "this failed") | IMPLEMENTED |
+| Creator withdrawals: reject | `POST /api/admin/withdrawals/{id}/reject`: **ADMIN only** | ✅ | ✅ | ✅ confirmed; refunds the reserved amount to the creator's balance | IMPLEMENTED |
+| HELP withdrawals: queue + approve/reject | `GET /api/admin/help-withdrawals`, `POST .../approve`, `POST .../reject`: **ADMIN only** | ✅ | ✅ | ✅ same shape and same explicit on-chain confirmation copy as creator withdrawals | IMPLEMENTED |
+| Journalists: review queue + search | `GET /api/admin/journalists?status=&search=`: STAFF | ✅ | ✅ | ✅ status filter, debounced search, the PENDING/VERIFIED/REJECTED/SUSPENDED stat counts the route computes | IMPLEMENTED |
+| Journalists: direct grant | `POST /api/admin/journalists {username}`: STAFF | ✅ | ✅ | ✅ by username; the route's own "already verified"/"user not found" messages are shown as given | IMPLEMENTED |
+| Journalists: approve/reject/suspend/restore/remove | `PATCH /api/admin/journalists/{id}` `{action, reason?}`: STAFF | ✅ | ✅ | ✅ `AdminJournalistProfile.availableActions` mirrors the route's own required-status gate per action | IMPLEMENTED |
+| Music artists: list + search | `GET /api/admin/music/artists?status=&q=&page=`: STAFF | ✅ | ✅ | ✅ verified/unverified/all filter, track and follower counts | IMPLEMENTED |
+| Music artists: verify/unverify | `POST /api/admin/music/artists/{id}/verify {verified}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Music artists: delete | `DELETE /api/admin/music/artists/{id}`: STAFF | ✅ | ✅ | ✅ confirmed with copy naming the real cascade - every track and album, not just the profile - matching the route's own deliberately destructive design | IMPLEMENTED |
+| Ambassadors: review queue + search | `GET /api/admin/ambassadors?status=&search=`: STAFF | ✅ | ✅ | ✅ country/city/languages/audience size/motivation shown in full | IMPLEMENTED |
+| Ambassadors: approve/reject/suspend/restore | `PATCH /api/admin/ambassadors/{id}` `{action, reason?}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+
+### Admin Console (phase 2b): Support, Analytics, Audit log, Charity, Billing, Storage
+
+Every route in this section is `requireAdmin` (full admin only), not
+`requireStaff` - a moderator sees none of these six.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Support tickets: list + search + stats | `GET /api/admin/support/tickets?status=&search=&page=`, `GET .../stats`: ADMIN | ✅ | ✅ | ✅ status filter, debounced search, the open/in-progress/awaiting-reply/resolved/total stat pills | IMPLEMENTED |
+| Support tickets: thread, status, reply | `GET/PUT /api/admin/support/tickets/{id}`, `POST .../reply {message, isInternal}`: ADMIN | ✅ | ✅ | ✅ full thread with internal-note replies visibly marked, status picker, reply composer with an internal-note toggle | IMPLEMENTED |
+| Support tickets: resolve | `POST /api/admin/support/tickets/{id}/resolve {resolution}`: ADMIN | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Support tickets: delete | `DELETE /api/admin/support/tickets/{id}`: ADMIN | ✅ | ✅ | ✅ confirmed; replies cascade with it | IMPLEMENTED |
+| Support tickets: assign to a staff member | `PUT .../{id}` `{assignedTo}`: ADMIN | ✅ | ✅ | ⬜ **not built** - would need a staff-member picker this pass didn't build; the field is read (assignedAdmin shows if already set) but not writable from iOS | PARTIAL |
+| Analytics: summary, engagement, top posts | `GET /api/admin/analytics?range=`: ADMIN | ✅ | ✅ | ✅ range picker (7d/30d/90d/all), the five headline counts, avg likes/comments per post, top 10 posts by engagement with each one's own counts | IMPLEMENTED |
+| Analytics: daily time-series chart | same route, `daily[]` | ✅ chart | ✅ chart | ⬜ **not rendered** - the route's per-day series is decoded (`AdminAnalyticsDailyPoint`) but this pass didn't build a chart for it; the summary/engagement/top-posts numbers above are real and complete | PARTIAL |
+| Analytics: geography/acquisition/platform/language breakdown | `GET /api/admin/analytics/geography` | ⬜ (Android-only) | ✅ | ⬜ out of scope for this pass, same as Android's own scope note - not blocking | n/a |
+| Audit log: list + filter | `GET /api/admin/audit-log?action=&targetType=&targetId=&cursor=`: ADMIN | ⬜ **no web page exists** | ✅ | ✅ **the second UI for this route, ever** - action filter (debounced), cursor pagination, a detail sheet rendering the free-form `metadata` JSON as key/value lines via a small `AdminJSONValue` decoder rather than assuming a shape, since a dozen-plus distinct `action` strings across this whole console each carry different metadata | IMPLEMENTED |
+| Charity disbursements: list + record | `GET/POST /api/admin/charity-disbursements`: ADMIN | ⬜ **no web page exists** | ✅ | ✅ full create form (beneficiary, cause, amount, currency, date, note, proof URL) matching the route's own validation; every record becomes part of the public charity ledger this app's own `charityTransparency` screen reads | IMPLEMENTED |
+| Subscriptions: list + overview + search | `GET /api/admin/subscriptions?...`: ADMIN | ✅ | ✅ | ✅ **deliberately narrower** - search plus plan and status filters, and the paid/needs-reconciliation overview numbers. Web/Android also filter by billing interval, payment method and "expiring within N days", and offer sort order; not built here - a phone-side billing lookup is usually "find this one user" or "see this one population," which the narrower filter set already covers | PARTIAL (deliberately narrower) |
+| Subscriptions: per-user detail | `GET /api/admin/subscriptions/{userId}`: ADMIN | ✅ | ✅ | ✅ current subscription, payment history. Legacy `PaymentRequest`/`UpgradeRequest` history and the subscription's `SubscriptionEvent` audit trail (both read by the web page for full context) are **not shown** - the current state and real payment history cover what a grant/cancel/restore decision needs | PARTIAL (deliberately narrower) |
+| Subscriptions: grant/extend | `POST /api/admin/subscriptions/{userId}/grant {plan, billingInterval}`: ADMIN | ✅ | ✅ | ✅ pro/business/enterprise only, matching `VALID_PLANS.filter(≠ free)` | IMPLEMENTED |
+| Subscriptions: cancel | `POST /api/admin/subscriptions/{userId}/cancel {reason?}`: ADMIN | ✅ | ✅ | ✅ confirmed, only offered on an ACTIVE subscription | IMPLEMENTED |
+| Subscriptions: restore | `POST /api/admin/subscriptions/{userId}/restore`: ADMIN | ✅ | ✅ | ✅ only offered on a CANCELED subscription | IMPLEMENTED |
+| Storage cleanup: scan (dry run) | `GET /api/admin/cleanup-uploadthing`: ADMIN | ✅ | ✅ | ✅ file/size counts, the held-for-review (< 24h) bucket kept visibly separate from what's actually eligible | IMPLEMENTED |
+| Storage cleanup: delete orphans | `POST /api/admin/cleanup-uploadthing`: ADMIN | ✅ | ✅ | ✅ **irreversible** - confirmation copy says so plainly and names what's held back (files under 24h old); re-scans and shows the real "deleted" count from the route's own response afterward rather than assuming the prior scan's number still holds | IMPLEMENTED |
+
+### Admin Console (phase 2c): News CMS, News Network automation
+
+This completes the admin console pass: every section from the original
+17-item plan is now built, several deliberately narrower than web where
+noted below.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| News CMS: list + search + filter | `GET /api/admin/news?status=&category=&search=&page=`: STAFF | ✅ | ✅ | ✅ debounced search, status filter (category filter not exposed as its own control, but search matches title/slug/excerpt/content same as the route) | IMPLEMENTED |
+| News CMS: create | `POST /api/admin/news`: STAFF | ✅ | ✅ | ✅ full editor form (title, auto-derived slug you can still hand-edit, excerpt, body, category, status, featured, cover image, source name/URL, review note). **No author-search picker**: the author field is a raw user-id text field defaulting to the signed-in staff member's own id - see the field's own footer copy | PARTIAL (deliberately narrower) |
+| News CMS: edit | `PUT /api/admin/news/{id}` (aliased to `PATCH` server-side): STAFF | ✅ | ✅ | ✅ same form, pre-filled; approving/rejecting a journalist's PENDING_REVIEW submission is two quick buttons that just set `status` and save, exactly as it is server-side - not a separate action | IMPLEMENTED |
+| News CMS: delete | `DELETE /api/admin/news/{id}`: STAFF | ✅ | ✅ | ✅ confirmed, irreversible | IMPLEMENTED |
+| News Network: status overview | `GET /api/admin/news-network/status`: STAFF | ✅ | ✅ | ✅ paused/running state, next cycle time, feed/publication/story counts, duplicates prevented today, source health breakdown (healthy/warning/failed/disabled) | IMPLEMENTED |
+| News Network: pause / resume | `PATCH /api/admin/news-network/settings {paused}`: **ADMIN only** | ✅ | ✅ | ✅ confirmed - explained as the platform-wide kill switch, taking effect on the next cycle | IMPLEMENTED |
+| News Network: run a cycle now | `POST /api/admin/news-network/run`: **ADMIN only** | ✅ | ✅ | ✅ confirmed - copy states this can publish real posts immediately; the route's own rate limit (a few per hour) is the real backstop | IMPLEMENTED |
+| News Network: feed roster (list/enable/disable/cadence/provision) | `GET/PATCH /api/admin/news-network/feeds`, `POST .../feeds/provision` | ✅ | ✅ | ⬜ **not built** | MISSING |
+| News Network: sources (list/create/seed/verify/edit/delete) | `GET/POST /api/admin/news-network/sources`, `.../seed`, `.../{id}/verify`, `PATCH/DELETE .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
+| News Network: editorial story queue (reject/correct) | `GET /api/admin/news-network/stories`, `PATCH .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
+| News Network: publications (list/unpublish) | `GET /api/admin/news-network/publications`, `DELETE .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
+
+**News Network is deliberately the overview/control-panel slice only**
+(status, pause/resume, manual run) - the four sub-areas above (Feeds,
+Sources, the editorial Stories queue, Publications) are real, separate
+management surfaces this pass did not build, given this was explicitly
+flagged as the largest remaining section and the last one in the build
+order. The overview screen says so in its own footer, not just here.
+
+Payments (manual crypto verification) and Upgrade Requests are legacy
+admin tools for the pre-Solana manual payment flow
+(`UpgradeRequest`/`PaymentRequest` in `schema.prisma`) and were not part
+of this pass's 17-item plan; they remain web-only.
+
+---
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
 | --- | --- |
-| **Admin console** (`/api/admin/**`, 40+ routes) | **Web-only for v1, by decision, not an oversight.** Android ships four admin screens; iOS ships none. Every admin route is independently role-gated server-side, so an iOS app without an admin surface loses no security and gains none: hiding a screen is not what protects those routes, and building one would not weaken them either. The reason to leave it out is product, not safety: a staff console is a desk-and-keyboard tool, and the four screens Android has cover a fraction of the twenty the website offers. Anyone doing moderation work should be on the web console that has all of it. Revisit only if staff genuinely need to act from a phone; if so, build it against the same server-role gate and never surface an admin control on a client check alone. |
+| **Admin console: News Network's Feeds/Sources/editorial-queue/Publications sub-areas** | Not built in this pass - see the **Admin Console (phase 2c)** section above. The overview/control-panel (status, pause/resume, manual run) is built; these four management surfaces are not. |
+| **Admin console: Payments (manual crypto verification), Upgrade Requests** | Legacy admin tools for the pre-Solana manual payment flow (`UpgradeRequest`/`PaymentRequest` in `schema.prisma`). Not part of this pass's scope; web-only for now. |
+| **Admin console: Support ticket assignment** (`PUT .../tickets/{id}` `{assignedTo}`) | Would need a staff-member picker this pass didn't build. The field is read (an already-assigned admin shows) but not writable from iOS. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | **Ads**: advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend*: money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** (see the Ads section below). |
 | **Creator Studio**: earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |

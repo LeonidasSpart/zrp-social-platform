@@ -52,6 +52,22 @@ struct SessionUser: Decodable, Equatable {
     let onboardingCompleted: Bool?
 }
 
+/// `USER`/`MODERATOR`/`ADMIN`/`JOURNALIST`, exactly as `prisma.schema`'s
+/// `Role` enum stores it. Kept as a raw string rather than a typed enum -
+/// `CurrentUser.role` is read in exactly one place, `isStaff` below, and a
+/// closed enum would need a case added (and every switch revisited) for
+/// any future role this app has no other use for.
+extension CurrentUser {
+    /// Whether this account may see the admin console entry point.
+    ///
+    /// **Not a security boundary.** Every `/api/admin/**` route re-checks
+    /// the role from the database on the server (`requireStaff`/
+    /// `requireAdmin` in `src/lib/admin.ts`); this only decides whether
+    /// `ZrpMenuView` shows the row at all. A stale or tampered client
+    /// value here changes nothing about what the server will accept.
+    var isStaff: Bool { role == "ADMIN" || role == "MODERATOR" }
+}
+
 /// The signed-in identity the app carries around.
 ///
 /// Deliberately built from either source - the login response or a
@@ -70,6 +86,12 @@ struct CurrentUser: Equatable {
     /// a permission check - every limit is enforced server-side.
     let plan: String?
 
+    /// `USER`/`MODERATOR`/`ADMIN`/`JOURNALIST`. Used only to decide
+    /// whether to show the admin console entry point (`isStaff` below) -
+    /// see that property's own doc comment for why it is not, and cannot
+    /// be, a permission check.
+    let role: String?
+
     var displayName: String { name?.isEmpty == false ? name! : username }
 
     init(from user: MobileUser) {
@@ -80,6 +102,7 @@ struct CurrentUser: Equatable {
         badgeType = user.badgeType
         onboardingCompleted = user.onboardingCompleted
         plan = user.plan
+        role = user.role
     }
 
     /// Returns `nil` when the session carries no identity - either signed
@@ -94,6 +117,7 @@ struct CurrentUser: Equatable {
         avatarUrl = user.avatarUrl
         badgeType = user.badgeType
         plan = user.plan
+        role = user.role
         // NextAuth's session callback carries this, but treat an absent
         // value as "already onboarded" rather than forcing a restored
         // session back through onboarding on a field that simply was not

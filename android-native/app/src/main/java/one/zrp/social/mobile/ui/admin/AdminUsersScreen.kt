@@ -65,6 +65,17 @@ private val ROLE_FILTERS = listOf("ALL", "USER", "MODERATOR", "ADMIN")
 private val STATUS_FILTERS = listOf("ALL", "ACTIVE", "BANNED")
 private val ASSIGNABLE_ROLES = listOf("USER", "MODERATOR", "ADMIN")
 
+// Matches web's own BADGE_OPTIONS in src/app/admin/users/page.tsx
+// exactly: null/"" (clear) plus the four badge types this generic route
+// is meant to be used for. "journalist" is a real, server-accepted
+// badgeType value too (VALID_BADGE_TYPES on the route includes it), but
+// the website's own dropdown deliberately never offers it here - a
+// journalist badge is only ever meant to be set together with a
+// JournalistProfile row via the dedicated Journalists grant flow (see
+// the route's own comment), so this list matches the website's actual
+// selectable options, not just what the route would technically accept.
+private val ASSIGNABLE_BADGES: List<String?> = listOf(null, "verified", "organization", "government", "team")
+
 /**
  * Ported from src/app/admin/users/page.tsx. isAdmin gates the
  * role-change, plan-change and delete controls - see
@@ -156,6 +167,7 @@ fun AdminUsersScreen(isAdmin: Boolean, onBack: () -> Unit, onOpenProfile: (Strin
                         onToggleBan = { viewModel.toggleBan(user.id) },
                         onChangeRole = { role -> viewModel.changeRole(user.id, role) },
                         onChangePlan = { plan -> viewModel.requestPlanChange(user.id, plan) },
+                        onChangeBadge = { badgeType -> viewModel.changeBadge(user.id, badgeType) },
                         onDelete = { viewModel.requestDelete(user.id) },
                         onOpenProfile = onOpenProfile,
                     )
@@ -242,6 +254,19 @@ private fun roleFilterLabel(role: String): String = when (role) {
 }
 
 @Composable
+private fun adminBadgeLabel(badgeType: String?): String = when (badgeType) {
+    "verified" -> stringResource(R.string.admin_badge_verified)
+    "organization" -> stringResource(R.string.admin_badge_organization)
+    "government" -> stringResource(R.string.admin_badge_government)
+    "team" -> stringResource(R.string.admin_badge_team)
+    null -> stringResource(R.string.admin_badge_none)
+    // A badgeType this dropdown doesn't offer (journalist, editorial, or
+    // one a future build doesn't know yet) - showing the raw value beats
+    // showing nothing, matching adminPlanLabel's own fallback.
+    else -> badgeType
+}
+
+@Composable
 private fun statusFilterLabel(status: String): String = when (status) {
     "ACTIVE" -> stringResource(R.string.admin_users_status_active)
     "BANNED" -> stringResource(R.string.admin_users_status_banned)
@@ -256,11 +281,13 @@ private fun UserRow(
     onToggleBan: () -> Unit,
     onChangeRole: (String) -> Unit,
     onChangePlan: (String) -> Unit,
+    onChangeBadge: (String?) -> Unit,
     onDelete: () -> Unit,
     onOpenProfile: (String) -> Unit,
 ) {
     var roleMenuOpen by remember { mutableStateOf(false) }
     var planMenuOpen by remember { mutableStateOf(false) }
+    var badgeMenuOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -357,6 +384,34 @@ private fun UserRow(
                             DropdownMenuItem(
                                 text = { Text(adminPlanLabel(plan)) },
                                 onClick = { planMenuOpen = false; onChangePlan(plan) },
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Same dropdown pattern again, against PUT /admin/users/{id}
+            // with a badgeType field - ADMIN-only server-side (see
+            // AdminApi.updateUserBadge's own KDoc), so it's shown on the
+            // same isAdmin gate as role/plan.
+            Box(modifier = Modifier.padding(start = Spacing.sm)) {
+                Text(
+                    text = adminBadgeLabel(user.badgeType),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .let { if (isAdmin) it.clickable { badgeMenuOpen = true } else it }
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                )
+                if (isAdmin) {
+                    DropdownMenu(expanded = badgeMenuOpen, onDismissRequest = { badgeMenuOpen = false }) {
+                        ASSIGNABLE_BADGES.forEach { badgeType ->
+                            DropdownMenuItem(
+                                text = { Text(adminBadgeLabel(badgeType)) },
+                                onClick = { badgeMenuOpen = false; onChangeBadge(badgeType) },
                             )
                         }
                     }

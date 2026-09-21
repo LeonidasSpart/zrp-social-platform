@@ -12,10 +12,21 @@ struct MenuEntry: Identifiable, Hashable {
     /// of a stack, not something pushed onto one.
     let route: Route?
     let tab: MainTab?
-    let titleKey: L10nKey
+    let titleKey: L10nKey?
+    /// A literal title, used instead of `titleKey` for the one row (Admin
+    /// Console) that has no entry in ZRP's shared translation dictionary -
+    /// see `ZrpMenu`'s own doc comment for why that row is English-only.
+    /// Exactly one of `titleKey`/`titleVerbatim` is non-nil.
+    let titleVerbatim: String?
     let systemImage: String
 
-    var id: String { "\(titleKey.rawValue)" }
+    var id: String { titleKey?.rawValue ?? titleVerbatim ?? systemImage }
+
+    /// The row's rendered title. Equivalent to `Text(titleKey)` for a
+    /// key-based entry - `Text(_:L10nKey)` itself resolves to
+    /// `Text(verbatim: L10n.string(key))`, so routing every entry through
+    /// this one property changes nothing about what a localized row shows.
+    var title: String { titleKey.map(L10n.string) ?? titleVerbatim ?? "" }
 
     init(
         _ titleKey: L10nKey,
@@ -24,6 +35,21 @@ struct MenuEntry: Identifiable, Hashable {
         tab: MainTab? = nil
     ) {
         self.titleKey = titleKey
+        self.titleVerbatim = nil
+        self.systemImage = systemImage
+        self.route = route
+        self.tab = tab
+    }
+
+    /// For a row with no localized copy to borrow - see `titleVerbatim`.
+    init(
+        verbatim title: String,
+        systemImage: String,
+        route: Route? = nil,
+        tab: MainTab? = nil
+    ) {
+        self.titleKey = nil
+        self.titleVerbatim = title
         self.systemImage = systemImage
         self.route = route
         self.tab = tab
@@ -46,8 +72,12 @@ struct MenuSection: Identifiable {
 /// person, minus the ones this app deliberately does not carry.
 ///
 /// What is **not** here, and why:
-/// - **Admin** - excluded from the native clients by product decision;
-///   the backoffice stays on the web.
+/// - **Admin** - phase 1 only. `.adminHome` (below, in `navMore`, gated to
+///   MODERATOR/ADMIN) covers Users, Reports, Appeals and Posts. The other
+///   ~35 admin routes (Ads, Marketplace, Opportunity, HELP, Payments,
+///   Analytics, Music verification, Support tickets, News, Ambassadors,
+///   the audit log, and more) stay web-only for now - see
+///   `ios-native/PARITY.md`'s admin section for the exact remaining list.
 /// - **Premium / Pricing** - a purchase surface. `/pricing` renders
 ///   upgrade buttons and a crypto payment modal, which App Store policy
 ///   does not allow in an app that takes payment outside it. The same
@@ -103,6 +133,10 @@ enum ZrpMenu {
                 MenuEntry(.navApiKeys, systemImage: "key", route: .apiKeys),
                 MenuEntry(.footerCharity, systemImage: "heart.circle", route: .charityTransparency),
                 MenuEntry(.footerTransparency, systemImage: "checkmark.shield", route: .moderationTransparency),
+                // Filtered out in `ZrpMenuView.visibleSections` for anyone
+                // whose session role is not MODERATOR/ADMIN - a UI
+                // convenience only, see `CurrentUser.isStaff`.
+                MenuEntry(verbatim: "Admin Console", systemImage: "lock.shield", route: .adminHome),
             ]),
 
             MenuSection(headingKey: .navAccount, entries: [
@@ -135,7 +169,7 @@ struct ZrpMenuView: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(ZrpMenu.sections) { section in
+                    ForEach(visibleSections) { section in
                         if let heading = section.headingKey {
                             Text(heading)
                                 .font(.footnote.weight(.semibold))
@@ -159,6 +193,21 @@ struct ZrpMenuView: View {
         }
         .background(ZrpColor.surface)
         .foregroundStyle(ZrpColor.onSurface)
+    }
+
+    /// `ZrpMenu.sections` with the Admin Console row dropped for anyone
+    /// who is not signed in as MODERATOR/ADMIN, and any section left
+    /// empty by that removed entirely rather than rendering a bare
+    /// heading over nothing.
+    ///
+    /// This is the *only* place that row is hidden - not a security
+    /// boundary, see `CurrentUser.isStaff`.
+    private var visibleSections: [MenuSection] {
+        let isStaff = session.currentUser?.isStaff ?? false
+        return ZrpMenu.sections.compactMap { section in
+            let entries = section.entries.filter { $0.route != .adminHome || isStaff }
+            return entries.isEmpty ? nil : MenuSection(headingKey: section.headingKey, entries: entries)
+        }
     }
 
     // MARK: - Header
@@ -222,7 +271,7 @@ struct ZrpMenuView: View {
                     .frame(width: 24)
                     .foregroundStyle(isCurrent(entry) ? ZrpColor.red : ZrpColor.onSurfaceMuted)
 
-                Text(entry.titleKey)
+                Text(verbatim: entry.title)
                     .font(.body.weight(isCurrent(entry) ? .semibold : .regular))
                     .foregroundStyle(ZrpColor.onSurface)
                     .lineLimit(1)
@@ -261,7 +310,7 @@ struct ZrpMenuView: View {
     /// decoration beside the name, so VoiceOver says "Messages, 3 unread"
     /// in one breath instead of announcing a stray number.
     private func label(for entry: MenuEntry) -> Text {
-        let title = L10n.string(entry.titleKey)
+        let title = entry.title
         guard let count = badge(for: entry), count > 0 else {
             return Text(verbatim: title)
         }
