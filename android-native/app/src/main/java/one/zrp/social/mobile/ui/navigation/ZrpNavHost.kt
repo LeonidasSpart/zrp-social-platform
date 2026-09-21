@@ -76,6 +76,8 @@ import one.zrp.social.mobile.ui.admin.AdminReportsScreen
 import one.zrp.social.mobile.ui.admin.AdminStorageScreen
 import one.zrp.social.mobile.ui.admin.AdminSupportTicketDetailScreen
 import one.zrp.social.mobile.ui.admin.AdminSupportTicketsScreen
+import one.zrp.social.mobile.ui.admin.AdminSubscriptionDetailScreen
+import one.zrp.social.mobile.ui.admin.AdminSubscriptionsScreen
 import one.zrp.social.mobile.ui.admin.AdminUpgradeRequestsScreen
 import one.zrp.social.mobile.ui.admin.AdminUsersScreen
 import one.zrp.social.mobile.ui.admin.AdminWithdrawalsScreen
@@ -345,6 +347,8 @@ fun ZrpNavHost(
     val goToAdminHelpWithdrawals: () -> Unit = { navController.navigate("admin/help-withdrawals") }
     val goToAdminUpgradeRequests: () -> Unit = { navController.navigate("admin/upgrade-requests") }
     val goToAdminNewsNetwork: () -> Unit = { navController.navigate("admin/news-network") }
+    val goToAdminSubscriptions: () -> Unit = { navController.navigate("admin/subscriptions") }
+    val goToAdminSubscriptionDetail: (String) -> Unit = { userId -> navController.navigate("admin/subscriptions/$userId") }
     val goToTerms: () -> Unit = { navController.navigate("legal/terms") }
     val goToPrivacyPolicy: () -> Unit = { navController.navigate("legal/privacy") }
     val goToGuidelines: () -> Unit = { navController.navigate("legal/guidelines") }
@@ -1456,6 +1460,7 @@ fun ZrpNavHost(
                     onOpenHelpWithdrawals = goToAdminHelpWithdrawals,
                     onOpenUpgradeRequests = goToAdminUpgradeRequests,
                     onOpenNewsNetwork = goToAdminNewsNetwork,
+                    onOpenSubscriptions = goToAdminSubscriptions,
                 )
             }
             composable("admin/reports") {
@@ -1593,6 +1598,26 @@ fun ZrpNavHost(
                     onOpenPost = goToComments,
                     onOpenProfile = goToProfile,
                 )
+            }
+            // Subscriptions & Billing - requireAdmin server-side on every
+            // route (list, detail, grant, cancel, restore), so this
+            // entry point sits in the same isAdmin-gated block on the
+            // Dashboard as the financial queues above, not the
+            // requireStaff sections.
+            composable("admin/subscriptions") {
+                AdminSubscriptionsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenDetail = goToAdminSubscriptionDetail,
+                )
+            }
+            composable(
+                route = "admin/subscriptions/{userId}",
+                arguments = listOf(navArgument("userId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")
+                if (userId != null) {
+                    AdminSubscriptionDetailScreen(userId = userId, onBack = { navController.popBackStack() })
+                }
             }
             composable(
                 route = "admin/support/{id}",

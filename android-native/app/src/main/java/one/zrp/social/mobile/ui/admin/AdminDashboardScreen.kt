@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.DeleteOutline
@@ -115,6 +116,7 @@ fun AdminDashboardScreen(
     onOpenHelpWithdrawals: () -> Unit,
     onOpenUpgradeRequests: () -> Unit,
     onOpenNewsNetwork: () -> Unit,
+    onOpenSubscriptions: () -> Unit,
 ) {
     val viewModel: AdminDashboardViewModel = viewModel(
         factory = remember { AdminDashboardViewModelFactory(AdminRepository()) },
@@ -324,6 +326,18 @@ fun AdminDashboardScreen(
                     OutlinedButton(onClick = onOpenPayments, modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
                         Icon(Icons.Filled.Payments, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
                         Text(stringResource(R.string.admin_dash_verify_payments))
+                    }
+                    // Subscriptions & Billing - requireAdmin on every
+                    // route (list, detail, grant, cancel, restore), same
+                    // as the rest of this block; never shown to a
+                    // MODERATOR, matching Analytics/Upgrade Requests/
+                    // Storage Cleanup above.
+                    OutlinedButton(
+                        onClick = onOpenSubscriptions,
+                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                    ) {
+                        Icon(Icons.Filled.CreditCard, contentDescription = null, modifier = Modifier.padding(end = Spacing.sm))
+                        Text(stringResource(R.string.admin_subscriptions_title))
                     }
                     OutlinedButton(
                         onClick = onOpenWithdrawals,
