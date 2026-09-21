@@ -126,11 +126,34 @@ struct AdminHomeView: View {
                 }
             } header: {
                 Text(verbatim: "People")
+            }
+
+            Section {
+                NavigationLink(value: Route.adminSupportTickets) {
+                    Label { Text(verbatim: "Support tickets") } icon: { Image(systemName: "lifepreserver") }
+                }
+                NavigationLink(value: Route.adminAnalytics) {
+                    Label { Text(verbatim: "Analytics") } icon: { Image(systemName: "chart.bar") }
+                }
+                NavigationLink(value: Route.adminAuditLog) {
+                    Label { Text(verbatim: "Audit log") } icon: { Image(systemName: "clock.arrow.circlepath") }
+                }
+                NavigationLink(value: Route.adminCharityDisbursements) {
+                    Label { Text(verbatim: "Charity disbursements") } icon: { Image(systemName: "heart.circle") }
+                }
+                NavigationLink(value: Route.adminSubscriptions) {
+                    Label { Text(verbatim: "Subscriptions & Billing") } icon: { Image(systemName: "creditcard") }
+                }
+                NavigationLink(value: Route.adminStorageCleanup) {
+                    Label { Text(verbatim: "Storage cleanup") } icon: { Image(systemName: "externaldrive.badge.minus") }
+                }
+            } header: {
+                Text(verbatim: "Ops")
             } footer: {
                 // Deliberately explains itself rather than pretending to
                 // be the entire web admin console - see this view's own
                 // doc comment for the exact list of what is still absent.
-                Text(verbatim: "Every action here re-checks your role on the server. Some sections remain web-only for now.")
+                Text(verbatim: "Every action here re-checks your role on the server. News CMS and News Network automation remain web-only for now.")
             }
         }
         .listStyle(.insetGrouped)

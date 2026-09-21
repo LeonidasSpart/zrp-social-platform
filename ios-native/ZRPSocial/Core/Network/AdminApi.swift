@@ -1247,7 +1247,7 @@ struct AdminAuditLogPage: Decodable {
 /// `metadata` JSON - a string, number, bool, null, or nested
 /// array/object of the same. Just enough to render `key: value` without
 /// assuming a shape.
-enum AdminJSONValue: Decodable {
+enum AdminJSONValue: Decodable, Equatable {
     case string(String)
     case number(Double)
     case bool(Bool)
