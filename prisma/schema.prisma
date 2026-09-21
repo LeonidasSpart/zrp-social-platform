@@ -518,6 +518,13 @@ model User {
   muter   Mute[] @relation("Muter")
   mutedBy Mute[] @relation("Muted")
 
+  // "Notify me when this account posts" - see PostSubscription below.
+  // Named to match Follow's own naming shape (subscriber/author, not
+  // Mute's muter/muted) since this is a directional "get notified about
+  // X's posts" relationship, not a mutual/symmetric one.
+  postSubscriptionsGiven   PostSubscription[] @relation("PostSubscriptionSubscriber")
+  postSubscriptionsGained  PostSubscription[] @relation("PostSubscriptionAuthor")
+
   notifications     Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
 
@@ -958,6 +965,29 @@ model Mute {
   @@unique([muterId, mutedId])
   @@index([muterId])
   @@index([mutedId])
+}
+
+// "Notify me when this account posts" - a per-viewer, per-author opt-in,
+// independent of Follow (you can subscribe to someone you don't follow -
+// e.g. a public account - and following someone does not imply a
+// subscription). Row existence IS the enabled state, same convention as
+// Follow/Mute/Blocked: there is no `enabled` column to keep in sync,
+// unsubscribing just deletes the row, so "subscribed" and "has a row"
+// can never drift apart.
+model PostSubscription {
+  id String @id @default(cuid())
+
+  subscriberId String
+  subscriber   User   @relation("PostSubscriptionSubscriber", fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation("PostSubscriptionAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([subscriberId, authorId])
+  @@index([subscriberId])
+  @@index([authorId])
 }
 
 // One row per device that has registered for native push (Firebase

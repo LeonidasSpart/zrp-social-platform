@@ -18,6 +18,7 @@ import { renderArticleBody } from "@/lib/sanitize";
 import { resolveScheduledAt } from "@/lib/scheduled-time";
 import { isTrustedUploadUrl, validateMediaUrls } from "@/lib/media-url";
 import { notifyMentionedUsers } from "@/lib/mentions";
+import { notifySubscribersOfNewPost } from "@/lib/post-subscriptions";
 
 // ─────────────────────────────────────────────────────────────
 // MEDIA HELPERS
@@ -941,6 +942,18 @@ export async function POST(
         content,
         authorId: user.id,
         postId: post.id,
+      });
+    }
+
+    // Same "only once the post is actually live" rule as mentions above -
+    // a scheduled post notifies subscribers when publish-scheduled-posts
+    // flips it to published, not now. Not awaited: a popular account's
+    // subscriber fan-out must never make posting itself slower.
+    if (post.status === "published") {
+      void notifySubscribersOfNewPost({
+        postId: post.id,
+        authorId: user.id,
+        authorName: (token.name as string) || (token.username as string) || "Someone",
       });
     }
 

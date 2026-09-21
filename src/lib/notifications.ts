@@ -37,7 +37,8 @@ interface CreateNotificationParams {
     | "help_campaign_rejected"
     | "help_campaign_removed"
     | "help_new_offer"
-    | "music_artist_verified";
+    | "music_artist_verified"
+    | "post_from_subscription";
   fromUserId: string;
   postId?: string;
   // Disambiguates which comment a comment_like/comment_repost/reply
@@ -152,6 +153,11 @@ export async function createNotification({
       "play_duel_accepted",
       "opportunity_new_application",
       "help_new_offer",
+      // Same reasoning: a subscriber already sees the in-app
+      // notification the moment they open the app, and an account with
+      // many subscribers posting often would otherwise turn this into a
+      // recurring email blast rather than a one-off alert.
+      "post_from_subscription",
     ]);
     if (NEVER_EMAIL_TYPES.has(type)) return true;
 
