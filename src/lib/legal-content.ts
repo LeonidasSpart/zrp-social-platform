@@ -1652,96 +1652,210 @@ export const PRESS_CONFIG: PageConfig = {
 };
 
 // ─── Investors (src/app/investors/page.tsx) ───────────────────────────────
-// Both CTA links (mailto:investors@zrp.one, a Link back to /about) follow
-// the same precedent as CAREERS_CONFIG/CONTACT_CONFIG: informational text,
-// not a tappable action. The closing quote has no heading key of its own on
-// the web page (a bare blockquote), so it's folded into the Investor
-// Contact section instead of inventing a new title key.
+// Mirrors the web page's own section order exactly (Hero -> What Is ZRP ->
+// Problem -> Approach -> Platform Ecosystem -> Traction -> Business Model ->
+// Market Opportunity -> Technology -> Security -> Swiss positioning ->
+// Social Impact -> Roadmap -> Growth Opportunities -> Investor Types -> CTA
+// -> FAQ -> Legal disclaimer -> closing quote), reading the exact same
+// "investors.*" keys the web page renders through t() - see
+// src/app/investors/page.tsx and the "investors.*" block in
+// src/lib/translations.ts. The CTA email/links are informational text here
+// (same precedent as CAREERS_CONFIG/CONTACT_CONFIG), not a tappable action.
+// A URL fragment like "zrp.one/transparency" is a literal, not a
+// translation key, matching how "195K+" was already handled elsewhere in
+// this file - it reads identically in every language by definition.
+function investorFaqItems(): { question: string[]; answer: string[] }[] {
+  return Array.from({ length: 10 }, (_, i) => ({
+    question: [`investors.faq.q${i + 1}`],
+    answer: [`investors.faq.a${i + 1}`],
+  }));
+}
+
 export const INVESTORS_CONFIG: PageConfig = {
-  title: ["investors.heroTitle"],
-  subtitle: ["investors.heroSubtitle"],
+  title: ["investors.hero.title"],
+  subtitle: ["investors.hero.subtitle"],
   sections: [
     {
-      id: "vision",
-      title: ["investors.visionHeading"],
-      body: [
-        P("investors.visionP1"),
-        P("investors.visionP2"),
-        CARDS(
-          card(["🇨🇭", "investors.why1Title"], ["investors.why1Desc"]),
-          card(["🌍", "investors.why2Title"], ["investors.why2Desc"]),
-          card(["⚡", "investors.why3Title"], ["investors.why3Desc"])
-        ),
-      ],
+      id: "what-is-zrp",
+      title: ["investors.whatIsZrp.heading"],
+      body: [P("investors.whatIsZrp.p1"), P("investors.whatIsZrp.p2")],
+    },
+    {
+      id: "problem",
+      title: ["investors.problem.heading"],
+      body: [P("investors.problem.p1"), P("investors.problem.p2")],
+    },
+    {
+      id: "approach",
+      title: ["investors.approach.heading"],
+      body: [P("investors.approach.p1"), P("investors.approach.p2")],
     },
     {
       id: "platform",
-      title: ["investors.platformHeading"],
+      title: ["investors.platform.heading"],
       body: [
-        P("investors.platformSubtitle"),
+        P("investors.platform.subtitle"),
         CARDS(
-          card(["investors.platform1Title"], ["investors.platform1Desc"]),
-          card(["investors.platform2Title"], ["investors.platform2Desc"]),
-          card(["investors.platform3Title"], ["investors.platform3Desc"]),
-          card(["investors.platform4Title"], ["investors.platform4Desc"]),
-          card(["investors.platform5Title"], ["investors.platform5Desc"]),
-          card(["investors.platform6Title"], ["investors.platform6Desc"])
+          card(["investors.platform.socialFeed.title"], ["investors.platform.socialFeed.desc"]),
+          card(["investors.platform.shorts.title"], ["investors.platform.shorts.desc"]),
+          card(["investors.platform.communities.title"], ["investors.platform.communities.desc"]),
+          card(["investors.platform.messaging.title"], ["investors.platform.messaging.desc"]),
+          card(["investors.platform.creatorMonetization.title"], ["investors.platform.creatorMonetization.desc"]),
+          card(["investors.platform.businessTools.title"], ["investors.platform.businessTools.desc"]),
+          card(["investors.platform.marketplace.title"], ["investors.platform.marketplace.desc"]),
+          card(["investors.platform.advertising.title"], ["investors.platform.advertising.desc"]),
+          card(["investors.platform.play.title"], ["investors.platform.play.desc"]),
+          card(["investors.platform.news.title"], ["investors.platform.news.desc"]),
+          card(["investors.platform.music.title"], ["investors.platform.music.desc"]),
+          card(["investors.platform.ambassadors.title"], ["investors.platform.ambassadors.desc"])
         ),
       ],
     },
     {
-      id: "growth",
-      title: ["investors.growthHeading"],
+      id: "traction",
+      title: ["investors.traction.heading"],
       body: [
-        P("investors.growthDesc"),
         CARDS(
-          card(["195K+"], ["investors.statUsersLabel"]),
-          card(["investors.statLiveValue"], ["investors.statLiveLabel"]),
-          card(["investors.statGrowingValue"], ["investors.statGrowingLabel"])
+          card(["investors.traction.stat1Value"], ["investors.traction.stat1Label"], ["investors.traction.stat1Date"]),
+          card(["investors.traction.stat2Value"], ["investors.traction.stat2Label"], ["investors.traction.stat2Date"]),
+          card(["investors.traction.stat3Value"], ["investors.traction.stat3Label"], ["investors.traction.stat3Date"])
         ),
-        CALLOUT("investors.figuresNote"),
+        CALLOUT(
+          "investors.traction.noteBefore",
+          "zrp.one/transparency",
+          "investors.traction.noteAnd",
+          "zrp.one/charity",
+          "investors.traction.noteEnd"
+        ),
       ],
     },
     {
-      id: "opportunities",
-      title: ["investors.opportunitiesHeading"],
+      id: "business-model",
+      title: ["investors.businessModel.heading"],
       body: [
-        P("investors.opportunitiesSubtitle"),
+        P("investors.businessModel.subtitle"),
         CARDS(
-          card(["💻", "investors.opp1Title"], ["investors.opp1Desc"]),
-          card(["🌍", "investors.opp2Title"], ["investors.opp2Desc"]),
-          card(["👥", "investors.opp3Title"], ["investors.opp3Desc"]),
-          card(["🚀", "investors.opp4Title"], ["investors.opp4Desc"])
+          card(["investors.businessModel.subscriptions.title"], ["investors.businessModel.subscriptions.what"]),
+          card(["investors.businessModel.creatorMonetization.title"], ["investors.businessModel.creatorMonetization.what"]),
+          card(["investors.businessModel.advertising.title"], ["investors.businessModel.advertising.what"])
+        ),
+        CARDS(
+          card(["investors.businessModel.planFree"], undefined, ["$0"]),
+          card(["investors.businessModel.planPro"], undefined, ["$9.99/mo"]),
+          card(["investors.businessModel.planBusiness"], undefined, ["$49.99/mo"]),
+          card(["investors.businessModel.planEnterprise"], undefined, ["$99.99/mo"])
+        ),
+      ],
+    },
+    {
+      id: "market-opportunity",
+      title: ["investors.market.heading"],
+      body: [
+        H("investors.market.factHeading"),
+        P("investors.market.factBody"),
+        H("investors.market.targetHeading"),
+        P("investors.market.targetBody"),
+        H("investors.market.opportunityHeading"),
+        P("investors.market.opportunityBody"),
+      ],
+    },
+    {
+      id: "technology",
+      title: ["investors.technology.heading"],
+      body: [
+        CARDS(
+          card(["investors.technology.crossPlatform.title"], ["investors.technology.crossPlatform.desc"]),
+          card(["investors.technology.realtime.title"], ["investors.technology.realtime.desc"]),
+          card(["investors.technology.payments.title"], ["investors.technology.payments.desc"]),
+          card(["investors.technology.localization.title"], ["investors.technology.localization.desc"])
+        ),
+      ],
+    },
+    {
+      id: "security",
+      title: ["investors.security.heading"],
+      body: [
+        P("investors.security.p1"),
+        P("investors.security.p2Before", "zrp.one/transparency", "investors.security.p2After"),
+        CALLOUT("investors.security.p3"),
+      ],
+    },
+    {
+      id: "swiss-positioning",
+      title: ["investors.swiss.heading"],
+      body: [P("investors.swiss.body")],
+    },
+    {
+      id: "social-impact",
+      title: ["investors.impact.heading"],
+      body: [
+        P("investors.impact.bodyBefore", "zrp.one/charity", "investors.impact.bodyAfter"),
+        CARDS(card(["35%"], ["investors.impact.statLabel"])),
+      ],
+    },
+    {
+      id: "roadmap",
+      title: ["investors.roadmap.heading"],
+      body: [
+        P("investors.roadmap.subtitle"),
+        H("investors.roadmap.nowLabel"),
+        BULLETS(["investors.roadmap.nowItem1"], ["investors.roadmap.nowItem2"]),
+        H("investors.roadmap.nextLabel"),
+        BULLETS(["investors.roadmap.nextItem1"], ["investors.roadmap.nextItem2"]),
+        H("investors.roadmap.laterLabel"),
+        BULLETS(["investors.roadmap.laterItem1"], ["investors.roadmap.laterItem2"]),
+      ],
+    },
+    {
+      id: "growth-opportunities",
+      title: ["investors.growth.heading"],
+      body: [
+        P("investors.growth.subtitle"),
+        CARDS(
+          card(["investors.growth.infra.title"], ["investors.growth.infra.desc"]),
+          card(["investors.growth.security.title"], ["investors.growth.security.desc"]),
+          card(["investors.growth.product.title"], ["investors.growth.product.desc"]),
+          card(["investors.growth.global.title"], ["investors.growth.global.desc"]),
+          card(["investors.growth.creatorBiz.title"], ["investors.growth.creatorBiz.desc"])
         ),
       ],
     },
     {
       id: "investor-types",
-      title: ["investors.typesHeading"],
+      title: ["investors.types.heading"],
       body: [
         BULLETS(
-          ["investors.type1"],
-          ["investors.type2"],
-          ["investors.type3"],
-          ["investors.type4"],
-          ["investors.type5"],
-          ["investors.type6"]
+          ["investors.types.individual"],
+          ["investors.types.angel"],
+          ["investors.types.strategic"],
+          ["investors.types.familyOffice"],
+          ["investors.types.vc"],
+          ["investors.types.corporate"]
         ),
       ],
     },
     {
-      id: "charity",
-      title: ["investors.charityHeading"],
-      body: [P("investors.charityDesc"), CARDS(card(["35%"], ["investors.charityStatLabel"]))],
+      id: "investor-contact",
+      title: ["investors.cta.heading"],
+      body: [
+        P("investors.cta.body"),
+        CARDS(card([], undefined, ["investors@zrp.one"])),
+      ],
     },
     {
-      id: "investor-contact",
-      title: ["investors.contactHeading"],
+      // No dedicated heading key exists for the legal disclaimer or the
+      // closing quote (the web page renders them as a bare disclaimer
+      // paragraph and a bare blockquote, with no section title of their
+      // own) - folded into the FAQ section's body instead of inventing an
+      // unused title key, the same precedent CAREERS_CONFIG/the previous
+      // version of this config already used for the closing quote.
+      id: "investor-faq",
+      title: ["investors.faq.heading"],
       body: [
-        P("investors.contactDesc"),
-        CARDS(card([], undefined, ["investors@zrp.one"])),
-        CALLOUT("investors.disclaimer"),
-        CALLOUT("investors.closingQuote"),
+        { type: "faq", items: investorFaqItems() },
+        CALLOUT("investors.legal.disclaimer"),
+        CALLOUT("investors.closing.quote"),
+        P("investors.closing.brand"),
       ],
     },
   ],
