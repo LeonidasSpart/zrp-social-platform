@@ -129,6 +129,19 @@ enum Route: Hashable {
     /// themselves rather than being hidden on a client-side plan guess.
     case team
     case apiKeys
+    /// The staff admin console - phase 1: Users, Reports, Appeals, Posts.
+    /// See `ZrpMenuView`'s doc comment for why this entry point exists now
+    /// and what still doesn't.
+    case adminHome
+    case adminUsers
+    // Reports and Appeals have no `GET .../{id}` route to refetch a
+    // single row by id - unlike `postDetail`, their detail view is a
+    // sheet presented from inside the list screen (see
+    // `AdminReportsView`/`AdminAppealsView`), not a pushed `Route`, so
+    // there is no `adminReportDetail`/`adminAppealDetail` case here.
+    case adminReports
+    case adminAppeals
+    case adminPosts
 }
 
 /// Owns the navigation stack's path.

@@ -157,6 +157,16 @@ struct RouteDestinationView: View {
             TeamView()
         case .apiKeys:
             ApiKeysView()
+        case .adminHome:
+            AdminHomeView()
+        case .adminUsers:
+            AdminUsersView()
+        case .adminReports:
+            AdminReportsView()
+        case .adminAppeals:
+            AdminAppealsView()
+        case .adminPosts:
+            AdminPostsView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

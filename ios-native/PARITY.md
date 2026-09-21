@@ -565,11 +565,56 @@ not be until they exist in ZRP:
 
 ---
 
+### Admin Console (staff/moderator, phase 1)
+
+**No longer "none" - iOS now ships the content-moderation core, matching
+what `requireStaff` (ADMIN or MODERATOR) already gates on web.** The
+entry point (`Admin Console`, `lock.shield`) sits in the navigation
+menu's `More` section, hidden for anyone whose session `role` is not
+`MODERATOR`/`ADMIN` (`CurrentUser.isStaff`, checked in
+`ZrpMenuView.visibleSections`). That check is a UI convenience only: every
+one of the four routes below independently re-asks `requireStaff`/
+`requireAdmin` from the database on every request, exactly as the web
+admin console does, and a 401/403 here is handled the same way as
+anywhere else in the app (session-expired handling for 401; the server's
+own message for 403).
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Dashboard | `GET /api/admin/stats`: STAFF | ✅ | ✅ | ✅ the same seven stat cards (users, posts, comments, reports, pending reports, admins, moderators) as a landing screen, plus four rows linking to Users/Reports/Appeals/Posts. A failed stat-grid load shows nothing rather than an error banner - it is a convenience summary, not this screen's job | IMPLEMENTED |
+| Users: search + filter | `GET /api/admin/users?search=&page=&role=&badge=&status=`: STAFF | ✅ | ✅ | ✅ debounced search plus role/badge/status filters, each a real server-side query parameter (not a client-side re-filter of one page), with the same search-only stat cards (total/active/banned/admins/mods) the web page keeps stable while the table filters move | IMPLEMENTED |
+| Users: change role | `PUT /api/admin/users/{id}` `{role}`: **ADMIN only** | ✅ | ✅ | ✅ USER/MODERATOR/ADMIN picker, matching `VALID_ROLES`. `JOURNALIST` is **not** offered here, exactly as web withholds it: a user already carrying that role sees a read-only badge and a note pointing at the (web-only) Journalists admin page, since granting it needs a `JournalistProfile` this generic endpoint does not create | IMPLEMENTED |
+| Users: change badge | `PUT /api/admin/users/{id}` `{badgeType}`: **ADMIN only** | ✅ | ✅ | ✅ verified/organization/government/team/journalist, or none. Clearing a badge sends a literal JSON `null`, not an omitted field - Swift's default `Encodable` synthesis would silently omit it instead, which the route reads as "leave it unchanged", so `AdminRepository.BadgeRequest` encodes it by hand (see its own doc comment, and `AdminRepositoryTests`) | IMPLEMENTED |
+| Users: ban / unban | `POST /api/admin/users/{id}/ban`: STAFF | ✅ | ✅ | ✅ toggle, confirmed with a dialog explaining it takes effect immediately and on every device | IMPLEMENTED |
+| Users: delete | `DELETE /api/admin/users/{id}`: **ADMIN only** | ✅ | ✅ | ✅ confirmed with explicit "irreversible, cascades to everything they own" copy; the route itself uses the same `deleteUserAccountAndFiles` helper as self-service account deletion | IMPLEMENTED |
+| Reports: review queue | `GET /api/admin/reports?status=&page=`: STAFF | ✅ | ✅ | ✅ status filter (pending/reviewed/dismissed/actioned/all), defaulting to pending like web. Every one of the report's seven polymorphic targets is handled (post, comment, listing, PLAY challenge, opportunity, HELP campaign, bare-profile) - `AdminReportTarget` in `AdminApi.swift`, covered by `AdminReportTargetTests` | IMPLEMENTED |
+| Reports: dismiss / mark reviewed / record an action | `PUT /api/admin/reports/{id}` `{status, actionType?, actionNote?}`: STAFF | ✅ | ✅ | ✅ **matches web's real behaviour exactly**: `actionType` (Delete post / Warn user / Ban user / Mute user / Delete comment / Other) is a **descriptive label only** - selecting "Ban user" here does not ban anyone. Carrying out the action is a separate trip to Users (ban/delete) or Posts (delete), same as on web; this screen does not invent enforcement the backend doesn't have | IMPLEMENTED |
+| Reports: delete | `DELETE /api/admin/reports/{id}`: **ADMIN only** | ✅ | ✅ | ✅ offered only once a report has left `pending`, matching the route's own 409 for a still-pending report and for one with an appeal on file - both shown as the server's own message, not pre-guessed client-side | IMPLEMENTED |
+| Appeals: review queue | `GET /api/admin/appeals?status=&page=`: STAFF | ✅ | ✅ | ✅ status filter (pending/upheld/overturned/all), showing the original report's reason and action alongside each appeal | IMPLEMENTED |
+| Appeals: resolve | `PUT /api/admin/appeals/{id}` `{status, resolutionNote}`: STAFF | ✅ | ✅ | ✅ uphold/overturn, with a resolution note this screen makes **required** even though the route itself accepts an empty one - a decision with no stated reason is not a bar this app sets for itself. Explains, for `BAN_USER` specifically, that overturning unbans the user as part of the same call; for every other action type, that there is no automated undo (matches `AdminRepository.resolveAppeal`'s own comment on why) | IMPLEMENTED |
+| Posts: search | `GET /api/admin/posts?search=&page=`: STAFF | ✅ | ✅ | ✅ debounced content search, with author, type, counts and a preview of the content itself | IMPLEMENTED |
+| Posts: delete | `DELETE /api/admin/posts/{id}`: STAFF | ✅ | ✅ | ✅ confirmed, irreversible; the route itself cleans up now-orphaned UploadThing media, same as the user-facing delete path | IMPLEMENTED |
+
+**Deliberately not built in this pass** - still web-only, same as
+before: Ads review, Marketplace review, Opportunity review, HELP
+campaign review, HELP withdrawals, creator withdrawals, Payments
+(manual crypto verification), Upgrade Requests, Analytics, Music artist
+verification, Support Tickets (staff side), News CMS, News Network
+automation console, Ambassadors review, the Audit Log, Charity
+Disbursements, Subscriptions/Billing, and storage cleanup. That is
+roughly twenty more admin sections the website offers; this pass covers
+the four that are the actual day-to-day content-moderation core
+(`requireStaff` on every route above except where marked ADMIN-only).
+Revisit the rest only if staff genuinely need them from a phone - build
+each against the same server-role gate, never a client-side check alone.
+
+---
+
 ### Deliberately out of scope for the consumer iOS app
 
 | Area | Reason |
 | --- | --- |
-| **Admin console** (`/api/admin/**`, 40+ routes) | **Web-only for v1, by decision, not an oversight.** Android ships four admin screens; iOS ships none. Every admin route is independently role-gated server-side, so an iOS app without an admin surface loses no security and gains none: hiding a screen is not what protects those routes, and building one would not weaken them either. The reason to leave it out is product, not safety: a staff console is a desk-and-keyboard tool, and the four screens Android has cover a fraction of the twenty the website offers. Anyone doing moderation work should be on the web console that has all of it. Revisit only if staff genuinely need to act from a phone; if so, build it against the same server-role gate and never surface an admin control on a client check alone. |
+| **Admin console: everything past phase 1** (~20 more `/api/admin/**` sections: Ads/Marketplace/Opportunity/HELP review, financial queues, Analytics, Music verification, Support Tickets, News CMS/Network, Ambassadors review, Audit Log, Charity Disbursements, storage cleanup) | Web-only for now, by decision - see the **Admin Console** section above for what phase 1 (Users/Reports/Appeals/Posts) already covers and why the rest waits. Every route stays independently role-gated server-side regardless. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | **Ads**: advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend*: money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** (see the Ads section below). |
 | **Creator Studio**: earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |

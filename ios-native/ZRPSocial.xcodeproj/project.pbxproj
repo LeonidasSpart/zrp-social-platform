@@ -10,14 +10,23 @@
 		1A0000000000000000000003 /* ZRPSocial.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZRPSocial.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A0000000000000000000011 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1A0000000000000000000012 /* ZRPSocial.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ZRPSocial.entitlements; sourceTree = "<group>"; };
+		1A0000000000000000000013 /* ZRPSocialTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZRPSocialTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		1A0000000000000000000004 /* ZRPSocial */ = {isa = PBXFileSystemSynchronizedRootGroup; path = ZRPSocial; sourceTree = "<group>"; };
+		1A0000000000000000000014 /* ZRPSocialTests */ = {isa = PBXFileSystemSynchronizedRootGroup; path = ZRPSocialTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		1A0000000000000000000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1A0000000000000000000019 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -31,6 +40,7 @@
 			isa = PBXGroup;
 			children = (
 				1A0000000000000000000004 /* ZRPSocial */,
+				1A0000000000000000000014 /* ZRPSocialTests */,
 				1A0000000000000000000010 /* Supporting */,
 				1A0000000000000000000006 /* Products */,
 			);
@@ -40,6 +50,7 @@
 			isa = PBXGroup;
 			children = (
 				1A0000000000000000000003 /* ZRPSocial.app */,
+				1A0000000000000000000013 /* ZRPSocialTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -78,7 +89,48 @@
 			productReference = 1A0000000000000000000003 /* ZRPSocial.app */;
 			productType = "com.apple.product-type.application";
 		};
+		1A0000000000000000000015 /* ZRPSocialTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A000000000000000000001D /* Build configuration list for PBXNativeTarget "ZRPSocialTests" */;
+			buildPhases = (
+				1A0000000000000000000018 /* Sources */,
+				1A0000000000000000000019 /* Frameworks */,
+				1A000000000000000000001A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1A0000000000000000000017 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				1A0000000000000000000014 /* ZRPSocialTests */,
+			);
+			name = ZRPSocialTests;
+			packageProductDependencies = (
+			);
+			productName = ZRPSocialTests;
+			productReference = 1A0000000000000000000013 /* ZRPSocialTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		1A0000000000000000000016 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1A0000000000000000000002;
+			remoteInfo = ZRPSocial;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		1A0000000000000000000017 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1A0000000000000000000002 /* ZRPSocial */;
+			targetProxy = 1A0000000000000000000016 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		1A0000000000000000000001 /* Project object */ = {
@@ -90,6 +142,10 @@
 				TargetAttributes = {
 					1A0000000000000000000002 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					1A0000000000000000000015 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 1A0000000000000000000002;
 					};
 				};
 			};
@@ -118,6 +174,7 @@
 			projectRoot = "";
 			targets = (
 				1A0000000000000000000002 /* ZRPSocial */,
+				1A0000000000000000000015 /* ZRPSocialTests */,
 			);
 		};
 /* End PBXProject section */
@@ -130,10 +187,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1A000000000000000000001A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1A0000000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1A0000000000000000000018 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -245,6 +316,55 @@
 			};
 			name = Release;
 		};
+		1A000000000000000000001B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = one.zrp.social.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZRPSocial.app/ZRPSocial";
+			};
+			name = Debug;
+		};
+		1A000000000000000000001C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = one.zrp.social.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZRPSocial.app/ZRPSocial";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -262,6 +382,15 @@
 			buildConfigurations = (
 				1A000000000000000000000E /* Debug */,
 				1A000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1A000000000000000000001D /* Build configuration list for PBXNativeTarget "ZRPSocialTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A000000000000000000001B /* Debug */,
+				1A000000000000000000001C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
