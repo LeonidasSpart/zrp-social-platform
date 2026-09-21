@@ -633,13 +633,62 @@ generic implementation (`AdminWithdrawalQueueView`) the same way.
 | Ambassadors: review queue + search | `GET /api/admin/ambassadors?status=&search=`: STAFF | ✅ | ✅ | ✅ country/city/languages/audience size/motivation shown in full | IMPLEMENTED |
 | Ambassadors: approve/reject/suspend/restore | `PATCH /api/admin/ambassadors/{id}` `{action, reason?}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
 
-**Still not built** (phase 2b, next): Support Tickets, Analytics, Audit
-Log, Charity Disbursements, Subscriptions/Billing, Storage cleanup.
-**After that** (phase 2c): News CMS, News Network automation - the
-largest remaining section. Payments (manual crypto verification) and
-Upgrade Requests are legacy admin tools for the pre-Solana manual
-payment flow (`UpgradeRequest`/`PaymentRequest` in `schema.prisma`) and
-are not currently planned for this pass.
+### Admin Console (phase 2b): Support, Analytics, Audit log, Charity, Billing, Storage
+
+Every route in this section is `requireAdmin` (full admin only), not
+`requireStaff` - a moderator sees none of these six.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Support tickets: list + search + stats | `GET /api/admin/support/tickets?status=&search=&page=`, `GET .../stats`: ADMIN | ✅ | ✅ | ✅ status filter, debounced search, the open/in-progress/awaiting-reply/resolved/total stat pills | IMPLEMENTED |
+| Support tickets: thread, status, reply | `GET/PUT /api/admin/support/tickets/{id}`, `POST .../reply {message, isInternal}`: ADMIN | ✅ | ✅ | ✅ full thread with internal-note replies visibly marked, status picker, reply composer with an internal-note toggle | IMPLEMENTED |
+| Support tickets: resolve | `POST /api/admin/support/tickets/{id}/resolve {resolution}`: ADMIN | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Support tickets: delete | `DELETE /api/admin/support/tickets/{id}`: ADMIN | ✅ | ✅ | ✅ confirmed; replies cascade with it | IMPLEMENTED |
+| Support tickets: assign to a staff member | `PUT .../{id}` `{assignedTo}`: ADMIN | ✅ | ✅ | ⬜ **not built** - would need a staff-member picker this pass didn't build; the field is read (assignedAdmin shows if already set) but not writable from iOS | PARTIAL |
+| Analytics: summary, engagement, top posts | `GET /api/admin/analytics?range=`: ADMIN | ✅ | ✅ | ✅ range picker (7d/30d/90d/all), the five headline counts, avg likes/comments per post, top 10 posts by engagement with each one's own counts | IMPLEMENTED |
+| Analytics: daily time-series chart | same route, `daily[]` | ✅ chart | ✅ chart | ⬜ **not rendered** - the route's per-day series is decoded (`AdminAnalyticsDailyPoint`) but this pass didn't build a chart for it; the summary/engagement/top-posts numbers above are real and complete | PARTIAL |
+| Analytics: geography/acquisition/platform/language breakdown | `GET /api/admin/analytics/geography` | ⬜ (Android-only) | ✅ | ⬜ out of scope for this pass, same as Android's own scope note - not blocking | n/a |
+| Audit log: list + filter | `GET /api/admin/audit-log?action=&targetType=&targetId=&cursor=`: ADMIN | ⬜ **no web page exists** | ✅ | ✅ **the second UI for this route, ever** - action filter (debounced), cursor pagination, a detail sheet rendering the free-form `metadata` JSON as key/value lines via a small `AdminJSONValue` decoder rather than assuming a shape, since a dozen-plus distinct `action` strings across this whole console each carry different metadata | IMPLEMENTED |
+| Charity disbursements: list + record | `GET/POST /api/admin/charity-disbursements`: ADMIN | ⬜ **no web page exists** | ✅ | ✅ full create form (beneficiary, cause, amount, currency, date, note, proof URL) matching the route's own validation; every record becomes part of the public charity ledger this app's own `charityTransparency` screen reads | IMPLEMENTED |
+| Subscriptions: list + overview + search | `GET /api/admin/subscriptions?...`: ADMIN | ✅ | ✅ | ✅ **deliberately narrower** - search plus plan and status filters, and the paid/needs-reconciliation overview numbers. Web/Android also filter by billing interval, payment method and "expiring within N days", and offer sort order; not built here - a phone-side billing lookup is usually "find this one user" or "see this one population," which the narrower filter set already covers | PARTIAL (deliberately narrower) |
+| Subscriptions: per-user detail | `GET /api/admin/subscriptions/{userId}`: ADMIN | ✅ | ✅ | ✅ current subscription, payment history. Legacy `PaymentRequest`/`UpgradeRequest` history and the subscription's `SubscriptionEvent` audit trail (both read by the web page for full context) are **not shown** - the current state and real payment history cover what a grant/cancel/restore decision needs | PARTIAL (deliberately narrower) |
+| Subscriptions: grant/extend | `POST /api/admin/subscriptions/{userId}/grant {plan, billingInterval}`: ADMIN | ✅ | ✅ | ✅ pro/business/enterprise only, matching `VALID_PLANS.filter(≠ free)` | IMPLEMENTED |
+| Subscriptions: cancel | `POST /api/admin/subscriptions/{userId}/cancel {reason?}`: ADMIN | ✅ | ✅ | ✅ confirmed, only offered on an ACTIVE subscription | IMPLEMENTED |
+| Subscriptions: restore | `POST /api/admin/subscriptions/{userId}/restore`: ADMIN | ✅ | ✅ | ✅ only offered on a CANCELED subscription | IMPLEMENTED |
+| Storage cleanup: scan (dry run) | `GET /api/admin/cleanup-uploadthing`: ADMIN | ✅ | ✅ | ✅ file/size counts, the held-for-review (< 24h) bucket kept visibly separate from what's actually eligible | IMPLEMENTED |
+| Storage cleanup: delete orphans | `POST /api/admin/cleanup-uploadthing`: ADMIN | ✅ | ✅ | ✅ **irreversible** - confirmation copy says so plainly and names what's held back (files under 24h old); re-scans and shows the real "deleted" count from the route's own response afterward rather than assuming the prior scan's number still holds | IMPLEMENTED |
+
+### Admin Console (phase 2c): News CMS, News Network automation
+
+This completes the admin console pass: every section from the original
+17-item plan is now built, several deliberately narrower than web where
+noted below.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| News CMS: list + search + filter | `GET /api/admin/news?status=&category=&search=&page=`: STAFF | ✅ | ✅ | ✅ debounced search, status filter (category filter not exposed as its own control, but search matches title/slug/excerpt/content same as the route) | IMPLEMENTED |
+| News CMS: create | `POST /api/admin/news`: STAFF | ✅ | ✅ | ✅ full editor form (title, auto-derived slug you can still hand-edit, excerpt, body, category, status, featured, cover image, source name/URL, review note). **No author-search picker**: the author field is a raw user-id text field defaulting to the signed-in staff member's own id - see the field's own footer copy | PARTIAL (deliberately narrower) |
+| News CMS: edit | `PUT /api/admin/news/{id}` (aliased to `PATCH` server-side): STAFF | ✅ | ✅ | ✅ same form, pre-filled; approving/rejecting a journalist's PENDING_REVIEW submission is two quick buttons that just set `status` and save, exactly as it is server-side - not a separate action | IMPLEMENTED |
+| News CMS: delete | `DELETE /api/admin/news/{id}`: STAFF | ✅ | ✅ | ✅ confirmed, irreversible | IMPLEMENTED |
+| News Network: status overview | `GET /api/admin/news-network/status`: STAFF | ✅ | ✅ | ✅ paused/running state, next cycle time, feed/publication/story counts, duplicates prevented today, source health breakdown (healthy/warning/failed/disabled) | IMPLEMENTED |
+| News Network: pause / resume | `PATCH /api/admin/news-network/settings {paused}`: **ADMIN only** | ✅ | ✅ | ✅ confirmed - explained as the platform-wide kill switch, taking effect on the next cycle | IMPLEMENTED |
+| News Network: run a cycle now | `POST /api/admin/news-network/run`: **ADMIN only** | ✅ | ✅ | ✅ confirmed - copy states this can publish real posts immediately; the route's own rate limit (a few per hour) is the real backstop | IMPLEMENTED |
+| News Network: feed roster (list/enable/disable/cadence/provision) | `GET/PATCH /api/admin/news-network/feeds`, `POST .../feeds/provision` | ✅ | ✅ | ⬜ **not built** | MISSING |
+| News Network: sources (list/create/seed/verify/edit/delete) | `GET/POST /api/admin/news-network/sources`, `.../seed`, `.../{id}/verify`, `PATCH/DELETE .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
+| News Network: editorial story queue (reject/correct) | `GET /api/admin/news-network/stories`, `PATCH .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
+| News Network: publications (list/unpublish) | `GET /api/admin/news-network/publications`, `DELETE .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
+
+**News Network is deliberately the overview/control-panel slice only**
+(status, pause/resume, manual run) - the four sub-areas above (Feeds,
+Sources, the editorial Stories queue, Publications) are real, separate
+management surfaces this pass did not build, given this was explicitly
+flagged as the largest remaining section and the last one in the build
+order. The overview screen says so in its own footer, not just here.
+
+Payments (manual crypto verification) and Upgrade Requests are legacy
+admin tools for the pre-Solana manual payment flow
+(`UpgradeRequest`/`PaymentRequest` in `schema.prisma`) and were not part
+of this pass's 17-item plan; they remain web-only.
 
 ---
 
@@ -647,7 +696,9 @@ are not currently planned for this pass.
 
 | Area | Reason |
 | --- | --- |
-| **Admin console: everything past phase 1** (~20 more `/api/admin/**` sections: Ads/Marketplace/Opportunity/HELP review, financial queues, Analytics, Music verification, Support Tickets, News CMS/Network, Ambassadors review, Audit Log, Charity Disbursements, storage cleanup) | Web-only for now, by decision - see the **Admin Console** section above for what phase 1 (Users/Reports/Appeals/Posts) already covers and why the rest waits. Every route stays independently role-gated server-side regardless. |
+| **Admin console: News Network's Feeds/Sources/editorial-queue/Publications sub-areas** | Not built in this pass - see the **Admin Console (phase 2c)** section above. The overview/control-panel (status, pause/resume, manual run) is built; these four management surfaces are not. |
+| **Admin console: Payments (manual crypto verification), Upgrade Requests** | Legacy admin tools for the pre-Solana manual payment flow (`UpgradeRequest`/`PaymentRequest` in `schema.prisma`). Not part of this pass's scope; web-only for now. |
+| **Admin console: Support ticket assignment** (`PUT .../tickets/{id}` `{assignedTo}`) | Would need a staff-member picker this pass didn't build. The field is read (an already-assigned admin shows) but not writable from iOS. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | **Ads**: advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend*: money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** (see the Ads section below). |
 | **Creator Studio**: earnings half (`/api/creator/dashboard`, `/withdraw`) | Balance, tips, premium revenue and withdrawals are the monetisation surface the row above already excludes. |

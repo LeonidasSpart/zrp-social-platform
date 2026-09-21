@@ -1431,3 +1431,169 @@ struct AdminStorageCleanupResult: Decodable, Equatable {
     let heldForReviewCount: Int
     let deleted: Int
 }
+
+// MARK: - News CMS (`/api/admin/news`) - staff
+
+struct AdminNewsArticle: Decodable, Identifiable, Equatable {
+    let id: String
+    let title: String
+    let slug: String
+    let excerpt: String?
+    let content: String
+    let coverImage: String?
+    let sourceName: String?
+    let sourceUrl: String?
+    let category: String
+    let status: String
+    let views: Int
+    let featured: Bool
+    let publishedAt: Date?
+    let submittedAt: Date?
+    let reviewNote: String?
+    let reviewedAt: Date?
+    let createdAt: Date
+    let author: AdminActorRef
+}
+
+struct AdminNewsArticlesPage: Decodable {
+    let articles: [AdminNewsArticle]
+    struct Pagination: Decodable { let page: Int; let totalPages: Int; let total: Int }
+    let pagination: Pagination
+}
+
+struct AdminNewsArticleResponse: Decodable {
+    let article: AdminNewsArticle
+}
+
+enum AdminNewsCategory: String, CaseIterable, Identifiable {
+    case world = "WORLD"
+    case europe = "EUROPE"
+    case switzerland = "SWITZERLAND"
+    case politics = "POLITICS"
+    case business = "BUSINESS"
+    case technology = "TECHNOLOGY"
+    case crypto = "CRYPTO"
+    case science = "SCIENCE"
+    case sports = "SPORTS"
+    case culture = "CULTURE"
+    case community = "COMMUNITY"
+    case gaming = "GAMING"
+
+    var id: String { rawValue }
+    var displayName: String { rawValue.capitalized }
+}
+
+enum AdminNewsStatus: String, CaseIterable, Identifiable {
+    case draft = "DRAFT"
+    case pendingReview = "PENDING_REVIEW"
+    case published = "PUBLISHED"
+    case rejected = "REJECTED"
+    case archived = "ARCHIVED"
+
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .draft: return "Draft"
+        case .pendingReview: return "Pending review"
+        case .published: return "Published"
+        case .rejected: return "Rejected"
+        case .archived: return "Archived"
+        }
+    }
+}
+
+enum AdminNewsStatusFilter: String, CaseIterable, Identifiable {
+    case all
+    case draft = "DRAFT"
+    case pendingReview = "PENDING_REVIEW"
+    case published = "PUBLISHED"
+    case rejected = "REJECTED"
+    case archived = "ARCHIVED"
+
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .all: return "All"
+        case .draft: return "Draft"
+        case .pendingReview: return "Pending review"
+        case .published: return "Published"
+        case .rejected: return "Rejected"
+        case .archived: return "Archived"
+        }
+    }
+}
+
+/// Everything a create or edit form needs. Used for both `POST` (create)
+/// and `PUT`/`PATCH` (edit) - the edit form always holds the article's
+/// full current state, so sending every field on save is equivalent to
+/// the route's own "only the keys present change" contract without this
+/// app needing to track which individual fields were actually touched.
+struct AdminNewsArticleDraft {
+    var title = ""
+    var slug = ""
+    var excerpt = ""
+    var content = ""
+    var coverImage = ""
+    var sourceName = ""
+    var sourceUrl = ""
+    var category: AdminNewsCategory = .world
+    var status: AdminNewsStatus = .draft
+    var authorId = ""
+    var featured = false
+    var reviewNote = ""
+}
+
+// MARK: - News Network automation (`/api/admin/news-network`) - overview only, see AdminNewsNetworkView
+
+struct AdminNewsNetworkSettings: Decodable, Equatable {
+    let paused: Bool
+    let lastCycleAt: Date?
+    let nextCycleAt: Date?
+    let requireHumanReviewForSensitive: Bool
+    let enabledLanguages: [String]
+    let maxPublicationsPerCycle: Int
+    let maxPublicationsPerDay: Int
+    let minMinutesBetweenPublications: Int
+}
+
+struct AdminNewsNetworkJobRun: Decodable, Equatable {
+    let id: String
+    let startedAt: Date
+    let finishedAt: Date?
+    let published: Int?
+    let duplicatesPrevented: Int?
+}
+
+struct AdminNewsNetworkStatus: Decodable, Equatable {
+    struct Feeds: Decodable, Equatable { let total: Int; let enabled: Int }
+    struct Publications: Decodable, Equatable { let today: Int; let scheduled: Int; let failed: Int }
+    struct Stories: Decodable, Equatable { let ready: Int; let pendingSensitiveReview: Int }
+    struct SourceHealth: Decodable, Equatable {
+        let healthy: Int
+        let warning: Int
+        let failed: Int
+        let disabled: Int
+
+        private enum CodingKeys: String, CodingKey {
+            case healthy = "HEALTHY", warning = "WARNING", failed = "FAILED", disabled = "DISABLED"
+        }
+    }
+
+    let status: AdminNewsNetworkSettings
+    let lastRun: AdminNewsNetworkJobRun?
+    let feeds: Feeds
+    let publications: Publications
+    let stories: Stories
+    let duplicatesPreventedToday: Int
+    let sourceHealth: SourceHealth
+}
+
+struct AdminNewsNetworkRunResult: Decodable, Equatable {
+    struct Result: Decodable, Equatable {
+        let ran: Bool
+        let reason: String?
+        let published: Int?
+        let scheduled: Int?
+    }
+    let result: Result
+}

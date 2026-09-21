@@ -159,6 +159,8 @@ enum Route: Hashable {
     case adminSubscriptions
     case adminSubscriptionDetail(userId: String)
     case adminStorageCleanup
+    case adminNews
+    case adminNewsNetwork
 }
 
 /// Owns the navigation stack's path.

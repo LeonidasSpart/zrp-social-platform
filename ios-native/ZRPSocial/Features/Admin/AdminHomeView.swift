@@ -149,11 +149,22 @@ struct AdminHomeView: View {
                 }
             } header: {
                 Text(verbatim: "Ops")
+            }
+
+            Section {
+                NavigationLink(value: Route.adminNews) {
+                    Label { Text(verbatim: "News") } icon: { Image(systemName: "newspaper") }
+                }
+                NavigationLink(value: Route.adminNewsNetwork) {
+                    Label { Text(verbatim: "News Network automation") } icon: { Image(systemName: "antenna.radiowaves.left.and.right") }
+                }
+            } header: {
+                Text(verbatim: "News")
             } footer: {
                 // Deliberately explains itself rather than pretending to
                 // be the entire web admin console - see this view's own
                 // doc comment for the exact list of what is still absent.
-                Text(verbatim: "Every action here re-checks your role on the server. News CMS and News Network automation remain web-only for now.")
+                Text(verbatim: "Every action here re-checks your role on the server. A few sub-areas remain deliberately narrower than web - see PARITY.md.")
             }
         }
         .listStyle(.insetGrouped)

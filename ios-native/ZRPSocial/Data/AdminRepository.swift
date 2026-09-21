@@ -132,6 +132,18 @@ protocol AdminRepositoryProtocol: Sendable {
     // Storage cleanup (ADMIN only)
     func scanStorage() async throws -> AdminStorageScanResult
     func cleanUpStorage() async throws -> AdminStorageCleanupResult
+
+    // News CMS (staff)
+    func newsArticles(status: AdminNewsStatusFilter, search: String, page: Int) async throws -> AdminNewsArticlesPage
+    func newsArticle(id: String) async throws -> AdminNewsArticle
+    func createNewsArticle(_ draft: AdminNewsArticleDraft) async throws -> AdminNewsArticle
+    func updateNewsArticle(id: String, _ draft: AdminNewsArticleDraft) async throws -> AdminNewsArticle
+    func deleteNewsArticle(id: String) async throws
+
+    // News Network automation overview (staff for status, admin for settings/run)
+    func newsNetworkStatus() async throws -> AdminNewsNetworkStatus
+    func setNewsNetworkPaused(_ paused: Bool) async throws
+    func runNewsNetworkCycle() async throws -> AdminNewsNetworkRunResult
 }
 
 /// The outcome of a call that can succeed outright, or succeed with a
@@ -871,5 +883,125 @@ struct AdminRepository: AdminRepositoryProtocol {
     /// acts on a fresh result, not a possibly-stale one the app cached.
     func cleanUpStorage() async throws -> AdminStorageCleanupResult {
         try await client.send(Endpoint.post("admin/cleanup-uploadthing"))
+    }
+
+    // MARK: - News CMS
+
+    func newsArticles(status: AdminNewsStatusFilter, search: String, page: Int) async throws -> AdminNewsArticlesPage {
+        try await client.send(
+            Endpoint.get(
+                "admin/news",
+                query: [
+                    ("status", status == .all ? nil : status.rawValue),
+                    ("search", search.isEmpty ? nil : search),
+                    ("page", String(page)),
+                    ("limit", String(Self.pageSize)),
+                ]
+            )
+        )
+    }
+
+    func newsArticle(id: String) async throws -> AdminNewsArticle {
+        let response: AdminNewsArticleResponse = try await client.send(Endpoint.get("admin/news/\(Endpoint.segment(id))"))
+        return response.article
+    }
+
+    private struct NewsArticleWriteRequest: Encodable {
+        let title: String
+        let slug: String
+        let excerpt: String?
+        let content: String
+        let coverImage: String?
+        let sourceName: String?
+        let sourceUrl: String?
+        let category: String
+        let status: String
+        let authorId: String
+        let featured: Bool
+        let reviewNote: String?
+    }
+
+    private static func writeBody(_ draft: AdminNewsArticleDraft) -> NewsArticleWriteRequest {
+        NewsArticleWriteRequest(
+            title: draft.title.trimmingCharacters(in: .whitespacesAndNewlines),
+            slug: draft.slug.trimmingCharacters(in: .whitespacesAndNewlines),
+            excerpt: draft.excerpt.isEmpty ? nil : draft.excerpt,
+            content: draft.content,
+            coverImage: draft.coverImage.isEmpty ? nil : draft.coverImage,
+            sourceName: draft.sourceName.isEmpty ? nil : draft.sourceName,
+            sourceUrl: draft.sourceUrl.isEmpty ? nil : draft.sourceUrl,
+            category: draft.category.rawValue,
+            status: draft.status.rawValue,
+            authorId: draft.authorId,
+            featured: draft.featured,
+            reviewNote: draft.reviewNote.isEmpty ? nil : draft.reviewNote
+        )
+    }
+
+    /// `POST /api/admin/news` - staff.
+    func createNewsArticle(_ draft: AdminNewsArticleDraft) async throws -> AdminNewsArticle {
+        let response: AdminNewsArticleResponse = try await client.send(
+            try Endpoint.post("admin/news", body: Self.writeBody(draft))
+        )
+        return response.article
+    }
+
+    /// `PUT /api/admin/news/{id}` (aliased to the same handler as
+    /// `PATCH` server-side - see that route's own comment on why) - staff.
+    func updateNewsArticle(id: String, _ draft: AdminNewsArticleDraft) async throws -> AdminNewsArticle {
+        let response: AdminNewsArticleResponse = try await client.send(
+            try Endpoint.put("admin/news/\(Endpoint.segment(id))", body: Self.writeBody(draft))
+        )
+        return response.article
+    }
+
+    /// `DELETE /api/admin/news/{id}` - staff.
+    func deleteNewsArticle(id: String) async throws {
+        try await client.sendIgnoringResponse(Endpoint.delete("admin/news/\(Endpoint.segment(id))"))
+    }
+
+    // MARK: - News Network automation overview
+
+    /// `GET /api/admin/news-network/status` - staff.
+    func newsNetworkStatus() async throws -> AdminNewsNetworkStatus {
+        struct Raw: Decodable {
+            let status: AdminNewsNetworkSettings
+            let lastRun: AdminNewsNetworkJobRun?
+            let feeds: AdminNewsNetworkStatus.Feeds
+            let publications: AdminNewsNetworkStatus.Publications
+            let stories: AdminNewsNetworkStatus.Stories
+            let duplicatesPreventedToday: Int
+            let sourceHealth: AdminNewsNetworkStatus.SourceHealth
+        }
+        let raw: Raw = try await client.send(Endpoint.get("admin/news-network/status"))
+        return AdminNewsNetworkStatus(
+            status: raw.status,
+            lastRun: raw.lastRun,
+            feeds: raw.feeds,
+            publications: raw.publications,
+            stories: raw.stories,
+            duplicatesPreventedToday: raw.duplicatesPreventedToday,
+            sourceHealth: raw.sourceHealth
+        )
+    }
+
+    private struct PausedRequest: Encodable {
+        let paused: Bool
+    }
+
+    /// `PATCH /api/admin/news-network/settings` `{paused}` - **admin-
+    /// only**. The platform-wide kill switch: takes effect on the very
+    /// next cycle.
+    func setNewsNetworkPaused(_ paused: Bool) async throws {
+        try await client.sendIgnoringResponse(
+            try Endpoint.patch("admin/news-network/settings", body: PausedRequest(paused: paused))
+        )
+    }
+
+    /// `POST /api/admin/news-network/run` - **admin-only**. Runs one
+    /// editorial cycle immediately, outside the schedule. Rate-limited to
+    /// a handful per hour server-side.
+    func runNewsNetworkCycle() async throws -> AdminNewsNetworkRunResult {
+        try await client.send(Endpoint.post("admin/news-network/run"))
     }
 }
