@@ -595,18 +595,51 @@ own message for 403).
 | Posts: search | `GET /api/admin/posts?search=&page=`: STAFF | ✅ | ✅ | ✅ debounced content search, with author, type, counts and a preview of the content itself | IMPLEMENTED |
 | Posts: delete | `DELETE /api/admin/posts/{id}`: STAFF | ✅ | ✅ | ✅ confirmed, irreversible; the route itself cleans up now-orphaned UploadThing media, same as the user-facing delete path | IMPLEMENTED |
 
-**Deliberately not built in this pass** - still web-only, same as
-before: Ads review, Marketplace review, Opportunity review, HELP
-campaign review, HELP withdrawals, creator withdrawals, Payments
-(manual crypto verification), Upgrade Requests, Analytics, Music artist
-verification, Support Tickets (staff side), News CMS, News Network
-automation console, Ambassadors review, the Audit Log, Charity
-Disbursements, Subscriptions/Billing, and storage cleanup. That is
-roughly twenty more admin sections the website offers; this pass covers
-the four that are the actual day-to-day content-moderation core
-(`requireStaff` on every route above except where marked ADMIN-only).
-Revisit the rest only if staff genuinely need them from a phone - build
-each against the same server-role gate, never a client-side check alone.
+Phase 1 covered the four-screen content-moderation core. **Phase 2a below adds nine more sections** - every review queue and payout queue the web admin console has, plus the three staff-reviewed profile types (journalists/ambassadors/music artists). Phase 2b (Support Tickets, Analytics, Audit Log, Charity Disbursements, Subscriptions/Billing, Storage cleanup) and phase 2c (News CMS, News Network automation) are tracked separately below, in that same order, so this document reflects exactly what exists at whatever point work on this pass stops.
+
+### Admin Console (phase 2a): review queues, payouts, people
+
+Three of these four screens (Marketplace, Opportunity, HELP campaigns) are
+genuinely one screen with different fields - `schema.prisma`'s own
+comments call HELP's moderation shape a mirror of Listing's, which mirrors
+AdCampaign's. iOS shares one generic implementation
+(`AdminReviewQueueView`/`AdminReviewQueueViewModel<Item>` in
+`Features/Admin/AdminReviewQueueView.swift`) across all three rather than
+three near-copies; Ads keeps its own screen because it has extra actions
+(suspend/resume/cancel) and a real lifecycle gate
+(`src/lib/ads/lifecycle.ts`). Creator and HELP withdrawals share a second
+generic implementation (`AdminWithdrawalQueueView`) the same way.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Ads: review queue | `GET /api/admin/ads?status=`: STAFF | ✅ | ✅ | ✅ full `AdCampaignStatus` filter set, campaign name/advertiser/bid/budget spent, the underlying ad post's own content | IMPLEMENTED |
+| Ads: approve/reject/suspend/resume/cancel/note | `PUT /api/admin/ads/{id}` `{action, rejectionReason?, adminNote?}`: STAFF | ✅ | ✅ | ✅ `AdminAdCampaign.availableActions` mirrors `canTransition("staff", ...)` client-side so only legal actions show for the current status - a UX guard only, the route re-validates regardless. The internal note is editable independently via its own "Save note" action, matching the web queue's separate note-save control | IMPLEMENTED |
+| Marketplace: review queue | `GET /api/admin/marketplace?status=&page=`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Marketplace: approve/reject/remove | `PUT /api/admin/marketplace/{id}` `{action, rejectionReason?}`: STAFF | ✅ | ✅ | ✅ approve/reject only from PENDING_REVIEW, remove only from ACTIVE, matching each route's own gate | IMPLEMENTED |
+| Opportunity: review queue | `GET /api/admin/opportunity?status=&page=`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Opportunity: approve/reject/remove | `PUT /api/admin/opportunity/{id}` `{action, rejectionReason?}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| HELP campaigns: review queue | `GET /api/admin/help?status=&page=`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| HELP campaigns: approve/reject/remove | `PUT /api/admin/help/{id}` `{action, rejectionReason?}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Creator withdrawals: queue | `GET /api/admin/withdrawals?status=`: **ADMIN only** | ✅ | ✅ | ✅ unpaginated (the route itself isn't), defaults to PENDING | IMPLEMENTED |
+| Creator withdrawals: approve | `POST /api/admin/withdrawals/{id}/approve`: **ADMIN only** | ✅ | ✅ | ✅ **the confirmation copy states explicitly that this sends a real on-chain USDC transfer from the platform wallet and cannot be recalled** - never undersold as a generic "approve?". The route's rare ambiguous-outcome (202) response is shown as an information alert distinct from an error, matching what the route itself is actually saying ("do not resubmit", not "this failed") | IMPLEMENTED |
+| Creator withdrawals: reject | `POST /api/admin/withdrawals/{id}/reject`: **ADMIN only** | ✅ | ✅ | ✅ confirmed; refunds the reserved amount to the creator's balance | IMPLEMENTED |
+| HELP withdrawals: queue + approve/reject | `GET /api/admin/help-withdrawals`, `POST .../approve`, `POST .../reject`: **ADMIN only** | ✅ | ✅ | ✅ same shape and same explicit on-chain confirmation copy as creator withdrawals | IMPLEMENTED |
+| Journalists: review queue + search | `GET /api/admin/journalists?status=&search=`: STAFF | ✅ | ✅ | ✅ status filter, debounced search, the PENDING/VERIFIED/REJECTED/SUSPENDED stat counts the route computes | IMPLEMENTED |
+| Journalists: direct grant | `POST /api/admin/journalists {username}`: STAFF | ✅ | ✅ | ✅ by username; the route's own "already verified"/"user not found" messages are shown as given | IMPLEMENTED |
+| Journalists: approve/reject/suspend/restore/remove | `PATCH /api/admin/journalists/{id}` `{action, reason?}`: STAFF | ✅ | ✅ | ✅ `AdminJournalistProfile.availableActions` mirrors the route's own required-status gate per action | IMPLEMENTED |
+| Music artists: list + search | `GET /api/admin/music/artists?status=&q=&page=`: STAFF | ✅ | ✅ | ✅ verified/unverified/all filter, track and follower counts | IMPLEMENTED |
+| Music artists: verify/unverify | `POST /api/admin/music/artists/{id}/verify {verified}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Music artists: delete | `DELETE /api/admin/music/artists/{id}`: STAFF | ✅ | ✅ | ✅ confirmed with copy naming the real cascade - every track and album, not just the profile - matching the route's own deliberately destructive design | IMPLEMENTED |
+| Ambassadors: review queue + search | `GET /api/admin/ambassadors?status=&search=`: STAFF | ✅ | ✅ | ✅ country/city/languages/audience size/motivation shown in full | IMPLEMENTED |
+| Ambassadors: approve/reject/suspend/restore | `PATCH /api/admin/ambassadors/{id}` `{action, reason?}`: STAFF | ✅ | ✅ | ✅ | IMPLEMENTED |
+
+**Still not built** (phase 2b, next): Support Tickets, Analytics, Audit
+Log, Charity Disbursements, Subscriptions/Billing, Storage cleanup.
+**After that** (phase 2c): News CMS, News Network automation - the
+largest remaining section. Payments (manual crypto verification) and
+Upgrade Requests are legacy admin tools for the pre-Solana manual
+payment flow (`UpgradeRequest`/`PaymentRequest` in `schema.prisma`) and
+are not currently planned for this pass.
 
 ---
 

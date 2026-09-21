@@ -486,3 +486,948 @@ struct AdminPostsPage: Decodable {
     let page: Int
     let totalPages: Int
 }
+
+// MARK: - Shared: paginated result
+
+/// A page of admin results, built by hand in `AdminRepository` rather
+/// than decoded directly - the review-queue routes below each nest
+/// their array under a different JSON key (`listings`, `campaigns`,
+/// `artists`...), so each repository method decodes its own small
+/// private `Raw` type and wraps it in this common shape. Sharing this
+/// (rather than one `Raw` type per kind duplicating the same four
+/// fields) is what lets `AdminReviewQueueViewModel` below be generic
+/// over every review-queue kind.
+struct AdminPageResult<Item> {
+    let items: [Item]
+    let total: Int
+    let page: Int
+    let totalPages: Int
+}
+
+// MARK: - Review queues (Ads, Marketplace, Opportunity, HELP campaigns)
+
+/// What every "user-submitted content awaiting staff approval" queue
+/// has in common - see `schema.prisma`'s own comment on `Listing`
+/// ("mirrors AdCampaign's moderation shape") and on `HelpCampaign`
+/// ("same ... shape as Listing"). `AdminReviewQueueView`/
+/// `AdminReviewQueueViewModel` are generic over this, so Marketplace,
+/// Opportunity and HELP campaigns - which really are the same screen
+/// with different fields - share one implementation rather than three
+/// near-identical copies. Ads has extra actions (suspend/resume/cancel)
+/// and its own lifecycle gate, so it gets its own screen instead of
+/// forcing a fourth shape through this protocol.
+protocol AdminReviewableItem: Decodable, Identifiable, Equatable where ID == String {
+    var status: String { get }
+    var rejectionReason: String? { get }
+    var createdAt: Date { get }
+    /// The listing/campaign's own title.
+    var reviewTitle: String { get }
+    /// Who submitted it.
+    var reviewOwner: AdminActorRef { get }
+    /// One extra descriptive line shown under the title - price,
+    /// compensation, fundraising goal, whatever that kind's equivalent is.
+    var reviewDetailLine: String { get }
+}
+
+/// `status=` query value shared by Marketplace/Opportunity/HELP - all
+/// three default to `PENDING_REVIEW` and accept `all`. The full set of
+/// terminal/live statuses differs per kind, so this only lists the ones
+/// every review queue actually filters by in practice; a status this
+/// screen doesn't offer is still reachable by whatever the route
+/// defaults to.
+enum AdminReviewStatusFilter: String, CaseIterable, Identifiable {
+    case all
+    case pendingReview = "PENDING_REVIEW"
+    case active = "ACTIVE"
+    case rejected = "REJECTED"
+    case removed = "REMOVED"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .all: return "All"
+        case .pendingReview: return "Pending review"
+        case .active: return "Active"
+        case .rejected: return "Rejected"
+        case .removed: return "Removed"
+        }
+    }
+}
+
+/// The three actions `PUT` on a Marketplace/Opportunity/HELP listing
+/// accepts. `approve`/`reject` only from `PENDING_REVIEW`; `remove`
+/// only from `ACTIVE` - enforced server-side, mirrored client-side so
+/// the right buttons show for the right status (see each route's own
+/// `if (action === "remove") ... else if (listing.status !== "PENDING_REVIEW")`).
+enum AdminReviewAction: String, CaseIterable, Identifiable {
+    case approve, reject, remove
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .approve: return "Approve"
+        case .reject: return "Reject"
+        case .remove: return "Remove"
+        }
+    }
+}
+
+extension AdminReviewableItem {
+    /// Mirrors each route's own from-status gate - a UX guard, not the
+    /// security boundary (the route re-checks this regardless).
+    var availableReviewActions: [AdminReviewAction] {
+        switch status {
+        case "PENDING_REVIEW": return [.approve, .reject]
+        case "ACTIVE": return [.remove]
+        default: return []
+        }
+    }
+}
+
+struct AdminMarketplaceListing: AdminReviewableItem {
+    let id: String
+    let title: String
+    let category: String
+    let price: Double?
+    let currency: String
+    let priceOnRequest: Bool
+    let location: String?
+    let status: String
+    let rejectionReason: String?
+    let createdAt: Date
+    let seller: AdminActorRef
+
+    var reviewTitle: String { title }
+    var reviewOwner: AdminActorRef { seller }
+    var reviewDetailLine: String {
+        let categoryLabel = category.replacingOccurrences(of: "_", with: " ").capitalized
+        if priceOnRequest { return "\(categoryLabel) Â· Price on request" }
+        if let price { return "\(categoryLabel) Â· \(currency) \(CountFormatting.exact(Int(price)))" }
+        return categoryLabel
+    }
+}
+
+struct AdminOpportunityListing: AdminReviewableItem {
+    let id: String
+    let title: String
+    let type: String
+    let organizationName: String?
+    let location: String?
+    let remote: Bool
+    let isPaid: Bool
+    let compensationInfo: String?
+    let status: String
+    let rejectionReason: String?
+    let createdAt: Date
+    let poster: AdminActorRef
+
+    var reviewTitle: String { title }
+    var reviewOwner: AdminActorRef { poster }
+    var reviewDetailLine: String {
+        var parts = [type.replacingOccurrences(of: "_", with: " ").capitalized]
+        if let organizationName, !organizationName.isEmpty { parts.append(organizationName) }
+        parts.append(remote ? "Remote" : (location ?? "On-site"))
+        parts.append(isPaid ? (compensationInfo?.isEmpty == false ? compensationInfo! : "Paid") : "Unpaid")
+        return parts.joined(separator: " Â· ")
+    }
+}
+
+struct AdminHelpCampaignReview: AdminReviewableItem {
+    let id: String
+    let title: String
+    let category: String
+    let goalAmount: Double?
+    let raisedAmount: Double
+    let currency: String
+    let status: String
+    let rejectionReason: String?
+    let createdAt: Date
+    let organizer: AdminActorRef
+
+    var reviewTitle: String { title }
+    var reviewOwner: AdminActorRef { organizer }
+    var reviewDetailLine: String {
+        let categoryLabel = category.replacingOccurrences(of: "_", with: " ").capitalized
+        guard let goalAmount, goalAmount > 0 else { return categoryLabel }
+        return "\(categoryLabel) Â· \(currency) \(CountFormatting.exact(Int(raisedAmount))) of \(CountFormatting.exact(Int(goalAmount)))"
+    }
+}
+
+// MARK: - Ads (`/api/admin/ads`)
+
+struct AdminAdCampaignPost: Decodable, Equatable {
+    let id: String
+    let content: String
+    let imageUrl: String?
+    let imageUrls: [String]
+    let mediaType: String?
+}
+
+struct AdminAdCampaign: Decodable, Identifiable, Equatable {
+    let id: String
+    let name: String
+    let status: String
+    let bidType: String
+    let bidAmount: Double
+    let budgetTotal: Double
+    let budgetSpent: Double
+    let targetUrl: String?
+    let startDate: Date?
+    let endDate: Date?
+    let rejectionReason: String?
+    let adminNote: String?
+    let createdAt: Date
+    let advertiser: AdminActorRef
+    let post: AdminAdCampaignPost
+}
+
+/// `status=` query value - the full `AdCampaignStatus` enum, unlike the
+/// curated set the other review queues offer, since an ad campaign's
+/// lifecycle genuinely has this many staff-relevant states.
+enum AdminAdStatusFilter: String, CaseIterable, Identifiable {
+    case all
+    case pendingReview = "PENDING_REVIEW"
+    case paymentPending = "PAYMENT_PENDING"
+    case paymentFailed = "PAYMENT_FAILED"
+    case active = "ACTIVE"
+    case paused = "PAUSED"
+    case suspended = "SUSPENDED"
+    case completed = "COMPLETED"
+    case rejected = "REJECTED"
+    case cancelled = "CANCELLED"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .all: return "All"
+        case .pendingReview: return "Pending review"
+        case .paymentPending: return "Payment pending"
+        case .paymentFailed: return "Payment failed"
+        case .active: return "Active"
+        case .paused: return "Paused"
+        case .suspended: return "Suspended"
+        case .completed: return "Completed"
+        case .rejected: return "Rejected"
+        case .cancelled: return "Cancelled"
+        }
+    }
+}
+
+enum AdminAdAction: String, CaseIterable, Identifiable {
+    case approve, reject, suspend, resume, cancel, note
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .approve: return "Approve"
+        case .reject: return "Reject"
+        case .suspend: return "Suspend"
+        case .resume: return "Resume"
+        case .cancel: return "Cancel"
+        case .note: return "Save note"
+        }
+    }
+}
+
+extension AdminAdCampaign {
+    /// Mirrors `src/lib/ads/lifecycle.ts`'s `staff` transition map - a UX
+    /// guard, not the security boundary (`canTransition` re-checks this
+    /// server-side on every `PUT`). `.note` is always available since it
+    /// never changes status.
+    var availableActions: [AdminAdAction] {
+        let lifecycle: [AdminAdAction]
+        switch status {
+        case "PENDING_REVIEW": lifecycle = [.approve, .reject]
+        case "PAYMENT_PENDING", "PAYMENT_FAILED": lifecycle = [.cancel]
+        case "ACTIVE", "PAUSED": lifecycle = [.suspend, .cancel]
+        case "SUSPENDED": lifecycle = [.resume, .cancel]
+        default: lifecycle = []
+        }
+        return lifecycle + [.note]
+    }
+}
+
+struct AdminAdsPage: Decodable {
+    let campaigns: [AdminAdCampaign]
+    let total: Int
+    let page: Int
+    let totalPages: Int
+}
+
+// MARK: - Withdrawals (Creator + HELP campaign)
+
+/// What a creator payout and a HELP campaign payout have in common -
+/// see `AdminReviewableItem`'s own doc comment for why this is a
+/// protocol rather than three near-identical screens.
+protocol AdminWithdrawalRequest: Decodable, Identifiable, Equatable where ID == String {
+    var amount: Double { get }
+    var currency: String { get }
+    var walletAddress: String { get }
+    var status: String { get }
+    var transactionHash: String? { get }
+    var createdAt: Date { get }
+    var withdrawalOwner: AdminActorRef { get }
+    /// One extra line under the amount - nothing for a creator payout,
+    /// the campaign name for a HELP one.
+    var withdrawalDetailLine: String? { get }
+}
+
+enum AdminWithdrawalStatusFilter: String, CaseIterable, Identifiable {
+    case pending = "PENDING"
+    case processing = "PROCESSING"
+    case completed = "COMPLETED"
+    case failed = "FAILED"
+    case rejected = "REJECTED"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .pending: return "Pending"
+        case .processing: return "Processing"
+        case .completed: return "Completed"
+        case .failed: return "Failed"
+        case .rejected: return "Rejected"
+        }
+    }
+}
+
+struct AdminCreatorWithdrawal: AdminWithdrawalRequest {
+    let id: String
+    let amount: Double
+    let currency: String
+    let walletAddress: String
+    let status: String
+    let transactionHash: String?
+    let createdAt: Date
+    let user: AdminActorRef
+
+    var withdrawalOwner: AdminActorRef { user }
+    var withdrawalDetailLine: String? { nil }
+}
+
+struct AdminHelpCampaignRef: Decodable, Equatable {
+    let id: String
+    let title: String
+}
+
+struct AdminHelpWithdrawal: AdminWithdrawalRequest {
+    let id: String
+    let amount: Double
+    let currency: String
+    let walletAddress: String
+    let status: String
+    let transactionHash: String?
+    let createdAt: Date
+    let organizer: AdminActorRef
+    let campaign: AdminHelpCampaignRef
+
+    var withdrawalOwner: AdminActorRef { organizer }
+    var withdrawalDetailLine: String? { "For: \(campaign.title)" }
+}
+
+// MARK: - Journalists (`/api/admin/journalists`)
+
+/// A journalist application/profile. `id` is the **user's** id - the
+/// route keys every action off `JournalistProfile.userId`, not the
+/// profile row's own id, because the badge/role sync (`syncJournalistBadge`,
+/// `User.role`) both key off the user too.
+struct AdminJournalistProfile: Decodable, Identifiable, Equatable {
+    let userId: String
+    let status: String
+    let outlet: String?
+    let pitch: String?
+    let portfolioUrl: String?
+    let appliedAt: Date
+    let reviewedAt: Date?
+    let rejectionReason: String?
+    let suspensionReason: String?
+    let user: AdminActorRef
+
+    var id: String { userId }
+}
+
+struct AdminJournalistsPage: Decodable {
+    let profiles: [AdminJournalistProfile]
+    let counts: [String: Int]
+    struct Pagination: Decodable {
+        let page: Int
+        let totalPages: Int
+        let total: Int
+    }
+    let pagination: Pagination
+}
+
+enum AdminJournalistStatusFilter: String, CaseIterable, Identifiable {
+    case all
+    case pending = "PENDING"
+    case verified = "VERIFIED"
+    case rejected = "REJECTED"
+    case suspended = "SUSPENDED"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .all: return "All"
+        case .pending: return "Pending"
+        case .verified: return "Verified"
+        case .rejected: return "Rejected"
+        case .suspended: return "Suspended"
+        }
+    }
+}
+
+enum AdminJournalistAction: String, CaseIterable, Identifiable {
+    case approve, reject, suspend, restore, remove
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .approve: return "Approve"
+        case .reject: return "Reject"
+        case .suspend: return "Suspend"
+        case .restore: return "Restore"
+        case .remove: return "Remove journalist status"
+        }
+    }
+}
+
+extension AdminJournalistProfile {
+    /// Mirrors `PATCH /api/admin/journalists/[id]`'s own `REQUIRED_STATUS`-
+    /// style gate - a UX guard, not the security boundary.
+    var availableActions: [AdminJournalistAction] {
+        switch status {
+        case "PENDING": return [.approve, .reject]
+        case "VERIFIED": return [.suspend, .remove]
+        case "SUSPENDED": return [.restore, .remove]
+        default: return []
+        }
+    }
+}
+
+// MARK: - Music artist verification (`/api/admin/music/artists`)
+
+struct AdminMusicArtistCounts: Decodable, Equatable {
+    let tracks: Int
+    let followers: Int
+}
+
+struct AdminMusicArtist: Decodable, Identifiable, Equatable {
+    let id: String
+    let displayName: String
+    let bio: String?
+    let avatarUrl: String?
+    let verified: Bool
+    let createdAt: Date
+    let user: AdminActorRef
+    let counts: AdminMusicArtistCounts
+
+    private enum CodingKeys: String, CodingKey {
+        case id, displayName, bio, avatarUrl, verified, createdAt, user
+        case counts = "_count"
+    }
+}
+
+struct AdminMusicArtistsPage: Decodable {
+    let artists: [AdminMusicArtist]
+    let total: Int
+    let page: Int
+    let totalPages: Int
+}
+
+enum AdminMusicArtistStatusFilter: String, CaseIterable, Identifiable {
+    case all
+    case verified
+    case unverified
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .all: return "All"
+        case .verified: return "Verified"
+        case .unverified: return "Unverified"
+        }
+    }
+}
+
+// MARK: - Ambassadors (`/api/admin/ambassadors`)
+
+/// Same shape as `AdminJournalistProfile` - `id` is the user's id.
+struct AdminAmbassadorProfile: Decodable, Identifiable, Equatable {
+    let userId: String
+    let status: String
+    let level: String
+    let countryCode: String
+    let countryName: String
+    let cityRegion: String?
+    let languages: [String]
+    let motivation: String
+    let communityDescription: String?
+    let audienceSize: Int?
+    let appliedAt: Date
+    let reviewedAt: Date?
+    let rejectionReason: String?
+    let suspensionReason: String?
+    let user: AdminActorRef
+
+    var id: String { userId }
+}
+
+struct AdminAmbassadorsPage: Decodable {
+    let profiles: [AdminAmbassadorProfile]
+    let counts: [String: Int]
+    struct Pagination: Decodable {
+        let page: Int
+        let totalPages: Int
+        let total: Int
+    }
+    let pagination: Pagination
+}
+
+enum AdminAmbassadorStatusFilter: String, CaseIterable, Identifiable {
+    case all
+    case pending = "PENDING"
+    case approved = "APPROVED"
+    case rejected = "REJECTED"
+    case suspended = "SUSPENDED"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .all: return "All"
+        case .pending: return "Pending"
+        case .approved: return "Approved"
+        case .rejected: return "Rejected"
+        case .suspended: return "Suspended"
+        }
+    }
+}
+
+enum AdminAmbassadorAction: String, CaseIterable, Identifiable {
+    case approve, reject, suspend, restore
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .approve: return "Approve"
+        case .reject: return "Reject"
+        case .suspend: return "Suspend"
+        case .restore: return "Restore"
+        }
+    }
+}
+
+extension AdminAmbassadorProfile {
+    var availableActions: [AdminAmbassadorAction] {
+        switch status {
+        case "PENDING": return [.approve, .reject]
+        case "APPROVED": return [.suspend]
+        case "SUSPENDED": return [.restore]
+        default: return []
+        }
+    }
+}
+
+// MARK: - Support tickets (`/api/admin/support/tickets`) - ADMIN only
+
+struct AdminSupportTicketReplyPreview: Decodable, Equatable {
+    let id: String
+    let message: String
+    let isInternal: Bool
+    let createdAt: Date
+    let user: AdminActorRef
+}
+
+struct AdminSupportTicketUser: Decodable, Equatable {
+    let id: String
+    let username: String
+    let email: String?
+    let avatarUrl: String?
+    let plan: String?
+}
+
+struct AdminSupportTicket: Decodable, Identifiable, Equatable {
+    let id: String
+    let subject: String
+    let message: String
+    let category: String
+    let priority: String
+    let status: String
+    let createdAt: Date
+    let resolution: String?
+    let resolvedAt: Date?
+    let user: AdminSupportTicketUser
+    let assignedAdmin: AdminActorRef?
+    let replies: [AdminSupportTicketReplyPreview]
+    let counts: AdminTicketReplyCounts
+
+    private enum CodingKeys: String, CodingKey {
+        case id, subject, message, category, priority, status, createdAt, resolution, resolvedAt
+        case user, assignedAdmin, replies
+        case counts = "_count"
+    }
+}
+
+struct AdminTicketReplyCounts: Decodable, Equatable {
+    let replies: Int
+}
+
+struct AdminSupportTicketsPage: Decodable {
+    let tickets: [AdminSupportTicket]
+    struct Pagination: Decodable { let page: Int; let pages: Int; let total: Int }
+    let pagination: Pagination
+}
+
+struct AdminSupportTicketStats: Decodable, Equatable {
+    let open: Int
+    let inProgress: Int
+    let awaitingReply: Int
+    let resolved: Int
+    let total: Int
+}
+
+/// The full ticket thread, from `GET /api/admin/support/tickets/{id}`.
+struct AdminSupportTicketDetail: Decodable, Equatable {
+    struct DetailUser: Decodable, Equatable {
+        let id: String
+        let username: String
+        let email: String?
+        let avatarUrl: String?
+        let plan: String?
+        let createdAt: Date
+    }
+    struct Reply: Decodable, Identifiable, Equatable {
+        let id: String
+        let message: String
+        let isInternal: Bool
+        let createdAt: Date
+        let user: AdminActorRef
+    }
+
+    let id: String
+    let subject: String
+    let message: String
+    let category: String
+    let priority: String
+    let status: String
+    let createdAt: Date
+    let resolution: String?
+    let resolvedAt: Date?
+    let user: DetailUser
+    let assignedAdmin: AdminActorRef?
+    let replies: [Reply]
+}
+
+enum AdminTicketStatusFilter: String, CaseIterable, Identifiable {
+    case all
+    case open = "OPEN"
+    case inProgress = "IN_PROGRESS"
+    case awaitingReply = "AWAITING_REPLY"
+    case resolved = "RESOLVED"
+    case closed = "CLOSED"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .all: return "All"
+        case .open: return "Open"
+        case .inProgress: return "In progress"
+        case .awaitingReply: return "Awaiting reply"
+        case .resolved: return "Resolved"
+        case .closed: return "Closed"
+        }
+    }
+}
+
+// MARK: - Analytics (`/api/admin/analytics`) - ADMIN only
+
+struct AdminAnalyticsSummary: Decodable, Equatable {
+    let users: Int
+    let posts: Int
+    let comments: Int
+    let likes: Int
+    let reposts: Int
+}
+
+struct AdminAnalyticsDailyPoint: Decodable, Identifiable, Equatable {
+    let date: String
+    let users: Int
+    let posts: Int
+    let comments: Int
+    let likes: Int
+    let reposts: Int
+
+    var id: String { date }
+}
+
+struct AdminAnalyticsTopPost: Decodable, Identifiable, Equatable {
+    struct Author: Decodable, Equatable {
+        let username: String
+        let name: String?
+    }
+    struct Counts: Decodable, Equatable {
+        let likes: Int
+        let comments: Int
+        let reposts: Int
+    }
+    let id: String
+    let content: String
+    let createdAt: Date
+    let author: Author
+    let engagement: Int
+    let counts: Counts
+
+    private enum CodingKeys: String, CodingKey {
+        case id, content, createdAt, author, engagement
+        case counts = "_count"
+    }
+}
+
+struct AdminAnalyticsEngagement: Decodable, Equatable {
+    let avgLikesPerPost: Double
+    let avgCommentsPerPost: Double
+    let totalLikes: Int
+    let totalComments: Int
+    let totalPosts: Int
+}
+
+struct AdminAnalytics: Decodable, Equatable {
+    let range: String
+    let summary: AdminAnalyticsSummary
+    let daily: [AdminAnalyticsDailyPoint]
+    let topPosts: [AdminAnalyticsTopPost]
+    let engagement: AdminAnalyticsEngagement
+}
+
+enum AdminAnalyticsRange: String, CaseIterable, Identifiable {
+    case sevenDays = "7d"
+    case thirtyDays = "30d"
+    case ninetyDays = "90d"
+    case all = "all"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .sevenDays: return "7 days"
+        case .thirtyDays: return "30 days"
+        case .ninetyDays: return "90 days"
+        case .all: return "All time"
+        }
+    }
+}
+
+// MARK: - Audit log (`/api/admin/audit-log`) - ADMIN only, no web UI
+
+struct AdminAuditLogEntry: Decodable, Identifiable, Equatable {
+    let id: String
+    let actorId: String?
+    let actorUsername: String?
+    let action: String
+    let targetType: String?
+    let targetId: String?
+    let createdAt: Date
+    /// Arbitrary per-action JSON, decoded loosely and rendered as
+    /// `key: value` lines rather than typed per action - there are
+    /// dozens of distinct `action` strings across this whole console
+    /// (`user.ban`, `withdrawal.approve`, `report.delete`...) and this is
+    /// the one screen whose entire job is showing whatever was actually
+    /// recorded, not reshaping it.
+    let metadata: [String: AdminJSONValue]?
+}
+
+struct AdminAuditLogPage: Decodable {
+    let entries: [AdminAuditLogEntry]
+    let nextCursor: String?
+}
+
+/// A minimal `Decodable` sum type for the audit log's free-form
+/// `metadata` JSON - a string, number, bool, null, or nested
+/// array/object of the same. Just enough to render `key: value` without
+/// assuming a shape.
+enum AdminJSONValue: Decodable {
+    case string(String)
+    case number(Double)
+    case bool(Bool)
+    case null
+    case array([AdminJSONValue])
+    case object([String: AdminJSONValue])
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() {
+            self = .null
+        } else if let bool = try? container.decode(Bool.self) {
+            self = .bool(bool)
+        } else if let number = try? container.decode(Double.self) {
+            self = .number(number)
+        } else if let string = try? container.decode(String.self) {
+            self = .string(string)
+        } else if let array = try? container.decode([AdminJSONValue].self) {
+            self = .array(array)
+        } else if let object = try? container.decode([String: AdminJSONValue].self) {
+            self = .object(object)
+        } else {
+            self = .null
+        }
+    }
+
+    /// A short, human-readable rendering for the audit log's detail view.
+    var displayString: String {
+        switch self {
+        case .string(let value): return value
+        case .number(let value): return value.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(value)) : String(value)
+        case .bool(let value): return value ? "true" : "false"
+        case .null: return "\u{2013}"
+        case .array(let values): return "[" + values.map(\.displayString).joined(separator: ", ") + "]"
+        case .object(let dict): return dict.map { "\($0.key): \($0.value.displayString)" }.sorted().joined(separator: ", ")
+        }
+    }
+}
+
+// MARK: - Charity disbursements (`/api/admin/charity-disbursements`) - ADMIN only, no web UI
+
+struct AdminCharityDisbursement: Decodable, Identifiable, Equatable {
+    let id: String
+    let beneficiaryName: String
+    let cause: String
+    let amount: Double
+    let currency: String
+    let disbursedAt: Date
+    let note: String?
+    let proofUrl: String?
+    let recordedByUsername: String?
+}
+
+/// The four causes `POST /api/admin/charity-disbursements` accepts.
+enum AdminCharityCause: String, CaseIterable, Identifiable {
+    case orphanages, schools, hospitals, climate
+    var id: String { rawValue }
+    var displayName: String { rawValue.capitalized }
+}
+
+// MARK: - Subscriptions & Billing (`/api/admin/subscriptions`) - ADMIN only
+
+struct AdminSubscriptionUserRef: Decodable, Equatable {
+    let id: String
+    let username: String
+    let email: String?
+    let name: String?
+    let plan: String
+    let badgeType: String?
+    let avatarUrl: String?
+}
+
+struct AdminSubscriptionPaymentRecord: Decodable, Identifiable, Equatable {
+    let id: String
+    let amount: Double
+    let plan: String
+    let billingInterval: String?
+    let paymentMethod: String
+    let createdAt: Date
+}
+
+struct AdminSubscriptionRow: Decodable, Identifiable, Equatable {
+    let userId: String
+    let user: AdminSubscriptionUserRef
+    let plan: String
+    let status: String
+    let billingInterval: String?
+    let currentPeriodEnd: Date?
+    let daysRemaining: Int?
+    let needsReconciliation: Bool
+    let lastPayment: AdminSubscriptionPaymentRecord?
+
+    var id: String { userId }
+}
+
+struct AdminSubscriptionsOverview: Decodable, Equatable {
+    let active: Int
+    let expired: Int
+    let canceled: Int
+    let pending: Int
+    let expiringWithin7Days: Int
+    let expiringWithin30Days: Int
+    let failedPayments: Int
+    let paidUsers: Int
+    let freeUsers: Int
+    let needsReconciliation: Int
+}
+
+struct AdminSubscriptionsPage: Decodable {
+    let overview: AdminSubscriptionsOverview
+    let subscriptions: [AdminSubscriptionRow]
+    struct Pagination: Decodable { let page: Int; let totalPages: Int; let total: Int }
+    let pagination: Pagination
+}
+
+/// `GET /api/admin/subscriptions/{userId}` - one user's full billing
+/// detail. Legacy `legacyPaymentRequests`/`legacyUpgradeRequests` and the
+/// subscription's `events` history are read by the web page for full
+/// audit context; this screen shows the current subscription and its
+/// payment history, which covers what a phone-side "grant/cancel/restore"
+/// decision actually needs - see PARITY.md for the exact narrower scope.
+struct AdminSubscriptionDetail: Decodable, Equatable {
+    struct DetailUser: Decodable, Equatable {
+        let id: String
+        let username: String
+        let email: String?
+        let name: String?
+        let plan: String
+        let badgeType: String?
+        let createdAt: Date
+    }
+    struct Subscription: Decodable, Equatable {
+        let id: String
+        let plan: String
+        let status: String
+        let billingInterval: String?
+        let currentPeriodStart: Date?
+        let currentPeriodEnd: Date?
+        let daysRemaining: Int?
+        let canceledAt: Date?
+        let expiredAt: Date?
+        let isLegacyBackfill: Bool
+        let payments: [AdminSubscriptionPaymentRecord]
+    }
+
+    let user: DetailUser
+    let subscription: Subscription?
+}
+
+/// The three plans `POST /api/admin/subscriptions/{userId}/grant`
+/// accepts - never `free` (nothing to grant), and never `enterprise`'s
+/// sibling values that don't exist; matches `VALID_PLANS.filter(plan =>
+/// plan !== "free")` server-side.
+enum AdminGrantablePlan: String, CaseIterable, Identifiable {
+    case pro, business, enterprise
+    var id: String { rawValue }
+    var displayName: String { rawValue.capitalized }
+}
+
+enum AdminBillingInterval: String, CaseIterable, Identifiable {
+    case monthly, yearly
+    var id: String { rawValue }
+    var displayName: String { rawValue.capitalized }
+}
+
+// MARK: - Storage cleanup (`/api/admin/cleanup-uploadthing`) - ADMIN only
+
+struct AdminStorageScanResult: Decodable, Equatable {
+    let totalFilesInUploadThing: Int
+    let totalReferencedInDb: Int
+    let nonUploadedStatusCount: Int
+    let orphanedCount: Int
+    let orphanedSizeMB: Double
+    let heldForReviewCount: Int
+    let heldForReviewSizeMB: Double
+}
+
+struct AdminStorageCleanupResult: Decodable, Equatable {
+    let orphanedCount: Int
+    let orphanedSizeMB: Double
+    let heldForReviewCount: Int
+    let deleted: Int
+}

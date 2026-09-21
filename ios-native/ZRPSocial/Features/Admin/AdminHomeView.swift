@@ -82,11 +82,55 @@ struct AdminHomeView: View {
                 }
             } header: {
                 Text(verbatim: "Moderation")
+            }
+
+            Section {
+                NavigationLink(value: Route.adminAds) {
+                    Label { Text(verbatim: "Ads") } icon: { Image(systemName: "megaphone") }
+                }
+                NavigationLink(value: Route.adminMarketplace) {
+                    Label { Text(verbatim: "Marketplace") } icon: { Image(systemName: "bag") }
+                }
+                NavigationLink(value: Route.adminOpportunity) {
+                    Label { Text(verbatim: "Opportunity") } icon: { Image(systemName: "briefcase") }
+                }
+                NavigationLink(value: Route.adminHelpCampaigns) {
+                    Label { Text(verbatim: "HELP campaigns") } icon: { Image(systemName: "heart") }
+                }
+            } header: {
+                Text(verbatim: "Review queues")
+            }
+
+            Section {
+                NavigationLink(value: Route.adminWithdrawals) {
+                    Label { Text(verbatim: "Creator withdrawals") } icon: { Image(systemName: "banknote") }
+                }
+                NavigationLink(value: Route.adminHelpWithdrawals) {
+                    Label { Text(verbatim: "HELP withdrawals") } icon: { Image(systemName: "banknote") }
+                }
+            } header: {
+                Text(verbatim: "Payouts")
+            } footer: {
+                Text(verbatim: "Approving a payout sends a real on-chain USDC transfer.")
+            }
+
+            Section {
+                NavigationLink(value: Route.adminJournalists) {
+                    Label { Text(verbatim: "Journalists") } icon: { Image(systemName: "newspaper") }
+                }
+                NavigationLink(value: Route.adminAmbassadors) {
+                    Label { Text(verbatim: "Ambassadors") } icon: { Image(systemName: "globe") }
+                }
+                NavigationLink(value: Route.adminMusicArtists) {
+                    Label { Text(verbatim: "Music artists") } icon: { Image(systemName: "music.mic") }
+                }
+            } header: {
+                Text(verbatim: "People")
             } footer: {
                 // Deliberately explains itself rather than pretending to
                 // be the entire web admin console - see this view's own
                 // doc comment for the exact list of what is still absent.
-                Text(verbatim: "Every action here re-checks your role on the server. Financial queues and other review queues remain web-only for now.")
+                Text(verbatim: "Every action here re-checks your role on the server. Some sections remain web-only for now.")
             }
         }
         .listStyle(.insetGrouped)

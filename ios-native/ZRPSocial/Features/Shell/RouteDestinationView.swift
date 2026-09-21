@@ -167,6 +167,40 @@ struct RouteDestinationView: View {
             AdminAppealsView()
         case .adminPosts:
             AdminPostsView()
+        case .adminAds:
+            AdminAdsView()
+        case .adminMarketplace:
+            AdminMarketplaceView()
+        case .adminOpportunity:
+            AdminOpportunityView()
+        case .adminHelpCampaigns:
+            AdminHelpCampaignsView()
+        case .adminHelpWithdrawals:
+            AdminHelpWithdrawalsView()
+        case .adminWithdrawals:
+            AdminWithdrawalsView()
+        case .adminJournalists:
+            AdminJournalistsView()
+        case .adminMusicArtists:
+            AdminMusicArtistsView()
+        case .adminAmbassadors:
+            AdminAmbassadorsView()
+        case .adminSupportTickets:
+            AdminSupportTicketsView()
+        case .adminSupportTicket(let id):
+            AdminSupportTicketDetailView(ticketId: id)
+        case .adminAnalytics:
+            AdminAnalyticsView()
+        case .adminAuditLog:
+            AdminAuditLogView()
+        case .adminCharityDisbursements:
+            AdminCharityDisbursementsView()
+        case .adminSubscriptions:
+            AdminSubscriptionsView()
+        case .adminSubscriptionDetail(let userId):
+            AdminSubscriptionDetailView(userId: userId)
+        case .adminStorageCleanup:
+            AdminStorageCleanupView()
         case .listingConversation(let partner, let draft):
             ConversationView(
                 partner: partner,

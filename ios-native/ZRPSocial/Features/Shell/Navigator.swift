@@ -142,6 +142,23 @@ enum Route: Hashable {
     case adminReports
     case adminAppeals
     case adminPosts
+    case adminAds
+    case adminMarketplace
+    case adminOpportunity
+    case adminHelpCampaigns
+    case adminHelpWithdrawals
+    case adminWithdrawals
+    case adminJournalists
+    case adminMusicArtists
+    case adminAmbassadors
+    case adminSupportTickets
+    case adminSupportTicket(id: String)
+    case adminAnalytics
+    case adminAuditLog
+    case adminCharityDisbursements
+    case adminSubscriptions
+    case adminSubscriptionDetail(userId: String)
+    case adminStorageCleanup
 }
 
 /// Owns the navigation stack's path.
