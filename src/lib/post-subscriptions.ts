@@ -80,17 +80,39 @@ async function notifySubscribersOfNewPostInternal({
   // rejected at the API layer, so subscriberIds should never contain it,
   // but a post's own author must never be notified about their own post
   // regardless of how that ever happened).
-  const recipientIds = subscriberIds.filter(
+  const candidateIds = subscriberIds.filter(
     (id) => id !== authorId && !blockedSubscriberIds.has(id)
   );
+  if (candidateIds.length === 0) return;
+
+  // Bulk pre-filter: who among the candidates already has a
+  // post_from_subscription notification for this exact post - one query,
+  // not per-recipient. This is what actually makes a repeat fan-out call
+  // for the same post a no-op (both for the DB row AND for the socket
+  // ping / push send below, which a DB-only unique-constraint guard would
+  // NOT have covered, since skipDuplicates silently drops the row but
+  // still lets the caller re-emit/re-push for it). The migration also
+  // adds a partial unique index on (userId, postId) scoped to this type
+  // as a defense-in-depth backstop against a genuine race between two
+  // concurrent calls - schema.prisma's DSL can't express a partial index,
+  // so environments that build the test schema straight from the DSL
+  // (see the `db push` step and its comment in .github/workflows/ci.yml)
+  // don't have it, which is exactly why this app-level check must not
+  // depend on that index existing to be correct on its own.
+  const alreadyNotified = await prisma.notification.findMany({
+    where: { postId, type: "post_from_subscription", userId: { in: candidateIds } },
+    select: { userId: true },
+  });
+  const alreadyNotifiedIds = new Set(alreadyNotified.map((n) => n.userId));
+  const recipientIds = candidateIds.filter((id) => !alreadyNotifiedIds.has(id));
   if (recipientIds.length === 0) return;
 
-  // One INSERT for every recipient. skipDuplicates relies on the
-  // partial unique index the migration adds on (userId, postId) scoped
-  // to type = 'post_from_subscription' (a post has exactly one author,
-  // so that pair alone is a safe dedup key for this type only) - a
-  // second fan-out call for the same post is a structural no-op instead
-  // of depending on this function only ever being called once.
+  // One INSERT for every remaining recipient. skipDuplicates is kept as a
+  // second layer on top of the pre-filter above (it relies on the
+  // migration's partial unique index where that index exists, e.g. a real
+  // production `migrate deploy`), so a genuine race between two
+  // concurrent calls still can't double-insert a row there even though
+  // the pre-filter query alone can't fully close that race.
   await prisma.notification.createMany({
     data: recipientIds.map((userId) => ({
       userId,
