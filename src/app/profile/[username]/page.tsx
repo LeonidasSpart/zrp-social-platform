@@ -205,6 +205,9 @@ interface UserProfile {
   // Independent of isFollowing (the other direction); see
   // src/app/api/users/[username]/route.ts.
   followsMe: boolean;
+  // "Notify me when this account posts" - independent of isFollowing,
+  // see PostSubscription in prisma/schema.prisma.
+  postNotificationsEnabled: boolean;
 
   followRequestStatus?: "pending" | "none";
 
@@ -309,6 +312,12 @@ export default function ProfilePage(
   const [followLoading, setFollowLoading] =
     useState(false);
 
+  const [postNotificationsEnabled, setPostNotificationsEnabled] =
+    useState(false);
+
+  const [notifyLoading, setNotifyLoading] =
+    useState(false);
+
   const [followRequestStatus, setFollowRequestStatus] =
     useState<"none" | "pending">("none");
 
@@ -402,6 +411,10 @@ export default function ProfilePage(
 
       setIsFollowing(
         data.isFollowing || false
+      );
+
+      setPostNotificationsEnabled(
+        data.postNotificationsEnabled || false
       );
 
       setIsBlocked(
@@ -677,6 +690,42 @@ export default function ProfilePage(
       );
     } finally {
       setFollowLoading(false);
+    }
+  };
+
+  // ─── Post notifications ("notify me when this account posts") ──
+  // Independent of Follow/Unfollow above - a toggle, not a
+  // request/approval flow, since it's a private "alert me" setting
+  // rather than a relationship the target ever sees.
+
+  const handleNotifyPosts = async () => {
+    if (!session || isOwnProfile) return;
+
+    setNotifyLoading(true);
+
+    try {
+      const res = await fetch(
+        `/api/users/${params.username}/notify-posts`,
+        { method: "POST" }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setPostNotificationsEnabled(data.subscribed);
+        setProfile((prev) =>
+          prev
+            ? { ...prev, postNotificationsEnabled: data.subscribed }
+            : null
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Post notification toggle error:",
+        error
+      );
+    } finally {
+      setNotifyLoading(false);
     }
   };
 
@@ -1643,6 +1692,40 @@ export default function ProfilePage(
                         )}
                       </span>
                     </>
+                  )}
+                </button>
+
+                {/* Post notifications - independent of Follow, a
+                    private "alert me" toggle rather than a
+                    request/approval relationship, so it's its own
+                    icon-only button rather than folded into Follow's
+                    label. */}
+
+                <button
+                  onClick={handleNotifyPosts}
+                  disabled={notifyLoading}
+                  aria-label={t(
+                    postNotificationsEnabled
+                      ? "profile.notifyPostsOn"
+                      : "profile.notifyPosts"
+                  )}
+                  title={t(
+                    postNotificationsEnabled
+                      ? "profile.notifyPostsOn"
+                      : "profile.notifyPosts"
+                  )}
+                  className={`inline-flex items-center justify-center h-11 w-11 rounded-full border transition whitespace-nowrap ${
+                    postNotificationsEnabled
+                      ? "bg-zrp-red/10 border-zrp-red text-zrp-red hover:bg-zrp-red/20"
+                      : "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  {notifyLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : postNotificationsEnabled ? (
+                    <Bell className="w-4 h-4 fill-current" />
+                  ) : (
+                    <Bell className="w-4 h-4" />
                   )}
                 </button>
 

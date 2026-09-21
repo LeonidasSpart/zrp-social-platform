@@ -185,10 +185,13 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // direction) and safe to add: one extra findUnique on a table
     // already queried above, no schema change.
     let followsMe = false;
+    // "Notify me when this account posts" - see PostSubscription in
+    // prisma/schema.prisma, independent of isFollowing.
+    let postNotificationsEnabled = false;
 
     if (session?.user?.id && session.user.id !== user.id) {
       // Independent lookups (no shared dependency), previously sequential.
-      const [follow, followBack, block] = await Promise.all([
+      const [follow, followBack, block, postSubscription] = await Promise.all([
         prisma.follow.findUnique({
           where: {
             followerId_followingId: {
@@ -213,10 +216,19 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
             },
           },
         }),
+        prisma.postSubscription.findUnique({
+          where: {
+            subscriberId_authorId: {
+              subscriberId: session.user.id,
+              authorId: user.id,
+            },
+          },
+        }),
       ]);
       isFollowing = !!follow;
       followsMe = !!followBack;
       isBlocked = !!block;
+      postNotificationsEnabled = !!postSubscription;
     }
 
     // ⚠️ SECURITY: data minimization for a public, unauthenticated
@@ -248,6 +260,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       isFollowing,
       isBlocked,
       followsMe,
+      postNotificationsEnabled,
       charityContributionUsdc,
       milestones,
     });

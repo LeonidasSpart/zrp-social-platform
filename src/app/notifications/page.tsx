@@ -20,7 +20,7 @@ interface FromUser {
 
 interface Notification {
   id: string;
-  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_request" | "repost" | "comment_repost" | "message";
+  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_request" | "repost" | "comment_repost" | "message" | "post_from_subscription";
   read: boolean;
   createdAt: string;
   fromUser: FromUser;
@@ -219,6 +219,8 @@ export default function NotificationsPage() {
         return <Repeat className="w-4 h-4 text-green-500" />;
       case "message":
         return <Mail className="w-4 h-4 text-zrp-red" />;
+      case "post_from_subscription":
+        return <Bell className="w-4 h-4 text-zrp-red" />;
       case "appeal_resolved":
         return <Scale className="w-4 h-4 text-zrp-red" />;
       case "listing_approved":
@@ -252,6 +254,8 @@ export default function NotificationsPage() {
         return plural ? t("notifications.repostedCommentSuffixPlural") : t("notifications.repostedCommentSuffix");
       case "message":
         return t("notifications.sentMessageSuffix");
+      case "post_from_subscription":
+        return t("notifications.postedNewSuffix");
       case "appeal_resolved":
         return t("notifications.appealResolvedSuffix");
       case "listing_approved":
