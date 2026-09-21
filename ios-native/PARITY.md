@@ -677,6 +677,10 @@ noted below.
 | News Network: sources (list/create/seed/verify/edit/delete) | `GET/POST /api/admin/news-network/sources`, `.../seed`, `.../{id}/verify`, `PATCH/DELETE .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
 | News Network: editorial story queue (reject/correct) | `GET /api/admin/news-network/stories`, `PATCH .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
 | News Network: publications (list/unpublish) | `GET /api/admin/news-network/publications`, `DELETE .../{id}` | ✅ | ✅ | ⬜ **not built** | MISSING |
+| Payments: list pending manual crypto verifications | `GET /api/admin/payments`: ADMIN | ✅ | ✅ | ✅ no filters or pagination, matching the route - it is always pre-filtered to pending and meant to stay a short queue | IMPLEMENTED |
+| Payments: verify | `POST /api/admin/payments/verify {paymentId}`: ADMIN | ✅ | ✅ | ✅ confirmed - grants/extends the user's plan in the same transaction as the server-side claim; a flat POST with the id in the body, not a `[id]` path segment, matching the route | IMPLEMENTED |
+| Upgrade requests: list + status filter | `GET /api/upgrade-requests?status=`: ADMIN | ✅ | ✅ | ✅ pending/approved/denied | IMPLEMENTED |
+| Upgrade requests: approve/deny | `PUT /api/upgrade-requests/{id} {action, billingInterval?}`: ADMIN | ✅ | ✅ | ✅ approve picks a billing interval (this legacy request never collects one) then confirms; deny confirms separately. Both grant/deny actions match the route's crash-safe claim pattern - a 409 means another admin/tab already processed it | IMPLEMENTED |
 
 **News Network is deliberately the overview/control-panel slice only**
 (status, pause/resume, manual run) - the four sub-areas above (Feeds,
@@ -685,10 +689,11 @@ management surfaces this pass did not build, given this was explicitly
 flagged as the largest remaining section and the last one in the build
 order. The overview screen says so in its own footer, not just here.
 
-Payments (manual crypto verification) and Upgrade Requests are legacy
+Payments (manual crypto verification) and Upgrade Requests, the legacy
 admin tools for the pre-Solana manual payment flow
-(`UpgradeRequest`/`PaymentRequest` in `schema.prisma`) and were not part
-of this pass's 17-item plan; they remain web-only.
+(`UpgradeRequest`/`PaymentRequest` in `schema.prisma`), were not part of
+this pass's original 17-item plan but have since been built - see the
+two rows above.
 
 ---
 
@@ -697,7 +702,6 @@ of this pass's 17-item plan; they remain web-only.
 | Area | Reason |
 | --- | --- |
 | **Admin console: News Network's Feeds/Sources/editorial-queue/Publications sub-areas** | Not built in this pass - see the **Admin Console (phase 2c)** section above. The overview/control-panel (status, pause/resume, manual run) is built; these four management surfaces are not. |
-| **Admin console: Payments (manual crypto verification), Upgrade Requests** | Legacy admin tools for the pre-Solana manual payment flow (`UpgradeRequest`/`PaymentRequest` in `schema.prisma`). Not part of this pass's scope; web-only for now. |
 | **Admin console: Support ticket assignment** (`PUT .../tickets/{id}` `{assignedTo}`) | Would need a staff-member picker this pass didn't build. The field is read (an already-assigned admin shows) but not writable from iOS. |
 | Tips, plan upgrade, premium-post purchase, help/charity contribution, creator withdrawals | Blocked in native apps by `rejectNativePayment()` (Apple 3.1.1). iOS **must** send `x-zrp-native-app: 1` and must not surface this UI. See [Store policy](#store-policy-constraint). |
 | **Ads**: advertiser side (`/api/ads/campaigns`, `src/app/ads`, `src/app/ads/new`) | Campaign creation is ad *spend*: money leaving an advertiser's account for placement. That is a commerce surface with the same store-policy exposure as the payment routes above, and it is a desk task besides. **The viewing side is a different question and is now built** (see the Ads section below). |

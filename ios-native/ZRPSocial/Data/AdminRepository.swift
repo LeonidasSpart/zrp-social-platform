@@ -129,6 +129,15 @@ protocol AdminRepositoryProtocol: Sendable {
     func cancelSubscription(userId: String, reason: String?) async throws
     func restoreSubscription(userId: String) async throws
 
+    // Payments (ADMIN only)
+    func pendingPayments() async throws -> [AdminPaymentRequest]
+    func verifyPayment(id: String) async throws
+
+    // Upgrade requests (ADMIN only, outside /api/admin/**)
+    func upgradeRequests(status: AdminUpgradeRequestStatusFilter) async throws -> [AdminUpgradeRequest]
+    func approveUpgradeRequest(id: String, billingInterval: AdminBillingInterval) async throws
+    func denyUpgradeRequest(id: String) async throws
+
     // Storage cleanup (ADMIN only)
     func scanStorage() async throws -> AdminStorageScanResult
     func cleanUpStorage() async throws -> AdminStorageCleanupResult
@@ -867,6 +876,67 @@ struct AdminRepository: AdminRepositoryProtocol {
     func restoreSubscription(userId: String) async throws {
         try await client.sendIgnoringResponse(
             Endpoint.post("admin/subscriptions/\(Endpoint.segment(userId))/restore")
+        )
+    }
+
+    // MARK: - Payments
+
+    /// `GET /api/admin/payments` - admin-only. Always pending-only, no
+    /// query params, no pagination - see `AdminPaymentRequest`'s own doc
+    /// comment.
+    func pendingPayments() async throws -> [AdminPaymentRequest] {
+        try await client.send(Endpoint.get("admin/payments"))
+    }
+
+    private struct VerifyPaymentRequest: Encodable {
+        let paymentId: String
+    }
+
+    /// `POST /api/admin/payments/verify` `{paymentId}` - admin-only. A
+    /// **flat** POST with the id in the body, not a `[id]` path segment
+    /// like most other admin routes - matches the route exactly. Verifies
+    /// the payment and grants/extends the user's plan in one transaction;
+    /// a 400/409 ("already processed") surfaces as an ordinary `ApiError`
+    /// for the caller to show.
+    func verifyPayment(id: String) async throws {
+        try await client.sendIgnoringResponse(
+            try Endpoint.post("admin/payments/verify", body: VerifyPaymentRequest(paymentId: id))
+        )
+    }
+
+    // MARK: - Upgrade requests (outside /api/admin/**, still admin-only)
+
+    /// `GET /api/upgrade-requests?status=` - admin-only.
+    func upgradeRequests(status: AdminUpgradeRequestStatusFilter) async throws -> [AdminUpgradeRequest] {
+        try await client.send(Endpoint.get("upgrade-requests", query: [("status", status.rawValue)]))
+    }
+
+    private struct UpgradeRequestActionBody: Encodable {
+        let action: String
+        let billingInterval: String?
+    }
+
+    /// `PUT /api/upgrade-requests/{id}` `{action: "approve", billingInterval}`
+    /// - admin-only. Grants/extends the subscription in a transaction,
+    /// the same crash-safe claim pattern as the payment/withdrawal
+    /// routes; a 409 ("already processed") means another admin or tab
+    /// claimed it first.
+    func approveUpgradeRequest(id: String, billingInterval: AdminBillingInterval) async throws {
+        try await client.sendIgnoringResponse(
+            try Endpoint.put(
+                "upgrade-requests/\(Endpoint.segment(id))",
+                body: UpgradeRequestActionBody(action: "approve", billingInterval: billingInterval.rawValue)
+            )
+        )
+    }
+
+    /// `PUT /api/upgrade-requests/{id}` `{action: "deny"}` - admin-only.
+    func denyUpgradeRequest(id: String) async throws {
+        try await client.sendIgnoringResponse(
+            try Endpoint.put(
+                "upgrade-requests/\(Endpoint.segment(id))",
+                body: UpgradeRequestActionBody(action: "deny", billingInterval: nil)
+            )
         )
     }
 

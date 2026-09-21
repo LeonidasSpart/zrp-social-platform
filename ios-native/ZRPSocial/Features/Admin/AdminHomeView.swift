@@ -144,6 +144,12 @@ struct AdminHomeView: View {
                 NavigationLink(value: Route.adminSubscriptions) {
                     Label { Text(verbatim: "Subscriptions & Billing") } icon: { Image(systemName: "creditcard") }
                 }
+                NavigationLink(value: Route.adminPayments) {
+                    Label { Text(verbatim: "Payments") } icon: { Image(systemName: "bitcoinsign.circle") }
+                }
+                NavigationLink(value: Route.adminUpgradeRequests) {
+                    Label { Text(verbatim: "Upgrade requests") } icon: { Image(systemName: "arrow.up.circle") }
+                }
                 NavigationLink(value: Route.adminStorageCleanup) {
                     Label { Text(verbatim: "Storage cleanup") } icon: { Image(systemName: "externaldrive.badge.minus") }
                 }

@@ -199,6 +199,10 @@ struct RouteDestinationView: View {
             AdminSubscriptionsView()
         case .adminSubscriptionDetail(let userId):
             AdminSubscriptionDetailView(userId: userId)
+        case .adminPayments:
+            AdminPaymentsView()
+        case .adminUpgradeRequests:
+            AdminUpgradeRequestsView()
         case .adminStorageCleanup:
             AdminStorageCleanupView()
         case .adminNews:
