@@ -215,6 +215,16 @@ final class MockAdminRepository: AdminRepositoryProtocol, @unchecked Sendable {
         )
     }
 
+    func analyticsGeography(range: AdminAnalyticsRange) async throws -> AdminAnalyticsGeographyResponse {
+        AdminAnalyticsGeographyResponse(
+            range: range.rawValue,
+            geography: .init(byCountry: [], byRegion: [], newUsersByCountry: [], unknownCountryCount: 0),
+            acquisition: .init(bySource: []),
+            platform: .init(byPlatform: []),
+            language: .init(byLanguage: [])
+        )
+    }
+
     func auditLog(action: String, targetType: String, targetId: String, cursor: String?) async throws -> AdminAuditLogPage {
         AdminAuditLogPage(entries: [], nextCursor: nil)
     }
