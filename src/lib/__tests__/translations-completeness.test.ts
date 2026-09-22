@@ -74,6 +74,8 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   // The brand itself
   "ZRP",
   "ZRP Social",
+  "ZRP Shorts",
+  "ZRP PLAY",
   // Third-party payment brand names - never translated in any language
   "PayPal",
   // ISO banking standard acronyms - identical in every language (French/
@@ -81,6 +83,22 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   // already makes them distinct from this exact English string).
   "IBAN:",
   "BIC:",
+  // Investor page (investors.* namespace): a bare digit or a lone
+  // sentence-final period used to close a fragment-pair sentence around an
+  // inline link (investors.traction.noteEnd/impact.bodyAfter/
+  // businessModel.pricingNoteEnd) - not language content, so identical
+  // across every language by construction.
+  ".",
+  "4",
+  "29",
+  // Registered-user count - some languages' translators kept the Western
+  // thousands-separator style rather than adapting it, which is a valid
+  // locale choice, not a missed translation.
+  "195,000+",
+  // A comma list of product/platform proper nouns (Web, PWA, Android, iOS)
+  // - none of which translate - the exact same pattern as the JPEG/MP4
+  // format lists above.
+  "Web, PWA, Android, iOS",
 ]);
 
 /**
@@ -102,6 +120,10 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
  */
 const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   fr: [
+    "investors.traction.heading",
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "action.message",
     "adminJournalists.portfolio",
     "adminNews.colActions",
@@ -265,6 +287,13 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.scoreLabel",
   ],
   de: [
+    "investors.hero.badge",
+    "investors.meta.title",
+    "investors.roadmap.heading",
+    "investors.platform.marketplace.title",
+    "investors.traction.heading",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.urlPlaceholder",
     "adminStorage.statInUploadThing",
     "adminUsers.badgeTeam",
@@ -369,6 +398,11 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colPlan",
   ],
   it: [
+    "investors.roadmap.heading",
+    "investors.traction.heading",
+    "investors.types.vc",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "hashtag.postSingular",
     "adminNews.slugLabel",
     "adminNews.urlPlaceholder",
@@ -463,6 +497,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.no",
   ],
   sq: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.urlPlaceholder",
     "adminUsers.planBusiness",
     "adminUsers.planEnterprise",
@@ -523,6 +559,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   es: [
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.slugLabel",
     "adminNews.urlPlaceholder",
     "adminPayments.tx",
@@ -618,6 +657,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colPlan",
   ],
   ru: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.urlPlaceholder",
     "adminUsers.planBusiness",
     "adminUsers.planEnterprise",
@@ -669,6 +710,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   ar: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.urlPlaceholder",
     "adminUsers.planBusiness",
     "adminUsers.planEnterprise",
@@ -701,6 +744,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   zh: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.urlPlaceholder",
     "adminUsers.planBusiness",
     "adminUsers.planEnterprise",
@@ -729,6 +774,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title",
   ],
   tr: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.urlPlaceholder",
     "adminTicket.planLabel",
     "adminUsers.colPlan",
@@ -799,6 +846,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colPlan",
   ],
   id: [
+    "investors.platform.marketplace.title",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.slugLabel",
     "adminNews.urlPlaceholder",
     "adminReports.total",
@@ -912,6 +962,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
   ],
   pt: [
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.slugLabel",
     "adminReports.total",
     "adminUsers.total",
@@ -966,6 +1019,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   ja: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "ads.dashboard.ctr",
     "contact.faqLabel",
     "faq.cat.marketPlus",
@@ -1019,6 +1074,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   nl: [
+    "investors.roadmap.heading",
+    "investors.technology.crossPlatform.title",
+    "investors.types.familyOffice",
     "hashtag.postSingular",
     "hashtag.postPlural",
     "action.repost",
@@ -1318,6 +1376,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.actorSystem",
   ],
   ro: [
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminMarketplace.title",
     "adminNews.feedbackPrefix",
     "adminNews.slugLabel",
@@ -1442,6 +1503,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
   ],
   cs: [
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminJournalists.portfolio",
     "adminNews.slugLabel",
     "adminPayments.tx",
@@ -1511,6 +1575,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
   ],
   hu: [
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.slugLabel",
     "adminTicket.adminBadge",
     "adminUsers.roleAdmin",
@@ -1563,6 +1630,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   sv: [
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminJournalists.portfolio",
     "adminMarketplace.title",
     "adminNews.feedbackPrefix",
@@ -1670,6 +1740,12 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.actorSystem",
   ],
   da: [
+    "investors.roadmap.heading",
+    "investors.platform.marketplace.title",
+    "investors.traction.heading",
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "action.post",
     "sharePost.send",
     "adminAds.budgetSummary",
@@ -1819,6 +1895,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.scoreLabel",
   ],
   hr: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminJournalists.portfolio",
     "adminPayments.tx",
     "adminSupport.colStatus",
@@ -1892,6 +1970,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
   ],
   bg: [
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminNews.slugLabel",
     "ads.dashboard.ctr",
     "faq.cat.marketPlus",
@@ -1929,6 +2010,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   el: [
+    "investors.types.familyOffice",
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "adminJournalists.portfolio",
     "adminMarketplace.title",
     "adminNews.slugLabel",
@@ -1989,6 +2073,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   // Market Plus/Shorts), a short admin/nav label, or a format-only value
   // (e.g. "/ 100", "{count}/1000", "{name}: {msg}", "24/7", "CTR").
   no: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "sharePost.send",
     "nav.admin", "action.repost", "settings.video", "chat.sendVoiceMessage",
     "chat.contactVideo", "group.lastMessagePrefix", "adminPayments.tx",
@@ -2022,6 +2108,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.actorSystem",
   ],
   sr: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "nav.admin", "settings.video", "chat.contactVideo", "group.lastMessagePrefix",
     "adminPayments.tx", "analytics.platformAndroid", "analytics.platformIos",
     "adminUsers.roleModerator", "adminUsers.colStatus", "investors.platform2Title",
@@ -2048,6 +2136,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
   ],
   bs: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "settings.video", "chat.contactVideo", "group.lastMessagePrefix", "adminPayments.tx",
     "analytics.platformAndroid", "analytics.platformIos",
     "adminUsers.roleModerator", "adminUsers.colPlan", "adminUsers.colStatus",
@@ -2084,6 +2174,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
   ],
   mk: [
+    "investors.platform.music.title",
+    "investors.platform.news.title",
     "group.lastMessagePrefix", "investors.platform2Title", "press.emailBadge",
     "help.section.aid.title", "help.section.opportunity.title", "help.music.studioHeading",
     "help.section.music.title", "marketplace.heroTitle", "faq.cat.marketPlus",
