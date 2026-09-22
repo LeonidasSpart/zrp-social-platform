@@ -416,6 +416,39 @@ app.prepare().then(async () => {
     return blocked;
   }
 
+  // ─── Incoming-call push notification (backgrounded/closed apps) ───
+  // The "incoming-call" socket event above only does anything while the
+  // recipient's page/app is actually open and running - a backgrounded
+  // tab, a minimized PWA, or a phone with the app not in the foreground
+  // never sees it. This calls the internal /api/internal/call-push
+  // route (same process, loopback only, bearer-secret protected - see
+  // that route's own comment) which reuses the existing, already-tested
+  // sendPushNotification (Web Push + FCM). Reads process.env.PORT
+  // directly rather than closing over the `port` const declared further
+  // down this file, so it never depends on this file's own declaration
+  // order. Deliberately fire-and-forget: a push failure, timeout, or a
+  // deployment that never configured INTERNAL_PUSH_SECRET must never
+  // delay or break the call itself, which is already ringing via the
+  // socket relay above regardless of this outcome.
+  function notifyIncomingCallPush({ receiverId, callerName, callerUsername, isVideo }) {
+    const secret = process.env.INTERNAL_PUSH_SECRET;
+    if (!secret) return;
+    const port = process.env.PORT || 8080;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    fetch(`http://127.0.0.1:${port}/api/internal/call-push`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${secret}`,
+      },
+      body: JSON.stringify({ receiverId, callerName, callerUsername, isVideo }),
+      signal: controller.signal,
+    })
+      .catch((err) => console.error("call-push notify error:", err))
+      .finally(() => clearTimeout(timeout));
+  }
+
   // ─── Handshake authentication ────────────────────────────────────
   // Previously every event handler below trusted whatever userId /
   // senderId / callerId the client sent in the payload - meaning any
@@ -822,6 +855,21 @@ app.prepare().then(async () => {
           signal,
           isVideo: isVideo === true,
           callId,
+        });
+
+        // Backgrounded/minimized apps and inactive tabs may not render
+        // anything for the "incoming-call" socket event above - it only
+        // does something while the recipient's page is actually running.
+        // A real OS-level push closes that gap. Best-effort and fully
+        // non-blocking: the call is already ringing via the socket path
+        // regardless of whether this succeeds, times out, or the secret
+        // was never configured for this deployment (see call-push
+        // route's own fail-closed check).
+        notifyIncomingCallPush({
+          receiverId,
+          callerName: caller.name || caller.username,
+          callerUsername: caller.username,
+          isVideo: isVideo === true,
         });
       } catch (err) {
         console.error("call-user relay error:", err);

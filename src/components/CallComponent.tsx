@@ -91,14 +91,26 @@ export default function CallComponent({
     <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50">
       <div className="relative w-full max-w-4xl p-4">
         <div className="relative bg-gray-900 rounded-2xl overflow-hidden aspect-video">
-          {showRemoteVideo ? (
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              playsInline
-              className="w-full h-full object-cover"
-            />
-          ) : (
+          {/* Always mounted, even for a voice call or before remoteStream
+              arrives - this is the ONLY thing that ever attaches
+              remoteStream to a real media element (see the effect above)
+              and clears isConnecting. It used to only render when
+              showRemoteVideo was already true, which for any voice call
+              (isVideo false) was never - so remoteVideoRef.current stayed
+              null forever, remoteStream's audio track was never handed to
+              anything that could play it, and isConnecting never left
+              true: a real, connected voice call still showed a permanent
+              "Connecting..." spinner with total silence. A <video>
+              element plays an audio-only stream's audio track fine; only
+              its visibility (not its existence) needs to depend on
+              whether this is a video call. */}
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
+            className={showRemoteVideo ? "w-full h-full object-cover" : "hidden"}
+          />
+          {!showRemoteVideo && (
             <div className="flex items-center justify-center h-full text-white text-2xl">
               {isIncoming ? (
                 <div className="text-center">
@@ -110,6 +122,16 @@ export default function CallComponent({
                 <div className="text-center">
                   <div className="w-12 h-12 border-4 border-zrp-red border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                   <p className="text-gray-400">Connecting...</p>
+                </div>
+              ) : !isVideo ? (
+                // A connected voice call has no camera at all - "Camera
+                // is off" (the branch below, correct for a video call
+                // whose camera the user toggled off) would be a
+                // nonsensical, confusing message here.
+                <div className="text-center">
+                  <div className="w-24 h-24 rounded-full bg-zrp-red/30 flex items-center justify-center mx-auto text-6xl">
+                    📞
+                  </div>
                 </div>
               ) : (
                 <div className="text-center">

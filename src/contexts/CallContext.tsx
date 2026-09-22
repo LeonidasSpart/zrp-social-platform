@@ -141,10 +141,59 @@ export function CallProvider({ children }: { children: ReactNode }) {
   // ref, never the state variable directly.
   const peerRef = useRef<Peer.Instance | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
-  const callerIdRef = useRef<string | null>(null);
+  // ⚠️ REAL BUG THIS FIXES: named `callerIdRef` and only ever written
+  // from the callee's own onIncomingCall handler below - startCall()
+  // (the caller's own path) never wrote it. endCall()/rejectCall() both
+  // read it to know who the "other party" is to notify. That's correct
+  // for a callee hanging up (the other party IS the caller), but for a
+  // caller hanging up - including cancelling before the callee ever
+  // answers - `otherPartyIdRef.current` was null, so the end-call emit
+  // at the bottom of endCall() was silently skipped: the callee's UI
+  // never learned the call ended and was left stuck showing an active
+  // or ringing call indefinitely (a ghost call). Renamed to
+  // `otherPartyIdRef` and now written from both startCall() (the
+  // receiver being called) and onIncomingCall() (the caller who called
+  // us), so it always holds the id of whoever is on the other end,
+  // regardless of which side placed the call.
+  const otherPartyIdRef = useRef<string | null>(null);
   const callIdRef = useRef<string | null>(null);
   const endingCallRef = useRef(false);
   const socketRef = useRef<any>(null);
+  // ⚠️ REAL BUG THIS FIXES: neither of these timeouts existed before.
+  // A callee who never answers left the caller's "Calling..." screen
+  // ringing forever with no way out but reloading the page (the exact
+  // failure mode documented at the top of this file for the OLD
+  // incoming-call bug, just from the other side). Separately - and this
+  // is the one that most directly matches "the action starts, but the
+  // connection isn't completed" - simple-peer's own `trickle: false`
+  // mode waits for ICE gathering to fully complete before it ever fires
+  // its one "signal" event; if gathering stalls (an unreachable STUN/
+  // TURN server, a network that blocks the required UDP/TCP ports) that
+  // event may simply never fire, so `call-user`/`accept-call` is never
+  // even sent - and once it IS sent and the other side is negotiating,
+  // WebRTC's iceConnectionState can transition to "failed" with no
+  // exception thrown anywhere for a caller/callee that got this far but
+  // still can't actually route media between each other (symmetric NAT,
+  // corporate firewall, TURN misconfigured). Both of those previously
+  // left the call sitting in "Calling.../Connecting..." forever, with
+  // only a diagnostic log (reportCallDiagnostic) and no user-facing
+  // error or cleanup at all.
+  const signalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const answerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const SIGNAL_TIMEOUT_MS = 20_000;
+  const ANSWER_TIMEOUT_MS = 45_000;
+
+  function clearCallTimeouts() {
+    if (signalTimeoutRef.current) {
+      clearTimeout(signalTimeoutRef.current);
+      signalTimeoutRef.current = null;
+    }
+    if (answerTimeoutRef.current) {
+      clearTimeout(answerTimeoutRef.current);
+      answerTimeoutRef.current = null;
+    }
+  }
 
   useEffect(() => {
     if (status !== "authenticated" || !userId) return;
@@ -161,7 +210,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     }: any) => {
       setCallerName(incomingCallerName);
       setCallerId(incomingCallerId);
-      callerIdRef.current = incomingCallerId;
+      otherPartyIdRef.current = incomingCallerId;
       callIdRef.current = callId ?? null;
       setIsVideoCall(isVideo);
       setIncomingSignal(signal);
@@ -169,14 +218,22 @@ export function CallProvider({ children }: { children: ReactNode }) {
     };
 
     const onCallAccepted = ({ signal }: any) => {
+      clearCallTimeouts();
       if (peerRef.current) {
         peerRef.current.signal(signal);
       }
     };
 
-    const onCallRejected = () => {
+    const onCallRejected = ({ reason }: any = {}) => {
       endCallInternal();
-      setCallError(t("chat.callRejected"));
+      // `reason` is additive (server.js) - an older/never-updated server
+      // still sends a bare event, which falls through to the original,
+      // generic "rejected" wording exactly as before.
+      setCallError(
+        reason === "unavailable" || reason === "service-unavailable"
+          ? t("chat.callUnavailable")
+          : t("chat.callRejected")
+      );
     };
 
     const onCallEnded = () => {
@@ -207,6 +264,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
   function endCallInternal() {
     endingCallRef.current = true;
+    clearCallTimeouts();
 
     if (peerRef.current) {
       peerRef.current.destroy();
@@ -223,7 +281,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
     setCallState("idle");
     setIncomingSignal(null);
     setCallerId(null);
-    callerIdRef.current = null;
+    otherPartyIdRef.current = null;
     callIdRef.current = null;
     setCallerName("");
   }
@@ -252,6 +310,10 @@ export function CallProvider({ children }: { children: ReactNode }) {
       // the caller's own "Ringing..." screen via callerName below, not
       // sent anywhere yet, so seed it now for symmetry with acceptCall.
       setCallerName(receiverName);
+      // See the REAL BUG comment on otherPartyIdRef's declaration above:
+      // this line is the actual fix - it was never written on the
+      // caller's own path before.
+      otherPartyIdRef.current = receiverId;
 
       const newPeer = new Peer({
         initiator: true,
@@ -262,7 +324,23 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
       peerRef.current = newPeer;
 
+      // See the REAL BUG comment on signalTimeoutRef's declaration
+      // above: if simple-peer's own ICE gathering (trickle:false waits
+      // for it to fully finish before "signal" ever fires) stalls, this
+      // is what turns silence into a real, user-visible failure instead
+      // of "Calling..." forever.
+      signalTimeoutRef.current = setTimeout(() => {
+        if (endingCallRef.current) return;
+        reportCallDiagnostic("caller-signal-timeout");
+        setCallError(t("chat.connectionFailed"));
+        endCallInternal();
+      }, SIGNAL_TIMEOUT_MS);
+
       newPeer.on("signal", (signal) => {
+        if (signalTimeoutRef.current) {
+          clearTimeout(signalTimeoutRef.current);
+          signalTimeoutRef.current = null;
+        }
         socketRef.current?.emit(
           "call-user",
           {
@@ -276,16 +354,39 @@ export function CallProvider({ children }: { children: ReactNode }) {
             callIdRef.current = response?.callId ?? null;
           }
         );
+        // The callee may never answer at all (offline, ignored,
+        // declined without the client emitting reject-call for some
+        // reason) - see the REAL BUG comment above. Cleared by
+        // onCallAccepted/onCallRejected/onCallEnded, or by the "stream"
+        // handler below, whichever resolves the call first.
+        answerTimeoutRef.current = setTimeout(() => {
+          if (endingCallRef.current) return;
+          reportCallDiagnostic("caller-no-answer-timeout");
+          setCallError(t("chat.callNoAnswer"));
+          endCall();
+        }, ANSWER_TIMEOUT_MS);
       });
 
       newPeer.on("stream", (remote) => {
         reportCallDiagnostic("caller-remote-stream-received");
+        clearCallTimeouts();
         setRemoteStream(remote);
         setCallState("active");
       });
 
       newPeer.on("iceStateChange", (state) => {
         reportCallDiagnostic("caller-ice-state", { state });
+        // See the REAL BUG comment on signalTimeoutRef's declaration
+        // above: WebRTC itself never throws for this - "failed" is a
+        // legitimate terminal state (e.g. no route between the two
+        // peers exists at all, TURN unreachable/misconfigured) that
+        // this simply never checked for before, leaving the call stuck
+        // showing "Connecting..." with a live peer that will never
+        // connect.
+        if (state === "failed" && !endingCallRef.current) {
+          setCallError(t("chat.connectionFailed"));
+          endCall();
+        }
       });
 
       newPeer.on("connect", () => {
@@ -340,7 +441,22 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
       peerRef.current = newPeer;
 
+      // See the REAL BUG comment on signalTimeoutRef's declaration in
+      // startCall() above - same failure mode, callee side: if this
+      // side's own ICE gathering stalls, "signal" never fires and
+      // accept-call is never sent, leaving both parties stuck.
+      signalTimeoutRef.current = setTimeout(() => {
+        if (endingCallRef.current) return;
+        reportCallDiagnostic("receiver-signal-timeout");
+        setCallError(t("chat.connectionFailed"));
+        rejectCall();
+      }, SIGNAL_TIMEOUT_MS);
+
       newPeer.on("signal", (signal) => {
+        if (signalTimeoutRef.current) {
+          clearTimeout(signalTimeoutRef.current);
+          signalTimeoutRef.current = null;
+        }
         if (callerId) {
           socketRef.current?.emit("accept-call", {
             callerId,
@@ -354,12 +470,19 @@ export function CallProvider({ children }: { children: ReactNode }) {
 
       newPeer.on("stream", (remote) => {
         reportCallDiagnostic("receiver-remote-stream-received");
+        clearCallTimeouts();
         setRemoteStream(remote);
         setCallState("active");
       });
 
       newPeer.on("iceStateChange", (state) => {
         reportCallDiagnostic("receiver-ice-state", { state });
+        // See the matching comment in startCall()'s own iceStateChange
+        // handler - the same terminal WebRTC state, callee side.
+        if (state === "failed" && !endingCallRef.current) {
+          setCallError(t("chat.connectionFailed"));
+          endCall();
+        }
       });
 
       newPeer.on("connect", () => {
@@ -393,26 +516,34 @@ export function CallProvider({ children }: { children: ReactNode }) {
   }
 
   function rejectCall() {
-    if (callerIdRef.current) {
+    clearCallTimeouts();
+    if (otherPartyIdRef.current) {
       socketRef.current?.emit("reject-call", {
-        callerId: callerIdRef.current,
+        callerId: otherPartyIdRef.current,
         callId: callIdRef.current ?? undefined,
       });
     }
     setCallState("idle");
     setIncomingSignal(null);
     setCallerId(null);
-    callerIdRef.current = null;
+    otherPartyIdRef.current = null;
     callIdRef.current = null;
   }
 
   function endCall() {
-    const hadCallerId = callerIdRef.current;
+    // Both captured BEFORE endCallInternal() runs, which clears both
+    // refs to null as part of resetting to idle - reading either
+    // AFTER that call (as this previously did for callId) sends
+    // `undefined`, always, silently defeating the CAS generation check
+    // callId exists for in the first place (see socket-authz.js's
+    // GENERATION RACE comment on createCallRegistry).
+    const otherPartyId = otherPartyIdRef.current;
+    const callId = callIdRef.current;
     endCallInternal();
-    if (hadCallerId) {
+    if (otherPartyId) {
       socketRef.current?.emit("end-call", {
-        callerId: hadCallerId,
-        callId: callIdRef.current ?? undefined,
+        callerId: otherPartyId,
+        callId: callId ?? undefined,
       });
     }
   }
