@@ -55,17 +55,30 @@ const nextConfig = {
         //   camera/microphone stay allowed for this origin only (WebRTC
         //   calling in /messages needs both); everything listed as ()
         //   is denied to this page AND any embedded frame.
-        // - Content-Security-Policy: ENFORCED only for frame-ancestors
-        //   (the CSP equivalent of X-Frame-Options: DENY, which modern
-        //   browsers prefer). Every other directive is delivered as
-        //   Report-Only below, so it observes and logs violations in
-        //   the browser console without ever blocking anything - the
-        //   origin inventory it encodes (UploadThing, GIPHY, YouTube
-        //   embeds, Google Analytics, Sentry, Solana RPC, Socket.IO)
-        //   was assembled from the code, not exercised against every
-        //   flow, and an enforced policy that misses one host would
-        //   silently break uploads, calls or embeds. Promote it to
-        //   enforcing only after a period with no genuine reports.
+        // - Content-Security-Policy: ENFORCED for every directive below.
+        //   This was Report-Only until the full origin allowlist was
+        //   cross-checked against every real flow in the app (uploads via
+        //   UploadThing, the GIF picker via GIPHY, YouTube embeds, Google
+        //   Analytics, Sentry error/replay reporting - which is same-origin
+        //   bundled, not a separate script host - Solana RPC, Socket.IO,
+        //   Google/Apple OAuth). That check found two real gaps that would
+        //   have silently broken production if enforced as-is:
+        //     1. connect-src had no `stun:`/`turn:`/`turns:` schemes.
+        //        Browsers apply connect-src to the ICE server URLs an
+        //        RTCPeerConnection dials (src/contexts/CallContext.tsx's
+        //        getIceServers(), backed by /api/turn-credentials's Metered
+        //        TURN + Google STUN fallback) - without these schemes,
+        //        every call needing an actual TURN relay would have failed
+        //        ICE under enforcement even though Report-Only mode never
+        //        surfaced it (it never blocks, only logs).
+        //     2. media-src listed only utfs.io/*.giphy.com, missing the
+        //        uploadthing.com/*.uploadthing.com host UploadThing also
+        //        serves from (src/lib/media-url.ts's UPLOAD_HOST_RULES)
+        //        and the bare giphy.com host.
+        //   Both are fixed below. If a genuinely new external origin is
+        //   ever needed (a new upload CDN, a new OAuth provider, a new
+        //   embed), add it here explicitly - CSP is enforced now, so a
+        //   missed host fails closed (blocked) instead of failing open.
         source: "/:path*",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },
@@ -76,22 +89,20 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(self), microphone=(self), geolocation=(), payment=(), usb=(), interest-cohort=()",
           },
-          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
           {
-            key: "Content-Security-Policy-Report-Only",
+            key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
               // Next.js injects inline bootstrapping scripts and GA is
               // loaded from googletagmanager.com; nonces would need a
-              // middleware rewrite of every response, which is exactly
-              // the kind of invasive change this policy avoids while
-              // it is report-only.
+              // middleware rewrite of every response, which is a much
+              // more invasive change than this allowlist-based policy.
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
-              "media-src 'self' blob: https://utfs.io https://*.utfs.io https://*.ufs.sh https://*.giphy.com",
+              "media-src 'self' blob: https://utfs.io https://*.utfs.io https://*.ufs.sh https://uploadthing.com https://*.uploadthing.com https://giphy.com https://*.giphy.com",
               "font-src 'self' data:",
-              "connect-src 'self' https: wss:",
+              "connect-src 'self' https: wss: stun: turn: turns:",
               "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://accounts.google.com https://appleid.apple.com",
               "worker-src 'self' blob:",
               "form-action 'self' https://accounts.google.com https://appleid.apple.com",

@@ -661,11 +661,11 @@ withdrawal is a payout rather than a purchase.
 - **Authenticate the socket.** Socket.IO handshakes are authenticated and
   origins are restricted; identity is not taken from the client.
 - **Baseline security headers.** `X-Frame-Options`,
-  `X-Content-Type-Options`, `Referrer-Policy` and
-  `Strict-Transport-Security` are set globally.
-  Content-Security-Policy and Permissions-Policy are deliberately not set
-  yet; getting either wrong would silently break WebRTC calling, uploads
-  or realtime, and both need a domain-by-domain audit first.
+  `X-Content-Type-Options`, `Referrer-Policy`, `Strict-Transport-Security`
+  and `Permissions-Policy` are set globally, and Content-Security-Policy
+  is fully enforced after a domain-by-domain audit of every real flow
+  (uploads, embeds, analytics, error reporting, Solana RPC, Socket.IO,
+  OAuth, and WebRTC's TURN/STUN ICE schemes).
 - **No secrets in the repository.** Configuration is injected at runtime;
   environment files and signing material are excluded by `.gitignore`.
 - **Defence in depth.** Store payment restrictions, for example, are
@@ -688,8 +688,6 @@ Direction, not a delivery commitment. Dates are not promised.
 - Complete the blocked backend capabilities the native clients need.
 - Extend Trust & Safety tooling and the public transparency reporting.
 - Broaden ZRP Music, Creator Studio and Opportunities.
-- Add Content-Security-Policy and Permissions-Policy after a
-  domain-by-domain audit.
 - Continue expanding localization coverage beyond the current 25
   languages as new markets are prioritized.
 - Keep tagging Web releases and publishing GitHub Releases going

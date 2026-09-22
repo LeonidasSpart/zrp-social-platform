@@ -72,10 +72,10 @@ The following are generally not treated as vulnerabilities on their own:
 - Findings from automated scanners without a demonstrated impact.
 - Missing security headers with no demonstrated exploit path. The
   headers currently set are in `next.config.js`. The Content-Security-
-  Policy there is deliberately enforced for `frame-ancestors` only, with
-  the full policy delivered as `Content-Security-Policy-Report-Only`
-  while its origin inventory is validated against every flow; that is a
-  documented, staged rollout rather than an oversight.
+  Policy there is fully enforced across every directive; its origin
+  allowlist was validated against every real flow (uploads, GIF picker,
+  embeds, analytics, error reporting, Solana RPC, Socket.IO, OAuth, and
+  WebRTC's TURN/STUN schemes) before enforcement was turned on.
 - Reports about third-party services or dependencies that are not
   exploitable through ZRP. Please report those to the upstream project,
   and tell us if ZRP is affected.
