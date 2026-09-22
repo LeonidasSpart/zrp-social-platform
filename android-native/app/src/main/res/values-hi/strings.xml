@@ -243,6 +243,9 @@
     <string name="chat_shared_media">साझा किया गया मीडिया</string>
     <string name="chat_no_shared_media">अभी तक कोई साझा फ़ोटो नहीं है</string>
     <string name="chat_call_rejected">कॉल अस्वीकार कर दी गई</string>
+    <string name="chat_connection_failed">कनेक्शन विफल हुआ</string>
+    <string name="chat_call_no_answer">कोई जवाब नहीं</string>
+    <string name="chat_call_unavailable">यह व्यक्ति अभी उपलब्ध नहीं है</string>
     <string name="chat_connection_error">कनेक्शन में गड़बड़ी:</string>
     <string name="chat_mic_camera_error">माइक्रोफ़ोन/कैमरा एक्सेस नहीं किया जा सका:</string>
     <string name="chat_missing_caller_id">स्वीकार नहीं किया जा सकता: कॉलर आईडी गायब है</string>

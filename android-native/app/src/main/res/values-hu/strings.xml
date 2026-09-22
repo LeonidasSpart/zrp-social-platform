@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Megosztott média</string>
     <string name="chat_no_shared_media">Még nincsenek megosztott fotók</string>
     <string name="chat_call_rejected">A hívást elutasították</string>
+    <string name="chat_connection_failed">Sikertelen kapcsolódás</string>
+    <string name="chat_call_no_answer">Nincs válasz</string>
+    <string name="chat_call_unavailable">Ez a személy jelenleg nem elérhető</string>
     <string name="chat_connection_error">Kapcsolódási hiba:</string>
     <string name="chat_mic_camera_error">Nem sikerült hozzáférni a mikrofonhoz/kamerához:</string>
     <string name="chat_missing_caller_id">Nem fogadható el: hiányzó hívóazonosító</string>

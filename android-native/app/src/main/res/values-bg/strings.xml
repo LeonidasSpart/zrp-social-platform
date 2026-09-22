@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Споделена медия</string>
     <string name="chat_no_shared_media">Все още няма споделени снимки</string>
     <string name="chat_call_rejected">Обаждането бе отхвърлено</string>
+    <string name="chat_connection_failed">Неуспешна връзка</string>
+    <string name="chat_call_no_answer">Няма отговор</string>
+    <string name="chat_call_unavailable">Този човек в момента не е достъпен</string>
     <string name="chat_connection_error">Грешка във връзката:</string>
     <string name="chat_mic_camera_error">Не бе получен достъп до микрофона/камерата:</string>
     <string name="chat_missing_caller_id">Не може да се приеме: липсва ID на обаждащия се</string>

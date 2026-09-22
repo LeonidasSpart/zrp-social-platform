@@ -300,6 +300,9 @@ private fun formatDuration(seconds: Int): String {
 @Composable
 private fun callErrorMessage(error: CallError): String = when (error) {
     is CallError.Rejected -> stringResource(R.string.chat_call_rejected)
+    is CallError.Unavailable -> stringResource(R.string.chat_call_unavailable)
+    is CallError.ConnectionFailed -> stringResource(R.string.chat_connection_failed)
+    is CallError.NoAnswer -> stringResource(R.string.chat_call_no_answer)
     is CallError.ConnectionError -> stringResource(R.string.chat_connection_error) + " " + error.detail
     is CallError.MicCameraError -> stringResource(R.string.chat_mic_camera_error) + " " + error.detail
     is CallError.MissingCallerId -> stringResource(R.string.chat_missing_caller_id)

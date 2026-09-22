@@ -5,6 +5,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,16 +40,35 @@ import org.webrtc.VideoTrack
 
 enum class CallPhase { IDLE, CALLING, INCOMING, ACTIVE }
 
+// Mirrors CallContext.tsx's own SIGNAL_TIMEOUT_MS/ANSWER_TIMEOUT_MS
+// (src/contexts/CallContext.tsx). Both are non-trickle-ICE timeouts:
+// this native PeerConnection is always built without a config that
+// enables trickle, so - exactly like simple-peer's `trickle: false`
+// on web - it never sends anything to the signaling server until ICE
+// gathering has fully completed, which is why a stalled gather has to
+// be caught with a timer rather than left to WebRTC's own connection-
+// state machinery (nothing has even been sent to time out on yet).
+private const val CALL_SIGNAL_TIMEOUT_MS = 20_000L
+private const val CALL_ANSWER_TIMEOUT_MS = 45_000L
+
 /**
  * A call problem the screen needs to show translated - kept separate
  * from a plain string the same way CreatePostViewModel's own
  * MediaValidationError is, since a plain ViewModel can't resolve
  * Android string resources itself; CallScreen maps each case to its
  * real, translated chat.* string (see translations.ts's own
- * callRejected/connectionError/micCameraError/missingCallerId keys).
+ * callRejected/callUnavailable/connectionFailed/callNoAnswer/
+ * connectionError/micCameraError/missingCallerId keys).
  */
 sealed class CallError {
+    /** A real human declined, or the server sent call-rejected with no `reason` at all (older server). */
     object Rejected : CallError()
+    /** call-rejected carried `reason: "unavailable"` or `"service-unavailable"` - the recipient was never actually reachable, not a real decline. */
+    object Unavailable : CallError()
+    /** This side's own ICE gathering never completed within CALL_SIGNAL_TIMEOUT_MS, so call-user/accept-call was never even sent. */
+    object ConnectionFailed : CallError()
+    /** call-user was sent (this side's signal fired) but the callee never answered within CALL_ANSWER_TIMEOUT_MS. */
+    object NoAnswer : CallError()
     data class ConnectionError(val detail: String) : CallError()
     data class MicCameraError(val detail: String) : CallError()
     object MissingCallerId : CallError()
@@ -113,6 +134,21 @@ class CallViewModel(
     private var endingCall = false
     private var incomingSignal: JsonObject? = null
 
+    // See CALL_SIGNAL_TIMEOUT_MS/CALL_ANSWER_TIMEOUT_MS above - the
+    // Job-per-timer-plus-cancel() shape matches this codebase's own
+    // idiom for a cancellable delayed action (see e.g. typingJob in
+    // ConversationViewModel.kt), used here in place of web's
+    // setTimeout/clearTimeout pair.
+    private var signalTimeoutJob: Job? = null
+    private var answerTimeoutJob: Job? = null
+
+    private fun clearCallTimeouts() {
+        signalTimeoutJob?.cancel()
+        signalTimeoutJob = null
+        answerTimeoutJob?.cancel()
+        answerTimeoutJob = null
+    }
+
     private var eglBase: EglBase? = null
     private var peerConnectionFactory: PeerConnectionFactory? = null
     private var peerConnection: PeerConnection? = null
@@ -149,6 +185,7 @@ class CallViewModel(
         })
 
         liveSocket.on("call-accepted", Emitter.Listener { args ->
+            clearCallTimeouts()
             val payload = parsePayload(args) ?: return@Listener
             val signal = payload.getAsJsonObject("signal") ?: return@Listener
             val type = signal.get("type")?.asString ?: return@Listener
@@ -159,13 +196,26 @@ class CallViewModel(
             )
         })
 
-        liveSocket.on("call-rejected", Emitter.Listener {
+        // `reason` is additive (server.js) - an older/never-updated
+        // server still sends a bare event (payload null or no `reason`
+        // key), which falls through to the original, generic Rejected
+        // wording exactly as before. Mirrors CallContext.tsx's own
+        // onCallRejected reason === "unavailable" || "service-unavailable" check.
+        liveSocket.on("call-rejected", Emitter.Listener { args ->
+            clearCallTimeouts()
             teardownPeer()
-            _state.update { CallUiState(error = CallError.Rejected) }
+            val reason = parsePayload(args)?.get("reason")?.asString
+            val error = if (reason == "unavailable" || reason == "service-unavailable") {
+                CallError.Unavailable
+            } else {
+                CallError.Rejected
+            }
+            _state.update { CallUiState(error = error) }
             otherPartyId = null
         })
 
         liveSocket.on("call-ended", Emitter.Listener {
+            clearCallTimeouts()
             teardownPeer()
             _state.update { CallUiState() }
             otherPartyId = null
@@ -181,6 +231,7 @@ class CallViewModel(
             liveSocket.disconnect()
         }
         socket = null
+        clearCallTimeouts()
         teardownPeer()
         _state.value = CallUiState()
     }
@@ -213,6 +264,20 @@ class CallViewModel(
                 val pc = createPeerConnection(iceServers) ?: return@launch
                 attachLocalMedia(context, pc, isVideo)
 
+                // See CALL_SIGNAL_TIMEOUT_MS's KDoc above and
+                // CallContext.tsx's signalTimeoutRef: if this side's own
+                // ICE gathering never reaches onIceGatheringComplete
+                // below, call-user is never sent and the caller would
+                // otherwise sit on "Calling..." forever. Cancelled as
+                // soon as onIceGatheringComplete actually fires.
+                signalTimeoutJob = viewModelScope.launch {
+                    delay(CALL_SIGNAL_TIMEOUT_MS)
+                    signalTimeoutJob = null
+                    teardownPeer()
+                    _state.update { CallUiState(error = CallError.ConnectionFailed) }
+                    otherPartyId = null
+                }
+
                 pc.createOffer(object : SdpObserver by LoggingSdpObserver() {
                     override fun onCreateSuccess(sdp: SessionDescription) {
                         pc.setLocalDescription(LoggingSdpObserver(), sdp)
@@ -225,6 +290,8 @@ class CallViewModel(
                 // a label the lambda itself declares can be targeted by
                 // return@.
                 onIceGatheringComplete = gatherOffer@{
+                    signalTimeoutJob?.cancel()
+                    signalTimeoutJob = null
                     val local = pc.localDescription ?: return@gatherOffer
                     val signal = JsonObject().apply {
                         addProperty("type", local.type.canonicalForm())
@@ -238,6 +305,18 @@ class CallViewModel(
                             .put("callerName", callerDisplayName)
                             .put("isVideo", isVideo),
                     )
+
+                    // See CALL_ANSWER_TIMEOUT_MS's KDoc above and
+                    // CallContext.tsx's answerTimeoutRef: the callee may
+                    // never answer at all (offline, ignored, declined
+                    // without emitting reject-call). Cleared by
+                    // call-accepted/call-rejected/call-ended above, or by
+                    // onTrack below, whichever resolves the call first.
+                    answerTimeoutJob = viewModelScope.launch {
+                        delay(CALL_ANSWER_TIMEOUT_MS)
+                        answerTimeoutJob = null
+                        endCall(CallError.NoAnswer)
+                    }
                 }
             } catch (e: Exception) {
                 _state.update {
@@ -259,6 +338,19 @@ class CallViewModel(
                 val pc = createPeerConnection(iceServers) ?: return@launch
                 attachLocalMedia(context, pc, isVideo)
 
+                // See CALL_SIGNAL_TIMEOUT_MS's KDoc above and
+                // CallContext.tsx's signalTimeoutRef (callee side): if
+                // this side's own ICE gathering stalls, accept-call is
+                // never sent and both parties would otherwise be stuck.
+                // rejectCall() also notifies the caller (it already
+                // knows about this call attempt from incoming-call), so
+                // it's used here rather than a bare local reset.
+                signalTimeoutJob = viewModelScope.launch {
+                    delay(CALL_SIGNAL_TIMEOUT_MS)
+                    signalTimeoutJob = null
+                    rejectCall(CallError.ConnectionFailed)
+                }
+
                 val type = signal.get("type")?.asString ?: "offer"
                 val sdp = signal.get("sdp")?.asString ?: return@launch
                 pc.setRemoteDescription(
@@ -275,6 +367,8 @@ class CallViewModel(
                 )
 
                 onIceGatheringComplete = gatherAnswer@{
+                    signalTimeoutJob?.cancel()
+                    signalTimeoutJob = null
                     val local = pc.localDescription ?: return@gatherAnswer
                     val callerId = otherPartyId
                     if (callerId == null) {
@@ -299,19 +393,23 @@ class CallViewModel(
         }
     }
 
-    fun rejectCall() {
+    /** [error] lets the two new timeout paths above surface a reason (CallError.ConnectionFailed); the plain "user pressed reject" call site keeps the default of no error. */
+    fun rejectCall(error: CallError? = null) {
+        clearCallTimeouts()
         otherPartyId?.let { id -> socket?.emit("reject-call", OrgJsonObject().put("callerId", id)) }
         teardownPeer()
-        _state.value = CallUiState()
+        _state.value = CallUiState(error = error)
         otherPartyId = null
         incomingSignal = null
     }
 
-    fun endCall() {
+    /** [error] lets the answer-timeout path above surface CallError.NoAnswer; the plain "user pressed end call" call site keeps the default of no error. */
+    fun endCall(error: CallError? = null) {
+        clearCallTimeouts()
         endingCall = true
         otherPartyId?.let { id -> socket?.emit("end-call", OrgJsonObject().put("callerId", id)) }
         teardownPeer()
-        _state.value = CallUiState()
+        _state.value = CallUiState(error = error)
         otherPartyId = null
         incomingSignal = null
     }
@@ -380,6 +478,11 @@ class CallViewModel(
             override fun onDataChannel(channel: DataChannel?) {}
             override fun onRenegotiationNeeded() {}
             override fun onTrack(transceiver: RtpTransceiver?) {
+                // Matches CallContext.tsx's own newPeer.on("stream", ...)
+                // handler: the call has actually connected, so both the
+                // signal- and answer-timeouts (whichever is still
+                // pending on this side) no longer apply.
+                clearCallTimeouts()
                 val track = transceiver?.receiver?.track()
                 if (track is VideoTrack) {
                     _remoteVideoTrack.value = track

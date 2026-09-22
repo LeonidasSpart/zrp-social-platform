@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Общие медиафайлы</string>
     <string name="chat_no_shared_media">Пока нет общих фото</string>
     <string name="chat_call_rejected">Вызов отклонён</string>
+    <string name="chat_connection_failed">Сбой соединения</string>
+    <string name="chat_call_no_answer">Нет ответа</string>
+    <string name="chat_call_unavailable">Этот человек сейчас недоступен</string>
     <string name="chat_connection_error">Ошибка соединения:</string>
     <string name="chat_mic_camera_error">Не удалось получить доступ к микрофону/камере:</string>
     <string name="chat_missing_caller_id">Невозможно принять: отсутствует идентификатор вызывающего</string>

@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Delte medier</string>
     <string name="chat_no_shared_media">Ingen delte billeder endnu</string>
     <string name="chat_call_rejected">Opkaldet blev afvist</string>
+    <string name="chat_connection_failed">Forbindelsen mislykkedes</string>
+    <string name="chat_call_no_answer">Intet svar</string>
+    <string name="chat_call_unavailable">Denne person er ikke tilgængelig lige nu</string>
     <string name="chat_connection_error">Forbindelsesfejl:</string>
     <string name="chat_mic_camera_error">Kunne ikke tilgå mikrofon/kamera:</string>
     <string name="chat_missing_caller_id">Kan ikke acceptere: mangler opkalder-id</string>

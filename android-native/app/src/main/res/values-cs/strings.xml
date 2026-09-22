@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Sdílená média</string>
     <string name="chat_no_shared_media">Zatím žádné sdílené fotky</string>
     <string name="chat_call_rejected">Hovor byl odmítnut</string>
+    <string name="chat_connection_failed">Připojení selhalo</string>
+    <string name="chat_call_no_answer">Bez odpovědi</string>
+    <string name="chat_call_unavailable">Tato osoba je nyní nedostupná</string>
     <string name="chat_connection_error">Chyba připojení:</string>
     <string name="chat_mic_camera_error">Nepodařilo se získat přístup k mikrofonu/kameře:</string>
     <string name="chat_missing_caller_id">Nelze přijmout: chybí ID volajícího</string>

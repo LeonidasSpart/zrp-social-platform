@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Media të ndara</string>
     <string name="chat_no_shared_media">Ende pa foto të ndara</string>
     <string name="chat_call_rejected">Thirrja u refuzua</string>
+    <string name="chat_connection_failed">Lidhja dështoi</string>
+    <string name="chat_call_no_answer">Pa përgjigje</string>
+    <string name="chat_call_unavailable">Ky person nuk është i disponueshëm tani</string>
     <string name="chat_connection_error">Gabim në lidhje:</string>
     <string name="chat_mic_camera_error">Nuk mund të qaseshin mikrofonat/kamera:</string>
     <string name="chat_missing_caller_id">Nuk mund të pranohet: mungon ID e telefonuesit</string>

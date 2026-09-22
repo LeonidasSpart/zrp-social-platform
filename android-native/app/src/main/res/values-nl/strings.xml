@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Gedeelde media</string>
     <string name="chat_no_shared_media">Nog geen gedeelde foto\'s</string>
     <string name="chat_call_rejected">Oproep werd geweigerd</string>
+    <string name="chat_connection_failed">Verbinding mislukt</string>
+    <string name="chat_call_no_answer">Geen antwoord</string>
+    <string name="chat_call_unavailable">Deze persoon is momenteel niet beschikbaar</string>
     <string name="chat_connection_error">Verbindingsfout:</string>
     <string name="chat_mic_camera_error">Kon geen toegang krijgen tot microfoon/camera:</string>
     <string name="chat_missing_caller_id">Kan niet accepteren: beller-ID ontbreekt</string>

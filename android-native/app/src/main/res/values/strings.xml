@@ -254,6 +254,9 @@
     <string name="chat_shared_media">Shared media</string>
     <string name="chat_no_shared_media">No shared photos yet</string>
     <string name="chat_call_rejected">Call was rejected</string>
+    <string name="chat_connection_failed">Connection failed</string>
+    <string name="chat_call_no_answer">No answer</string>
+    <string name="chat_call_unavailable">This person is unavailable right now</string>
     <string name="chat_connection_error">Connection error:</string>
     <string name="chat_mic_camera_error">Could not access microphone/camera:</string>
     <string name="chat_missing_caller_id">Cannot accept: missing caller ID</string>

@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Κοινά πολυμέσα</string>
     <string name="chat_no_shared_media">Δεν υπάρχουν κοινές φωτογραφίες ακόμα</string>
     <string name="chat_call_rejected">Η κλήση απορρίφθηκε</string>
+    <string name="chat_connection_failed">Η σύνδεση απέτυχε</string>
+    <string name="chat_call_no_answer">Καμία απάντηση</string>
+    <string name="chat_call_unavailable">Αυτό το άτομο δεν είναι διαθέσιμο αυτή τη στιγμή</string>
     <string name="chat_connection_error">Σφάλμα σύνδεσης:</string>
     <string name="chat_mic_camera_error">Δεν ήταν δυνατή η πρόσβαση στο μικρόφωνο/κάμερα:</string>
     <string name="chat_missing_caller_id">Δεν είναι δυνατή η αποδοχή: λείπει το αναγνωριστικό καλούντος</string>

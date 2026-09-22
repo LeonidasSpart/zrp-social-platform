@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Delte medier</string>
     <string name="chat_no_shared_media">Ingen delte bilder ennå</string>
     <string name="chat_call_rejected">Anropet ble avvist</string>
+    <string name="chat_connection_failed">Tilkoblingen mislyktes</string>
+    <string name="chat_call_no_answer">Ikke noe svar</string>
+    <string name="chat_call_unavailable">Denne personen er ikke tilgjengelig akkurat nå</string>
     <string name="chat_connection_error">Tilkoblingsfeil:</string>
     <string name="chat_mic_camera_error">Fikk ikke tilgang til mikrofon/kamera:</string>
     <string name="chat_missing_caller_id">Kan ikke svare: mangler anroper-ID</string>
