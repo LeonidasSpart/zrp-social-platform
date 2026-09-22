@@ -18,6 +18,7 @@ final class GroupConversationViewModel: ObservableObject {
     @Published private(set) var isSending = false
     @Published private(set) var uploadProgress: Double?
     @Published var errorMessage: String?
+    @Published var replyTarget: GroupMessage?
 
     @Published private(set) var isLoadingOlder = false
     @Published private(set) var olderCursor: String?
@@ -262,12 +263,14 @@ final class GroupConversationViewModel: ObservableObject {
             let sent = try await repository.send(
                 id: conversationId,
                 content: content,
-                imageUrl: nil
+                imageUrl: nil,
+                replyToId: replyTarget?.id
             )
             if !messages.contains(where: { $0.id == sent.id }) {
                 messages.append(sent)
             }
             draft = ""
+            replyTarget = nil
 
             // A courtesy to everyone else in the group: the REST route
             // above already stored the message, and this only makes it
@@ -329,7 +332,8 @@ final class GroupConversationViewModel: ObservableObject {
             let sent = try await repository.send(
                 id: conversationId,
                 content: attachment.messageContent,
-                imageUrl: uploadedUrl
+                imageUrl: uploadedUrl,
+                replyToId: nil
             )
             if !messages.contains(where: { $0.id == sent.id }) {
                 messages.append(sent)
@@ -354,7 +358,7 @@ final class GroupConversationViewModel: ObservableObject {
         defer { isSending = false }
 
         do {
-            let sent = try await repository.send(id: conversationId, content: "", imageUrl: gif.url)
+            let sent = try await repository.send(id: conversationId, content: "", imageUrl: gif.url, replyToId: nil)
             if !messages.contains(where: { $0.id == sent.id }) {
                 messages.append(sent)
             }
@@ -492,10 +496,12 @@ final class GroupConversationViewModel: ObservableObject {
 /// A group thread.
 ///
 /// Structurally the 1:1 conversation screen, minus what the group route
-/// does not support: no reactions, no replies, no edit, no per-message
-/// read receipts. `GROUP_MESSAGE_INCLUDE` attaches only `sender`, and
-/// there is no route to act on a group message beyond deleting your own
-/// - so none of those controls appear rather than appearing inert.
+/// does not support: no reactions, no edit, no per-message read
+/// receipts. Reply IS supported - the same `replyToId` field and
+/// server-side conversation-membership check 1:1 chat's own send route
+/// uses - so that control appears here too. There is no route to act on
+/// a group message beyond deleting your own or replying to it, so
+/// nothing else appears rather than appearing inert.
 struct GroupConversationView: View {
 
     @StateObject private var viewModel: GroupConversationViewModel
@@ -628,7 +634,16 @@ struct GroupConversationView: View {
                     ForEach(viewModel.messages) { message in
                         GroupMessageBubble(
                             message: message,
-                            isOwn: viewModel.isOwn(message)
+                            isOwn: viewModel.isOwn(message),
+                            onReply: {
+                                viewModel.replyTarget = message
+                                isComposerFocused = true
+                            },
+                            onScrollToReply: { id in
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    proxy.scrollTo(id, anchor: .center)
+                                }
+                            }
                         )
                         .id(message.id)
                     }
@@ -688,6 +703,26 @@ struct GroupConversationView: View {
 
     @ViewBuilder
     private var composer: some View {
+        if let target = viewModel.replyTarget {
+            HStack(spacing: ZrpSpacing.sm) {
+                Text(.iosChatReplyingTo, [
+                    "name": target.sender?.displayName ?? "",
+                ])
+                .font(.caption)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+                .lineLimit(1)
+                Spacer(minLength: 0)
+                Button { viewModel.replyTarget = nil } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                }
+                .accessibilityLabel(Text(.iosCommentCancelReply))
+            }
+            .padding(.horizontal, ZrpSpacing.md)
+            .padding(.top, ZrpSpacing.sm)
+            .background(ZrpColor.surface)
+        }
+
         // Uploading a 32MB video over a slow connection takes long
         // enough that a composer with no feedback reads as frozen.
         if let progress = viewModel.uploadProgress {
@@ -824,6 +859,8 @@ private struct GroupMessageBubble: View {
 
     let message: GroupMessage
     let isOwn: Bool
+    var onReply: () -> Void
+    var onScrollToReply: (String) -> Void
 
     var body: some View {
         HStack {
@@ -840,6 +877,13 @@ private struct GroupMessageBubble: View {
                         }
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if let replyTo = message.replyTo {
+                    Button { onScrollToReply(replyTo.id) } label: {
+                        replyContext(replyTo)
                     }
                     .buttonStyle(.plain)
                 }
@@ -877,11 +921,16 @@ private struct GroupMessageBubble: View {
                         .fixedSize(horizontal: false, vertical: true)
                         // Group messages had no long-press action at all
                         // on iOS - unlike 1:1 chat's own .contextMenu,
-                        // there was no way to copy a message's text here
-                        // either. This adds just that, without inventing
-                        // reply/react/edit/delete affordances this screen
-                        // never had.
+                        // there was no way to copy a message's text, or
+                        // reply to it, here either. This adds both,
+                        // mirroring 1:1 chat's own contextMenu - without
+                        // inventing react/edit/delete affordances this
+                        // screen never had, since the group route
+                        // supports neither.
                         .contextMenu {
+                            Button(action: onReply) {
+                                Label { Text(.iosChatReply) } icon: { Image(systemName: "arrowshape.turn.up.left") }
+                            }
                             Button {
                                 UIPasteboard.general.string = message.content
                             } label: {
@@ -908,5 +957,29 @@ private struct GroupMessageBubble: View {
 
             if !isOwn { Spacer(minLength: ZrpSpacing.xxl) }
         }
+    }
+
+    private func replyContext(_ replyTo: RepliedMessage) -> some View {
+        HStack(spacing: ZrpSpacing.xs) {
+            Rectangle()
+                .fill(ZrpColor.outline)
+                .frame(width: 2)
+            VStack(alignment: .leading, spacing: 0) {
+                if let sender = replyTo.sender {
+                    HStack(spacing: 2) {
+                        Text(verbatim: sender.displayName)
+                        VerifiedBadge(badgeType: sender.badgeType, size: 11)
+                    }
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                }
+                Text(verbatim: replyTo.content)
+                    .font(.caption2)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .lineLimit(2)
+            }
+        }
+        .padding(.horizontal, ZrpSpacing.sm)
+        .frame(maxWidth: 260, alignment: .leading)
     }
 }
