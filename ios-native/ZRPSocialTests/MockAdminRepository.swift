@@ -250,6 +250,13 @@ final class MockAdminRepository: AdminRepositoryProtocol, @unchecked Sendable {
     func cancelSubscription(userId: String, reason: String?) async throws {}
     func restoreSubscription(userId: String) async throws {}
 
+    func pendingPayments() async throws -> [AdminPaymentRequest] { [] }
+    func verifyPayment(id: String) async throws {}
+
+    func upgradeRequests(status: AdminUpgradeRequestStatusFilter) async throws -> [AdminUpgradeRequest] { [] }
+    func approveUpgradeRequest(id: String, billingInterval: AdminBillingInterval) async throws {}
+    func denyUpgradeRequest(id: String) async throws {}
+
     func scanStorage() async throws -> AdminStorageScanResult {
         AdminStorageScanResult(
             totalFilesInUploadThing: 0, totalReferencedInDb: 0, nonUploadedStatusCount: 0,

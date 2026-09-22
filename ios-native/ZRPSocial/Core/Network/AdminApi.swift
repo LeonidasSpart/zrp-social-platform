@@ -1413,6 +1413,76 @@ enum AdminBillingInterval: String, CaseIterable, Identifiable {
     var displayName: String { rawValue.capitalized }
 }
 
+// MARK: - Payments (`/api/admin/payments`) - ADMIN only
+
+/// One pending manual crypto payment claim, awaiting an admin's
+/// on-chain verification - the native answer to `/admin/payments`. The
+/// route pre-filters to `status: "pending"` server-side and takes no
+/// query params or pagination (it's meant to stay a short queue), so
+/// this screen has no filter or page controls to match.
+struct AdminPaymentRequest: Decodable, Identifiable, Equatable {
+    let id: String
+    let userId: String
+    let plan: String
+    let amount: Double
+    let currency: String
+    let billingInterval: String?
+    let transactionId: String?
+    let status: String
+    let createdAt: Date
+    let user: AdminPaymentUserRef
+}
+
+struct AdminPaymentUserRef: Decodable, Equatable {
+    let id: String
+    let username: String
+    let name: String?
+    let email: String?
+    let avatarUrl: String?
+    let badgeType: String?
+}
+
+// MARK: - Upgrade requests (`/api/upgrade-requests`) - ADMIN only
+//
+// The older, pre-Solana manual-upgrade path: a user submits a requested
+// plan with a free-text payment method/message, and an admin approves
+// (granting/extending the subscription, same as a verified payment) or
+// denies. Lives outside `/api/admin/**` but is `requireAdmin` all the
+// same - see `src/app/api/upgrade-requests/route.ts` and
+// `src/app/api/upgrade-requests/[id]/route.ts`.
+struct AdminUpgradeRequest: Decodable, Identifiable, Equatable {
+    let id: String
+    let userId: String
+    let requestedPlan: String
+    let paymentMethod: String?
+    let message: String?
+    let status: String
+    let approvedBy: String?
+    let approvedAt: Date?
+    let createdAt: Date
+    let updatedAt: Date
+    let user: AdminSubscriptionUserRef
+}
+
+/// `status=` query value on `GET /api/upgrade-requests`. The route
+/// defaults to `pending` server-side when omitted; this screen also
+/// offers the two resolved states as read-only history.
+enum AdminUpgradeRequestStatusFilter: String, CaseIterable, Identifiable {
+    case pending
+    case approved
+    case denied
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .pending: return "Pending"
+        case .approved: return "Approved"
+        case .denied: return "Denied"
+        }
+    }
+}
+
 // MARK: - Storage cleanup (`/api/admin/cleanup-uploadthing`) - ADMIN only
 
 struct AdminStorageScanResult: Decodable, Equatable {

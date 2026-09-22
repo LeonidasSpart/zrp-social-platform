@@ -158,6 +158,8 @@ enum Route: Hashable {
     case adminCharityDisbursements
     case adminSubscriptions
     case adminSubscriptionDetail(userId: String)
+    case adminPayments
+    case adminUpgradeRequests
     case adminStorageCleanup
     case adminNews
     case adminNewsNetwork
