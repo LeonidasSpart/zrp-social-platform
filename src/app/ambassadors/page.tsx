@@ -1,22 +1,20 @@
 import { Metadata } from "next";
 import AmbassadorsExperience from "@/components/ambassadors/AmbassadorsExperience";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
+
+const TITLE = "Global Ambassadors";
+const DESCRIPTION =
+  "Build your community. Represent your country. Connect the world. Join the ZRP Global Ambassadors program.";
 
 export const metadata: Metadata = {
-  title: "Global Ambassadors",
-  description:
-    "Build your community. Represent your country. Connect the world. Join the ZRP Global Ambassadors program.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: "/ambassadors" },
-  openGraph: {
+  ...buildSocialMetadata({
     title: "ZRP Global Ambassadors",
     description: "Build your community. Represent your country. Connect the world.",
-    url: "/ambassadors",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "ZRP Global Ambassadors",
-    description: "Build your community. Represent your country. Connect the world.",
-  },
+    path: "/ambassadors",
+  }),
 };
 
 export default function AmbassadorsPage() {

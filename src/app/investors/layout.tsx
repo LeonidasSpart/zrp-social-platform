@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { translations, SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 
 const SUPPORTED_LANG_CODES = SUPPORTED_LANGUAGES.map((l) => l.code);
 
@@ -27,17 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: "/investors" },
-    openGraph: {
+    ...buildSocialMetadata({
       title: `${title} | ZRP Social`,
       description,
-      url: "/investors",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} | ZRP Social`,
-      description,
-    },
+      path: "/investors",
+    }),
   };
 }
 

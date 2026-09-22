@@ -6,8 +6,7 @@ import T from "@/components/i18n/T";
 import LocaleDateTime from "@/components/i18n/LocaleDateTime";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import type { TranslationKey } from "@/lib/translations";
-
-const SITE_URL = "https://zrp.one";
+import { SITE_URL, SITE_NAME, TWITTER_HANDLE, resolveOgImages } from "@/lib/seo/metadata";
 
 const CATEGORY_KEYS: Record<string, TranslationKey> = {
   WORLD: "newsCategory.world",
@@ -61,6 +60,7 @@ export async function generateMetadata({
   const description =
     article.excerpt || "Read the latest from ZRP News.";
   const url = `${SITE_URL}/news/${slug}`;
+  const images = resolveOgImages({ image: article.coverImage, title: article.title, subtitle: description });
 
   return {
     title: article.title,
@@ -74,18 +74,19 @@ export async function generateMetadata({
       title: article.title,
       description,
       url,
+      siteName: SITE_NAME,
+      locale: "en_US",
       publishedTime: article.publishedAt.toISOString(),
       modifiedTime: article.updatedAt.toISOString(),
       authors: article.author.name ? [article.author.name] : undefined,
-      images: article.coverImage
-        ? [{ url: article.coverImage, alt: article.title }]
-        : undefined,
+      images,
     },
     twitter: {
-      card: article.coverImage ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: article.title,
       description,
-      images: article.coverImage ? [article.coverImage] : undefined,
+      creator: TWITTER_HANDLE,
+      images: images.map((img) => img.url),
     },
   };
 }

@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
   title: "ZRP News",
   description:
     "ZRP News brings you the latest stories from Switzerland, Europe and around the world.",
   alternates: { canonical: "/news" },
-  openGraph: {
+
+  ...buildSocialMetadata({
     title: "ZRP News",
-    description:
-      "ZRP News brings you the latest stories from Switzerland, Europe and around the world.",
-    url: "/news",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "ZRP News",
-    description:
-      "ZRP News brings you the latest stories from Switzerland, Europe and around the world.",
-  },
+    description: "ZRP News brings you the latest stories from Switzerland, Europe and around the world.",
+    path: "/news",
+  }),
 };
 
 export default function NewsLayout({

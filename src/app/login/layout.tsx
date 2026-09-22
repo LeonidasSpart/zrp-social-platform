@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
   title: "Log In",
   description: "Log in to your ZRP Social account.",
   alternates: { canonical: "/login" },
   robots: { index: true, follow: true },
-  openGraph: {
+  ...buildSocialMetadata({
     title: "Log In | ZRP Social",
     description: "Log in to your ZRP Social account.",
-    url: "/login",
-    type: "website",
-  },
+    path: "/login",
+  }),
 };
 
 export default function LoginLayout({

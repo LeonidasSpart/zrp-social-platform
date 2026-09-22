@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
-
-const SITE_URL = "https://zrp.one";
+import { SITE_URL, SITE_NAME, TWITTER_HANDLE, resolveOgImages } from "@/lib/seo/metadata";
 
 /**
  * Builds <head> metadata for a public profile page.
@@ -67,16 +66,27 @@ export async function buildProfileMetadata(
       title: `${displayName} (@${user.username})`,
       description,
       url,
+      siteName: SITE_NAME,
+      locale: "en_US",
       username: user.username,
-      images: user.avatarUrl
-        ? [{ url: user.avatarUrl, alt: displayName }]
-        : undefined,
+      images: resolveOgImages({
+        image: user.avatarUrl,
+        title: `${displayName} (@${user.username})`,
+        subtitle: description,
+        alt: displayName,
+      }),
     },
     twitter: {
-      card: user.avatarUrl ? "summary" : "summary_large_image",
+      card: "summary_large_image",
       title: `${displayName} (@${user.username})`,
       description,
-      images: user.avatarUrl ? [user.avatarUrl] : undefined,
+      creator: TWITTER_HANDLE,
+      images: resolveOgImages({
+        image: user.avatarUrl,
+        title: `${displayName} (@${user.username})`,
+        subtitle: description,
+        alt: displayName,
+      }).map((img) => img.url),
     },
   };
 }

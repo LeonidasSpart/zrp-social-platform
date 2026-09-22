@@ -245,7 +245,25 @@ export async function middleware(req: NextRequest) {
   // above: this only bypasses the no-token case, so the banned-user
   // check (which runs before this point) and the onboarding check
   // (right below, for anyone who does have a token) are both untouched.
-  const PUBLIC_WHEN_LOGGED_OUT_PATHS = ["/post"];
+  //
+  // /profile, /hashtag and /trust joined this list as part of the
+  // social-sharing metadata audit: each already has a real, server-side
+  // generateMetadata() (see profile/[username]/layout.tsx,
+  // hashtag/[tag]/layout.tsx, trust/[username]/layout.tsx) that builds
+  // a correct, privacy-aware <head> for a public/non-banned entity and
+  // a generic noindex one for a private/banned/nonexistent one - but a
+  // logged-out visitor, INCLUDING a social-preview crawler (which never
+  // executes client JS and so never reaches page.tsx's own
+  // useSession()-based "not logged in -> /login" redirect), was bounced
+  // to /login by this gate before Next.js ever rendered that metadata
+  // at all. A shared profile/hashtag/trust link therefore never showed
+  // a working preview, for the same class of reason /post's link
+  // sharing previously didn't. This does not change what a real,
+  // hydrated browser does - page.tsx's own client-side redirect for a
+  // signed-out human is untouched - it only lets the server-rendered
+  // HTML (and therefore its metadata) reach a request that never runs
+  // that client code, i.e. a crawler.
+  const PUBLIC_WHEN_LOGGED_OUT_PATHS = ["/post", "/profile", "/hashtag", "/trust"];
 
   if (!token) {
     if (pathMatches(path, PUBLIC_WHEN_LOGGED_OUT_PATHS)) {
