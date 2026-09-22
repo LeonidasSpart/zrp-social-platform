@@ -45,6 +45,7 @@ import AnalyticsTab from "@/components/AnalyticsTab";
 import TipModal from "@/components/TipModal";
 import ReportModal from "@/components/ReportModal";
 import NativePaymentNotice from "@/components/NativePaymentNotice";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { SkeletonProfileHeader } from "@/components/skeletons/SkeletonProfileHeader";
 import { SkeletonFeed } from "@/components/skeletons/SkeletonFeed";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -301,6 +302,9 @@ export default function ProfilePage(
     useState(false);
 
   const [uploadingAvatar, setUploadingAvatar] =
+    useState(false);
+
+  const [avatarLightboxOpen, setAvatarLightboxOpen] =
     useState(false);
 
   const [isFollowing, setIsFollowing] =
@@ -1491,14 +1495,40 @@ export default function ProfilePage(
           // any cover.
           className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-zrp-deepBlack overflow-hidden flex-shrink-0 group bg-white dark:bg-zrp-deepBlack">
             {profile.avatarUrl ? (
-              <img
-                src={profile.avatarUrl}
-                alt={
-                  profile.name ||
-                  profile.username
-                }
-                className="w-full h-full object-cover"
-              />
+              // Own profile keeps the hover-camera overlay below as the
+              // avatar's one action (change it); everyone else has no
+              // action there today, which is the bug this fixes - the
+              // image itself becomes a button that opens the full-size
+              // viewer. A plain <img> would never have been a valid
+              // click target for a screen reader or keyboard user.
+              isOwnProfile ? (
+                <img
+                  src={profile.avatarUrl}
+                  alt={
+                    profile.name ||
+                    profile.username
+                  }
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAvatarLightboxOpen(true)}
+                  aria-label={t("profile.viewPhotoAria", {
+                    name: profile.name || profile.username,
+                  })}
+                  className="w-full h-full block focus-visible:outline focus-visible:outline-2 focus-visible:outline-zrp-red"
+                >
+                  <img
+                    src={profile.avatarUrl}
+                    alt={
+                      profile.name ||
+                      profile.username
+                    }
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              )
             ) : (
               <div className="w-full h-full flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">
                 {(
@@ -1809,6 +1839,23 @@ export default function ProfilePage(
             )}
           </div>
         </div>
+
+        {!isOwnProfile && (
+          <ImageLightbox
+            src={
+              avatarLightboxOpen
+                ? profile.avatarUrl
+                : null
+            }
+            alt={
+              profile.name ||
+              profile.username
+            }
+            onClose={() =>
+              setAvatarLightboxOpen(false)
+            }
+          />
+        )}
 
         {!isOwnProfile && (
           <ReportModal
