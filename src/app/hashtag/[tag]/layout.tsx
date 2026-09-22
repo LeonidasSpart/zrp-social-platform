@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 
 export async function generateMetadata({
   params,
@@ -9,22 +10,17 @@ export async function generateMetadata({
   const cleanTag = decodeURIComponent(tag).replace(/^#/, "");
   const title = `#${cleanTag}`;
   const description = `See posts tagged #${cleanTag} on ZRP Social.`;
+  const path = `/hashtag/${encodeURIComponent(cleanTag)}`;
 
   return {
     title,
     description,
-    alternates: { canonical: `/hashtag/${encodeURIComponent(cleanTag)}` },
-    openGraph: {
+    alternates: { canonical: path },
+    ...buildSocialMetadata({
       title: `#${cleanTag} | ZRP Social`,
       description,
-      url: `/hashtag/${encodeURIComponent(cleanTag)}`,
-      type: "website",
-    },
-    twitter: {
-      card: "summary",
-      title: `#${cleanTag} | ZRP Social`,
-      description,
-    },
+      path,
+    }),
   };
 }
 

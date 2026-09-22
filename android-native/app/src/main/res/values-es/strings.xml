@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Contenido compartido</string>
     <string name="chat_no_shared_media">Aún no hay fotos compartidas</string>
     <string name="chat_call_rejected">La llamada fue rechazada</string>
+    <string name="chat_connection_failed">Error de conexión</string>
+    <string name="chat_call_no_answer">Sin respuesta</string>
+    <string name="chat_call_unavailable">Esta persona no está disponible en este momento</string>
     <string name="chat_connection_error">Error de conexión:</string>
     <string name="chat_mic_camera_error">No se pudo acceder al micrófono/cámara:</string>
     <string name="chat_missing_caller_id">No se puede aceptar: falta el ID de quien llama</string>

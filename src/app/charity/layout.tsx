@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
   title: "Charity Commitment",
   description:
     "35% of ZRP Social's platform profits go to charities supporting orphans, schools, hospitals, and climate relief. Learn about our social impact commitment.",
   alternates: { canonical: "/charity" },
-  openGraph: {
+
+  ...buildSocialMetadata({
     title: "Charity Commitment | ZRP Social",
-    description:
-      "35% of ZRP Social's platform profits go to charities supporting orphans, schools, hospitals, and climate relief.",
-    url: "/charity",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Charity Commitment | ZRP Social",
-    description:
-      "35% of ZRP Social's platform profits go to charities supporting orphans, schools, hospitals, and climate relief.",
-  },
+    description: "35% of ZRP Social's platform profits go to charities supporting orphans, schools, hospitals, and climate relief.",
+    path: "/charity",
+  }),
 };
 
 export default function CharityLayout({

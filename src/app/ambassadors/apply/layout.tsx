@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 
 // Nested routes don't inherit a parent page.tsx's metadata (only a
 // parent layout.tsx cascades) - without this, /ambassadors/apply fell
@@ -10,19 +11,12 @@ export const metadata: Metadata = {
   description:
     "Tell us about your country and your community. Apply to become a ZRP Global Ambassador - every application is reviewed by our team.",
   alternates: { canonical: "/ambassadors/apply" },
-  openGraph: {
+
+  ...buildSocialMetadata({
     title: "Become a ZRP Ambassador",
-    description:
-      "Apply to become a ZRP Global Ambassador and represent your country and community.",
-    url: "/ambassadors/apply",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Become a ZRP Ambassador",
-    description:
-      "Apply to become a ZRP Global Ambassador and represent your country and community.",
-  },
+    description: "Apply to become a ZRP Global Ambassador and represent your country and community.",
+    path: "/ambassadors/apply",
+  }),
 };
 
 export default function AmbassadorsApplyLayout({

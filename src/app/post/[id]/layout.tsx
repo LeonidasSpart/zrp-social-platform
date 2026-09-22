@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
-
-const SITE_URL = "https://zrp.one";
+import { SITE_URL, SITE_NAME, TWITTER_HANDLE, resolveOgImages } from "@/lib/seo/metadata";
 
 // Reads the DB at request time via generateMetadata - force dynamic
 // rendering so `next build` never tries to run that query without a
@@ -67,6 +66,7 @@ export async function generateMetadata({
   const title = `${displayName}: "${truncate(bodyText, 60)}"`;
   const url = `${SITE_URL}/post/${id}`;
   const image = post.imageUrl || post.imageUrls?.[0] || post.author.avatarUrl;
+  const images = resolveOgImages({ image, title, subtitle: description });
 
   return {
     title,
@@ -77,15 +77,18 @@ export async function generateMetadata({
       title,
       description,
       url,
+      siteName: SITE_NAME,
+      locale: "en_US",
       publishedTime: post.createdAt.toISOString(),
       modifiedTime: post.updatedAt.toISOString(),
-      images: image ? [{ url: image, alt: title }] : undefined,
+      images,
     },
     twitter: {
-      card: image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title,
       description,
-      images: image ? [image] : undefined,
+      creator: TWITTER_HANDLE,
+      images: images.map((img) => img.url),
     },
   };
 }

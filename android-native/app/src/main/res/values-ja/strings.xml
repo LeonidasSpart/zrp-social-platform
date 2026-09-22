@@ -243,6 +243,9 @@
     <string name="chat_shared_media">共有メディア</string>
     <string name="chat_no_shared_media">共有された写真はまだありません</string>
     <string name="chat_call_rejected">通話は拒否されました</string>
+    <string name="chat_connection_failed">接続に失敗しました</string>
+    <string name="chat_call_no_answer">応答なし</string>
+    <string name="chat_call_unavailable">この人は現在利用できません</string>
     <string name="chat_connection_error">接続エラー：</string>
     <string name="chat_mic_camera_error">マイク／カメラにアクセスできませんでした：</string>
     <string name="chat_missing_caller_id">発信者IDが見つからないため応答できません</string>

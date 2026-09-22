@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Podijeljeni mediji</string>
     <string name="chat_no_shared_media">Još nema podijeljenih fotografija</string>
     <string name="chat_call_rejected">Poziv je odbijen</string>
+    <string name="chat_connection_failed">Povezivanje nije uspjelo</string>
+    <string name="chat_call_no_answer">Nema odgovora</string>
+    <string name="chat_call_unavailable">Ova osoba trenutno nije dostupna</string>
     <string name="chat_connection_error">Greška veze:</string>
     <string name="chat_mic_camera_error">Nije moguće pristupiti mikrofonu/kameri:</string>
     <string name="chat_missing_caller_id">Nije moguće prihvatiti: nedostaje ID pozivatelja</string>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
+import { buildSocialMetadata } from "@/lib/seo/metadata";
 
 // Reads the DB at request time via generateMetadata - force dynamic
 // rendering so `next build` never tries to run that query without a
@@ -30,21 +31,17 @@ export async function generateMetadata({
   const title = `${displayName}'s Trust Passport`;
   const description = `View @${user.username}'s Trust Passport on ZRP Social - account verification and trust signals.`;
 
+  const path = `/trust/${user.username}`;
+
   return {
     title,
     description,
-    alternates: { canonical: `/trust/${user.username}` },
-    openGraph: {
+    alternates: { canonical: path },
+    ...buildSocialMetadata({
       title: `${title} | ZRP Social`,
       description,
-      url: `/trust/${user.username}`,
-      type: "website",
-    },
-    twitter: {
-      card: "summary",
-      title: `${title} | ZRP Social`,
-      description,
-    },
+      path,
+    }),
   };
 }
 

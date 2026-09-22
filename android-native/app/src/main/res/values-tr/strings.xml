@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Paylaşılan medya</string>
     <string name="chat_no_shared_media">Henüz paylaşılan fotoğraf yok</string>
     <string name="chat_call_rejected">Arama reddedildi</string>
+    <string name="chat_connection_failed">Bağlantı başarısız oldu</string>
+    <string name="chat_call_no_answer">Cevap yok</string>
+    <string name="chat_call_unavailable">Bu kişi şu anda müsait değil</string>
     <string name="chat_connection_error">Bağlantı hatası:</string>
     <string name="chat_mic_camera_error">Mikrofona/kameraya erişilemedi:</string>
     <string name="chat_missing_caller_id">Kabul edilemiyor: arayan kimliği eksik</string>

@@ -136,8 +136,12 @@ the `src/app/api/external/*` routes.
 - Quotas that gate paid work (e.g. `/api/ai/chat`): reserve atomically before doing the
   work (`src/lib/ai-quota.ts` pattern: conditional `updateMany` with `< limit`), refund on
   provider failure. Never check-then-increment.
-- Security headers live in `next.config.js`; the full CSP is Report-Only until its origin
-  inventory has been validated against every flow. Don't promote it blindly.
+- Security headers live in `next.config.js`. The Content-Security-Policy is fully enforced
+  (not Report-Only); its origin allowlist was validated against every real flow (UploadThing,
+  GIPHY, YouTube embeds, Google Analytics, Sentry, Solana RPC, Socket.IO, Google/Apple OAuth,
+  and WebRTC's `stun:`/`turn:`/`turns:` ICE schemes) before being promoted. Adding a new
+  external origin (upload CDN, OAuth provider, embed) requires adding it to the policy first,
+  or the browser blocks it - CSP now fails closed.
 - CI: Android release signing steps run only on `push` to main / `workflow_dispatch`,
   never on `pull_request`. Never regenerate the signing key.
 

@@ -243,6 +243,9 @@
     <string name="chat_shared_media">공유된 미디어</string>
     <string name="chat_no_shared_media">아직 공유된 사진이 없어요</string>
     <string name="chat_call_rejected">통화가 거절되었어요</string>
+    <string name="chat_connection_failed">연결 실패</string>
+    <string name="chat_call_no_answer">응답 없음</string>
+    <string name="chat_call_unavailable">이 사용자는 현재 이용할 수 없습니다</string>
     <string name="chat_connection_error">연결 오류:</string>
     <string name="chat_mic_camera_error">마이크/카메라에 접근할 수 없어요:</string>
     <string name="chat_missing_caller_id">수락할 수 없어요: 발신자 ID가 없어요</string>

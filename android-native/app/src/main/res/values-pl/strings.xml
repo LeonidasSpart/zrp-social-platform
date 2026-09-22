@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Udostępnione multimedia</string>
     <string name="chat_no_shared_media">Brak udostępnionych zdjęć</string>
     <string name="chat_call_rejected">Połączenie zostało odrzucone</string>
+    <string name="chat_connection_failed">Połączenie nie powiodło się</string>
+    <string name="chat_call_no_answer">Brak odpowiedzi</string>
+    <string name="chat_call_unavailable">Ta osoba jest teraz niedostępna</string>
     <string name="chat_connection_error">Błąd połączenia:</string>
     <string name="chat_mic_camera_error">Nie można uzyskać dostępu do mikrofonu/kamery:</string>
     <string name="chat_missing_caller_id">Nie można przyjąć połączenia: brak identyfikatora dzwoniącego</string>

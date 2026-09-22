@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Geteilte Medien</string>
     <string name="chat_no_shared_media">Noch keine geteilten Fotos</string>
     <string name="chat_call_rejected">Anruf wurde abgelehnt</string>
+    <string name="chat_connection_failed">Verbindung fehlgeschlagen</string>
+    <string name="chat_call_no_answer">Keine Antwort</string>
+    <string name="chat_call_unavailable">Diese Person ist gerade nicht erreichbar</string>
     <string name="chat_connection_error">Verbindungsfehler:</string>
     <string name="chat_mic_camera_error">Zugriff auf Mikrofon/Kamera nicht möglich:</string>
     <string name="chat_missing_caller_id">Annahme nicht möglich: Anrufer-ID fehlt</string>

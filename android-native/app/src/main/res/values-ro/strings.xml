@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Conținut media partajat</string>
     <string name="chat_no_shared_media">Nicio fotografie partajată încă</string>
     <string name="chat_call_rejected">Apelul a fost respins</string>
+    <string name="chat_connection_failed">Conexiune eșuată</string>
+    <string name="chat_call_no_answer">Fără răspuns</string>
+    <string name="chat_call_unavailable">Această persoană nu este disponibilă acum</string>
     <string name="chat_connection_error">Eroare de conexiune:</string>
     <string name="chat_mic_camera_error">Nu s-a putut accesa microfonul/camera:</string>
     <string name="chat_missing_caller_id">Nu se poate accepta: lipsește ID-ul apelantului</string>

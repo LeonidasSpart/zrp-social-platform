@@ -244,6 +244,9 @@
     <string name="chat_shared_media">Delad media</string>
     <string name="chat_no_shared_media">Inga delade bilder än</string>
     <string name="chat_call_rejected">Samtalet avvisades</string>
+    <string name="chat_connection_failed">Anslutningen misslyckades</string>
+    <string name="chat_call_no_answer">Inget svar</string>
+    <string name="chat_call_unavailable">Den här personen är inte tillgänglig just nu</string>
     <string name="chat_connection_error">Anslutningsfel:</string>
     <string name="chat_mic_camera_error">Kunde inte komma åt mikrofon/kamera:</string>
     <string name="chat_missing_caller_id">Kan inte acceptera: uppringarens ID saknas</string>
