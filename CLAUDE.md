@@ -63,6 +63,12 @@ Other features read these when present (all fail soft/are optional at runtime):
 - `SOCKET_ALLOWED_ORIGINS`: comma-separated CORS origins for the Socket.IO server
   (falls back to `NEXTAUTH_URL`).
 - `PORT`: HTTP port for `server.js` (defaults to 8080).
+- `INTERNAL_PUSH_SECRET`: shared bearer secret `server.js` uses to call its own
+  loopback-only `/api/internal/call-push` route so a backgrounded/minimized
+  recipient still gets a real push notification for an incoming voice/video call
+  (the `incoming-call` Socket.IO event alone only reaches an already-open page).
+  Unset means that push is skipped; the call itself still rings normally over the
+  socket relay.
 
 ## Architecture
 

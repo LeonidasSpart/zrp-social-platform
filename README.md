@@ -520,7 +520,12 @@ include:
   `VAPID_PRIVATE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
 - **AI**: `DEEPSEEK_API_KEY`
 - **Realtime and calling**: `SOCKET_ALLOWED_ORIGINS`, `METERED_API_KEY`,
-  `METERED_APP_NAME`
+  `METERED_APP_NAME`, `INTERNAL_PUSH_SECRET` (optional; a shared secret
+  `server.js` uses to authenticate its own loopback call to
+  `/api/internal/call-push` so a backgrounded/minimized recipient still
+  gets a real push notification for an incoming voice/video call, not
+  just the in-page Socket.IO event; unset means that push is skipped,
+  the call itself is unaffected)
 - **Blockchain**: `SOLANA_RPC_URL`, `NEXT_PUBLIC_SOLANA_RPC_URL`,
   `SOLANA_WALLET_ADDRESS`, `SOLANA_PRIVATE_KEY`, `NEXT_PUBLIC_USDC_MINT`
 - **Observability and misc**: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`,
