@@ -51,24 +51,33 @@ export function ImageLightbox({ src, alt, onClose }: ImageLightboxProps) {
 
   if (!src) return null;
 
+  // A click only closes when it lands directly on the backdrop element
+  // itself (event.target === event.currentTarget), never when it
+  // bubbles up from a descendant (the image, the loading/error state,
+  // the close button). This is the standard, bulletproof backdrop-
+  // click pattern - it does not depend on every descendant remembering
+  // to stopPropagation, or on the content wrapper's box happening to
+  // leave a real gap around it. An earlier version of this component
+  // relied on the latter (mirroring PostCard's own lightbox) and a
+  // manual click-target check during review found it unreliable here:
+  // the content wrapper's own sizing left far less real backdrop margin
+  // than intended, at only sm:p-6 (24px) around most of its edge.
+  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) onClose();
+  };
+
   return (
     <div
       className="fixed inset-0 z-[999] flex items-center justify-center bg-black/90 p-3 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={alt}
-      onClick={onClose}
+      onClick={handleBackdropClick}
     >
-      {/* No stopPropagation here on purpose: tapping the photo itself
-          also closes the viewer, the same as PostCard's own lightbox
-          (see profile-regressions.test.ts's "image lightbox" describe
-          block for the exact bug this avoids - an inner wrapper sized
-          to fill nearly the whole dialog, whose own stopPropagation
-          then ate almost every click, leaving only a thin backdrop
-          strip that actually closed anything). Only the close button
-          below needs its own stopPropagation, so its click isn't
-          double-counted by also bubbling to this dialog's onClose. */}
-      <div className="relative flex h-full max-h-[92vh] w-full max-w-3xl items-center justify-center">
+      <div
+        className="relative flex h-full max-h-[92vh] w-full max-w-3xl items-center justify-center"
+        onClick={handleBackdropClick}
+      >
         {status === "loading" && (
           <Loader2 className="h-10 w-10 animate-spin text-white/80" aria-hidden="true" />
         )}
@@ -92,10 +101,7 @@ export function ImageLightbox({ src, alt, onClose }: ImageLightboxProps) {
 
         <button
           type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onClose();
-          }}
+          onClick={onClose}
           aria-label={t("post.closeImageAria")}
           className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 sm:right-2 sm:top-2"
         >

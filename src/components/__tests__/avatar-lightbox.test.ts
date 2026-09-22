@@ -25,28 +25,30 @@ describe("ImageLightbox component", () => {
     expect(src).toContain("if (!src) return null;");
   });
 
-  it("closes on backdrop click, Escape, and an explicit close button", () => {
-    expect(src).toContain('onClick={onClose}');
+  it("closes on Escape and an explicit close button", () => {
     expect(src).toContain('event.key === "Escape"');
-    expect(src).toContain("onClose()");
+    expect(src).toContain("onClick={onClose}");
   });
 
-  it("lets a tap on the photo itself close the viewer too, not just the backdrop", () => {
-    // Mirrors PostCard's own lightbox (see profile-regressions.test.ts's
-    // "image lightbox" describe block): the content wrapper must NOT
-    // stopPropagation, or a tap almost anywhere in the viewer - the
-    // photo included - would silently do nothing, since that wrapper
-    // fills nearly the entire dialog.
-    const wrapperIdx = src.indexOf('className="relative flex h-full max-h-[92vh]');
-    expect(wrapperIdx).toBeGreaterThan(-1);
-    const wrapper = src.slice(wrapperIdx, wrapperIdx + 200);
-    expect(wrapper).not.toContain("stopPropagation");
+  it("only closes a backdrop click when the click lands directly on the backdrop, never bubbled from a descendant", () => {
+    // The standard, bulletproof pattern: event.target === event.currentTarget.
+    // A manual click-target check during review found the alternative
+    // (stopPropagation on the content wrapper, closing on everything
+    // else) unreliable here - the content wrapper's own sizing left far
+    // less real backdrop margin around it than intended, so a "backdrop"
+    // click could still land on the wrapper itself.
+    expect(src).toContain("event.target === event.currentTarget");
+    expect(src).toContain("handleBackdropClick");
   });
 
-  it("stops the close button's own click from double-firing via the bubbled backdrop close", () => {
+  it("does not close a second time from the close button's own click bubbling up", () => {
+    // The close button calls onClose() directly and needs no
+    // stopPropagation of its own: event.target there is the button, not
+    // the backdrop div, so handleBackdropClick's own target check
+    // already excludes it.
     const btnIdx = src.indexOf('aria-label={t("post.closeImageAria")}');
     expect(btnIdx).toBeGreaterThan(-1);
-    expect(src.slice(Math.max(0, btnIdx - 200), btnIdx)).toContain("event.stopPropagation()");
+    expect(src.slice(Math.max(0, btnIdx - 100), btnIdx)).toContain("onClick={onClose}");
   });
 
   it("has a real loading state and a real error state, not just the bare image", () => {
