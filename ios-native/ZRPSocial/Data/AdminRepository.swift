@@ -106,6 +106,7 @@ protocol AdminRepositoryProtocol: Sendable {
 
     // Analytics (ADMIN only)
     func analytics(range: AdminAnalyticsRange) async throws -> AdminAnalytics
+    func analyticsGeography(range: AdminAnalyticsRange) async throws -> AdminAnalyticsGeographyResponse
 
     // Audit log (ADMIN only)
     func auditLog(action: String, targetType: String, targetId: String, cursor: String?) async throws -> AdminAuditLogPage
@@ -754,6 +755,12 @@ struct AdminRepository: AdminRepositoryProtocol {
 
     func analytics(range: AdminAnalyticsRange) async throws -> AdminAnalytics {
         try await client.send(Endpoint.get("admin/analytics", query: [("range", range.rawValue)]))
+    }
+
+    /// `GET /api/admin/analytics/geography?range=` - admin-only. Same
+    /// `range` value the core analytics call above takes.
+    func analyticsGeography(range: AdminAnalyticsRange) async throws -> AdminAnalyticsGeographyResponse {
+        try await client.send(Endpoint.get("admin/analytics/geography", query: [("range", range.rawValue)]))
     }
 
     // MARK: - Audit log (ADMIN only)

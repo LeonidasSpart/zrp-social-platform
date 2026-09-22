@@ -1219,6 +1219,66 @@ enum AdminAnalyticsRange: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Analytics geography/acquisition/platform/language (`/api/admin/analytics/geography`) - ADMIN only
+
+/// One `{key, count}` row shared by every breakdown on the geography
+/// route - country, region, signup source, signup platform and
+/// language all come back in this same shape.
+struct AdminAnalyticsCountBucket: Decodable, Identifiable, Equatable {
+    let key: String
+    let count: Int
+
+    var id: String { key }
+}
+
+/// `"OTHER"` - the route's own small-cohort privacy fold (any bucket
+/// under 3 users, folded before it ever reaches this client - see the
+/// route's own comment). `"UNKNOWN"` is a distinct, real bucket (a null
+/// `countryCode`/`languageCode`/`signupSource`/`signupPlatform` column).
+/// Never conflate the two; there is no unfolding to do here or anywhere
+/// else client-side.
+enum AdminAnalyticsBucketKey {
+    static let other = "OTHER"
+    static let unknown = "UNKNOWN"
+}
+
+struct AdminAnalyticsGeographyBreakdown: Decodable, Equatable {
+    /// Users by their **current** country - a live snapshot across all
+    /// users, never range-filtered.
+    let byCountry: [AdminAnalyticsCountBucket]
+    let byRegion: [AdminAnalyticsCountBucket]
+    /// Users by their **signup-time** country, range-filtered and
+    /// immutable per-row. Genuinely different from `byCountry` above -
+    /// never merge the two into one chart/list.
+    let newUsersByCountry: [AdminAnalyticsCountBucket]
+    let unknownCountryCount: Int
+}
+
+struct AdminAnalyticsAcquisitionBreakdown: Decodable, Equatable {
+    let bySource: [AdminAnalyticsCountBucket]
+}
+
+struct AdminAnalyticsPlatformBreakdown: Decodable, Equatable {
+    let byPlatform: [AdminAnalyticsCountBucket]
+}
+
+struct AdminAnalyticsLanguageBreakdown: Decodable, Equatable {
+    let byLanguage: [AdminAnalyticsCountBucket]
+}
+
+/// `GET /api/admin/analytics/geography?range=` - admin-only. Companion
+/// to `AdminAnalytics` above (content/engagement totals); this is "where
+/// do our users come from". Takes the same `range` the core analytics
+/// call does - see `AdminAnalyticsViewModel`, which fetches both with
+/// the one selected range rather than giving this its own control.
+struct AdminAnalyticsGeographyResponse: Decodable, Equatable {
+    let range: String
+    let geography: AdminAnalyticsGeographyBreakdown
+    let acquisition: AdminAnalyticsAcquisitionBreakdown
+    let platform: AdminAnalyticsPlatformBreakdown
+    let language: AdminAnalyticsLanguageBreakdown
+}
+
 // MARK: - Audit log (`/api/admin/audit-log`) - ADMIN only, no web UI
 
 struct AdminAuditLogEntry: Decodable, Identifiable, Equatable {
