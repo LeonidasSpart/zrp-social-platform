@@ -24,6 +24,7 @@ import {
   Video,
   Copy,
   Check,
+  Reply,
 } from "lucide-react";
 import { getSocket } from "@/lib/socket-client";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
@@ -80,6 +81,12 @@ interface GroupMessage {
   createdAt: string;
   imageUrl?: string | null;
   edited?: boolean;
+  replyTo?: {
+    id: string;
+    content: string;
+    imageUrl?: string | null;
+    sender: GroupParticipantUser;
+  } | null;
   reactions?: Reaction[];
   sender: GroupParticipantUser;
 }
@@ -258,6 +265,17 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
     });
   };
 
+  const scrollToMessage = (messageId: string) => {
+    setActiveMessageActions(null);
+    const element = document.getElementById(`msg-${messageId}`);
+    if (!element) return;
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
+    element.classList.add("ring-2", "ring-zrp-red");
+    setTimeout(() => {
+      element.classList.remove("ring-2", "ring-zrp-red");
+    }, 1200);
+  };
+
   useEffect(() => {
     if (!initialMessagesLoadedRef.current && messages.length > 0) {
       initialMessagesLoadedRef.current = true;
@@ -413,6 +431,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null);
   const [activeMessageActions, setActiveMessageActions] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<GroupMessage | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
@@ -449,6 +468,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
     if (!userId || !session?.user) return;
 
     setSending(true);
+    const replyToSnapshot = replyingTo;
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const optimistic: GroupMessage = {
       id: tempId,
@@ -457,6 +477,14 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
       conversationId,
       createdAt: new Date().toISOString(),
       imageUrl,
+      replyTo: replyToSnapshot
+        ? {
+            id: replyToSnapshot.id,
+            content: replyToSnapshot.content,
+            imageUrl: replyToSnapshot.imageUrl,
+            sender: replyToSnapshot.sender,
+          }
+        : null,
       reactions: [],
       sender: {
         id: userId,
@@ -469,6 +497,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
 
     setMessages((prev) => [...prev, optimistic]);
     setNewMessage("");
+    setReplyingTo(null);
     setActiveMessageActions(null);
     setReactionPickerFor(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
@@ -477,7 +506,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
       const res = await fetch(`/api/conversations/${conversationId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: content || "", imageUrl, replyToId: null }),
+        body: JSON.stringify({ content: content || "", imageUrl, replyToId: replyToSnapshot?.id || null }),
       });
       if (!res.ok) {
         const error = await res.json().catch(() => null);
@@ -1103,6 +1132,20 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                               <Smile className="h-4 w-4" />
                             </button>
 
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setReplyingTo(message);
+                                setReactionPickerFor(null);
+                                setActiveMessageActions(null);
+                              }}
+                              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                              aria-label={t("action.reply")}
+                            >
+                              <Reply className="h-4 w-4" />
+                            </button>
+
                             {displayContent && (
                               <button
                                 type="button"
@@ -1179,6 +1222,31 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                               ))}
                             </div>
                           </>
+                        )}
+
+                        {/* REPLY PREVIEW */}
+                        {message.replyTo && (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              scrollToMessage(message.replyTo!.id);
+                            }}
+                            className={`mb-1.5 block w-full min-w-0 rounded-lg border-l-2 px-2.5 py-1.5 text-left text-xs ${
+                              isOwn
+                                ? "border-white/50 bg-white/10 text-white/80 hover:bg-white/15"
+                                : "border-gray-400 bg-black/5 text-gray-600 hover:bg-black/10 dark:border-gray-500 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
+                            }`}
+                          >
+                            <p className="truncate font-semibold">
+                              {message.replyTo.sender.id === userId
+                                ? "You"
+                                : message.replyTo.sender.name || message.replyTo.sender.username}
+                            </p>
+                            <p className="mt-0.5 truncate opacity-90">
+                              {message.replyTo.content || (message.replyTo.imageUrl ? "📷 Image" : "")}
+                            </p>
+                          </button>
                         )}
 
                         {message.imageUrl && (
@@ -1339,6 +1407,35 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
           </div>
         )}
       </div>
+
+      {/* REPLY PREVIEW (composer bar) */}
+      {replyingTo && (
+        <div className="relative z-20 flex shrink-0 items-center gap-2 border-t border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-zrp-deepBlack sm:px-4">
+          <Reply className="h-4 w-4 shrink-0 text-zrp-red" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-medium text-zrp-red">
+              Replying to{" "}
+              {replyingTo.senderId === userId
+                ? "yourself"
+                : replyingTo.sender.name || replyingTo.sender.username}
+            </p>
+            <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+              {replyingTo.content || (replyingTo.imageUrl ? "📷 Image" : "")}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setReplyingTo(null);
+              setActiveMessageActions(null);
+            }}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white"
+            aria-label={t("chat.cancelReplyAria")}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* COMPOSER */}
       <form

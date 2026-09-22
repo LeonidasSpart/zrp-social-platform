@@ -138,7 +138,7 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/messages storyId (integration, r
     expect(res.status).toBe(403);
   });
 
-  it("lets a follower reply to a visible story: creates a Message with storyId + the true author as receiver, ignoring any client-sent receiverId, and a notification", async () => {
+  it("lets a follower reply to a visible story: creates a Message with storyId + the true author as receiver, ignoring any client-sent receiverId, and does not also create a duplicate in-app notification", async () => {
     const author = await createUser("happy-author");
     const follower = await createUser("happy-follower");
     const decoy = await createUser("happy-decoy");
@@ -158,11 +158,17 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/messages storyId (integration, r
     expect(stored?.storyId).toBe(story.id);
     expect(stored?.receiverId).toBe(author.id);
 
+    // A "message"-type Notification row is deliberately never created
+    // (see the comment above the push-notification block in
+    // src/app/api/messages/route.ts): the Message row itself, surfaced
+    // via /api/messages/unread and the Messages nav badge, is the single
+    // source of truth for message unread state. Asserting its absence
+    // here locks in that fix so it can't silently regress.
     const notification = await prisma.notification.findFirst({
       where: { userId: author.id, fromUserId: follower.id, type: "message" },
       orderBy: { createdAt: "desc" },
     });
-    expect(notification).not.toBeNull();
+    expect(notification).toBeNull();
   });
 
   it("does not require the story to be given via a separate content mode - text-only reply still respects MAX_MESSAGE_LENGTH validation upstream", async () => {

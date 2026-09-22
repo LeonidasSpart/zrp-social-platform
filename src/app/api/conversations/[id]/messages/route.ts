@@ -141,15 +141,15 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     // Real participant rows only - someone removed a moment before this
     // send can no longer be notified, matching how their removal
     // already revokes read access too (see ConversationParticipant's
-    // own KDoc). In-app Notification rows are deliberately not created
-    // here yet - the existing Notification model has no conversationId
-    // reference, so a "message" notification would link to a fake 1:1
-    // thread with the sender instead of this real group (see
-    // notifications/page.tsx's own linkHref logic). Real push
+    // own KDoc). In-app Notification rows are deliberately never created
+    // here: the Messages page/badge (Message.read via
+    // /api/messages/unread) is the single source of truth for message
+    // unread state, for groups exactly as for 1:1 (see the matching,
+    // now-removed createNotification call this file's 1:1 sibling
+    // (messages/route.ts) used to make, and the "message"-type exclusion
+    // in /api/notifications and /api/notifications/unread). Real push
     // notifications don't have that constraint (a free-form url), so
-    // those go out for real; the in-app notification-list entry is a
-    // known, deliberate gap for a follow-up small schema addition, not
-    // a silent omission.
+    // those still go out for real below.
     const otherParticipants = await prisma.conversationParticipant.findMany({
       where: { conversationId: id, userId: { not: session.user.id } },
       select: { userId: true },

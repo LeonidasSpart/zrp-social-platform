@@ -7,6 +7,7 @@ const { getServerSession } = vi.hoisted(() => ({ getServerSession: vi.fn() }));
 vi.mock("next-auth", () => ({ getServerSession }));
 
 import { GET } from "../route";
+import { GET as GET_UNREAD } from "../unread/route";
 
 const hasRealDatabaseUrl =
   !!process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("...");
@@ -140,6 +141,37 @@ describe.skipIf(!hasRealDatabaseUrl)(
       getServerSession.mockResolvedValue(null);
       const res = await GET(req());
       expect(res.status).toBe(401);
+    });
+
+    // Regression coverage for the duplicate-unread-indicator fix: the
+    // Messages page/badge (Message.read via /api/messages/unread) is the
+    // single source of truth for message unread state, so a
+    // "message"-type Notification row must never surface on the
+    // Notifications page or contribute to its bell badge count - whether
+    // it's a fresh row or one written before messages/route.ts stopped
+    // creating them. See src/app/api/messages/route.ts and
+    // src/app/api/conversations/[id]/messages/route.ts's comments.
+    it("excludes 'message'-type notifications from both the list and the unread count", async () => {
+      const user = await createUser("excl-message");
+      getServerSession.mockResolvedValue(sessionFor(user.id));
+
+      const like = await createNotification(user.id, new Date());
+      const messageNotif = await prisma.notification.create({
+        data: { userId: user.id, fromUserId: user.id, type: "message", read: false },
+      });
+      notificationIds.push(messageNotif.id);
+
+      const listRes = await GET(req());
+      const listBody = await listRes.json();
+      const listIds = listBody.map((n: { id: string }) => n.id);
+      expect(listIds).toContain(like.id);
+      expect(listIds).not.toContain(messageNotif.id);
+
+      const unreadRes = await GET_UNREAD(req());
+      const unreadBody = await unreadRes.json();
+      // Both rows are unread, but only the "like" one should count -
+      // the "message" row must not inflate the bell badge.
+      expect(unreadBody.count).toBe(1);
     });
   }
 );

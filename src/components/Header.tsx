@@ -8,6 +8,8 @@ import { signOut, useSession } from "next-auth/react";
 import {
   Home,
   Compass,
+  Zap,
+  ListChecks,
   Search,
   MessageSquare,
   Bell,
@@ -202,6 +204,11 @@ export default function Header() {
       label: t("nav.shorts"),
     },
     {
+      href: "/discover",
+      icon: Zap,
+      label: t("nav.discover"),
+    },
+    {
       href: "/explore",
       icon: Compass,
       label: t("nav.explore"),
@@ -220,13 +227,20 @@ export default function Header() {
       // Kept in sync with Sidebar.tsx's navItems by hand - this is the
       // phone-only nav drawer (rendered md:hidden), a completely
       // separate list from the Sidebar rail (hidden md:flex, compact
-      // icon-only from md to lg, full labels from lg up). Music
-      // was added to Sidebar but not here, which is exactly how it
-      // went missing from navigation on every screen below the md
-      // breakpoint - add any future nav destination to both.
+      // icon-only from md to lg, full labels from lg up). Music,
+      // Discover, Communities and Lists were all added to Sidebar but
+      // not here at various points, which is exactly how each went
+      // missing from navigation on every screen below the md breakpoint
+      // (a user could only reach them by switching their browser to
+      // "Desktop site" mode) - add any future nav destination to both.
       href: "/music",
       icon: Music2,
       label: t("nav.music"),
+    },
+    {
+      href: "/communities",
+      icon: Users,
+      label: t("nav.communities"),
     },
     {
       href: "/play",
@@ -264,6 +278,11 @@ export default function Header() {
       href: "/bookmarks",
       icon: Bookmark,
       label: t("nav.bookmarks"),
+    },
+    {
+      href: "/lists",
+      icon: ListChecks,
+      label: t("nav.lists"),
     },
   ];
 
