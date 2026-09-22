@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendPushNotification } from "@/lib/push-notifications";
-import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
 import { getUserConversations } from "@/lib/conversations";
 import { isAllowedMediaUrl } from "@/lib/media-url";
@@ -212,27 +211,24 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // ─── Create in-app notification + send push (non‑blocking) ──────
-    // Previously this only attempted a browser push notification, which
-    // most people never grant permission for - so if push failed or
-    // wasn't set up, there was no trace of the message anywhere in the
-    // Notifications page at all. Now a durable in-app notification is
-    // always created too, matching every other notification type. A
-    // story reply reuses this exact same "message" notification (in-app
-    // + push) rather than inventing a second notification type/path -
-    // only the push copy is worded differently so the recipient knows
-    // it was prompted by their story.
+    // ─── Send push (non‑blocking) ────────────────────────────────────
+    // This used to also create a generic "message"-type Notification row
+    // so there was some trace of the message even if push failed/wasn't
+    // set up. That created a second, independently-read unread indicator
+    // for the exact same message: the Messages page/badge (driven by
+    // Message.read via /api/messages/unread) already IS that guaranteed
+    // trace - it's visible the moment the message is saved, regardless of
+    // push permission, so the extra Notification row only produced a
+    // duplicate badge on the Notifications page that could drift out of
+    // sync with the real read state (see /api/notifications/unread and
+    // /api/notifications's exclusion of type "message" for the same
+    // reason, which also absorbs any such rows written before this
+    // change). Group messages never had this double-write to begin with
+    // (see conversations/[id]/messages/route.ts's own comment) - this
+    // makes 1:1 messages consistent with that. A story reply still gets
+    // its own worded push below, it just no longer also writes a
+    // Notification row.
     if (resolvedReceiverId !== session.user.id) {
-      try {
-        await createNotification({
-          userId: resolvedReceiverId,
-          type: "message",
-          fromUserId: session.user.id,
-        });
-      } catch (notifErr) {
-        console.error("In-app message notification failed:", notifErr);
-      }
-
       try {
         const senderName = session.user.name || session.user.username;
         const notificationMessage = validStoryId

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import {
   Heart,
   MessageCircle,
@@ -419,6 +420,13 @@ export default function PostCard({
 
   const [lightboxImageIndex, setLightboxImageIndex] =
     useState<number | null>(null);
+
+  // Separate from the gallery lightbox above (`lightboxImageIndex`
+  // indexes into `galleryImages`, the post's own attachments) - the
+  // author's avatar isn't one of those and opens the simpler, single-
+  // image ImageLightbox instead.
+  const [avatarLightboxOpen, setAvatarLightboxOpen] =
+    useState(false);
 
   const [reactions, setReactions] =
     useState<Record<string, number>>({});
@@ -1642,25 +1650,39 @@ export default function PostCard({
         <div className="flex items-start gap-3">
 
           {/* AVATAR */}
-          <Link
-            href={`/profile/${post.author.username}`}
-          >
-            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
-              {post.author.avatarUrl ? (
-                <img
-                  src={post.author.avatarUrl}
-                  alt={
-                    post.author.name ||
-                    post.author.username
-                  }
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                getInitial()
-              )}
-            </div>
-          </Link>
+          {/* Tapping the picture opens it full-size (the bug this
+              fixes: it was a plain Link to the profile, with no way to
+              actually see the photo). Navigating to the profile itself
+              stays one tap away on the display name/username right
+              next to it, so nothing here removes that path. */}
+          {post.author.avatarUrl ? (
+            <button
+              type="button"
+              onClick={() => setAvatarLightboxOpen(true)}
+              aria-label={t("profile.viewPhotoAria", {
+                name: post.author.name || post.author.username,
+              })}
+              className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-zrp-red"
+            >
+              <img
+                src={post.author.avatarUrl}
+                alt={
+                  post.author.name ||
+                  post.author.username
+                }
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </button>
+          ) : (
+            <Link
+              href={`/profile/${post.author.username}`}
+            >
+              <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold flex-shrink-0 overflow-hidden">
+                {getInitial()}
+              </div>
+            </Link>
+          )}
 
           <div className="flex-1 min-w-0">
 
@@ -3008,6 +3030,20 @@ export default function PostCard({
           onClose={() => setShowShareModal(false)}
         />
       )}
+
+      {/* AVATAR LIGHTBOX */}
+      <ImageLightbox
+        src={
+          avatarLightboxOpen
+            ? post.author.avatarUrl || null
+            : null
+        }
+        alt={
+          post.author.name ||
+          post.author.username
+        }
+        onClose={() => setAvatarLightboxOpen(false)}
+      />
 
       {/* IMAGE LIGHTBOX */}
       {lightboxOpen &&

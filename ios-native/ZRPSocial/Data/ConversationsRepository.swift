@@ -4,7 +4,7 @@ protocol ConversationsRepositoryProtocol: Sendable {
     func groups() async throws -> [GroupConversation]
     func detail(id: String) async throws -> GroupConversationDetail
     func messages(id: String, before cursor: String?, limit: Int) async throws -> GroupMessagesPage
-    func send(id: String, content: String, imageUrl: String?) async throws -> GroupMessage
+    func send(id: String, content: String, imageUrl: String?, replyToId: String?) async throws -> GroupMessage
     func create(name: String, participantIds: [String], avatarUrl: String?) async throws -> String
     func update(id: String, name: String?, avatarUrl: String??) async throws -> GroupConversationDetail
     func addParticipants(id: String, participantIds: [String]) async throws -> GroupConversationDetail
@@ -55,6 +55,7 @@ struct ConversationsRepository: ConversationsRepositoryProtocol {
     private struct SendRequest: Encodable {
         let content: String
         let imageUrl: String?
+        let replyToId: String?
     }
 
     /// The route refuses a message that is empty with no attachment
@@ -63,11 +64,16 @@ struct ConversationsRepository: ConversationsRepositoryProtocol {
     /// allowlist the post routes use. The composer mirrors the first
     /// rule; the other two are the server's to enforce and its wording
     /// is shown as written.
-    func send(id: String, content: String, imageUrl: String?) async throws -> GroupMessage {
+    ///
+    /// `replyToId` is validated server-side against this same
+    /// conversation - a stale or cross-conversation id is silently
+    /// dropped rather than trusted, the same rule 1:1 chat's own send
+    /// route applies.
+    func send(id: String, content: String, imageUrl: String?, replyToId: String?) async throws -> GroupMessage {
         try await client.send(
             try Endpoint.post(
                 "conversations/\(Endpoint.segment(id))/messages",
-                body: SendRequest(content: content, imageUrl: imageUrl)
+                body: SendRequest(content: content, imageUrl: imageUrl, replyToId: replyToId)
             )
         )
     }

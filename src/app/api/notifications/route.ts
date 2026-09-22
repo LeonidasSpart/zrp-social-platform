@@ -36,7 +36,14 @@ export async function GET(req: NextRequest) {
     const { cursor, limit } = parseCursorParams(req, 50);
 
     const notifications = await prisma.notification.findMany({
-      where: { userId: session.user.id },
+      // "message"-type rows are excluded: the Messages/Chat page (and its
+      // own nav badge, driven by Message.read via /api/messages/unread)
+      // is the single source of truth for message unread state, so a
+      // message never needs to also show up as a second, separately-read
+      // entry in the general notification feed. See the matching
+      // exclusion in /api/notifications/unread and the removed
+      // createNotification call in /api/messages/route.ts.
+      where: { userId: session.user.id, type: { not: "message" } },
       orderBy: { createdAt: "desc" },
       take: limit + 1,
       skip: cursor ? 1 : 0,

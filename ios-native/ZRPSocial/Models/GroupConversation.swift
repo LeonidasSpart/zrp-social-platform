@@ -37,13 +37,14 @@ struct GroupConversation: Decodable, Identifiable, Equatable, Hashable {
 
 /// One message in a group thread.
 ///
-/// Deliberately its own type rather than a reuse of `Message`. The group
-/// route's `GROUP_MESSAGE_INCLUDE` attaches only `sender` - no
-/// `replyTo`, no `reactions`, and `receiverId` is meaningless for a
-/// group (the schema's own KDoc says so). Decoding this as a `Message`
-/// would produce a value whose absent fields look like "none" rather
-/// than "not sent", and a card that offered reactions with nothing
-/// behind them.
+/// Deliberately its own type rather than a reuse of `Message`, since
+/// `receiverId` is meaningless for a group (the schema's own KDoc says
+/// so) and would look like "none" rather than "not applicable" if
+/// decoded as one. The full-thread route (`GET
+/// /api/conversations/{id}/messages`) includes `sender`, `replyTo` (with
+/// that message's own sender) and `reactions` - the same `MESSAGE_INCLUDE`
+/// 1:1 chat's own route uses. `replyTo` is decoded here; `reactions` is
+/// not, since this screen has no reaction UI to show it in.
 struct GroupMessage: Decodable, Identifiable, Equatable, Hashable {
     let id: String
     let content: String
@@ -53,8 +54,12 @@ struct GroupMessage: Decodable, Identifiable, Equatable, Hashable {
     let edited: Bool
     let sender: PostAuthor?
 
+    /// One level deep only, same as `Message.replyTo`: the route includes
+    /// the replied-to message's own sender, but not its own `replyTo`.
+    let replyTo: RepliedMessage?
+
     private enum CodingKeys: String, CodingKey {
-        case id, content, imageUrl, senderId, createdAt, edited, sender
+        case id, content, imageUrl, senderId, createdAt, edited, sender, replyTo
     }
 
     init(from decoder: Decoder) throws {
@@ -68,6 +73,17 @@ struct GroupMessage: Decodable, Identifiable, Equatable, Hashable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         edited = try container.decodeIfPresent(Bool.self, forKey: .edited) ?? false
         sender = try container.decodeIfPresent(PostAuthor.self, forKey: .sender)
+        replyTo = try container.decodeIfPresent(RepliedMessage.self, forKey: .replyTo)
+    }
+
+    static func == (lhs: GroupMessage, rhs: GroupMessage) -> Bool {
+        lhs.id == rhs.id && lhs.content == rhs.content && lhs.imageUrl == rhs.imageUrl
+            && lhs.senderId == rhs.senderId && lhs.createdAt == rhs.createdAt
+            && lhs.edited == rhs.edited && lhs.sender == rhs.sender && lhs.replyTo == rhs.replyTo
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
