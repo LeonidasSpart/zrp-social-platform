@@ -52,6 +52,35 @@ iOS has no build shipped yet.
 
 ### Bug Fixes
 
+- **Voice and video calling**: fixed voice calls getting stuck on
+  "Connecting..." with total silence, even though the call had actually
+  connected - the element that attaches the remote audio/video stream
+  was only ever mounted for video calls. Also fixed "ghost calls" (a
+  call that appeared to still be ringing after it had actually ended),
+  a timing bug that could end the wrong call, and added a 20-second
+  connection timeout and a 45-second no-answer timeout so a call now
+  fails with a clear message instead of hanging forever. A
+  backgrounded/minimized recipient now also gets a real push
+  notification for an incoming call, not just the in-app ring (#392).
+  Android's calling flow already had the connection itself right, but
+  didn't have these same two timeouts or a way to tell "the other
+  person is unavailable" apart from "they declined" - both ported over
+  to match (#394).
+- **Broken link previews when sharing ZRP on social media**: sharing
+  `/ambassadors` (and, it turned out, about 30 other pages) on
+  X/Twitter, Facebook, WhatsApp, etc. showed a title but no image,
+  because a page that customized its own preview text accidentally lost
+  the image entirely rather than inheriting the site's default. Fixed
+  platform-wide with a shared helper that can no longer make that
+  mistake, plus a new branded image generator so every page - including
+  posts, profiles, articles and hashtags with no photo of their own -
+  gets a real, on-brand preview image instead of a blank one (#394).
+- **Quoted posts on iOS opened the wrong thing**: tapping a quoted post
+  (e.g. someone quote-posting an official ZRP announcement) didn't open
+  the original post at all - only its author's name/photo (which opened
+  their profile) and its own image (which opened a full-screen photo
+  viewer) did anything. Web and Android already opened the right post
+  when you tapped anywhere on a quote; iOS now does too (#396).
 - Fixed the language selector menu overflowing the viewport with no way
   to scroll to it once the list reached 25 entries, on the desktop
   header dropdown, the mobile drawer, and the sidebar flyout (Web) (#363).
@@ -80,8 +109,21 @@ iOS has no build shipped yet.
   and fixed iOS's localization generator drifting on the `action.copy`
   key (#350).
 
+### Security
+
+- **Content-Security-Policy is now fully enforced**, not just
+  logged-and-observed: promoted after checking the real allowlist every
+  upload, embed, analytics, error-reporting, payment and calling flow
+  actually needs against what the policy allows, and fixing two real
+  gaps that check found (calling's TURN/STUN connections, and a missing
+  UploadThing host in the media policy) so enforcing it didn't break
+  anything live (#394).
+
 ### Features
 
+- **Manage your own Stories**: you can now delete a Story you posted,
+  or edit its caption, from the Story viewer - previously there was no
+  way to fix or remove one once it was up (Web) (#396).
 - **ZRP Discover**: a new vertical, swipeable, ranked video feed
   (`/discover`, Web), reusing Shorts' existing video posts with
   server-side ranking, a creator-diversity pass, viewer-state gating and
