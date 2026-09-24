@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { X, Eye, Heart, Send } from "lucide-react";
+import { X, Eye, Heart, Send, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ConfirmModal from "@/components/ConfirmModal";
 
 // Mirrors MAX_MESSAGE_LENGTH in src/app/api/messages/route.ts - a story
 // reply is a real DM, so it's bound by the same content limit as every
@@ -28,9 +29,13 @@ interface Props {
   };
   onClose: () => void;
   onStoryViewed: () => void;
+  // Called after a successful edit or delete, so the tray/list behind
+  // this viewer (StoriesBar's own `groups` state) picks up the change -
+  // same refetch function StoriesBar already passes as onStoryViewed.
+  onStoriesChanged: () => void;
 }
 
-export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
+export default function StoryViewer({ group, onClose, onStoryViewed, onStoriesChanged }: Props) {
   const { t } = useLanguage();
   const { data: session } = useSession();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -65,9 +70,112 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
     Object.fromEntries(group.stories.map((s) => [s.id, s.likeCount ?? 0]))
   );
 
-  const story = group.stories[currentIndex];
+  // The story list itself is also tracked locally, initialized from the
+  // group prop and mutated directly on edit/delete - the same pattern as
+  // likedMap/likeCountMap above. `group` is a snapshot StoriesBar handed
+  // this viewer when it was opened and is never refreshed while it's
+  // open, so a delete needs somewhere local to actually remove the item.
+  const [stories, setStories] = useState(group.stories);
+
+  const story = stories[currentIndex];
   const liked = likedMap[story.id] ?? false;
   const likeCount = likeCountMap[story.id] ?? 0;
+
+  // ─── Own-story management: options menu, edit, delete ────────────────
+  const [showOptions, setShowOptions] = useState(false);
+
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const openEdit = () => {
+    setShowOptions(false);
+    setEditText(story.content || "");
+    setEditError(null);
+    setEditing(true);
+    setPaused(true);
+  };
+
+  const cancelEdit = () => {
+    setEditing(false);
+    setEditError(null);
+    setPaused(false);
+  };
+
+  const saveEdit = async () => {
+    if (savingEdit) return;
+    setSavingEdit(true);
+    setEditError(null);
+    try {
+      const res = await fetch(`/api/stories/${story.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editText.trim() }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || t("stories.editFailed"));
+      }
+      const updated = await res.json();
+      setStories((prev) =>
+        prev.map((s) =>
+          s.id === story.id ? { ...s, content: updated.content ?? undefined } : s
+        )
+      );
+      setEditing(false);
+      setPaused(false);
+      onStoriesChanged();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : t("stories.editFailed"));
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const requestDelete = () => {
+    setShowOptions(false);
+    setDeleteError(null);
+    setConfirmingDelete(true);
+    setPaused(true);
+  };
+
+  const cancelDelete = () => {
+    setConfirmingDelete(false);
+    setDeleteError(null);
+    setPaused(false);
+  };
+
+  const confirmDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/stories/${story.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || t("stories.deleteFailed"));
+      }
+      onStoriesChanged();
+      const remaining = stories.filter((s) => s.id !== story.id);
+      if (remaining.length === 0) {
+        onClose();
+        return;
+      }
+      setStories(remaining);
+      setCurrentIndex((idx) => Math.min(idx, remaining.length - 1));
+      setConfirmingDelete(false);
+      setPaused(false);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : t("stories.deleteFailed"));
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!story.viewed) {
@@ -88,7 +196,7 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
       setProgress(pct);
       if (pct >= 100) {
         clearInterval(interval);
-        if (currentIndex < group.stories.length - 1) {
+        if (currentIndex < stories.length - 1) {
           setCurrentIndex(currentIndex + 1);
         } else {
           onClose();
@@ -98,10 +206,10 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
     timerRef.current = interval;
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, group.stories.length, onClose, paused]);
+  }, [currentIndex, stories.length, onClose, paused]);
 
   const next = () => {
-    if (currentIndex < group.stories.length - 1) setCurrentIndex(currentIndex + 1);
+    if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
     else onClose();
   };
 
@@ -229,6 +337,57 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
         <X className="w-8 h-8" />
       </button>
 
+      {/* Story management: Edit/Delete, own story only. The backend is
+          the real gate (PUT/DELETE /api/stories/{id} verify ownership
+          against the DB) - hiding this button for anyone else's story is
+          a UX nicety, not the enforcement. Positioned to the left of the
+          close button, same z-tier and safe-area handling. */}
+      {isOwnStory && (
+        <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] right-16 z-20">
+          <button
+            onClick={() => setShowOptions((v) => !v)}
+            aria-label={t("post.moreOptions")}
+            aria-haspopup="menu"
+            aria-expanded={showOptions}
+            className="flex items-center justify-center rounded-full bg-black/40 p-2 text-white transition hover:bg-black/60 hover:text-gray-300"
+          >
+            <MoreVertical className="w-6 h-6" />
+          </button>
+
+          {showOptions && (
+            <>
+              <div
+                className="fixed inset-0 z-30"
+                onClick={() => setShowOptions(false)}
+              />
+              <div
+                role="menu"
+                className="absolute end-0 top-full mt-1 z-40 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-zrp-charcoal"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={openEdit}
+                  className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <Pencil className="w-4 h-4" />
+                  {t("action.edit")}
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={requestDelete}
+                  className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-zrp-red hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {t("action.delete")}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       <div
         className="relative w-full max-w-md h-[80vh] bg-gray-900 rounded-lg overflow-hidden outline-none"
         role="group"
@@ -257,7 +416,7 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
       >
         {/* Progress bar */}
         <div className="absolute top-0 left-0 right-0 flex gap-1 p-2 z-10">
-          {group.stories.map((_, idx) => (
+          {stories.map((_, idx) => (
             <div
               key={idx}
               className="h-1 flex-1 bg-gray-600 rounded-full overflow-hidden"
@@ -438,7 +597,64 @@ export default function StoryViewer({ group, onClose, onStoryViewed }: Props) {
           className="absolute right-0 top-0 w-1/3 h-full cursor-pointer z-10"
           onClick={next}
         />
+
+        {/* Edit panel, own story only - text-only, matching the same
+            convention Post edit already uses (media is never touched by
+            an edit on either client). Covers the card so the navigation
+            zones behind it can't be tapped while editing. */}
+        {editing && (
+          <div
+            className="absolute inset-0 z-30 flex flex-col justify-end bg-black/70 p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              placeholder={t("stories.editPlaceholder")}
+              aria-label={t("stories.editPlaceholder")}
+              autoFocus
+              rows={4}
+              className="w-full resize-none rounded-xl border border-white/30 bg-black/40 p-3 text-sm text-white placeholder-white/60 outline-none backdrop-blur-sm focus:border-white/60"
+            />
+            {editError && (
+              <div role="alert" className="mt-2 rounded-lg bg-red-600/90 px-3 py-1.5 text-xs text-white">
+                {editError}
+              </div>
+            )}
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelEdit}
+                disabled={savingEdit}
+                className="rounded-full px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-50"
+              >
+                {t("action.cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={saveEdit}
+                disabled={savingEdit}
+                className="rounded-full bg-zrp-red px-4 py-2 text-sm font-semibold text-white transition hover:bg-zrp-darkRed disabled:opacity-60"
+              >
+                {t("action.save")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {confirmingDelete && (
+        <ConfirmModal
+          title={t("stories.deleteStoryConfirmTitle")}
+          body={deleteError || t("stories.deleteStoryConfirmBody")}
+          confirmLabel={t("action.delete")}
+          cancelLabel={t("action.cancel")}
+          destructive
+          busy={deleting}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+      )}
 
       <style jsx>{`
         .story-heart-burst {

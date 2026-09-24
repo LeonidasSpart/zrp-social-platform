@@ -134,6 +134,7 @@ export default function StoriesBar() {
           group={selectedGroup}
           onClose={() => setSelectedGroup(null)}
           onStoryViewed={fetchStories}
+          onStoriesChanged={fetchStories}
         />
       )}
 
