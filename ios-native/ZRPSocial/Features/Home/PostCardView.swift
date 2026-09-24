@@ -462,6 +462,23 @@ struct PostCardView: View {
     @ViewBuilder
     private var quotedPost: some View {
         if let quoted = post.quotePost {
+            // Root cause of the reported navigation bug: this block had
+            // no tap target of its own at all - only the author name/
+            // avatar (which opens their profile, not the post) and the
+            // media (which opens a full-screen viewer of that image).
+            // Tapping the block's text or empty space did nothing, so
+            // hit-testing fell through to the QUOTING post's own card,
+            // which has no gesture either except the reply button in its
+            // action bar below - the one place a stray tap in this
+            // vicinity actually lands on and navigates
+            // (.postDetail(postId: post.id, ...), i.e. the *quoting*
+            // post, not what's quoted here). Web (PostCard.tsx) and
+            // Android (PostCard.kt's QuotedPostPreview) both already
+            // make the *entire* quoted-post preview open the quoted
+            // post when tapped anywhere in it; matching that here (via
+            // onTapGesture on the container, so the still-more-specific
+            // nested author/media buttons below keep their own meaning)
+            // is what was missing, not a wrong id anywhere.
             VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
                 HStack(spacing: ZrpSpacing.sm) {
                     Button {
@@ -521,11 +538,18 @@ struct PostCardView: View {
             }
             .padding(ZrpSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                navigator.push(.postDetail(postId: quoted.id, preloaded: nil, targetCommentId: nil))
+            }
             .overlay(
                 RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous)
                     .strokeBorder(ZrpColor.outline, lineWidth: 1)
             )
             .accessibilityElement(children: .contain)
+            .accessibilityAction {
+                navigator.push(.postDetail(postId: quoted.id, preloaded: nil, targetCommentId: nil))
+            }
         }
     }
 
