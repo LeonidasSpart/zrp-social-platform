@@ -114,7 +114,7 @@ fun NotificationsScreen(
         val primary = g.users.firstOrNull() ?: return
         when {
             g.type == "message" -> onOpenMessage(primary.id, primary.username)
-            g.type == "follow" || g.type == "follow_request" -> onAuthorClick(primary.username)
+            g.type == "follow" || g.type == "follow_back" || g.type == "follow_request" -> onAuthorClick(primary.username)
             // Matches web's own notification-click routing
             // (src/app/notifications/page.tsx): an appeal's resolution
             // goes to the Appeals screen, a listing review's outcome
@@ -251,7 +251,7 @@ private fun badgeFor(type: String): NotificationBadge = when (type) {
     "like" -> NotificationBadge(Icons.Filled.Favorite, ZrpRed)
     "comment" -> NotificationBadge(Icons.Filled.ChatBubbleOutline, ZrpBlue)
     "repost" -> NotificationBadge(Icons.Filled.Repeat, ZrpGreen)
-    "follow", "follow_request" -> NotificationBadge(Icons.Filled.PersonAdd, ZrpRed)
+    "follow", "follow_back", "follow_request" -> NotificationBadge(Icons.Filled.PersonAdd, ZrpRed)
     "mention" -> NotificationBadge(Icons.Filled.AlternateEmail, ZrpBlue)
     "message" -> NotificationBadge(Icons.Filled.MailOutline, ZrpBlue)
     "appeal_resolved" -> NotificationBadge(Icons.Filled.Balance, ZrpRed)
@@ -440,6 +440,13 @@ private fun describeNotificationSuffix(type: String, others: Int): String {
         "like" -> if (plural) "liked your post" else stringResource(R.string.notifications_liked_post_suffix)
         "comment" -> stringResource(R.string.notifications_commented_post_suffix)
         "follow" -> if (plural) "started following you" else stringResource(R.string.notifications_started_following_suffix)
+        // Distinct from "follow": this follow completed a mutual
+        // relationship (the recipient already followed the actor), so
+        // the "Follow back" button below (gated on type == "follow"
+        // specifically) correctly does not render for this type -
+        // tapping it when already mutual would have called the same
+        // toggle endpoint and actually unfollowed the other person.
+        "follow_back" -> if (plural) "followed you back" else stringResource(R.string.notifications_followed_you_back_suffix)
         "repost" -> if (plural) "reposted your post" else stringResource(R.string.notifications_reposted_post_suffix)
         "mention" -> "mentioned you"
         "message" -> "sent you a message"

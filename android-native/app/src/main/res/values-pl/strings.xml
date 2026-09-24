@@ -455,6 +455,7 @@
     <string name="notifications_liked_post_suffix">polubił(a) Twój post</string>
     <string name="notifications_commented_post_suffix">skomentował(a) Twój post</string>
     <string name="notifications_started_following_suffix">zaczął(-ęła) Cię obserwować</string>
+    <string name="notifications_followed_you_back_suffix">zaczął(-ęła) Cię obserwować z powrotem</string>
     <string name="notifications_reposted_post_suffix">zrepostował(a) Twój post</string>
     <string name="notifications_appeal_resolved_suffix">rozstrzygnął(-ęła) Twoje odwołanie od moderacji</string>
     <string name="notifications_listing_approved_suffix">zatwierdził(a) Twoje ogłoszenie na rynku</string>

@@ -20,7 +20,7 @@ interface FromUser {
 
 interface Notification {
   id: string;
-  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_request" | "repost" | "comment_repost" | "message" | "post_from_subscription";
+  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_back" | "follow_request" | "repost" | "comment_repost" | "message" | "post_from_subscription";
   read: boolean;
   createdAt: string;
   fromUser: FromUser;
@@ -54,7 +54,7 @@ interface GroupedNotification {
   ids: string[];
 }
 
-const GROUPABLE_TYPES = new Set<Notification["type"]>(["like", "comment_like", "repost", "comment_repost", "follow"]);
+const GROUPABLE_TYPES = new Set<Notification["type"]>(["like", "comment_like", "repost", "comment_repost", "follow", "follow_back"]);
 
 function groupNotifications(list: Notification[]): GroupedNotification[] {
   const result: GroupedNotification[] = [];
@@ -212,6 +212,7 @@ export default function NotificationsPage() {
       case "reply":
         return <MessageCircle className="w-4 h-4 text-blue-500" />;
       case "follow":
+      case "follow_back":
       case "follow_request":
         return <UserPlus className="w-4 h-4 text-green-500" />;
       case "repost":
@@ -246,6 +247,8 @@ export default function NotificationsPage() {
         return t("notifications.repliedCommentSuffix");
       case "follow":
         return plural ? t("notifications.startedFollowingSuffixPlural") : t("notifications.startedFollowingSuffix");
+      case "follow_back":
+        return plural ? t("notifications.followedYouBackSuffixPlural") : t("notifications.followedYouBackSuffix");
       case "follow_request":
         return t("notifications.followRequestSuffix");
       case "repost":
@@ -286,7 +289,7 @@ export default function NotificationsPage() {
       return notifications.filter((n) => !!n.fromUser.badgeType);
     }
     if (activeTab === "follows") {
-      return notifications.filter((n) => n.type === "follow");
+      return notifications.filter((n) => n.type === "follow" || n.type === "follow_back");
     }
     return notifications;
   }, [notifications, activeTab]);

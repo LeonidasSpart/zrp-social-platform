@@ -453,6 +453,7 @@
     <string name="notifications_liked_post_suffix">lajka tvoju objavu</string>
     <string name="notifications_commented_post_suffix">komentira tvoju objavu</string>
     <string name="notifications_started_following_suffix">te sada prati</string>
+    <string name="notifications_followed_you_back_suffix">sada te prati zauzvrat</string>
     <string name="notifications_reposted_post_suffix">objavljuje ponovno tvoju objavu</string>
     <string name="notifications_appeal_resolved_suffix">rješava tvoju žalbu na moderiranje</string>
     <string name="notifications_listing_approved_suffix">odobrava tvoj oglas na tržnici</string>

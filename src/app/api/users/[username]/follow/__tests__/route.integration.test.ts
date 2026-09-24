@@ -121,6 +121,80 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(notifs2).toHaveLength(1);
     });
 
+    it("a follow-back is a distinct notification type, identifying the right user, and unfollowing retracts it", async () => {
+      const a = await createUser("mutualA5");
+      const b = await createUser("mutualB5");
+
+      // A follows B first.
+      getServerSession.mockResolvedValue(sessionFor(a));
+      const aFollowsB = await POST(req(), { params: Promise.resolve({ username: b.username }) });
+      expect(aFollowsB.status).toBe(200);
+
+      const bNotif = await prisma.notification.findFirst({
+        where: { userId: b.id, fromUserId: a.id },
+      });
+      expect(bNotif?.type).toBe("follow");
+
+      // B follows A back - this is the reported bug scenario: A's
+      // notification must reflect that B followed them BACK (a distinct
+      // type from a plain "follow"), not the generic first-follow type.
+      getServerSession.mockResolvedValue(sessionFor(b));
+      const bFollowsA = await POST(req(), { params: Promise.resolve({ username: a.username }) });
+      expect(bFollowsA.status).toBe(200);
+
+      // Both directions of the relationship now genuinely exist -
+      // the underlying state, not just the notification text, must be
+      // correct.
+      const aFollowsBRow = await prisma.follow.findUnique({
+        where: { followerId_followingId: { followerId: a.id, followingId: b.id } },
+      });
+      const bFollowsARow = await prisma.follow.findUnique({
+        where: { followerId_followingId: { followerId: b.id, followingId: a.id } },
+      });
+      expect(aFollowsBRow).toBeTruthy();
+      expect(bFollowsARow).toBeTruthy();
+
+      // A's notification (from B's follow-back) must be type
+      // "follow_back", not "follow" - and must correctly attribute B,
+      // not some other user, as the actor.
+      const aNotif = await prisma.notification.findFirst({
+        where: { userId: a.id, fromUserId: b.id },
+      });
+      expect(aNotif?.type).toBe("follow_back");
+      expect(aNotif?.fromUserId).toBe(b.id);
+
+      // B's own original notification (from step 1) is untouched by A's
+      // later action - still the plain "follow" type, since when A
+      // first followed B, B did not yet follow A back.
+      const bNotifAfter = await prisma.notification.findFirst({
+        where: { userId: b.id, fromUserId: a.id },
+      });
+      expect(bNotifAfter?.type).toBe("follow");
+
+      // B unfollowing A must retract the follow_back notification it
+      // created (same "no orphaned unread notification" rule as a plain
+      // follow), not just silently fail to match it because it's
+      // looking for the wrong type.
+      const bUnfollowsA = await POST(req(), { params: Promise.resolve({ username: a.username }) });
+      expect(bUnfollowsA.status).toBe(200);
+      expect((await bUnfollowsA.json()).following).toBe(false);
+
+      const aNotifAfterUnfollow = await prisma.notification.findFirst({
+        where: { userId: a.id, fromUserId: b.id, type: "follow_back" },
+      });
+      expect(aNotifAfterUnfollow).toBeNull();
+
+      // B following A again re-creates the mutual relationship and must
+      // again produce a follow_back notification (not a duplicate-guard
+      // false negative from the retracted row).
+      const bFollowsAAgain = await POST(req(), { params: Promise.resolve({ username: a.username }) });
+      expect(bFollowsAAgain.status).toBe(200);
+      const aNotifAgain = await prisma.notification.findFirst({
+        where: { userId: a.id, fromUserId: b.id, type: "follow_back" },
+      });
+      expect(aNotifAgain).toBeTruthy();
+    });
+
     it("a concurrent duplicate follow request is idempotent, not a 500, and never produces a duplicate row", async () => {
       const target = await createUser("target4");
       const follower = await createUser("follower4");

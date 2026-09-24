@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "heeft gereageerd op je post";
 "notifications.repliedCommentSuffix" = "heeft geantwoord op je reactie";
 "notifications.startedFollowingSuffix" = "volgt je nu";
+"notifications.followedYouBackSuffix" = "volgt je nu ook terug";
 "notifications.repostedPostSuffix" = "heeft je post gerepost";
 "notifications.appealResolvedSuffix" = "heeft je moderatieberoep afgehandeld";
 "notifications.listingApprovedSuffix" = "heeft je marketplace-advertentie goedgekeurd";

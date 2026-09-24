@@ -453,6 +453,7 @@
     <string name="notifications_liked_post_suffix">赞了你的帖子</string>
     <string name="notifications_commented_post_suffix">评论了你的帖子</string>
     <string name="notifications_started_following_suffix">开始关注你</string>
+    <string name="notifications_followed_you_back_suffix">也关注了你</string>
     <string name="notifications_reposted_post_suffix">转发了你的帖子</string>
     <string name="notifications_appeal_resolved_suffix">处理了您的内容审核申诉</string>
     <string name="notifications_listing_approved_suffix">批准了您的市场商品</string>

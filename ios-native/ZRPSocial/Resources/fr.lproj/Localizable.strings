@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "a commenté votre publication";
 "notifications.repliedCommentSuffix" = "a répondu à votre commentaire";
 "notifications.startedFollowingSuffix" = "a commencé à vous suivre";
+"notifications.followedYouBackSuffix" = "vous suit maintenant en retour";
 "notifications.repostedPostSuffix" = "a repartagé votre publication";
 "notifications.appealResolvedSuffix" = "a résolu votre appel de modération";
 "notifications.listingApprovedSuffix" = "a approuvé votre annonce sur la marketplace";

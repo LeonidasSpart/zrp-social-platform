@@ -451,6 +451,7 @@
     <string name="notifications_liked_post_suffix">хареса публикацията ти</string>
     <string name="notifications_commented_post_suffix">коментира публикацията ти</string>
     <string name="notifications_started_following_suffix">те последва</string>
+    <string name="notifications_followed_you_back_suffix">също те последва</string>
     <string name="notifications_reposted_post_suffix">препубликува публикацията ти</string>
     <string name="notifications_appeal_resolved_suffix">разгледа обжалването ти</string>
     <string name="notifications_listing_approved_suffix">одобри обявата ти в пазара</string>

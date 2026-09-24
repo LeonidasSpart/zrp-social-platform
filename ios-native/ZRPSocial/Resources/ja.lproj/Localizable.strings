@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "があなたの投稿にコメントしました";
 "notifications.repliedCommentSuffix" = "があなたのコメントに返信しました";
 "notifications.startedFollowingSuffix" = "にフォローされました";
+"notifications.followedYouBackSuffix" = "にもフォローされました";
 "notifications.repostedPostSuffix" = "があなたの投稿をリポストしました";
 "notifications.appealResolvedSuffix" = "があなたのモデレーション異議申し立てを解決しました";
 "notifications.listingApprovedSuffix" = "あなたのマーケットプレイスのリスティングを承認しました";

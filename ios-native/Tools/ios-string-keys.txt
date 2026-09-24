@@ -286,6 +286,7 @@ notifications.likedPostSuffix
 notifications.commentedPostSuffix
 notifications.repliedCommentSuffix
 notifications.startedFollowingSuffix
+notifications.followedYouBackSuffix
 notifications.repostedPostSuffix
 notifications.appealResolvedSuffix
 notifications.listingApprovedSuffix

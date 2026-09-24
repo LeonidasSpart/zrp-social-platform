@@ -451,6 +451,7 @@
     <string name="notifications_liked_post_suffix">έκανε «Μου αρέσει» στην ανάρτησή σου</string>
     <string name="notifications_commented_post_suffix">σχολίασε την ανάρτησή σου</string>
     <string name="notifications_started_following_suffix">άρχισε να σε ακολουθεί</string>
+    <string name="notifications_followed_you_back_suffix">σε ακολούθησε επίσης</string>
     <string name="notifications_reposted_post_suffix">αναδημοσίευσε την ανάρτησή σου</string>
     <string name="notifications_appeal_resolved_suffix">επίλυσε την ένσταση συντονισμού που υπέβαλες</string>
     <string name="notifications_listing_approved_suffix">ενέκρινε την καταχώρησή σου στο marketplace</string>

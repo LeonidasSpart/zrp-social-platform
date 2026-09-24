@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "mengomentari postingan Anda";
 "notifications.repliedCommentSuffix" = "membalas komentar Anda";
 "notifications.startedFollowingSuffix" = "mulai mengikuti Anda";
+"notifications.followedYouBackSuffix" = "mengikuti Anda kembali";
 "notifications.repostedPostSuffix" = "membagikan ulang postingan Anda";
 "notifications.appealResolvedSuffix" = "memutuskan banding moderasi Anda";
 "notifications.listingApprovedSuffix" = "menyetujui listingan marketplace Anda";

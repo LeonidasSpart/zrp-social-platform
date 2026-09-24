@@ -453,6 +453,7 @@
     <string name="notifications_liked_post_suffix">a apreciat postarea ta</string>
     <string name="notifications_commented_post_suffix">a comentat la postarea ta</string>
     <string name="notifications_started_following_suffix">a început să te urmărească</string>
+    <string name="notifications_followed_you_back_suffix">te urmărește înapoi</string>
     <string name="notifications_reposted_post_suffix">a redistribuit postarea ta</string>
     <string name="notifications_appeal_resolved_suffix">ți-a soluționat contestația de moderare</string>
     <string name="notifications_listing_approved_suffix">ți-a aprobat anunțul din marketplace</string>

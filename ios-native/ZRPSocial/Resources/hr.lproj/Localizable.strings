@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "komentira tvoju objavu";
 "notifications.repliedCommentSuffix" = "odgovara na tvoj komentar";
 "notifications.startedFollowingSuffix" = "te sada prati";
+"notifications.followedYouBackSuffix" = "sada te prati zauzvrat";
 "notifications.repostedPostSuffix" = "objavljuje ponovno tvoju objavu";
 "notifications.appealResolvedSuffix" = "rješava tvoju žalbu na moderiranje";
 "notifications.listingApprovedSuffix" = "odobrava tvoj oglas na tržnici";

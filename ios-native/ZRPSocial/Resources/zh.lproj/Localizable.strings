@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "评论了你的帖子";
 "notifications.repliedCommentSuffix" = "回复了你的评论";
 "notifications.startedFollowingSuffix" = "开始关注你";
+"notifications.followedYouBackSuffix" = "也关注了你";
 "notifications.repostedPostSuffix" = "转发了你的帖子";
 "notifications.appealResolvedSuffix" = "处理了您的内容审核申诉";
 "notifications.listingApprovedSuffix" = "批准了您的市场商品";

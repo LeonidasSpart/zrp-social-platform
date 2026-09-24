@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "gönderinize yorum yaptı";
 "notifications.repliedCommentSuffix" = "yorumunuza yanıt verdi";
 "notifications.startedFollowingSuffix" = "sizi takip etmeye başladı";
+"notifications.followedYouBackSuffix" = "sizi geri takip etti";
 "notifications.repostedPostSuffix" = "gönderinizi yeniden paylaştı";
 "notifications.appealResolvedSuffix" = "moderasyon itirazınızı karara bağladı";
 "notifications.listingApprovedSuffix" = "pazar yeri ilanınızı onayladı";

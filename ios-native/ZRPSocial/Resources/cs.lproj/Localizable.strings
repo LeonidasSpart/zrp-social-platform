@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "okomentoval(a) tvůj příspěvek";
 "notifications.repliedCommentSuffix" = "odpověděl(a) na tvůj komentář";
 "notifications.startedFollowingSuffix" = "tě začal(a) sledovat";
+"notifications.followedYouBackSuffix" = "tě začal(a) sledovat zpět";
 "notifications.repostedPostSuffix" = "sdílel(a) tvůj příspěvek";
 "notifications.appealResolvedSuffix" = "vyřešil(a) tvoje odvolání proti moderování";
 "notifications.listingApprovedSuffix" = "schválil(a) tvůj inzerát na tržišti";

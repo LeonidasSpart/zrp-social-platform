@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "علّق على منشورك";
 "notifications.repliedCommentSuffix" = "رد على تعليقك";
 "notifications.startedFollowingSuffix" = "بدأ بمتابعتك";
+"notifications.followedYouBackSuffix" = "تابعك أيضًا";
 "notifications.repostedPostSuffix" = "أعاد نشر منشورك";
 "notifications.appealResolvedSuffix" = "بتّ في طعن الإشراف الخاص بك";
 "notifications.listingApprovedSuffix" = "وافق على إعلانك في السوق";

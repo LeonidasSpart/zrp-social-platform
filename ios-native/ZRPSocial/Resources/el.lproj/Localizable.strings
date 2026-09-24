@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "σχολίασε την ανάρτησή σου";
 "notifications.repliedCommentSuffix" = "απάντησε στο σχόλιό σου";
 "notifications.startedFollowingSuffix" = "άρχισε να σε ακολουθεί";
+"notifications.followedYouBackSuffix" = "σε ακολούθησε επίσης";
 "notifications.repostedPostSuffix" = "αναδημοσίευσε την ανάρτησή σου";
 "notifications.appealResolvedSuffix" = "επίλυσε την ένσταση συντονισμού που υπέβαλες";
 "notifications.listingApprovedSuffix" = "ενέκρινε την καταχώρησή σου στο marketplace";

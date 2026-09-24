@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "a comentat la postarea ta";
 "notifications.repliedCommentSuffix" = "a răspuns la comentariul tău";
 "notifications.startedFollowingSuffix" = "a început să te urmărească";
+"notifications.followedYouBackSuffix" = "te urmărește înapoi";
 "notifications.repostedPostSuffix" = "a redistribuit postarea ta";
 "notifications.appealResolvedSuffix" = "ți-a soluționat contestația de moderare";
 "notifications.listingApprovedSuffix" = "ți-a aprobat anunțul din marketplace";

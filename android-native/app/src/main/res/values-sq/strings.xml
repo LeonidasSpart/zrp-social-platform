@@ -453,6 +453,7 @@
     <string name="notifications_liked_post_suffix">pëlqeu postimin tuaj</string>
     <string name="notifications_commented_post_suffix">komentoi në postimin tuaj</string>
     <string name="notifications_started_following_suffix">filloi t\'ju ndjekë</string>
+    <string name="notifications_followed_you_back_suffix">ju ndjek gjithashtu tani</string>
     <string name="notifications_reposted_post_suffix">ripublikoi postimin tuaj</string>
     <string name="notifications_appeal_resolved_suffix">vendosi për ankesën tuaj të moderimit</string>
     <string name="notifications_listing_approved_suffix">miratoi shpalljen tuaj në marketplace</string>

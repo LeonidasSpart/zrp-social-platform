@@ -451,6 +451,7 @@
     <string name="notifications_liked_post_suffix">kedvelte a bejegyzésedet</string>
     <string name="notifications_commented_post_suffix">megjegyzést fűzött a bejegyzésedhez</string>
     <string name="notifications_started_following_suffix">követni kezdett téged</string>
+    <string name="notifications_followed_you_back_suffix">visszakövetett téged</string>
     <string name="notifications_reposted_post_suffix">megosztotta a bejegyzésedet</string>
     <string name="notifications_appeal_resolved_suffix">elbírálta a moderációs fellebbezésedet</string>
     <string name="notifications_listing_approved_suffix">jóváhagyta a piactéri hirdetésedet</string>

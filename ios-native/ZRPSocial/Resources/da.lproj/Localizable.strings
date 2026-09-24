@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "kommenterede på dit opslag";
 "notifications.repliedCommentSuffix" = "svarede på din kommentar";
 "notifications.startedFollowingSuffix" = "begyndte at følge dig";
+"notifications.followedYouBackSuffix" = "begyndte at følge dig tilbage";
 "notifications.repostedPostSuffix" = "delte dit opslag igen";
 "notifications.appealResolvedSuffix" = "afgjorde din moderationsanke";
 "notifications.listingApprovedSuffix" = "godkendte dit opslag på markedspladsen";

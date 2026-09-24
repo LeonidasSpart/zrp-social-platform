@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "kommenterade ditt inlägg";
 "notifications.repliedCommentSuffix" = "svarade på din kommentar";
 "notifications.startedFollowingSuffix" = "började följa dig";
+"notifications.followedYouBackSuffix" = "började följa dig tillbaka";
 "notifications.repostedPostSuffix" = "repostade ditt inlägg";
 "notifications.appealResolvedSuffix" = "löste ditt modereringsöverklagande";
 "notifications.listingApprovedSuffix" = "godkände din marknadsplatsannons";

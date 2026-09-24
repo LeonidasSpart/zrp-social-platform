@@ -451,6 +451,7 @@
     <string name="notifications_liked_post_suffix">vindt je post leuk</string>
     <string name="notifications_commented_post_suffix">heeft gereageerd op je post</string>
     <string name="notifications_started_following_suffix">volgt je nu</string>
+    <string name="notifications_followed_you_back_suffix">volgt je nu ook terug</string>
     <string name="notifications_reposted_post_suffix">heeft je post gerepost</string>
     <string name="notifications_appeal_resolved_suffix">heeft je moderatieberoep afgehandeld</string>
     <string name="notifications_listing_approved_suffix">heeft je marketplace-advertentie goedgekeurd</string>

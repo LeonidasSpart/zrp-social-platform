@@ -46,13 +46,13 @@ data class NotificationsUiState(
             val filtered = when (activeTab) {
                 NotificationFilterTab.ALL -> notifications
                 NotificationFilterTab.VERIFIED -> notifications.filter { !it.fromUser?.badgeType.isNullOrBlank() }
-                NotificationFilterTab.FOLLOWS -> notifications.filter { it.type == "follow" }
+                NotificationFilterTab.FOLLOWS -> notifications.filter { it.type == "follow" || it.type == "follow_back" }
             }
             return groupNotifications(filtered)
         }
 }
 
-private val GROUPABLE_TYPES = setOf("like", "repost", "follow")
+private val GROUPABLE_TYPES = setOf("like", "repost", "follow", "follow_back")
 
 private fun groupNotifications(list: List<AppNotification>): List<GroupedNotification> {
     val result = mutableListOf<GroupedNotification>()

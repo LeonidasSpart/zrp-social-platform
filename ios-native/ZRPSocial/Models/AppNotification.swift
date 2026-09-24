@@ -47,6 +47,15 @@ enum NotificationKind: String {
     case comment
     case reply
     case follow
+    /// Distinct from `.follow`: this follow completed a mutual
+    /// relationship (the recipient already followed the actor back
+    /// before this event) - the notification says "followed you back"
+    /// instead of the generic "started following you". See the web
+    /// follow route's own mutual-follow check for why this needs to be
+    /// a distinct type rather than a client-side guess: the client has
+    /// no reliable way to know the relationship was already mutual at
+    /// the moment this notification was created.
+    case followBack = "follow_back"
     case followRequest = "follow_request"
     case repost
     case message
@@ -64,6 +73,7 @@ enum NotificationKind: String {
         case .comment: return .notificationsCommentedPostSuffix
         case .reply: return .notificationsRepliedCommentSuffix
         case .follow: return .notificationsStartedFollowingSuffix
+        case .followBack: return .notificationsFollowedYouBackSuffix
         case .followRequest: return .iosNotificationsFollowRequestSuffix
         case .repost: return .notificationsRepostedPostSuffix
         case .message: return .iosNotificationsMessageSuffix
@@ -79,7 +89,7 @@ enum NotificationKind: String {
         switch self {
         case .like: return "heart.fill"
         case .comment, .reply: return "bubble.left.fill"
-        case .follow, .followRequest: return "person.badge.plus"
+        case .follow, .followBack, .followRequest: return "person.badge.plus"
         case .repost: return "arrow.2.squarepath"
         case .message: return "envelope.fill"
         case .appealResolved: return "scalemass"
