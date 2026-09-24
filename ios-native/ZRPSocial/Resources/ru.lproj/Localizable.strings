@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "прокомментировал(а) вашу публикацию";
 "notifications.repliedCommentSuffix" = "ответил(а) на ваш комментарий";
 "notifications.startedFollowingSuffix" = "подписался(лась) на вас";
+"notifications.followedYouBackSuffix" = "тоже подписался(лась) на вас";
 "notifications.repostedPostSuffix" = "сделал(а) репост вашей публикации";
 "notifications.appealResolvedSuffix" = "рассмотрел(а) вашу апелляцию модерации";
 "notifications.listingApprovedSuffix" = "одобрил(а) ваше объявление на маркетплейсе";

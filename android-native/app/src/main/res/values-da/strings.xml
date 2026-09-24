@@ -451,6 +451,7 @@
     <string name="notifications_liked_post_suffix">synes godt om dit opslag</string>
     <string name="notifications_commented_post_suffix">kommenterede på dit opslag</string>
     <string name="notifications_started_following_suffix">begyndte at følge dig</string>
+    <string name="notifications_followed_you_back_suffix">begyndte at følge dig tilbage</string>
     <string name="notifications_reposted_post_suffix">delte dit opslag igen</string>
     <string name="notifications_appeal_resolved_suffix">afgjorde din moderationsanke</string>
     <string name="notifications_listing_approved_suffix">godkendte dit opslag på markedspladsen</string>

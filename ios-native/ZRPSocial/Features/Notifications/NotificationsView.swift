@@ -50,7 +50,7 @@ final class NotificationsViewModel: ObservableObject {
             return notifications.filter { $0.fromUser?.badgeType?.isEmpty == false }
         case .follows:
             return notifications.filter {
-                $0.kind == .follow || $0.kind == .followRequest
+                $0.kind == .follow || $0.kind == .followBack || $0.kind == .followRequest
             }
         }
     }
@@ -285,7 +285,7 @@ struct NotificationsView: View {
         switch kind {
         case .like: return ZrpColor.red
         case .comment, .reply: return ZrpColor.blue
-        case .follow, .followRequest, .repost: return ZrpColor.green
+        case .follow, .followBack, .followRequest, .repost: return ZrpColor.green
         default: return ZrpColor.onSurfaceMuted
         }
     }
@@ -300,7 +300,7 @@ struct NotificationsView: View {
         case .comment, .reply:
             guard let post = notification.post else { return nil }
             return .postDetail(postId: post.id, preloaded: nil, targetCommentId: notification.commentId)
-        case .follow, .followRequest:
+        case .follow, .followBack, .followRequest:
             guard let author = notification.fromUser else { return nil }
             return .profile(username: author.username)
         case .message:

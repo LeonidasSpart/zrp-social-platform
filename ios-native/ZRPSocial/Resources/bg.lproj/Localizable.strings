@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "коментира публикацията ти";
 "notifications.repliedCommentSuffix" = "отговори на коментара ти";
 "notifications.startedFollowingSuffix" = "те последва";
+"notifications.followedYouBackSuffix" = "също те последва";
 "notifications.repostedPostSuffix" = "препубликува публикацията ти";
 "notifications.appealResolvedSuffix" = "разгледа обжалването ти";
 "notifications.listingApprovedSuffix" = "одобри обявата ти в пазара";

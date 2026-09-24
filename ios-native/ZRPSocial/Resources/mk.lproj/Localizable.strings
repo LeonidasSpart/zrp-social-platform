@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "ја коментираше твојата објава";
 "notifications.repliedCommentSuffix" = "одговори на твојот коментар";
 "notifications.startedFollowingSuffix" = "почна да те следи";
+"notifications.followedYouBackSuffix" = "исто така почна да те следи";
 "notifications.repostedPostSuffix" = "ја објави повторно твојата објава";
 "notifications.appealResolvedSuffix" = "ја реши твојата жалба на модерацијата";
 "notifications.listingApprovedSuffix" = "го одобри твојот оглас на пазарот";

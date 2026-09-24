@@ -450,6 +450,7 @@
     <string name="notifications_liked_post_suffix">gostou da tua publicação</string>
     <string name="notifications_commented_post_suffix">comentou a tua publicação</string>
     <string name="notifications_started_following_suffix">começou a seguir-te</string>
+    <string name="notifications_followed_you_back_suffix">também começou a seguir o seu perfil</string>
     <string name="notifications_reposted_post_suffix">republicou a tua publicação</string>
     <string name="notifications_appeal_resolved_suffix">resolveu o teu recurso de moderação</string>
     <string name="notifications_listing_approved_suffix">aprovou o teu anúncio no mercado</string>

@@ -522,6 +522,8 @@ enum L10nKey: String, CaseIterable {
     case notificationsRepliedCommentSuffix = "notifications.repliedCommentSuffix"
     /// en: "started following you"
     case notificationsStartedFollowingSuffix = "notifications.startedFollowingSuffix"
+    /// en: "followed you back"
+    case notificationsFollowedYouBackSuffix = "notifications.followedYouBackSuffix"
     /// en: "reposted your post"
     case notificationsRepostedPostSuffix = "notifications.repostedPostSuffix"
     /// en: "resolved your moderation appeal"

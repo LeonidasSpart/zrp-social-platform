@@ -451,6 +451,7 @@
     <string name="notifications_liked_post_suffix">se sviđa vaša objava</string>
     <string name="notifications_commented_post_suffix">je komentarisao vašu objavu</string>
     <string name="notifications_started_following_suffix">je počeo da vas prati</string>
+    <string name="notifications_followed_you_back_suffix">je takođe počeo da vas prati</string>
     <string name="notifications_reposted_post_suffix">je ponovo objavio vašu objavu</string>
     <string name="notifications_appeal_resolved_suffix">je rešio vašu žalbu na moderaciju</string>
     <string name="notifications_listing_approved_suffix">je odobrio vaš oglas na marketu</string>

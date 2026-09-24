@@ -453,6 +453,7 @@
     <string name="notifications_liked_post_suffix">понравилась ваша публикация</string>
     <string name="notifications_commented_post_suffix">прокомментировал(а) вашу публикацию</string>
     <string name="notifications_started_following_suffix">подписался(лась) на вас</string>
+    <string name="notifications_followed_you_back_suffix">тоже подписался(лась) на вас</string>
     <string name="notifications_reposted_post_suffix">сделал(а) репост вашей публикации</string>
     <string name="notifications_appeal_resolved_suffix">рассмотрел(а) вашу апелляцию модерации</string>
     <string name="notifications_listing_approved_suffix">одобрил(а) ваше объявление на маркетплейсе</string>

@@ -463,6 +463,7 @@
     <string name="notifications_liked_post_suffix">liked your post</string>
     <string name="notifications_commented_post_suffix">commented on your post</string>
     <string name="notifications_started_following_suffix">started following you</string>
+    <string name="notifications_followed_you_back_suffix">followed you back</string>
     <string name="notifications_reposted_post_suffix">reposted your post</string>
     <string name="notifications_appeal_resolved_suffix">resolved your moderation appeal</string>
     <string name="notifications_listing_approved_suffix">approved your marketplace listing</string>

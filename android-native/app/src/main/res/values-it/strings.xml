@@ -453,6 +453,7 @@
     <string name="notifications_liked_post_suffix">ha messo mi piace al tuo post</string>
     <string name="notifications_commented_post_suffix">ha commentato il tuo post</string>
     <string name="notifications_started_following_suffix">ha iniziato a seguirti</string>
+    <string name="notifications_followed_you_back_suffix">ti segue anche ora</string>
     <string name="notifications_reposted_post_suffix">ha ripubblicato il tuo post</string>
     <string name="notifications_appeal_resolved_suffix">ha deciso sul tuo ricorso di moderazione</string>
     <string name="notifications_listing_approved_suffix">ha approvato il tuo annuncio sul marketplace</string>

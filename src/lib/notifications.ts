@@ -11,6 +11,15 @@ interface CreateNotificationParams {
     | "comment"
     | "reply"
     | "follow"
+    // A "follow" whose target already followed the actor before this
+    // event - i.e. it completes a mutual relationship. Distinct from
+    // "follow" so the UI can say "followed you back" instead of the
+    // generic "started following you", and - just as importantly - so
+    // it can suppress the "Follow back" call-to-action that "follow"
+    // notifications show, which would otherwise let the recipient
+    // accidentally unfollow the person by tapping a button that looks
+    // like it means "follow" (see the follow route's toggle semantics).
+    | "follow_back"
     | "repost"
     | "comment_repost"
     | "mention"
@@ -149,6 +158,7 @@ export async function createNotification({
       "message",
       "mention",
       "follow",
+      "follow_back",
       "play_duel_challenge",
       "play_duel_accepted",
       "opportunity_new_application",
@@ -175,6 +185,7 @@ export async function createNotification({
       comment: "comments",
       reply: "comments",
       follow: "follows",
+      follow_back: "follows",
       repost: "reposts",
       mention: "mentions",
       message: "messages",
@@ -209,6 +220,7 @@ export async function createNotification({
       comment: { action: "commented on your post", emoji: "💬" },
       reply: { action: "replied to your comment", emoji: "💬" },
       follow: { action: "started following you", emoji: "👋" },
+      follow_back: { action: "followed you back", emoji: "🤝" },
       repost: { action: "reposted your post", emoji: "🔄" },
       mention: { action: "mentioned you in a post", emoji: "📝" },
       message: { action: "sent you a message", emoji: "✉️" },
@@ -507,6 +519,7 @@ export async function createNotification({
       comment: `${actorName} commented on your post`,
       reply: `${actorName} replied to your comment`,
       follow: `${actorName} started following you`,
+      follow_back: `${actorName} followed you back`,
       repost: `${actorName} reposted your post`,
       mention: `${actorName} mentioned you in a post`,
       message: `${actorName} sent you a message`,

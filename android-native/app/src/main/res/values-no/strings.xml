@@ -451,6 +451,7 @@
     <string name="notifications_liked_post_suffix">likte innlegget ditt</string>
     <string name="notifications_commented_post_suffix">kommenterte innlegget ditt</string>
     <string name="notifications_started_following_suffix">begynte å følge deg</string>
+    <string name="notifications_followed_you_back_suffix">begynte å følge deg tilbake</string>
     <string name="notifications_reposted_post_suffix">repostet innlegget ditt</string>
     <string name="notifications_appeal_resolved_suffix">behandlet klagen din på moderering</string>
     <string name="notifications_listing_approved_suffix">godkjente annonsen din på markedsplassen</string>

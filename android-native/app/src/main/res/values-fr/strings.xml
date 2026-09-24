@@ -453,6 +453,7 @@
     <string name="notifications_liked_post_suffix">a aimé votre publication</string>
     <string name="notifications_commented_post_suffix">a commenté votre publication</string>
     <string name="notifications_started_following_suffix">a commencé à vous suivre</string>
+    <string name="notifications_followed_you_back_suffix">vous suit maintenant en retour</string>
     <string name="notifications_reposted_post_suffix">a repartagé votre publication</string>
     <string name="notifications_appeal_resolved_suffix">a résolu votre appel de modération</string>
     <string name="notifications_listing_approved_suffix">a approuvé votre annonce sur la marketplace</string>

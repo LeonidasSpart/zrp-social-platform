@@ -453,6 +453,7 @@
     <string name="notifications_liked_post_suffix">menyukai postingan Anda</string>
     <string name="notifications_commented_post_suffix">mengomentari postingan Anda</string>
     <string name="notifications_started_following_suffix">mulai mengikuti Anda</string>
+    <string name="notifications_followed_you_back_suffix">mengikuti Anda kembali</string>
     <string name="notifications_reposted_post_suffix">membagikan ulang postingan Anda</string>
     <string name="notifications_appeal_resolved_suffix">memutuskan banding moderasi Anda</string>
     <string name="notifications_listing_approved_suffix">menyetujui listingan marketplace Anda</string>

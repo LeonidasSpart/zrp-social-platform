@@ -455,6 +455,7 @@
     <string name="notifications_liked_post_suffix">olajkoval(a) tvůj příspěvek</string>
     <string name="notifications_commented_post_suffix">okomentoval(a) tvůj příspěvek</string>
     <string name="notifications_started_following_suffix">tě začal(a) sledovat</string>
+    <string name="notifications_followed_you_back_suffix">tě začal(a) sledovat zpět</string>
     <string name="notifications_reposted_post_suffix">sdílel(a) tvůj příspěvek</string>
     <string name="notifications_appeal_resolved_suffix">vyřešil(a) tvoje odvolání proti moderování</string>
     <string name="notifications_listing_approved_suffix">schválil(a) tvůj inzerát na tržišti</string>

@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "kommenterte innlegget ditt";
 "notifications.repliedCommentSuffix" = "svarte på kommentaren din";
 "notifications.startedFollowingSuffix" = "begynte å følge deg";
+"notifications.followedYouBackSuffix" = "begynte å følge deg tilbake";
 "notifications.repostedPostSuffix" = "repostet innlegget ditt";
 "notifications.appealResolvedSuffix" = "behandlet klagen din på moderering";
 "notifications.listingApprovedSuffix" = "godkjente annonsen din på markedsplassen";

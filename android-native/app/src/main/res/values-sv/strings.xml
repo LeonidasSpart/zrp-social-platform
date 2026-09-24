@@ -451,6 +451,7 @@
     <string name="notifications_liked_post_suffix">gillade ditt inlägg</string>
     <string name="notifications_commented_post_suffix">kommenterade ditt inlägg</string>
     <string name="notifications_started_following_suffix">började följa dig</string>
+    <string name="notifications_followed_you_back_suffix">började följa dig tillbaka</string>
     <string name="notifications_reposted_post_suffix">repostade ditt inlägg</string>
     <string name="notifications_appeal_resolved_suffix">löste ditt modereringsöverklagande</string>
     <string name="notifications_listing_approved_suffix">godkände din marknadsplatsannons</string>

@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "megjegyzést fűzött a bejegyzésedhez";
 "notifications.repliedCommentSuffix" = "válaszolt a megjegyzésedre";
 "notifications.startedFollowingSuffix" = "követni kezdett téged";
+"notifications.followedYouBackSuffix" = "visszakövetett téged";
 "notifications.repostedPostSuffix" = "megosztotta a bejegyzésedet";
 "notifications.appealResolvedSuffix" = "elbírálta a moderációs fellebbezésedet";
 "notifications.listingApprovedSuffix" = "jóváhagyta a piactéri hirdetésedet";

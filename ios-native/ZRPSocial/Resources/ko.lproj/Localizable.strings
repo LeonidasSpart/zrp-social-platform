@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "님이 회원님의 게시물에 댓글을 남겼습니다";
 "notifications.repliedCommentSuffix" = "님이 회원님의 댓글에 답글을 달았습니다";
 "notifications.startedFollowingSuffix" = "님이 회원님을 팔로우하기 시작했습니다";
+"notifications.followedYouBackSuffix" = "님이 회원님을 다시 팔로우했습니다";
 "notifications.repostedPostSuffix" = "님이 회원님의 게시물을 리포스트했습니다";
 "notifications.appealResolvedSuffix" = "님이 회원님의 제재 이의 제기를 처리했습니다";
 "notifications.listingApprovedSuffix" = "회원님의 마켓플레이스 매물을 승인했습니다";

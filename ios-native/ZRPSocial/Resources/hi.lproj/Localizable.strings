@@ -257,6 +257,7 @@
 "notifications.commentedPostSuffix" = "ने आपकी पोस्ट पर कमेंट किया";
 "notifications.repliedCommentSuffix" = "ने आपकी टिप्पणी का जवाब दिया";
 "notifications.startedFollowingSuffix" = "ने आपको फॉलो करना शुरू किया";
+"notifications.followedYouBackSuffix" = "ने आपको वापस फॉलो किया";
 "notifications.repostedPostSuffix" = "ने आपकी पोस्ट रीपोस्ट की";
 "notifications.appealResolvedSuffix" = "ने आपकी मॉडरेशन अपील का समाधान कर दिया";
 "notifications.listingApprovedSuffix" = "ने आपकी मार्केटप्लेस लिस्टिंग स्वीकृत की";

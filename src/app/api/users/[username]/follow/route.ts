@@ -90,8 +90,11 @@ export async function POST(req: NextRequest, props: { params: Promise<{ username
       // Retract the follow notification, same reasoning as the
       // like route's unlike branch: a follow -> unfollow -> follow
       // cycle shouldn't leave an orphaned unread notification behind.
+      // Covers both "follow" and "follow_back" - whichever this
+      // particular follow actually created (see the mutual-follow
+      // check below).
       await prisma.notification.deleteMany({
-        where: { type: "follow", fromUserId: followerId, userId: targetId, read: false },
+        where: { type: { in: ["follow", "follow_back"] }, fromUserId: followerId, userId: targetId, read: false },
       });
 
       return NextResponse.json({ following: false, requested: false });
@@ -184,19 +187,40 @@ export async function POST(req: NextRequest, props: { params: Promise<{ username
       return NextResponse.json({ following: true, requested: false });
     }
 
+    // ─── Mutual-follow check ───────────────────────────────────────────
+    // Does the recipient (targetId) already follow the actor (followerId)?
+    // If so, this follow completes a mutual relationship - the recipient
+    // gets "followed you back" (type: follow_back) instead of the generic
+    // "follow", so the notifications UI can both say the right thing and
+    // suppress the "Follow back" button it shows for plain "follow"
+    // notifications (tapping it there when already mutual would call this
+    // same toggle endpoint and actually unfollow the other person).
+    const alreadyFollowedByTarget = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: targetId,
+          followingId: followerId,
+        },
+      },
+    });
+    const notificationType = alreadyFollowedByTarget ? "follow_back" : "follow";
+
     // ─── Send database notification ──────────────────────────────────
     const notified = await createNotification({
       userId: targetId,
-      type: "follow",
+      type: notificationType,
       fromUserId: followerId,
     });
 
     // ─── Send push notification ──────────────────────────────────────
     if (notified) {
+      const actorName = session.user.name || session.user.username;
       await sendPushNotification(
         targetId,
-        "New Follower",
-        `${session.user.name || session.user.username} started following you.`,
+        notificationType === "follow_back" ? "Followed You Back" : "New Follower",
+        notificationType === "follow_back"
+          ? `${actorName} followed you back.`
+          : `${actorName} started following you.`,
         `/profile/${session.user.username}`
       );
     }
