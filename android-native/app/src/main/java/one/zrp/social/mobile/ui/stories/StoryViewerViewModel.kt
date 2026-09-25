@@ -11,6 +11,7 @@ import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.StoriesRepository
 import one.zrp.social.mobile.network.StoryAuthor
 import one.zrp.social.mobile.network.StoryItem
+import one.zrp.social.mobile.network.UserStories
 
 data class StoryViewerUiState(
     val author: StoryAuthor? = null,
@@ -28,10 +29,13 @@ data class StoryViewerUiState(
 )
 
 /**
- * Backs a single user's story viewer. There's no dedicated
- * GET /stories/{userId} endpoint - the website's own rail fetches the
- * whole grouped list and picks a user's stories out of it, so this
- * does the same rather than inventing a second server-side query.
+ * Backs a single user's story viewer, but loads the *whole* grouped
+ * tray (same one GET /stories call the website's own rail and this
+ * app's StoriesRail use) so that finishing this author's stories can
+ * hand off straight into the next unseen author's - see
+ * advanceToNextUnseenGroup() - rather than closing the fullscreen
+ * viewer and forcing the person back to the rail to tap the next
+ * avatar themselves, which is what this used to do.
  */
 class StoryViewerViewModel(
     private val repository: StoriesRepository,
@@ -41,6 +45,10 @@ class StoryViewerViewModel(
     private val _state = MutableStateFlow(StoryViewerUiState())
     val state: StateFlow<StoryViewerUiState> = _state.asStateFlow()
 
+    private var allGroups: List<UserStories> = emptyList()
+    private var currentGroupIndex: Int = -1
+    private var ownUserId: String? = null
+
     init {
         load()
     }
@@ -48,23 +56,51 @@ class StoryViewerViewModel(
     private fun load() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            val ownUserId = repository.getOwnUserId().getOrNull()
+            ownUserId = repository.getOwnUserId().getOrNull()
             repository.getStories()
                 .onSuccess { groups ->
-                    val group = groups.find { g -> g.user.id == userId }
-                    _state.update {
-                        it.copy(
-                            author = group?.user,
-                            stories = group?.stories ?: emptyList(),
-                            isOwnStories = ownUserId != null && userId == ownUserId,
-                            isLoading = false,
-                        )
-                    }
+                    allGroups = groups
+                    currentGroupIndex = groups.indexOfFirst { g -> g.user.id == userId }
+                    applyCurrentGroup(isLoading = false)
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoading = false, error = error.message ?: "Couldn't load stories.") }
                 }
         }
+    }
+
+    private fun applyCurrentGroup(isLoading: Boolean) {
+        val group = allGroups.getOrNull(currentGroupIndex)
+        _state.update {
+            it.copy(
+                author = group?.user,
+                stories = group?.stories ?: emptyList(),
+                isOwnStories = ownUserId != null && group?.user?.id == ownUserId,
+                isLoading = isLoading,
+                replyDraft = "",
+                isSendingReply = false,
+                replyError = null,
+                replySent = false,
+            )
+        }
+    }
+
+    /**
+     * Advances into the next author's stories that still has something
+     * unseen, skipping any already fully-viewed group in between - the
+     * same "unseen stories still ahead" signal the tray's own rings use.
+     * Returns false (and leaves state untouched) once nothing unseen is
+     * left, so the caller knows to actually close the viewer instead.
+     */
+    fun advanceToNextUnseenGroup(): Boolean {
+        for (i in (currentGroupIndex + 1) until allGroups.size) {
+            if (allGroups[i].stories.any { story -> !story.viewed }) {
+                currentGroupIndex = i
+                applyCurrentGroup(isLoading = false)
+                return true
+            }
+        }
+        return false
     }
 
     fun markViewed(storyId: String) {

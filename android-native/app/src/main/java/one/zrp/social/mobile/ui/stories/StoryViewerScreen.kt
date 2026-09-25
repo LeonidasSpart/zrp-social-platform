@@ -114,7 +114,12 @@ fun StoryViewerScreen(
         factory = remember(userId) { StoryViewerViewModelFactory(StoriesRepository(), userId) },
     )
     val state by viewModel.state.collectAsState()
-    var currentIndex by remember(userId) { mutableIntStateOf(0) }
+    // Keyed on the *current author's* id, not the nav-route `userId` -
+    // this screen now stays mounted across several authors in a row
+    // (see advanceToNextUnseenGroup in the ViewModel), so these need to
+    // reset every time the author the state describes changes, not just
+    // once for the whole screen's lifetime.
+    var currentIndex by remember(state.author?.id) { mutableIntStateOf(0) }
     // Persists across this author's stories (not reset per-story) so a
     // user's mute choice carries forward the same way it would on any
     // other short-form video surface (see Shorts' own muted state) -
@@ -122,7 +127,7 @@ fun StoryViewerScreen(
     // on by default, browser autoplay policy permitting), which native
     // matches by defaulting to unmuted rather than inventing a
     // different default.
-    var videoMuted by remember(userId) { mutableStateOf(false) }
+    var videoMuted by remember(state.author?.id) { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -152,8 +157,18 @@ fun StoryViewerScreen(
                 var progress by remember(story.id) { mutableFloatStateOf(0f) }
                 var burstTrigger by remember(story.id) { mutableIntStateOf(0) }
 
+                // At the last story in this author's set: hand off to the
+                // next unseen author's stories instead of closing, so
+                // finishing one person's stories flows straight into the
+                // next person's the way Instagram/TikTok/Snapchat do -
+                // only actually closing once nothing unseen is left
+                // anywhere in the tray.
                 fun goNext() {
-                    if (index < stories.lastIndex) currentIndex = index + 1 else onClose()
+                    if (index < stories.lastIndex) {
+                        currentIndex = index + 1
+                    } else if (!viewModel.advanceToNextUnseenGroup()) {
+                        onClose()
+                    }
                 }
                 fun goPrev() {
                     if (index > 0) currentIndex = index - 1
