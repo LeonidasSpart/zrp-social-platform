@@ -322,6 +322,7 @@
     <string name="message_open_camera_cd">カメラを開く</string>
     <string name="message_attach_video_cd">動画を添付</string>
     <string name="message_attach_document_cd">ファイルを添付</string>
+    <string name="message_add_attachment_cd">添付ファイルを追加</string>
     <string name="message_record_voice_cd">ボイスメッセージを録音</string>
     <string name="chat_cancel_recording_cd">キャンセル</string>
     <string name="chat_recording_label">録音中...</string>
@@ -548,6 +549,7 @@
     <string name="composer_err_gif_limit">現在のプランでは1投稿につき%1$d枚まで画像を追加できます。</string>
     <string name="profile_change_avatar">アイコンを変更</string>
     <string name="profile_change_banner">バナーを変更</string>
+    <string name="profile_view_photo">%1$sさんの写真を表示</string>
     <string name="profile_upload_avatar_failed">アイコンのアップロードに失敗しました</string>
     <string name="profile_upload_banner_failed">バナーのアップロードに失敗しました</string>
     <string name="auth_welcome_title">ZRP Social</string>

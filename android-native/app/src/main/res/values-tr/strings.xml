@@ -323,6 +323,7 @@
     <string name="message_open_camera_cd">Kamerayı aç</string>
     <string name="message_attach_video_cd">Video ekle</string>
     <string name="message_attach_document_cd">Belge ekle</string>
+    <string name="message_add_attachment_cd">Ek ekle</string>
     <string name="message_record_voice_cd">Sesli mesaj kaydet</string>
     <string name="chat_cancel_recording_cd">İptal</string>
     <string name="chat_recording_label">Kaydediliyor...</string>
@@ -551,6 +552,7 @@
     <string name="composer_err_gif_limit">Planınız gönderi başına %1$d görsele izin veriyor.</string>
     <string name="profile_change_avatar">Profil fotoğrafını değiştir</string>
     <string name="profile_change_banner">Kapak fotoğrafını değiştir</string>
+    <string name="profile_view_photo">%1$s adlı kullanıcının fotoğrafını görüntüle</string>
     <string name="profile_upload_avatar_failed">Profil fotoğrafı yüklenemedi</string>
     <string name="profile_upload_banner_failed">Kapak fotoğrafı yüklenemedi</string>
     <string name="auth_welcome_title">ZRP Social</string>

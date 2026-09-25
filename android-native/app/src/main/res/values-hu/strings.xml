@@ -323,6 +323,7 @@
     <string name="message_open_camera_cd">Kamera megnyitása</string>
     <string name="message_attach_video_cd">Videó csatolása</string>
     <string name="message_attach_document_cd">Dokumentum csatolása</string>
+    <string name="message_add_attachment_cd">Melléklet hozzáadása</string>
     <string name="message_record_voice_cd">Hangüzenet rögzítése</string>
     <string name="chat_cancel_recording_cd">Mégse</string>
     <string name="chat_recording_label">Felvétel...</string>
@@ -549,6 +550,7 @@
     <string name="composer_err_gif_limit">A csomagod bejegyzésenként %1$d képet engedélyez.</string>
     <string name="profile_change_avatar">Profilkép módosítása</string>
     <string name="profile_change_banner">Borító módosítása</string>
+    <string name="profile_view_photo">%1$s fotójának megtekintése</string>
     <string name="profile_upload_avatar_failed">Nem sikerült feltölteni a profilképet</string>
     <string name="profile_upload_banner_failed">Nem sikerült feltölteni a borítót</string>
     <string name="auth_welcome_title">ZRP Social</string>

@@ -310,6 +310,9 @@ export default function ProfilePage(
   const [avatarLightboxOpen, setAvatarLightboxOpen] =
     useState(false);
 
+  const [bannerLightboxOpen, setBannerLightboxOpen] =
+    useState(false);
+
   const [isFollowing, setIsFollowing] =
     useState(false);
 
@@ -1481,7 +1484,20 @@ export default function ProfilePage(
           is now drawn only when there is a photograph. */}
       <div className="relative h-48 bg-gray-100 dark:bg-gray-900">
         {profile.coverUrl && (
-          <>
+          // The banner had no view action at all, for anyone - unlike
+          // the avatar, which at least worked for someone else's
+          // profile. A plain <img> would never be a valid click target
+          // for a screen reader or keyboard user, so the image itself
+          // becomes a real button that opens the full-size viewer,
+          // matching the avatar's own pattern below.
+          <button
+            type="button"
+            onClick={() => setBannerLightboxOpen(true)}
+            aria-label={t("profile.viewPhotoAria", {
+              name: profile.name || profile.username,
+            })}
+            className="block w-full h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-zrp-red"
+          >
             <img
               src={profile.coverUrl}
               alt="Cover"
@@ -1489,15 +1505,19 @@ export default function ProfilePage(
             />
 
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
-          </>
+          </button>
         )}
 
         {isOwnProfile && (
           <div className="absolute bottom-2 right-2">
             <button
-              onClick={() =>
-                bannerInputRef.current?.click()
-              }
+              onClick={(e) => {
+                // Stops this from also bubbling up to the banner's own
+                // onClick above and opening the viewer at the same time
+                // as the upload picker.
+                e.stopPropagation();
+                bannerInputRef.current?.click();
+              }}
               disabled={
                 uploadingBanner
               }
@@ -1544,13 +1564,24 @@ export default function ProfilePage(
           // any cover.
           className="relative w-20 h-20 -mt-10 sm:w-28 sm:h-28 sm:-mt-16 rounded-full border-4 border-white dark:border-zrp-deepBlack overflow-hidden flex-shrink-0 group bg-white dark:bg-zrp-deepBlack">
             {profile.avatarUrl ? (
-              // Own profile keeps the hover-camera overlay below as the
-              // avatar's one action (change it); everyone else has no
-              // action there today, which is the bug this fixes - the
-              // image itself becomes a button that opens the full-size
-              // viewer. A plain <img> would never have been a valid
-              // click target for a screen reader or keyboard user.
-              isOwnProfile ? (
+              // One tap target for everyone, own profile included - the
+              // image itself opens the full-size viewer, matching the
+              // banner's own pattern above. Previously only someone
+              // else's avatar was clickable at all: on your own profile
+              // a full-cover "change avatar" button sat on top of the
+              // whole image (invisible until hover, but always
+              // intercepting every click underneath), so there was no
+              // way to actually view your own avatar full-size - that
+              // button is now a small corner badge instead (below),
+              // leaving the avatar itself free to open the viewer.
+              <button
+                type="button"
+                onClick={() => setAvatarLightboxOpen(true)}
+                aria-label={t("profile.viewPhotoAria", {
+                  name: profile.name || profile.username,
+                })}
+                className="w-full h-full block focus-visible:outline focus-visible:outline-2 focus-visible:outline-zrp-red"
+              >
                 <img
                   src={profile.avatarUrl}
                   alt={
@@ -1559,25 +1590,7 @@ export default function ProfilePage(
                   }
                   className="w-full h-full object-cover"
                 />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setAvatarLightboxOpen(true)}
-                  aria-label={t("profile.viewPhotoAria", {
-                    name: profile.name || profile.username,
-                  })}
-                  className="w-full h-full block focus-visible:outline focus-visible:outline-2 focus-visible:outline-zrp-red"
-                >
-                  <img
-                    src={profile.avatarUrl}
-                    alt={
-                      profile.name ||
-                      profile.username
-                    }
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              )
+              </button>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-2xl sm:text-3xl font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">
                 {(
@@ -1590,13 +1603,17 @@ export default function ProfilePage(
             {isOwnProfile && (
               <>
                 <button
-                  onClick={() =>
-                    avatarInputRef.current?.click()
-                  }
+                  onClick={(e) => {
+                    // Stops this from also bubbling up to the avatar's
+                    // own onClick above and opening the viewer at the
+                    // same time as the upload picker.
+                    e.stopPropagation();
+                    avatarInputRef.current?.click();
+                  }}
                   disabled={
                     uploadingAvatar
                   }
-                  className="absolute inset-0 bg-black/40 opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100 flex items-center justify-center text-white"
+                  className="absolute bottom-0 right-0 flex items-center justify-center h-11 w-11 bg-black/50 text-white rounded-full hover:bg-black/70 transition border-2 border-white dark:border-zrp-deepBlack"
                   aria-label={t(
                     "profile.changeAvatar"
                   )}
@@ -1605,9 +1622,9 @@ export default function ProfilePage(
                   )}
                 >
                   {uploadingAvatar ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
-                    <Camera className="w-6 h-6" />
+                    <Camera className="w-5 h-5" />
                   )}
                 </button>
 
@@ -1923,22 +1940,38 @@ export default function ProfilePage(
           </div>
         </div>
 
-        {!isOwnProfile && (
-          <ImageLightbox
-            src={
-              avatarLightboxOpen
-                ? profile.avatarUrl
-                : null
-            }
-            alt={
-              profile.name ||
-              profile.username
-            }
-            onClose={() =>
-              setAvatarLightboxOpen(false)
-            }
-          />
-        )}
+        {/* No longer gated to !isOwnProfile - the avatar button above is
+            now clickable on your own profile too, so this has to be able
+            to open for it. */}
+        <ImageLightbox
+          src={
+            avatarLightboxOpen
+              ? profile.avatarUrl
+              : null
+          }
+          alt={
+            profile.name ||
+            profile.username
+          }
+          onClose={() =>
+            setAvatarLightboxOpen(false)
+          }
+        />
+
+        <ImageLightbox
+          src={
+            bannerLightboxOpen
+              ? profile.coverUrl
+              : null
+          }
+          alt={
+            profile.name ||
+            profile.username
+          }
+          onClose={() =>
+            setBannerLightboxOpen(false)
+          }
+        />
 
         {!isOwnProfile && (
           <ReportModal

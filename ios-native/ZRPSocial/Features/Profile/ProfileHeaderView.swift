@@ -11,6 +11,14 @@ struct ProfileHeaderView: View {
 
     @EnvironmentObject private var navigator: Navigator
 
+    /// Set to open the avatar or cover full-size. There is no inline
+    /// "change avatar/cover" control on this screen to conflict with -
+    /// editing happens on the separate `EditProfileView` reached through
+    /// the "Edit Profile" button below - so the image itself can be the
+    /// whole tap target, matching the website and Android fix for the
+    /// same bug.
+    @State private var mediaPresentation: MediaPresentation?
+
     private static let joinedFormatter: DateFormatter = {
         let formatter = DateFormatter()
         // Locale-appropriate month + year ordering rather than a fixed
@@ -47,35 +55,84 @@ struct ProfileHeaderView: View {
         ZStack(alignment: .bottomLeading) {
             Group {
                 if let coverUrl = profile.coverUrl, !coverUrl.isEmpty {
-                    RemoteImage(url: coverUrl, targetSize: 200) {
-                        ZrpColor.surfaceHighest
+                    // The image itself is the tap target that opens the
+                    // full-size viewer - no separate "change cover" control
+                    // sits on this screen to fight it for taps.
+                    Button {
+                        mediaPresentation = MediaPresentation(
+                            urls: [coverUrl],
+                            isVideo: false,
+                            startIndex: 0
+                        )
+                    } label: {
+                        RemoteImage(url: coverUrl, targetSize: 200) {
+                            ZrpColor.surfaceHighest
+                        }
+                        .scaledToFill()
                     }
-                    .scaledToFill()
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(
+                        Text(verbatim: "View \(profile.displayName)'s cover photo")
+                    )
                 } else {
                     // No cover is the common case, so it gets a deliberate
-                    // brand treatment rather than an empty grey band.
+                    // brand treatment rather than an empty grey band. There
+                    // is nothing to view full-size, so this stays decorative.
                     LinearGradient(
                         colors: [ZrpColor.red.opacity(0.7), ZrpColor.darkRed.opacity(0.5)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
+                    .accessibilityHidden(true)
                 }
             }
             .frame(height: 140)
             .frame(maxWidth: .infinity)
             .clipped()
 
-            AvatarView(
-                url: profile.avatarUrl,
-                displayName: profile.displayName,
-                size: ZrpMetrics.avatarLarge
-            )
-            .overlay(Circle().strokeBorder(ZrpColor.background, lineWidth: 4))
-            .padding(.leading, ZrpSpacing.lg)
-            .offset(y: ZrpMetrics.avatarLarge / 2)
+            avatarButton
         }
         .padding(.bottom, ZrpMetrics.avatarLarge / 2)
-        .accessibilityHidden(true)
+        .fullScreenCover(item: $mediaPresentation) { item in
+            FullScreenMediaView(urls: item.urls, isVideo: item.isVideo, startIndex: item.startIndex)
+        }
+    }
+
+    /// The avatar as its own tap target, opening it full-size. Disabled
+    /// (and left as a plain image) when there is no photo to view - an
+    /// initials fallback has nothing to show full screen, matching the
+    /// website, which only makes the avatar a button when `avatarUrl` is
+    /// set.
+    @ViewBuilder
+    private var avatarButton: some View {
+        let avatar = AvatarView(
+            url: profile.avatarUrl,
+            displayName: profile.displayName,
+            size: ZrpMetrics.avatarLarge
+        )
+        .overlay(Circle().strokeBorder(ZrpColor.background, lineWidth: 4))
+
+        if let avatarUrl = profile.avatarUrl, !avatarUrl.isEmpty {
+            Button {
+                mediaPresentation = MediaPresentation(
+                    urls: [avatarUrl],
+                    isVideo: false,
+                    startIndex: 0
+                )
+            } label: {
+                avatar
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                Text(verbatim: "View \(profile.displayName)'s avatar photo")
+            )
+            .padding(.leading, ZrpSpacing.lg)
+            .offset(y: ZrpMetrics.avatarLarge / 2)
+        } else {
+            avatar
+                .padding(.leading, ZrpSpacing.lg)
+                .offset(y: ZrpMetrics.avatarLarge / 2)
+        }
     }
 
     private var identity: some View {

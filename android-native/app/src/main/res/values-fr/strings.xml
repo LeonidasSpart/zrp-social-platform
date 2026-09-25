@@ -323,6 +323,7 @@
     <string name="message_open_camera_cd">Ouvrir l\'appareil photo</string>
     <string name="message_attach_video_cd">Joindre une vidéo</string>
     <string name="message_attach_document_cd">Joindre un document</string>
+    <string name="message_add_attachment_cd">Ajouter une pièce jointe</string>
     <string name="message_record_voice_cd">Enregistrer un message vocal</string>
     <string name="chat_cancel_recording_cd">Annuler</string>
     <string name="chat_recording_label">Enregistrement...</string>
@@ -551,6 +552,7 @@
     <string name="composer_err_gif_limit">Votre offre permet %1$d image(s) par publication.</string>
     <string name="profile_change_avatar">Changer l\'avatar</string>
     <string name="profile_change_banner">Changer la bannière</string>
+    <string name="profile_view_photo">Voir la photo de %1$s</string>
     <string name="profile_upload_avatar_failed">Échec du téléchargement de l\'avatar</string>
     <string name="profile_upload_banner_failed">Échec du téléchargement de la bannière</string>
     <string name="auth_welcome_title">ZRP Social</string>

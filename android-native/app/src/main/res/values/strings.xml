@@ -333,6 +333,7 @@
     <string name="message_open_camera_cd">Open camera</string>
     <string name="message_attach_video_cd">Attach video</string>
     <string name="message_attach_document_cd">Attach document</string>
+    <string name="message_add_attachment_cd">Add attachment</string>
     <string name="message_record_voice_cd">Record a voice message</string>
     <string name="chat_cancel_recording_cd">Cancel</string>
     <string name="chat_recording_label">Recording...</string>
@@ -561,6 +562,7 @@
     <string name="composer_err_gif_limit">Your plan allows %1$d image(s) per post.</string>
     <string name="profile_change_avatar">Change avatar</string>
     <string name="profile_change_banner">Change banner</string>
+    <string name="profile_view_photo">View %1$s\'s photo</string>
     <string name="profile_upload_avatar_failed">Failed to upload avatar</string>
     <string name="profile_upload_banner_failed">Failed to upload banner</string>
     <string name="auth_welcome_title">ZRP Social</string>

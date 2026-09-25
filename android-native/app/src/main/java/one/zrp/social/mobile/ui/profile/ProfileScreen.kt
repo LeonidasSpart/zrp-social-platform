@@ -103,6 +103,7 @@ import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.UserReply
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.ImageLightbox
 import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.ProfileHeaderSkeleton
 import one.zrp.social.mobile.ui.components.ReportDialog
@@ -633,6 +634,14 @@ private fun ProfileHeader(
         contract = ActivityResultContracts.PickVisualMedia(),
     ) { uri -> if (uri != null) onBannerPicked(uri) }
 
+    // Neither had any way to actually view the full-size image at all -
+    // ImageLightbox already existed (PostCard.kt's own image viewer) but
+    // was never wired in here. The small "change" IconButtons below
+    // already sit in their own corner, distinct from the tap area this
+    // adds to the cover/avatar itself, so there's no click conflict.
+    var showAvatarViewer by remember { mutableStateOf(false) }
+    var showBannerViewer by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.fillMaxWidth()) {
             // Cover photo and the action-button row both live in this
@@ -648,7 +657,13 @@ private fun ProfileHeader(
                             model = profile.coverUrl,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable(
+                                    onClick = { showBannerViewer = true },
+                                    role = Role.Button,
+                                    onClickLabel = stringResource(R.string.profile_view_photo, profile.name ?: profile.username),
+                                ),
                         )
                     } else {
                         Box(
@@ -868,6 +883,15 @@ private fun ProfileHeader(
                     size = HeaderAvatarSize,
                     ringColor = MaterialTheme.colorScheme.background,
                     ringWidth = 4.dp,
+                    modifier = if (profile.avatarUrl != null) {
+                        Modifier.clickable(
+                            onClick = { showAvatarViewer = true },
+                            role = Role.Button,
+                            onClickLabel = stringResource(R.string.profile_view_photo, profile.name ?: profile.username),
+                        )
+                    } else {
+                        Modifier
+                    },
                 )
 
                 if (isOwnProfile) {
@@ -1171,6 +1195,22 @@ private fun ProfileHeader(
         }
 
         HorizontalDivider()
+    }
+
+    if (showAvatarViewer && profile.avatarUrl != null) {
+        ImageLightbox(
+            images = listOf(profile.avatarUrl),
+            initialIndex = 0,
+            onDismiss = { showAvatarViewer = false },
+        )
+    }
+
+    if (showBannerViewer && profile.coverUrl != null) {
+        ImageLightbox(
+            images = listOf(profile.coverUrl),
+            initialIndex = 0,
+            onDismiss = { showBannerViewer = false },
+        )
     }
 }
 
