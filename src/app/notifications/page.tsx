@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import EmptyState from "@/components/ui/EmptyState";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { getNotificationHref, NOTIFICATION_FALLBACK_ACTION } from "@/lib/notification-links";
 
 interface FromUser {
   id: string;
@@ -268,7 +269,7 @@ export default function NotificationsPage() {
       case "listing_removed":
         return t("notifications.listingRemovedSuffix");
       default:
-        return "";
+        return NOTIFICATION_FALLBACK_ACTION[type] ?? "";
     }
   };
 
@@ -379,17 +380,12 @@ export default function NotificationsPage() {
             const others = g.users.length - 1;
             const followState = followingBack[primaryUser.id] || "idle";
 
-            const linkHref = g.type === "message"
-              ? `/messages/${primaryUser.username}`
-              : (g.type as string) === "appeal_resolved"
-                ? "/settings/appeals"
-                : (g.type as string) === "listing_approved" || (g.type as string) === "listing_rejected" || (g.type as string) === "listing_removed"
-                  ? "/marketplace/my-listings"
-                  : g.postId
-                    ? g.commentId
-                      ? `/post/${g.postId}?commentId=${g.commentId}`
-                      : `/post/${g.postId}`
-                    : `/profile/${primaryUser.username}`;
+            const linkHref = getNotificationHref({
+              type: g.type,
+              postId: g.postId,
+              commentId: g.commentId,
+              fromUsername: primaryUser.username,
+            });
 
             return (
               <div

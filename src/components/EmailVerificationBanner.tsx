@@ -69,6 +69,7 @@ export default function EmailVerificationBanner() {
         onClick={() => setDismissed(true)}
         className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-200 transition"
         title={t("emailVerification.dismiss")}
+        aria-label={t("emailVerification.dismiss")}
       >
         <X className="w-5 h-5" />
       </button>

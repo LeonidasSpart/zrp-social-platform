@@ -20,7 +20,6 @@ export default function robots(): MetadataRoute.Robots {
         "/creator/",
         "/journalist/",
         "/search/",
-        "/test/",
         "/forgot-password/",
         "/reset-password/",
         "/verify-email/",

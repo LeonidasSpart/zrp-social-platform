@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useId } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import VerifiedBadge from "./VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { getPlanLimits } from "@/lib/limits";
@@ -33,6 +34,9 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const titleId = useId();
+  const dialogRef = useDialogA11y(true, onClose, !loading);
 
   useBodyScrollLock(true);
 
@@ -97,9 +101,9 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
         visual viewport in browsers that support it, and an explicit
         safe-area-inset-bottom pad on the footer for the home indicator.
       */}
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-t-2xl sm:rounded-xl shadow-xl max-w-2xl w-full max-h-[100dvh] sm:max-h-[90dvh] flex flex-col overflow-hidden">
+      <div className="focus:outline-none bg-white dark:bg-zrp-deepBlack rounded-t-2xl sm:rounded-xl shadow-xl max-w-2xl w-full max-h-[100dvh] sm:max-h-[90dvh] flex flex-col overflow-hidden" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("quote.title")}</h2>
+          <h2 id={titleId} className="text-xl font-bold text-gray-900 dark:text-white">{t("quote.title")}</h2>
           <button
             onClick={onClose}
             aria-label={t("help.close")}

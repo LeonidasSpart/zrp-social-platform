@@ -1,5 +1,7 @@
 "use client";
 
+import WalletVerifyPanel from "@/components/WalletVerifyPanel";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -52,7 +54,7 @@ export default function MyCampaignsPage() {
         body: JSON.stringify({ amount }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to request withdrawal");
+      if (!res.ok) throw new Error(localizeApiMessage(data.error, t) || t("help.errWithdrawFailed"));
       setWithdrawSuccess(t("help.withdrawalRequested"));
       setWithdrawId(null);
       setWithdrawAmount("");
@@ -136,6 +138,8 @@ export default function MyCampaignsPage() {
                           placeholder={t("help.amountLabel")}
                           className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red"
                         />
+                        {/* Payouts go only to the ownership-verified wallet. */}
+                        <WalletVerifyPanel compact />
                         {withdrawError && <p className="text-xs text-red-500">{withdrawError}</p>}
                         <div className="flex gap-2">
                           <button

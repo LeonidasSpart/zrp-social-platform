@@ -40,7 +40,9 @@ export default function AdminPayments() {
       router.push("/login");
       return;
     }
-    if (session?.user?.role !== "ADMIN") {
+    // Same full-admin rule as the admin layout and requireAdmin():
+    // role ADMIN *or* the isAdmin flag.
+    if (!(session?.user?.isAdmin || session?.user?.role === "ADMIN")) {
       router.push("/");
       return;
     }

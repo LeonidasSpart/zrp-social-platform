@@ -226,7 +226,7 @@ export default function ArticleEditorForm({ mode, article, canSubmit }: ArticleE
       {error && (
         <div className="mb-5 flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
           <span>{error}</span>
-          <button type="button" onClick={() => setError(null)} className="shrink-0">
+          <button type="button" onClick={() => setError(null)} aria-label={t("chat.dismiss")} className="shrink-0">
             <X className="h-4 w-4" />
           </button>
         </div>

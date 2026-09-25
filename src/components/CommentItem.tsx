@@ -308,6 +308,7 @@ export default function CommentItem({
               <button
                 onClick={handleEdit}
                 disabled={savingEdit || !editContent.trim()}
+                aria-label={t("action.save")}
                 className="p-1 text-green-500 hover:text-green-600 disabled:opacity-50"
               >
                 <Check className="w-4 h-4" />
@@ -317,6 +318,7 @@ export default function CommentItem({
                   setIsEditing(false);
                   setEditContent(comment.content);
                 }}
+                aria-label={t("action.cancel")}
                 className="p-1 text-gray-500 hover:text-gray-700"
               >
                 <X className="w-4 h-4" />
@@ -367,7 +369,7 @@ export default function CommentItem({
                     </p>
                   )}
                   {showTranslation && translatedText && (
-                    <p className="text-sm text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words border-l-2 border-gray-200 dark:border-gray-700 pl-2">
+                    <p className="text-sm text-gray-800 dark:text-gray-200 mt-1 whitespace-pre-wrap break-words border-s-2 border-gray-200 dark:border-gray-700 ps-2">
                       {translatedText}
                     </p>
                   )}
@@ -381,6 +383,8 @@ export default function CommentItem({
             <button
               onClick={handleLike}
               disabled={loading.like}
+              aria-label={t("action.like")}
+              aria-pressed={liked}
               className={`flex items-center gap-1 text-xs transition ${
                 liked ? "text-red-500" : "text-gray-500 hover:text-red-500"
               }`}
@@ -391,6 +395,7 @@ export default function CommentItem({
 
             <button
               onClick={() => onReply(comment.id)}
+              aria-label={t("action.reply")}
               className="flex items-center gap-1 text-xs text-gray-500 hover:text-zrp-red transition"
             >
               <MessageCircle className="w-3.5 h-3.5" />
@@ -399,6 +404,8 @@ export default function CommentItem({
             <button
               onClick={handleRepost}
               disabled={loading.repost}
+              aria-label={t("action.repost")}
+              aria-pressed={reposted}
               className={`flex items-center gap-1 text-xs transition ${
                 reposted ? "text-green-500" : "text-gray-500 hover:text-green-500"
               }`}
@@ -410,6 +417,8 @@ export default function CommentItem({
             <button
               onClick={handleBookmark}
               disabled={loading.bookmark}
+              aria-label={t("nav.bookmarks")}
+              aria-pressed={bookmarked}
               className={`flex items-center gap-1 text-xs transition ${
                 bookmarked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"
               }`}
@@ -420,6 +429,7 @@ export default function CommentItem({
 
             <button
               onClick={handleShare}
+              aria-label={t("post.share")}
               className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition"
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -432,6 +442,7 @@ export default function CommentItem({
                   onClick={() => setIsEditing(true)}
                   className="text-gray-400 hover:text-gray-600 transition"
                   title={t("action.edit")}
+                  aria-label={t("action.edit")}
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
@@ -440,6 +451,7 @@ export default function CommentItem({
                   disabled={loading.delete}
                   className="text-gray-400 hover:text-red-500 transition"
                   title={t("action.delete")}
+                  aria-label={t("action.delete")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>

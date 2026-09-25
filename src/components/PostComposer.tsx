@@ -2640,6 +2640,7 @@ export default function PostComposer({
                             false
                           )
                         }
+                        aria-label={t("help.close")}
                         className="
                           p-1.5
                           rounded-full
@@ -2760,6 +2761,7 @@ export default function PostComposer({
                                     idx
                                   )
                                 }
+                                aria-label={t("music.common.remove")}
                                 className="
                                   p-2
                                   text-red-500
@@ -3093,6 +3095,9 @@ export default function PostComposer({
                       title={t(
                         "composer.addGif"
                       )}
+                      aria-label={t(
+                        "composer.addGif"
+                      )}
                     >
                       <FileImage className="w-5 h-5" />
                     </button>
@@ -3129,7 +3134,8 @@ export default function PostComposer({
                           : ""
                       }
                     `}
-                    title="Add emoji"
+                    title={t("chat.addEmoji")}
+                    aria-label={t("chat.addEmoji")}
                   >
                     <Smile className="w-5 h-5" />
                   </button>
@@ -3160,6 +3166,9 @@ export default function PostComposer({
                           }
                         `}
                         title={t(
+                          "composer.addPoll"
+                        )}
+                        aria-label={t(
                           "composer.addPoll"
                         )}
                       >

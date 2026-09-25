@@ -16,6 +16,7 @@ import PasswordInput from "@/components/PasswordInput";
 import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { getPlanLimits } from "@/lib/limits";
 import CustomUrlSettings from "@/components/CustomUrlSettings";
+import WalletVerifyPanel from "@/components/WalletVerifyPanel";
 import CategoryPickerModal from "@/components/CategoryPickerModal";
 import { categoryToTranslationKey } from "@/lib/professionalCategories";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -1488,6 +1489,11 @@ export default function SettingsPage() {
                     {updatingWallet ? t("settings.saving") : t("settings.saveWallet")}
                   </button>
                 </form>
+                {/* Ownership-verified payout wallet: the only address
+                    creator/HELP withdrawals are ever paid to. */}
+                <div className="mt-6">
+                  <WalletVerifyPanel />
+                </div>
               </div>
             </div>
           )}

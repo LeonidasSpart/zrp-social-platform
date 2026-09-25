@@ -766,7 +766,7 @@ export default function Header() {
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                        className="flex items-center gap-3 w-full px-4 py-3 text-start text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
                       >
                         <LogOut className="w-5 h-5" />
 
@@ -1220,7 +1220,7 @@ export default function Header() {
                   >
                     <Info className="w-5 h-5 text-gray-500" />
 
-                    <span className="flex-1 text-left font-medium">
+                    <span className="flex-1 text-start font-medium">
                       {t("nav.aboutZrp")}
                     </span>
 
@@ -1273,7 +1273,7 @@ export default function Header() {
                   >
                     <LifeBuoy className="w-5 h-5 text-gray-500" />
 
-                    <span className="flex-1 text-left font-medium">
+                    <span className="flex-1 text-start font-medium">
                       {t("footer.supportHeading")}
                     </span>
 
@@ -1319,7 +1319,7 @@ export default function Header() {
                   >
                     <Scale className="w-5 h-5 text-gray-500" />
 
-                    <span className="flex-1 text-left font-medium">
+                    <span className="flex-1 text-start font-medium">
                       {t("footer.legalHeading")}
                     </span>
 
@@ -1386,7 +1386,7 @@ export default function Header() {
                   >
                     <Globe className="w-5 h-5 text-gray-500" />
 
-                    <span className="flex-1 text-left font-medium">
+                    <span className="flex-1 text-start font-medium">
                       {t("nav.language")}
                     </span>
 
@@ -1473,7 +1473,7 @@ export default function Header() {
                     <Sun className="w-5 h-5 text-gray-500" />
                   )}
 
-                  <span className="flex-1 text-left font-medium">
+                  <span className="flex-1 text-start font-medium">
                     {theme === "light"
                       ? t("nav.darkMode")
                       : t("nav.lightMode")}

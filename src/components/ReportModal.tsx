@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 
 interface ReportModalProps {
   isOpen: boolean;
@@ -15,6 +16,9 @@ export default function ReportModal({ isOpen, onClose, onSubmit }: ReportModalPr
   const [reason, setReason] = useState("");
   const [details, setDetails] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const titleId = useId();
+  const dialogRef = useDialogA11y(isOpen, onClose, true);
 
   if (!isOpen) return null;
 
@@ -45,9 +49,9 @@ export default function ReportModal({ isOpen, onClose, onSubmit }: ReportModalPr
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-md w-full p-6">
+      <div className="focus:outline-none bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-md w-full p-6" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("report.modalTitle")}</h2>
+          <h2 id={titleId} className="text-xl font-bold text-gray-900 dark:text-white">{t("report.modalTitle")}</h2>
           <button
             onClick={onClose}
             aria-label={t("help.close")}

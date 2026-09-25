@@ -171,7 +171,11 @@ export default function AdminUsers() {
     const actionLabel = currentStatus ? t("adminUsers.unban").toLowerCase() : t("adminUsers.ban").toLowerCase();
     if (!confirm(t("adminUsers.banConfirm", { action: actionLabel }))) return;
     try {
-      const res = await fetch(`/api/admin/users/${userId}/ban`, { method: "POST" });
+      const res = await fetch(`/api/admin/users/${userId}/ban`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ banned: !currentStatus }),
+      });
       if (res.ok) fetchUsers();
       else {
         const err = await res.json();

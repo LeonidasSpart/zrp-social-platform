@@ -17,6 +17,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
+import { safeExternalHref } from "@/lib/profile-website";
 
 type JournalistStatus = "PENDING" | "VERIFIED" | "REJECTED" | "SUSPENDED";
 
@@ -343,9 +344,9 @@ export default function AdminJournalistsPage() {
                     {profile.pitch && (
                       <p className="mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400">{profile.pitch}</p>
                     )}
-                    {profile.portfolioUrl && (
+                    {safeExternalHref(profile.portfolioUrl) && (
                       <a
-                        href={profile.portfolioUrl}
+                        href={safeExternalHref(profile.portfolioUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className="mt-1 inline-flex items-center gap-1 text-sm text-zrp-red hover:underline"

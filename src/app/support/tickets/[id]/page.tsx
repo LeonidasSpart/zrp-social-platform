@@ -96,7 +96,9 @@ export default function TicketDetailPage() {
     try {
       const res = await fetch(`/api/support/tickets/${id}`);
       const data = await res.json();
-      setTicket(data);
+      // A 404/403 body is `{ error }`, not a ticket: rendering it crashed
+      // the page into the error boundary instead of the not-found state.
+      setTicket(res.ok ? data : null);
     } catch (error) {
       console.error('Failed to fetch ticket', error);
     } finally {

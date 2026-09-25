@@ -110,6 +110,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
             <button
               onClick={searchGifs}
               disabled={query.length < 2}
+              aria-label={t("nav.search")}
               className="bg-zrp-red text-white px-4 py-2 rounded-lg hover:bg-zrp-darkRed disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               <Search className="w-5 h-5" />

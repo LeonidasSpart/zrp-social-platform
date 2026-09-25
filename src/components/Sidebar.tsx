@@ -52,8 +52,18 @@ export default function Sidebar() {
   // same reason) keeps both flyouts fully visible at every width.
   const langButtonRef = useRef<HTMLButtonElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
-  const [langMenuPos, setLangMenuPos] = useState<{ left: number; bottom: number; maxHeight: number } | null>(null);
-  const [moreMenuPos, setMoreMenuPos] = useState<{ left: number; bottom: number } | null>(null);
+  const [langMenuPos, setLangMenuPos] = useState<{ left?: number; right?: number; bottom: number; maxHeight: number } | null>(null);
+  const [moreMenuPos, setMoreMenuPos] = useState<{ left?: number; right?: number; bottom: number } | null>(null);
+
+  // In Arabic (RTL) the rail sits on the right edge of the screen, so a
+  // flyout anchored by its left edge to the trigger's left edge extends
+  // past the viewport (at the compact w-16 rail nearly all of a w-64
+  // menu was off-screen). Anchor to the trigger's inline-start edge
+  // instead: its left in LTR, its right in RTL.
+  const inlineStartAnchor = (rect: DOMRect) =>
+    typeof document !== "undefined" && document.documentElement.dir === "rtl"
+      ? { right: window.innerWidth - rect.right }
+      : { left: rect.left };
 
   // This flyout is anchored by its bottom edge (it opens upward, since
   // the trigger sits near the bottom of the rail) and, with 25
@@ -68,7 +78,7 @@ export default function Sidebar() {
     if (!langButtonRef.current) return;
     const rect = langButtonRef.current.getBoundingClientRect();
     setLangMenuPos({
-      left: rect.left,
+      ...inlineStartAnchor(rect),
       bottom: window.innerHeight - rect.top + 8,
       maxHeight: Math.max(rect.top - 16, 160),
     });
@@ -96,7 +106,7 @@ export default function Sidebar() {
   const toggleMoreMenu = () => {
     if (!moreMenuOpen && moreButtonRef.current) {
       const rect = moreButtonRef.current.getBoundingClientRect();
-      setMoreMenuPos({ left: rect.left, bottom: window.innerHeight - rect.top + 8 });
+      setMoreMenuPos({ ...inlineStartAnchor(rect), bottom: window.innerHeight - rect.top + 8 });
     }
     setMoreMenuOpen((value) => !value);
   };
@@ -112,6 +122,11 @@ export default function Sidebar() {
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
+
+      // Hand focus back to the trigger that opened the flyout, instead
+      // of leaving it on a now-unmounted menu item (i.e. on <body>).
+      if (langMenuOpen) langButtonRef.current?.focus();
+      if (moreMenuOpen) moreButtonRef.current?.focus();
 
       setLangMenuOpen(false);
       setMoreMenuOpen(false);
@@ -403,6 +418,7 @@ export default function Sidebar() {
                   aria-label={t("nav.language")}
                   style={{
                     left: langMenuPos.left,
+                    right: langMenuPos.right,
                     bottom: langMenuPos.bottom,
                     maxHeight: langMenuPos.maxHeight,
                   }}
@@ -417,7 +433,7 @@ export default function Sidebar() {
                         setLanguage(lang.code);
                         setLangMenuOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-2.5 text-sm transition ${
+                      className={`w-full text-start px-4 py-2.5 text-sm transition ${
                         language === lang.code
                           ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-medium"
                           : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -456,7 +472,7 @@ export default function Sidebar() {
               />
 
               <div
-                style={{ left: moreMenuPos.left, bottom: moreMenuPos.bottom }}
+                style={{ left: moreMenuPos.left, right: moreMenuPos.right, bottom: moreMenuPos.bottom }}
                 className="fixed w-64 max-h-[70vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
                 <Link
                   href="/pricing"
@@ -533,7 +549,7 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => setAboutOpen((value) => !value)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-start text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   aria-expanded={aboutOpen}
                 >
                   <Info className="w-4 h-4" />
@@ -574,7 +590,7 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => setSupportOpen((value) => !value)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-start text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   aria-expanded={supportOpen}
                 >
                   <LifeBuoy className="w-4 h-4" />
@@ -608,7 +624,7 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => setLegalOpen((value) => !value)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-start text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   aria-expanded={legalOpen}
                 >
                   <Scale className="w-4 h-4" />
@@ -641,7 +657,7 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex items-center gap-3 w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-red-600 dark:text-red-400"
+                  className="flex items-center gap-3 w-full text-start px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-red-600 dark:text-red-400"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>{t("nav.signOut")}</span>

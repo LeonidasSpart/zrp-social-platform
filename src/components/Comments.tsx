@@ -243,7 +243,10 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         setComments((prev) => [{ ...created, replies: created.replies || [] }, ...prev]);
         onCommentAdded(1); // Local count update only, never reloads the feed
       } else {
-        console.error("Failed to post comment");
+        // Was console-only: a rejected comment (rate limit, blocked,
+        // disabled comments, too long) looked like a dead Send button.
+        const data = await res.json().catch(() => ({}));
+        alert(localizeApiMessage(data.error, t) || t("auth.errTryAgain"));
       }
     } catch (error) {
       console.error("Error posting comment:", error);
@@ -278,6 +281,9 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
           replies: [...(c.replies || []), { ...created, replies: [] }],
         }));
         onCommentAdded(1);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(localizeApiMessage(data.error, t) || t("auth.errTryAgain"));
       }
     } catch (error) {
       console.error("Error replying:", error);
@@ -312,6 +318,9 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         setEditContent("");
         updateCommentInTree(commentId, (c) => ({ ...c, content: updated.content }));
         onCommentAdded(0);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(localizeApiMessage(data.error, t) || t("comment.errUpdateFailed"));
       }
     } catch (error) {
       console.error("Error editing comment:", error);
@@ -350,6 +359,9 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
         removeCommentFromTree(commentToDelete);
         setCommentToDelete(null);
         onCommentAdded(-1);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(localizeApiMessage(data.error, t) || t("comment.errDeleteFailed"));
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
@@ -543,6 +555,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                   onClick={() => startEdit(comment)}
                   className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 p-1"
                   title={t("action.edit")}
+                  aria-label={t("action.edit")}
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
@@ -550,6 +563,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                   onClick={() => confirmDelete(comment.id)}
                   className="text-gray-400 hover:text-red-500 p-1"
                   title={t("action.delete")}
+                  aria-label={t("action.delete")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -561,6 +575,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                   onClick={() => openReportModal(comment.id)}
                   className="text-gray-400 hover:text-red-500 p-1"
                   title={t("report.modalTitle")}
+                  aria-label={t("report.modalTitle")}
                 >
                   <Flag className="w-3.5 h-3.5" />
                 </button>
@@ -593,6 +608,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 disabled={!editContent.trim() || editing}
                 className="flex-shrink-0 text-green-600 hover:text-green-700 p-1 disabled:opacity-50"
                 title={t("action.save")}
+                aria-label={t("action.save")}
               >
                 <Check className="w-4 h-4" />
               </button>
@@ -600,6 +616,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 onClick={cancelEdit}
                 className="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1"
                 title={t("action.cancel")}
+                aria-label={t("action.cancel")}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -684,6 +701,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                     : "text-gray-400 hover:text-green-500"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                 title={t("action.repost")}
+                aria-label={t("action.repost")}
               >
                 <Repeat className="w-3.5 h-3.5" />
                 {comment._count?.reposts ? comment._count.reposts : ""}
@@ -698,6 +716,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                     : "text-gray-400 hover:text-red-500"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                 title={t("action.like")}
+                aria-label={t("action.like")}
               >
                 <Heart className={`w-3.5 h-3.5 ${comment.liked ? "fill-red-500" : ""}`} />
                 {comment._count?.likes ? comment._count.likes : ""}
@@ -712,6 +731,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                     : "text-gray-400 hover:text-zrp-red"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                 title={t("nav.bookmarks")}
+                aria-label={t("nav.bookmarks")}
               >
                 <Bookmark className={`w-3.5 h-3.5 ${comment.bookmarked ? "fill-zrp-red" : ""}`} />
               </button>
@@ -794,6 +814,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 onClick={() => setShowReplyGifPicker(true)}
                 disabled={replyUploading || !!replyImageUrl}
                 title={t("composer.addGif")}
+                aria-label={t("composer.addGif")}
                 className="flex-shrink-0 p-1.5 text-gray-400 hover:text-zrp-red disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
                 <FileImage className="w-4 h-4" />
@@ -951,6 +972,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             onClick={() => setShowNewCommentGifPicker(true)}
             disabled={newCommentUploading || !!newCommentImageUrl}
             title={t("composer.addGif")}
+            aria-label={t("composer.addGif")}
             className="flex-shrink-0 p-2 text-gray-500 dark:text-gray-400 hover:text-zrp-red disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
             <FileImage className="w-5 h-5" />

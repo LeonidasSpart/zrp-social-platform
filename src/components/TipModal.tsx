@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { Loader2, X, Copy, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
@@ -71,6 +72,9 @@ export default function TipModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const titleId = useId();
+  const dialogRef = useDialogA11y(isOpen, onClose, !loading);
 
   if (!isOpen) return null;
 
@@ -151,9 +155,9 @@ export default function TipModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
+      <div className="focus:outline-none w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h2 id={titleId} className="text-xl font-bold text-gray-900 dark:text-white">
             {t("tipModal.title", { name: recipientName })}
           </h2>
           <button

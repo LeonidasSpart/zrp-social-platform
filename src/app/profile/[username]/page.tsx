@@ -1,5 +1,6 @@
 "use client";
 
+import { safeExternalHref } from "@/lib/profile-website";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, useCallback, use } from "react";
@@ -2166,9 +2167,8 @@ export default function ProfilePage(
 
             {profile.website && (
               <a
-                href={
-                  profile.website
-                }
+                // http(s) only: a stored javascript: value must never become a live href
+                href={safeExternalHref(profile.website)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-zrp-red hover:underline"
