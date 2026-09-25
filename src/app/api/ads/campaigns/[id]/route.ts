@@ -21,6 +21,9 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
   try {
     const campaign = await prisma.adCampaign.findUnique({
       where: { id: params.id },
+      // adminNote is staff-only (see schema.prisma) - never returned to
+      // the advertiser.
+      omit: { adminNote: true },
       include: {
         post: {
           select: {
@@ -60,7 +63,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
   try {
     const existing = await prisma.adCampaign.findUnique({
       where: { id: params.id },
-      select: { advertiserId: true, status: true, budgetSpent: true },
+      select: { advertiserId: true, status: true, budgetSpent: true, budgetTotal: true, paidAt: true },
     });
     if (!existing) {
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
@@ -105,16 +108,46 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
           { status: 400 }
         );
       }
+      // ⚠️ SECURITY: once paid, budgetTotal is what the on-chain payment
+      // actually funded (the pay route requires verifiedAmount >=
+      // budgetTotal). Raising it afterwards would let serve/impression/
+      // click keep billing - and showing - the ad far past what was ever
+      // paid for: free advertising. Lowering it is still allowed.
+      if (existing.paidAt && existing.budgetTotal.lessThan(numericBudget)) {
+        return NextResponse.json(
+          { error: "A funded campaign's budget can't be increased." },
+          { status: 400 }
+        );
+      }
       data.budgetTotal = numericBudget;
     }
 
     if (endDate !== undefined) {
-      data.endDate = endDate ? new Date(endDate) : null;
+      const parsedEnd = endDate ? new Date(endDate) : null;
+      if (parsedEnd && Number.isNaN(parsedEnd.getTime())) {
+        return NextResponse.json({ error: "Invalid end date." }, { status: 400 });
+      }
+      data.endDate = parsedEnd;
     }
 
-    const campaign = await prisma.adCampaign.update({
-      where: { id: params.id },
+    // Compare-and-swap on the status the transition above was validated
+    // against: a staff suspend/cancel (or the payment route) landing in
+    // between must not be silently overwritten - e.g. an advertiser's
+    // PAUSED -> ACTIVE racing a staff PAUSED -> SUSPENDED would otherwise
+    // resume a suspended campaign.
+    const updated = await prisma.adCampaign.updateMany({
+      where: { id: params.id, status: existing.status },
       data,
+    });
+    if (updated.count === 0) {
+      return NextResponse.json(
+        { error: "This campaign was changed in the meantime. Please refresh and try again." },
+        { status: 409 }
+      );
+    }
+    const campaign = await prisma.adCampaign.findUnique({
+      where: { id: params.id },
+      omit: { adminNote: true },
     });
 
     return jsonWithDecimals({ campaign });

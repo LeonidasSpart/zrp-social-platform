@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { applyPremiumGating } from "@/lib/premium-content";
+import { viewablePostAuthorFilter } from "@/lib/permissions";
 // Shared video/GIF/image classifier, also used by ZRP Discover
 // (src/lib/discover/candidates.ts) - see src/lib/video-media.ts for
 // the extracted logic and its priority rules. Behavior here is
@@ -131,6 +132,11 @@ export async function GET(req: NextRequest) {
       authorId: {
         notIn: excludedAuthorIds,
       },
+
+      // ⚠️ SECURITY: same private-account rule as every other public
+      // listing (explore, hashtag, search) - Shorts, including a
+      // logged-out visitor's, used to serve private accounts' videos.
+      author: viewablePostAuthorFilter(userId),
 
       status: "published",
 

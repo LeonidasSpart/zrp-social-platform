@@ -80,6 +80,55 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(result!.id).toBe(existing.id);
     });
 
+    it("claims an UNVERIFIED pre-registered account: marks it verified and drops the squatter's password/tokens", async () => {
+      // Account pre-hijacking: an attacker registers a credentials
+      // account with the victim's address (never verified), then the
+      // real owner signs in with Google. The attacker's password must
+      // not survive on the account the victim ends up using.
+      const email = `squatted-${runId}@oauthtest.example`;
+      const squatted = await prisma.user.create({
+        data: {
+          email,
+          username: `squatted${runId}`.slice(0, 20),
+          password: "$2a$10$attackerknownhashattackerknownhashattackerknownhas",
+          role: "USER",
+          verificationToken: `vt-${runId}`,
+          verificationTokenExpiry: new Date(Date.now() + 60_000),
+          resetToken: `rt-${runId}`,
+          resetTokenExpiry: new Date(Date.now() + 60_000),
+        },
+      });
+      userIds.push(squatted.id);
+
+      const result = await findOrCreateOAuthUser(email, "Real Owner", null);
+      expect(result!.id).toBe(squatted.id);
+      expect(result!.emailVerified).toBe(true);
+
+      const dbUser = await prisma.user.findUnique({ where: { id: squatted.id } });
+      expect(dbUser?.password).toBeNull();
+      expect(dbUser?.emailVerified).not.toBeNull();
+      expect(dbUser?.verificationToken).toBeNull();
+      expect(dbUser?.resetToken).toBeNull();
+    });
+
+    it("leaves an already-VERIFIED account's password untouched when linking", async () => {
+      const email = `verifiedlink-${runId}@oauthtest.example`;
+      const existing = await prisma.user.create({
+        data: {
+          email,
+          username: `verifiedlink${runId}`.slice(0, 20),
+          password: "$2a$10$ownerownhashownerownhashownerownhashownerownhashowner",
+          role: "USER",
+          emailVerified: new Date(),
+        },
+      });
+      userIds.push(existing.id);
+
+      await findOrCreateOAuthUser(email, "Owner", null);
+      const dbUser = await prisma.user.findUnique({ where: { id: existing.id } });
+      expect(dbUser?.password).toBe(existing.password);
+    });
+
     it("returns null for a banned account instead of issuing a session", async () => {
       const email = `bannedgoogle-${runId}@oauthtest.example`;
       const banned = await prisma.user.create({

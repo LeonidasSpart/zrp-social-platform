@@ -45,6 +45,10 @@ type GateablePost = {
   imageUrl?: string | null;
   imageUrls?: string[];
   linkUrl?: string | null;
+  // An ARTICLE post's full text lives in `body`, not `content` - any
+  // post type can be made pay-per-view, and every route that uses
+  // `include` (or selects `body`) returns it.
+  body?: string | null;
   // A quote-post can itself be gated independently of the post quoting
   // it. Several routes `include: { quotePost: { include: { author, ... } } }`,
   // which returns the quoted post's own scalar fields (content,
@@ -131,6 +135,9 @@ export async function applyPremiumGating<T extends GateablePost>(
       ...(("imageUrl" in post) ? { imageUrl: unlocked ? post.imageUrl : null } : {}),
       ...(("imageUrls" in post) ? { imageUrls: unlocked ? post.imageUrls : [] } : {}),
       ...(("linkUrl" in post) ? { linkUrl: unlocked ? post.linkUrl : null } : {}),
+      // ⚠️ SECURITY: a premium ARTICLE's real content is its `body` -
+      // redacting only `content` left the whole paid article readable.
+      ...(("body" in post) ? { body: unlocked ? post.body : null } : {}),
       premiumPost: {
         id: premiumPost.id,
         price: premiumPost.price.toNumber(),

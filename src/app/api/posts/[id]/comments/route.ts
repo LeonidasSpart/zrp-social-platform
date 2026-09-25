@@ -10,6 +10,7 @@ import { canViewPrivateContent } from "@/lib/permissions";
 import { notifyMentionedUsers } from "@/lib/mentions";
 import { isBlockedEitherWay } from "@/lib/auth-guards";
 import { isAllowedMediaUrl } from "@/lib/media-url";
+import { findVisiblePost } from "@/lib/post-visibility";
 
 // ─── GET: Fetch a page of threaded comments with counts and status ──
 // Paginates by top-level comment (cursor + limit), then loads only the
@@ -187,12 +188,17 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     }
 
     // ─── Check if comments are enabled for this post ────────────────
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
-      select: { commentsEnabled: true, authorId: true },
-    });
+    // ⚠️ SECURITY/PRIVACY: same visibility rule as reading the post
+    // (GET /api/posts/[id]) - a non-follower could otherwise comment on
+    // (and notify) a private account's post, or a not-yet-published
+    // scheduled one, just by knowing its id.
+    const post = await findVisiblePost(session.user.id, postId);
 
-    if (!post || post.commentsEnabled === false) {
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    if (post.commentsEnabled === false) {
       return NextResponse.json(
         { error: "Comments are disabled for this post." },
         { status: 403 }

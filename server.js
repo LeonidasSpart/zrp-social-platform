@@ -36,6 +36,7 @@ const {
   createRedisPresenceStore,
 } = require("./presence");
 const { isRedisBackedCallsAllowed } = require("./redis-readiness");
+const { isBlockedInternalRequest } = require("./internal-route-gate");
 
 // Minimal cookie-header parser, written inline rather than requiring
 // the "cookie" package - this file is the process entrypoint, so a
@@ -59,6 +60,16 @@ function parseCookieHeader(header) {
     }
   });
   return result;
+}
+
+// Socket event arguments are fully client-controlled. Destructuring one
+// directly (`async ({ a } = {}) => ...`) throws for a client that emits
+// null or nothing at all, and inside an async listener that throw becomes
+// an unhandled rejection, which terminates the whole Node process - one
+// authenticated socket could take the server down. Handlers destructure
+// payloadObject(payload) instead.
+function payloadObject(payload) {
+  return payload && typeof payload === "object" ? payload : {};
 }
 
 const dev = process.env.NODE_ENV !== "production";
@@ -149,6 +160,16 @@ const allowedOrigins = (process.env.SOCKET_ALLOWED_ORIGINS || process.env.NEXTAU
 app.prepare().then(async () => {
   const server = createServer((req, res) => {
     const parsedUrl = parse(req.url, true);
+    // /api/internal/* (see notifyIncomingCallPush below) is only ever
+    // called by this process over loopback. Refuse it for any other peer
+    // (anything that came through the reverse proxy) before Next.js sees
+    // it, so its bearer secret is never exposed to online guessing.
+    // See internal-route-gate.js.
+    if (isBlockedInternalRequest(req, parsedUrl.pathname)) {
+      res.statusCode = 404;
+      res.end();
+      return;
+    }
     handle(req, res, parsedUrl);
   });
 
@@ -445,6 +466,11 @@ app.prepare().then(async () => {
       body: JSON.stringify({ receiverId, callerName, callerUsername, isVideo }),
       signal: controller.signal,
     })
+      .then((res) => {
+        // Surface a refused call (misconfigured secret, blocked route)
+        // instead of failing silently - fetch only rejects on network errors.
+        if (!res.ok) console.error(`call-push notify failed: HTTP ${res.status}`);
+      })
       .catch((err) => console.error("call-push notify error:", err))
       .finally(() => clearTimeout(timeout));
   }
@@ -608,7 +634,8 @@ app.prepare().then(async () => {
       }
     });
 
-    socket.on("typing", async ({ receiverId, isTyping } = {}) => {
+    socket.on("typing", async (payload) => {
+      const { receiverId, isTyping } = payloadObject(payload);
       if (!receiverId || typeof receiverId !== "string" || receiverId === userId) return;
       if (!checkEventRateLimit(userId, "typing", 60, 10_000)) return;
       try {
@@ -677,7 +704,8 @@ app.prepare().then(async () => {
       }
     });
 
-    socket.on("typing-group", async ({ conversationId, isTyping } = {}) => {
+    socket.on("typing-group", async (payload) => {
+      const { conversationId, isTyping } = payloadObject(payload);
       if (!conversationId || typeof conversationId !== "string") return;
       if (!checkEventRateLimit(userId, "typing-group", 60, 10_000)) return;
       try {
@@ -748,8 +776,12 @@ app.prepare().then(async () => {
       }
     });
 
-    socket.on("mark-read", async ({ messageId }) => {
-      if (!messageId) return;
+    socket.on("mark-read", async (payload) => {
+      const { messageId } = payloadObject(payload);
+      if (!messageId || typeof messageId !== "string" || messageId.length > 128) return;
+      // Each event is a DB read + write; same per-user cap as the other
+      // relays so one socket can't drive unbounded database load.
+      if (!checkEventRateLimit(userId, "mark-read", 120, 10_000)) return;
       try {
         // Only the actual receiver of a message may mark it read -
         // previously any connected client could flip read=true on any
@@ -779,7 +811,8 @@ app.prepare().then(async () => {
     // user who has blocked the caller (or vice versa) either. The
     // callerName shown to the callee is the caller's real name from
     // the database, not whatever the payload claimed.
-    socket.on("call-user", async ({ receiverId, signal, isVideo } = {}, ack) => {
+    socket.on("call-user", async (payload, ack) => {
+      const { receiverId, signal, isVideo } = payloadObject(payload);
       if (!receiverId || typeof receiverId !== "string" || receiverId === userId) return;
       if (!checkEventRateLimit(userId, "call-user", 10, 30_000)) return;
       // ⚠️ SPLIT-BRAIN GUARD: Redis is configured (the fleet is meant to
@@ -876,7 +909,8 @@ app.prepare().then(async () => {
       }
     });
 
-    socket.on("accept-call", async ({ callerId, signal, callId } = {}) => {
+    socket.on("accept-call", async (payload) => {
+      const { callerId, signal, callId } = payloadObject(payload);
       if (!callerId || typeof callerId !== "string") return;
       try {
         if (!(await calls.accept(userId, callerId, callId))) return;
@@ -888,7 +922,8 @@ app.prepare().then(async () => {
       io.to(callerId).emit("call-accepted", { signal, callId });
     });
 
-    socket.on("reject-call", async ({ callerId, callId } = {}) => {
+    socket.on("reject-call", async (payload) => {
+      const { callerId, callId } = payloadObject(payload);
       if (!callerId || typeof callerId !== "string") return;
       try {
         if (!(await calls.reject(userId, callerId, callId))) return;
@@ -900,7 +935,8 @@ app.prepare().then(async () => {
       io.to(callerId).emit("call-rejected");
     });
 
-    socket.on("end-call", async ({ callerId, callId } = {}) => {
+    socket.on("end-call", async (payload) => {
+      const { callerId, callId } = payloadObject(payload);
       if (!callerId || typeof callerId !== "string") return;
       try {
         if (!(await calls.end(userId, callerId, callId))) return;

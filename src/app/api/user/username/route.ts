@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 
 // ─── GET: Check current username and cooldown ──────────────────────
 export async function GET(req: NextRequest) {
@@ -50,7 +51,7 @@ export async function PUT(req: NextRequest) {
     const { username } = await req.json();
 
     // ─── Validation ──────────────────────────────────────────────────
-    if (!username || username.length < 3) {
+    if (typeof username !== "string" || username.length < 3) {
       return NextResponse.json(
         { error: "Username must be at least 3 characters" },
         { status: 400 }
@@ -123,6 +124,10 @@ export async function PUT(req: NextRequest) {
         usernameChangedAt: new Date(),
       },
     });
+
+    // auth-state.ts caches username and overlays it onto every token
+    // read; drop it so the rename is visible immediately.
+    invalidateUserAuthState(session.user.id);
 
     // ─── Return updated user (exclude password) ────────────────────
     const { password, ...userWithoutPassword } = updatedUser;

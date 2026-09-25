@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { normalizeCountryInput } from "@/lib/geo/country";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
+import { normalizeProfileWebsite } from "@/lib/profile-website";
 
 const MAX_SKILLS = 20;
 const MAX_SKILL_LENGTH = 50;
@@ -53,7 +54,13 @@ export async function PUT(req: NextRequest) {
       // a stale one from a previous value - never guessed, never stale.
       data.countryCode = normalizeCountryInput(country);
     }
-    if ("website" in body) data.website = website || null;
+    if ("website" in body) {
+      const normalized = normalizeProfileWebsite(website);
+      if (!normalized.ok) {
+        return NextResponse.json({ error: normalized.error }, { status: 400 });
+      }
+      data.website = normalized.value;
+    }
     if ("category" in body) data.category = category || null;
     if ("showCategory" in body) data.showCategory = !!showCategory;
 

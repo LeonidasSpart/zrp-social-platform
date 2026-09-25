@@ -83,6 +83,21 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { tipsEnabled, tipsMessage, premiumPostsEnabled } = body;
 
+    // Malformed values used to reach Prisma and surface as a 500.
+    if (
+      (tipsEnabled !== undefined && typeof tipsEnabled !== "boolean") ||
+      (premiumPostsEnabled !== undefined && typeof premiumPostsEnabled !== "boolean") ||
+      (tipsMessage !== undefined && tipsMessage !== null &&
+        (typeof tipsMessage !== "string" || tipsMessage.length > 1000))
+    ) {
+      return NextResponse.json({ error: "Invalid creator settings." }, { status: 400 });
+    }
+
+    const existing = await prisma.creatorProfile.findUnique({ where: { userId }, select: { id: true } });
+    if (!existing) {
+      return NextResponse.json({ error: "Creator profile not found." }, { status: 404 });
+    }
+
     const profile = await prisma.creatorProfile.update({
       where: { userId },
       data: {

@@ -22,18 +22,26 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     );
   }
 
-  const claimed = await prisma.helpWithdrawalRequest.updateMany({
-    where: { id, status: "PENDING" },
-    data: { status: "REJECTED" },
+  // Claim and refund in ONE transaction, same as the creator-withdrawal
+  // reject route: as two separate writes, a crash between them left the
+  // request REJECTED (un-retriable) with the reserved amount never
+  // returned to the campaign's balance.
+  const refunded = await prisma.$transaction(async (tx) => {
+    const claimed = await tx.helpWithdrawalRequest.updateMany({
+      where: { id, status: "PENDING" },
+      data: { status: "REJECTED" },
+    });
+    if (claimed.count === 0) return false;
+
+    await tx.helpCampaign.update({
+      where: { id: withdrawal.campaignId },
+      data: { balance: { increment: withdrawal.amount } },
+    });
+    return true;
   });
-  if (claimed.count === 0) {
+  if (!refunded) {
     return NextResponse.json({ error: "Withdrawal is already being processed." }, { status: 409 });
   }
-
-  await prisma.helpCampaign.update({
-    where: { id: withdrawal.campaignId },
-    data: { balance: { increment: withdrawal.amount } },
-  });
 
   await logAdminAction({
     actor: adminCheck.session,

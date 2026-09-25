@@ -9,6 +9,7 @@ vi.mock("next-auth", () => ({ getServerSession }));
 
 import { DELETE } from "../route";
 import { GET as getMessages } from "../../../[userId]/route";
+import { GET as getUnread } from "../../../unread/route";
 
 const hasRealDatabaseUrl =
   !!process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("...");
@@ -140,6 +141,27 @@ describe.skipIf(!hasRealDatabaseUrl)("DELETE /api/messages/conversation/[userId]
 
     const bConversations = await getUserConversations(b.id);
     expect(bConversations.some((c) => c.partner.id === a.id)).toBe(true);
+  });
+
+  it("unread messages hidden by a clearance no longer count toward the Messages nav badge", async () => {
+    const a = await createUser("convn");
+    const b = await createUser("convo");
+    const c = await createUser("convp");
+    await prisma.message.create({ data: { senderId: b.id, receiverId: a.id, content: "unread 1" } });
+    await prisma.message.create({ data: { senderId: b.id, receiverId: a.id, content: "unread 2" } });
+    await prisma.message.create({ data: { senderId: c.id, receiverId: a.id, content: "other convo" } });
+
+    getServerSession.mockResolvedValueOnce(sessionFor(a.id));
+    await call(b.id);
+
+    getServerSession.mockResolvedValueOnce(sessionFor(a.id));
+    const res = await getUnread(new NextRequest("https://zrp.one/api/messages/unread"));
+    expect(res.status).toBe(200);
+    // Only C's message: B's two unread messages are in a conversation A
+    // cleared, so the list shows nothing for B and the badge must agree.
+    expect((await res.json()).count).toBe(1);
+    const listed = (await getUserConversations(a.id)).reduce((sum, conv) => sum + conv.unreadCount, 0);
+    expect(listed).toBe(1);
   });
 
   it("never touches a third party's unrelated messages with either user", async () => {

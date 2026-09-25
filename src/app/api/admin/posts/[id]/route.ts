@@ -23,6 +23,9 @@ export async function DELETE(
       where: { id: id },
       select: { imageUrl: true, imageUrls: true },
     });
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
     const commentsWithImages = await prisma.comment.findMany({
       where: { postId: id, imageUrl: { not: null } },
       select: { imageUrl: true },
@@ -50,6 +53,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Admin delete post error:", error);
     return NextResponse.json({ error: "Failed to delete post" }, { status: 500 });
   }
 }

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  // Unauthenticated proxy onto ZRP's own GIPHY key, whose quota is
+  // small and shared by every user - without a limit one script could
+  // exhaust it and break the GIF picker for everyone.
+  const limit = await rateLimit(req, { limit: 60, window: 60, type: "gif-search" });
+  if (!limit.success) return limit.response;
+
   const query = req.nextUrl.searchParams.get("q");
 
   if (!query || query.length < 2) {

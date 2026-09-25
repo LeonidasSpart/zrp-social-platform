@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
+import { normalizeProfileWebsite } from "@/lib/profile-website";
 
 /**
  * POST /api/journalist/apply
@@ -28,8 +29,17 @@ export async function POST(request: NextRequest) {
 
     const outlet = typeof body.outlet === "string" ? body.outlet.trim().slice(0, 200) : null;
     const pitch = typeof body.pitch === "string" ? body.pitch.trim().slice(0, 5000) : null;
-    const portfolioUrl =
-      typeof body.portfolioUrl === "string" ? body.portfolioUrl.trim().slice(0, 500) : null;
+    // ⚠️ SECURITY: rendered as <a href> on /admin/journalists for the
+    // reviewing admin - an unvalidated `javascript:` value was a stored
+    // XSS aimed squarely at an admin session. http(s) only.
+    const normalizedPortfolio = normalizeProfileWebsite(
+      typeof body.portfolioUrl === "string" ? body.portfolioUrl.trim().slice(0, 500) : null,
+      "Portfolio"
+    );
+    if (!normalizedPortfolio.ok) {
+      return NextResponse.json({ success: false, error: normalizedPortfolio.error }, { status: 400 });
+    }
+    const portfolioUrl = normalizedPortfolio.value;
 
     if (!pitch) {
       return NextResponse.json(

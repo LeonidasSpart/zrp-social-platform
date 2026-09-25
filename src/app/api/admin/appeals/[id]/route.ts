@@ -37,16 +37,24 @@ export async function PUT(
     const actorUsername =
       (adminCheck.session.user as { username?: string | null }).username ?? null;
 
-    const updated = await prisma.appeal.update({
-      where: { id },
+    // Compare-and-swap on status "pending": two staff resolving the same
+    // appeal at once (one upheld, one overturned) used to both pass the
+    // read above, leaving the stored decision and the ban state
+    // disagreeing and the user notified twice. Only one claim can win.
+    const claimed = await prisma.appeal.updateMany({
+      where: { id, status: "pending" },
       data: {
         status,
-        resolutionNote: resolutionNote || null,
+        resolutionNote: typeof resolutionNote === "string" && resolutionNote.trim() ? resolutionNote.trim() : null,
         resolvedById: adminCheck.session.user.id,
         resolvedByUsername: actorUsername,
         resolvedAt: new Date(),
       },
     });
+    if (claimed.count === 0) {
+      return NextResponse.json({ error: "This appeal was already resolved." }, { status: 409 });
+    }
+    const updated = await prisma.appeal.findUniqueOrThrow({ where: { id } });
 
     // BAN_USER is the only moderation action with a real, reversible DB
     // state (User.banned). Everything else (deleted content, warnings,

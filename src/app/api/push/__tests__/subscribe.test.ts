@@ -9,6 +9,7 @@ const { getServerSession, upsert, deleteMany } = vi.hoisted(() => ({
 
 vi.mock("next-auth", () => ({ getServerSession }));
 vi.mock("@/lib/auth", () => ({ authOptions: {} }));
+vi.mock("@/lib/rate-limit", () => ({ checkRateLimitKey: vi.fn(async () => ({ success: true, retryAfter: 0 })) }));
 vi.mock("@/lib/db", () => ({
   prisma: { pushSubscription: { upsert, deleteMany } },
 }));
@@ -83,6 +84,40 @@ describe("POST /api/push/subscribe", () => {
     );
     expect(res.status).toBe(200);
     expect(deleteMany).not.toHaveBeenCalled();
+  });
+
+  // sendPushNotification POSTs to the stored endpoint from the server, so
+  // an arbitrary URL here would be a server-side request forgery vector.
+  it.each([
+    "https://169.254.169.254/latest/meta-data",
+    "http://fcm.googleapis.com/fcm/send/x",
+    "https://evil.example/fcm.googleapis.com",
+    "https://fcm.googleapis.com.evil.example/x",
+    "https://fcm.googleapis.com:8443/x",
+    "not a url",
+  ])("rejects a non-push-service endpoint %s", async (endpoint) => {
+    const res = await subscribe(req({ subscription: { ...subscription, endpoint } }));
+    expect(res.status).toBe(400);
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it("accepts the major browser push services", async () => {
+    for (const endpoint of [
+      "https://updates.push.services.mozilla.com/wpush/v2/abc",
+      "https://web.push.apple.com/abc",
+      "https://wns2-db5p.notify.windows.com/w/?token=abc",
+    ]) {
+      const res = await subscribe(req({ subscription: { ...subscription, endpoint } }));
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("rejects a malformed subscription instead of throwing a 500", async () => {
+    for (const body of [{}, { subscription: null }, { subscription: { endpoint: NEW_ENDPOINT } }, { subscription: { endpoint: NEW_ENDPOINT, keys: { p256dh: 1, auth: "a" } } }]) {
+      const res = await subscribe(req(body));
+      expect(res.status).toBe(400);
+    }
+    expect(upsert).not.toHaveBeenCalled();
   });
 
   it("rejects an unauthenticated caller", async () => {

@@ -50,6 +50,9 @@ export async function POST(req: NextRequest) {
   try {
     const { content, receiverId, imageUrl, replyToId, storyId } = await req.json();
 
+    if ((content != null && typeof content !== "string") || (imageUrl != null && typeof imageUrl !== "string")) {
+      return NextResponse.json({ error: "Invalid message payload" }, { status: 400 });
+    }
     // Allow empty content only if there is an image
     if ((!content || content.trim().length === 0) && !imageUrl) {
       return NextResponse.json({ error: "Message content or image is required" }, { status: 400 });

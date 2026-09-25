@@ -24,12 +24,20 @@ export async function GET(req: NextRequest) {
 
   try {
     const [directCount, groupConversations] = await Promise.all([
-      prisma.message.count({
-        where: {
-          receiverId: session.user.id,
-          read: false,
-        },
-      }),
+      // Same ConversationClearance exclusion getUserConversations
+      // applies to its per-partner unreadCount - an unread message from
+      // before this user cleared ("deleted") that conversation is hidden
+      // from their list, so counting it here left a nav badge that
+      // could never be cleared from the UI.
+      prisma.$queryRaw<{ count: bigint }[]>`
+        SELECT COUNT(*) AS count
+        FROM "Message" m
+        LEFT JOIN "ConversationClearance" cc
+          ON cc."userId" = ${session.user.id} AND cc."otherUserId" = m."senderId"
+        WHERE m."receiverId" = ${session.user.id} AND m."read" = false
+          AND m."conversationId" IS NULL
+          AND (cc.id IS NULL OR m."createdAt" > cc."clearedBefore")
+      `.then((rows) => Number(rows[0]?.count ?? 0)),
       getUserGroupConversations(session.user.id),
     ]);
 

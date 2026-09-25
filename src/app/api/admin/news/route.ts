@@ -11,6 +11,21 @@ import {
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
+// sourceUrl is rendered as a clickable link on the public article page
+// (src/app/news/[slug]/page.tsx). The CSP allows inline script, so a
+// `javascript:` URL here - settable by any staff member, moderators
+// included - would run in the session of whoever clicks it (admins
+// reviewing the article). Only plain http(s) links are accepted.
+function isHttpUrl(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "https:" || protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+
 function isValidDate(value: unknown): value is string | Date {
   if (value instanceof Date) {
     return !Number.isNaN(value.getTime());
@@ -201,6 +216,13 @@ export async function POST(request: NextRequest) {
       featured,
       publishedAt,
     } = body;
+
+    if (typeof sourceUrl === "string" && sourceUrl.trim() && !isHttpUrl(sourceUrl.trim())) {
+      return NextResponse.json(
+        { success: false, error: "Source URL must be a valid http(s) URL" },
+        { status: 400 }
+      );
+    }
 
     /*
      * Basic validation

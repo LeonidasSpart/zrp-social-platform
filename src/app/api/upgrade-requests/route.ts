@@ -11,7 +11,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { requestedPlan, paymentMethod, message } = await req.json();
+  const { requestedPlan, paymentMethod, message } = await req.json().catch(() => ({}));
+
+  if (
+    (paymentMethod != null && (typeof paymentMethod !== "string" || paymentMethod.length > 100)) ||
+    (message != null && (typeof message !== "string" || message.length > 2000))
+  ) {
+    return NextResponse.json({ error: "Invalid payment method or message." }, { status: 400 });
+  }
 
   // Validate plan
   const validPlans = ["pro", "business", "enterprise"];

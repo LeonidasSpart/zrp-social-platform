@@ -24,6 +24,11 @@ export async function GET(req: NextRequest) {
         followers: {
           none: { followerId: session.user.id },
         },
+        // Same exclusions /api/search and /api/discover/people apply:
+        // never suggest a banned account, or one blocked either way.
+        banned: false,
+        blockedBy: { none: { blockerId: session.user.id } },
+        blockedUsers: { none: { blockedId: session.user.id } },
       },
       select: {
         id: true,

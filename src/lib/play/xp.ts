@@ -91,10 +91,19 @@ export async function ensurePlayProfile(userId: string) {
 
 export async function awardXp(userId: string, amount: number) {
   if (amount <= 0) return;
-  const profile = await ensurePlayProfile(userId);
-  const newTotal = profile.totalXp + amount;
-  await prisma.playProfile.update({
+  await ensurePlayProfile(userId);
+  // Increment in the database rather than writing back a total read a
+  // moment earlier: two awards landing together (a duel settling while
+  // a solo submit is in flight) would otherwise overwrite each other.
+  const updated = await prisma.playProfile.update({
     where: { userId },
-    data: { totalXp: newTotal, level: levelFromXp(newTotal) },
+    data: { totalXp: { increment: amount } },
+    select: { totalXp: true },
+  });
+  // Only the writer that produced the current total sets the level, so a
+  // slower concurrent award can't stamp a stale, lower level over it.
+  await prisma.playProfile.updateMany({
+    where: { userId, totalXp: updated.totalXp },
+    data: { level: levelFromXp(updated.totalXp) },
   });
 }

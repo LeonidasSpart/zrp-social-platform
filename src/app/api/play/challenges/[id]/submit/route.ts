@@ -73,10 +73,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
-      const existingAttempt = await prisma.playAttempt.findFirst({
-        where: { duelId, userId },
+      // Claim this side's score slot atomically: the conditional update
+      // only matches while the slot is still empty, so two concurrent
+      // submissions from the same player can't both record (and the
+      // second can't overwrite the first with a better score).
+      const claimed = await prisma.playDuel.updateMany({
+        where: isChallenger
+          ? { id: duelId, status: "ACCEPTED", challengerScore: null }
+          : { id: duelId, status: "ACCEPTED", opponentScore: null },
+        data: isChallenger ? { challengerScore: score } : { opponentScore: score },
       });
-      if (existingAttempt) {
+      if (claimed.count !== 1) {
         return NextResponse.json({ error: "You've already played this duel." }, { status: 400 });
       }
 
@@ -84,10 +91,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         data: { challengeId, userId, score, timeMs: safeTimeMs, duelId, xpEarned: 0 },
       });
 
-      const updated = await prisma.playDuel.update({
-        where: { id: duelId },
-        data: isChallenger ? { challengerScore: score } : { opponentScore: score },
-      });
+      const updated = await prisma.playDuel.findUniqueOrThrow({ where: { id: duelId } });
 
       const bothSubmitted = updated.challengerScore !== null && updated.opponentScore !== null;
       if (!bothSubmitted) {
@@ -103,41 +107,45 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             ? updated.challengerId
             : updated.opponentId;
 
-      await prisma.playDuel.update({
-        where: { id: duelId },
+      // Both sides can land here at once when the two final submissions
+      // race; only the one whose conditional update flips the duel to
+      // COMPLETED settles it, so XP and duel stats are awarded exactly once.
+      const settled = await prisma.playDuel.updateMany({
+        where: { id: duelId, status: "ACCEPTED" },
         data: { status: "COMPLETED", completedAt: new Date(), winnerId },
       });
+      if (settled.count === 1) {
+        for (const participantId of [updated.challengerId, updated.opponentId]) {
+          const xpEarned = winnerId === null ? DUEL_TIE_XP : winnerId === participantId ? DUEL_WIN_XP : DUEL_LOSS_XP;
+          await prisma.playAttempt.updateMany({
+            where: { duelId, userId: participantId },
+            data: { xpEarned },
+          });
+          await ensurePlayProfile(participantId);
+          await awardXp(participantId, xpEarned);
+          const profile = await prisma.playProfile.update({
+            where: { userId: participantId },
+            data: {
+              duelsPlayed: { increment: 1 },
+              duelsWon: winnerId === participantId ? { increment: 1 } : undefined,
+            },
+          });
+          await checkAndAwardAchievements(participantId, profile);
+        }
 
-      for (const participantId of [updated.challengerId, updated.opponentId]) {
-        const xpEarned = winnerId === null ? DUEL_TIE_XP : winnerId === participantId ? DUEL_WIN_XP : DUEL_LOSS_XP;
-        await prisma.playAttempt.updateMany({
-          where: { duelId, userId: participantId },
-          data: { xpEarned },
+        await createNotification({
+          userId: updated.challengerId,
+          type: "play_duel_result",
+          fromUserId: updated.opponentId,
+          duelId,
         });
-        await ensurePlayProfile(participantId);
-        await awardXp(participantId, xpEarned);
-        const profile = await prisma.playProfile.update({
-          where: { userId: participantId },
-          data: {
-            duelsPlayed: { increment: 1 },
-            duelsWon: winnerId === participantId ? { increment: 1 } : undefined,
-          },
+        await createNotification({
+          userId: updated.opponentId,
+          type: "play_duel_result",
+          fromUserId: updated.challengerId,
+          duelId,
         });
-        await checkAndAwardAchievements(participantId, profile);
       }
-
-      await createNotification({
-        userId: updated.challengerId,
-        type: "play_duel_result",
-        fromUserId: updated.opponentId,
-        duelId,
-      });
-      await createNotification({
-        userId: updated.opponentId,
-        type: "play_duel_result",
-        fromUserId: updated.challengerId,
-        duelId,
-      });
 
       return NextResponse.json({
         score,
@@ -150,45 +158,61 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // ─── Solo path ────────────────────────────────────────────────────
-    const profile = await ensurePlayProfile(userId);
+    await ensurePlayProfile(userId);
     const now = new Date();
 
-    // Replaying a challenge is allowed (section 4 requires "replay
-    // capability"), but only the first solo completion of a given
-    // challenge earns base XP - otherwise a user could grind any single
-    // easy challenge indefinitely for unlimited XP. The daily/streak
-    // bonus below has its own separate once-per-day gate.
-    const alreadyCompletedThisChallenge = await prisma.playAttempt.findFirst({
-      where: { userId, challengeId, duelId: null },
-      select: { id: true },
-    });
+    // The first-completion and once-per-day gates below are read-then-
+    // write, so two submissions fired in parallel would both see "not
+    // yet played" and both earn XP. A per-user transaction-scoped
+    // advisory lock serialises this user's solo submissions from the
+    // gate reads through the attempt insert; other users are unaffected.
+    const { profile, xpEarned, isFirstPlayToday, newStreak } = await prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`play-solo:${userId}`}))`;
+        const profile = await tx.playProfile.findUniqueOrThrow({ where: { userId } });
 
-    let xpEarned = alreadyCompletedThisChallenge ? 0 : soloXp(score / challenge.maxScore, challenge.difficulty);
-    let isFirstPlayToday = false;
-    let newStreak = profile.currentStreak;
+        // Replaying a challenge is allowed (section 4 requires "replay
+        // capability"), but only the first solo completion of a given
+        // challenge earns base XP - otherwise a user could grind any single
+        // easy challenge indefinitely for unlimited XP. The daily/streak
+        // bonus below has its own separate once-per-day gate.
+        const alreadyCompletedThisChallenge = await tx.playAttempt.findFirst({
+          where: { userId, challengeId, duelId: null },
+          select: { id: true },
+        });
 
-    // The daily/streak bonus only applies to the day's designated
-    // daily challenge, and only once per day, so grinding an easy
-    // challenge repeatedly can't farm it.
-    if (challenge.isDaily) {
-      const alreadyPlayedDailyToday = await prisma.playAttempt.findFirst({
-        where: {
-          userId,
-          challenge: { isDaily: true },
-          createdAt: { gte: startOfDay(now) },
-        },
-      });
-      if (!alreadyPlayedDailyToday) {
-        const streakResult = computeStreak(profile.currentStreak, profile.lastPlayedAt, now);
-        newStreak = streakResult.streak;
-        isFirstPlayToday = streakResult.isFirstPlayToday;
-        xpEarned += DAILY_BONUS_XP + streakXp(newStreak);
-      }
-    }
+        let xpEarned = alreadyCompletedThisChallenge ? 0 : soloXp(score / challenge.maxScore, challenge.difficulty);
+        let isFirstPlayToday = false;
+        let newStreak = profile.currentStreak;
 
-    await prisma.playAttempt.create({
-      data: { challengeId, userId, score, timeMs: safeTimeMs, xpEarned },
-    });
+        // The daily/streak bonus only applies to the day's designated
+        // daily challenge, and only once per day, so grinding an easy
+        // challenge repeatedly can't farm it.
+        if (challenge.isDaily) {
+          const alreadyPlayedDailyToday = await tx.playAttempt.findFirst({
+            where: {
+              userId,
+              challenge: { isDaily: true },
+              createdAt: { gte: startOfDay(now) },
+            },
+          });
+          if (!alreadyPlayedDailyToday) {
+            const streakResult = computeStreak(profile.currentStreak, profile.lastPlayedAt, now);
+            newStreak = streakResult.streak;
+            isFirstPlayToday = streakResult.isFirstPlayToday;
+            xpEarned += DAILY_BONUS_XP + streakXp(newStreak);
+          }
+        }
+
+        await tx.playAttempt.create({
+          data: { challengeId, userId, score, timeMs: safeTimeMs, xpEarned },
+        });
+
+        return { profile, xpEarned, isFirstPlayToday, newStreak };
+      },
+      { maxWait: 10_000, timeout: 15_000 }
+    );
+
     await prisma.playChallenge.update({
       where: { id: challengeId },
       data: { playCount: { increment: 1 } },

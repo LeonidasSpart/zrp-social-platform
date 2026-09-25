@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { canViewPrivateContent } from "@/lib/permissions";
+import { canViewPrivateContent, viewablePostAuthorFilter } from "@/lib/permissions";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
@@ -26,10 +28,21 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       return NextResponse.json({ items: [], nextCursor: null });
     }
 
+    // Same block rule as the sibling posts/likes/media/replies tabs:
+    // a profile owner blocked either way sees nothing here.
+    if (viewerId && viewerId !== user.id && (await isBlockedEitherWay(viewerId, user.id))) {
+      return NextResponse.json({ items: [], nextCursor: null });
+    }
+
     // Get posts this user has reposted. Cursor/paging is on the Repost
     // row itself, not the Post (a Post can be reposted by many users).
+    // The reposted post itself must be one the VIEWER may see: published,
+    // and not by a private account the viewer doesn't follow.
     const rawReposts = await prisma.repost.findMany({
-      where: { userId: user.id },
+      where: {
+        userId: user.id,
+        post: { status: "published", author: viewablePostAuthorFilter(viewerId) },
+      },
       take: limit + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
@@ -78,7 +91,11 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       });
     }
 
-    return NextResponse.json({ items: posts, nextCursor });
+    // ⚠️ SECURITY: redact pay-per-view content the viewer hasn't paid
+    // for - see src/lib/premium-content.ts.
+    const gatedPosts = await applyPremiumGating(posts, viewerId);
+
+    return NextResponse.json({ items: gatedPosts, nextCursor });
   } catch (error) {
     console.error("Error fetching reposts:", error);
     return NextResponse.json({ error: "Failed to fetch reposts" }, { status: 500 });

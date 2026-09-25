@@ -89,17 +89,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "This duel invite has already been responded to." }, { status: 400 });
     }
     if (duel.expiresAt < new Date()) {
-      await prisma.playDuel.update({ where: { id }, data: { status: "EXPIRED" } });
+      await prisma.playDuel.updateMany({ where: { id, status: "PENDING" }, data: { status: "EXPIRED" } });
       return NextResponse.json({ error: "This duel invite has expired." }, { status: 400 });
     }
 
-    const updated = await prisma.playDuel.update({
-      where: { id },
+    // Conditional on still being PENDING so a double-tap (or accept and
+    // decline racing) resolves the invite exactly once.
+    const responded = await prisma.playDuel.updateMany({
+      where: { id, status: "PENDING" },
       data: {
         status: action === "accept" ? "ACCEPTED" : "DECLINED",
         respondedAt: new Date(),
       },
     });
+    if (responded.count !== 1) {
+      return NextResponse.json({ error: "This duel invite has already been responded to." }, { status: 400 });
+    }
+    const updated = await prisma.playDuel.findUniqueOrThrow({ where: { id } });
 
     if (action === "accept") {
       await createNotification({

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -21,10 +22,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   });
 
   if (existing) {
-    await prisma.musicFollow.delete({ where: { id: existing.id } });
+    await prisma.musicFollow.deleteMany({ where: { id: existing.id } });
     return NextResponse.json({ following: false });
   }
 
-  await prisma.musicFollow.create({ data: { userId: session.user.id, artistId: id } });
+  try {
+    await prisma.musicFollow.create({ data: { userId: session.user.id, artistId: id } });
+  } catch (err) {
+    // A concurrent follow (double tap) already created it - not a 500.
+    if (!(err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002")) throw err;
+  }
   return NextResponse.json({ following: true });
 }

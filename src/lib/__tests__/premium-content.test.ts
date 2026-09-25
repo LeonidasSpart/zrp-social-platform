@@ -127,6 +127,25 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(gated.quotePost?.content).toBe("SECRET quoted content 3");
       expect(gated.quotePost?.premiumPost?.locked).toBe(false);
     });
+
+    // A premium ARTICLE's paid text lives in `body`, which every route
+    // using `include` returns - redacting only `content` left it readable.
+    it("redacts a premium article's body for a non-purchaser and keeps it for the author", async () => {
+      const author = await createUser("articleauthor");
+      const { post } = await createPremiumPost(author.id, 5, "teaser");
+      const viewer = await createUser("articleviewer");
+      const row = { id: post.id, authorId: post.authorId, content: post.content, body: "<p>SECRET ARTICLE BODY</p>" };
+
+      const [locked] = await applyPremiumGating([row], viewer.id);
+      expect(locked.body).toBeNull();
+      expect(locked.premiumPost?.locked).toBe(true);
+
+      const [anon] = await applyPremiumGating([row], null);
+      expect(anon.body).toBeNull();
+
+      const [own] = await applyPremiumGating([row], author.id);
+      expect(own.body).toBe("<p>SECRET ARTICLE BODY</p>");
+    });
   }
 );
 

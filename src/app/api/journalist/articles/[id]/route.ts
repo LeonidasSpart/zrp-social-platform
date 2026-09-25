@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { NewsArticleCategory } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireJournalistRole } from "@/lib/journalist";
+import { normalizeProfileWebsite } from "@/lib/profile-website";
 
 const AUTHOR_SELECT = {
   id: true,
@@ -100,6 +101,13 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
+    // Same http(s)-only rule as article creation (rendered as <a href>).
+    const normalizedSourceUrl =
+      sourceUrl !== undefined ? normalizeProfileWebsite(sourceUrl, "Source") : null;
+    if (normalizedSourceUrl && !normalizedSourceUrl.ok) {
+      return NextResponse.json({ success: false, error: normalizedSourceUrl.error }, { status: 400 });
+    }
+
     if (category !== undefined && !Object.values(NewsArticleCategory).includes(category)) {
       return NextResponse.json({ success: false, error: "Invalid news category" }, { status: 400 });
     }
@@ -140,9 +148,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         ...(sourceName !== undefined
           ? { sourceName: typeof sourceName === "string" && sourceName.trim() ? sourceName.trim() : null }
           : {}),
-        ...(sourceUrl !== undefined
-          ? { sourceUrl: typeof sourceUrl === "string" && sourceUrl.trim() ? sourceUrl.trim() : null }
-          : {}),
+        ...(normalizedSourceUrl?.ok ? { sourceUrl: normalizedSourceUrl.value } : {}),
         ...(category !== undefined ? { category: category as NewsArticleCategory } : {}),
         ...(submit === true
           ? {

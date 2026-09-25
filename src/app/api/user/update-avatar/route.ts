@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { UTApi } from "uploadthing/server";
+import { isTrustedUploadUrl } from "@/lib/media-url";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Only allow URLs from our own UploadThing app to prevent arbitrary URL injection
-      if (!avatarUrl.includes("utfs.io") && !avatarUrl.includes("ufs.sh")) {
+      if (!isTrustedUploadUrl(avatarUrl)) {
         return NextResponse.json({ error: "Invalid avatar URL" }, { status: 400 });
       }
 

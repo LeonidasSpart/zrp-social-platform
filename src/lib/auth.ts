@@ -253,6 +253,35 @@ export async function findOrCreateOAuthUser(
 
   if (existing) {
     if (existing.banned) return null;
+
+    // ⚠️ SECURITY (account pre-hijacking): an existing row whose email
+    // was never verified proves nothing about who created it - anyone
+    // can register a credentials account under someone else's address.
+    // Linking the real owner's (provider-verified) OAuth login to that
+    // row as-is would leave the squatter's password on the account the
+    // victim then uses, and the moment the victim verifies (e.g. clicks
+    // the original verification mail) the squatter can log in with it.
+    // The provider has just proven ownership of this address, so the
+    // row is claimed by the OAuth user: mark it verified and drop every
+    // credential/token the unverified creator could have set. The real
+    // owner can set a password later via forgot-password or settings.
+    if (!existing.emailVerified) {
+      const claimed = await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          emailVerified: new Date(),
+          password: null,
+          verificationToken: null,
+          verificationTokenExpiry: null,
+          resetToken: null,
+          resetTokenExpiry: null,
+          pendingEmail: null,
+        },
+        select,
+      });
+      Object.assign(existing, claimed);
+    }
+
     return {
       id: existing.id,
       email: existing.email,

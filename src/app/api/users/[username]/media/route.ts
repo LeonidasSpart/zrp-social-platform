@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
@@ -124,7 +125,12 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       });
     }
 
-    return NextResponse.json({ items: posts, nextCursor });
+    // ⚠️ SECURITY: this tab is nothing but post media, so an ungated
+    // pay-per-view post handed its images to anyone who opened it -
+    // redact exactly as /api/users/[username]/posts does.
+    const gatedPosts = await applyPremiumGating(posts, viewerId);
+
+    return NextResponse.json({ items: gatedPosts, nextCursor });
   } catch (error) {
     console.error("Error fetching media:", error);
     return NextResponse.json({ error: "Failed to fetch media" }, { status: 500 });

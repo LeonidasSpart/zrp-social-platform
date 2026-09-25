@@ -80,6 +80,16 @@ describe("parseFeed (Atom)", () => {
 });
 
 describe("parseFeed robustness", () => {
+  it("drops an item whose link is a non-http(s) URL instead of storing it as a clickable source", () => {
+    const hostile = `<feed xmlns="http://www.w3.org/2005/Atom">
+      <entry><title>Bad link</title><link rel="alternate" href="javascript:alert(document.cookie)"/></entry>
+      <entry><title>Data link</title><link href="data:text/html,hi"/></entry>
+      <entry><title>Good link</title><link rel="alternate" href="/ok"/></entry>
+    </feed>`;
+    const parsed = parseFeed(hostile, { baseUrl: "https://example.org/feed.xml" });
+    expect(parsed.map((i) => i.link)).toEqual(["https://example.org/ok"]);
+  });
+
   it("returns an empty array for junk rather than throwing", () => {
     expect(parseFeed("not xml at all")).toEqual([]);
     expect(parseFeed("")).toEqual([]);

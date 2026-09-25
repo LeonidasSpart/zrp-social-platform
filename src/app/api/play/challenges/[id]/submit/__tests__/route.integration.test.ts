@@ -170,6 +170,59 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/play/challenges/[id]/submit - an
     expect(finalBody.winnerId).toBe(challenger.id);
   });
 
+  it("awards first-completion XP exactly once when the same solo play is submitted in parallel", async () => {
+    const user = await createUser("race1");
+    const challenge = await createTriviaChallenge();
+    getVerifiedToken.mockResolvedValue({ id: user.id });
+
+    const results = await Promise.all(
+      Array.from({ length: 5 }, () => submit(postReq(challenge.id, { answers: [1], timeMs: 500 }), params(challenge.id)))
+    );
+    const bodies = await Promise.all(results.map((r) => r.json()));
+    expect(results.every((r) => r.status === 200)).toBe(true);
+    const earning = bodies.filter((b) => b.xpEarned > 0);
+    expect(earning).toHaveLength(1);
+
+    const profile = await prisma.playProfile.findUniqueOrThrow({ where: { userId: user.id } });
+    const attempts = await prisma.playAttempt.findMany({ where: { userId: user.id } });
+    expect(attempts).toHaveLength(5);
+    // Total XP is exactly what the attempts recorded plus any achievement
+    // rewards - no lost update, no double award.
+    const achievements = await prisma.playUserAchievement.findMany({ where: { userId: user.id } });
+    expect(new Set(achievements.map((a) => a.achievementKey)).size).toBe(achievements.length);
+    expect(profile.totalXp).toBeGreaterThanOrEqual(earning[0].xpEarned);
+    expect(profile.challengesCompleted).toBe(5);
+  });
+
+  it("records only one of several parallel submissions to the same duel side", async () => {
+    const challenger = await createUser("racec");
+    const opponent = await createUser("raceo");
+    const challenge = await createTriviaChallenge();
+    const duel = await prisma.playDuel.create({
+      data: {
+        challengeId: challenge.id,
+        challengerId: challenger.id,
+        opponentId: opponent.id,
+        status: "ACCEPTED",
+        expiresAt: new Date(Date.now() + 86_400_000),
+      },
+    });
+    duelIds.push(duel.id);
+
+    getVerifiedToken.mockResolvedValue({ id: challenger.id });
+    const results = await Promise.all(
+      [0, 1, 0, 1].map((answer) =>
+        submit(postReq(challenge.id, { answers: [answer], timeMs: 500, duelId: duel.id }), params(challenge.id))
+      )
+    );
+    expect(results.filter((r) => r.status === 200)).toHaveLength(1);
+    expect(results.filter((r) => r.status === 400)).toHaveLength(3);
+    const attempts = await prisma.playAttempt.findMany({ where: { duelId: duel.id } });
+    expect(attempts).toHaveLength(1);
+    const after = await prisma.playDuel.findUniqueOrThrow({ where: { id: duel.id } });
+    expect(after.challengerScore).toBe(attempts[0].score);
+  });
+
   it("404s for a REMOVED challenge instead of scoring against soft-deleted content", async () => {
     const user = await createUser("removed1");
     const challenge = await createTriviaChallenge();

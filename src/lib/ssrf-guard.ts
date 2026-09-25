@@ -56,18 +56,70 @@ export function isDisallowedIPv4(ip: string): boolean {
   return false;
 }
 
-export function isDisallowedIPv6(ip: string): boolean {
-  const normalized = ip.toLowerCase();
+// Expands any valid IPv6 literal (compressed "::", embedded dotted-quad
+// tail, zone id) to its 8 16-bit groups, or null if it isn't one.
+function expandIPv6(ip: string): number[] | null {
+  let addr = ip.toLowerCase().replace(/^\[|\]$/g, "");
+  const zone = addr.indexOf("%");
+  if (zone !== -1) addr = addr.slice(0, zone);
+  if (net.isIP(addr) !== 6) return null;
 
-  if (normalized === "::1" || normalized === "::") return true; // loopback / unspecified
-  if (normalized.startsWith("fe8") || normalized.startsWith("fe9") || normalized.startsWith("fea") || normalized.startsWith("feb")) {
-    return true; // fe80::/10 link-local
+  // A dotted-quad tail (::ffff:1.2.3.4, ::1.2.3.4) becomes two groups.
+  const dotted = addr.match(/^(.*:)(\d+\.\d+\.\d+\.\d+)$/);
+  if (dotted) {
+    const o = dotted[2].split(".").map(Number);
+    addr = `${dotted[1]}${((o[0] << 8) | o[1]).toString(16)}:${((o[2] << 8) | o[3]).toString(16)}`;
   }
-  if (normalized.startsWith("fc") || normalized.startsWith("fd")) return true; // fc00::/7 unique local
 
-  // IPv4-mapped (::ffff:a.b.c.d) - validate the embedded IPv4 address.
-  const mapped = normalized.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) return isDisallowedIPv4(mapped[1]);
+  const halves = addr.split("::");
+  const head = halves[0] ? halves[0].split(":") : [];
+  const tail = halves.length > 1 && halves[1] ? halves[1].split(":") : [];
+  const fill = halves.length > 1 ? 8 - head.length - tail.length : 0;
+  const groups = [...head, ...Array(fill).fill("0"), ...tail].map((g) => parseInt(g, 16));
+  return groups.length === 8 && groups.every((g) => Number.isInteger(g) && g >= 0 && g <= 0xffff)
+    ? groups
+    : null;
+}
+
+function embeddedIPv4(hi: number, lo: number): string {
+  return `${hi >> 8}.${hi & 0xff}.${lo >> 8}.${lo & 0xff}`;
+}
+
+/*
+ * ⚠️ SECURITY: this used to be a handful of string-prefix checks that
+ * only recognised an IPv4-mapped address in its dotted form
+ * (::ffff:127.0.0.1). WHATWG URL parsing - which every URL reaching
+ * safeFetch goes through - normalises that to hex (::ffff:7f00:1), and
+ * the other IPv6 forms that embed an IPv4 target (IPv4-compatible ::a.b.c.d,
+ * NAT64 64:ff9b::/96, 6to4 2002::/16) were never checked at all. The
+ * address is now expanded to its real 128 bits and classified on that.
+ */
+export function isDisallowedIPv6(ip: string): boolean {
+  const g = expandIPv6(ip);
+  if (!g) return true; // fail closed on anything unparseable
+
+  const upperZero = g.slice(0, 5).every((x) => x === 0);
+  if (upperZero && g[5] === 0 && g[6] === 0 && (g[7] === 0 || g[7] === 1)) return true; // :: and ::1
+  // IPv4-mapped ::ffff:0:0/96 and deprecated IPv4-compatible ::/96
+  if (upperZero && (g[5] === 0xffff || g[5] === 0)) return isDisallowedIPv4(embeddedIPv4(g[6], g[7]));
+  // IPv4-translated ::ffff:0:0:0/96 (RFC 2765)
+  if (g.slice(0, 4).every((x) => x === 0) && g[4] === 0xffff && g[5] === 0) {
+    return isDisallowedIPv4(embeddedIPv4(g[6], g[7]));
+  }
+  // NAT64 well-known prefix 64:ff9b::/96 and local-use 64:ff9b:1::/48
+  if (g[0] === 0x64 && g[1] === 0xff9b) {
+    if (g[2] === 1) return true;
+    if (g.slice(2, 6).every((x) => x === 0)) return isDisallowedIPv4(embeddedIPv4(g[6], g[7]));
+  }
+  // 6to4 2002::/16 embeds an IPv4 address in bits 16-47
+  if (g[0] === 0x2002) return isDisallowedIPv4(embeddedIPv4(g[1], g[2]));
+
+  if ((g[0] & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
+  if ((g[0] & 0xffc0) === 0xfec0) return true; // fec0::/10 deprecated site-local
+  if ((g[0] & 0xfe00) === 0xfc00) return true; // fc00::/7 unique local (incl. Railway private network)
+  if ((g[0] & 0xff00) === 0xff00) return true; // ff00::/8 multicast
+  if (g[0] === 0x2001 && g[1] === 0x0db8) return true; // 2001:db8::/32 documentation
+  if (g[0] === 0x0100 && g[1] === 0 && g[2] === 0 && g[3] === 0) return true; // 100::/64 discard
 
   return false;
 }
@@ -297,8 +349,16 @@ export async function safeFetch(
     // passed below, since safeLookup is never even invoked for those.
     // This check is what actually gates a literal-IP host; safeLookup
     // below is what gates a hostname that only resolves to one via DNS.
-    const hostIpFamily = net.isIP(target.hostname);
-    if (hostIpFamily && !isAddressAllowed(target.hostname, hostIpFamily)) {
+    //
+    // ⚠️ SECURITY: an IPv6 literal's URL hostname keeps its brackets
+    // ("[::1]"), which net.isIP() does not recognise (returns 0) - but
+    // http.request() strips them before connecting, and then skips the
+    // custom lookup exactly as above. So http://[::1]:6379/ or a
+    // Railway-private-network [fd12:...] address sailed past this check
+    // completely. The brackets must be removed before classifying.
+    const literalHost = target.hostname.replace(/^\[|\]$/g, "");
+    const hostIpFamily = net.isIP(literalHost);
+    if (hostIpFamily && !isAddressAllowed(literalHost, hostIpFamily)) {
       throw new SsrfBlockedError();
     }
 

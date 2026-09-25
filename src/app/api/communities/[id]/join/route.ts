@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
@@ -40,6 +41,11 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
     return NextResponse.json({ isMember: true, alreadyMember: false });
   } catch (error) {
+    // A concurrent join (double-tap) already created the membership; the
+    // transaction rolled back so memberCount is still correct.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ isMember: true, alreadyMember: true });
+    }
     console.error("Error joining community:", error);
     return NextResponse.json({ error: "Failed to join community" }, { status: 500 });
   }

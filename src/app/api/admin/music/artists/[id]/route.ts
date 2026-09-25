@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { logAdminAction } from "@/lib/audit-log";
-import { deleteUploadThingKeys, extractUploadThingKey } from "@/lib/uploadthing";
+import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
 
 export const dynamic = "force-dynamic";
 
@@ -35,42 +35,20 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
   await prisma.musicArtist.delete({ where: { id } });
 
-  // Every storage object exclusively owned by this artist's catalogue
-  // is now safe to remove - the DB rows referencing them are already
-  // gone. Audio files are always exclusive to their track. Covers
-  // (track/album/avatar/banner) could in principle be reused, so each
-  // is only deleted from storage once nothing else in the platform
-  // still points at that same URL - never blind-deleted.
-  const keysToDelete: string[] = [];
-  const coverUrlsToCheck: string[] = [];
-
-  for (const track of artist.tracks) {
-    const audioKey = track.audioKey || extractUploadThingKey(track.audioUrl);
-    if (audioKey) keysToDelete.push(audioKey);
-    if (track.coverUrl) coverUrlsToCheck.push(track.coverUrl);
-  }
-  for (const album of artist.albums) {
-    if (album.coverUrl) coverUrlsToCheck.push(album.coverUrl);
-  }
-  if (artist.avatarUrl) coverUrlsToCheck.push(artist.avatarUrl);
-  if (artist.bannerUrl) coverUrlsToCheck.push(artist.bannerUrl);
-
-  for (const url of Array.from(new Set(coverUrlsToCheck))) {
-    const [otherTrack, otherAlbum, otherArtistAvatar, otherArtistBanner] = await Promise.all([
-      prisma.musicTrack.findFirst({ where: { coverUrl: url }, select: { id: true } }),
-      prisma.musicAlbum.findFirst({ where: { coverUrl: url }, select: { id: true } }),
-      prisma.musicArtist.findFirst({ where: { avatarUrl: url }, select: { id: true } }),
-      prisma.musicArtist.findFirst({ where: { bannerUrl: url }, select: { id: true } }),
-    ]);
-    if (!otherTrack && !otherAlbum && !otherArtistAvatar && !otherArtistBanner) {
-      const key = extractUploadThingKey(url);
-      if (key) keysToDelete.push(key);
-    }
-  }
-
-  if (keysToDelete.length) {
-    await deleteUploadThingKeys(keysToDelete);
-  }
+  // The DB rows referencing this catalogue's files are gone now.
+  // ⚠️ SECURITY: an artist's avatar/banner/cover only has to be SOME
+  // UploadThing URL (isTrustedUploadUrl), and every such URL is public -
+  // an artist can point theirs at another user's profile avatar or post
+  // image. Checking only the music tables before deleting (the old
+  // behaviour here) let a staff delete of that artist destroy the other
+  // user's file. The shared guard deletes a key only when nothing
+  // anywhere in the database still references it.
+  await deleteUploadsIfUnreferenced([
+    ...artist.tracks.flatMap((t) => [t.audioKey, t.audioUrl, t.coverKey, t.coverUrl]),
+    ...artist.albums.flatMap((a) => [a.coverKey, a.coverUrl]),
+    artist.avatarUrl,
+    artist.bannerUrl,
+  ]);
 
   await logAdminAction({
     actor: adminCheck.session,

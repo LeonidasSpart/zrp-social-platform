@@ -92,8 +92,14 @@ export async function PUT(
       );
     }
 
-    const updated = await prisma.adCampaign.update({
-      where: { id },
+    // Compare-and-swap on the status validated above: the advertiser
+    // (cancel/pause), the payment flow and the completion cron all move
+    // this row too. A plain update(where: {id}) let e.g. an "approve"
+    // resurrect a campaign the advertiser had just CANCELLED, or a
+    // "resume" reopen one the cron had just COMPLETED - transitions the
+    // lifecycle map never allows.
+    const claimed = await prisma.adCampaign.updateMany({
+      where: { id, status: campaign.status },
       data: {
         ...(isNoteOnly ? {} : { status: nextStatus }),
         // rejectionReason/suspend-reason share one advertiser-visible
@@ -104,7 +110,9 @@ export async function PUT(
           ? {}
           : {
               rejectionReason:
-                action === "reject" || action === "suspend" || action === "cancel" ? (rejectionReason || null) : null,
+                action === "reject" || action === "suspend" || action === "cancel"
+                  ? (typeof rejectionReason === "string" && rejectionReason ? rejectionReason.slice(0, 2000) : null)
+                  : null,
             }),
         // adminNote is staff-only - never returned on any advertiser
         // route (/api/ads/campaigns/*).
@@ -113,6 +121,13 @@ export async function PUT(
         reviewedAt: new Date(),
       },
     });
+    if (claimed.count === 0) {
+      return NextResponse.json(
+        { error: "This campaign changed status while you were reviewing it. Reload and try again." },
+        { status: 409 }
+      );
+    }
+    const updated = await prisma.adCampaign.findUniqueOrThrow({ where: { id } });
 
     await logAdminAction({
       actor: check.session,

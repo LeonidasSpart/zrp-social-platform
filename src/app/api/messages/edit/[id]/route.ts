@@ -21,6 +21,9 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
   try {
     const { content } = await req.json();
+    if (content != null && typeof content !== "string") {
+      return NextResponse.json({ error: "Invalid message payload" }, { status: 400 });
+    }
     if (!content || content.trim().length === 0) {
       return NextResponse.json({ error: "Message content is required" }, { status: 400 });
     }
@@ -56,6 +59,11 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
         },
         reactions: {
           include: { user: { select: { id: true, username: true, name: true, avatarUrl: true } } },
+        },
+        // The chat UI replaces its copy of the message with this response;
+        // without it an edited story reply lost its story preview.
+        story: {
+          select: { id: true, mediaUrl: true, mediaType: true, content: true },
         },
       },
     });

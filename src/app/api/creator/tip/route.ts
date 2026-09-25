@@ -6,12 +6,13 @@ import { randomUUID } from "crypto";
 // ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
-import { getVerifiedToken as getToken } from "@/lib/auth-guards";
+import { getVerifiedToken as getToken, isBlockedEitherWay } from "@/lib/auth-guards";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { rejectNativePayment } from "@/lib/native-payment-policy.server";
+import { checkPaymentSender } from "@/lib/payment-sender";
 
 const PLATFORM_FEE = 0.10; // 10% platform fee
 const CHARITY_PERCENTAGE = 0.35; // 35% of platform fee goes to charity
@@ -52,11 +53,6 @@ export async function POST(req: NextRequest) {
     // for the native app. See src/lib/native-payment-policy.ts.
     const nativeBlock = rejectNativePayment(req);
     if (nativeBlock) return nativeBlock;
-
-    const sender = await prisma.user.findUnique({
-      where: { id: senderId },
-      select: { verifiedSolanaWallet: true },
-    });
 
     // ─────────────────────────────────────────────────────────────
     // Parse request
@@ -153,6 +149,7 @@ export async function POST(req: NextRequest) {
     // ─────────────────────────────────────────────────────────────
 
     let verifiedAmount: number;
+    let senderError: string | null = null;
 
     try {
       const { verifyUsdcTransaction } = await import("@/lib/solana");
@@ -213,24 +210,10 @@ export async function POST(req: NextRequest) {
       // account. Without this, verifying that *a* valid payment arrived
       // says nothing about who sent it - anyone could submit someone
       // else's public transaction signature and claim the tip credit
-      // for their own account. Enforced once the account has gone
-      // through the signature-based wallet link flow
-      // (/api/wallet/link-challenge + link-verify); accounts that
-      // haven't linked a wallet yet keep today's behavior so existing
-      // tipping isn't broken by this change.
-      if (
-        sender?.verifiedSolanaWallet &&
-        result.from &&
-        result.from !== sender.verifiedSolanaWallet
-      ) {
-        return NextResponse.json(
-          {
-            error:
-              "This transaction was sent from a wallet that isn't linked to your account.",
-          },
-          { status: 400 }
-        );
-      }
+      // for their own account. See checkPaymentSender() for the exact
+      // rules (claimant's own linked wallet must match; a sender wallet
+      // verified-linked to a DIFFERENT account is always refused).
+      senderError = await checkPaymentSender(senderId, result.from);
     } catch (err: unknown) {
       console.error(
         "Transaction verification error:",
@@ -250,6 +233,10 @@ export async function POST(req: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    if (senderError) {
+      return NextResponse.json({ error: senderError }, { status: 400 });
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -374,13 +361,23 @@ export async function POST(req: NextRequest) {
     // Create notification
     // ─────────────────────────────────────────────────────────────
 
-    await prisma.notification.create({
-      data: {
-        userId: recipientId,
-        fromUserId: senderId,
-        type: "TIP",
-      },
-    });
+    // Same rule createNotification() applies everywhere else: nothing
+    // is surfaced between accounts that have blocked each other. The
+    // payment is already recorded by now, so a notification failure is
+    // logged rather than turned into a 500 for a completed payment.
+    try {
+      if (!(await isBlockedEitherWay(recipientId, senderId))) {
+        await prisma.notification.create({
+          data: {
+            userId: recipientId,
+            fromUserId: senderId,
+            type: "TIP",
+          },
+        });
+      }
+    } catch (notifyError) {
+      console.error("Payment notification failed:", notifyError);
+    }
 
     // ─────────────────────────────────────────────────────────────
     // Response

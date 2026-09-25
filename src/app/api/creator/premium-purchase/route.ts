@@ -3,12 +3,13 @@ import { randomUUID } from "crypto";
 // ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
-import { getVerifiedToken as getToken } from "@/lib/auth-guards";
+import { getVerifiedToken as getToken, isBlockedEitherWay } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { verifyUsdcTransaction } from "@/lib/solana";
 import { rateLimit } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { rejectNativePayment } from "@/lib/native-payment-policy.server";
+import { checkPaymentSender } from "@/lib/payment-sender";
 
 const PLATFORM_FEE = 0.10;
 const CHARITY_PERCENTAGE = 0.35;
@@ -131,25 +132,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ⚠️ SECURITY: same sender-binding as tips (see /api/creator/tip) -
-    // only enforced once the buyer has a cryptographically verified
-    // wallet on file, so accounts that haven't linked one yet aren't
-    // broken by this change.
-    const buyer = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { verifiedSolanaWallet: true },
-    });
-    if (
-      buyer?.verifiedSolanaWallet &&
-      verification.from &&
-      verification.from !== buyer.verifiedSolanaWallet
-    ) {
-      return NextResponse.json(
-        {
-          error: "This transaction was sent from a wallet that isn't linked to your account.",
-        },
-        { status: 400 }
-      );
+    // ⚠️ SECURITY: same sender-binding as tips (see /api/creator/tip and
+    // checkPaymentSender()).
+    const senderError = await checkPaymentSender(userId, verification.from);
+    if (senderError) {
+      return NextResponse.json({ error: senderError }, { status: 400 });
     }
 
     // Calculate fees - Decimal arithmetic throughout so fee splits on a
@@ -219,14 +206,24 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Create notification for creator (without content) ──────
-    await prisma.notification.create({
-      data: {
-        userId: premiumPost.creatorProfile.userId,
-        fromUserId: userId,
-        type: "PURCHASE",
-        // No 'content' field: the frontend will display based on type and fromUserId
-      },
-    });
+    // Same rule createNotification() applies everywhere else: nothing
+    // is surfaced between accounts that have blocked each other. The
+    // payment is already recorded by now, so a notification failure is
+    // logged rather than turned into a 500 for a completed payment.
+    try {
+      if (!(await isBlockedEitherWay(premiumPost.creatorProfile.userId, userId))) {
+        await prisma.notification.create({
+          data: {
+            userId: premiumPost.creatorProfile.userId,
+            fromUserId: userId,
+            type: "PURCHASE",
+            // No 'content' field: the frontend will display based on type and fromUserId
+          },
+        });
+      }
+    } catch (notifyError) {
+      console.error("Payment notification failed:", notifyError);
+    }
 
     return jsonWithDecimals({
       purchase,

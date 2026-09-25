@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "./db";
 import crypto from "crypto";
 import { checkRateLimitKey } from "./rate-limit";
+import { canAccessApi } from "./feature-status";
 
 // Per-key limit, independent of the per-IP limits elsewhere - a single
 // leaked or scripted-too-aggressively key shouldn't be able to hammer
@@ -73,6 +74,17 @@ export async function validateApiKey(req: NextRequest) {
   // as long as they were valid.
   if (apiKey.user.banned) {
     return { error: "Invalid or expired API key", status: 401 };
+  }
+
+  // ⚠️ SECURITY: API access is a paid feature (PLANS.apiAccess). Issuing
+  // a key checks the plan, but using one didn't - an account that
+  // downgraded, or whose subscription expired (expire-subscriptions cron
+  // sets plan to "free"), kept full API access for up to a year through
+  // keys minted while it was paying. The plan is read fresh from the DB
+  // on every call (above), so this follows the account's current plan;
+  // re-upgrading makes the same keys work again.
+  if (!canAccessApi(apiKey.user)) {
+    return { error: "API access requires a Business or Enterprise plan.", status: 403 };
   }
 
   const limit = await checkRateLimitKey(

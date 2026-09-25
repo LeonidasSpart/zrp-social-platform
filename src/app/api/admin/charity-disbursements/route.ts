@@ -50,6 +50,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // proofUrl is rendered as a link on the public /charity page; only a
+    // plain http(s) URL is accepted (a `javascript:` URL would run script
+    // for every visitor who clicks "View proof").
+    const cleanProofUrl = typeof proofUrl === "string" && proofUrl.trim() ? proofUrl.trim() : null;
+    if (cleanProofUrl) {
+      let protocol = "";
+      try {
+        protocol = new URL(cleanProofUrl).protocol;
+      } catch {
+        // falls through to the 400 below
+      }
+      if (protocol !== "https:" && protocol !== "http:") {
+        return NextResponse.json({ error: "Proof URL must be a valid http(s) URL" }, { status: 400 });
+      }
+    }
+
     const disbursement = await prisma.charityDisbursement.create({
       data: {
         beneficiaryName: beneficiaryName.trim(),
@@ -58,7 +74,7 @@ export async function POST(req: NextRequest) {
         currency: typeof currency === "string" && currency.trim() ? currency.trim() : "USD",
         disbursedAt: disbursedAtDate,
         note: typeof note === "string" && note.trim() ? note.trim() : null,
-        proofUrl: typeof proofUrl === "string" && proofUrl.trim() ? proofUrl.trim() : null,
+        proofUrl: cleanProofUrl,
         recordedById: adminCheck.session.user.id,
         recordedByUsername: adminCheck.session.user.username ?? null,
       },

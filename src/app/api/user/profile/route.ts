@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { findExistingSessionUser, ACCOUNT_NOT_FOUND_RESPONSE } from "@/lib/session-user";
 import { normalizeCountryInput } from "@/lib/geo/country";
+import { normalizeProfileWebsite } from "@/lib/profile-website";
 
 const MAX_SKILLS = 20;
 const MAX_SKILL_LENGTH = 50;
@@ -28,6 +29,11 @@ export async function PUT(req: NextRequest) {
 
     const { name, bio, location, country, website, headline, company, position, skills } =
       await req.json();
+
+    const normalizedWebsite = normalizeProfileWebsite(website);
+    if (!normalizedWebsite.ok) {
+      return NextResponse.json({ error: normalizedWebsite.error }, { status: 400 });
+    }
 
     const normalizedCountry =
       typeof country === "string" && country.trim() ? country.trim() : null;
@@ -66,10 +72,7 @@ export async function PUT(req: NextRequest) {
         // - see src/lib/geo/country.ts.
         country: normalizedCountry,
         countryCode: normalizeCountryInput(normalizedCountry),
-        website:
-          typeof website === "string" && website.trim()
-            ? website.trim()
-            : null,
+        website: normalizedWebsite.value,
         headline:
           typeof headline === "string" && headline.trim()
             ? headline.trim().slice(0, 220)

@@ -34,6 +34,10 @@ const MESSAGE_RELAY_INCLUDE = {
   sender: { select: USER_SELECT },
   replyTo: { include: { sender: { select: USER_SELECT } } },
   reactions: { include: { user: { select: REACTION_USER_SELECT } } },
+  // Story replies render a "Replied to your story" quote from this - the
+  // same select the REST routes return, so a relayed message isn't
+  // missing it until the next reload.
+  story: { select: { id: true, mediaUrl: true, mediaType: true, content: true } },
 };
 
 function isNonEmptyString(value) {
@@ -208,6 +212,13 @@ async function authorizeReactionRelay(prisma, userId, payload) {
 async function authorizeDeleteRelay(prisma, userId, payload) {
   const messageId = payload && payload.messageId;
   if (!isNonEmptyString(messageId)) return { ok: false };
+
+  // The relay only ever follows a successful REST delete, so the row
+  // must already be gone. Without this, a participant could make the
+  // other side's open chat drop any message that still exists (their
+  // own included) by naming its id.
+  const stillExists = await prisma.message.findUnique({ where: { id: messageId }, select: { id: true } });
+  if (stillExists) return { ok: false };
 
   const conversationId = payload && payload.conversationId;
   if (isNonEmptyString(conversationId)) {

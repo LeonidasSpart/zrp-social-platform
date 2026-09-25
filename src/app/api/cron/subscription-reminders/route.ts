@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendJ7Reminders } from "@/lib/subscriptions";
+import { isAuthorizedCronRequest } from "@/lib/cron-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,9 +10,7 @@ export const dynamic = "force-dynamic";
 // most one reminder per subscription billing period regardless of how
 // often or how many overlapping instances invoke this.
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  const secret = process.env.CRON_SECRET;
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  if (!isAuthorizedCronRequest(req.headers.get("authorization"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

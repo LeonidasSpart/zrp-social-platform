@@ -19,9 +19,11 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
   // unhandled foreign-key violation instead of a clean 404.
   const story = await prisma.story.findUnique({
     where: { id: storyId },
-    select: { id: true },
+    select: { id: true, expiresAt: true },
   });
-  if (!story) {
+  // An expired story is gone as far as every reader is concerned
+  // (GET /api/stories filters it out) - don't keep recording views.
+  if (!story || story.expiresAt <= new Date()) {
     return NextResponse.json({ error: "Story not found" }, { status: 404 });
   }
 

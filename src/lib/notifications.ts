@@ -316,7 +316,7 @@ export async function createNotification({
           </a>
           <p style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 16px;">
             You are receiving this email because you have notifications enabled for support tickets.<br />
-            Manage your preferences in your <a href="${process.env.NEXTAUTH_URL}/settings/notifications" style="color: #FF2D2D; text-decoration: underline;">ZRP settings</a>.
+            Manage your preferences in your <a href="${process.env.NEXTAUTH_URL}/settings" style="color: #FF2D2D; text-decoration: underline;">ZRP settings</a>.
           </p>
         </div>
       `;
@@ -479,8 +479,8 @@ export async function createNotification({
     ) {
       const campaignUrl =
         (type === "help_campaign_approved" || type === "help_new_offer") && campaignId
-          ? `${process.env.NEXTAUTH_URL}/help/campaign/${campaignId}`
-          : `${process.env.NEXTAUTH_URL}/help/my-campaigns`;
+          ? `${process.env.NEXTAUTH_URL}/aid/campaign/${campaignId}`
+          : `${process.env.NEXTAUTH_URL}/aid/my-campaigns`;
       const heading =
         type === "help_campaign_approved"
           ? "Your HELP campaign is live"

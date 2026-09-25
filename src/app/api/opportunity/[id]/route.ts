@@ -164,7 +164,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       (type && type !== existing.type) ||
       (title && title.trim() !== existing.title) ||
       (description && description.trim() !== existing.description) ||
-      (compensationInfo !== undefined && compensationInfo !== existing.compensationInfo);
+      (compensationInfo !== undefined && compensationInfo !== existing.compensationInfo) ||
+      // The "Apply externally" link is exactly what a bait-and-switch
+      // would swap after approval (approved job -> phishing page), so a
+      // changed externalUrl must go back through review too.
+      (externalUrl !== undefined &&
+        ((typeof externalUrl === "string" ? externalUrl.trim().slice(0, 500) || null : null) ??
+          null) !== existing.externalUrl);
 
     // Only the owner closing/reopening their own listing, or staff
     // acting on it, may set status directly; anything else routes

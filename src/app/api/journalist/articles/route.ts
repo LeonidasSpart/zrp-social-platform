@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { NewsArticleCategory, NewsArticleStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireJournalistRole } from "@/lib/journalist";
+import { normalizeProfileWebsite } from "@/lib/profile-website";
 
 const AUTHOR_SELECT = {
   id: true,
@@ -123,6 +124,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Content is required" }, { status: 400 });
     }
 
+    // Rendered as <a href> on the public article page: http(s) only, or
+    // a `javascript:` source link becomes stored XSS once published.
+    const normalizedSourceUrl = normalizeProfileWebsite(sourceUrl, "Source");
+    if (!normalizedSourceUrl.ok) {
+      return NextResponse.json({ success: false, error: normalizedSourceUrl.error }, { status: 400 });
+    }
+
     const articleCategory =
       category && Object.values(NewsArticleCategory).includes(category)
         ? (category as NewsArticleCategory)
@@ -160,7 +168,7 @@ export async function POST(request: NextRequest) {
         content: content.trim(),
         coverImage: typeof coverImage === "string" && coverImage.trim() ? coverImage.trim() : null,
         sourceName: typeof sourceName === "string" && sourceName.trim() ? sourceName.trim() : null,
-        sourceUrl: typeof sourceUrl === "string" && sourceUrl.trim() ? sourceUrl.trim() : null,
+        sourceUrl: normalizedSourceUrl.value,
         category: articleCategory,
         status: requestedStatus,
         authorId: check.session.user.id,

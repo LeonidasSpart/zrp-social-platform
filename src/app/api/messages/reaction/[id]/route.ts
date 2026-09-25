@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getConversationParticipant } from "@/lib/conversations";
 
+const MAX_EMOJI_LENGTH = 32;
+
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
 
@@ -20,8 +22,14 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
   try {
     const { emoji } = await req.json();
-    if (!emoji) {
+    if (typeof emoji !== "string" || emoji.trim().length === 0) {
       return NextResponse.json({ error: "Emoji is required" }, { status: 400 });
+    }
+    // A reaction is a single emoji (the longest ZWJ sequences are ~11
+    // UTF-16 units). Without a cap the column accepted arbitrary text of
+    // any size, rendered as a "reaction" pill in the other party's chat.
+    if (emoji.length > MAX_EMOJI_LENGTH) {
+      return NextResponse.json({ error: "Invalid emoji" }, { status: 400 });
     }
 
     const message = await prisma.message.findUnique({

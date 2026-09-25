@@ -3,7 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
+import { Prisma } from "@prisma/client";
 import { rateLimit } from "@/lib/rate-limit";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -32,12 +34,10 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
     if (existing) {
       // Unlike
-      await prisma.storyLike.delete({
+      await prisma.storyLike.deleteMany({
         where: {
-          storyId_likerId: {
-            storyId,
-            likerId,
-          },
+          storyId,
+          likerId,
         },
       });
       return NextResponse.json({ liked: false });
@@ -45,17 +45,33 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
     // Like - the story must still exist (it may have expired/been
     // deleted between the viewer opening it and tapping the heart).
+    // Expiry is application-enforced (GET /api/stories filters on
+    // expiresAt), so an expired story must be treated as gone here too -
+    // otherwise its owner kept getting "like" notifications for a story
+    // nobody can see any more. Same for a blocked-either-way pair.
     const story = await prisma.story.findUnique({
       where: { id: storyId },
-      select: { userId: true },
+      select: { userId: true, expiresAt: true },
     });
-    if (!story) {
+    if (!story || story.expiresAt <= new Date()) {
+      return NextResponse.json({ error: "Story not found" }, { status: 404 });
+    }
+    if (story.userId !== likerId && (await isBlockedEitherWay(likerId, story.userId))) {
       return NextResponse.json({ error: "Story not found" }, { status: 404 });
     }
 
-    await prisma.storyLike.create({
-      data: { storyId, likerId },
-    });
+    try {
+      await prisma.storyLike.create({
+        data: { storyId, likerId },
+      });
+    } catch (err) {
+      // A concurrent like (double tap) already created it - same outcome,
+      // and it already sent the notification.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        return NextResponse.json({ liked: true });
+      }
+      throw err;
+    }
 
     if (story.userId !== likerId) {
       await createNotification({

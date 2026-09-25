@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { Prisma } from "@prisma/client";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -108,6 +109,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(appeal, { status: 201 });
   } catch (error) {
+    // Two concurrent submissions both passing the findUnique above - the
+    // @@unique([reportId, userId]) constraint rejects the second.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json(
+        { error: "You've already filed an appeal for this action." },
+        { status: 409 }
+      );
+    }
     console.error("Error creating appeal:", error);
     return NextResponse.json({ error: "Failed to submit appeal" }, { status: 500 });
   }

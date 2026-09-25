@@ -92,6 +92,47 @@ describe("isDisallowedIPv6", () => {
   it("allows an ordinary public IPv6 address", () => {
     expect(isDisallowedIPv6("2001:4860:4860::8888")).toBe(false);
   });
+
+  // WHATWG URL parsing normalises ::ffff:127.0.0.1 to ::ffff:7f00:1, so
+  // the hex form is what actually reaches the guard from a URL.
+  it("blocks IPv4-mapped addresses in their URL-normalised hex form", () => {
+    expect(isDisallowedIPv6("::ffff:7f00:1")).toBe(true);
+    expect(isDisallowedIPv6("::ffff:a9fe:a9fe")).toBe(true); // 169.254.169.254
+    expect(isDisallowedIPv6("0:0:0:0:0:ffff:0a00:0001")).toBe(true); // 10.0.0.1
+    expect(isDisallowedIPv6("::ffff:808:808")).toBe(false); // 8.8.8.8
+  });
+
+  it("blocks other IPv6 forms that embed a private IPv4 target", () => {
+    expect(isDisallowedIPv6("::7f00:1")).toBe(true); // IPv4-compatible
+    expect(isDisallowedIPv6("64:ff9b::7f00:1")).toBe(true); // NAT64
+    expect(isDisallowedIPv6("2002:7f00:1::")).toBe(true); // 6to4
+    expect(isDisallowedIPv6("2002:808:808::1")).toBe(false); // 6to4 of 8.8.8.8
+  });
+
+  it("blocks multicast, expanded loopback, zone ids and garbage", () => {
+    expect(isDisallowedIPv6("ff02::1")).toBe(true);
+    expect(isDisallowedIPv6("0:0:0:0:0:0:0:1")).toBe(true);
+    expect(isDisallowedIPv6("fe80::1%eth0")).toBe(true);
+    expect(isDisallowedIPv6("[::1]")).toBe(true);
+    expect(isDisallowedIPv6("not-an-ip")).toBe(true);
+  });
+});
+
+describe("safeFetch IPv6 literal hosts", () => {
+  // A URL's hostname keeps its brackets ("[::1]"), which net.isIP()
+  // does not recognise - http.request() strips them and connects
+  // directly without ever calling the custom lookup, so the literal-IP
+  // check is the only gate. These must be refused BEFORE any connect
+  // attempt (i.e. with SsrfBlockedError, not a network error).
+  it.each([
+    "http://[::1]:6379/",
+    "http://[::ffff:127.0.0.1]/",
+    "http://[::ffff:169.254.169.254]/latest/meta-data/",
+    "http://[fd12:3456::1]/",
+    "http://[fe80::1]/",
+  ])("refuses %s", async (url) => {
+    await expect(safeFetch(url)).rejects.toBeInstanceOf(SsrfBlockedError);
+  });
 });
 
 // Node's raw http/https client never auto-decompresses (unlike a

@@ -48,6 +48,22 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // ⚠️ SECURITY: a bookmarked COMMENT carries its parent post's
+    // content too. Bookmarking a comment needs no purchase (comments on
+    // a premium post are public), so this was a free read of any paid
+    // post's full text. Same gate as above.
+    const commentParentPosts = items.filter((b) => b.comment?.post).map((b) => b.comment!.post);
+    if (commentParentPosts.length > 0) {
+      const gatedParents = new Map(
+        (await applyPremiumGating(commentParentPosts, userId)).map((p) => [p.id, p])
+      );
+      items.forEach((b) => {
+        if (b.comment?.post) {
+          b.comment.post = gatedParents.get(b.comment.post.id) as typeof b.comment.post;
+        }
+      });
+    }
+
     return NextResponse.json({ items, nextCursor });
   } catch (error) {
     console.error("Error fetching bookmarks:", error);

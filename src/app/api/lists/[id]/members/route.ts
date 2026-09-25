@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 
 // ─── POST (add a member by username) ────────────────────────────────
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -32,6 +33,12 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     });
     if (!targetUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Same rule as follow/notify-posts: a blocked-either-way pair must
+    // not be able to curate one another into a (possibly public) list.
+    if (targetUser.id !== session.user.id && (await isBlockedEitherWay(session.user.id, targetUser.id))) {
+      return NextResponse.json({ error: "You can't add this user to a list" }, { status: 403 });
     }
 
     const memberCount = await prisma.listMember.count({ where: { listId: id } });

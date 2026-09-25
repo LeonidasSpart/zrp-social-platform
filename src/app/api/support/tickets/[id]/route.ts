@@ -12,12 +12,19 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const isAdmin = await isSessionAdmin(session);
+
     const ticket = await prisma.supportTicket.findUnique({
       where: { id: params.id },
       include: {
         user: { select: { username: true, email: true, avatarUrl: true, plan: true } },
         assignedAdmin: { select: { username: true, avatarUrl: true } },
         replies: {
+          // ⚠️ SECURITY: internal notes (isInternal, written from the
+          // admin ticket view) are staff-only. This route is what the
+          // ticket OWNER's page reads, so they must never be included
+          // for a non-admin caller.
+          ...(isAdmin ? {} : { where: { isInternal: false } }),
           orderBy: { createdAt: 'asc' },
           include: { user: { select: { username: true, avatarUrl: true, role: true } } },
         },
@@ -29,7 +36,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     }
 
     // Security: ensure user owns the ticket or is admin
-    if (ticket.userId !== session.user.id && !(await isSessionAdmin(session))) {
+    if (ticket.userId !== session.user.id && !isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
