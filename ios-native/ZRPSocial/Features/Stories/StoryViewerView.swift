@@ -12,7 +12,13 @@ import UIKit
 /// action against the backend.
 struct StoryViewerView: View {
 
-    let group: StoryGroup
+    // Both are `@State`, not `let`: reaching the end of `group`'s
+    // stories now hands off into the next unseen author's stories from
+    // `viewModel.groups` (see advanceToNextGroupOrDismiss) rather than
+    // always dismissing, so this view stays mounted across several
+    // authors in a row and needs to be able to mutate which one it is
+    // currently showing.
+    @State private var group: StoryGroup
     let startIndex: Int
 
     /// Who is watching, so the viewer can show view counts to the story's
@@ -61,7 +67,7 @@ struct StoryViewerView: View {
         viewerId: String?,
         viewModel: StoriesViewModel
     ) {
-        self.group = group
+        _group = State(initialValue: group)
         self.startIndex = startIndex
         self.viewerId = viewerId
         self.viewModel = viewModel
@@ -86,6 +92,11 @@ struct StoryViewerView: View {
         .onAppear { start() }
         .onDisappear { teardown() }
         .onChange(of: index) { _, _ in start() }
+        // `index` alone does not always change when advanceToNextGroupOrDismiss
+        // switches `group` - a single-story author landing back on index 0
+        // is a same-value change `onChange(of: index)` would not fire for -
+        // so the group switching is watched separately.
+        .onChange(of: group.id) { _, _ in start() }
         // A downward drag dismisses, matching every other story viewer.
         // The threshold is generous so it does not fight the tap targets.
         .gesture(
@@ -94,7 +105,7 @@ struct StoryViewerView: View {
                     if value.translation.height > 80 { dismiss() }
                 }
         )
-        .task(id: "\(index)-\(isPaused)-\(videoDuration ?? 0)") { await runTimer() }
+        .task(id: "\(group.id)-\(index)-\(isPaused)-\(videoDuration ?? 0)") { await runTimer() }
         // Typing a reply pauses playback exactly like the press-and-hold
         // gesture does - the field itself is the "hold".
         .onChange(of: isReplyFocused) { _, focused in setPaused(focused) }
@@ -413,10 +424,40 @@ struct StoryViewerView: View {
             return
         }
         if next >= group.stories.count {
-            dismiss()
+            advanceToNextGroupOrDismiss()
             return
         }
         index = next
+    }
+
+    /// Reaching the end of `group`'s own stories: continue straight into
+    /// the next author in the rail who still has something unseen,
+    /// matching Instagram/TikTok/Snapchat, instead of always dismissing
+    /// back to the rail. `viewModel.groups` is the same live, ordered
+    /// list the rail itself renders, kept current by `markViewed` as
+    /// stories get viewed - so a group already fully seen (including
+    /// this one, just finished) is skipped rather than reopened.
+    private func advanceToNextGroupOrDismiss() {
+        let groups = viewModel.groups
+        guard let currentPosition = groups.firstIndex(where: { $0.user.id == group.user.id }) else {
+            dismiss()
+            return
+        }
+        for position in (currentPosition + 1)..<groups.count {
+            let candidate = groups[position]
+            if !candidate.isFullyViewed {
+                group = candidate
+                index = candidate.firstUnviewedIndex
+                // A reply composer is scoped to `group`'s author - an
+                // unsent draft must not carry over to the next author
+                // sendReply would otherwise send it to.
+                replyDraft = ""
+                replyError = nil
+                replySent = false
+                return
+            }
+        }
+        dismiss()
     }
 
     /// Drives the progress bar and the auto-advance.

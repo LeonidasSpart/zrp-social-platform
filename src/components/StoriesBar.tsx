@@ -29,7 +29,13 @@ export default function StoriesBar() {
   const { t } = useLanguage();
   const { data: session } = useSession();
   const [groups, setGroups] = useState<StoryGroup[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<StoryGroup | null>(null);
+  // A frozen snapshot of the tray order at the moment the viewer opened,
+  // plus which group within it is showing - not a live index into
+  // `groups`, which keeps refetching (onStoryViewed/onStoriesChanged)
+  // while the viewer is open. Freezing it means a background refetch
+  // can't reorder the list out from under an open viewer or jump it to
+  // the wrong person mid-story.
+  const [viewer, setViewer] = useState<{ groups: StoryGroup[]; index: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showComposer, setShowComposer] = useState(false);
 
@@ -114,7 +120,7 @@ export default function StoriesBar() {
               key={group.user.id}
               user={group.user}
               hasUnseen={hasUnseen(group)}
-              onClick={() => setSelectedGroup(group)}
+              onClick={() => setViewer({ groups, index: groupIndex })}
               storyPreview={previewUrl}
               storyPreviewType={previewType}
               // Purely cosmetic alternation between the primary red ring
@@ -129,10 +135,28 @@ export default function StoriesBar() {
         })}
       </div>
 
-      {selectedGroup && (
+      {viewer && (
         <StoryViewer
-          group={selectedGroup}
-          onClose={() => setSelectedGroup(null)}
+          // Remounts the viewer's own internal state (progress, per-story
+          // like/view maps, reply draft, etc.) whenever the active group
+          // changes, whether from a direct tap on a different tray avatar
+          // or from auto-advancing into the next unseen group below -
+          // the same reset every other per-item viewer in this codebase
+          // gets from keying/remembering on the item's own id.
+          key={viewer.groups[viewer.index].user.id}
+          group={viewer.groups[viewer.index]}
+          onClose={() => setViewer(null)}
+          onGroupComplete={() => {
+            setViewer((prev) => {
+              if (!prev) return null;
+              for (let i = prev.index + 1; i < prev.groups.length; i++) {
+                if (hasUnseen(prev.groups[i])) return { ...prev, index: i };
+              }
+              // Nothing unseen left in the tray - close, matching the
+              // old behavior for the (now last) group.
+              return null;
+            });
+          }}
           onStoryViewed={fetchStories}
           onStoriesChanged={fetchStories}
         />

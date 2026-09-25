@@ -28,6 +28,14 @@ interface Props {
     }>;
   };
   onClose: () => void;
+  // Called when the last story in this group finishes (by timer or a
+  // manual "next" tap) instead of onClose, so the caller can advance
+  // into the next unseen author's stories - matching Instagram/TikTok/
+  // Snapchat, where finishing one person's stories continues straight
+  // into the next person's rather than closing the whole viewer.
+  // onClose is still used for an explicit exit (the X button, Escape,
+  // or deleting your own last remaining story).
+  onGroupComplete: () => void;
   onStoryViewed: () => void;
   // Called after a successful edit or delete, so the tray/list behind
   // this viewer (StoriesBar's own `groups` state) picks up the change -
@@ -35,7 +43,7 @@ interface Props {
   onStoriesChanged: () => void;
 }
 
-export default function StoryViewer({ group, onClose, onStoryViewed, onStoriesChanged }: Props) {
+export default function StoryViewer({ group, onClose, onGroupComplete, onStoryViewed, onStoriesChanged }: Props) {
   const { t } = useLanguage();
   const { data: session } = useSession();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -199,18 +207,18 @@ export default function StoryViewer({ group, onClose, onStoryViewed, onStoriesCh
         if (currentIndex < stories.length - 1) {
           setCurrentIndex(currentIndex + 1);
         } else {
-          onClose();
+          onGroupComplete();
         }
       }
     }, 100);
     timerRef.current = interval;
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, stories.length, onClose, paused]);
+  }, [currentIndex, stories.length, onGroupComplete, paused]);
 
   const next = () => {
     if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1);
-    else onClose();
+    else onGroupComplete();
   };
 
   const prev = () => {
