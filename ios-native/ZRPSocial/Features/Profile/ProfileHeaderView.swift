@@ -72,7 +72,7 @@ struct ProfileHeaderView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(
-                        Text(verbatim: "View \(profile.displayName)'s cover photo")
+                        Text(verbatim: L10n.string(.profileViewPhotoAria, ["name": profile.displayName]))
                     )
                 } else {
                     // No cover is the common case, so it gets a deliberate
@@ -124,7 +124,7 @@ struct ProfileHeaderView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(
-                Text(verbatim: "View \(profile.displayName)'s avatar photo")
+                Text(verbatim: L10n.string(.profileViewPhotoAria, ["name": profile.displayName]))
             )
             .padding(.leading, ZrpSpacing.lg)
             .offset(y: ZrpMetrics.avatarLarge / 2)

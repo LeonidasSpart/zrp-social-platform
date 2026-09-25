@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Dit account is privé";
 "profile.protectedMessage" = "Volg dit account om de posts en profielgegevens te zien.";
 "profile.editProfileButton" = "Profiel bewerken";
+"profile.viewPhotoAria" = "Foto van {name} bekijken";
 "action.follow" = "Volgen";
 "action.following" = "Volgend";
 "action.unfollow" = "Ontvolgen";

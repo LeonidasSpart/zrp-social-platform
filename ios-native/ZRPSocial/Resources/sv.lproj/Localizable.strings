@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Det här kontot är privat";
 "profile.protectedMessage" = "Följ det här kontot för att se dess inlägg och profiluppgifter.";
 "profile.editProfileButton" = "Redigera profil";
+"profile.viewPhotoAria" = "Visa {name}s foto";
 "action.follow" = "Följ";
 "action.following" = "Följer";
 "action.unfollow" = "Sluta följa";

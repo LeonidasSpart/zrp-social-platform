@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Ez a fiók privát";
 "profile.protectedMessage" = "Kövesd ezt a fiókot, hogy lásd a bejegyzéseit és profiladatait.";
 "profile.editProfileButton" = "Profil szerkesztése";
+"profile.viewPhotoAria" = "{name} fotójának megtekintése";
 "action.follow" = "Követés";
 "action.following" = "Követve";
 "action.unfollow" = "Követés visszavonása";

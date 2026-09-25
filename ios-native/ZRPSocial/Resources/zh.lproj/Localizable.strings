@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "此账号为私密账号";
 "profile.protectedMessage" = "关注此账号后即可查看其帖子和个人资料详情。";
 "profile.editProfileButton" = "编辑个人资料";
+"profile.viewPhotoAria" = "查看{name}的照片";
 "action.follow" = "关注";
 "action.following" = "已关注";
 "action.unfollow" = "取消关注";

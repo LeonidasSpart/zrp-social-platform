@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Bu hesap gizli";
 "profile.protectedMessage" = "Gönderilerini ve profil bilgilerini görmek için bu hesabı takip edin.";
 "profile.editProfileButton" = "Profili düzenle";
+"profile.viewPhotoAria" = "{name} adlı kullanıcının fotoğrafını görüntüle";
 "action.follow" = "Takip Et";
 "action.following" = "Takip Ediliyor";
 "action.unfollow" = "Takibi Bırak";

@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Acest cont este privat";
 "profile.protectedMessage" = "Urmărește acest cont ca să-i vezi postările și detaliile profilului.";
 "profile.editProfileButton" = "Editează profilul";
+"profile.viewPhotoAria" = "Vezi fotografia lui {name}";
 "action.follow" = "Urmărește";
 "action.following" = "Urmărești";
 "action.unfollow" = "Nu mai urmări";

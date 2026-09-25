@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Овој профил е приватен";
 "profile.protectedMessage" = "Следи го овој профил за да ги гледаш неговите објави и детали за профилот.";
 "profile.editProfileButton" = "Уреди профил";
+"profile.viewPhotoAria" = "Прикажи ја фотографијата на {name}";
 "action.follow" = "Следи";
 "action.following" = "Следите";
 "action.unfollow" = "Откажи следење";

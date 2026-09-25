@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "هذا الحساب خاص";
 "profile.protectedMessage" = "تابع هذا الحساب لرؤية منشوراته وتفاصيل ملفه الشخصي.";
 "profile.editProfileButton" = "تعديل الملف الشخصي";
+"profile.viewPhotoAria" = "عرض صورة {name}";
 "action.follow" = "متابعة";
 "action.following" = "متابَع";
 "action.unfollow" = "إلغاء المتابعة";

@@ -213,6 +213,7 @@ profile.userNotFound
 profile.protectedAccount
 profile.protectedMessage
 profile.editProfileButton
+profile.viewPhotoAria
 action.follow
 action.following
 action.unfollow
