@@ -65,7 +65,13 @@ export async function generateMetadata({
   const description = truncate(bodyText, 160);
   const title = `${displayName}: "${truncate(bodyText, 60)}"`;
   const url = `${SITE_URL}/post/${id}`;
-  const image = post.imageUrl || post.imageUrls?.[0] || post.author.avatarUrl;
+  // ⚠️ SECURITY: a premium post's own media is part of what is paid for
+  // (applyPremiumGating nulls it for non-purchasers) - putting it in
+  // og:image published the paid image to every crawler, link unfurl and
+  // view-source. Fall back to the author's avatar instead.
+  const image = post.premiumPost
+    ? post.author.avatarUrl
+    : post.imageUrl || post.imageUrls?.[0] || post.author.avatarUrl;
   const images = resolveOgImages({ image, title, subtitle: description });
 
   return {

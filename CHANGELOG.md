@@ -32,6 +32,35 @@ production; Android is versioned independently (see
 [README.md](README.md#android-and-ios-versioning-independent-of-web)) and
 iOS has no build shipped yet.
 
+### Full product audit (#400)
+
+- **Security:** paid and private content no longer leaks through the
+  feed, Shorts, bookmarks, profile tabs, og:image, the premium-post API
+  or article bodies. Stored `javascript:` links are rejected on write
+  and made inert on render. Closed an IPv6-literal SSRF bypass and
+  arbitrary push endpoints. Malformed socket payloads can no longer
+  crash the server. OAuth sign-in into an unverified password account
+  clears the attacker-set password. Moderators can no longer ban or
+  demote admins. Staff notes are hidden from ticket owners. Payment
+  signatures can't be claimed twice across plan/tip/purchase/ad/HELP,
+  and payments from another account's verified wallet are refused.
+  Ad budgets can't be raised after payment. API keys need an
+  API-capable plan. `/api/internal/*` is loopback-only at the socket.
+- **Races:** PLAY XP/duels, poll votes, appeals, ad status, HELP
+  withdrawal reject, AI quota and duplicate-toggle 500s.
+- **Flows:** withdrawals now work via a wallet ownership check in
+  Settings, the creator dashboard and HELP campaigns. Fixed support
+  ticket page crashes, the PWA manifest link, dead notification, email
+  and push links, pending follow requests after reload, ambassador
+  referral attribution, and AI chat context (it now sends the latest 20
+  turns). Removed the `/test` debug page.
+- **Accessibility/RTL:** dialog semantics for nine modals, labels on
+  about 30 icon-only buttons, and post menus that close on Escape and
+  outside click and lay out correctly in RTL.
+- **Native (next build):** iOS comment edit no longer fails to decode;
+  iOS group deep links open the group; Android keeps "Requested" for a
+  pending follow request; Android strings localized in all 29 languages.
+
 ### Localization
 
 - **Localization expanded from 15 to 25 languages** ("EU Wave 1"): Dutch,

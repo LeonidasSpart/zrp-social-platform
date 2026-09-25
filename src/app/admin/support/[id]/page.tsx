@@ -1,6 +1,7 @@
 // src/app/admin/support/[id]/page.tsx
 'use client';
 
+import { localizeApiMessage } from '@/lib/api-error-i18n';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
@@ -76,13 +77,24 @@ export default function AdminTicketDetailPage() {
   }, [id]);
 
   const fetchTicket = async () => {
-    const res = await fetch(`/api/admin/support/tickets/${id}`);
-    const data = await res.json();
-    setTicket(data);
-    setStatus(data.status);
-    setPriority(data.priority);
-    setAssignedTo(data.assignedAdmin?.id || '');
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/admin/support/tickets/${id}`);
+      const data = await res.json();
+      // An error body is `{ error }`, not a ticket - show the not-found
+      // state instead of crashing on ticket.user below.
+      if (!res.ok) {
+        setTicket(null);
+        return;
+      }
+      setTicket(data);
+      setStatus(data.status);
+      setPriority(data.priority);
+      setAssignedTo(data.assignedAdmin?.id || '');
+    } catch (error) {
+      console.error('Failed to fetch ticket', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const sendReply = async () => {
@@ -95,6 +107,9 @@ export default function AdminTicketDetailPage() {
     if (res.ok) {
       setReplyMessage('');
       fetchTicket();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(localizeApiMessage(data.error, t) || t('support.ticketDetail.errReplyFailed'));
     }
   };
 

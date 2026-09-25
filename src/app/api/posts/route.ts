@@ -19,6 +19,9 @@ import { resolveScheduledAt } from "@/lib/scheduled-time";
 import { isTrustedUploadUrl, validateMediaUrls } from "@/lib/media-url";
 import { notifyMentionedUsers } from "@/lib/mentions";
 import { notifySubscribersOfNewPost } from "@/lib/post-subscriptions";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
+import { viewablePostAuthorFilter } from "@/lib/permissions";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 // ─────────────────────────────────────────────────────────────
 // MEDIA HELPERS
@@ -170,6 +173,20 @@ function normalizeMediaType(
   return "image";
 }
 
+function isSafeApplyUrl(value: unknown): boolean {
+  if (typeof value !== "string" || value.length > 2048) return false;
+  try {
+    const url = new URL(value.trim());
+    return (
+      url.protocol === "https:" ||
+      url.protocol === "http:" ||
+      url.protocol === "mailto:"
+    );
+  } catch {
+    return false;
+  }
+}
+
 // ─── GET (Feed) ─────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
@@ -278,6 +295,14 @@ export async function GET(req: NextRequest) {
           some: { followerId: userId },
         },
       };
+    } else {
+      // ⚠️ SECURITY: every other public listing (explore, hashtag,
+      // search, videos) restricts to authors the viewer may see; this
+      // default tab (also reachable logged-out) returned private
+      // accounts' posts to anyone. A Follow row only exists once a
+      // private account approved it, so the Following branch above is
+      // already restricted to visible authors.
+      where.author = viewablePostAuthorFilter(userId);
     }
 
     const posts =
@@ -332,6 +357,8 @@ export async function GET(req: NextRequest) {
           quotePost: {
             select: {
               id: true,
+              // Needed by applyPremiumGating's owner check below.
+              authorId: true,
               content: true,
               imageUrl: true,
               imageUrls: true,
@@ -418,8 +445,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // ⚠️ SECURITY: redact pay-per-view content the viewer hasn't paid
+    // for - this feed (the Following tab on web and native) returned
+    // every premium post's full content/media/article body un-gated.
+    // See src/lib/premium-content.ts.
+    const gatedPosts =
+      await applyPremiumGating(
+        posts,
+        userId
+      );
+
     return NextResponse.json({
-      posts,
+      posts: gatedPosts,
       nextCursor,
     });
   } catch (error) {
@@ -554,6 +591,75 @@ export async function POST(
           status: 400,
         }
       );
+    }
+
+    // ⚠️ SECURITY: applyUrl is rendered as the href of the recruitment
+    // card's "Apply Now" link for every viewer. It was stored verbatim,
+    // so `javascript:...` became a stored XSS (React 18 does not block
+    // javascript: hrefs and the CSP allows inline script). Only real
+    // web/mail links are accepted.
+    if (
+      type === "RECRUITMENT" &&
+      applyUrl != null &&
+      applyUrl !== "" &&
+      !isSafeApplyUrl(applyUrl)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Apply link must be a valid http(s) or mailto: URL.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    // ⚠️ SECURITY/PRIVACY: a quote embeds the quoted post's content in
+    // the new post, shown to everyone who can see the NEW post. The id
+    // was stored unchecked, so a follower of a private account (or
+    // anyone holding a scheduled post's id, or a blocked user) could
+    // republish that content to the world via a public quote - and an
+    // unknown id failed the insert with a 500 after the poll was
+    // already created.
+    if (quotePostId) {
+      const quoted =
+        typeof quotePostId === "string"
+          ? await prisma.post.findUnique({
+              where: { id: quotePostId },
+              select: {
+                authorId: true,
+                status: true,
+                author: {
+                  select: { isPrivate: true },
+                },
+              },
+            })
+          : null;
+
+      const isOwnQuoted =
+        quoted?.authorId === user.id;
+
+      if (
+        !quoted ||
+        (!isOwnQuoted &&
+          (quoted.status !== "published" ||
+            quoted.author.isPrivate ||
+            (await isBlockedEitherWay(
+              user.id,
+              quoted.authorId
+            ))))
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "This post can't be quoted.",
+          },
+          {
+            status: 400,
+          }
+        );
+      }
     }
 
     const primaryImageUrl:

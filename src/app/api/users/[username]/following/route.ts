@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { canViewPrivateContent } from "@/lib/permissions";
+import { isBlockedEitherWay } from "@/lib/auth-guards";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
@@ -28,6 +29,13 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       return NextResponse.json({ items: [], nextCursor: null });
     }
     if (!(await canViewPrivateContent(session?.user?.id, user.id, user.isPrivate))) {
+      return NextResponse.json({ items: [], nextCursor: null });
+    }
+    // Same block rule as the profile's posts/likes/media/replies tabs.
+    // Blocking doesn't delete an existing Follow row, so without this a
+    // blocked follower of a private account could still list its graph.
+    const viewerId = session?.user?.id;
+    if (viewerId && viewerId !== user.id && (await isBlockedEitherWay(viewerId, user.id))) {
       return NextResponse.json({ items: [], nextCursor: null });
     }
 

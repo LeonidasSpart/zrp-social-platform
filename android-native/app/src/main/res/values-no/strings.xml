@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">Offentlig myndighet</string>
     <string name="admin_badge_team">ZRP-teamet</string>
     <string name="admin_badge_none">Ingen</string>
+    <string name="post_show_translation">Vis oversettelse</string>
+    <string name="post_show_original">Vis original</string>
+    <string name="post_translation_unavailable">Oversettelse er ikke tilgjengelig akkurat nå.</string>
+    <string name="auth_username_taken">Det brukernavnet er opptatt.</string>
+    <string name="auth_username_format_hint">3–20 tegn, kun bokstaver, tall og understreker</string>
+    <string name="quote_post_title">Siter innlegg</string>
 </resources>

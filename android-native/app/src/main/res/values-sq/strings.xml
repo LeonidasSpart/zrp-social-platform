@@ -2413,4 +2413,10 @@
     <string name="admin_badge_government">Qeveria</string>
     <string name="admin_badge_team">Ekipi ZRP</string>
     <string name="admin_badge_none">Asnjë</string>
+    <string name="post_show_translation">Shfaq përkthimin</string>
+    <string name="post_show_original">Shfaq origjinalin</string>
+    <string name="post_translation_unavailable">Përkthimi nuk është i disponueshëm tani.</string>
+    <string name="auth_username_taken">Ky emër përdoruesi është i zënë.</string>
+    <string name="auth_username_format_hint">3-20 karaktere, vetëm shkronja/numra/nënvija</string>
+    <string name="quote_post_title">Cito postimin</string>
 </resources>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useId } from "react";
 import { X, Image, Video, Send } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 
 interface Props {
   onClose: () => void;
@@ -18,6 +19,9 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
   const [mediaType, setMediaType] = useState<"image" | "video" | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const titleId = useId();
+  const dialogRef = useDialogA11y(true, onClose, !uploading);
 
   const { startUpload } = useUploadThing("storyMedia", {
     onClientUploadComplete: () => {
@@ -103,16 +107,16 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 relative">
+      <div className="focus:outline-none bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 relative" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <button
           onClick={onClose}
           aria-label={t("help.close")}
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+          className="absolute top-3 end-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <h2 id={titleId} className="text-xl font-bold text-gray-900 dark:text-white mb-4">
           {t("stories.addStory")}
         </h2>
 
@@ -149,7 +153,8 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
                   setMediaPreview(null);
                   setMediaType(null);
                 }}
-                className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition"
+                aria-label={t("comment.removeAttachment")}
+                className="absolute top-2 end-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition"
               >
                 <X className="w-4 h-4" />
               </button>

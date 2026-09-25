@@ -128,6 +128,13 @@ describe("delete-message relay", () => {
     expect((await authz.authorizeDeleteRelay(fakePrisma(rows), "mallory", { messageId: "gone", receiverId: "bob" })).ok).toBe(false);
     expect((await authz.authorizeDeleteRelay(fakePrisma(rows), "alice", { messageId: "gone", receiverId: "alice" })).ok).toBe(false);
   });
+
+  it("refuses to relay a deletion for a message that still exists", async () => {
+    // m1 (alice -> bob) was never deleted: bob must not be able to make
+    // alice's open chat drop it.
+    expect((await authz.authorizeDeleteRelay(fakePrisma(rows), "bob", { messageId: "m1", receiverId: "alice" })).ok).toBe(false);
+    expect((await authz.authorizeDeleteRelay(fakePrisma(rows, [], [], groupMembers), "alice", { messageId: "g1m1", conversationId: "g1" })).ok).toBe(false);
+  });
 });
 
 describe("group conversations (send-group-message / edit / reaction / delete with conversationId)", () => {

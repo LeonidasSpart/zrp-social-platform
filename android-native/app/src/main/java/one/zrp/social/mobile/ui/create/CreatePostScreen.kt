@@ -203,10 +203,9 @@ fun CreatePostScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // "Quote Post" stays English-only on purpose - matches
-                // QuotePostModal.tsx's own hardcoded, untranslated title.
+                // Same wording as QuotePostModal.tsx's t("quote.title").
                 Text(
-                    text = "Quote Post",
+                    text = stringResource(R.string.quote_post_title),
                     style = MaterialTheme.typography.titleLarge,
                 )
                 IconButton(onClick = onCancel) {

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  // Unauthenticated proxy onto ZRP's own GIPHY key, whose quota is
+  // small and shared by every user - without a limit one script could
+  // exhaust it and break the GIF picker for everyone.
+  const limit = await rateLimit(req, { limit: 60, window: 60, type: "gif-trending" });
+  if (!limit.success) return limit.response;
+
   const apiKey = process.env.GIPHY_API_KEY;
   if (!apiKey) {
     console.error("GIPHY_API_KEY not set: GIF picker cannot load trending GIFs");

@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { parseAdTargetUrl } from "@/lib/ads/target-url";
 
 export async function POST(req: NextRequest) {
   const limit = await rateLimit(req, { limit: 60, window: 60, type: "ads-click" });
@@ -76,7 +77,10 @@ export async function POST(req: NextRequest) {
     // external destination - clicking an ad should always go somewhere.
     return NextResponse.json({
       logged: true,
-      redirectUrl: campaign.targetUrl || `/post/${campaign.postId}`,
+      // parseAdTargetUrl: rows written before targetUrl was validated on
+      // create could hold a `javascript:` URL - never hand one to a client
+      // that navigates to it.
+      redirectUrl: parseAdTargetUrl(campaign.targetUrl) || `/post/${campaign.postId}`,
     });
   } catch (error) {
     console.error("Error logging ad click:", error);

@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">政府機関</string>
     <string name="admin_badge_team">ZRPチーム</string>
     <string name="admin_badge_none">なし</string>
+    <string name="post_show_translation">翻訳を表示</string>
+    <string name="post_show_original">元の文を表示</string>
+    <string name="post_translation_unavailable">現在、翻訳を利用できません。</string>
+    <string name="auth_username_taken">そのユーザー名はすでに使われています。</string>
+    <string name="auth_username_format_hint">3〜20文字、英字・数字・アンダースコアのみ</string>
+    <string name="quote_post_title">投稿を引用</string>
 </resources>

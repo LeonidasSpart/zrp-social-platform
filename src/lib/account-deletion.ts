@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { deleteUploadsIfUnreferenced } from "@/lib/upload-ownership";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 
 // The actual, permanent account wipe - shared between the user-triggered
 // "delete now" path (src/app/api/user/delete/confirm) and the cron sweep
@@ -45,6 +46,10 @@ export async function deleteUserAccountAndFiles(userId: string): Promise<void> {
   ]);
 
   await prisma.user.delete({ where: { id: userId } });
+  // A deleted account must stop authenticating immediately on this
+  // instance, not after the auth-state cache window (a cached
+  // exists:true entry would otherwise keep the old JWT working).
+  invalidateUserAuthState(userId);
 
   // p.imageUrl is always a copy of p.imageUrls[0] (see POST /api/posts)
   // - deleteUploadsIfUnreferenced dedupes that and skips anything still

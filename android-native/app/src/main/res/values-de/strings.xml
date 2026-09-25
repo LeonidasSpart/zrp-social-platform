@@ -2413,4 +2413,10 @@
     <string name="admin_badge_government">Behörde</string>
     <string name="admin_badge_team">ZRP Team</string>
     <string name="admin_badge_none">Keine</string>
+    <string name="post_show_translation">Übersetzung anzeigen</string>
+    <string name="post_show_original">Original anzeigen</string>
+    <string name="post_translation_unavailable">Übersetzung derzeit nicht verfügbar.</string>
+    <string name="auth_username_taken">Dieser Benutzername ist bereits vergeben.</string>
+    <string name="auth_username_format_hint">3–20 Zeichen, nur Buchstaben/Zahlen/Unterstriche</string>
+    <string name="quote_post_title">Beitrag zitieren</string>
 </resources>

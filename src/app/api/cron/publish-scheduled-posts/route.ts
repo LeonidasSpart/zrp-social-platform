@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { notifySubscribersOfNewPost } from "@/lib/post-subscriptions";
+import { isAuthorizedCronRequest } from "@/lib/cron-auth";
 
 export const dynamic = 'force-dynamic';
 
@@ -13,9 +14,7 @@ export async function GET(req: NextRequest) {
   // endpoint with zero warning. Better to have scheduled posts not
   // publish (loud, obvious, fixable by setting the env var) than to
   // have this silently open to anyone who finds the URL.
-  const authHeader = req.headers.get("authorization");
-  const secret = process.env.CRON_SECRET;
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  if (!isAuthorizedCronRequest(req.headers.get("authorization"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

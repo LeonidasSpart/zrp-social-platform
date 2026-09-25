@@ -58,6 +58,33 @@ describe("POST /api/internal/call-push", () => {
     expect(sendPushNotification).not.toHaveBeenCalled();
   });
 
+  it("accepts server.js's own loopback call even though Next.js stamps X-Forwarded-For on it", async () => {
+    // Next's request handler sets x-forwarded-for to the socket address
+    // (127.0.0.1 here) on EVERY request, so the route must not use that
+    // header to decide "external" - that check silently 404'd every
+    // incoming-call push. Loopback-only is enforced in server.js instead.
+    const res = await POST(
+      new NextRequest("http://127.0.0.1:8080/api/internal/call-push", {
+        method: "POST",
+        headers: new Headers({
+          "content-type": "application/json",
+          authorization: "Bearer test-secret",
+          "x-forwarded-for": "127.0.0.1",
+        }),
+        body: JSON.stringify({ receiverId: "u1", callerName: "Ada", callerUsername: "ada", isVideo: false }),
+      })
+    );
+    expect(res.status).toBe(200);
+    expect(sendPushNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects a secret that only matches as a prefix", async () => {
+    const body = { receiverId: "u1", callerName: "Ada", callerUsername: "ada", isVideo: false };
+    expect((await call(body, "test-secre")).status).toBe(401);
+    expect((await call(body, "test-secret-extra")).status).toBe(401);
+    expect(sendPushNotification).not.toHaveBeenCalled();
+  });
+
   it("rejects a payload missing required fields", async () => {
     const res = await call({ receiverId: "u1" }, "test-secret");
     expect(res.status).toBe(400);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runPipelineCycle } from "@/lib/news/pipeline";
+import { isAuthorizedCronRequest } from "@/lib/cron-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +26,7 @@ export const maxDuration = 900;
  * that must be deliberately turned on before anything is ever posted.
  */
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  const secret = process.env.CRON_SECRET;
-
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  if (!isAuthorizedCronRequest(req.headers.get("authorization"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -154,6 +154,7 @@ class ProfileViewModel(
                         it.copy(
                             profile = profile,
                             isOwnProfile = isOwnProfile,
+                            isFollowRequested = profile.followRequestStatus == "pending",
                             isLoadingProfile = false,
                             ownUserId = if (isOwnProfile) profile.id else it.ownUserId,
                             selectedTab = ProfileTab.POSTS,
@@ -416,14 +417,10 @@ class ProfileViewModel(
         }
     }
 
-    // Matches page.tsx's own local-only followRequestStatus: the profile
-    // GET response never actually carries a pending-request flag (web's
-    // own `data.followRequestStatus || "none"` read is dead code, since
-    // route.ts never sets that field), so a freshly-opened private
-    // profile that already has a pending request from a previous visit
-    // shows a plain Follow button on both platforms alike until clicked
-    // again - a real web limitation this mirrors rather than "fixes"
-    // unilaterally on native only.
+    // isFollowRequested is seeded from the profile GET's
+    // followRequestStatus (so a pending request survives reopening the
+    // screen, same as the website) and then kept current by the
+    // follow toggle's own response below.
     fun toggleFollow() {
         val username = resolvedUsername ?: return
         val profile = _state.value.profile ?: return

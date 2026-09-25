@@ -87,6 +87,9 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
   try {
     const { content, imageUrl, replyToId } = await req.json();
 
+    if ((content != null && typeof content !== "string") || (imageUrl != null && typeof imageUrl !== "string")) {
+      return NextResponse.json({ error: "Invalid message payload" }, { status: 400 });
+    }
     if ((!content || content.trim().length === 0) && !imageUrl) {
       return NextResponse.json({ error: "Message content or image is required" }, { status: 400 });
     }

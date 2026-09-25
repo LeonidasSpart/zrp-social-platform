@@ -75,6 +75,10 @@ data class UserProfile(
     // signal, distinct from isFollowing (the other direction). Also new
     // on the route, so defaulted the same way.
     val followsMe: Boolean = false,
+    // "pending" while the viewer's request to follow this private
+    // account awaits approval, else "none". Nullable: Gson skips Kotlin
+    // defaults, so an older response without the key arrives as null.
+    val followRequestStatus: String? = null,
 )
 
 data class FollowToggleResponse(

@@ -35,6 +35,8 @@ const COMMENT_INCLUDE = {
       post: {
         select: {
           id: true,
+          // Needed by applyPremiumGating's owner check (GET /api/bookmarks).
+          authorId: true,
           content: true,
           author: { select: { username: true, name: true } },
         },

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { canViewPrivateContent } from "@/lib/permissions";
+import { canViewPrivateContent, viewablePostAuthorFilter } from "@/lib/permissions";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
@@ -58,7 +59,17 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
 
     // ─── Fetch replies (comments) by this user ──────────────────────
     const rawReplies = await prisma.comment.findMany({
-      where: { authorId: profileOwner.id },
+      // The parent post's content is echoed below as replyTo context, so
+      // a reply to a private account's post (one the viewer can't see)
+      // or to a blocked author's / unpublished post must not surface here.
+      where: {
+        authorId: profileOwner.id,
+        post: {
+          status: "published",
+          authorId: { notIn: excludedAuthorIds },
+          author: viewablePostAuthorFilter(viewerId),
+        },
+      },
       orderBy: { createdAt: "desc" },
       take: limit + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
@@ -75,6 +86,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         post: {
           select: {
             id: true,
+            authorId: true,
             content: true,
             author: {
               select: {
@@ -89,6 +101,14 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
 
     const { items: replies, nextCursor } = buildPage(rawReplies, limit);
 
+    // ⚠️ SECURITY: the parent post's content is pay-per-view gated the
+    // same as anywhere else it is shown (see src/lib/premium-content.ts).
+    const gatedParents = await applyPremiumGating(
+      replies.map((r) => ({ id: r.post.id, authorId: r.post.authorId, content: r.post.content })),
+      viewerId
+    );
+    const parentContentById = new Map(gatedParents.map((p) => [p.id, p.content]));
+
     // ─── Format replies with replyTo context and postId ────────────
     const formattedReplies = replies.map((reply) => ({
       id: reply.id,
@@ -99,7 +119,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       postId: reply.post.id,
       replyTo: {
         id: reply.post.id,
-        content: reply.post.content,
+        content: parentContentById.get(reply.post.id) ?? "",
         author: {
           username: reply.post.author.username,
           name: reply.post.author.name,

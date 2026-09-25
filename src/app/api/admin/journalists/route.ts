@@ -121,11 +121,22 @@ export async function POST(request: NextRequest) {
 
     const targetUser = await prisma.user.findUnique({
       where: userId ? { id: String(userId) } : { username: String(username).trim() },
-      select: { id: true },
+      select: { id: true, role: true, isAdmin: true },
     });
 
     if (!targetUser) {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+    }
+
+    // ⚠️ SECURITY: granting journalist status overwrites User.role. Doing
+    // that to an ADMIN/MODERATOR would strip their staff role - and this
+    // route is staff-level, so a moderator could demote an admin. Staff
+    // roles only change through the admin-only /api/admin/users/[id].
+    if (targetUser.isAdmin || targetUser.role === "ADMIN" || targetUser.role === "MODERATOR") {
+      return NextResponse.json(
+        { success: false, error: "Staff accounts can't hold the journalist role. Change their role first." },
+        { status: 409 }
+      );
     }
 
     const existing = await prisma.journalistProfile.findUnique({

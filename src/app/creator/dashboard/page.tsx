@@ -1,5 +1,6 @@
 "use client";
 
+import WalletVerifyPanel from "@/components/WalletVerifyPanel";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -128,7 +129,9 @@ export default function CreatorDashboard() {
   // ─── Withdrawal states ────────────────────────────────────────────
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
+  // The server pays withdrawals only to the ownership-verified wallet
+  // (User.verifiedSolanaWallet); a typed-in address was silently ignored.
+  const [verifiedWallet, setVerifiedWallet] = useState<string | null>(null);
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [withdrawMessage, setWithdrawMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -196,8 +199,8 @@ export default function CreatorDashboard() {
       setWithdrawMessage({ type: "error", text: t("creatorDash.errInvalidAmount") });
       return;
     }
-    if (!walletAddress || walletAddress.length < 32) {
-      setWithdrawMessage({ type: "error", text: t("creatorDash.errInvalidWallet") });
+    if (!verifiedWallet) {
+      setWithdrawMessage({ type: "error", text: t("walletVerify.none") });
       return;
     }
     if (amount > (profile?.balance || 0)) {
@@ -211,7 +214,7 @@ export default function CreatorDashboard() {
       const res = await fetch("/api/creator/withdraw", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, walletAddress }),
+        body: JSON.stringify({ amount }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -220,7 +223,6 @@ export default function CreatorDashboard() {
       setWithdrawMessage({ type: "success", text: data.message });
       setShowWithdrawModal(false);
       setWithdrawAmount("");
-      setWalletAddress("");
       fetchDashboard();
     } catch (err: any) {
       setWithdrawMessage({ type: "error", text: err.message });
@@ -536,13 +538,7 @@ export default function CreatorDashboard() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {t("creatorDash.solanaWalletLabel")}
                 </label>
-                <Input
-                  type="text"
-                  value={walletAddress}
-                  onChange={(e) => setWalletAddress(e.target.value)}
-                  placeholder={t("creatorDash.enterWalletPlaceholder")}
-                  disabled={withdrawLoading}
-                />
+                <WalletVerifyPanel compact onVerifiedChange={setVerifiedWallet} />
               </div>
               {withdrawMessage && (
                 <div className={`text-sm ${withdrawMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
@@ -558,7 +554,7 @@ export default function CreatorDashboard() {
                 >
                   {t("action.cancel")}
                 </Button>
-                <Button type="submit" disabled={withdrawLoading}>
+                <Button type="submit" disabled={withdrawLoading || !verifiedWallet}>
                   {withdrawLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />

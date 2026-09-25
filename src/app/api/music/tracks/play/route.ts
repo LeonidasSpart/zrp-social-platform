@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  // Unauthenticated by design (anonymous listens count), and playCount
+  // drives the "popular" ranking - same IP-based backstop against a
+  // script inflating it as /api/posts/[id]/view has.
+  const limit = await rateLimit(req, { limit: 120, window: 60, type: "music-play" });
+  if (!limit.success) return limit.response;
+
+  const body = await req.json().catch(() => ({}));
   const trackId = String(body.trackId || "");
   if (!trackId) return NextResponse.json({ error: "trackId required" }, { status: 400 });
 

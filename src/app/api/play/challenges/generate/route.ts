@@ -6,18 +6,13 @@ import { NextRequest, NextResponse } from "next/server";
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
-import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { reserveAiMessage, releaseAiMessage, aiUsageDateKey } from "@/lib/ai-quota";
 import { generateChallengeContent } from "@/lib/play/ai-generate";
 import { AI_SUPPORTED_GAME_TYPES } from "@/lib/play/registry";
 import type { PlayChallengeType } from "@prisma/client";
 
 const DAILY_AI_LIMIT = 10;
-
-function todayDateOnly() {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-}
 
 // ─── POST: generate challenge content from a topic using ZRP AI ─────
 // Reuses the existing AIDailyUsage table (shared quota bucket with ZRP
@@ -45,25 +40,27 @@ export async function POST(req: NextRequest) {
     }
     const cleanDifficulty = ["easy", "medium", "hard"].includes(difficulty) ? difficulty : "medium";
 
-    const date = todayDateOnly();
-    const usage = await prisma.aIDailyUsage.upsert({
-      where: { userId_date: { userId, date } },
-      update: {},
-      create: { userId, date, messages: 0 },
-    });
-    if (usage.messages >= DAILY_AI_LIMIT) {
+    // Reserve the slot atomically BEFORE calling the model (see
+    // src/lib/ai-quota.ts): a read-compare-then-increment let a burst of
+    // parallel requests all pass the check and all run.
+    // Same day key /api/ai/chat uses, so the two features really do
+    // share one bucket.
+    const date = aiUsageDateKey();
+    const reservation = await reserveAiMessage(userId, DAILY_AI_LIMIT, date);
+    if (!reservation.ok) {
       return NextResponse.json(
         { error: `You've reached today's AI generation limit (${DAILY_AI_LIMIT}). Try again tomorrow.` },
         { status: 429 }
       );
     }
 
-    const generated = await generateChallengeContent(topic.trim(), type as PlayChallengeType, cleanDifficulty);
-
-    await prisma.aIDailyUsage.update({
-      where: { userId_date: { userId, date } },
-      data: { messages: { increment: 1 } },
-    });
+    let generated: Awaited<ReturnType<typeof generateChallengeContent>>;
+    try {
+      generated = await generateChallengeContent(topic.trim(), type as PlayChallengeType, cleanDifficulty);
+    } catch (error) {
+      await releaseAiMessage(userId, date);
+      throw error;
+    }
 
     return NextResponse.json({
       title: generated.title,
@@ -74,7 +71,11 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating PLAY challenge:", error);
-    const message = error instanceof Error ? error.message : "Failed to generate challenge";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Never echo the raw error: it can name server configuration
+    // ("DEEPSEEK_API_KEY is not configured") or carry provider output.
+    return NextResponse.json(
+      { error: "We couldn't generate a challenge right now. Please try again." },
+      { status: 500 }
+    );
   }
 }

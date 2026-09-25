@@ -18,7 +18,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { postId, price, previewContent } = body;
 
-    if (!postId || !price || price <= 0) {
+    const numericPrice = Number(price);
+    if (
+      !postId ||
+      typeof postId !== "string" ||
+      (typeof price !== "number" && typeof price !== "string") ||
+      !Number.isFinite(numericPrice) ||
+      numericPrice <= 0 ||
+      numericPrice > 1_000_000
+    ) {
+      return NextResponse.json({ error: "Invalid premium post details." }, { status: 400 });
+    }
+    if (previewContent !== undefined && previewContent !== null && typeof previewContent !== "string") {
       return NextResponse.json({ error: "Invalid premium post details." }, { status: 400 });
     }
 
@@ -42,14 +53,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Create premium post
-    const premiumPost = await prisma.premiumPost.create({
-      data: {
-        postId,
-        creatorProfileId: creatorProfile.id,
-        price,
-        previewContent: previewContent || post.content.slice(0, 100) + "...",
-      },
-    });
+    let premiumPost;
+    try {
+      premiumPost = await prisma.premiumPost.create({
+        data: {
+          postId,
+          creatorProfileId: creatorProfile.id,
+          price: numericPrice,
+          previewContent: (previewContent || post.content.slice(0, 100) + "...").slice(0, 2000),
+        },
+      });
+    } catch (err: any) {
+      if (err?.code === "P2002") {
+        return NextResponse.json({ error: "This post is already a premium post." }, { status: 409 });
+      }
+      throw err;
+    }
 
     return jsonWithDecimals({ premiumPost });
   } catch (error) {
@@ -108,15 +127,28 @@ export async function GET(req: NextRequest) {
     }
 
     const isOwner = userId === premiumPost.post.authorId;
+    const canViewFull = hasPurchased || isOwner;
+
+    // ⚠️ SECURITY: `premiumPost.post` is the full Post row (content,
+    // imageUrl(s), linkUrl, ...). Spreading it into the response as-is
+    // handed the paid content to anyone - including logged-out callers -
+    // regardless of `fullContent` below. Only the post's non-gated
+    // identity/author fields are returned unless the viewer may see it
+    // (same rule as applyPremiumGating in src/lib/premium-content.ts).
+    const { post, ...premiumPostFields } = premiumPost;
+    const safePost = canViewFull
+      ? post
+      : { id: post.id, authorId: post.authorId, createdAt: post.createdAt, author: post.author };
 
     return jsonWithDecimals({
       isPremium: true,
       premiumPost: {
-        ...premiumPost,
+        ...premiumPostFields,
+        post: safePost,
         hasPurchased,
         isOwner,
         // Only show full content if purchased or owner
-        fullContent: (hasPurchased || isOwner) ? premiumPost.post.content : null,
+        fullContent: canViewFull ? post.content : null,
         previewContent: premiumPost.previewContent,
         price: premiumPost.price,
       },

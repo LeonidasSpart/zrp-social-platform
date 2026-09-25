@@ -9,6 +9,7 @@ import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
+import { parseAdTargetUrl } from "@/lib/ads/target-url";
 
 // ─── GET: list the current user's own campaigns ─────────────────────
 export async function GET(req: NextRequest) {
@@ -20,6 +21,8 @@ export async function GET(req: NextRequest) {
   try {
     const campaigns = await prisma.adCampaign.findMany({
       where: { advertiserId: token.id as string },
+      // adminNote is staff-only (see schema.prisma) - never returned here.
+      omit: { adminNote: true },
       orderBy: { createdAt: "desc" },
       include: {
         post: {
@@ -83,6 +86,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ⚠️ SECURITY: targetUrl is where every viewer's click on this ad is
+    // sent (AdCard does `window.location.href = redirectUrl`), and the
+    // enforced CSP allows inline script - a `javascript:` URL here would
+    // run in every clicking viewer's ZRP session. Only absolute http(s)
+    // URLs are accepted.
+    let normalizedTargetUrl: string | null = null;
+    if (targetUrl !== undefined && targetUrl !== null && targetUrl !== "") {
+      normalizedTargetUrl = parseAdTargetUrl(targetUrl);
+      if (!normalizedTargetUrl) {
+        return NextResponse.json(
+          { error: "Destination URL must be a valid http(s) URL." },
+          { status: 400 }
+        );
+      }
+    }
+
+    const parsedStart = startDate ? new Date(startDate) : null;
+    const parsedEnd = endDate ? new Date(endDate) : null;
+    if ((parsedStart && Number.isNaN(parsedStart.getTime())) || (parsedEnd && Number.isNaN(parsedEnd.getTime()))) {
+      return NextResponse.json({ error: "Invalid start or end date." }, { status: 400 });
+    }
+
     // The ad creative must be the advertiser's own post - otherwise
     // anyone could promote someone else's content without consent.
     const post = await prisma.post.findUnique({
@@ -120,10 +145,11 @@ export async function POST(req: NextRequest) {
         bidType,
         bidAmount: numericBid,
         budgetTotal: numericBudget,
-        targetUrl: targetUrl || null,
-        startDate: startDate ? new Date(startDate) : null,
-        endDate: endDate ? new Date(endDate) : null,
+        targetUrl: normalizedTargetUrl,
+        startDate: parsedStart,
+        endDate: parsedEnd,
       },
+      omit: { adminNote: true },
     });
 
     return jsonWithDecimals({ campaign }, { status: 201 });

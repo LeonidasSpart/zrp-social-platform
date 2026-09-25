@@ -142,6 +142,7 @@ function ModalShell({
   children: React.ReactNode;
   wide?: boolean;
 }) {
+  const { t } = useLanguage();
   return (
     <div className="fixed inset-0 z-[10050] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center">
       <div
@@ -152,6 +153,7 @@ function ModalShell({
           <button
             type="button"
             onClick={onClose}
+            aria-label={t("music.shell.close")}
             className="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center"
           >
             <X className="w-4.5 h-4.5" />

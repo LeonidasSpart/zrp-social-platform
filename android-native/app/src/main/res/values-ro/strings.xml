@@ -2363,4 +2363,10 @@
     <string name="admin_badge_government">Guvern</string>
     <string name="admin_badge_team">Echipa ZRP</string>
     <string name="admin_badge_none">Fără</string>
+    <string name="post_show_translation">Arată traducerea</string>
+    <string name="post_show_original">Arată originalul</string>
+    <string name="post_translation_unavailable">Traducerea este indisponibilă momentan.</string>
+    <string name="auth_username_taken">Acest nume de utilizator este deja luat.</string>
+    <string name="auth_username_format_hint">3-20 de caractere, doar litere/cifre/liniuțe de subliniere</string>
+    <string name="quote_post_title">Citează postarea</string>
 </resources>

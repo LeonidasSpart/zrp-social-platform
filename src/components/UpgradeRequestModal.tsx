@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { X, Loader2, Building, CreditCard, Wallet } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Props {
@@ -20,6 +21,9 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const titleId = useId();
+  const dialogRef = useDialogA11y(true, onClose, !loading);
 
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
   const price = limits.priceMonthly;
@@ -57,16 +61,16 @@ export default function UpgradeRequestModal({ plan, limits, onClose, onSuccess }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto">
+      <div className="focus:outline-none bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <button
           onClick={onClose}
           aria-label={t("help.close")}
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+          className="absolute top-3 end-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 id={titleId} className="text-xl font-bold text-gray-900 dark:text-white mb-2">
           {t("upgradeRequest.title", { plan: planLabel })}
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">

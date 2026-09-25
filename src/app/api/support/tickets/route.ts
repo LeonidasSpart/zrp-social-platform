@@ -21,7 +21,10 @@ export async function GET(req: NextRequest) {
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
       include: {
+        // Internal staff notes are never shown to the ticket owner
+        // (same rule as GET /api/support/tickets/[id]).
         replies: {
+          where: { isInternal: false },
           orderBy: { createdAt: 'desc' },
           take: 1,
           include: {
@@ -36,7 +39,7 @@ export async function GET(req: NextRequest) {
         },
         _count: {
           select: {
-            replies: true,
+            replies: { where: { isInternal: false } },
           },
         },
       },

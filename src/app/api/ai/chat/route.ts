@@ -125,14 +125,18 @@ export async function POST(req: NextRequest) {
           id: conversationId,
         },
         include: {
+          // The 20 MOST RECENT turns (newest first here, put back into
+          // chronological order below) - ascending + take would pin the
+          // model to the first 20 turns of a long conversation forever.
           messages: {
             orderBy: {
-              createdAt: "asc",
+              createdAt: "desc",
             },
             take: 20,
           },
         },
       });
+      conversation?.messages.reverse();
 
       if (conversation?.userId !== session.user.id) {
         return NextResponse.json(
@@ -492,8 +496,9 @@ If someone asks who you are, say:
 
       return NextResponse.json(
         {
+          // Generic on purpose: the provider's own error text can carry
+          // request details or configuration hints.
           error:
-            error.message ||
             "AI service temporarily unavailable",
         },
         { status: 503 }

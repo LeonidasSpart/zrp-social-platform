@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { UTApi } from "uploadthing/server";
+import { isTrustedUploadUrl } from "@/lib/media-url";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Missing coverUrl" }, { status: 400 });
       }
 
-      if (!coverUrl.includes("utfs.io") && !coverUrl.includes("ufs.sh")) {
+      if (!isTrustedUploadUrl(coverUrl)) {
         return NextResponse.json({ error: "Invalid cover URL" }, { status: 400 });
       }
 

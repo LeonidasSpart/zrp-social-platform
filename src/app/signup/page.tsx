@@ -91,10 +91,24 @@ export default function SignupPage() {
     setError("");
 
     try {
+      // Acquisition attribution: an ambassador's invite link is
+      // /signup?ref=<invitationCode> (see ambassadors/dashboard) and
+      // campaigns use utm_source/utm_campaign. /api/auth/register
+      // classifies these, but they were never forwarded, so every web
+      // signup was recorded as DIRECT and no referral ever counted.
+      const query = new URLSearchParams(window.location.search);
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, username, email, password }),
+        body: JSON.stringify({
+          name,
+          username,
+          email,
+          password,
+          ref: query.get("ref") || undefined,
+          utmSource: query.get("utm_source") || undefined,
+          utmCampaign: query.get("utm_campaign") || undefined,
+        }),
       });
 
       const data = await res.json();

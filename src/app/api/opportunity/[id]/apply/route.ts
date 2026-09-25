@@ -9,6 +9,7 @@ import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { createNotification } from "@/lib/notifications";
+import { isTrustedUploadUrl } from "@/lib/media-url";
 
 // ─── POST: apply to an in-platform opportunity listing ──────────────
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -52,6 +53,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Cover note is too long (max 3000 characters)." }, { status: 400 });
     }
     if (resumeUrl !== undefined && typeof resumeUrl !== "string") {
+      return NextResponse.json({ error: "Invalid resume URL." }, { status: 400 });
+    }
+    // ⚠️ SECURITY: the resume is rendered as an <a href> on the poster's
+    // applicants page. ApplyModal only ever sends an UploadThing URL, so
+    // anything else (e.g. `javascript:...`, a phishing host) is rejected
+    // rather than handed to the listing owner as a clickable link.
+    if (typeof resumeUrl === "string" && resumeUrl.trim() && !isTrustedUploadUrl(resumeUrl.trim())) {
       return NextResponse.json({ error: "Invalid resume URL." }, { status: 400 });
     }
 

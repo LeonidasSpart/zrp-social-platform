@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireStaff, requireAdmin } from "@/lib/admin";
 import { logAdminAction } from "@/lib/audit-log";
+const REPORT_STATUSES = ["pending", "reviewed", "dismissed", "actioned"];
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -13,15 +15,25 @@ export async function PUT(
   if (!adminCheck.authorized) return adminCheck.response;
 
   try {
-    const { status, actionType, actionNote } = await req.json();
+    const { status, actionType, actionNote } = await req.json().catch(() => ({}));
+
+    // Report.status is a free-text column; anything outside the known
+    // set would drop the report out of every queue filter and the
+    // transparency dashboard's counts (which only know these four).
+    if (!REPORT_STATUSES.includes(status)) {
+      return NextResponse.json(
+        { error: `status must be one of: ${REPORT_STATUSES.join(", ")}` },
+        { status: 400 }
+      );
+    }
 
     // Build the update payload
     const data: any = { status };
 
     // If status is "actioned", store action details and timestamp
     if (status === "actioned") {
-      data.actionType = actionType || null;
-      data.actionNote = actionNote || null;
+      data.actionType = typeof actionType === "string" && actionType ? actionType : null;
+      data.actionNote = typeof actionNote === "string" && actionNote ? actionNote : null;
       data.actionedAt = new Date();
 
       // Denormalize who this action was actually taken against, read
@@ -77,6 +89,9 @@ export async function PUT(
 
     return NextResponse.json(report);
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ error: "Report not found" }, { status: 404 });
+    }
     console.error("Error updating report:", error);
     return NextResponse.json(
       { error: "Failed to update report" },

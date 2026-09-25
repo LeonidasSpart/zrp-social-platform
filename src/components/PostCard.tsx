@@ -54,6 +54,7 @@ import ParsedContent from "./ParsedContent";
 import Poll from "./Poll";
 import { extractFirstUrl } from "@/lib/link-preview-parse";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { getDateLocale } from "@/lib/dateLocale";
 import { getPostUrl } from "@/lib/postUrl";
 import SharePostModal from "./SharePostModal";
@@ -410,6 +411,36 @@ export default function PostCard({
 
   const [showQuoteModal, setShowQuoteModal] =
     useState(false);
+
+  // The "..." menu and the repost dropdown were pointer-only: no
+  // Escape, and the repost dropdown had no outside-click dismissal at
+  // all (it stayed open until an item was picked). Escape now closes
+  // either one and hands focus back to the button that opened it.
+  const moreMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const repostButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!showMoreMenu && !repostDropdownOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+
+      if (showMoreMenu) {
+        setShowMoreMenu(false);
+        moreMenuButtonRef.current?.focus();
+      }
+
+      if (repostDropdownOpen) {
+        setRepostDropdownOpen(false);
+        repostButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () =>
+      document.removeEventListener("keydown", handleEscape);
+  }, [showMoreMenu, repostDropdownOpen]);
 
   const [lastClickTime, setLastClickTime] =
     useState(0);
@@ -1187,16 +1218,29 @@ export default function PostCard({
           );
 
         if (res.ok) {
-          setLiked(!liked);
+          // Follow the server's settled state instead of blindly
+          // flipping: a request that raced a double-tap/another tab
+          // returns the real state, and flipping left the heart and
+          // count inverted from the database.
+          const data = await res.json().catch(() => null);
 
-          setLikesCount(
-            liked
-              ? Math.max(
-                  0,
-                  likesCount - 1
-                )
-              : likesCount + 1
-          );
+          const nowLiked =
+            typeof data?.liked === "boolean"
+              ? data.liked
+              : !liked;
+
+          if (nowLiked !== liked) {
+            setLiked(nowLiked);
+
+            setLikesCount(
+              nowLiked
+                ? likesCount + 1
+                : Math.max(
+                    0,
+                    likesCount - 1
+                  )
+            );
+          }
         }
       } catch (error) {
         console.error(
@@ -1337,10 +1381,10 @@ export default function PostCard({
           // message regardless of what actually went wrong - that was
           // making a 401/403/404 indistinguishable from a real 500 from
           // this UI alone.
-          let message = "Failed to delete post";
+          let message = t("post.errDeleteFailed");
           try {
             const data = await res.json();
-            if (data?.error) message = `Failed to delete post: ${data.error}`;
+            if (data?.error) message = `${t("post.errDeleteFailed")}: ${localizeApiMessage(data.error, t)}`;
           } catch {
             // Body wasn't JSON - fall back to the generic message.
           }
@@ -1353,7 +1397,7 @@ export default function PostCard({
         );
 
         alert(
-          "Failed to delete post"
+          t("post.errDeleteFailed")
         );
       } finally {
         setDeleting(false);
@@ -1389,7 +1433,7 @@ export default function PostCard({
 
         if (res.ok) {
           alert(
-            "Report submitted. Thank you for helping keep the community safe."
+            t("comment.reportSubmitted")
           );
 
           setShowReportModal(false);
@@ -1402,8 +1446,8 @@ export default function PostCard({
               );
 
           alert(
-            err.error ||
-              "Failed to submit report. Please try again."
+            localizeApiMessage(err.error, t) ||
+              t("comment.errReportFailed")
           );
 
           if (res.status === 409) {
@@ -1417,7 +1461,7 @@ export default function PostCard({
         );
 
         alert(
-          "Failed to submit report. Please try again."
+          t("comment.errReportFailed")
         );
       }
     };
@@ -1478,7 +1522,7 @@ export default function PostCard({
           onPinToggle?.();
         } else {
           alert(
-            "Failed to update pin status"
+            t("post.errPinFailed")
           );
         }
       } catch (error) {
@@ -1488,7 +1532,7 @@ export default function PostCard({
         );
 
         alert(
-          "Failed to update pin status"
+          t("post.errPinFailed")
         );
       } finally {
         setPinLoading(false);
@@ -1790,12 +1834,15 @@ export default function PostCard({
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
+                  ref={moreMenuButtonRef}
                   type="button"
                   onClick={() => setShowMoreMenu((v) => !v)}
                   aria-label={t("post.moreOptions")}
                   aria-haspopup="menu"
                   aria-expanded={showMoreMenu}
-                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition p-1 rounded-full"
+                  // p-3 gives a 40px hit area; -m-2 keeps the 24px
+                  // footprint the byline row was laid out around.
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition p-3 -m-2 rounded-full"
                 >
                   <MoreVertical className="w-4 h-4" />
                 </button>
@@ -1923,7 +1970,7 @@ export default function PostCard({
                   <Repeat className="w-3 h-3" />
 
                   <span>
-                    Reposted from{" "}
+                    {t("post.repostedFrom")}{" "}
                     <Link
                       href={`/profile/${originalAuthor.username}`}
                       className="hover:underline text-zrp-red"
@@ -2279,7 +2326,11 @@ export default function PostCard({
                         </div>
                       )}
 
-                      {post.applyUrl && (
+                      {/* Only real web/mail links - a stored
+                          javascript: URL (accepted by the API before
+                          it validated this field) must never become a
+                          clickable href. */}
+                      {post.applyUrl && /^(https?:|mailto:)/i.test(post.applyUrl.trim()) && (
                         <a
                           href={
                             post.applyUrl
@@ -2572,13 +2623,13 @@ export default function PostCard({
                             className="absolute bottom-2 right-2 z-10 bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
                             title={
                               videoMuted
-                                ? "Unmute"
-                                : "Mute"
+                                ? t("shorts.unmute")
+                                : t("shorts.mute")
                             }
                             aria-label={
                               videoMuted
-                                ? "Unmute video"
-                                : "Mute video"
+                                ? t("shorts.unmute")
+                                : t("shorts.mute")
                             }
                           >
                             {videoMuted ? (
@@ -2665,6 +2716,8 @@ export default function PostCard({
               {/* REPOST */}
               <div className="relative">
                 <button
+                  ref={repostButtonRef}
+                  type="button"
                   onClick={() =>
                     setRepostDropdownOpen(
                       !repostDropdownOpen
@@ -2689,7 +2742,7 @@ export default function PostCard({
                     />
                   </span>
 
-                  <span className="group-hover:text-green-500 group-focus-visible:text-green-500 transition -ml-1 whitespace-nowrap">
+                  <span className="group-hover:text-green-500 group-focus-visible:text-green-500 transition -ms-1 whitespace-nowrap">
                     {formatCount(
                       repostsCount +
                         (post._count
@@ -2698,11 +2751,19 @@ export default function PostCard({
                     )}
                   </span>
 
-                  <ChevronDown className="w-3 h-3 ml-0.5" />
+                  <ChevronDown className="w-3 h-3 ms-0.5" />
                 </button>
 
                 {repostDropdownOpen && (
-                  <div className="absolute left-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-20 overflow-hidden">
+                  <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setRepostDropdownOpen(false)}
+                  />
+                  <div
+                    role="menu"
+                    className="absolute start-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-20 overflow-hidden"
+                  >
 
                     {reposted ? (
                       <button
@@ -2713,9 +2774,11 @@ export default function PostCard({
                             false
                           );
                         }}
-                        className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        type="button"
+                        role="menuitem"
+                        className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
-                        Undo Repost
+                        {t("post.undoRepost")}
                       </button>
                     ) : (
                       <button
@@ -2726,9 +2789,11 @@ export default function PostCard({
                             false
                           );
                         }}
-                        className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        type="button"
+                        role="menuitem"
+                        className="block w-full text-start px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
-                        Repost
+                        {t("action.repost")}
                       </button>
                     )}
 
@@ -2742,39 +2807,45 @@ export default function PostCard({
                           false
                         );
                       }}
-                      className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      type="button"
+                      role="menuitem"
+                      className="block w-full text-start px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
-                      Quote
+                      {t("quote.submit")}
                     </button>
 
                     <Link
                       href={`/post/${post.id}/reposts`}
-                      className="block w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-t border-gray-100 dark:border-gray-700"
+                      role="menuitem"
+                      onClick={() => setRepostDropdownOpen(false)}
+                      className="block w-full text-start px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-t border-gray-100 dark:border-gray-700"
                     >
-                      {formatCount(
-                        repostsCount
-                      )}{" "}
-                      reposts
+                      {t("reposts.count", {
+                        n: formatCount(repostsCount),
+                      })}
                     </Link>
 
                     <Link
                       href={`/post/${post.id}/quotes`}
-                      className="block w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      role="menuitem"
+                      onClick={() => setRepostDropdownOpen(false)}
+                      className="block w-full text-start px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
-                      {formatCount(
-                        post._count
-                          ?.quotedBy ||
-                          0
-                      )}{" "}
-                      quotes
+                      {t("quotes.count", {
+                        n: formatCount(
+                          post._count
+                            ?.quotedBy || 0
+                        ),
+                      })}
                     </Link>
                   </div>
+                  </>
                 )}
 
                 {repostNotice && (
                   <div
                     role="status"
-                    className="absolute left-0 top-full mt-1 w-48 px-3 py-2 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs shadow-lg z-20"
+                    className="absolute start-0 top-full mt-1 w-48 px-3 py-2 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs shadow-lg z-20"
                   >
                     {repostNotice}
                   </div>
@@ -3189,6 +3260,7 @@ export default function PostCard({
                 onClick={() =>
                   setShowEmojiPicker(false)
                 }
+                aria-label={t("help.close")}
                 className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <X className="w-5 h-5" />

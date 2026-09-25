@@ -178,6 +178,22 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       );
     }
 
+    // A withdrawal request already moved its amount OUT of `balance`
+    // (reserve-on-request), so a zero balance doesn't mean nothing is in
+    // flight. HelpWithdrawalRequest cascades off the campaign: deleting
+    // now would silently erase a PENDING request (and the reserved funds
+    // with it), or pull the row out from under an admin approval that
+    // is mid-transfer on-chain.
+    const inFlight = await prisma.helpWithdrawalRequest.count({
+      where: { campaignId: id, status: { in: ["PENDING", "PROCESSING"] } },
+    });
+    if (inFlight > 0) {
+      return NextResponse.json(
+        { error: "This campaign has a withdrawal still being processed and can't be deleted yet." },
+        { status: 409 }
+      );
+    }
+
     await prisma.helpCampaign.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {

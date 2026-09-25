@@ -46,7 +46,8 @@ const ORPHAN_GRACE_PERIOD_MS = 24 * 60 * 60 * 1000; // 24 hours
 //   avatar           -> User.avatarUrl
 //   banner           -> User.coverUrl
 //   chatImage/File/
-//   Audio/Video      -> Message.imageUrl (one field holds every chat
+//   Audio/Video      -> Conversation.avatarUrl (group avatars, chatImage),
+//                        Message.imageUrl (one field holds every chat
 //                        attachment type - see ChatInterface.tsx),
 //                        OpportunityApplication.resumeUrl (application
 //                        forms reuse the chatFile route for resumes)
@@ -80,6 +81,7 @@ async function collectReferencedKeys(): Promise<Set<string>> {
     musicAlbums,
     musicTracks,
     musicPlaylists,
+    conversations,
   ] = await Promise.all([
     prisma.user.findMany({ select: { avatarUrl: true, coverUrl: true } }),
     prisma.post.findMany({ select: { imageUrl: true, imageUrls: true } }),
@@ -94,9 +96,14 @@ async function collectReferencedKeys(): Promise<Set<string>> {
     prisma.listing.findMany({ select: { imageUrls: true, videoUrl: true } }),
     prisma.helpCampaign.findMany({ select: { imageUrls: true, proofUrls: true } }),
     prisma.musicArtist.findMany({ select: { avatarUrl: true, bannerUrl: true } }),
-    prisma.musicAlbum.findMany({ select: { coverUrl: true } }),
-    prisma.musicTrack.findMany({ select: { audioUrl: true, audioKey: true, coverUrl: true } }),
+    prisma.musicAlbum.findMany({ select: { coverUrl: true, coverKey: true } }),
+    prisma.musicTrack.findMany({ select: { audioUrl: true, audioKey: true, coverUrl: true, coverKey: true } }),
     prisma.musicPlaylist.findMany({ where: { coverUrl: { not: null } }, select: { coverUrl: true } }),
+    // Group-chat avatars (GroupInfoPanel uploads them via chatImage) -
+    // missing here meant every group avatar older than the grace period
+    // was reported as orphaned and deleted by a cleanup run. Kept in
+    // step with isKeyReferencedInTextColumns() in src/lib/upload-ownership.ts.
+    prisma.conversation.findMany({ where: { avatarUrl: { not: null } }, select: { avatarUrl: true } }),
   ]);
 
   users.forEach((u) => {
@@ -124,13 +131,18 @@ async function collectReferencedKeys(): Promise<Set<string>> {
     addUrl(a.avatarUrl);
     addUrl(a.bannerUrl);
   });
-  musicAlbums.forEach((a) => addUrl(a.coverUrl));
+  musicAlbums.forEach((a) => {
+    addUrl(a.coverUrl);
+    addKey(a.coverKey);
+  });
   musicTracks.forEach((t) => {
     addUrl(t.audioUrl);
     addKey(t.audioKey);
     addUrl(t.coverUrl);
+    addKey(t.coverKey);
   });
   musicPlaylists.forEach((p) => addUrl(p.coverUrl));
+  conversations.forEach((c) => addUrl(c.avatarUrl));
 
   return referenced;
 }

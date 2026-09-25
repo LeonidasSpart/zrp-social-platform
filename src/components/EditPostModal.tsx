@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { useSession } from "next-auth/react";
 import { X } from "lucide-react";
 import { getPlanLimits } from "@/lib/limits";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface EditPostModalProps {
@@ -27,6 +28,9 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
   const [content, setContent] = useState(post.content);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const titleId = useId();
+  const dialogRef = useDialogA11y(isOpen, onClose, !loading);
 
   if (!isOpen) return null;
 
@@ -63,9 +67,9 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdate }: EditP
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-lg w-full p-6">
+      <div className="focus:outline-none bg-white dark:bg-zrp-deepBlack rounded-lg shadow-xl max-w-lg w-full p-6" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("editPost.title")}</h2>
+          <h2 id={titleId} className="text-xl font-bold text-gray-900 dark:text-white">{t("editPost.title")}</h2>
           <button
             onClick={onClose}
             aria-label={t("help.close")}

@@ -626,4 +626,135 @@ describe.skipIf(!hasRealDatabaseUrl)("AdCampaign lifecycle (integration, real Po
     });
     expect(deleteRes.status).toBe(403);
   });
+
+  // ─── Money/entitlement hardening ─────────────────────────────────
+
+  async function payFor(advertiserId: string, campaignId: string, amount = 50, from?: string) {
+    const txId = `tx-ad-hard-${randomUUID()}`;
+    verifyUsdcTransaction.mockResolvedValue(validVerification({ amount, ...(from ? { from } : {}) }));
+    asUser(advertiserId);
+    return payCampaign(
+      req(`https://zrp.one/api/ads/campaigns/${campaignId}/pay`, "POST", { transactionId: txId }),
+      { params: Promise.resolve({ id: campaignId }) }
+    );
+  }
+
+  it("a funded campaign's budget cannot be raised above what was paid (lowering is still allowed)", async () => {
+    const advertiser = await createUser("creator-budget1");
+    const post = await createPost(advertiser.id);
+    const campaign = await createCampaignFor(advertiser.id, post.id, { budgetTotal: 50 });
+    await approveViaAdmin(campaign.id);
+    expect((await payFor(advertiser.id, campaign.id, 50)).status).toBe(200);
+
+    asUser(advertiser.id);
+    const raise = await putCampaign(
+      req(`https://zrp.one/api/ads/campaigns/${campaign.id}`, "PUT", { budgetTotal: 1_000_000 }),
+      { params: Promise.resolve({ id: campaign.id }) }
+    );
+    expect(raise.status).toBe(400);
+    expect((await prisma.adCampaign.findUnique({ where: { id: campaign.id } }))?.budgetTotal.toNumber()).toBe(50);
+
+    const lower = await putCampaign(
+      req(`https://zrp.one/api/ads/campaigns/${campaign.id}`, "PUT", { budgetTotal: 40 }),
+      { params: Promise.resolve({ id: campaign.id }) }
+    );
+    expect(lower.status).toBe(200);
+  });
+
+  it("the staff-only adminNote is never returned on advertiser-facing routes", async () => {
+    const advertiser = await createUser("creator-note1");
+    const post = await createPost(advertiser.id);
+    const campaign = await createCampaignFor(advertiser.id, post.id);
+    await prisma.adCampaign.update({ where: { id: campaign.id }, data: { adminNote: "internal: shady advertiser" } });
+
+    asUser(advertiser.id);
+    const { GET: listCampaigns } = await import("../campaigns/route");
+    const { GET: getCampaign } = await import("../campaigns/[id]/route");
+    const listBody = await (await listCampaigns(req("https://zrp.one/api/ads/campaigns", "GET"))).json();
+    const oneBody = await (
+      await getCampaign(req(`https://zrp.one/api/ads/campaigns/${campaign.id}`, "GET"), {
+        params: Promise.resolve({ id: campaign.id }),
+      })
+    ).json();
+    const putBody = await (
+      await putCampaign(req(`https://zrp.one/api/ads/campaigns/${campaign.id}`, "PUT", { name: "x" }), {
+        params: Promise.resolve({ id: campaign.id }),
+      })
+    ).json();
+
+    const listed = listBody.campaigns.find((c: { id: string }) => c.id === campaign.id);
+    expect(listed).toBeDefined();
+    expect(listed).not.toHaveProperty("adminNote");
+    expect(oneBody.campaign).not.toHaveProperty("adminNote");
+    expect(putBody.campaign).not.toHaveProperty("adminNote");
+  });
+
+  it("refuses a javascript: (or any non-http(s)) targetUrl, and the click route never hands one out", async () => {
+    const advertiser = await createUser("creator-url1");
+    const post = await createPost(advertiser.id);
+
+    asUser(advertiser.id);
+    for (const bad of ["javascript:alert(document.cookie)", "data:text/html,<script>1</script>", "not a url"]) {
+      const res = await createCampaign(
+        req("https://zrp.one/api/ads/campaigns", "POST", {
+          postId: post.id,
+          name: "xss",
+          bidType: "CPC",
+          bidAmount: 1,
+          budgetTotal: 10,
+          targetUrl: bad,
+        })
+      );
+      expect(res.status).toBe(400);
+    }
+
+    // A legacy row written before validation existed.
+    const campaign = await createCampaignFor(advertiser.id, post.id, { bidType: "CPC" });
+    await prisma.adCampaign.update({
+      where: { id: campaign.id },
+      data: { status: "ACTIVE", targetUrl: "javascript:alert(1)" },
+    });
+    asLoggedOut();
+    const click = await logClick(req("https://zrp.one/api/ads/click", "POST", { campaignId: campaign.id }));
+    const body = await click.json();
+    expect(body.redirectUrl).toBe(`/post/${post.id}`);
+  });
+
+  it("a payment whose verification finishes after staff cancelled the campaign does not reactivate it", async () => {
+    const advertiser = await createUser("creator-race1");
+    const post = await createPost(advertiser.id);
+    const campaign = await createCampaignFor(advertiser.id, post.id, { budgetTotal: 50 });
+    await approveViaAdmin(campaign.id);
+
+    const txId = `tx-ad-race-${randomUUID()}`;
+    verifyUsdcTransaction.mockImplementation(async () => {
+      // Staff cancels while the on-chain verification is in flight.
+      await prisma.adCampaign.update({ where: { id: campaign.id }, data: { status: "CANCELLED" } });
+      return validVerification({ amount: 50 });
+    });
+    asUser(advertiser.id);
+    const res = await payCampaign(
+      req(`https://zrp.one/api/ads/campaigns/${campaign.id}/pay`, "POST", { transactionId: txId }),
+      { params: Promise.resolve({ id: campaign.id }) }
+    );
+    expect(res.status).toBe(409);
+    const row = await prisma.adCampaign.findUnique({ where: { id: campaign.id } });
+    expect(row?.status).toBe("CANCELLED");
+    // The signature was not burned by the rolled-back claim.
+    expect(await prisma.consumedPaymentTransaction.findUnique({ where: { transactionId: txId } })).toBeNull();
+  });
+
+  it("a payment sent from a wallet verified-linked to ANOTHER account cannot fund this campaign", async () => {
+    const victimWallet = `VictimWallet${randomUUID().replace(/-/g, "").slice(0, 20)}`;
+    const victim = await createUser("adpay-victim1");
+    await prisma.user.update({ where: { id: victim.id }, data: { verifiedSolanaWallet: victimWallet } });
+    const advertiser = await createUser("creator-thief1");
+    const post = await createPost(advertiser.id);
+    const campaign = await createCampaignFor(advertiser.id, post.id, { budgetTotal: 50 });
+    await approveViaAdmin(campaign.id);
+
+    const res = await payFor(advertiser.id, campaign.id, 50, victimWallet);
+    expect(res.status).toBe(400);
+    expect((await prisma.adCampaign.findUnique({ where: { id: campaign.id } }))?.status).toBe("PAYMENT_PENDING");
+  });
 });

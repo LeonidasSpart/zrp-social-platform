@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { canViewPrivateContent } from "@/lib/permissions";
+import { canViewPrivateContent, viewablePostAuthorFilter } from "@/lib/permissions";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
 import { applyPremiumGating } from "@/lib/premium-content";
 
@@ -25,8 +25,27 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       return NextResponse.json({ items: [], nextCursor: null });
     }
 
+    // ⚠️ SECURITY/PRIVACY: each quote is its OWN post by its own author
+    // - checking only the ORIGINAL post's visibility (above) meant a
+    // private account's quote, a not-yet-published scheduled quote, and
+    // a quote by someone the viewer blocked (or who blocked them) were
+    // all listed here in full. Same rules as every other post listing.
+    const excludedAuthorIds = viewerId
+      ? (
+          await prisma.blocked.findMany({
+            where: { OR: [{ blockerId: viewerId }, { blockedId: viewerId }] },
+            select: { blockerId: true, blockedId: true },
+          })
+        ).map((b) => (b.blockerId === viewerId ? b.blockedId : b.blockerId))
+      : [];
+
     const rawQuotes = await prisma.post.findMany({
-      where: { quotePostId: postId },
+      where: {
+        quotePostId: postId,
+        status: "published",
+        authorId: { notIn: excludedAuthorIds },
+        author: viewablePostAuthorFilter(viewerId),
+      },
       orderBy: { createdAt: "desc" },
       take: limit + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),

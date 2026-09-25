@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { adminGrantSubscription } from "@/lib/subscriptions";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 import type { Plan } from "@/lib/limits";
 import { PLANS } from "@/lib/limits";
 
@@ -43,6 +44,9 @@ export async function POST(req: NextRequest, props: { params: Promise<{ userId: 
     actorUsername: adminCheck.session.user.username ?? null,
     ref: `admin-grant-${randomUUID()}`,
   });
+  // applyVerifiedPayment() wrote User.plan inside the transaction; the
+  // cancel/restore helpers invalidate themselves, this path must too.
+  invalidateUserAuthState(userId);
 
   await prisma.auditLog.create({
     data: {

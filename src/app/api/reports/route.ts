@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { Prisma } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   // Rate limit: 10 reports per 10 minutes - reports are meant to be rare
@@ -21,8 +22,18 @@ export async function POST(req: NextRequest) {
     const { postId, commentId, listingId, challengeId, opportunityId, campaignId, userId, reason, details } =
       await req.json();
 
-    if (!reason) {
+    if (typeof reason !== "string" || !reason.trim() || reason.length > 200) {
       return NextResponse.json({ error: "Reason is required" }, { status: 400 });
+    }
+    if (details !== undefined && details !== null && (typeof details !== "string" || details.length > 2000)) {
+      return NextResponse.json({ error: "Details must be text (up to 2000 characters)." }, { status: 400 });
+    }
+    // Every target id, when present, must be a string - anything else
+    // used to reach Prisma and surface as a 500.
+    for (const value of [postId, commentId, listingId, challengeId, opportunityId, campaignId, userId]) {
+      if (value !== undefined && value !== null && typeof value !== "string") {
+        return NextResponse.json({ error: "Invalid report target." }, { status: 400 });
+      }
     }
 
     if (!postId && !commentId && !listingId && !challengeId && !opportunityId && !campaignId && !userId) {
@@ -95,6 +106,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(report, { status: 201 });
   } catch (error) {
+    // Foreign-key violation: the reported post/comment/user/etc. doesn't
+    // exist (or was deleted meanwhile).
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
+      return NextResponse.json({ error: "The reported content no longer exists." }, { status: 404 });
+    }
     console.error("Report error:", error);
     return NextResponse.json({ error: "Failed to create report" }, { status: 500 });
   }

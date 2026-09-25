@@ -544,7 +544,7 @@ fun PostCard(
                             )
                         }
                         Text(
-                            text = if (showTranslation) "Show original" else "Show translation",
+                            text = stringResource(if (showTranslation) R.string.post_show_original else R.string.post_show_translation),
                             style = MaterialTheme.typography.bodySmall,
                             color = ZrpRed,
                             modifier = Modifier.padding(start = 4.dp),
@@ -553,7 +553,7 @@ fun PostCard(
 
                     if (translateError) {
                         Text(
-                            text = "Translation unavailable right now.",
+                            text = stringResource(R.string.post_translation_unavailable),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 2.dp),

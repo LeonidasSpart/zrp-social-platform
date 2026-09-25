@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash, timingSafeEqual } from "crypto";
 import { sendPushNotification } from "@/lib/push-notifications";
 
 export const dynamic = "force-dynamic";
+
+// Constant-time comparison of the presented Authorization header against
+// the expected one (hashed first so both buffers are always equal length).
+function secretMatches(presented: string | null, secret: string): boolean {
+  if (!presented) return false;
+  const a = createHash("sha256").update(presented).digest();
+  const b = createHash("sha256").update(`Bearer ${secret}`).digest();
+  return timingSafeEqual(a, b);
+}
 
 // server.js (the raw Node/Socket.IO process - not a Next.js request
 // context, so it cannot import this route's TS module tree directly)
@@ -16,9 +26,14 @@ export const dynamic = "force-dynamic";
 // client. Reuses the existing, already-tested sendPushNotification
 // (Web Push + FCM) rather than a second, duplicated implementation.
 export async function POST(req: NextRequest) {
+  // Loopback-only is enforced in server.js, on the raw socket address,
+  // before Next.js sees the request. It can't be re-checked here from
+  // X-Forwarded-For: Next.js itself sets that header to the socket's
+  // remote address (127.0.0.1 for server.js's own call) on every request.
+
   const authHeader = req.headers.get("authorization");
   const secret = process.env.INTERNAL_PUSH_SECRET;
-  if (!secret || authHeader !== `Bearer ${secret}`) {
+  if (!secret || !secretMatches(authHeader, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

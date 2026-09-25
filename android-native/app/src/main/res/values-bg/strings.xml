@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">Държавна институция</string>
     <string name="admin_badge_team">Екип на ZRP</string>
     <string name="admin_badge_none">Без значка</string>
+    <string name="post_show_translation">Покажи превода</string>
+    <string name="post_show_original">Покажи оригинала</string>
+    <string name="post_translation_unavailable">В момента преводът не е наличен.</string>
+    <string name="auth_username_taken">Това потребителско име вече е заето.</string>
+    <string name="auth_username_format_hint">3-20 символа, само букви/цифри/долни черти</string>
+    <string name="quote_post_title">Цитирай публикация</string>
 </resources>

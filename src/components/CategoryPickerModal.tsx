@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useId } from "react";
 import { X, Search, Check } from "lucide-react";
 import { PROFESSIONAL_CATEGORIES, categoryToTranslationKey } from "@/lib/professionalCategories";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 
 interface CategoryPickerModalProps {
   isOpen: boolean;
@@ -35,6 +36,9 @@ export default function CategoryPickerModal({
     return PROFESSIONAL_CATEGORIES.filter((c) => c.toLowerCase().includes(q));
   }, [query]);
 
+  const titleId = useId();
+  const dialogRef = useDialogA11y(isOpen, onClose, true);
+
   if (!isOpen) return null;
 
   const handleSave = () => {
@@ -43,7 +47,7 @@ export default function CategoryPickerModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center sm:justify-center">
-      <div className="bg-white dark:bg-zrp-deepBlack w-full sm:max-w-lg sm:rounded-2xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div className="focus:outline-none bg-white dark:bg-zrp-deepBlack w-full sm:max-w-lg sm:rounded-2xl max-h-[85vh] flex flex-col overflow-hidden" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         {/* ─── Header ─────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <button
@@ -53,7 +57,7 @@ export default function CategoryPickerModal({
           >
             <X className="w-5 h-5" />
           </button>
-          <span className="font-semibold text-gray-900 dark:text-white">
+          <span id={titleId} className="font-semibold text-gray-900 dark:text-white">
             {t("categoryPicker.selectTitle")}
           </span>
           <div className="w-5" />

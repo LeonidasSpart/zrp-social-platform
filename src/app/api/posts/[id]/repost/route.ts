@@ -9,6 +9,7 @@ import { sendPushNotification } from "@/lib/push-notifications";
 import { getPlanLimits, getUserPlan } from "@/lib/limits";
 import { reserveRepost, releaseRepost } from "@/lib/repost-quota";
 import { isBlockedEitherWay } from "@/lib/auth-guards";
+import { findVisiblePost } from "@/lib/post-visibility";
 
 function isUniqueViolation(err: unknown): boolean {
   return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
@@ -105,10 +106,22 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       // even reserved - a blocked relationship must never cost the
       // reposter part of their daily limit for an interaction that can't
       // happen anyway.
-      const targetPost = await prisma.post.findUnique({
-        where: { id: postId },
-        select: { authorId: true },
-      });
+      //
+      // ⚠️ SECURITY: a repost republishes the post on the reposter's
+      // public reposts tab, so it must obey the same visibility rule as
+      // reading it - a private account's (or a still-scheduled) post
+      // could otherwise be pushed to everyone by anyone holding its id.
+      // A private account's post can't be reposted by anyone but its
+      // owner (same rule as X's protected posts): even an approved
+      // follower's repost would surface it on their own, possibly
+      // public, profile.
+      const targetPost = await findVisiblePost(userId, postId);
+      if (!targetPost) {
+        return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      }
+      if (targetPost.author.isPrivate && targetPost.authorId !== userId) {
+        return NextResponse.json({ error: "Posts from private accounts can't be reposted" }, { status: 403 });
+      }
       if (
         targetPost &&
         targetPost.authorId !== userId &&

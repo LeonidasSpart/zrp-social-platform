@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">정부 기관</string>
     <string name="admin_badge_team">ZRP 팀</string>
     <string name="admin_badge_none">없음</string>
+    <string name="post_show_translation">번역 보기</string>
+    <string name="post_show_original">원문 보기</string>
+    <string name="post_translation_unavailable">지금은 번역을 이용할 수 없습니다.</string>
+    <string name="auth_username_taken">이미 사용 중인 사용자 이름입니다.</string>
+    <string name="auth_username_format_hint">3~20자, 영문자/숫자/밑줄만 사용 가능</string>
+    <string name="quote_post_title">게시물 인용</string>
 </resources>

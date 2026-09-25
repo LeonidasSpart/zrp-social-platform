@@ -2368,4 +2368,10 @@
     <string name="admin_badge_government">Instytucja rządowa</string>
     <string name="admin_badge_team">Zespół ZRP</string>
     <string name="admin_badge_none">Brak</string>
+    <string name="post_show_translation">Pokaż tłumaczenie</string>
+    <string name="post_show_original">Pokaż oryginał</string>
+    <string name="post_translation_unavailable">Tłumaczenie jest teraz niedostępne.</string>
+    <string name="auth_username_taken">Ta nazwa użytkownika jest zajęta.</string>
+    <string name="auth_username_format_hint">3-20 znaków, tylko litery/cyfry/podkreślenia</string>
+    <string name="quote_post_title">Zacytuj post</string>
 </resources>

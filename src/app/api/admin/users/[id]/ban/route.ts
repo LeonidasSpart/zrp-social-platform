@@ -14,18 +14,48 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
   const userId = params.id;
 
+  // Optional explicit target state ({ banned: true|false }). The admin UI
+  // sends it so a double-submit, or two staff acting on the same stale
+  // row, can't flip a ban straight back off. Omitted = legacy toggle.
+  const body = await req.json().catch(() => ({}));
+  const requested: boolean | undefined =
+    typeof body?.banned === "boolean" ? body.banned : undefined;
+
+  if (userId === adminCheck.session.user.id) {
+    return NextResponse.json({ error: "You can't ban your own account." }, { status: 400 });
+  }
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { banned: true },
+      select: { banned: true, role: true, isAdmin: true },
     });
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // ⚠️ SECURITY: this route is staff-level (moderators included), but a
+    // banned account fails every admin/staff check. Without this, any
+    // moderator could lock every admin (and every other moderator) out
+    // of the platform. Only a full admin may ban/unban a staff account.
+    const targetIsStaff = user.isAdmin || user.role === "ADMIN" || user.role === "MODERATOR";
+    if (targetIsStaff) {
+      const actor = await prisma.user.findUnique({
+        where: { id: adminCheck.session.user.id },
+        select: { role: true, isAdmin: true },
+      });
+      if (!actor || !(actor.isAdmin || actor.role === "ADMIN")) {
+        return NextResponse.json(
+          { error: "Only an admin can ban or unban a staff account." },
+          { status: 403 }
+        );
+      }
+    }
+
+    const nextBanned = requested ?? !user.banned;
     const updated = await prisma.user.update({
       where: { id: userId },
-      data: { banned: !user.banned },
+      data: { banned: nextBanned },
     });
 
     // A ban must bite immediately: drop the cached auth state so the

@@ -7,6 +7,7 @@ import LocaleDateTime from "@/components/i18n/LocaleDateTime";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import type { TranslationKey } from "@/lib/translations";
 import { SITE_URL, SITE_NAME, TWITTER_HANDLE, resolveOgImages } from "@/lib/seo/metadata";
+import { safeExternalHref } from "@/lib/profile-website";
 
 const CATEGORY_KEYS: Record<string, TranslationKey> = {
   WORLD: "newsCategory.world",
@@ -273,9 +274,9 @@ export default async function NewsArticlePage({
               <T k="news.source" />
             </div>
 
-            {article.sourceUrl ? (
+            {safeExternalHref(article.sourceUrl) ? (
               <a
-                href={article.sourceUrl}
+                href={safeExternalHref(article.sourceUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-1 inline-block font-medium text-red-600 hover:underline"

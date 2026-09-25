@@ -139,7 +139,11 @@ function resolveUrl(href: string, baseUrl: string | null): string | null {
   if (/^https?:\/\//i.test(href)) return href;
   if (!baseUrl) return null;
   try {
-    return new URL(href, baseUrl).toString();
+    // A relative href resolves against the feed's base, but an absolute
+    // one with another scheme (`javascript:`, `data:`) survives `new URL`
+    // unchanged - and becomes the article's clickable source link.
+    const resolved = new URL(href, baseUrl);
+    return resolved.protocol === "http:" || resolved.protocol === "https:" ? resolved.toString() : null;
   } catch {
     return null;
   }

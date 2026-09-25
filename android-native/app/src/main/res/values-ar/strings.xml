@@ -2413,4 +2413,10 @@
     <string name="admin_badge_government">حكومة</string>
     <string name="admin_badge_team">فريق ZRP</string>
     <string name="admin_badge_none">لا شيء</string>
+    <string name="post_show_translation">إظهار الترجمة</string>
+    <string name="post_show_original">إظهار النص الأصلي</string>
+    <string name="post_translation_unavailable">الترجمة غير متوفرة حاليًا.</string>
+    <string name="auth_username_taken">اسم المستخدم هذا مُستخدم بالفعل.</string>
+    <string name="auth_username_format_hint">من 3 إلى 20 حرفًا، أحرف/أرقام/شرطات سفلية فقط</string>
+    <string name="quote_post_title">اقتباس المنشور</string>
 </resources>

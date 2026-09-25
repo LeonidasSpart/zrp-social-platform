@@ -82,6 +82,11 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     if (!user) {
       console.log("🔍 Prisma OR returned null, trying raw SQL...");
 
+      // ILIKE treats % and _ as wildcards: an unescaped slug like "a%"
+      // resolved to an arbitrary user whose handle merely starts with
+      // "a" (wildcard enumeration / wrong-profile resolution). Escape
+      // them so this stays an exact, case-insensitive match.
+      const likeSlug = slug.replace(/[!%_]/g, (c) => `!${c}`);
       const users = await prisma.$queryRaw<Array<{
         id: string;
         username: string;
@@ -119,7 +124,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
           "solanaWallet", "category", "showCategory",
           "headline", "company", "position", "skills"
         FROM "User"
-        WHERE username ILIKE ${slug} OR "customUrl" ILIKE ${slug}
+        WHERE username ILIKE ${likeSlug} ESCAPE '!' OR "customUrl" ILIKE ${likeSlug} ESCAPE '!'
         LIMIT 1
       `;
 
@@ -188,10 +193,14 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // "Notify me when this account posts" - see PostSubscription in
     // prisma/schema.prisma, independent of isFollowing.
     let postNotificationsEnabled = false;
+    // A still-pending request to follow this (private) account, so the
+    // profile keeps showing "Requested" after a reload instead of
+    // "Follow" - the page reads this field, the route never returned it.
+    let followRequestStatus: "pending" | "none" = "none";
 
     if (session?.user?.id && session.user.id !== user.id) {
       // Independent lookups (no shared dependency), previously sequential.
-      const [follow, followBack, block, postSubscription] = await Promise.all([
+      const [follow, followBack, block, postSubscription, followRequest] = await Promise.all([
         prisma.follow.findUnique({
           where: {
             followerId_followingId: {
@@ -224,8 +233,18 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
             },
           },
         }),
+        prisma.followRequest.findUnique({
+          where: {
+            requesterId_targetId: {
+              requesterId: session.user.id,
+              targetId: user.id,
+            },
+          },
+          select: { status: true },
+        }),
       ]);
       isFollowing = !!follow;
+      followRequestStatus = !follow && followRequest?.status === "pending" ? "pending" : "none";
       followsMe = !!followBack;
       isBlocked = !!block;
       postNotificationsEnabled = !!postSubscription;
@@ -261,6 +280,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       isBlocked,
       followsMe,
       postNotificationsEnabled,
+      followRequestStatus,
       charityContributionUsdc,
       milestones,
     });

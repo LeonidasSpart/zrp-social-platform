@@ -160,7 +160,7 @@ export const metadata: Metadata = {
     ],
   },
 
-  manifest: "/manifest",
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -261,7 +261,7 @@ export default async function RootLayout({
           }}
         />
 
-        <link rel="manifest" href="/manifest" />
+        <link rel="manifest" href="/manifest.webmanifest" />
 
         <meta
           name="theme-color"

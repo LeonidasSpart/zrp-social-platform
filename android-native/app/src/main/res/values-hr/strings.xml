@@ -2363,4 +2363,10 @@
     <string name="admin_badge_government">Vlada</string>
     <string name="admin_badge_team">ZRP tim</string>
     <string name="admin_badge_none">Nema</string>
+    <string name="post_show_translation">Prikaži prijevod</string>
+    <string name="post_show_original">Prikaži izvornik</string>
+    <string name="post_translation_unavailable">Prijevod trenutačno nije dostupan.</string>
+    <string name="auth_username_taken">To korisničko ime je zauzeto.</string>
+    <string name="auth_username_format_hint">3-20 znakova, samo slova/brojevi/podvlake</string>
+    <string name="quote_post_title">Citiraj objavu</string>
 </resources>

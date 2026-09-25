@@ -22,7 +22,11 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
 
     // ─── Pagination parameters ──────────────────────────────────────
     const cursor = req.nextUrl.searchParams.get("cursor");
-    const limit = parseInt(req.nextUrl.searchParams.get("limit") || "10");
+    // Clamped: an unbounded ?limit= let one request pull a user's entire
+    // post history (with includes), and a non-numeric one reached Prisma
+    // as NaN and 500'd.
+    const parsedLimit = parseInt(req.nextUrl.searchParams.get("limit") || "10", 10);
+    const limit = Math.min(Math.max(Number.isFinite(parsedLimit) ? parsedLimit : 10, 1), 50);
 
     // ─── Find the user by username ──────────────────────────────────
     const user = await prisma.user.findUnique({
@@ -42,11 +46,18 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
     // ─── Get blocked users (if logged in) ──────────────────────────
     let blockedIds: string[] = [];
     if (session?.user?.id) {
+      // Either direction, same as /api/users/[username]/posts: a profile
+      // owner who blocked the viewer must not be readable by them either.
       const blocked = await prisma.blocked.findMany({
-        where: { blockerId: session.user.id },
-        select: { blockedId: true },
+        where: {
+          OR: [
+            { blockerId: session.user.id, blockedId: user.id },
+            { blockerId: user.id, blockedId: session.user.id },
+          ],
+        },
+        select: { blockerId: true, blockedId: true },
       });
-      blockedIds = blocked.map((b) => b.blockedId);
+      blockedIds = blocked.length > 0 ? [user.id] : [];
     }
 
     // ─── If the profile user is blocked, return empty results ──────
@@ -176,7 +187,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
   } catch (error: any) {
     console.error("Error fetching profile posts:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch posts" },
+      { error: "Failed to fetch posts" },
       { status: 500 }
     );
   }

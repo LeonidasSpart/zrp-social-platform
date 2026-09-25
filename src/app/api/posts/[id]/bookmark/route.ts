@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { rateLimit } from "@/lib/rate-limit";
+import { findVisiblePost } from "@/lib/post-visibility";
+
+function isPrismaCode(err: unknown, code: string): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === code;
+}
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -41,23 +47,43 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
     if (existing) {
       // Remove bookmark
-      await prisma.bookmark.delete({
-        where: {
-          userId_postId: {
+      try {
+        await prisma.bookmark.delete({
+          where: {
+            userId_postId: {
+              userId,
+              postId,
+            },
+          },
+        });
+      } catch (err) {
+        // A concurrent un-bookmark already removed it - same outcome.
+        if (!isPrismaCode(err, "P2025")) throw err;
+      }
+      return NextResponse.json({ bookmarked: false });
+    } else {
+      // ⚠️ SECURITY: GET /api/bookmarks returns the bookmarked post in
+      // full, so bookmarking must be subject to the same visibility rule
+      // as reading the post - otherwise a private account's post (or a
+      // scheduled one) was readable by anyone holding its id. See
+      // src/lib/post-visibility.ts.
+      if (!(await findVisiblePost(userId, postId))) {
+        return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      }
+
+      // Add bookmark
+      try {
+        await prisma.bookmark.create({
+          data: {
             userId,
             postId,
           },
-        },
-      });
-      return NextResponse.json({ bookmarked: false });
-    } else {
-      // Add bookmark
-      await prisma.bookmark.create({
-        data: {
-          userId,
-          postId,
-        },
-      });
+        });
+      } catch (err) {
+        // A concurrent bookmark request (double tap) already created it
+        // - the caller's intended outcome, not a 500.
+        if (!isPrismaCode(err, "P2002")) throw err;
+      }
       return NextResponse.json({ bookmarked: true });
     }
   } catch (error) {

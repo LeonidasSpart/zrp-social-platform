@@ -9,8 +9,19 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
   const { publicLikes, publicFollowing, isPrivate } = body; // ✅ include isPrivate
+
+  // Non-boolean values used to reach prisma.update unchecked and surface
+  // as an unhandled 500 (Prisma validation error).
+  for (const value of [publicLikes, publicFollowing, isPrivate]) {
+    if (value !== undefined && typeof value !== "boolean") {
+      return NextResponse.json({ error: "Privacy settings must be true or false" }, { status: 400 });
+    }
+  }
 
   // Update only the fields that are provided
   const data: any = {};

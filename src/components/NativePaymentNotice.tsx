@@ -1,7 +1,9 @@
 "use client";
 
+import { useId } from "react";
 import { X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 import type { TranslationKey } from "@/lib/translations";
 
 interface Props {
@@ -18,18 +20,21 @@ interface Props {
 export default function NativePaymentNotice({ messageKey, onClose }: Props) {
   const { t } = useLanguage();
 
+  const titleId = useId();
+  const dialogRef = useDialogA11y(true, onClose, true);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-xl shadow-xl max-w-sm w-full p-6 relative">
+      <div className="focus:outline-none bg-white dark:bg-zrp-deepBlack rounded-xl shadow-xl max-w-sm w-full p-6 relative" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
-          aria-label="Close"
+          className="absolute top-3 end-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+          aria-label={t("help.close")}
         >
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2 pr-6">
+        <h2 id={titleId} className="text-lg font-bold text-gray-900 dark:text-white mb-2 pe-6">
           {t("native.paymentUnavailable.title")}
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">{t(messageKey)}</p>

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { canViewPrivateContent } from "@/lib/permissions";
+import { canViewPrivateContent, viewablePostAuthorFilter } from "@/lib/permissions";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { applyPremiumGating } from "@/lib/premium-content";
 
 export async function GET(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
@@ -72,6 +73,9 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
         post: {
           authorId: { notIn: excludedAuthorIds },
           status: "published",
+          // A liked post by a private account the VIEWER can't see must
+          // not surface through someone else's Likes tab.
+          author: viewablePostAuthorFilter(viewerId),
         },
       },
       orderBy: { createdAt: "desc" },
@@ -150,7 +154,11 @@ export async function GET(req: NextRequest, props: { params: Promise<{ username:
       });
     }
 
-    return NextResponse.json({ items: posts, nextCursor });
+    // ⚠️ SECURITY: redact pay-per-view content the viewer hasn't paid
+    // for - see src/lib/premium-content.ts.
+    const gatedPosts = await applyPremiumGating(posts, viewerId);
+
+    return NextResponse.json({ items: gatedPosts, nextCursor });
   } catch (error) {
     console.error("Error fetching liked posts:", error);
     return NextResponse.json({ error: "Failed to fetch liked posts" }, { status: 500 });

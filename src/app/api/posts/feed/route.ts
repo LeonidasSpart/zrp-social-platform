@@ -21,6 +21,10 @@ export async function GET(req: NextRequest) {
     const posts = await prisma.post.findMany({
       where: {
         authorId: { in: followedIds },
+        // Every other feed only lists published posts - without this a
+        // followed account's scheduled posts were readable here before
+        // their publish time.
+        status: "published",
       },
       take: 30,
       orderBy: { createdAt: "desc" },

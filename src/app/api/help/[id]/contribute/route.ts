@@ -9,6 +9,7 @@ import { randomUUID } from "crypto";
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { checkPaymentSender } from "@/lib/payment-sender";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 
@@ -38,11 +39,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (nativeBlock) return nativeBlock;
 
     const contributorId = token.id as string;
-
-    const contributor = await prisma.user.findUnique({
-      where: { id: contributorId },
-      select: { verifiedSolanaWallet: true },
-    });
 
     const body = await req.json();
     const { amount, message, isAnonymous, transactionId } = body;
@@ -112,12 +108,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
 
       // Bind the on-chain sender to the authenticated ZRP account - same
-      // wallet-link enforcement as creator-tip.
-      if (contributor?.verifiedSolanaWallet && verifiedFrom && verifiedFrom !== contributor.verifiedSolanaWallet) {
-        return NextResponse.json(
-          { error: "This transaction was sent from a wallet that isn't linked to your account." },
-          { status: 400 }
-        );
+      // wallet-link enforcement as creator-tip (checkPaymentSender also
+      // refuses a payment sent from a wallet verified to ANOTHER account,
+      // which the claimant-only check here used to miss).
+      const senderError = await checkPaymentSender(contributorId, verifiedFrom);
+      if (senderError) {
+        return NextResponse.json({ error: senderError }, { status: 400 });
       }
     } catch (err: unknown) {
       console.error("HELP contribution verification error:", err);

@@ -57,13 +57,18 @@ export default function AdminHelpWithdrawalsPage() {
     setProcessing(id);
     try {
       const res = await fetch(`/api/admin/help-withdrawals/${id}/${action}`, { method: "POST" });
-      if (!res.ok) {
-        const err = await res.json();
+      if (!res.ok || res.status === 202) {
+        // 202 = the transfer's outcome is uncertain and needs manual
+        // review (NOT refunded). res.ok is true for it, so it must be
+        // surfaced explicitly or the admin sees a silent "success".
+        const err = await res.json().catch(() => ({}));
         throw new Error(localizeApiMessage(err.error, t) || t("adminHelpWithdrawals.errActionFailed"));
       }
       await fetchWithdrawals();
     } catch (err) {
       alert(err instanceof Error ? err.message : t("adminHelpWithdrawals.errActionFailed"));
+      // The row's real status may have changed server-side either way.
+      await fetchWithdrawals();
     } finally {
       setProcessing(null);
     }

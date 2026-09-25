@@ -2428,4 +2428,10 @@
     <string name="admin_badge_government">Government</string>
     <string name="admin_badge_team">ZRP Team</string>
     <string name="admin_badge_none">None</string>
+    <string name="post_show_translation">Show translation</string>
+    <string name="post_show_original">Show original</string>
+    <string name="post_translation_unavailable">Translation unavailable right now.</string>
+    <string name="auth_username_taken">That username is taken.</string>
+    <string name="auth_username_format_hint">3-20 characters, letters/numbers/underscores only</string>
+    <string name="quote_post_title">Quote post</string>
 </resources>

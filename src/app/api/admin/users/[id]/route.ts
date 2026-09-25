@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
-import { Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { deleteUserAccountAndFiles } from "@/lib/account-deletion";
 import { logAdminAction } from "@/lib/audit-log";
 
@@ -27,7 +27,12 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
     const data: { isAdmin?: boolean; badgeType?: string | null; role?: Role } = {};
 
-    if (isAdmin !== undefined) data.isAdmin = isAdmin;
+    if (isAdmin !== undefined) {
+      if (typeof isAdmin !== "boolean") {
+        return NextResponse.json({ error: "isAdmin must be a boolean" }, { status: 400 });
+      }
+      data.isAdmin = isAdmin;
+    }
     if (badgeType !== undefined) {
       if (!VALID_BADGE_TYPES.includes(badgeType)) {
         return NextResponse.json({ error: "Invalid badge type" }, { status: 400 });
@@ -72,6 +77,9 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
 
     return NextResponse.json(updated);
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
     console.error("Update user error:", error);
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
   }

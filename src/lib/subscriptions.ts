@@ -398,7 +398,7 @@ export async function sendJ7Reminders(now: Date = new Date(), windowDays = 7) {
 
     let pushOk = true;
     try {
-      await sendPushNotification(sub.userId, title, body, "/settings/billing");
+      await sendPushNotification(sub.userId, title, body, "/pricing");
     } catch (err) {
       pushOk = false;
       console.error("J-7 reminder push failed:", err);

@@ -70,7 +70,10 @@ export default function AdminWithdrawalsPage() {
     setProcessing(id);
     try {
       const res = await fetch(`/api/admin/withdrawals/${id}/${action}`, { method: "POST" });
-      if (!res.ok) {
+      if (!res.ok || res.status === 202) {
+        // 202 = the transfer was broadcast but its outcome isn't
+        // confirmed yet. res.ok is true for it, so it must be surfaced
+        // explicitly or the admin sees a silent "success".
         const err = await res.json().catch(() => ({}));
         throw new Error(localizeApiMessage(err.error, t) || t("adminWithdrawals.errActionFailed"));
       }

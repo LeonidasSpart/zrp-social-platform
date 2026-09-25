@@ -11,6 +11,11 @@ import { rateLimit } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 import { canTransition } from "@/lib/ads/lifecycle";
+import { checkPaymentSender } from "@/lib/payment-sender";
+
+// Statuses from which the "system" actor may move a campaign to ACTIVE on
+// a verified payment (see canTransition("system", ..., "ACTIVE")).
+const PAYABLE_STATUSES = ["PAYMENT_PENDING", "PAYMENT_FAILED"] as const;
 
 // ─── POST: fund an approved campaign's budget with a verified on-chain
 // USDC payment. This is the step that was entirely missing before - an
@@ -21,6 +26,8 @@ import { canTransition } from "@/lib/ads/lifecycle";
 // src/app/api/creator/tip/route.ts, including the shared
 // ConsumedPaymentTransaction dedupe table so a signature can never fund
 // two campaigns, or a campaign and a tip, etc. ──────────────────────────
+class CampaignNoLongerPayableError extends Error {}
+
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
 
@@ -110,31 +117,68 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       // this does NOT consume the transaction ID (nothing was claimed),
       // so a genuinely valid signature that failed for a transient RPC
       // reason can still be resubmitted.
-      await prisma.adCampaign.update({
-        where: { id: params.id },
+      //
+      // ⚠️ Conditional on the campaign STILL being payable: verification
+      // is a slow RPC round trip, and staff may have cancelled it (or the
+      // advertiser cancelled it) meanwhile. An unconditional update used
+      // to overwrite that CANCELLED with PAYMENT_FAILED - a status the
+      // advertiser can pay out of - undoing a staff cancel.
+      await prisma.adCampaign.updateMany({
+        where: { id: params.id, status: { in: [...PAYABLE_STATUSES] } },
         data: { status: "PAYMENT_FAILED", paymentFailureReason: message.slice(0, 2000) },
       });
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
+    // ⚠️ SECURITY: same sender binding as tips/premium purchases - a
+    // payment sent from a wallet verified-linked to another account can't
+    // be claimed here to fund this advertiser's campaign.
+    const senderError = await checkPaymentSender(token.id as string, fromAddress);
+    if (senderError) {
+      return NextResponse.json({ error: senderError }, { status: 400 });
+    }
+
     // ─── Claim the signature + activate the campaign atomically ───────
+    //
+    // ⚠️ The activation is a compare-and-swap on the status, not a blind
+    // update: between the status check at the top of this handler and
+    // here (a slow on-chain verification), staff may have cancelled the
+    // campaign, or a second concurrent payment with a DIFFERENT signature
+    // may already have activated it. A blind update re-activated a
+    // staff-cancelled campaign, and let two payments both "fund" the
+    // same campaign. If the campaign is no longer payable the whole
+    // transaction (signature claim included) rolls back, so the
+    // signature is not burned.
     let campaign;
     try {
-      [, campaign] = await prisma.$transaction([
-        prisma.consumedPaymentTransaction.create({
+      campaign = await prisma.$transaction(async (tx) => {
+        await tx.consumedPaymentTransaction.create({
           data: { transactionId, paymentType: "ad_campaign", paymentId: params.id },
-        }),
-        prisma.adCampaign.update({
-          where: { id: params.id },
+        });
+        const activated = await tx.adCampaign.updateMany({
+          where: { id: params.id, status: { in: [...PAYABLE_STATUSES] } },
           data: {
             status: "ACTIVE",
             paymentTransactionId: transactionId,
             paidAt: new Date(),
             paymentFailureReason: null,
           },
-        }),
-      ]);
+        });
+        if (activated.count === 0) {
+          throw new CampaignNoLongerPayableError();
+        }
+        return tx.adCampaign.findUniqueOrThrow({
+          where: { id: params.id },
+          omit: { adminNote: true },
+        });
+      });
     } catch (err: any) {
+      if (err instanceof CampaignNoLongerPayableError) {
+        return NextResponse.json(
+          { error: "This campaign isn't awaiting payment." },
+          { status: 409 }
+        );
+      }
       if (err?.code === "P2002") {
         return NextResponse.json({ error: "Transaction already processed." }, { status: 409 });
       }

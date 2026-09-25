@@ -56,7 +56,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const profile = await prisma.journalistProfile.findUnique({ where: { userId } });
+    const profile = await prisma.journalistProfile.findUnique({
+      where: { userId },
+      include: { user: { select: { role: true, isAdmin: true } } },
+    });
 
     if (!profile) {
       return NextResponse.json(
@@ -87,6 +90,23 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (action === "restore" && profile.status !== "SUSPENDED") {
       return NextResponse.json(
         { success: false, error: "Only suspended journalists can be restored." },
+        { status: 409 }
+      );
+    }
+
+    // ⚠️ SECURITY: this route (staff-level, so any MODERATOR) writes
+    // User.role. For a target who is ADMIN or MODERATOR that write would
+    // silently strip their staff role - a moderator could demote an
+    // admin just by approving/removing a journalist application they
+    // had on file. Staff roles are only ever changed through the
+    // admin-only /api/admin/users/[id] route, so here the role is left
+    // alone for staff; granting (approve/restore) is refused outright,
+    // since a staff account can't also hold the JOURNALIST role.
+    const isStaffTarget =
+      profile.user.isAdmin || profile.user.role === "ADMIN" || profile.user.role === "MODERATOR";
+    if (isStaffTarget && (action === "approve" || action === "restore")) {
+      return NextResponse.json(
+        { success: false, error: "Staff accounts can't hold the journalist role. Change their role first." },
         { status: 409 }
       );
     }
@@ -141,7 +161,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         data,
         include: PROFILE_INCLUDE,
       }),
-      prisma.user.update({ where: { id: userId }, data: { role: newRole } }),
+      ...(isStaffTarget ? [] : [prisma.user.update({ where: { id: userId }, data: { role: newRole } })]),
     ]);
     invalidateUserAuthState(userId);
 

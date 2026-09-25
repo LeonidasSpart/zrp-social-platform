@@ -2413,4 +2413,10 @@
     <string name="admin_badge_government">政府</string>
     <string name="admin_badge_team">ZRP 团队</string>
     <string name="admin_badge_none">无</string>
+    <string name="post_show_translation">显示翻译</string>
+    <string name="post_show_original">显示原文</string>
+    <string name="post_translation_unavailable">翻译暂不可用。</string>
+    <string name="auth_username_taken">该用户名已被占用。</string>
+    <string name="auth_username_format_hint">3-20个字符，仅限字母/数字/下划线</string>
+    <string name="quote_post_title">引用帖子</string>
 </resources>

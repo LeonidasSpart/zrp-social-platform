@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { X, Copy, Check } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface Props {
@@ -23,6 +24,9 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
   const [copied, setCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const titleId = useId();
+  const dialogRef = useDialogA11y(true, onClose, !submitting);
 
   const copyAddress = () => {
     navigator.clipboard.writeText(walletAddress);
@@ -61,16 +65,16 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-zrp-deepBlack rounded-xl shadow-xl max-w-md w-full p-6 relative">
+      <div className="focus:outline-none bg-white dark:bg-zrp-deepBlack rounded-xl shadow-xl max-w-md w-full p-6 relative" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <button
           onClick={onClose}
           aria-label={t("help.close")}
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+          className="absolute top-3 end-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <h2 id={titleId} className="text-xl font-bold text-gray-900 dark:text-white mb-4">
           {t("cryptoPayment.subscribeTitle", { plan: plan.charAt(0).toUpperCase() + plan.slice(1) })}
         </h2>
 
@@ -89,6 +93,7 @@ export default function CryptoPaymentModal({ plan, amount, onClose, onSuccess }:
               onClick={copyAddress}
               className="flex-shrink-0 ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400"
               title={t("help.copyAddress")}
+              aria-label={t("help.copyAddress")}
             >
               {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
             </button>

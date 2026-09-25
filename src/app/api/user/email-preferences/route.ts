@@ -39,6 +39,14 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+    // Values are merged into the stored JSON as-is, so anything other
+    // than a boolean would be persisted verbatim (arbitrary nested JSON).
+    if (Object.values(body).some((v) => typeof v !== "boolean")) {
+      return NextResponse.json({ error: "Preference values must be true or false" }, { status: 400 });
+    }
     const allowedKeys = Object.keys(defaultPreferences);
     const invalidKeys = Object.keys(body).filter(k => !allowedKeys.includes(k));
     if (invalidKeys.length > 0) {

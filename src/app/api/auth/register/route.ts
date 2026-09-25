@@ -31,7 +31,8 @@ async function classifySignupAttribution(
   utmCampaign: unknown
 ): Promise<SignupAttribution> {
   if (typeof ref === "string" && ref.trim()) {
-    const trimmedRef = ref.trim();
+    // Client-controlled and stored verbatim as signupCampaign - bounded.
+    const trimmedRef = ref.trim().slice(0, 100);
     const ambassador = await prisma.ambassadorProfile.findUnique({
       where: { invitationCode: trimmedRef },
       select: { id: true },
@@ -48,9 +49,9 @@ async function classifySignupAttribution(
   }
 
   const campaignValue =
-    (typeof utmCampaign === "string" && utmCampaign.trim()) ||
-    (typeof utmSource === "string" && utmSource.trim()) ||
-    null;
+    ((typeof utmCampaign === "string" && utmCampaign.trim()) ||
+      (typeof utmSource === "string" && utmSource.trim()) ||
+      "").slice(0, 100) || null;
   if (campaignValue) {
     return { source: "CAMPAIGN", campaign: campaignValue };
   }
@@ -79,6 +80,10 @@ export async function POST(req: NextRequest) {
 
     // ─── Validation ──────────────────────────────────────────────
     if (!rawEmail || !password || !username) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
+    // Non-string values used to reach .trim()/bcrypt.hash and 500.
+    if (typeof rawEmail !== "string" || typeof password !== "string" || typeof username !== "string") {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 

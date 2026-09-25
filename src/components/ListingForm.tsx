@@ -236,7 +236,8 @@ export default function ListingForm({
               <button
                 type="button"
                 onClick={() => setImageUrls((prev) => prev.filter((_, idx) => idx !== i))}
-                className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5"
+                aria-label={t("comment.removeAttachment")}
+                className="absolute top-0.5 end-0.5 bg-black/60 text-white rounded-full p-0.5"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -246,6 +247,7 @@ export default function ListingForm({
             type="button"
             onClick={() => imageInputRef.current?.click()}
             disabled={uploadingImages}
+            aria-label={t("comment.addImage")}
             className="w-20 h-20 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-400 hover:border-zrp-red hover:text-zrp-red transition"
           >
             {uploadingImages ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImagePlus className="w-5 h-5" />}
@@ -271,7 +273,8 @@ export default function ListingForm({
             <button
               type="button"
               onClick={() => setVideoUrl(null)}
-              className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1"
+              aria-label={t("comment.removeAttachment")}
+              className="absolute top-2 end-2 bg-black/60 text-white rounded-full p-1"
             >
               <X className="w-4 h-4" />
             </button>

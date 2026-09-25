@@ -185,5 +185,39 @@ describe.skipIf(!hasRealDatabaseUrl)(
       expect(found.imageUrl).toBeNull();
       expect(found.premiumPost.locked).toBe(true);
     });
+
+    // Shorts used to ignore User.isPrivate entirely - every other public
+    // listing (explore, hashtag, search) applies viewablePostAuthorFilter.
+    it("never serves a private account's video to a non-follower, but does to an approved follower", async () => {
+      const owner = await createUser("privowner");
+      await prisma.user.update({ where: { id: owner.id }, data: { isPrivate: true } });
+      const stranger = await createUser("stranger");
+      const follower = await createUser("follower");
+      await prisma.follow.create({ data: { followerId: follower.id, followingId: owner.id } });
+      const post = await prisma.post.create({
+        data: {
+          authorId: owner.id,
+          content: "private short",
+          imageUrl: "https://utfs.io/f/private-short.mp4",
+          mediaType: "video",
+          status: "published",
+        },
+      });
+      postIds.push(post.id);
+
+      try {
+        for (const session of [null, { user: { id: stranger.id } }]) {
+          getServerSession.mockResolvedValue(session);
+          const body = await (await GET(videosReq(`?startId=${post.id}&limit=30`))).json();
+          expect(body.posts.some((p: { id: string }) => p.id === post.id)).toBe(false);
+        }
+
+        getServerSession.mockResolvedValue({ user: { id: follower.id } });
+        const body = await (await GET(videosReq(`?startId=${post.id}&limit=5`))).json();
+        expect(body.posts[0]?.id).toBe(post.id);
+      } finally {
+        await prisma.follow.deleteMany({ where: { followingId: owner.id } });
+      }
+    });
   }
 );

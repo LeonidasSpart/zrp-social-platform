@@ -131,12 +131,19 @@ export async function checkAndAwardAchievements(
     (def) => !unlockedKeys.has(def.key) && def.isUnlocked(profile)
   );
 
+  const awarded: PlayAchievementDef[] = [];
   for (const def of newlyUnlocked) {
-    await prisma.playUserAchievement.create({
-      data: { userId, achievementKey: def.key },
+    // createMany + skipDuplicates: when two submissions unlock the same
+    // achievement concurrently, the (userId, achievementKey) unique key
+    // lets exactly one insert land, and only that caller awards the XP.
+    const created = await prisma.playUserAchievement.createMany({
+      data: [{ userId, achievementKey: def.key }],
+      skipDuplicates: true,
     });
+    if (created.count === 0) continue;
     await awardXp(userId, def.xpReward);
+    awarded.push(def);
   }
 
-  return newlyUnlocked;
+  return awarded;
 }
