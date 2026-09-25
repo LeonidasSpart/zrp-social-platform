@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "यह अकाउंट निजी है";
 "profile.protectedMessage" = "इनकी पोस्ट और प्रोफ़ाइल विवरण देखने के लिए इस अकाउंट को फ़ॉलो करें।";
 "profile.editProfileButton" = "प्रोफ़ाइल संपादित करें";
+"profile.viewPhotoAria" = "{name} की फ़ोटो देखें";
 "action.follow" = "फॉलो करें";
 "action.following" = "फॉलो कर रहे हैं";
 "action.unfollow" = "अनफॉलो करें";

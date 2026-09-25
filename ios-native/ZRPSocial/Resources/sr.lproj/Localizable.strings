@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Ovaj nalog je privatan";
 "profile.protectedMessage" = "Zapratite ovaj nalog da biste videli njegove objave i podatke profila.";
 "profile.editProfileButton" = "Uredi profil";
+"profile.viewPhotoAria" = "Prikaži fotografiju korisnika {name}";
 "action.follow" = "Prati";
 "action.following" = "Pratite";
 "action.unfollow" = "Otprati";

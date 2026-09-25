@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Αυτός ο λογαριασμός είναι ιδιωτικός";
 "profile.protectedMessage" = "Ακολούθησε αυτόν τον λογαριασμό για να δεις τις αναρτήσεις και τα στοιχεία του προφίλ του.";
 "profile.editProfileButton" = "Επεξεργασία προφίλ";
+"profile.viewPhotoAria" = "Προβολή φωτογραφίας του/της {name}";
 "action.follow" = "Ακολούθησε";
 "action.following" = "Ακολουθείτε";
 "action.unfollow" = "Κατάργηση ακολούθησης";

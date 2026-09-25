@@ -323,6 +323,7 @@
     <string name="message_open_camera_cd">Buka kamera</string>
     <string name="message_attach_video_cd">Lampirkan video</string>
     <string name="message_attach_document_cd">Lampirkan dokumen</string>
+    <string name="message_add_attachment_cd">Tambahkan lampiran</string>
     <string name="message_record_voice_cd">Rekam pesan suara</string>
     <string name="chat_cancel_recording_cd">Batal</string>
     <string name="chat_recording_label">Merekam...</string>
@@ -551,6 +552,7 @@
     <string name="composer_err_gif_limit">Paket Anda mengizinkan %1$d gambar per postingan.</string>
     <string name="profile_change_avatar">Ubah foto profil</string>
     <string name="profile_change_banner">Ubah banner</string>
+    <string name="profile_view_photo">Lihat foto %1$s</string>
     <string name="profile_upload_avatar_failed">Gagal mengunggah foto profil</string>
     <string name="profile_upload_banner_failed">Gagal mengunggah banner</string>
     <string name="auth_welcome_title">ZRP Social</string>

@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Esta conta é privada";
 "profile.protectedMessage" = "Siga esta conta para ver as suas publicações e os detalhes do perfil.";
 "profile.editProfileButton" = "Editar perfil";
+"profile.viewPhotoAria" = "Ver a foto de {name}";
 "action.follow" = "Seguir";
 "action.following" = "A seguir";
 "action.unfollow" = "Deixar de seguir";

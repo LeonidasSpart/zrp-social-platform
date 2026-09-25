@@ -322,6 +322,7 @@
     <string name="message_open_camera_cd">कैमरा खोलें</string>
     <string name="message_attach_video_cd">वीडियो अटैच करें</string>
     <string name="message_attach_document_cd">दस्तावेज़ अटैच करें</string>
+    <string name="message_add_attachment_cd">अटैचमेंट जोड़ें</string>
     <string name="message_record_voice_cd">वॉइस मैसेज रिकॉर्ड करें</string>
     <string name="chat_cancel_recording_cd">रद्द करें</string>
     <string name="chat_recording_label">रिकॉर्डिंग हो रही है...</string>
@@ -548,6 +549,7 @@
     <string name="composer_err_gif_limit">आपका प्लान प्रति पोस्ट %1$d इमेज की अनुमति देता है।</string>
     <string name="profile_change_avatar">अवतार बदलें</string>
     <string name="profile_change_banner">बैनर बदलें</string>
+    <string name="profile_view_photo">%1$s की फ़ोटो देखें</string>
     <string name="profile_upload_avatar_failed">अवतार अपलोड नहीं हो सका</string>
     <string name="profile_upload_banner_failed">बैनर अपलोड नहीं हो सका</string>
     <string name="auth_welcome_title">ZRP Social</string>

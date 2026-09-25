@@ -400,6 +400,8 @@ enum L10nKey: String, CaseIterable {
     case profileProtectedMessage = "profile.protectedMessage"
     /// en: "Edit profile"
     case profileEditProfileButton = "profile.editProfileButton"
+    /// en: "View {name}'s photo"
+    case profileViewPhotoAria = "profile.viewPhotoAria"
     /// en: "Follow"
     case actionFollow = "action.follow"
     /// en: "Following"

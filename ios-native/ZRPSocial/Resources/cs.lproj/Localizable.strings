@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Tento účet je soukromý";
 "profile.protectedMessage" = "Sleduj tento účet a uvidíš jeho příspěvky a podrobnosti profilu.";
 "profile.editProfileButton" = "Upravit profil";
+"profile.viewPhotoAria" = "Zobrazit fotku uživatele {name}";
 "action.follow" = "Sledovat";
 "action.following" = "Sleduješ";
 "action.unfollow" = "Přestat sledovat";

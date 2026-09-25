@@ -323,6 +323,7 @@
     <string name="message_open_camera_cd">Otvori kameru</string>
     <string name="message_attach_video_cd">Priloži video</string>
     <string name="message_attach_document_cd">Priloži dokument</string>
+    <string name="message_add_attachment_cd">Dodaj prilog</string>
     <string name="message_record_voice_cd">Snimi glasovnu poruku</string>
     <string name="chat_cancel_recording_cd">Otkaži</string>
     <string name="chat_recording_label">Snimanje...</string>
@@ -549,6 +550,7 @@
     <string name="composer_err_gif_limit">Vaš paket dozvoljava %1$d sliku(e) po objavi.</string>
     <string name="profile_change_avatar">Promeni sliku profila</string>
     <string name="profile_change_banner">Promeni baner</string>
+    <string name="profile_view_photo">Prikaži fotografiju korisnika %1$s</string>
     <string name="profile_upload_avatar_failed">Otpremanje slike profila nije uspelo</string>
     <string name="profile_upload_banner_failed">Otpremanje banera nije uspelo</string>
     <string name="auth_welcome_title">ZRP Social</string>

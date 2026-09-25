@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -90,7 +91,14 @@ fun AmbassadorApplyScreen(
     val errGeneric = stringResource(R.string.ambassadors_apply_err_generic)
     val uriHandler = LocalUriHandler.current
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    // MainActivity opts into enableEdgeToEdge(), so AndroidManifest.xml's
+    // windowSoftInputMode="adjustResize" alone doesn't reserve space for
+    // the IME here - Compose draws behind it unless a real inset modifier
+    // asks for the space back. Without this, the keyboard covered the
+    // fields of this scrollable application form - see
+    // ConversationScreen.kt's own imePadding() for the same fix on the
+    // equivalent DM composer.
+    Column(modifier = Modifier.fillMaxSize().imePadding()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,

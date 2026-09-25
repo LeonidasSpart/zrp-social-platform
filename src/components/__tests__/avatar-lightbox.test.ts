@@ -107,34 +107,51 @@ describe("PostCard feed avatar", () => {
   });
 });
 
-describe("profile page's own avatar", () => {
+describe("profile page's own avatar and banner", () => {
   const src = read(PROFILE);
 
-  it("opens the lightbox for a profile that is not the viewer's own", () => {
-    const idx = src.indexOf("isOwnProfile ? (");
+  it("opens the lightbox for the avatar regardless of whose profile it is", () => {
+    // One tap target for everyone, own profile included - previously
+    // only someone else's avatar was clickable at all, since a
+    // full-cover "change avatar" button sat on top of the whole image
+    // on your own profile and intercepted every click underneath.
+    const idx = src.indexOf("profile.avatarUrl ? (");
     expect(idx).toBeGreaterThan(-1);
     const block = src.slice(idx, idx + 900);
     expect(block).toContain("setAvatarLightboxOpen(true)");
     expect(block).toContain('aria-label={t("profile.viewPhotoAria"');
   });
 
-  it("leaves the owner's own avatar as the existing change-photo control, untouched", () => {
-    // isOwnProfile still gets a plain <img>, so the pre-existing
-    // hover-camera "change avatar" button (isOwnProfile-gated, further
-    // below) keeps the whole avatar as its hit area exactly as before -
-    // this fix does not touch that flow.
-    const idx = src.indexOf("isOwnProfile ? (");
-    const block = src.slice(idx, idx + 400);
-    expect(block).toContain("<img");
-    expect(src).toContain("avatarInputRef.current?.click()");
+  it("moves the owner's own change-avatar control to a small corner badge that stops its click from also opening the viewer", () => {
+    const idx = src.indexOf("avatarInputRef.current?.click()");
+    expect(idx).toBeGreaterThan(-1);
+    const block = src.slice(Math.max(0, idx - 200), idx);
+    expect(block).toContain("e.stopPropagation()");
   });
 
-  it("renders the shared ImageLightbox, gated to other people's profiles", () => {
+  it("renders the shared ImageLightbox for the avatar, ungated by ownership", () => {
     expect(src).toContain('import { ImageLightbox } from "@/components/ui/ImageLightbox"');
-    const idx = src.indexOf("{!isOwnProfile && (\n          <ImageLightbox");
+    const idx = src.indexOf("avatarLightboxOpen\n              ? profile.avatarUrl");
     expect(idx).toBeGreaterThan(-1);
-    const block = src.slice(idx, idx + 400);
-    expect(block).toContain("avatarLightboxOpen");
-    expect(block).toContain("profile.avatarUrl");
+  });
+
+  it("opens the lightbox for the cover/banner for everyone, when a cover exists", () => {
+    const idx = src.indexOf("{profile.coverUrl && (");
+    expect(idx).toBeGreaterThan(-1);
+    const block = src.slice(idx, idx + 700);
+    expect(block).toContain("setBannerLightboxOpen(true)");
+    expect(block).toContain('aria-label={t("profile.viewPhotoAria"');
+  });
+
+  it("moves the owner's own change-banner control to a small corner badge that stops its click from also opening the viewer", () => {
+    const idx = src.indexOf("bannerInputRef.current?.click()");
+    expect(idx).toBeGreaterThan(-1);
+    const block = src.slice(Math.max(0, idx - 200), idx);
+    expect(block).toContain("e.stopPropagation()");
+  });
+
+  it("renders the shared ImageLightbox for the banner, ungated by ownership", () => {
+    const idx = src.indexOf("bannerLightboxOpen\n              ? profile.coverUrl");
+    expect(idx).toBeGreaterThan(-1);
   });
 });

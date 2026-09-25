@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "비공개 계정입니다";
 "profile.protectedMessage" = "이 계정을 팔로우하면 게시물과 프로필 세부 정보를 볼 수 있어요.";
 "profile.editProfileButton" = "프로필 수정";
+"profile.viewPhotoAria" = "{name}님의 사진 보기";
 "action.follow" = "팔로우";
 "action.following" = "팔로잉";
 "action.unfollow" = "팔로우 취소";

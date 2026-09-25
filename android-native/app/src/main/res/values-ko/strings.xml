@@ -322,6 +322,7 @@
     <string name="message_open_camera_cd">카메라 열기</string>
     <string name="message_attach_video_cd">동영상 첨부</string>
     <string name="message_attach_document_cd">문서 첨부</string>
+    <string name="message_add_attachment_cd">첨부 파일 추가</string>
     <string name="message_record_voice_cd">음성 메시지 녹음</string>
     <string name="chat_cancel_recording_cd">취소</string>
     <string name="chat_recording_label">녹음 중...</string>
@@ -548,6 +549,7 @@
     <string name="composer_err_gif_limit">현재 요금제는 게시물당 이미지 %1$d개까지 허용해요.</string>
     <string name="profile_change_avatar">아바타 변경</string>
     <string name="profile_change_banner">배너 변경</string>
+    <string name="profile_view_photo">%1$s님의 사진 보기</string>
     <string name="profile_upload_avatar_failed">아바타 업로드에 실패했어요</string>
     <string name="profile_upload_banner_failed">배너 업로드에 실패했어요</string>
     <string name="auth_welcome_title">ZRP Social</string>

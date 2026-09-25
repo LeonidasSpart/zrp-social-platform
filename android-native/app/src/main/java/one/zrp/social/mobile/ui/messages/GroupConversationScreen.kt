@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.WindowInsets
@@ -31,6 +30,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
@@ -90,6 +90,7 @@ import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.extractFirstUrl
+import one.zrp.social.mobile.ui.theme.Radius
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.TypingIndicator
@@ -133,6 +134,12 @@ fun GroupConversationScreen(
     var isDeletingMessage by remember { mutableStateOf(false) }
     var reactingToMessageId by remember { mutableStateOf<String?>(null) }
     var showGifPicker by remember { mutableStateOf(false) }
+
+    // Same fix as ConversationScreen.kt's 1:1 composer: collapse the
+    // attachment icons behind one attach button + DropdownMenu instead of
+    // always showing them inline, so the message field keeps a real
+    // comfortable width on every phone size.
+    var attachMenuOpen by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
     var pendingScrollIndex by remember { mutableStateOf<Int?>(null) }
@@ -383,28 +390,45 @@ fun GroupConversationScreen(
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.Bottom,
         ) {
-            IconButton(
-                onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
-                enabled = !state.isUploadingAttachment,
-            ) {
-                Icon(Icons.Filled.CameraAlt, contentDescription = stringResource(R.string.message_open_camera_cd))
-            }
+            Box {
+                IconButton(
+                    onClick = { attachMenuOpen = true },
+                    enabled = !state.isUploadingAttachment,
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.message_add_attachment_cd))
+                }
 
-            IconButton(
-                onClick = { imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                enabled = !state.isUploadingAttachment,
-            ) {
-                Icon(Icons.Filled.PhotoLibrary, contentDescription = stringResource(R.string.message_attach_image_cd))
-            }
-
-            IconButton(
-                onClick = { showGifPicker = true },
-                enabled = !state.isUploadingAttachment,
-            ) {
-                Icon(Icons.Filled.Image, contentDescription = stringResource(R.string.composer_add_gif))
+                DropdownMenu(expanded = attachMenuOpen, onDismissRequest = { attachMenuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.message_open_camera_cd)) },
+                        leadingIcon = { Icon(Icons.Filled.CameraAlt, contentDescription = null) },
+                        onClick = {
+                            attachMenuOpen = false
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.message_attach_image_cd)) },
+                        leadingIcon = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
+                        onClick = {
+                            attachMenuOpen = false
+                            imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.composer_add_gif)) },
+                        leadingIcon = { Icon(Icons.Filled.Image, contentDescription = null) },
+                        onClick = {
+                            attachMenuOpen = false
+                            showGifPicker = true
+                        },
+                    )
+                }
             }
 
             OutlinedTextField(
@@ -412,10 +436,12 @@ fun GroupConversationScreen(
                 onValueChange = { viewModel.onDraftChange(it) },
                 placeholder = { Text(stringResource(R.string.group_message_placeholder, groupName)) },
                 enabled = !state.isSending,
-                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(Radius.lg),
+                maxLines = 6,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp),
             )
-
-            Spacer(modifier = Modifier.width(8.dp))
 
             IconButton(onClick = { viewModel.send() }, enabled = !state.isSending && state.draft.isNotBlank()) {
                 if (state.isSending) {

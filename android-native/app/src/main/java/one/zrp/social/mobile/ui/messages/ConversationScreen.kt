@@ -39,6 +39,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CameraAlt
@@ -114,6 +115,7 @@ import one.zrp.social.mobile.ui.components.LinkPreviewBlock
 import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.extractFirstUrl
+import one.zrp.social.mobile.ui.theme.Radius
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
@@ -165,6 +167,18 @@ fun ConversationScreen(
     var showContactPopup by remember { mutableStateOf(false) }
     var isBlocked by remember { mutableStateOf(false) }
     var showGifPicker by remember { mutableStateOf(false) }
+
+    // Camera/gallery/GIF/video/document used to be five always-visible
+    // 48dp IconButtons in a row ahead of the text field - on a real
+    // ~360-412dp phone that's 240dp+ of icons before the input even
+    // starts, which is exactly the "message field squeezed, media
+    // actions crush the text field" defect. Collapsing them behind one
+    // attach button + a DropdownMenu (the same DropdownMenu already used
+    // a few hundred lines down for the per-message long-press menu) frees
+    // that space back on every device size without hiding any of the
+    // five attachment types on narrower phones the way a responsive
+    // show/hide breakpoint would.
+    var attachMenuOpen by remember { mutableStateOf(false) }
 
     // Delete-conversation flow reached from ChatContactPopup's own "More"
     // menu (matches ChatContactDrawer.tsx's own Block/Unblock + Delete
@@ -745,46 +759,59 @@ fun ConversationScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.Bottom,
             ) {
-                IconButton(
-                    onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
-                    enabled = !state.isUploadingAttachment,
-                ) {
-                    Icon(Icons.Filled.CameraAlt, contentDescription = stringResource(R.string.message_open_camera_cd))
-                }
+                Box {
+                    IconButton(
+                        onClick = { attachMenuOpen = true },
+                        enabled = !state.isUploadingAttachment,
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.message_add_attachment_cd))
+                    }
 
-                IconButton(
-                    onClick = {
-                        imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    },
-                    enabled = !state.isUploadingAttachment,
-                ) {
-                    Icon(Icons.Filled.PhotoLibrary, contentDescription = stringResource(R.string.message_attach_image_cd))
-                }
-
-                IconButton(
-                    onClick = { showGifPicker = true },
-                    enabled = !state.isUploadingAttachment,
-                ) {
-                    Icon(Icons.Filled.Image, contentDescription = stringResource(R.string.composer_add_gif))
-                }
-
-                IconButton(
-                    onClick = {
-                        videoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
-                    },
-                    enabled = !state.isUploadingAttachment,
-                ) {
-                    Icon(Icons.Filled.VideoLibrary, contentDescription = stringResource(R.string.message_attach_video_cd))
-                }
-
-                IconButton(
-                    onClick = { documentPickerLauncher.launch(documentMimeTypes) },
-                    enabled = !state.isUploadingAttachment,
-                ) {
-                    Icon(Icons.Filled.Description, contentDescription = stringResource(R.string.message_attach_document_cd))
+                    DropdownMenu(expanded = attachMenuOpen, onDismissRequest = { attachMenuOpen = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.message_open_camera_cd)) },
+                            leadingIcon = { Icon(Icons.Filled.CameraAlt, contentDescription = null) },
+                            onClick = {
+                                attachMenuOpen = false
+                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.message_attach_image_cd)) },
+                            leadingIcon = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
+                            onClick = {
+                                attachMenuOpen = false
+                                imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.composer_add_gif)) },
+                            leadingIcon = { Icon(Icons.Filled.Image, contentDescription = null) },
+                            onClick = {
+                                attachMenuOpen = false
+                                showGifPicker = true
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.message_attach_video_cd)) },
+                            leadingIcon = { Icon(Icons.Filled.VideoLibrary, contentDescription = null) },
+                            onClick = {
+                                attachMenuOpen = false
+                                videoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.message_attach_document_cd)) },
+                            leadingIcon = { Icon(Icons.Filled.Description, contentDescription = null) },
+                            onClick = {
+                                attachMenuOpen = false
+                                documentPickerLauncher.launch(documentMimeTypes)
+                            },
+                        )
+                    }
                 }
 
                 OutlinedTextField(
@@ -792,10 +819,12 @@ fun ConversationScreen(
                     onValueChange = { viewModel.onDraftChange(it) },
                     placeholder = { Text(stringResource(R.string.chat_message_placeholder, partnerUsername)) },
                     enabled = !state.isSending,
-                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(Radius.lg),
+                    maxLines = 6,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp),
                 )
-
-                Spacer(modifier = Modifier.width(8.dp))
 
                 // Matches ChatInterface.tsx's own Send-or-Mic swap: an
                 // empty draft shows the mic (tap to start recording), any

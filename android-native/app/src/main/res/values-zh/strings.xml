@@ -323,6 +323,7 @@
     <string name="message_open_camera_cd">打开相机</string>
     <string name="message_attach_video_cd">添加视频</string>
     <string name="message_attach_document_cd">添加文档</string>
+    <string name="message_add_attachment_cd">添加附件</string>
     <string name="message_record_voice_cd">录制语音消息</string>
     <string name="chat_cancel_recording_cd">取消</string>
     <string name="chat_recording_label">录音中...</string>
@@ -551,6 +552,7 @@
     <string name="composer_err_gif_limit">你的套餐每篇帖子最多允许 %1$d 张图片。</string>
     <string name="profile_change_avatar">更换头像</string>
     <string name="profile_change_banner">更换横幅</string>
+    <string name="profile_view_photo">查看%1$s的照片</string>
     <string name="profile_upload_avatar_failed">头像上传失败</string>
     <string name="profile_upload_banner_failed">横幅上传失败</string>
     <string name="auth_welcome_title">ZRP 社交</string>

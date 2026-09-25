@@ -323,6 +323,7 @@
     <string name="message_open_camera_cd">Otevřít fotoaparát</string>
     <string name="message_attach_video_cd">Přiložit video</string>
     <string name="message_attach_document_cd">Přiložit dokument</string>
+    <string name="message_add_attachment_cd">Přidat přílohu</string>
     <string name="message_record_voice_cd">Nahrát hlasovou zprávu</string>
     <string name="chat_cancel_recording_cd">Zrušit</string>
     <string name="chat_recording_label">Nahrávání...</string>
@@ -553,6 +554,7 @@
     <string name="composer_err_gif_limit">Tvůj tarif umožňuje %1$d obrázků na příspěvek.</string>
     <string name="profile_change_avatar">Změnit profilový obrázek</string>
     <string name="profile_change_banner">Změnit banner</string>
+    <string name="profile_view_photo">Zobrazit fotku uživatele %1$s</string>
     <string name="profile_upload_avatar_failed">Nahrání profilového obrázku se nezdařilo</string>
     <string name="profile_upload_banner_failed">Nahrání banneru se nezdařilo</string>
     <string name="auth_welcome_title">ZRP Social</string>

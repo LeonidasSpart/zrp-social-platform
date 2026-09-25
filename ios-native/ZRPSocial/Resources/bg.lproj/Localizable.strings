@@ -196,6 +196,7 @@
 "profile.protectedAccount" = "Този акаунт е личен";
 "profile.protectedMessage" = "Последвай този акаунт, за да виждаш публикациите и данните в профила му.";
 "profile.editProfileButton" = "Редактирай профила";
+"profile.viewPhotoAria" = "Преглед на снимката на {name}";
 "action.follow" = "Последвай";
 "action.following" = "Следваш";
 "action.unfollow" = "Спри да следваш";

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -88,7 +89,14 @@ fun ArticleEditorScreen(articleId: String?, onBack: () -> Unit, onSaved: () -> U
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    // MainActivity opts into enableEdgeToEdge(), so AndroidManifest.xml's
+    // windowSoftInputMode="adjustResize" alone doesn't reserve space for
+    // the IME here - Compose draws behind it unless a real inset modifier
+    // asks for the space back. Without this, the keyboard covered the
+    // title/content fields of this scrollable editor form - see
+    // ConversationScreen.kt's own imePadding() for the same fix on the
+    // equivalent DM composer.
+    Column(modifier = Modifier.fillMaxSize().imePadding()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
