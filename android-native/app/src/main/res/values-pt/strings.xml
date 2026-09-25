@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">Governo</string>
     <string name="admin_badge_team">Equipa ZRP</string>
     <string name="admin_badge_none">Nenhum</string>
+    <string name="post_show_translation">Mostrar tradução</string>
+    <string name="post_show_original">Mostrar original</string>
+    <string name="post_translation_unavailable">Tradução indisponível de momento.</string>
+    <string name="auth_username_taken">Esse nome de utilizador já está em uso.</string>
+    <string name="auth_username_format_hint">3-20 caracteres, apenas letras/números/sublinhados</string>
+    <string name="quote_post_title">Citar publicação</string>
 </resources>

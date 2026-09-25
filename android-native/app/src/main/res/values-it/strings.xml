@@ -2413,4 +2413,10 @@
     <string name="admin_badge_government">Governo</string>
     <string name="admin_badge_team">Team ZRP</string>
     <string name="admin_badge_none">Nessuno</string>
+    <string name="post_show_translation">Mostra traduzione</string>
+    <string name="post_show_original">Mostra originale</string>
+    <string name="post_translation_unavailable">Traduzione non disponibile al momento.</string>
+    <string name="auth_username_taken">Questo nome utente è già in uso.</string>
+    <string name="auth_username_format_hint">3-20 caratteri, solo lettere/numeri/trattini bassi</string>
+    <string name="quote_post_title">Cita il post</string>
 </resources>

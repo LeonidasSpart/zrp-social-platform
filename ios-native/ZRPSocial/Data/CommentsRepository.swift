@@ -3,7 +3,7 @@ import Foundation
 protocol CommentsRepositoryProtocol: Sendable {
     func comments(postId: String, cursor: String?) async throws -> CommentsPage
     func create(postId: String, content: String, parentId: String?) async throws -> Comment
-    func edit(commentId: String, content: String) async throws -> Comment
+    func edit(commentId: String, content: String) async throws -> String
     func delete(commentId: String) async throws
     func toggleLike(commentId: String) async throws -> Bool
     func toggleRepost(commentId: String) async throws -> Bool
@@ -53,10 +53,22 @@ struct CommentsRepository: CommentsRepositoryProtocol {
     }
 
     /// Author-only, enforced server-side with a 403.
-    func edit(commentId: String, content: String) async throws -> Comment {
-        try await client.send(
-            try Endpoint.put("comments/\(commentId)", body: EditRequest(content: content))
+    ///
+    /// Returns the text the server saved. `PUT /api/comments/{id}`
+    /// answers with the bare updated row - no `author`, no `_count` - so
+    /// decoding it as a full `Comment` always failed, and an edit the
+    /// server had accepted was reported to the user as an error.
+    func edit(commentId: String, content: String) async throws -> String {
+        struct Response: Decodable {
+            let content: String
+        }
+        let response: Response = try await client.send(
+            try Endpoint.put(
+                "comments/\(Endpoint.segment(commentId))",
+                body: EditRequest(content: content)
+            )
         )
+        return response.content
     }
 
     func delete(commentId: String) async throws {

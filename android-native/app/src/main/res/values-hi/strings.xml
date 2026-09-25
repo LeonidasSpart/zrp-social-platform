@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">सरकार</string>
     <string name="admin_badge_team">ZRP टीम</string>
     <string name="admin_badge_none">कोई नहीं</string>
+    <string name="post_show_translation">अनुवाद दिखाएं</string>
+    <string name="post_show_original">मूल दिखाएं</string>
+    <string name="post_translation_unavailable">अभी अनुवाद उपलब्ध नहीं है।</string>
+    <string name="auth_username_taken">वह यूज़रनेम पहले से लिया जा चुका है।</string>
+    <string name="auth_username_format_hint">3-20 अक्षर, केवल अक्षर/संख्या/अंडरस्कोर</string>
+    <string name="quote_post_title">पोस्ट कोट करें</string>
 </resources>

@@ -91,6 +91,11 @@ enum DeepLink {
             // app pushes a conversation with a `PostAuthor` it does not
             // have from a username alone. The inbox is the honest
             // destination until the thread route accepts a handle.
+            // `/messages/group/{id}` (what a group message push carries)
+            // needs no partner - the group thread loads by id alone.
+            if second == "group", let id = third {
+                return DeepLinkTarget(.messages, .groupConversation(id: id))
+            }
             return DeepLinkTarget(.messages)
 
         case "shorts":

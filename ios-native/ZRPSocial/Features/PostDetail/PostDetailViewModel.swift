@@ -393,11 +393,11 @@ final class PostDetailViewModel: ObservableObject {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         do {
-            let updated = try await commentsRepository.edit(
+            let saved = try await commentsRepository.edit(
                 commentId: comment.id,
                 content: trimmed
             )
-            comments = comments.map { $0.replacingContent(of: updated.id, with: updated.content) }
+            comments = comments.map { $0.replacingContent(of: comment.id, with: saved) }
         } catch let error as ApiError {
             errorMessage = error.userFacingMessage
         } catch {

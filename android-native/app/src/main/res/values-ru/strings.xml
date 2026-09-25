@@ -2413,4 +2413,10 @@
     <string name="admin_badge_government">Государство</string>
     <string name="admin_badge_team">Команда ZRP</string>
     <string name="admin_badge_none">Нет</string>
+    <string name="post_show_translation">Показать перевод</string>
+    <string name="post_show_original">Показать оригинал</string>
+    <string name="post_translation_unavailable">Перевод сейчас недоступен.</string>
+    <string name="auth_username_taken">Это имя пользователя уже занято.</string>
+    <string name="auth_username_format_hint">3–20 символов, только буквы/цифры/подчёркивания</string>
+    <string name="quote_post_title">Процитировать пост</string>
 </resources>

@@ -132,9 +132,8 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
 
         if (state.usernameStatus == UsernameStatus.INVALID && state.username.isNotBlank()) {
             Text(
-                // Byte-matches SignupPage.tsx's own hardcoded, untranslated
-                // inline hint under the username field.
-                text = "3-20 characters, letters/numbers/underscores only",
+                // Same wording as the website's auth.usernameFormatHint.
+                text = stringResource(R.string.auth_username_format_hint),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
@@ -143,7 +142,7 @@ fun SignupScreen(authViewModel: AuthViewModel, onSignIn: () -> Unit) {
 
         if (state.usernameStatus == UsernameStatus.TAKEN) {
             Text(
-                text = "That username is taken.",
+                text = stringResource(R.string.auth_username_taken),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.fillMaxWidth().padding(top = 2.dp),

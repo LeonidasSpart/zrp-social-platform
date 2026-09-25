@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">Overheid</string>
     <string name="admin_badge_team">ZRP-team</string>
     <string name="admin_badge_none">Geen</string>
+    <string name="post_show_translation">Vertaling tonen</string>
+    <string name="post_show_original">Origineel tonen</string>
+    <string name="post_translation_unavailable">Vertaling op dit moment niet beschikbaar.</string>
+    <string name="auth_username_taken">Die gebruikersnaam is al in gebruik.</string>
+    <string name="auth_username_format_hint">3-20 tekens, alleen letters/cijfers/underscores</string>
+    <string name="quote_post_title">Post citeren</string>
 </resources>

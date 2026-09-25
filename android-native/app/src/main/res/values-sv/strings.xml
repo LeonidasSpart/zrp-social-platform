@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">Myndighet</string>
     <string name="admin_badge_team">ZRP-teamet</string>
     <string name="admin_badge_none">Inget</string>
+    <string name="post_show_translation">Visa översättning</string>
+    <string name="post_show_original">Visa original</string>
+    <string name="post_translation_unavailable">Översättning inte tillgänglig just nu.</string>
+    <string name="auth_username_taken">Det användarnamnet är upptaget.</string>
+    <string name="auth_username_format_hint">3–20 tecken, endast bokstäver/siffror/understreck</string>
+    <string name="quote_post_title">Citera inlägg</string>
 </resources>

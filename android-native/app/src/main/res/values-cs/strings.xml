@@ -2368,4 +2368,10 @@
     <string name="admin_badge_government">Vládní instituce</string>
     <string name="admin_badge_team">Tým ZRP</string>
     <string name="admin_badge_none">Žádný</string>
+    <string name="post_show_translation">Zobrazit překlad</string>
+    <string name="post_show_original">Zobrazit originál</string>
+    <string name="post_translation_unavailable">Překlad teď není dostupný.</string>
+    <string name="auth_username_taken">Toto uživatelské jméno je již obsazené.</string>
+    <string name="auth_username_format_hint">3-20 znaků, pouze písmena/číslice/podtržítka</string>
+    <string name="quote_post_title">Citovat příspěvek</string>
 </resources>

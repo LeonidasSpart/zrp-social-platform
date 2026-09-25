@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">Κυβέρνηση</string>
     <string name="admin_badge_team">Ομάδα ZRP</string>
     <string name="admin_badge_none">Κανένα</string>
+    <string name="post_show_translation">Εμφάνιση μετάφρασης</string>
+    <string name="post_show_original">Εμφάνιση πρωτότυπου</string>
+    <string name="post_translation_unavailable">Η μετάφραση δεν είναι διαθέσιμη αυτή τη στιγμή.</string>
+    <string name="auth_username_taken">Αυτό το όνομα χρήστη είναι ήδη σε χρήση.</string>
+    <string name="auth_username_format_hint">3-20 χαρακτήρες, μόνο γράμματα/αριθμοί/κάτω παύλες</string>
+    <string name="quote_post_title">Παράθεση ανάρτησης</string>
 </resources>

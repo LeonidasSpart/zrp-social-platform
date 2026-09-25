@@ -2358,4 +2358,10 @@
     <string name="admin_badge_government">Kormányzat</string>
     <string name="admin_badge_team">ZRP csapat</string>
     <string name="admin_badge_none">Nincs</string>
+    <string name="post_show_translation">Fordítás megjelenítése</string>
+    <string name="post_show_original">Eredeti megjelenítése</string>
+    <string name="post_translation_unavailable">A fordítás jelenleg nem érhető el.</string>
+    <string name="auth_username_taken">Ez a felhasználónév foglalt.</string>
+    <string name="auth_username_format_hint">3-20 karakter, csak betűk/számok/aláhúzások</string>
+    <string name="quote_post_title">Bejegyzés idézése</string>
 </resources>
