@@ -2238,7 +2238,7 @@ enum L10nKey: String, CaseIterable {
     case footerTransparency = "footer.transparency"
     /// en: "Charity"
     case footerCharity = "footer.charity"
-    /// en: "Swiss European Social Media Platform"
+    /// en: "A Swiss-European social platform built around people, freedom of expression, privacy and security."
     case aboutSubtitle = "about.subtitle"
     /// en: "All"
     case adminUsersStatusAll = "adminUsers.statusAll"
