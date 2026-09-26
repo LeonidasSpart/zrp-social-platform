@@ -16,6 +16,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
+import {
+  focusCurrentLanguageItem,
+  handleLanguageMenuKeyDown,
+} from "@/components/i18n/languageMenuKeys";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
 type NavItem = {
@@ -51,6 +55,7 @@ export default function Sidebar() {
   // trigger's own rect (the same fix BottomNav already uses, for the
   // same reason) keeps both flyouts fully visible at every width.
   const langButtonRef = useRef<HTMLButtonElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const [langMenuPos, setLangMenuPos] = useState<{ left?: number; right?: number; bottom: number; maxHeight: number } | null>(null);
   const [moreMenuPos, setMoreMenuPos] = useState<{ left?: number; right?: number; bottom: number } | null>(null);
@@ -93,6 +98,9 @@ export default function Sidebar() {
     if (!langMenuOpen) return;
 
     positionLangMenu();
+    // Focus lands on the current language so the arrow keys and
+    // typeahead (languageMenuKeys.ts) start from it.
+    focusCurrentLanguageItem([langMenuRef.current]);
     window.addEventListener("resize", positionLangMenu);
     window.addEventListener("orientationchange", positionLangMenu);
 
@@ -414,8 +422,10 @@ export default function Sidebar() {
                 />
 
                 <div
+                  ref={langMenuRef}
                   role="menu"
                   aria-label={t("nav.language")}
+                  onKeyDown={handleLanguageMenuKeyDown}
                   style={{
                     left: langMenuPos.left,
                     right: langMenuPos.right,
@@ -427,11 +437,14 @@ export default function Sidebar() {
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <button
                       type="button"
-                      role="menuitem"
+                      role="menuitemradio"
+                      aria-checked={language === lang.code}
+                      lang={lang.code}
                       key={lang.code}
                       onClick={() => {
                         setLanguage(lang.code);
                         setLangMenuOpen(false);
+                        langButtonRef.current?.focus();
                       }}
                       className={`w-full text-start px-4 py-2.5 text-sm transition ${
                         language === lang.code

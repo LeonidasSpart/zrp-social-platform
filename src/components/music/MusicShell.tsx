@@ -112,7 +112,7 @@ export default function MusicShell() {
   const [yourPlaylists, setYourPlaylists] = useState<PlaylistSummary[]>([]);
   const [q, setQ] = useState("");
   const [studio, setStudio] = useState(false);
-  const { play, addToQueue, clearQueue } = useMusicPlayer();
+  const { play, addToQueue, clearQueue, current, dismissed, resume } = useMusicPlayer();
 
   // Real, database-backed homepage sections - each only renders when
   // it actually has data, never a fake/empty placeholder row. All of
@@ -212,13 +212,13 @@ export default function MusicShell() {
             </div>
 
             <div className="relative flex-1 max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute start-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t("music.shell.searchPlaceholder")}
                 aria-label={t("music.shell.searchPlaceholder")}
-                className="w-full h-11 pl-11 pr-4 rounded-full bg-gray-100 dark:bg-white/[0.07] border border-transparent focus:border-zrp-red/40 outline-none transition text-sm"
+                className="w-full h-11 ps-11 pe-4 rounded-full bg-gray-100 dark:bg-white/[0.07] border border-transparent focus:border-zrp-red/40 outline-none transition text-sm"
               />
             </div>
 
@@ -318,7 +318,7 @@ export default function MusicShell() {
             <Link
               key={String(href)}
               href={String(href)}
-              className="group text-left rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.035] p-4 hover:border-zrp-red/30 hover:bg-zrp-red/[0.03] transition"
+              className="group text-start rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.035] p-4 hover:border-zrp-red/30 hover:bg-zrp-red/[0.03] transition"
             >
               <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-white/10 flex items-center justify-center group-hover:bg-zrp-red group-hover:text-white transition">
                 {(() => {
@@ -565,7 +565,7 @@ export default function MusicShell() {
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
-                      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur text-[10px] text-white/80">
+                      <div className="absolute top-3 start-3 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur text-[10px] text-white/80">
                         #{String(index + 1).padStart(2, "0")}
                       </div>
 
@@ -580,7 +580,7 @@ export default function MusicShell() {
                           play(track);
                           tracks.slice(index + 1).forEach((t) => addToQueue(t));
                         }}
-                        className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-zrp-red text-white flex items-center justify-center shadow-xl shadow-black/30 active:scale-95 transition"
+                        className="absolute bottom-4 start-4 w-12 h-12 rounded-full bg-zrp-red text-white flex items-center justify-center shadow-xl shadow-black/30 active:scale-95 transition"
                         aria-label={t("music.shell.playTrackAria", { title: track.title })}
                       >
                         <Play className="w-5 h-5 fill-current ml-0.5" />
@@ -589,7 +589,7 @@ export default function MusicShell() {
                       <button
                         type="button"
                         onClick={() => addToQueue(track)}
-                        className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur text-white flex items-center justify-center hover:bg-black/70 transition"
+                        className="absolute bottom-4 end-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur text-white flex items-center justify-center hover:bg-black/70 transition"
                         aria-label={t("music.common.addToQueue")}
                       >
                         <ListPlus className="w-4 h-4" />

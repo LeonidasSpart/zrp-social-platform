@@ -98,12 +98,54 @@ describe("language menus are height-bounded and internally scrollable", () => {
 });
 
 describe("language menus stay reachable by keyboard and screen readers", () => {
-  it("every language popover is a labelled role=menu of role=menuitem buttons", () => {
+  it("every language popover is a labelled role=menu of role=menuitemradio buttons that mark the current language aria-checked", () => {
+    // menuitemradio, not plain menuitem: picking a language is a
+    // single-select choice, and aria-checked is how a menu exposes
+    // which one is current (aria-selected is not valid on menu items).
     for (const source of [headerSource, sidebarSource]) {
-      const menuItemMatches = source.match(/role="menuitem"/g) ?? [];
+      const menuItemMatches = source.match(/role="menuitemradio"/g) ?? [];
       expect(menuItemMatches.length).toBeGreaterThan(0);
+      expect(source).not.toMatch(/role="menuitem"/);
+      expect(source).toMatch(/aria-checked=\{(language === lang\.code|selected)\}/);
+      // Each label is rendered in its own language, so it is tagged as such.
+      expect(source).toMatch(/lang=\{lang\.code\}/);
     }
     const roleMenuMatches = headerSource.match(/role="menu"/g) ?? [];
     expect(roleMenuMatches.length).toBe(2); // desktop dropdown + mobile drawer section
+  });
+
+  it("every language popover wires the shared arrow-key / Home / End / typeahead handler", () => {
+    for (const source of [headerSource, sidebarSource]) {
+      expect(source).toContain(
+        'from "@/components/i18n/languageMenuKeys"'
+      );
+      const menus = source.match(/role="menu"\n/g) ?? [];
+      const handlers = source.match(/onKeyDown=\{handleLanguageMenuKeyDown\}/g) ?? [];
+      expect(handlers.length).toBe(menus.length);
+      expect(source).toContain("focusCurrentLanguageItem(");
+    }
+  });
+
+  it("the shared handler moves focus with wrap-around and scrolls the focused row into view with block: nearest (never the whole page)", () => {
+    const keys = readFileSync(
+      path.resolve(__dirname, "../i18n/languageMenuKeys.ts"),
+      "utf-8"
+    );
+    expect(keys).toContain('case "ArrowDown":');
+    expect(keys).toContain('case "ArrowUp":');
+    expect(keys).toContain('case "Home":');
+    expect(keys).toContain('case "End":');
+    expect(keys).toContain('item.scrollIntoView({ block: "nearest" })');
+    // On open the list container itself is brought into view first -
+    // inside the mobile drawer the 40dvh list used to open partly below
+    // the fold, with overscroll-contain then stopping the inner scroll
+    // from chaining out to the drawer to reveal the rest.
+    expect(keys).toContain('container.scrollIntoView({ block: "nearest" })');
+    expect(keys).toContain('aria-checked") === "true"');
+  });
+
+  it("Escape hands focus back to the language trigger that opened the menu", () => {
+    expect(headerSource).toMatch(/desktopLangTriggerRef\.current, mobileLangTriggerRef\.current/);
+    expect(sidebarSource).toMatch(/if \(langMenuOpen\) langButtonRef\.current\?\.focus\(\);/);
   });
 });

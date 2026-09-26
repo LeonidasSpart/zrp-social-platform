@@ -71,8 +71,17 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
         }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(localizeApiMessage(data.error, t) || t("quote.errGeneric"));
+        const data = await res.json().catch(() => null);
+        // /api/posts refuses a quote of a private account's, scheduled
+        // or blocked-relationship post with this one English sentence
+        // (400) - surface it in the viewer's language instead of raw.
+        if (
+          typeof data?.error === "string" &&
+          /can't be quoted/i.test(data.error)
+        ) {
+          throw new Error(t("quote.errCannotQuote"));
+        }
+        throw new Error(localizeApiMessage(data?.error, t) || t("quote.errGeneric"));
       }
       onQuotePosted();
       onClose();
@@ -105,9 +114,10 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
         <div className="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0">
           <h2 id={titleId} className="text-xl font-bold text-gray-900 dark:text-white">{t("quote.title")}</h2>
           <button
+            type="button"
             onClick={onClose}
             aria-label={t("help.close")}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+            className="-me-2 flex h-11 w-11 items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition"
           >
             <X className="w-5 h-5" />
           </button>

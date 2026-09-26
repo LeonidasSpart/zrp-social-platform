@@ -1273,7 +1273,7 @@ export default function ShortsPage() {
         onClick={() =>
           router.push("/")
         }
-        className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-4 z-30 text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+        className="absolute top-[calc(1rem+env(safe-area-inset-top))] start-4 z-30 flex h-11 w-11 items-center justify-center text-white bg-black/40 rounded-full hover:bg-black/60 transition"
         aria-label={t("shorts.back")}
       >
         <ArrowLeft className="w-6 h-6 rtl:-scale-x-100" />
@@ -1295,7 +1295,7 @@ export default function ShortsPage() {
             link. */}
         <Link
           href="/discover"
-          className="text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+          className="flex h-11 w-11 items-center justify-center text-white bg-black/40 rounded-full hover:bg-black/60 transition"
           title={t("nav.discover")}
           aria-label={t("nav.discover")}
         >
@@ -1308,7 +1308,7 @@ export default function ShortsPage() {
               true
             )
           }
-          className="text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+          className="flex h-11 w-11 items-center justify-center text-white bg-black/40 rounded-full hover:bg-black/60 transition"
           title={t("shorts.postAShort")}
         >
           <Plus className="w-6 h-6" />
@@ -1324,7 +1324,7 @@ export default function ShortsPage() {
                 return next;
               })
             }
-            className="text-white bg-black/40 rounded-full p-2 hover:bg-black/60 transition"
+            className="flex h-11 w-11 items-center justify-center text-white bg-black/40 rounded-full hover:bg-black/60 transition"
             aria-label={
               muted
                 ? t("shorts.unmute")

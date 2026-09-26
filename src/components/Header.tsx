@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -45,6 +45,10 @@ import {
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
+import {
+  focusCurrentLanguageItem,
+  handleLanguageMenuKeyDown,
+} from "@/components/i18n/languageMenuKeys";
 import { getSocket } from "@/lib/socket-client";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -82,6 +86,13 @@ export default function Header() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  // The two language menus (desktop dropdown, mobile drawer section)
+  // share one open state; these let the open effect focus whichever is
+  // displayed, and Escape hand focus back to the trigger that opened it.
+  const desktopLangMenuRef = useRef<HTMLDivElement>(null);
+  const mobileLangMenuRef = useRef<HTMLDivElement>(null);
+  const desktopLangTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobileLangTriggerRef = useRef<HTMLButtonElement>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
@@ -344,6 +355,13 @@ export default function Header() {
     };
   }, []);
 
+  // On open: scroll the list into view and focus the current language,
+  // so arrow keys/typeahead start from it (see languageMenuKeys.ts).
+  useEffect(() => {
+    if (!langMenuOpen) return;
+    focusCurrentLanguageItem([desktopLangMenuRef.current, mobileLangMenuRef.current]);
+  }, [langMenuOpen]);
+
   // Escape closes whatever is open, innermost first. The drawer, the
   // user menu and the language menu were all dismissable by pointer
   // only; a keyboard user who opened one had no way out but Tab.
@@ -352,6 +370,12 @@ export default function Header() {
       if (e.key !== "Escape") return;
 
       if (userMenuOpen || langMenuOpen) {
+        if (langMenuOpen) {
+          const trigger = [desktopLangTriggerRef.current, mobileLangTriggerRef.current].find(
+            (el) => el && el.offsetParent !== null
+          );
+          trigger?.focus();
+        }
         setUserMenuOpen(false);
         setLangMenuOpen(false);
         return;
@@ -498,6 +522,7 @@ export default function Header() {
 
               <div className="relative lang-menu">
                 <button
+                  ref={desktopLangTriggerRef}
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -530,8 +555,10 @@ export default function Header() {
 
                 {langMenuOpen && (
                   <div
+                    ref={desktopLangMenuRef}
                     role="menu"
                     aria-label={t("nav.language")}
+                    onKeyDown={handleLanguageMenuKeyDown}
                     className="absolute end-0 mt-2 w-44 max-h-[min(60dvh,24rem)] overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800"
                   >
                     {SUPPORTED_LANGUAGES.map(
@@ -539,7 +566,9 @@ export default function Header() {
                         <button
                           key={lang.code}
                           type="button"
-                          role="menuitem"
+                          role="menuitemradio"
+                          aria-checked={language === lang.code}
+                          lang={lang.code}
                           onClick={(e) => {
                             e.stopPropagation();
 
@@ -1360,16 +1389,13 @@ export default function Header() {
                 </p>
 
                 {/* LANGUAGE */}
-
                 <div className="lang-menu rounded-xl overflow-hidden">
                   <button
+                    ref={mobileLangTriggerRef}
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-
-                      setLangMenuOpen(
-                        (value) => !value
-                      );
+                      setLangMenuOpen((value) => !value);
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3.5 text-gray-700 dark:text-gray-200 transition ${
                       langMenuOpen
@@ -1377,40 +1403,26 @@ export default function Header() {
                         : "hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
                     aria-haspopup="menu"
-                    aria-expanded={
-                      langMenuOpen
-                    }
-                    aria-label={t(
-                      "nav.language"
-                    )}
+                    aria-expanded={langMenuOpen}
+                    aria-label={t("nav.language")}
                   >
                     <Globe className="w-5 h-5 text-gray-500" />
-
-                    <span className="flex-1 text-start font-medium">
-                      {t("nav.language")}
-                    </span>
-
-                    <span className="text-xs font-semibold text-gray-400 me-1">
-                      {currentLangLabel}
-                    </span>
-
+                    <span className="flex-1 text-start font-medium">{t("nav.language")}</span>
+                    <span className="text-xs font-semibold text-gray-400 me-1">{currentLangLabel}</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-gray-400 transition-transform ${
-                        langMenuOpen
-                          ? "rotate-180"
-                          : ""
-                      }`}
+                      className={`w-4 h-4 text-gray-400 transition-transform ${langMenuOpen ? "rotate-180" : ""}`}
                     />
                   </button>
 
                   {langMenuOpen && (
                     <div
+                      ref={mobileLangMenuRef}
                       role="menu"
                       aria-label={t("nav.language")}
+                      onKeyDown={handleLanguageMenuKeyDown}
                       className="mx-2 mb-2 max-h-[40dvh] overflow-y-auto overscroll-contain rounded-xl bg-gray-50 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700"
                     >
-                      {SUPPORTED_LANGUAGES.map(
-                        (lang) => {
+                      {SUPPORTED_LANGUAGES.map((lang) => {
                           const selected =
                             language ===
                             lang.code;
@@ -1421,7 +1433,9 @@ export default function Header() {
                                 lang.code
                               }
                               type="button"
-                              role="menuitem"
+                              role="menuitemradio"
+                              aria-checked={selected}
+                              lang={lang.code}
                               onClick={(
                                 e
                               ) => {

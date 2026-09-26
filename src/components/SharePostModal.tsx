@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Loader2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDialogA11y } from "@/hooks/useDialogA11y";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { getPostUrl } from "@/lib/postUrl";
 
 interface SharePostModalProps {
@@ -37,6 +39,14 @@ export default function SharePostModal({ postId, onClose }: SharePostModalProps)
   const [sentTo, setSentTo] = useState<Record<string, "sending" | "sent" | "error">>({});
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Escape-to-close, focus trap and focus restore, same as the other
+  // post dialogs (QuotePostModal, ReportModal) - this one had neither,
+  // so a keyboard user could tab out behind the backdrop and Escape
+  // did nothing. The dialog hook manages initial focus; the search
+  // field then takes it explicitly since that is the one thing to do.
+  const dialogRef = useDialogA11y(true, onClose, true);
+  useBodyScrollLock(true);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -93,10 +103,12 @@ export default function SharePostModal({ postId, onClose }: SharePostModalProps)
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="share-post-modal-title"
-        className="bg-white dark:bg-zrp-deepBlack rounded-2xl shadow-xl max-w-md w-full max-h-[80vh] flex flex-col"
+        className="focus:outline-none bg-white dark:bg-zrp-deepBlack rounded-2xl shadow-xl max-w-md w-full max-h-[80dvh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -104,9 +116,10 @@ export default function SharePostModal({ postId, onClose }: SharePostModalProps)
             {t("sharePost.title")}
           </h2>
           <button
+            type="button"
             onClick={onClose}
             aria-label={t("help.close")}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition p-1 rounded-full"
+            className="-me-2 flex h-11 w-11 items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -145,7 +158,7 @@ export default function SharePostModal({ postId, onClose }: SharePostModalProps)
                   key={user.id}
                   onClick={() => handleSend(user)}
                   disabled={state === "sending" || state === "sent"}
-                  className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:cursor-default text-left"
+                  className="w-full flex items-center gap-3 p-2 min-h-11 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:cursor-default text-start"
                 >
                   {user.avatarUrl ? (
                     <img

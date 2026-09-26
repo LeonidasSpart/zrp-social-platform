@@ -46,13 +46,16 @@ type MusicContextType = {
   buffering: boolean;
   error: string | null;
 
-  // Whether the persistent player bar is dismissed from view. This is
-  // independent of playback: dismissing hides the bar (and its lock
-  // screen / Media Session controls remain unaffected) but does not
-  // pause, does not clear `current`, and does not touch the queue -
-  // "close the bar" and "stop the music" are two different actions.
+  // Whether the persistent player bar is closed. Closing pauses playback
+  // and hides the bar, but keeps `current`, the queue, history and the
+  // playback position exactly as they were, so it is fully reversible:
+  // `resume()` (the "Continue listening" strip on the Music page) or any
+  // deliberate `play()` brings the bar back and carries on from where
+  // it stopped. Previously the X hid the bar while the audio kept
+  // playing, with no in-app control left to pause it or bring it back.
   dismissed: boolean;
   dismiss: () => void;
+  resume: () => void;
 
   play: (track?: MusicTrack) => void;
   pause: () => void;
@@ -435,13 +438,24 @@ export function MusicPlayerProvider({
     setPlaying(false);
   }, []);
 
-  // Hides the persistent player bar without stopping playback, clearing
-  // `current`, or touching the queue - a minimize, not a stop. Playback
-  // (and the OS-level Media Session / lock-screen controls) keeps
-  // working exactly as before; only the in-app bar disappears until the
-  // next deliberate `play()` call brings it back.
+  // Closes the persistent player bar: pauses playback and hides the bar.
+  // Nothing is cleared - `current`, the queue, history and the audio
+  // element's position all survive - so `resume()` picks up exactly where
+  // this left off. A close that kept the audio playing behind an
+  // invisible bar (the old behaviour) left the listener with no in-app
+  // way to pause it; a close that threw the queue away would not be
+  // reversible. This is neither.
   const dismiss = useCallback(() => {
+    setPlaying(false);
     setDismissed(true);
+  }, []);
+
+  // Brings a closed player back and continues the same track from the
+  // position it was paused at.
+  const resume = useCallback(() => {
+    if (!currentRef.current) return;
+    setDismissed(false);
+    setPlaying(true);
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -623,6 +637,7 @@ export function MusicPlayerProvider({
 
         dismissed,
         dismiss,
+        resume,
 
         play,
         pause,

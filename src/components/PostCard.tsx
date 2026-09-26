@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import {
@@ -327,6 +328,7 @@ export default function PostCard({
   showInlineComments = true,
 }: PostCardProps) {
   const { data: session } = useSession();
+  const router = useRouter();
   const { language: uiLanguage, t } = useLanguage();
 
   const [liked, setLiked] = useState(post.liked || false);
@@ -1263,6 +1265,15 @@ export default function PostCard({
 
   const handleRepost =
     async () => {
+      // /post/[id] and /profile are public when logged out, so this
+      // card renders for a signed-out visitor too. The server answers
+      // 401 in that case; previously that was swallowed (nothing
+      // happened on tap), so send them to sign in instead.
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+
       try {
         const res =
           await fetch(
@@ -1303,12 +1314,37 @@ export default function PostCard({
           // Previously a completely silent failure - the button just
           // did nothing once the daily repost quota was hit.
           showRepostNotice(t("post.repostLimitReached", { n: data.limit ?? "" }));
+        } else if (res.status === 401) {
+          // Session expired between page load and the tap.
+          router.push("/login");
+        } else if (res.status === 403) {
+          // The route refuses a private account's post (same rule as
+          // protected posts: only its owner may repost it) and a
+          // blocked-either-way relationship, both as 403. The private
+          // case is the one a user can actually hit from the feed
+          // (they follow the account and see the post), so it gets its
+          // own explanation; the blocked case falls through to the
+          // generic "can't be reposted" line rather than the raw
+          // English server string or, as before, nothing at all.
+          const isPrivateRefusal =
+            typeof data?.error === "string" &&
+            /private/i.test(data.error);
+          showRepostNotice(
+            isPrivateRefusal
+              ? t("post.repostPrivateAccount")
+              : t("post.repostUnavailable")
+          );
+        } else if (res.status === 404) {
+          showRepostNotice(t("post.repostUnavailable"));
+        } else {
+          showRepostNotice(t("post.repostFailed"));
         }
       } catch (error) {
         console.error(
           "Error reposting post:",
           error
         );
+        showRepostNotice(t("post.repostFailed"));
       }
     };
 
@@ -2134,13 +2170,13 @@ export default function PostCard({
                   tabIndex={0}
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.location.href = `/post/${post.quotePost!.id}`;
+                    router.push(`/post/${post.quotePost!.id}`);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
                       e.stopPropagation();
-                      window.location.href = `/post/${post.quotePost!.id}`;
+                      router.push(`/post/${post.quotePost!.id}`);
                     }
                   }}
                   className="mt-3 rounded-2xl border border-gray-300 dark:border-gray-700 bg-gray-50/80 dark:bg-white/[0.035] p-3 sm:p-4 cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/[0.06] transition-colors focus:outline-none focus:ring-2 focus:ring-zrp-red/60"
@@ -2149,7 +2185,7 @@ export default function PostCard({
                   <div className="flex items-center gap-2 mb-2">
                     <Quote className="w-4 h-4 text-zrp-red flex-shrink-0" />
                     <span className="text-xs font-semibold uppercase tracking-wide text-zrp-red">
-                      Quoted post
+                      {t("postCard.quotedPost")}
                     </span>
                   </div>
 
@@ -2193,7 +2229,7 @@ export default function PostCard({
                         <div className="mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
                           <img
                             src={post.quotePost.imageUrl || post.quotePost.imageUrls?.[0] || ""}
-                            alt="Quoted post media"
+                            alt={t("postCard.quotedPostAria", { username: post.quotePost.author.username })}
                             className="w-full max-h-72 object-cover"
                             loading="lazy"
                           />
@@ -2687,7 +2723,7 @@ export default function PostCard({
                 }
                 aria-label={`${t("action.reply")} (${commentsCount})`}
                 aria-expanded={showComments}
-                className={`group flex items-center gap-1 text-sm rounded-full ${
+                className={`group flex items-center gap-1 min-h-11 text-sm rounded-full ${
                   commentsEnabled
                     ? "text-gray-500 dark:text-gray-400"
                     : "text-gray-300 dark:text-gray-500 cursor-not-allowed opacity-50"
@@ -2726,7 +2762,7 @@ export default function PostCard({
                   aria-label={t("action.repost")}
                   aria-haspopup="menu"
                   aria-expanded={repostDropdownOpen}
-                  className={`group flex items-center text-sm rounded-full ${
+                  className={`group flex items-center min-h-11 text-sm rounded-full ${
                     reposted
                       ? "text-green-500"
                       : "text-gray-500 dark:text-gray-400"
@@ -2776,7 +2812,7 @@ export default function PostCard({
                         }}
                         type="button"
                         role="menuitem"
-                        className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="block w-full text-start px-4 py-3 min-h-11 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         {t("post.undoRepost")}
                       </button>
@@ -2791,7 +2827,7 @@ export default function PostCard({
                         }}
                         type="button"
                         role="menuitem"
-                        className="block w-full text-start px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        className="block w-full text-start px-4 py-3 min-h-11 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
                         {t("action.repost")}
                       </button>
@@ -2809,7 +2845,7 @@ export default function PostCard({
                       }}
                       type="button"
                       role="menuitem"
-                      className="block w-full text-start px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      className="block w-full text-start px-4 py-3 min-h-11 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
                       {t("quote.submit")}
                     </button>
@@ -2818,7 +2854,7 @@ export default function PostCard({
                       href={`/post/${post.id}/reposts`}
                       role="menuitem"
                       onClick={() => setRepostDropdownOpen(false)}
-                      className="block w-full text-start px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-t border-gray-100 dark:border-gray-700"
+                      className="block w-full text-start px-4 py-3 min-h-11 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition border-t border-gray-100 dark:border-gray-700"
                     >
                       {t("reposts.count", {
                         n: formatCount(repostsCount),
@@ -2829,7 +2865,7 @@ export default function PostCard({
                       href={`/post/${post.id}/quotes`}
                       role="menuitem"
                       onClick={() => setRepostDropdownOpen(false)}
-                      className="block w-full text-start px-4 py-2 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      className="block w-full text-start px-4 py-3 min-h-11 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                     >
                       {t("quotes.count", {
                         n: formatCount(
@@ -2845,7 +2881,8 @@ export default function PostCard({
                 {repostNotice && (
                   <div
                     role="status"
-                    className="absolute start-0 top-full mt-1 w-48 px-3 py-2 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs shadow-lg z-20"
+                    aria-live="polite"
+                    className="absolute start-0 top-full mt-1 w-56 max-w-[calc(100vw-2rem)] px-3 py-2 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs shadow-lg z-20"
                   >
                     {repostNotice}
                   </div>
@@ -2859,7 +2896,7 @@ export default function PostCard({
                 }
                 aria-label={`${t("action.like")} (${likesCount})`}
                 aria-pressed={liked}
-                className={`group flex items-center gap-1 text-sm rounded-full ${
+                className={`group flex items-center gap-1 min-h-11 text-sm rounded-full ${
                   liked
                     ? "text-red-500"
                     : "text-gray-500 dark:text-gray-400"
@@ -2908,7 +2945,7 @@ export default function PostCard({
                   disabled={
                     bookmarkLoading
                   }
-                  className={`group p-2 rounded-full transition hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
+                  className={`group flex h-11 w-11 items-center justify-center rounded-full transition hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
                     bookmarked
                       ? "text-blue-500"
                       : "text-gray-500 dark:text-gray-500 hover:text-blue-500 focus-visible:text-blue-500"
@@ -2932,7 +2969,7 @@ export default function PostCard({
                   }
                   aria-label={t("post.share")}
                   title={t("post.share")}
-                  className="p-2 rounded-full transition text-gray-500 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 focus-visible:text-blue-500"
+                  className="flex h-11 w-11 items-center justify-center rounded-full transition text-gray-500 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 focus-visible:text-blue-500"
                 >
                   <Share2 className="w-[18px] h-[18px]" />
                 </button>
@@ -2940,7 +2977,7 @@ export default function PostCard({
 
               {!commentsEnabled && (
                 <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
-                  Comments off
+                  {t("postCard.commentsOff")}
                 </span>
               )}
             </div>
@@ -3158,7 +3195,7 @@ export default function PostCard({
                 type="button"
                 onClick={closeLightbox}
                 aria-label={t("post.closeImageAria")}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-black/50 hover:bg-white/20 text-white transition"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-black/50 hover:bg-white/20 text-white transition"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -3233,7 +3270,7 @@ export default function PostCard({
                 }
               >
                 <div className="bg-black/50 backdrop-blur-sm text-white text-xs font-medium rounded-full px-4 py-2">
-                  Swipe to browse
+                  {t("postCard.swipeToBrowse")}
                 </div>
               </div>
             )}
@@ -3261,7 +3298,7 @@ export default function PostCard({
                   setShowEmojiPicker(false)
                 }
                 aria-label={t("help.close")}
-                className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <X className="w-5 h-5" />
               </button>
