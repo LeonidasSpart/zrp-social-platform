@@ -40,7 +40,7 @@ import java.util.Locale
 
 /**
  * The native equivalent of the website's language switcher (Header.tsx/
- * Sidebar.tsx's "nav.language" menu) - the same 29 official ZRP
+ * Sidebar.tsx's "nav.language" menu) - the same 34 official ZRP
  * languages, backed by AppCompatDelegate's per-app language API rather
  * than a custom locale-storage mechanism. Unlike the website (which
  * persists the choice in a "zrp-lang" cookie scoped to that one

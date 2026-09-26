@@ -102,6 +102,7 @@ class LocalizationCompletenessTest {
     private val languages = listOf(
         "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "pt", "ja", "ko", "hi",
         "nl", "pl", "ro", "cs", "hu", "sv", "da", "hr", "bg", "el", "no", "sr", "bs", "mk",
+        "uk", "fi", "sk", "sl", "lt",
     )
 
     private val placeholderRegex = Regex("""%\d+\$[sd]|\{[a-zA-Z]+\}""")

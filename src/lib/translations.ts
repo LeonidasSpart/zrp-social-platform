@@ -1,4 +1,4 @@
-export type Language = "en" | "fr" | "de" | "it" | "sq" | "es" | "ru" | "ar" | "zh" | "tr" | "id" | "pt" | "ja" | "ko" | "hi" | "nl" | "pl" | "ro" | "cs" | "hu" | "sv" | "da" | "hr" | "bg" | "el" | "no" | "sr" | "bs" | "mk";
+export type Language = "en" | "fr" | "de" | "it" | "sq" | "es" | "ru" | "ar" | "zh" | "tr" | "id" | "pt" | "ja" | "ko" | "hi" | "nl" | "pl" | "ro" | "cs" | "hu" | "sv" | "da" | "hr" | "bg" | "el" | "no" | "sr" | "bs" | "mk" | "uk" | "fi" | "sk" | "sl" | "lt";
 
 export const SUPPORTED_LANGUAGES: { code: Language; label: string }[] = [
   { code: "en", label: "English" },
@@ -30,6 +30,11 @@ export const SUPPORTED_LANGUAGES: { code: Language; label: string }[] = [
   { code: "sr", label: "Srpski" },
   { code: "bs", label: "Bosanski" },
   { code: "mk", label: "Македонски" },
+  { code: "uk", label: "Українська" },
+  { code: "fi", label: "Suomi" },
+  { code: "sk", label: "Slovenčina" },
+  { code: "sl", label: "Slovenščina" },
+  { code: "lt", label: "Lietuvių" },
 ];
 
 // Arabic is the only RTL language in this list - LanguageContext sets

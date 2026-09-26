@@ -157,16 +157,17 @@ is the single most common drift in the web codebase.
 
 ## 5. Copy is a design material
 
-ZRP ships **25 languages**: `en, fr, de, it, sq, es, ru, ar, zh, tr, id,
-pt, ja, ko, hi, nl, pl, ro, cs, hu, sv, da, hr, bg, el`.
+ZRP ships **34 languages**: `en, fr, de, it, sq, es, ru, ar, zh, tr, id,
+pt, ja, ko, hi, nl, pl, ro, cs, hu, sv, da, hr, bg, el, no, sr, bs, mk,
+uk, fi, sk, sl, lt`.
 
 - Web strings live in `src/lib/translations.ts`; native in
   `android-native/app/src/main/res/values*/strings.xml`.
 - **Reuse before you invent.** Web's dictionary is the source of truth and
   is already professionally translated. Most native strings in this repo
   were lifted verbatim from it, and that is the correct pattern.
-- Adding a user-facing string means adding it to **all 25** language
-  blocks (and the `TranslationKey` union on web). A new key with 24
+- Adding a user-facing string means adding it to **all 34** language
+  blocks (and the `TranslationKey` union on web). A new key with 33
   English fallbacks is not done.
 - Never machine-translate to fill a gap. If no translation exists and
   none can be reused, say so and ask.
