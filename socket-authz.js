@@ -97,6 +97,28 @@ async function isConversationMember(prisma, userId, conversationId) {
   return membership !== null;
 }
 
+/*
+ * Live Audio rooms. Same shape as groupRoom()/isConversationMember()
+ * above: a dedicated Socket.IO room per LiveAudioRoom id, joined only
+ * after a real, current membership check against Postgres - never
+ * because the client merely claims to be in the room. The join/leave/
+ * moderation REST routes (src/lib/live-audio/room-service.ts) are what
+ * actually change LiveAudioParticipant rows; this only gates which
+ * sockets receive the realtime broadcasts those routes emit via
+ * emitToLiveAudioRoom() (src/lib/socket-emit.ts).
+ */
+function liveAudioRoom(roomId) {
+  return `live-audio:${roomId}`;
+}
+
+async function isLiveAudioParticipant(prisma, userId, roomId) {
+  const participant = await prisma.liveAudioParticipant.findUnique({
+    where: { roomId_userId: { roomId, userId } },
+    select: { leftAt: true, removedAt: true },
+  });
+  return !!participant && !participant.leftAt && !participant.removedAt;
+}
+
 /**
  * send-group-message: the message must exist, have been sent BY the
  * verified user INTO the claimed conversation, and the user must still
@@ -573,4 +595,6 @@ module.exports = {
   authorizeDeleteRelay,
   authorizeConversationDeleteRelay,
   createCallRegistry,
+  liveAudioRoom,
+  isLiveAudioParticipant,
 };

@@ -35,6 +35,8 @@
     "geoip-lite": "^2.0.3",
     "google-auth-library": "^11.0.2",
     "i18n-iso-countries": "^7.14.0",
+    "livekit-client": "^2.22.3",
+    "livekit-server-sdk": "^2.19.1",
     "lucide-react": "^0.263.1",
     "marked": "^18.0.11",
     "next": "^15.5.25",

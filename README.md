@@ -528,6 +528,16 @@ include:
   the call itself is unaffected)
 - **Blockchain**: `SOLANA_RPC_URL`, `NEXT_PUBLIC_SOLANA_RPC_URL`,
   `SOLANA_WALLET_ADDRESS`, `SOLANA_PRIVATE_KEY`, `NEXT_PUBLIC_USDC_MINT`
+- **Live Audio (SFU)**: `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` (paired
+  credential for `livekit-server-sdk`; mints room access tokens and
+  verifies webhooks locally, no network call required; never sent to any
+  client), `LIVEKIT_URL` (the LiveKit server's WebSocket URL, given to
+  clients so they know where to connect; not secret), `LIVEKIT_WEBHOOK_API_KEY`
+  / `LIVEKIT_WEBHOOK_API_SECRET` (optional; only needed if the LiveKit
+  webhook is signed with a different key/secret pair than the main one —
+  defaults to `LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET` when unset). Every
+  Live Audio route fails closed with a `503` when these are unset rather
+  than faking a token; see `docs/live-audio-architecture.md`.
 - **Observability and misc**: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`,
   `CRON_SECRET`, `GIPHY_API_KEY`
 - **Security tuning (optional)**: `TRUSTED_PROXY_HOPS` (number of

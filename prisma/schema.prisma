@@ -470,7 +470,7 @@ model User {
   // `category` (existing field, see src/lib/professionalCategories.ts)
   // already serves as the industry taxonomy - deliberately not
   // duplicated here. These four are the genuinely missing fields.
-  headline String? @db.Text
+  headline String?  @db.Text
   company  String?
   position String?
   skills   String[] @default([])
@@ -522,8 +522,8 @@ model User {
   // Named to match Follow's own naming shape (subscriber/author, not
   // Mute's muter/muted) since this is a directional "get notified about
   // X's posts" relationship, not a mutual/symmetric one.
-  postSubscriptionsGiven   PostSubscription[] @relation("PostSubscriptionSubscriber")
-  postSubscriptionsGained  PostSubscription[] @relation("PostSubscriptionAuthor")
+  postSubscriptionsGiven  PostSubscription[] @relation("PostSubscriptionSubscriber")
+  postSubscriptionsGained PostSubscription[] @relation("PostSubscriptionAuthor")
 
   notifications     Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
@@ -598,8 +598,8 @@ model User {
   assignedTickets SupportTicket[] @relation("AssignedTickets")
   ticketReplies   TicketReply[]
 
-  aiConversations AIConversation[]
-  aiDailyUsage    AIDailyUsage[]
+  aiConversations  AIConversation[]
+  aiDailyUsage     AIDailyUsage[]
   repostDailyUsage RepostDailyUsage[]
 
   adCampaigns   AdCampaign[]   @relation("AdAdvertiser")
@@ -659,14 +659,22 @@ model User {
   listMemberships ListMember[] @relation("ListMemberUser")
 
   // ─── ZRP Discover ────────────────────────────────────────────
-  discoverEvents      DiscoverEvent[]     @relation("DiscoverEventUser")
-  discoverDismissals  DiscoverDismissal[]
+  discoverEvents     DiscoverEvent[]     @relation("DiscoverEventUser")
+  discoverDismissals DiscoverDismissal[]
+
+  // ─── ZRP Live Audio ──────────────────────────────────────────
+  liveAudioRoomsHosted                LiveAudioRoom[]             @relation("LiveAudioHost")
+  liveAudioParticipations             LiveAudioParticipant[]      @relation("LiveAudioParticipantUser")
+  liveAudioParticipantsRemoved        LiveAudioParticipant[]      @relation("LiveAudioParticipantRemovedBy")
+  liveAudioSpeakerRequests            LiveAudioSpeakerRequest[]   @relation("LiveAudioSpeakerRequestUser")
+  liveAudioSpeakerRequestsResolved    LiveAudioSpeakerRequest[]   @relation("LiveAudioSpeakerRequestResolvedBy")
+  liveAudioModerationActionsPerformed LiveAudioModerationAction[] @relation("LiveAudioModerationActor")
+  liveAudioModerationActionsReceived  LiveAudioModerationAction[] @relation("LiveAudioModerationTarget")
 
   // Admin Subscriptions & Billing (list/KPI queries filter and group by
   // plan directly on User, since a legacy-paid user may have no
   // Subscription row yet - see docs/subscriptions.md "Legacy users").
   @@index([plan])
-
   // Geography/acquisition analytics + feed geo-relevance + ad targeting
   // all groupBy/filter on these - see docs/user-geography-and-acquisition.md.
   @@index([countryCode])
@@ -1358,6 +1366,13 @@ model Report {
   reportedUserId String?
   reportedUser   User?   @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
 
+  // Eighth polymorphic target - a Live Audio room (e.g. abusive/illegal
+  // content spoken in a room, harassment by a host/speaker). SetNull,
+  // same audit-trail reasoning as every other target above: a room
+  // being cleaned up/deleted must not erase why it was reported.
+  liveAudioRoomId String?
+  liveAudioRoom   LiveAudioRoom? @relation(fields: [liveAudioRoomId], references: [id], onDelete: SetNull)
+
   appeals Appeal[]
 
   @@index([postId])
@@ -1367,6 +1382,7 @@ model Report {
   @@index([opportunityId])
   @@index([campaignId])
   @@index([reportedUserId])
+  @@index([liveAudioRoomId])
   @@index([status])
   @@index([reporterId])
   @@index([targetUserId])
@@ -2052,7 +2068,7 @@ model AdCampaign {
   // by POST /api/ads/campaigns/[id]/pay, the same verifyUsdcTransaction +
   // ConsumedPaymentTransaction pattern src/app/api/creator/tip already
   // uses. Never trust a client-claimed "paid" state without this.
-  paymentTransactionId String? @unique
+  paymentTransactionId String?   @unique
   paidAt               DateTime?
   paymentFailureReason String?   @db.Text
 
@@ -3286,7 +3302,8 @@ model Community {
   createdById String
   createdBy   User   @relation("CommunityCreator", fields: [createdById], references: [id])
 
-  members CommunityMember[]
+  members        CommunityMember[]
+  liveAudioRooms LiveAudioRoom[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -3309,6 +3326,189 @@ model CommunityMember {
 
   @@unique([communityId, userId])
   @@index([userId])
+}
+
+// ─── ZRP Live Audio ──────────────────────────────────────────────
+// Twitter-Spaces-style multi-party live audio rooms. Media itself flows
+// through an external SFU (LiveKit - see docs/live-audio-architecture.md
+// for why a P2P mesh, which is what ZRP's existing 1:1 calls use,
+// cannot scale to this); everything here is the durable, authoritative
+// side of that: who is allowed to be in the room, at what role, and
+// what happened. Optionally scoped to a Community via communityId -
+// reuses CommunityMember for the "is this viewer allowed to see/join a
+// COMMUNITY-visibility room" check rather than inventing a second
+// membership system.
+enum LiveAudioRoomStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+enum LiveAudioVisibility {
+  PUBLIC
+  COMMUNITY
+  PRIVATE
+}
+
+enum LiveAudioParticipantRole {
+  LISTENER
+  SPEAKER
+  MODERATOR
+  HOST
+}
+
+enum LiveAudioSpeakerRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum LiveAudioModerationActionType {
+  MUTE
+  UNMUTE
+  REMOVE
+  PROMOTE_SPEAKER
+  DEMOTE_SPEAKER
+}
+
+model LiveAudioRoom {
+  id String @id @default(cuid())
+
+  hostId String
+  host   User   @relation("LiveAudioHost", fields: [hostId], references: [id], onDelete: Cascade)
+
+  // Optional Community scoping - see CommunityMember note above. Null
+  // for a standalone room.
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
+  title       String
+  description String?             @db.Text
+  // A free-form tag, not a new enum: unlike Community (whose category
+  // drives its own directory), a Live Audio room's category is purely
+  // descriptive for the discovery list and never gates access or
+  // membership, so it doesn't need the weight of an enum + migration
+  // every time a new topic is wanted.
+  category    String?
+  status      LiveAudioRoomStatus @default(SCHEDULED)
+  visibility  LiveAudioVisibility @default(PUBLIC)
+
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  endedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Final stats, written once at ENDED (see room-service.ts) - not a
+  // running counter updated on every join/leave, and not a separate
+  // 1:1 "statistics" table: a handful of denormalized columns on the
+  // room itself is simpler than a joined table for data this small.
+  // Live/current counts are read directly from LiveAudioParticipant
+  // (WHERE roomId AND leftAt IS NULL) - see the architecture doc's
+  // Redis-vs-Postgres section for why that's not cached.
+  peakListenerCount       Int @default(0)
+  peakSpeakerCount        Int @default(0)
+  totalUniqueParticipants Int @default(0)
+
+  participants      LiveAudioParticipant[]
+  speakerRequests   LiveAudioSpeakerRequest[]
+  moderationActions LiveAudioModerationAction[]
+  reports           Report[]
+
+  // Discovery query: WHERE status = 'LIVE' AND visibility = 'PUBLIC'.
+  @@index([visibility, status])
+  // Cleanup cron query: WHERE status = 'LIVE'.
+  @@index([status])
+  // A community's "live now" surface.
+  @@index([communityId])
+  // "My rooms" / abuse investigation by host.
+  @@index([hostId])
+}
+
+model LiveAudioParticipant {
+  id String @id @default(cuid())
+
+  roomId String
+  room   LiveAudioRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("LiveAudioParticipantUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  role LiveAudioParticipantRole @default(LISTENER)
+
+  // One row per (roomId, userId) for the room's whole lifetime, mutated
+  // in place rather than inserted fresh on every join - see the
+  // architecture doc for why this (not a partial/filtered unique index,
+  // which Prisma's schema DSL cannot express) is how "no duplicate
+  // active membership" is actually enforced: a second join can only
+  // ever update this same row, never create a second one. "Currently
+  // active" = leftAt IS NULL AND removedAt IS NULL.
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
+  isMuted  Boolean   @default(false)
+
+  removedAt   DateTime?
+  removedById String?
+  removedBy   User?     @relation("LiveAudioParticipantRemovedBy", fields: [removedById], references: [id], onDelete: SetNull)
+
+  @@unique([roomId, userId])
+  // Promote/demote/mute/remove all need "who are the current speakers/
+  // moderators in this room".
+  @@index([roomId, role])
+  // "Which rooms is this user currently in" - the banned-user-mid-
+  // session sweep uses this.
+  @@index([userId])
+}
+
+model LiveAudioSpeakerRequest {
+  id String @id @default(cuid())
+
+  roomId String
+  room   LiveAudioRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("LiveAudioSpeakerRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  status LiveAudioSpeakerRequestStatus @default(PENDING)
+
+  requestedAt DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  resolvedById String?
+  resolvedBy   User?   @relation("LiveAudioSpeakerRequestResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  // One row per (roomId, userId) - a repeat request updates this row
+  // back to PENDING rather than accumulating spam rows (also rate-
+  // limited at the API layer - see room-service.ts).
+  @@unique([roomId, userId])
+  // The host/moderator "pending requests" queue for this room.
+  @@index([roomId, status])
+}
+
+model LiveAudioModerationAction {
+  id String @id @default(cuid())
+
+  roomId String
+  room   LiveAudioRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  actorId String
+  actor   User   @relation("LiveAudioModerationActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  targetUserId String
+  target       User   @relation("LiveAudioModerationTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  action LiveAudioModerationActionType
+  reason String?                       @db.Text
+
+  createdAt DateTime @default(now())
+
+  // Room audit trail.
+  @@index([roomId])
+  // "Has this user been actioned before" (in any room).
+  @@index([targetUserId])
 }
 
 // ─── ZRP Lists ─────────────────────────────────────────────────

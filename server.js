@@ -29,6 +29,8 @@ const {
   authorizeDeleteRelay,
   authorizeConversationDeleteRelay,
   createCallRegistry,
+  liveAudioRoom,
+  isLiveAudioParticipant,
 } = require("./socket-authz");
 const { runLegacyPasswordMigrationAtStartup } = require("./legacy-passwords");
 const {
@@ -687,6 +689,30 @@ app.prepare().then(async () => {
     socket.on("leave-conversation", (conversationId) => {
       if (!conversationId || typeof conversationId !== "string") return;
       socket.leave(groupRoom(conversationId));
+    });
+
+    // ─── Live Audio realtime broadcasts ────────────────────────────
+    // Room/participant/role state itself lives in Postgres and is
+    // mutated only by the REST routes under src/app/api/live-audio/
+    // (see src/lib/live-audio/room-service.ts) - this is purely the
+    // realtime fan-out layer for the changes those routes already made,
+    // same "membership check before joining the broadcast room" pattern
+    // as join-conversation above.
+    socket.on("join-live-audio-room", async (roomId) => {
+      if (!roomId || typeof roomId !== "string") return;
+      if (!checkEventRateLimit(userId, "join-live-audio-room", 30, 10_000)) return;
+      try {
+        if (await isLiveAudioParticipant(prisma, userId, roomId)) {
+          socket.join(liveAudioRoom(roomId));
+        }
+      } catch (err) {
+        console.error("join-live-audio-room error:", err);
+      }
+    });
+
+    socket.on("leave-live-audio-room", (roomId) => {
+      if (!roomId || typeof roomId !== "string") return;
+      socket.leave(liveAudioRoom(roomId));
     });
 
     // ⚠️ SECURITY: like send-message above, the relayed record is the

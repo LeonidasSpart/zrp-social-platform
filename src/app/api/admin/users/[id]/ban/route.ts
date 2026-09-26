@@ -6,6 +6,7 @@ import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
 import { logAdminAction } from "@/lib/audit-log";
+import { forceLeaveAllLiveAudioRooms } from "@/lib/live-audio/room-service";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -61,6 +62,19 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     // A ban must bite immediately: drop the cached auth state so the
     // next request from this user (any route, any client) sees it.
     invalidateUserAuthState(userId);
+
+    // A ban must also bite anyone this user is currently speaking to in
+    // a Live Audio room - an old realtime connection must not let them
+    // keep talking just because requireActiveUser()'s fresh ban check
+    // only runs on their NEXT request, which may never come if the
+    // media connection itself stays open. Never blocks the ban response
+    // on this: it's a best-effort sweep of a realtime feature, not the
+    // ban itself.
+    if (updated.banned) {
+      void forceLeaveAllLiveAudioRooms(userId).catch((err) =>
+        console.error(`Failed to sweep Live Audio rooms for banned user ${userId}:`, err)
+      );
+    }
 
     await logAdminAction({
       actor: adminCheck.session,
