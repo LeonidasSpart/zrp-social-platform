@@ -951,40 +951,68 @@ export function resolveMoreHelpText(lang: Language): string {
 }
 
 // ─── About (src/app/about/page.tsx) ───────────────────────────────────────
-// Paragraphs are grouped the same way the web page's own JSX does (a
-// plain sentence immediately followed by its bold clause, so joinParts
-// reassembles one natural paragraph) - about.p3Bold is deliberately
-// skipped since about.p3 already contains that exact phrase in plain
-// text (the web page bolds a substring of its own paragraph, which this
-// content model can't express inline; duplicating it as a second part
-// would repeat the phrase instead).
+// Mirrors the web page's 10-section structure exactly (see AboutPage in
+// src/app/about/page.tsx) so this native content feed and the web page
+// can never describe ZRP differently. The three "What ZRP Stands For"
+// pillars go through CARDS with a two-paragraph text array joined per
+// card, the same joinParts natural-paragraph-concatenation pattern used
+// elsewhere in this file (e.g. the "story" section's old P(...) calls) -
+// each pillar's two paragraphs are rendered as one resolved card `text`
+// field on native, and as two separate <p> tags on web.
 export const ABOUT_CONFIG: PageConfig = {
   title: ["about.title"],
   subtitle: ["about.subtitle"],
   sections: [
     {
-      id: "story",
-      title: ["about.storySectionTitle"],
+      id: "who-we-are",
+      title: ["about.whoWeAreTitle"],
+      body: [P("about.whoWeAreP1")],
+    },
+    {
+      id: "why-exists",
+      title: ["about.whyExistsTitle"],
+      body: [P("about.whyExistsP1"), P("about.whyExistsP2")],
+    },
+    {
+      id: "swiss-identity",
+      title: ["about.swissTitle"],
+      body: [P("about.swissP1"), P("about.swissP2")],
+    },
+    {
+      id: "pillars",
+      title: ["about.pillarsTitle"],
       body: [
-        P("about.p1", "about.p1Bold"),
-        P("about.p2"),
-        P("about.p3"),
-        P("about.p4", "about.p4Bold", "about.p5"),
-        P("about.p5Em", "about.p5EmQuote", "about.p5Rest"),
-        P("about.p6"),
-        P("about.tagline"),
+        CARDS(
+          card(["about.pillarExpressionTitle"], ["about.pillarExpressionP1", "about.pillarExpressionP2"]),
+          card(["about.pillarPrivacyTitle"], ["about.pillarPrivacyP1", "about.pillarPrivacyP2"]),
+          card(["about.pillarPeopleTitle"], ["about.pillarPeopleP1", "about.pillarPeopleP2"]),
+        ),
       ],
     },
     {
-      id: "values",
-      title: ["about.valuesSectionTitle"],
-      body: [
-        CARDS(
-          card(["about.value1Title"], ["about.value1Desc"]),
-          card(["about.value2Title"], ["about.value2Desc"]),
-          card(["about.value3Title"], ["about.value3Desc"]),
-        ),
-      ],
+      id: "ecosystem",
+      title: ["about.ecosystemTitle"],
+      body: [P("about.ecosystemP1")],
+    },
+    {
+      id: "community",
+      title: ["about.communityTitle"],
+      body: [P("about.communityP1")],
+    },
+    {
+      id: "impact",
+      title: ["about.impactTitle"],
+      body: [P("about.impactP1")],
+    },
+    {
+      id: "vision",
+      title: ["about.visionTitle"],
+      body: [P("about.visionP1")],
+    },
+    {
+      id: "join",
+      title: ["about.joinTitle"],
+      body: [P("about.joinP1"), P("about.ctaText")],
     },
   ],
 };
