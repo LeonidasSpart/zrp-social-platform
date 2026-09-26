@@ -27,6 +27,7 @@
 interface ZrpGlobal {
   __zrpIO?: {
     to(room: string): { emit(event: string, payload?: unknown): void };
+    in(room: string): { socketsLeave(room: string | string[]): void };
   };
 }
 
@@ -37,5 +38,50 @@ export function emitToUser(userId: string, event: string, payload?: unknown): vo
     io.to(userId).emit(event, payload);
   } catch (err) {
     console.error(`socket emit failed for event "${event}":`, err);
+  }
+}
+
+/**
+ * Broadcasts to every socket currently joined to a Live Audio room's
+ * dedicated Socket.IO room ("live-audio:<roomId>"), joined via
+ * server.js's join-live-audio-room event (membership-checked there,
+ * mirroring the existing group-chat join-conversation/groupRoom
+ * pattern in socket-authz.js) - one `io.to(...).emit()` fans out to
+ * every connected participant, not N individual emitToUser calls, so a
+ * large room's broadcast stays O(1) server-side work regardless of how
+ * many listeners are in it.
+ */
+export function emitToLiveAudioRoom(roomId: string, event: string, payload?: unknown): void {
+  const io = (globalThis as ZrpGlobal).__zrpIO;
+  if (!io) return;
+  try {
+    io.to(`live-audio:${roomId}`).emit(event, payload);
+  } catch (err) {
+    console.error(`socket emit failed for event "${event}":`, err);
+  }
+}
+
+/**
+ * Forcibly evicts every socket a removed/banned user currently has open
+ * (every socket already sits in a room named by its own userId, the same
+ * room emitToUser() targets) from a Live Audio room's broadcast channel.
+ *
+ * Without this, being "removed" only stopped a well-behaved client from
+ * rejoining the broadcast room on its next connect (server.js's
+ * join-live-audio-room re-checks membership) - a client that simply
+ * ignored the polite "you-were-removed" event and never reconnected
+ * would keep receiving that room's realtime metadata (who's speaking,
+ * mute/role changes) indefinitely, even though its actual LiveKit audio
+ * connection is separately force-dropped via forceDisconnectParticipant.
+ * Exclusion is the entire point of "removed," so this closes that gap
+ * rather than relying on client cooperation.
+ */
+export function evictUserFromLiveAudioRoom(userId: string, roomId: string): void {
+  const io = (globalThis as ZrpGlobal).__zrpIO;
+  if (!io) return;
+  try {
+    io.in(userId).socketsLeave(`live-audio:${roomId}`);
+  } catch (err) {
+    console.error("socket eviction from live-audio room failed:", err);
   }
 }

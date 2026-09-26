@@ -19,8 +19,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { postId, commentId, listingId, challengeId, opportunityId, campaignId, userId, reason, details } =
-      await req.json();
+    const {
+      postId,
+      commentId,
+      listingId,
+      challengeId,
+      opportunityId,
+      campaignId,
+      liveAudioRoomId,
+      userId,
+      reason,
+      details,
+    } = await req.json();
 
     if (typeof reason !== "string" || !reason.trim() || reason.length > 200) {
       return NextResponse.json({ error: "Reason is required" }, { status: 400 });
@@ -30,17 +40,35 @@ export async function POST(req: NextRequest) {
     }
     // Every target id, when present, must be a string - anything else
     // used to reach Prisma and surface as a 500.
-    for (const value of [postId, commentId, listingId, challengeId, opportunityId, campaignId, userId]) {
+    for (const value of [
+      postId,
+      commentId,
+      listingId,
+      challengeId,
+      opportunityId,
+      campaignId,
+      liveAudioRoomId,
+      userId,
+    ]) {
       if (value !== undefined && value !== null && typeof value !== "string") {
         return NextResponse.json({ error: "Invalid report target." }, { status: 400 });
       }
     }
 
-    if (!postId && !commentId && !listingId && !challengeId && !opportunityId && !campaignId && !userId) {
+    if (
+      !postId &&
+      !commentId &&
+      !listingId &&
+      !challengeId &&
+      !opportunityId &&
+      !campaignId &&
+      !liveAudioRoomId &&
+      !userId
+    ) {
       return NextResponse.json(
         {
           error:
-            "One of postId, commentId, listingId, challengeId, opportunityId, campaignId, or userId is required",
+            "One of postId, commentId, listingId, challengeId, opportunityId, campaignId, liveAudioRoomId, or userId is required",
         },
         { status: 400 }
       );
@@ -71,7 +99,9 @@ export async function POST(req: NextRequest) {
               ? { opportunityId }
               : campaignId
                 ? { campaignId }
-                : { reportedUserId: userId };
+                : liveAudioRoomId
+                  ? { liveAudioRoomId }
+                  : { reportedUserId: userId };
 
     const existingReport = await prisma.report.findFirst({
       where: {
@@ -97,6 +127,7 @@ export async function POST(req: NextRequest) {
         challengeId: challengeId || null,
         opportunityId: opportunityId || null,
         campaignId: campaignId || null,
+        liveAudioRoomId: liveAudioRoomId || null,
         reportedUserId: userId || null,
         reason,
         details: details || null,

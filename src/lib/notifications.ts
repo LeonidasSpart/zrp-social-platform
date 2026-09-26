@@ -47,7 +47,17 @@ interface CreateNotificationParams {
     | "help_campaign_removed"
     | "help_new_offer"
     | "music_artist_verified"
-    | "post_from_subscription";
+    | "post_from_subscription"
+    // A community you're a member of started a Live Audio room - never
+    // sent for a PUBLIC/PRIVATE room (see notifyCommunityRoomStarted in
+    // src/lib/live-audio/room-service.ts), which would be feed-
+    // dominating spam for every room anyone anywhere creates.
+    | "live_audio_started"
+    // A host/moderator promoted you to speaker directly (not via your
+    // own request - that's the pair below).
+    | "live_audio_speaker_invited"
+    | "live_audio_speaker_approved"
+    | "live_audio_speaker_rejected";
   fromUserId: string;
   postId?: string;
   // Disambiguates which comment a comment_like/comment_repost/reply
@@ -168,6 +178,14 @@ export async function createNotification({
       // many subscribers posting often would otherwise turn this into a
       // recurring email blast rather than a one-off alert.
       "post_from_subscription",
+      // All four Live Audio types describe something happening RIGHT
+      // NOW (a room going live, a role change mid-room) - an email that
+      // arrives after the room has likely already ended is useless, the
+      // same reasoning as every other "happening now" type above.
+      "live_audio_started",
+      "live_audio_speaker_invited",
+      "live_audio_speaker_approved",
+      "live_audio_speaker_rejected",
     ]);
     if (NEVER_EMAIL_TYPES.has(type)) return true;
 
@@ -247,6 +265,10 @@ export async function createNotification({
       help_campaign_removed: { action: "removed your ZRP HELP campaign", emoji: "⚠️" },
       help_new_offer: { action: "offered to help with your ZRP HELP campaign", emoji: "🤝" },
       music_artist_verified: { action: "verified your ZRP Music Artist profile", emoji: "🎵" },
+      live_audio_started: { action: "started a Live Audio room", emoji: "🎙️" },
+      live_audio_speaker_invited: { action: "invited you to speak", emoji: "🎙️" },
+      live_audio_speaker_approved: { action: "approved your request to speak", emoji: "✅" },
+      live_audio_speaker_rejected: { action: "didn't approve your request to speak", emoji: "🚫" },
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 
