@@ -324,7 +324,7 @@ struct AdminUsersView: View {
                     .padding(.top, 2)
                 }
                 Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
             }

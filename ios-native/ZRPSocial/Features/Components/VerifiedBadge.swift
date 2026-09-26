@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The badge shown next to a verified account's name.
 ///
-/// The five badge kinds, their exact colours, and their labels are ported
+/// The six badge kinds, their exact colours, and their labels are ported
 /// verbatim from the web app's own `src/components/VerifiedBadge.tsx`, so
 /// an account that reads as ZRP staff on the website reads as ZRP staff
 /// here. An unrecognised `badgeType` renders nothing at all, exactly as
@@ -28,16 +28,22 @@ struct VerifiedBadge: View {
             // the palette by hand-edit.
             return Style(color: ZrpColor.blue, systemImage: "checkmark.seal.fill", label: .iosBadgeVerified)
         case "organization":
-            return Style(color: Color(hex: 0xFFD700), systemImage: "checkmark.seal.fill", label: .iosBadgeOrganization)
+            return Style(color: ZrpColor.badgeOrganization, systemImage: "checkmark.seal.fill", label: .iosBadgeOrganization)
         case "government":
-            return Style(color: Color(hex: 0x9CA3AF), systemImage: "checkmark.seal.fill", label: .iosBadgeGovernment)
+            return Style(color: ZrpColor.badgeGovernment, systemImage: "checkmark.seal.fill", label: .iosBadgeGovernment)
         case "team":
-            return Style(color: Color(hex: 0xEF4444), systemImage: "checkmark.seal.fill", label: .iosBadgeTeam)
+            return Style(color: ZrpColor.badgeTeam, systemImage: "checkmark.seal.fill", label: .iosBadgeTeam)
         case "journalist":
             // ZRP brand red, but a distinct newspaper glyph so it is never
             // visually confused with the "team" staff badge - the same
             // reasoning the web component documents.
             return Style(color: ZrpColor.red, systemImage: "newspaper.fill", label: .iosBadgeJournalist)
+        case "editorial":
+            // The automated ZRP editorial feed - the sixth kind the web
+            // component renders (an RSS glyph, brand red). It rendered
+            // nothing here, so the official feed's posts carried no
+            // badge on iOS while carrying one everywhere else.
+            return Style(color: ZrpColor.red, systemImage: "dot.radiowaves.up.forward", label: .verifiedBadgeNewsAutomated)
         default:
             return nil
         }

@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Nem sikerült létrehozni a listát.";
 "lists.errorAddMember" = "Nem sikerült hozzáadni a tagot.";
 "lists.errorRemoveMember" = "Nem sikerült eltávolítani a tagot.";
+"auth.showPassword" = "Jelszó megjelenítése";
+"auth.hidePassword" = "Jelszó elrejtése";
+"verifiedBadge.newsAutomated" = "Hivatalos ZRP szerkesztőségi hírfolyam (automatizált)";
+"profile.errLoadPosts" = "Nem sikerült betölteni. Próbáld újra.";
+"ambassadors.apply.alreadyAmbassador" = "Már ZRP-nagykövet vagy. Az állapotod, a szinted és a meghívólinked az irányítópultodon található.";
+"communities.detail.leaveConfirmTitle" = "Kilépsz ebből a közösségből?";
+"communities.detail.leaveConfirmBody" = "Kilépsz innen: {name}. Bármikor újra csatlakozhatsz.";
+"communities.detail.ownerCannotLeave" = "Te vagy ennek a közösségnek a tulajdonosa, ezért nem léphetsz ki belőle. Töröld, ha mindenki számára le szeretnéd zárni.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    hu. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "A ZRP-nek hozzáférésre van szüksége a mikrofonhoz hangüzenet rögzítéséhez. Ezt a Beállításokban kapcsolhatod be.";
 "ios.post.applyNow" = "Jelentkezz most";
 "ios.chat.cameraUnavailable" = "A kamera ezen az eszközön nem érhető el.";
+"ios.chat.addAttachment" = "Melléklet hozzáadása";
+"ios.chat.sharedPost" = "Megosztott bejegyzés";
+"ios.chat.sharedPostUnavailable" = "Ez a bejegyzés már nem érhető el.";
+"ios.post.repostBlocked" = "Ezt a bejegyzést nem lehet újra megosztani, mert a fiók privát.";
+"ios.media.loadFailed" = "Nem sikerült betölteni ezt a képet.";

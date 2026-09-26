@@ -1276,3 +1276,14 @@ lists.errorLoad
 lists.errorCreate
 lists.errorAddMember
 lists.errorRemoveMember
+# ── Mission: password visibility toggles, editorial badge (web keys) ─
+auth.showPassword
+auth.hidePassword
+verifiedBadge.newsAutomated
+profile.errLoadPosts
+
+# ── Keys used by the Ambassador/Communities screens (added here because the key list is owned centrally) ─
+ambassadors.apply.alreadyAmbassador
+communities.detail.leaveConfirmTitle
+communities.detail.leaveConfirmBody
+communities.detail.ownerCannotLeave

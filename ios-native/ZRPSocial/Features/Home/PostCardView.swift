@@ -454,7 +454,9 @@ struct PostCardView: View {
             let target = post.linkUrl.flatMap { $0.isEmpty ? nil : $0 }
                 ?? FirstURL.first(in: displayed)
             if let target {
-                LinkPreviewCard(url: target)
+                // A zrp.one link unfurls into the app's own screen for
+                // it, not Safari - the same rule the post text follows.
+                LinkPreviewCard(url: target, onZrpLink: { navigator.push($0) })
             }
         }
     }

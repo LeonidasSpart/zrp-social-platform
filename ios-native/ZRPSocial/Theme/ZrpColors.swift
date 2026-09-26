@@ -40,6 +40,19 @@ enum ZrpColor {
     /// equivalent for, taken from the web rather than invented.
     static let amber = Color(hex: 0xEAB308)
 
+    // MARK: - Verification badge colours
+
+    /// The badge palette, ported value-for-value from the website's
+    /// `VerifiedBadge.tsx` (`BADGE_STYLES`) so an account reads the same
+    /// on every ZRP client. Tokens rather than hex in the badge view, so
+    /// the one place these are written down is here. They are a trust
+    /// signal shared across platforms, not a UI accent: changing one
+    /// here alone would make the same account look different on iOS
+    /// than on the web, so any change must land on the web first.
+    static let badgeOrganization = Color(hex: 0xFFD700)
+    static let badgeGovernment = Color(hex: 0x9CA3AF)
+    static let badgeTeam = Color(hex: 0xEF4444)
+
     // MARK: - Semantic surfaces
 
     /// The page background behind everything.

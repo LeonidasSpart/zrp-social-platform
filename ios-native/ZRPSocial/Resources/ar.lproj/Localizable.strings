@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "فشل إنشاء القائمة.";
 "lists.errorAddMember" = "فشلت إضافة العضو.";
 "lists.errorRemoveMember" = "فشلت إزالة العضو.";
+"auth.showPassword" = "إظهار كلمة المرور";
+"auth.hidePassword" = "إخفاء كلمة المرور";
+"verifiedBadge.newsAutomated" = "خلاصة تحريرية رسمية لـ ZRP (آلية)";
+"profile.errLoadPosts" = "تعذّر التحميل. حاول مرة أخرى.";
+"ambassadors.apply.alreadyAmbassador" = "أنت بالفعل سفير ZRP. حالتك ومستواك ورابط الدعوة الخاص بك موجودة في لوحة التحكم.";
+"communities.detail.leaveConfirmTitle" = "هل تريد مغادرة هذا المجتمع؟";
+"communities.detail.leaveConfirmBody" = "ستغادر {name}. يمكنك الانضمام مرة أخرى في أي وقت.";
+"communities.detail.ownerCannotLeave" = "أنت مالك هذا المجتمع، لذا لا يمكنك مغادرته. احذفه لإغلاقه للجميع.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ar. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "يحتاج ZRP إلى الوصول إلى الميكروفون لتسجيل رسالة صوتية. يمكنك تفعيله من الإعدادات.";
 "ios.post.applyNow" = "قدّم الآن";
 "ios.chat.cameraUnavailable" = "الكاميرا غير متاحة على هذا الجهاز.";
+"ios.chat.addAttachment" = "إضافة مرفق";
+"ios.chat.sharedPost" = "منشور مشارك";
+"ios.chat.sharedPostUnavailable" = "هذا المنشور لم يعد متاحًا.";
+"ios.post.repostBlocked" = "لا يمكن إعادة نشر هذا المنشور لأن الحساب خاص.";
+"ios.media.loadFailed" = "تعذّر تحميل هذه الصورة.";

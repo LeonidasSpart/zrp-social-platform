@@ -81,6 +81,10 @@ struct PostListView<Header: View>: View {
         .frame(maxWidth: ZrpMetrics.contentMaxWidth)
         .frame(maxWidth: .infinity)
         .postSheets(sheets, onCreated: onCreated)
+        // A refused like/repost/bookmark surfaces wherever the post is,
+        // not only on Home - a private author's 403 on a profile or a
+        // hashtag timeline used to roll the button back in silence.
+        .postActionErrorAlert()
     }
 
     @ViewBuilder
@@ -100,6 +104,36 @@ struct PostListView<Header: View>: View {
                 .foregroundStyle(ZrpColor.onSurfaceMuted)
                 .frame(maxWidth: .infinity)
                 .padding(ZrpSpacing.xl)
+        }
+    }
+}
+
+extension View {
+    /// Presents `PostInteractionStore.actionError` as an alert and clears
+    /// it on dismissal. Applied once per screen that renders posts - by
+    /// `PostListView`, and directly by the one screen (Bookmarks) that
+    /// renders rows without it - so the store has exactly one presenter
+    /// on screen at a time.
+    func postActionErrorAlert() -> some View {
+        modifier(PostActionErrorAlert())
+    }
+}
+
+private struct PostActionErrorAlert: ViewModifier {
+
+    @EnvironmentObject private var interactions: PostInteractionStore
+
+    func body(content: Content) -> some View {
+        content.alert(
+            Text(.iosErrorGenericTitle),
+            isPresented: Binding(
+                get: { interactions.actionError != nil },
+                set: { if !$0 { interactions.actionError = nil } }
+            )
+        ) {
+            Button { interactions.actionError = nil } label: { Text(.actionCancel) }
+        } message: {
+            Text(verbatim: interactions.actionError ?? "")
         }
     }
 }

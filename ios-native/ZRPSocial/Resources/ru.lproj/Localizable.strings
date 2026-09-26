@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Не удалось создать список.";
 "lists.errorAddMember" = "Не удалось добавить участника.";
 "lists.errorRemoveMember" = "Не удалось удалить участника.";
+"auth.showPassword" = "Показать пароль";
+"auth.hidePassword" = "Скрыть пароль";
+"verifiedBadge.newsAutomated" = "Официальная редакционная лента ZRP (автоматическая)";
+"profile.errLoadPosts" = "Не удалось загрузить. Попробуйте снова.";
+"ambassadors.apply.alreadyAmbassador" = "Вы уже Амбассадор ZRP. Ваш статус, уровень и пригласительная ссылка находятся на вашей панели.";
+"communities.detail.leaveConfirmTitle" = "Покинуть это сообщество?";
+"communities.detail.leaveConfirmBody" = "Вы покинете {name}. Вы сможете присоединиться снова в любое время.";
+"communities.detail.ownerCannotLeave" = "Вы владелец этого сообщества, поэтому не можете его покинуть. Удалите его, чтобы закрыть для всех.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ru. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP нужен доступ к микрофону для записи голосового сообщения. Вы можете включить его в настройках.";
 "ios.post.applyNow" = "Откликнуться";
 "ios.chat.cameraUnavailable" = "Камера недоступна на этом устройстве.";
+"ios.chat.addAttachment" = "Добавить вложение";
+"ios.chat.sharedPost" = "Пересланный пост";
+"ios.chat.sharedPostUnavailable" = "Этот пост больше недоступен.";
+"ios.post.repostBlocked" = "Этот пост нельзя репостнуть, потому что аккаунт закрытый.";
+"ios.media.loadFailed" = "Не удалось загрузить это изображение.";

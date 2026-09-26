@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Η δημιουργία λίστας απέτυχε.";
 "lists.errorAddMember" = "Η προσθήκη μέλους απέτυχε.";
 "lists.errorRemoveMember" = "Η αφαίρεση μέλους απέτυχε.";
+"auth.showPassword" = "Εμφάνιση κωδικού";
+"auth.hidePassword" = "Απόκρυψη κωδικού";
+"verifiedBadge.newsAutomated" = "Επίσημη εκδοτική ροή του ZRP (αυτοματοποιημένη)";
+"profile.errLoadPosts" = "Δεν ήταν δυνατή η φόρτωση. Δοκίμασε ξανά.";
+"ambassadors.apply.alreadyAmbassador" = "Είσαι ήδη Πρεσβευτής ZRP. Η κατάσταση, το επίπεδο και ο σύνδεσμος πρόσκλησής σου βρίσκονται στον πίνακά σου.";
+"communities.detail.leaveConfirmTitle" = "Αποχώρηση από αυτήν την κοινότητα;";
+"communities.detail.leaveConfirmBody" = "Θα αποχωρήσεις από το {name}. Μπορείς να ξαναγίνεις μέλος όποτε θέλεις.";
+"communities.detail.ownerCannotLeave" = "Είσαι ο ιδιοκτήτης αυτής της κοινότητας, οπότε δεν μπορείς να αποχωρήσεις. Διάγραψέ την για να την κλείσεις για όλους.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    el. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "Το ZRP χρειάζεται πρόσβαση στο μικρόφωνο για την εγγραφή φωνητικού μηνύματος. Μπορείτε να την ενεργοποιήσετε στις Ρυθμίσεις.";
 "ios.post.applyNow" = "Υποβολή αίτησης τώρα";
 "ios.chat.cameraUnavailable" = "Η κάμερα δεν είναι διαθέσιμη σε αυτή τη συσκευή.";
+"ios.chat.addAttachment" = "Προσθήκη συνημμένου";
+"ios.chat.sharedPost" = "Κοινοποιημένη ανάρτηση";
+"ios.chat.sharedPostUnavailable" = "Αυτή η ανάρτηση δεν είναι πλέον διαθέσιμη.";
+"ios.post.repostBlocked" = "Αυτή η ανάρτηση δεν μπορεί να αναδημοσιευτεί επειδή ο λογαριασμός είναι ιδιωτικός.";
+"ios.media.loadFailed" = "Δεν ήταν δυνατή η φόρτωση αυτής της εικόνας.";

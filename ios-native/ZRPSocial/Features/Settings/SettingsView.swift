@@ -372,15 +372,27 @@ struct ChangePasswordView: View {
     var body: some View {
         List {
             Section {
-                SecureField(text: $current, prompt: Text(.settingsCurrentPasswordPlaceholder)) {
-                    Text(.settingsCurrentPassword)
-                }
-                SecureField(text: $newPassword, prompt: Text(.settingsNewPasswordPlaceholder)) {
-                    Text(.settingsNewPassword)
-                }
-                SecureField(text: $confirmation, prompt: Text(.settingsConfirmNewPasswordPlaceholder)) {
-                    Text(.settingsConfirmNewPassword)
-                }
+                // Each field has its own show/hide toggle, so revealing
+                // the new password never reveals the confirmation (or
+                // the current one) with it.
+                ZrpSecureField(
+                    prompt: L10n.string(.settingsCurrentPasswordPlaceholder),
+                    text: $current,
+                    contentType: .password,
+                    label: .settingsCurrentPassword
+                )
+                ZrpSecureField(
+                    prompt: L10n.string(.settingsNewPasswordPlaceholder),
+                    text: $newPassword,
+                    contentType: .newPassword,
+                    label: .settingsNewPassword
+                )
+                ZrpSecureField(
+                    prompt: L10n.string(.settingsConfirmNewPasswordPlaceholder),
+                    text: $confirmation,
+                    contentType: .newPassword,
+                    label: .settingsConfirmNewPassword
+                )
             } footer: {
                 if let message {
                     Text(verbatim: message.text)

@@ -178,7 +178,12 @@
     "ios.action.done": "Done",
     "ios.chat.micDenied": "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings.",
     "ios.post.applyNow": "Apply Now",
-    "ios.chat.cameraUnavailable": "Camera unavailable on this device."
+    "ios.chat.cameraUnavailable": "Camera unavailable on this device.",
+    "ios.chat.addAttachment": "Add attachment",
+    "ios.chat.sharedPost": "Shared post",
+    "ios.chat.sharedPostUnavailable": "This post is no longer available.",
+    "ios.post.repostBlocked": "This post can't be reposted because the account is private.",
+    "ios.media.loadFailed": "Couldn't load this image."
   },
   "translations": {
     "fr": {
@@ -342,7 +347,12 @@
       "ios.chat.micDenied": "ZRP a besoin d'accéder au microphone pour enregistrer un message vocal. Vous pouvez l'activer dans Réglages.",
       "ios.post.applyNow": "Postuler maintenant",
       "ios.a11y.bookmark": "Marque-page",
-      "ios.chat.cameraUnavailable": "Caméra indisponible sur cet appareil."
+      "ios.chat.cameraUnavailable": "Caméra indisponible sur cet appareil.",
+      "ios.chat.addAttachment": "Ajouter une pièce jointe",
+      "ios.chat.sharedPost": "Publication partagée",
+      "ios.chat.sharedPostUnavailable": "Cette publication n'est plus disponible.",
+      "ios.post.repostBlocked": "Cette publication ne peut pas être repartagée car le compte est privé.",
+      "ios.media.loadFailed": "Impossible de charger cette image."
     },
     "de": {
       "ios.a11y.bookmark": "Merken",
@@ -505,7 +515,12 @@
       "ios.action.done": "Fertig",
       "ios.chat.micDenied": "ZRP benötigt Zugriff auf das Mikrofon, um eine Sprachnachricht aufzunehmen. Du kannst dies in den Einstellungen aktivieren.",
       "ios.post.applyNow": "Jetzt bewerben",
-      "ios.chat.cameraUnavailable": "Kamera auf diesem Gerät nicht verfügbar."
+      "ios.chat.cameraUnavailable": "Kamera auf diesem Gerät nicht verfügbar.",
+      "ios.chat.addAttachment": "Anhang hinzufügen",
+      "ios.chat.sharedPost": "Geteilter Beitrag",
+      "ios.chat.sharedPostUnavailable": "Dieser Beitrag ist nicht mehr verfügbar.",
+      "ios.post.repostBlocked": "Dieser Beitrag kann nicht erneut geteilt werden, weil das Konto privat ist.",
+      "ios.media.loadFailed": "Dieses Bild konnte nicht geladen werden."
     },
     "it": {
       "ios.a11y.bookmark": "Salva",
@@ -668,7 +683,12 @@
       "ios.action.done": "Fatto",
       "ios.chat.micDenied": "ZRP ha bisogno dell'accesso al microfono per registrare un messaggio vocale. Puoi attivarlo nelle Impostazioni.",
       "ios.post.applyNow": "Candidati ora",
-      "ios.chat.cameraUnavailable": "Fotocamera non disponibile su questo dispositivo."
+      "ios.chat.cameraUnavailable": "Fotocamera non disponibile su questo dispositivo.",
+      "ios.chat.addAttachment": "Aggiungi allegato",
+      "ios.chat.sharedPost": "Post condiviso",
+      "ios.chat.sharedPostUnavailable": "Questo post non è più disponibile.",
+      "ios.post.repostBlocked": "Questo post non può essere ricondiviso perché l'account è privato.",
+      "ios.media.loadFailed": "Impossibile caricare questa immagine."
     },
     "sq": {
       "ios.a11y.bookmark": "Ruaje",
@@ -831,7 +851,12 @@
       "ios.action.done": "U krye",
       "ios.chat.micDenied": "ZRP ka nevojë për akses te mikrofoni për të regjistruar një mesazh zanor. Mund ta aktivizosh në Cilësimet.",
       "ios.post.applyNow": "Apliko tani",
-      "ios.chat.cameraUnavailable": "Kamera nuk është e disponueshme në këtë pajisje."
+      "ios.chat.cameraUnavailable": "Kamera nuk është e disponueshme në këtë pajisje.",
+      "ios.chat.addAttachment": "Shto një bashkëngjitje",
+      "ios.chat.sharedPost": "Postim i ndarë",
+      "ios.chat.sharedPostUnavailable": "Ky postim nuk është më i disponueshëm.",
+      "ios.post.repostBlocked": "Ky postim nuk mund të ripostohet sepse llogaria është private.",
+      "ios.media.loadFailed": "Ky imazh nuk mund të ngarkohej."
     },
     "es": {
       "ios.a11y.bookmark": "Guardar",
@@ -994,7 +1019,12 @@
       "ios.action.done": "Listo",
       "ios.chat.micDenied": "ZRP necesita acceso al micrófono para grabar un mensaje de voz. Puedes activarlo en Ajustes.",
       "ios.post.applyNow": "Postularme ahora",
-      "ios.chat.cameraUnavailable": "Cámara no disponible en este dispositivo."
+      "ios.chat.cameraUnavailable": "Cámara no disponible en este dispositivo.",
+      "ios.chat.addAttachment": "Añadir adjunto",
+      "ios.chat.sharedPost": "Publicación compartida",
+      "ios.chat.sharedPostUnavailable": "Esta publicación ya no está disponible.",
+      "ios.post.repostBlocked": "Esta publicación no se puede republicar porque la cuenta es privada.",
+      "ios.media.loadFailed": "No se pudo cargar esta imagen."
     },
     "ru": {
       "ios.a11y.bookmark": "Добавить в закладки",
@@ -1157,7 +1187,12 @@
       "ios.action.done": "Готово",
       "ios.chat.micDenied": "ZRP нужен доступ к микрофону для записи голосового сообщения. Вы можете включить его в настройках.",
       "ios.post.applyNow": "Откликнуться",
-      "ios.chat.cameraUnavailable": "Камера недоступна на этом устройстве."
+      "ios.chat.cameraUnavailable": "Камера недоступна на этом устройстве.",
+      "ios.chat.addAttachment": "Добавить вложение",
+      "ios.chat.sharedPost": "Пересланный пост",
+      "ios.chat.sharedPostUnavailable": "Этот пост больше недоступен.",
+      "ios.post.repostBlocked": "Этот пост нельзя репостнуть, потому что аккаунт закрытый.",
+      "ios.media.loadFailed": "Не удалось загрузить это изображение."
     },
     "ar": {
       "ios.a11y.bookmark": "حفظ",
@@ -1320,7 +1355,12 @@
       "ios.action.done": "تم",
       "ios.chat.micDenied": "يحتاج ZRP إلى الوصول إلى الميكروفون لتسجيل رسالة صوتية. يمكنك تفعيله من الإعدادات.",
       "ios.post.applyNow": "قدّم الآن",
-      "ios.chat.cameraUnavailable": "الكاميرا غير متاحة على هذا الجهاز."
+      "ios.chat.cameraUnavailable": "الكاميرا غير متاحة على هذا الجهاز.",
+      "ios.chat.addAttachment": "إضافة مرفق",
+      "ios.chat.sharedPost": "منشور مشارك",
+      "ios.chat.sharedPostUnavailable": "هذا المنشور لم يعد متاحًا.",
+      "ios.post.repostBlocked": "لا يمكن إعادة نشر هذا المنشور لأن الحساب خاص.",
+      "ios.media.loadFailed": "تعذّر تحميل هذه الصورة."
     },
     "zh": {
       "ios.a11y.bookmark": "收藏",
@@ -1483,7 +1523,12 @@
       "ios.action.done": "完成",
       "ios.chat.micDenied": "ZRP 需要访问麦克风以录制语音消息。您可以在设置中开启此权限。",
       "ios.post.applyNow": "立即申请",
-      "ios.chat.cameraUnavailable": "此设备不支持相机。"
+      "ios.chat.cameraUnavailable": "此设备不支持相机。",
+      "ios.chat.addAttachment": "添加附件",
+      "ios.chat.sharedPost": "分享的帖子",
+      "ios.chat.sharedPostUnavailable": "此帖子已不再可用。",
+      "ios.post.repostBlocked": "由于该账号为私密账号，无法转发此帖子。",
+      "ios.media.loadFailed": "无法加载此图片。"
     },
     "tr": {
       "ios.a11y.bookmark": "Kaydet",
@@ -1646,7 +1691,12 @@
       "ios.action.done": "Bitti",
       "ios.chat.micDenied": "ZRP, sesli mesaj kaydetmek için mikrofona erişim gerektiriyor. Ayarlar'dan açabilirsiniz.",
       "ios.post.applyNow": "Şimdi başvur",
-      "ios.chat.cameraUnavailable": "Bu cihazda kamera kullanılamıyor."
+      "ios.chat.cameraUnavailable": "Bu cihazda kamera kullanılamıyor.",
+      "ios.chat.addAttachment": "Ek ekle",
+      "ios.chat.sharedPost": "Paylaşılan gönderi",
+      "ios.chat.sharedPostUnavailable": "Bu gönderi artık mevcut değil.",
+      "ios.post.repostBlocked": "Hesap gizli olduğu için bu gönderi yeniden paylaşılamaz.",
+      "ios.media.loadFailed": "Bu görsel yüklenemedi."
     },
     "id": {
       "ios.a11y.bookmark": "Simpan",
@@ -1809,7 +1859,12 @@
       "ios.action.done": "Selesai",
       "ios.chat.micDenied": "ZRP memerlukan akses mikrofon untuk merekam pesan suara. Anda dapat mengaktifkannya di Pengaturan.",
       "ios.post.applyNow": "Lamar sekarang",
-      "ios.chat.cameraUnavailable": "Kamera tidak tersedia di perangkat ini."
+      "ios.chat.cameraUnavailable": "Kamera tidak tersedia di perangkat ini.",
+      "ios.chat.addAttachment": "Tambahkan lampiran",
+      "ios.chat.sharedPost": "Postingan yang dibagikan",
+      "ios.chat.sharedPostUnavailable": "Postingan ini sudah tidak tersedia.",
+      "ios.post.repostBlocked": "Postingan ini tidak dapat diposting ulang karena akunnya privat.",
+      "ios.media.loadFailed": "Gambar ini tidak dapat dimuat."
     },
     "pt": {
       "ios.a11y.bookmark": "Guardar",
@@ -1972,7 +2027,12 @@
       "ios.action.done": "Concluído",
       "ios.chat.micDenied": "A ZRP precisa de aceder ao microfone para gravar uma mensagem de voz. Pode ativá-lo nas Definições.",
       "ios.post.applyNow": "Candidatar-se agora",
-      "ios.chat.cameraUnavailable": "Câmara indisponível neste dispositivo."
+      "ios.chat.cameraUnavailable": "Câmara indisponível neste dispositivo.",
+      "ios.chat.addAttachment": "Adicionar anexo",
+      "ios.chat.sharedPost": "Publicação partilhada",
+      "ios.chat.sharedPostUnavailable": "Esta publicação já não está disponível.",
+      "ios.post.repostBlocked": "Esta publicação não pode ser republicada porque a conta é privada.",
+      "ios.media.loadFailed": "Não foi possível carregar esta imagem."
     },
     "ja": {
       "ios.a11y.bookmark": "ブックマーク",
@@ -2135,7 +2195,12 @@
       "ios.action.done": "完了",
       "ios.chat.micDenied": "音声メッセージを録音するには、ZRPがマイクへのアクセス許可を必要とします。設定でオンにできます。",
       "ios.post.applyNow": "今すぐ応募",
-      "ios.chat.cameraUnavailable": "このデバイスではカメラを使用できません。"
+      "ios.chat.cameraUnavailable": "このデバイスではカメラを使用できません。",
+      "ios.chat.addAttachment": "添付ファイルを追加",
+      "ios.chat.sharedPost": "共有された投稿",
+      "ios.chat.sharedPostUnavailable": "この投稿はもう利用できません。",
+      "ios.post.repostBlocked": "アカウントが非公開のため、この投稿はリポストできません。",
+      "ios.media.loadFailed": "この画像を読み込めませんでした。"
     },
     "ko": {
       "ios.a11y.bookmark": "북마크",
@@ -2298,7 +2363,12 @@
       "ios.action.done": "완료",
       "ios.chat.micDenied": "음성 메시지를 녹음하려면 ZRP에 마이크 접근 권한이 필요합니다. 설정에서 켤 수 있습니다.",
       "ios.post.applyNow": "지금 지원하기",
-      "ios.chat.cameraUnavailable": "이 기기에서는 카메라를 사용할 수 없습니다."
+      "ios.chat.cameraUnavailable": "이 기기에서는 카메라를 사용할 수 없습니다.",
+      "ios.chat.addAttachment": "첨부 파일 추가",
+      "ios.chat.sharedPost": "공유된 게시물",
+      "ios.chat.sharedPostUnavailable": "이 게시물은 더 이상 사용할 수 없습니다.",
+      "ios.post.repostBlocked": "계정이 비공개이므로 이 게시물을 리포스트할 수 없습니다.",
+      "ios.media.loadFailed": "이 이미지를 불러올 수 없습니다."
     },
     "hi": {
       "ios.a11y.bookmark": "बुकमार्क करें",
@@ -2461,7 +2531,12 @@
       "ios.action.done": "हो गया",
       "ios.chat.micDenied": "वॉइस मैसेज रिकॉर्ड करने के लिए ZRP को माइक्रोफ़ोन एक्सेस की आवश्यकता है। आप इसे सेटिंग्स में चालू कर सकते हैं।",
       "ios.post.applyNow": "अभी आवेदन करें",
-      "ios.chat.cameraUnavailable": "इस डिवाइस पर कैमरा उपलब्ध नहीं है।"
+      "ios.chat.cameraUnavailable": "इस डिवाइस पर कैमरा उपलब्ध नहीं है।",
+      "ios.chat.addAttachment": "अटैचमेंट जोड़ें",
+      "ios.chat.sharedPost": "साझा की गई पोस्ट",
+      "ios.chat.sharedPostUnavailable": "यह पोस्ट अब उपलब्ध नहीं है।",
+      "ios.post.repostBlocked": "यह पोस्ट रीपोस्ट नहीं की जा सकती क्योंकि खाता निजी है।",
+      "ios.media.loadFailed": "यह छवि लोड नहीं हो सकी।"
     },
     "nl": {
       "ios.a11y.bookmark": "Bewaren",
@@ -2624,7 +2699,12 @@
       "ios.action.done": "Klaar",
       "ios.chat.micDenied": "ZRP heeft toegang tot de microfoon nodig om een spraakbericht op te nemen. Je kunt dit inschakelen in Instellingen.",
       "ios.post.applyNow": "Nu solliciteren",
-      "ios.chat.cameraUnavailable": "Camera niet beschikbaar op dit apparaat."
+      "ios.chat.cameraUnavailable": "Camera niet beschikbaar op dit apparaat.",
+      "ios.chat.addAttachment": "Bijlage toevoegen",
+      "ios.chat.sharedPost": "Gedeeld bericht",
+      "ios.chat.sharedPostUnavailable": "Dit bericht is niet meer beschikbaar.",
+      "ios.post.repostBlocked": "Dit bericht kan niet opnieuw worden gedeeld omdat het account privé is.",
+      "ios.media.loadFailed": "Deze afbeelding kon niet worden geladen."
     },
     "pl": {
       "ios.a11y.bookmark": "Zapisz",
@@ -2787,7 +2867,12 @@
       "ios.action.done": "Gotowe",
       "ios.chat.micDenied": "ZRP potrzebuje dostępu do mikrofonu, aby nagrać wiadomość głosową. Możesz go włączyć w Ustawieniach.",
       "ios.post.applyNow": "Aplikuj teraz",
-      "ios.chat.cameraUnavailable": "Aparat niedostępny na tym urządzeniu."
+      "ios.chat.cameraUnavailable": "Aparat niedostępny na tym urządzeniu.",
+      "ios.chat.addAttachment": "Dodaj załącznik",
+      "ios.chat.sharedPost": "Udostępniony wpis",
+      "ios.chat.sharedPostUnavailable": "Ten wpis nie jest już dostępny.",
+      "ios.post.repostBlocked": "Tego wpisu nie można ponownie udostępnić, ponieważ konto jest prywatne.",
+      "ios.media.loadFailed": "Nie udało się wczytać tego obrazu."
     },
     "ro": {
       "ios.a11y.bookmark": "Salvează",
@@ -2950,7 +3035,12 @@
       "ios.action.done": "Terminat",
       "ios.chat.micDenied": "ZRP are nevoie de acces la microfon pentru a înregistra un mesaj vocal. Îl poți activa din Setări.",
       "ios.post.applyNow": "Aplică acum",
-      "ios.chat.cameraUnavailable": "Camera nu este disponibilă pe acest dispozitiv."
+      "ios.chat.cameraUnavailable": "Camera nu este disponibilă pe acest dispozitiv.",
+      "ios.chat.addAttachment": "Adaugă un atașament",
+      "ios.chat.sharedPost": "Postare distribuită",
+      "ios.chat.sharedPostUnavailable": "Această postare nu mai este disponibilă.",
+      "ios.post.repostBlocked": "Această postare nu poate fi redistribuită deoarece contul este privat.",
+      "ios.media.loadFailed": "Această imagine nu a putut fi încărcată."
     },
     "cs": {
       "ios.a11y.bookmark": "Uložit",
@@ -3113,7 +3203,12 @@
       "ios.action.done": "Hotovo",
       "ios.chat.micDenied": "ZRP potřebuje přístup k mikrofonu, aby mohl nahrát hlasovou zprávu. Můžete jej zapnout v Nastavení.",
       "ios.post.applyNow": "Přihlásit se",
-      "ios.chat.cameraUnavailable": "Fotoaparát na tomto zařízení není k dispozici."
+      "ios.chat.cameraUnavailable": "Fotoaparát na tomto zařízení není k dispozici.",
+      "ios.chat.addAttachment": "Přidat přílohu",
+      "ios.chat.sharedPost": "Sdílený příspěvek",
+      "ios.chat.sharedPostUnavailable": "Tento příspěvek už není dostupný.",
+      "ios.post.repostBlocked": "Tento příspěvek nelze znovu sdílet, protože účet je soukromý.",
+      "ios.media.loadFailed": "Tento obrázek se nepodařilo načíst."
     },
     "hu": {
       "ios.a11y.bookmark": "Mentés",
@@ -3276,7 +3371,12 @@
       "ios.action.done": "Kész",
       "ios.chat.micDenied": "A ZRP-nek hozzáférésre van szüksége a mikrofonhoz hangüzenet rögzítéséhez. Ezt a Beállításokban kapcsolhatod be.",
       "ios.post.applyNow": "Jelentkezz most",
-      "ios.chat.cameraUnavailable": "A kamera ezen az eszközön nem érhető el."
+      "ios.chat.cameraUnavailable": "A kamera ezen az eszközön nem érhető el.",
+      "ios.chat.addAttachment": "Melléklet hozzáadása",
+      "ios.chat.sharedPost": "Megosztott bejegyzés",
+      "ios.chat.sharedPostUnavailable": "Ez a bejegyzés már nem érhető el.",
+      "ios.post.repostBlocked": "Ezt a bejegyzést nem lehet újra megosztani, mert a fiók privát.",
+      "ios.media.loadFailed": "Nem sikerült betölteni ezt a képet."
     },
     "sv": {
       "ios.a11y.bookmark": "Spara",
@@ -3439,7 +3539,12 @@
       "ios.action.done": "Klar",
       "ios.chat.micDenied": "ZRP behöver tillgång till mikrofonen för att spela in ett röstmeddelande. Du kan slå på det i Inställningar.",
       "ios.post.applyNow": "Ansök nu",
-      "ios.chat.cameraUnavailable": "Kameran är inte tillgänglig på den här enheten."
+      "ios.chat.cameraUnavailable": "Kameran är inte tillgänglig på den här enheten.",
+      "ios.chat.addAttachment": "Lägg till bilaga",
+      "ios.chat.sharedPost": "Delat inlägg",
+      "ios.chat.sharedPostUnavailable": "Det här inlägget är inte längre tillgängligt.",
+      "ios.post.repostBlocked": "Det här inlägget kan inte delas igen eftersom kontot är privat.",
+      "ios.media.loadFailed": "Det gick inte att läsa in den här bilden."
     },
     "da": {
       "ios.a11y.bookmark": "Gem",
@@ -3602,7 +3707,12 @@
       "ios.action.done": "Færdig",
       "ios.chat.micDenied": "ZRP skal bruge adgang til mikrofonen for at optage en talebesked. Du kan slå det til i Indstillinger.",
       "ios.post.applyNow": "Ansøg nu",
-      "ios.chat.cameraUnavailable": "Kameraet er ikke tilgængeligt på denne enhed."
+      "ios.chat.cameraUnavailable": "Kameraet er ikke tilgængeligt på denne enhed.",
+      "ios.chat.addAttachment": "Tilføj vedhæftning",
+      "ios.chat.sharedPost": "Delt opslag",
+      "ios.chat.sharedPostUnavailable": "Dette opslag er ikke længere tilgængeligt.",
+      "ios.post.repostBlocked": "Dette opslag kan ikke genopslås, fordi kontoen er privat.",
+      "ios.media.loadFailed": "Billedet kunne ikke indlæses."
     },
     "hr": {
       "ios.a11y.bookmark": "Spremi",
@@ -3765,7 +3875,12 @@
       "ios.action.done": "Gotovo",
       "ios.chat.micDenied": "ZRP-u je potreban pristup mikrofonu za snimanje glasovne poruke. Možete ga uključiti u Postavkama.",
       "ios.post.applyNow": "Prijavi se sada",
-      "ios.chat.cameraUnavailable": "Kamera nije dostupna na ovom uređaju."
+      "ios.chat.cameraUnavailable": "Kamera nije dostupna na ovom uređaju.",
+      "ios.chat.addAttachment": "Dodaj privitak",
+      "ios.chat.sharedPost": "Podijeljena objava",
+      "ios.chat.sharedPostUnavailable": "Ova objava više nije dostupna.",
+      "ios.post.repostBlocked": "Ova se objava ne može ponovno podijeliti jer je račun privatan.",
+      "ios.media.loadFailed": "Ovu sliku nije moguće učitati."
     },
     "sr": {
       "ios.a11y.bookmark": "Obeleži",
@@ -3928,7 +4043,12 @@
       "ios.action.done": "Gotovo",
       "ios.chat.micDenied": "ZRP-u je potreban pristup mikrofonu za snimanje glasovne poruke. Možete ga uključiti u Podešavanjima.",
       "ios.post.applyNow": "Prijavi se sada",
-      "ios.chat.cameraUnavailable": "Kamera nije dostupna na ovom uređaju."
+      "ios.chat.cameraUnavailable": "Kamera nije dostupna na ovom uređaju.",
+      "ios.chat.addAttachment": "Dodaj prilog",
+      "ios.chat.sharedPost": "Podeljena objava",
+      "ios.chat.sharedPostUnavailable": "Ova objava više nije dostupna.",
+      "ios.post.repostBlocked": "Ova objava ne može ponovo da se podeli jer je nalog privatan.",
+      "ios.media.loadFailed": "Ovu sliku nije moguće učitati."
     },
     "bg": {
       "ios.a11y.bookmark": "Запази",
@@ -4091,7 +4211,12 @@
       "ios.action.done": "Готово",
       "ios.chat.micDenied": "ZRP се нуждае от достъп до микрофона, за да запише гласово съобщение. Можете да го включите в Настройки.",
       "ios.post.applyNow": "Кандидатствай сега",
-      "ios.chat.cameraUnavailable": "Камерата не е налична на това устройство."
+      "ios.chat.cameraUnavailable": "Камерата не е налична на това устройство.",
+      "ios.chat.addAttachment": "Добавяне на прикачен файл",
+      "ios.chat.sharedPost": "Споделена публикация",
+      "ios.chat.sharedPostUnavailable": "Тази публикация вече не е налична.",
+      "ios.post.repostBlocked": "Тази публикация не може да бъде споделена повторно, защото профилът е частен.",
+      "ios.media.loadFailed": "Изображението не можа да бъде заредено."
     },
     "el": {
       "ios.a11y.bookmark": "Αποθήκευση",
@@ -4254,7 +4379,12 @@
       "ios.action.done": "Ολοκληρώθηκε",
       "ios.chat.micDenied": "Το ZRP χρειάζεται πρόσβαση στο μικρόφωνο για την εγγραφή φωνητικού μηνύματος. Μπορείτε να την ενεργοποιήσετε στις Ρυθμίσεις.",
       "ios.post.applyNow": "Υποβολή αίτησης τώρα",
-      "ios.chat.cameraUnavailable": "Η κάμερα δεν είναι διαθέσιμη σε αυτή τη συσκευή."
+      "ios.chat.cameraUnavailable": "Η κάμερα δεν είναι διαθέσιμη σε αυτή τη συσκευή.",
+      "ios.chat.addAttachment": "Προσθήκη συνημμένου",
+      "ios.chat.sharedPost": "Κοινοποιημένη ανάρτηση",
+      "ios.chat.sharedPostUnavailable": "Αυτή η ανάρτηση δεν είναι πλέον διαθέσιμη.",
+      "ios.post.repostBlocked": "Αυτή η ανάρτηση δεν μπορεί να αναδημοσιευτεί επειδή ο λογαριασμός είναι ιδιωτικός.",
+      "ios.media.loadFailed": "Δεν ήταν δυνατή η φόρτωση αυτής της εικόνας."
     },
     "bs": {
       "ios.a11y.bookmark": "Zabilježi",
@@ -4417,7 +4547,12 @@
       "ios.action.done": "Gotovo",
       "ios.chat.micDenied": "ZRP-u je potreban pristup mikrofonu za snimanje glasovne poruke. Možete ga uključiti u Postavkama.",
       "ios.post.applyNow": "Prijavi se sada",
-      "ios.chat.cameraUnavailable": "Kamera nije dostupna na ovom uređaju."
+      "ios.chat.cameraUnavailable": "Kamera nije dostupna na ovom uređaju.",
+      "ios.chat.addAttachment": "Dodaj prilog",
+      "ios.chat.sharedPost": "Podijeljena objava",
+      "ios.chat.sharedPostUnavailable": "Ova objava više nije dostupna.",
+      "ios.post.repostBlocked": "Ova objava se ne može ponovo podijeliti jer je račun privatan.",
+      "ios.media.loadFailed": "Nije moguće učitati ovu sliku."
     },
     "mk": {
       "ios.a11y.bookmark": "Обележи",
@@ -4580,7 +4715,12 @@
       "ios.action.done": "Готово",
       "ios.chat.micDenied": "На ZRP му е потребен пристап до микрофонот за да сними гласовна порака. Можеш да го овозможиш во Поставки.",
       "ios.post.applyNow": "Пријави се сега",
-      "ios.chat.cameraUnavailable": "Камерата не е достапна на овој уред."
+      "ios.chat.cameraUnavailable": "Камерата не е достапна на овој уред.",
+      "ios.chat.addAttachment": "Додај прилог",
+      "ios.chat.sharedPost": "Споделена објава",
+      "ios.chat.sharedPostUnavailable": "Оваа објава веќе не е достапна.",
+      "ios.post.repostBlocked": "Оваа објава не може повторно да се сподели бидејќи профилот е приватен.",
+      "ios.media.loadFailed": "Оваа слика не можеше да се вчита."
     },
     "no": {
       "ios.a11y.bookmark": "Bokmerk",
@@ -4743,7 +4883,12 @@
       "ios.action.done": "Ferdig",
       "ios.chat.micDenied": "ZRP trenger tilgang til mikrofonen for å spille inn en talemelding. Du kan slå det på i Innstillinger.",
       "ios.post.applyNow": "Søk nå",
-      "ios.chat.cameraUnavailable": "Kameraet er ikke tilgjengelig på denne enheten."
+      "ios.chat.cameraUnavailable": "Kameraet er ikke tilgjengelig på denne enheten.",
+      "ios.chat.addAttachment": "Legg til vedlegg",
+      "ios.chat.sharedPost": "Delt innlegg",
+      "ios.chat.sharedPostUnavailable": "Dette innlegget er ikke lenger tilgjengelig.",
+      "ios.post.repostBlocked": "Dette innlegget kan ikke reposteres fordi kontoen er privat.",
+      "ios.media.loadFailed": "Kunne ikke laste inn dette bildet."
     }
   }
 }

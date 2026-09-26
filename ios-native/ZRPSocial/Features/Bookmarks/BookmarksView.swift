@@ -146,6 +146,7 @@ struct BookmarksView: View {
         .navigationTitle(Text(.bookmarksTitle))
         .navigationBarTitleDisplayMode(.inline)
         .postSheets(sheets)
+        .postActionErrorAlert()
         .task {
             viewModel.attach(interactions: interactions)
             await viewModel.loadIfNeeded()

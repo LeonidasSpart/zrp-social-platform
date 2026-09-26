@@ -715,11 +715,13 @@ struct GroupConversationView: View {
                 Button { viewModel.replyTarget = nil } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
+                        .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                        .contentShape(Rectangle())
                 }
                 .accessibilityLabel(Text(.iosCommentCancelReply))
             }
             .padding(.horizontal, ZrpSpacing.md)
-            .padding(.top, ZrpSpacing.sm)
+            .padding(.top, ZrpSpacing.xs)
             .background(ZrpColor.surface)
         }
 
@@ -750,56 +752,51 @@ struct GroupConversationView: View {
 
     private var textComposer: some View {
         HStack(alignment: .bottom, spacing: ZrpSpacing.sm) {
-            // Group threads previously had no photo affordance at all -
-            // only the video/document menu below and voice notes. This
-            // Camera/Gallery/GIF trio matches the 1-1 thread's own
-            // composer (ConversationView) and this session's audit,
-            // which found the group composer missing photos entirely.
-            Button {
-                if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                    isShowingCamera = true
-                } else {
-                    cameraUnavailable = true
-                }
-            } label: {
-                Image(systemName: "camera")
-                    .font(.title3)
-                    .foregroundStyle(ZrpColor.onSurfaceMuted)
-                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                    .contentShape(Rectangle())
-            }
-            .disabled(viewModel.isSending)
-            .accessibilityLabel(Text(.chatOpenCamera))
-
-            PhotosPicker(
-                selection: $pickerSelection,
-                maxSelectionCount: 1,
-                matching: .images
-            ) {
-                Image(systemName: "photo")
-                    .font(.title3)
-                    .foregroundStyle(ZrpColor.onSurfaceMuted)
-                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                    .contentShape(Rectangle())
-            }
-            .disabled(viewModel.isSending)
-            .accessibilityLabel(Text(.iosA11yAddPhoto))
-
-            Button { isShowingGifPicker = true } label: {
-                Image(systemName: "text.below.photo")
-                    .font(.title3)
-                    .foregroundStyle(ZrpColor.onSurfaceMuted)
-                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                    .contentShape(Rectangle())
-            }
-            .disabled(viewModel.isSending)
-            .accessibilityLabel(Text(.composerAddGif))
-
+            // Camera, photo library, GIF, video and document all live
+            // behind one "+" - the same menu the 1:1 composer uses.
+            // Five separate 44pt icons plus the microphone and the send
+            // button left the text field itself ~8pt wide on a 375pt
+            // phone.
             ChatAttachmentMenu(
                 onPick: { attachment in
                     Task { await viewModel.send(attachment: attachment) }
                 },
-                isBusy: viewModel.isSending
+                isBusy: viewModel.isSending,
+                photoSelection: $pickerSelection,
+                onCamera: {
+                    if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                        isShowingCamera = true
+                    } else {
+                        cameraUnavailable = true
+                    }
+                },
+                onGif: { isShowingGifPicker = true }
+            )
+
+            TextField(
+                text: $viewModel.draft,
+                prompt: Text(.iosChatMessagePlaceholder),
+                axis: .vertical,
+                label: { Text(.iosChatMessagePlaceholder) }
+            )
+            .labelsHidden()
+            .font(.subheadline)
+            .foregroundStyle(ZrpColor.onSurface)
+            .tint(ZrpColor.red)
+            .lineLimit(1...5)
+            .focused($isComposerFocused)
+            .padding(.horizontal, ZrpSpacing.md)
+            .padding(.vertical, ZrpSpacing.sm)
+            .frame(minHeight: ZrpMetrics.minTouchTarget)
+            .frame(maxWidth: .infinity)
+            .background(ZrpColor.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous)
+                    .strokeBorder(
+                        isComposerFocused ? ZrpColor.red : ZrpColor.outline,
+                        lineWidth: 1
+                    )
             )
 
             VoiceNoteComposer(
@@ -810,29 +807,25 @@ struct GroupConversationView: View {
                 isBusy: viewModel.isSending
             )
 
-            TextField(
-                text: $viewModel.draft,
-                prompt: Text(.iosChatMessagePlaceholder),
-                axis: .vertical,
-                label: { Text(.iosChatMessagePlaceholder) }
-            )
-            .labelsHidden()
-            .lineLimit(1...5)
-            .focused($isComposerFocused)
-            .padding(.horizontal, ZrpSpacing.md)
-            .padding(.vertical, ZrpSpacing.sm)
-            .background(ZrpColor.surfaceElevated)
-            .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg))
-
             Button {
                 Task { await viewModel.send() }
             } label: {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.title2)
-                    .frame(
-                        width: ZrpMetrics.minTouchTarget,
-                        height: ZrpMetrics.minTouchTarget
-                    )
+                if viewModel.isSending {
+                    ProgressView()
+                        .tint(ZrpColor.red)
+                        .frame(
+                            width: ZrpMetrics.minTouchTarget,
+                            height: ZrpMetrics.minTouchTarget
+                        )
+                } else {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.title2)
+                        .frame(
+                            width: ZrpMetrics.minTouchTarget,
+                            height: ZrpMetrics.minTouchTarget
+                        )
+                        .contentShape(Rectangle())
+                }
             }
             .buttonStyle(.plain)
             .foregroundStyle(viewModel.canSend ? ZrpColor.red : ZrpColor.onSurfaceMuted)
@@ -939,12 +932,29 @@ private struct GroupMessageBubble: View {
                         }
                 }
 
-                // Same rule PostCardView's own `linkPreview` uses: no
-                // preview once the message already carries an image, and
-                // only the message's own text is scanned for a link.
-                if message.imageUrl?.isEmpty != false,
-                   let target = FirstURL.first(in: message.content) {
-                    LinkPreviewCard(url: target)
+                // A ZRP post link is what "Send in Message" sends, so it
+                // is drawn as the post itself and opens the post in-app.
+                // Any other link follows the same rule PostCardView's own
+                // `linkPreview` uses: no preview once the message already
+                // carries an image, and only the message's own text is
+                // scanned for a link.
+                if message.imageUrl?.isEmpty != false {
+                    switch SharedZrpLink.classify(in: message.content) {
+                    case .post(let id)?:
+                        SharedPostCard(postId: id) { post in
+                            navigator.push(.postDetail(postId: post.id, preloaded: post, targetCommentId: nil))
+                        }
+                    case .profile(let username)?:
+                        SharedProfileCard(username: username) { navigator.push(.profile(username: $0)) }
+                    case .other?:
+                        // The link text above already routes in-app; the generic
+                        // unfurl route cannot read ZRP's own pages.
+                        EmptyView()
+                    case nil:
+                        if let target = FirstURL.first(in: message.content) {
+                            LinkPreviewCard(url: target, onZrpLink: { navigator.push($0) })
+                        }
+                    }
                 }
 
                 Text(verbatim: RelativeTime.compact(from: message.createdAt))

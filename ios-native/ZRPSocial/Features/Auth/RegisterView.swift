@@ -133,11 +133,15 @@ struct RegisterView: View {
                     .autocorrectionDisabled()
 
                 VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
-                    SecureField(text: $viewModel.password, prompt: Text(.authCreatePassword)) {
-                        Text(.authCreatePassword)
-                    }
-                    .textContentType(.newPassword)
-                    .padding(ZrpSpacing.md)
+                    ZrpSecureField(
+                        prompt: L10n.string(.authCreatePassword),
+                        text: $viewModel.password,
+                        contentType: .newPassword
+                    )
+                    .padding(.leading, ZrpSpacing.md)
+                    .padding(.trailing, ZrpSpacing.xs)
+                    .padding(.vertical, ZrpSpacing.xs)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
                     .background(ZrpColor.surfaceElevated)
                     .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md))
 

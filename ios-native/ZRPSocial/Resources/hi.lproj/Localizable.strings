@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "लिस्ट बनाने में विफल रहा।";
 "lists.errorAddMember" = "मेंबर जोड़ने में विफल रहा।";
 "lists.errorRemoveMember" = "मेंबर हटाने में विफल रहा।";
+"auth.showPassword" = "पासवर्ड दिखाएं";
+"auth.hidePassword" = "पासवर्ड छिपाएं";
+"verifiedBadge.newsAutomated" = "आधिकारिक ZRP संपादकीय फ़ीड (स्वचालित)";
+"profile.errLoadPosts" = "लोड नहीं हो सका। पुनः प्रयास करें।";
+"ambassadors.apply.alreadyAmbassador" = "आप पहले से ही ZRP एंबेसडर हैं। आपकी स्थिति, स्तर और आमंत्रण लिंक आपके डैशबोर्ड पर हैं।";
+"communities.detail.leaveConfirmTitle" = "इस समुदाय को छोड़ना चाहते हैं?";
+"communities.detail.leaveConfirmBody" = "आप {name} छोड़ देंगे। आप कभी भी दोबारा शामिल हो सकते हैं।";
+"communities.detail.ownerCannotLeave" = "आप इस समुदाय के स्वामी हैं, इसलिए इसे छोड़ नहीं सकते। सभी के लिए इसे बंद करने हेतु इसे हटाएँ।";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    hi. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "वॉइस मैसेज रिकॉर्ड करने के लिए ZRP को माइक्रोफ़ोन एक्सेस की आवश्यकता है। आप इसे सेटिंग्स में चालू कर सकते हैं।";
 "ios.post.applyNow" = "अभी आवेदन करें";
 "ios.chat.cameraUnavailable" = "इस डिवाइस पर कैमरा उपलब्ध नहीं है।";
+"ios.chat.addAttachment" = "अटैचमेंट जोड़ें";
+"ios.chat.sharedPost" = "साझा की गई पोस्ट";
+"ios.chat.sharedPostUnavailable" = "यह पोस्ट अब उपलब्ध नहीं है।";
+"ios.post.repostBlocked" = "यह पोस्ट रीपोस्ट नहीं की जा सकती क्योंकि खाता निजी है।";
+"ios.media.loadFailed" = "यह छवि लोड नहीं हो सकी।";

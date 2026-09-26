@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Crearea listei a eșuat.";
 "lists.errorAddMember" = "Adăugarea membrului a eșuat.";
 "lists.errorRemoveMember" = "Eliminarea membrului a eșuat.";
+"auth.showPassword" = "Afișează parola";
+"auth.hidePassword" = "Ascunde parola";
+"verifiedBadge.newsAutomated" = "Flux editorial oficial ZRP (automatizat)";
+"profile.errLoadPosts" = "Nu am putut încărca acest conținut. Încearcă din nou.";
+"ambassadors.apply.alreadyAmbassador" = "Ești deja Ambasador ZRP. Statutul, nivelul și linkul tău de invitație se află în panoul tău.";
+"communities.detail.leaveConfirmTitle" = "Părăsești această comunitate?";
+"communities.detail.leaveConfirmBody" = "Vei părăsi {name}. Te poți alătura din nou oricând.";
+"communities.detail.ownerCannotLeave" = "Ești proprietarul acestei comunități, așa că nu o poți părăsi. Șterge-o pentru a o închide pentru toată lumea.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ro. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP are nevoie de acces la microfon pentru a înregistra un mesaj vocal. Îl poți activa din Setări.";
 "ios.post.applyNow" = "Aplică acum";
 "ios.chat.cameraUnavailable" = "Camera nu este disponibilă pe acest dispozitiv.";
+"ios.chat.addAttachment" = "Adaugă un atașament";
+"ios.chat.sharedPost" = "Postare distribuită";
+"ios.chat.sharedPostUnavailable" = "Această postare nu mai este disponibilă.";
+"ios.post.repostBlocked" = "Această postare nu poate fi redistribuită deoarece contul este privat.";
+"ios.media.loadFailed" = "Această imagine nu a putut fi încărcată.";

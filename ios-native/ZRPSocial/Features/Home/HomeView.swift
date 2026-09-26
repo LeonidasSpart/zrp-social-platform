@@ -56,17 +56,9 @@ struct HomeView: View {
         .onChange(of: viewModel.selectedTab) { _, tab in
             viewModel.loadIfNeeded(tab)
         }
-        .alert(
-            Text(.iosErrorGenericTitle),
-            isPresented: Binding(
-                get: { interactions.actionError != nil },
-                set: { if !$0 { interactions.actionError = nil } }
-            )
-        ) {
-            Button { interactions.actionError = nil } label: { Text(.actionCancel) }
-        } message: {
-            Text(verbatim: interactions.actionError ?? "")
-        }
+        // The action-error alert is presented by `PostListView` itself
+        // (`postActionErrorAlert`), so it appears on every timeline and
+        // is never presented twice on this one.
     }
 
     /// The stories rail.

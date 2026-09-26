@@ -129,8 +129,7 @@ struct LoginView: View {
 
             Group {
                 if isSecure {
-                    SecureField(placeholder, text: text)
-                        .textContentType(.password)
+                    ZrpSecureField(prompt: placeholder, text: text, contentType: .password)
                         .submitLabel(.go)
                         .onSubmit { Task { await signIn() } }
                 } else {
