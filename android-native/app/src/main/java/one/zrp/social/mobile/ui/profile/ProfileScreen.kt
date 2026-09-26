@@ -67,6 +67,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -107,6 +109,7 @@ import one.zrp.social.mobile.ui.components.ImageLightbox
 import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.ProfileHeaderSkeleton
 import one.zrp.social.mobile.ui.components.ReportDialog
+import one.zrp.social.mobile.ui.components.repostFailureMessage
 import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.home.PostCard
@@ -149,7 +152,17 @@ fun ProfileScreen(
         factory = remember(username) { ProfileViewModelFactory(ProfileRepository(), username) },
     )
     val state by viewModel.state.collectAsState()
+    val repostFailure by viewModel.repostFailure.collectAsState()
     val context = LocalContext.current
+
+    // Same refused-repost snackbar HomeScreen shows - see RepostFeedback.kt.
+    val snackbarHostState = remember { SnackbarHostState() }
+    val repostFailureText = repostFailure?.let { repostFailureMessage(it) }
+    LaunchedEffect(repostFailureText) {
+        val text = repostFailureText ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(text)
+        viewModel.dismissRepostFailure()
+    }
     val contentResolver = context.contentResolver
 
     val isRefreshingSelectedTab = when (state.selectedTab) {
@@ -585,6 +598,11 @@ fun ProfileScreen(
             refreshing = isRefreshingSelectedTab,
             state = pullRefreshState,
             modifier = Modifier.align(Alignment.TopCenter),
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
 }

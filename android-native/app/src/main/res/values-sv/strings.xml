@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Ansök igen</string>
     <string name="ambassadors_dashboard_suspended_title">Ambassadörsstatus avstängd</string>
     <string name="ambassadors_dashboard_suspended_body">Din ambassadörsstatus är för närvarande avstängd. Kontakta ZRP-supporten för mer information.</string>
+    <string name="ambassadors_apply_already_ambassador">Du är redan ZRP-ambassadör. Din status, nivå och inbjudningslänk finns på din instrumentpanel.</string>
     <string name="ambassadors_dashboard_my_country">Mitt land</string>
     <string name="ambassadors_dashboard_my_level">Min nivå</string>
     <string name="ambassadors_dashboard_my_invitation_link">Min inbjudningslänk</string>
@@ -2241,6 +2242,9 @@
     <string name="communities_detail_delete_confirm_body">Detta tar bort %1$s för alla och kan inte ångras. Inlägg taggade #%2$s tas inte bort.</string>
     <string name="communities_detail_delete_confirm_action">Ta bort</string>
     <string name="communities_detail_delete_error">Det gick inte att ta bort den här communityn. Försök igen.</string>
+    <string name="communities_detail_leave_confirm_title">Lämna den här communityn?</string>
+    <string name="communities_detail_leave_confirm_body">Du lämnar %1$s. Du kan gå med igen när som helst.</string>
+    <string name="communities_detail_owner_cannot_leave">Du äger den här communityn och kan därför inte lämna den. Ta bort den för att stänga den för alla.</string>
     <string name="communities_error_load">Det gick inte att läsa in communities.</string>
     <string name="communities_error_create">Det gick inte att skapa communityn.</string>
     <string name="communities_error_join">Det gick inte att gå med i communityn.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">Det användarnamnet är upptaget.</string>
     <string name="auth_username_format_hint">3–20 tecken, endast bokstäver/siffror/understreck</string>
     <string name="quote_post_title">Citera inlägg</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Inlägg från privata konton kan inte repostas.</string>
+    <string name="post_repost_forbidden_error">Det här inlägget kan inte repostas.</string>
+    <string name="post_repost_failed">Det gick inte att reposta. Försök igen.</string>
+    <string name="image_viewer_load_failed">Det gick inte att läsa in den här bilden.</string>
+    <string name="settings_appearance_title">Utseende</string>
+    <string name="settings_theme_system">Använd enhetens inställning</string>
+    <string name="music_player_hidden">Spelaren är dold. Uppspelningen fortsätter.</string>
+    <string name="music_show_player">Visa spelaren</string>
 </resources>

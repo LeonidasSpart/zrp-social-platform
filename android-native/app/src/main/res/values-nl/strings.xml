@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Opnieuw aanvragen</string>
     <string name="ambassadors_dashboard_suspended_title">Ambassadeursstatus opgeschort</string>
     <string name="ambassadors_dashboard_suspended_body">Je ambassadeursstatus is momenteel opgeschort. Neem contact op met ZRP-support voor meer informatie.</string>
+    <string name="ambassadors_apply_already_ambassador">Je bent al ZRP-ambassadeur. Je status, niveau en uitnodigingslink staan op je dashboard.</string>
     <string name="ambassadors_dashboard_my_country">Mijn land</string>
     <string name="ambassadors_dashboard_my_level">Mijn niveau</string>
     <string name="ambassadors_dashboard_my_invitation_link">Mijn uitnodigingslink</string>
@@ -2241,6 +2242,9 @@
     <string name="communities_detail_delete_confirm_body">Dit verwijdert %1$s voor iedereen en kan niet ongedaan worden gemaakt. Posts met de tag #%2$s worden niet verwijderd.</string>
     <string name="communities_detail_delete_confirm_action">Verwijderen</string>
     <string name="communities_detail_delete_error">Kon deze community niet verwijderen. Probeer het opnieuw.</string>
+    <string name="communities_detail_leave_confirm_title">Deze community verlaten?</string>
+    <string name="communities_detail_leave_confirm_body">Je verlaat %1$s. Je kunt op elk moment opnieuw lid worden.</string>
+    <string name="communities_detail_owner_cannot_leave">Je bent eigenaar van deze community en kunt deze daarom niet verlaten. Verwijder de community om deze voor iedereen te sluiten.</string>
     <string name="communities_error_load">Laden van communities mislukt.</string>
     <string name="communities_error_create">Aanmaken van community mislukt.</string>
     <string name="communities_error_join">Lid worden van community mislukt.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">Die gebruikersnaam is al in gebruik.</string>
     <string name="auth_username_format_hint">3-20 tekens, alleen letters/cijfers/underscores</string>
     <string name="quote_post_title">Post citeren</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Berichten van privéaccounts kunnen niet gerepost worden.</string>
+    <string name="post_repost_forbidden_error">Dit bericht kan niet gerepost worden.</string>
+    <string name="post_repost_failed">Reposten is mislukt. Probeer het opnieuw.</string>
+    <string name="image_viewer_load_failed">Deze afbeelding kon niet worden geladen.</string>
+    <string name="settings_appearance_title">Weergave</string>
+    <string name="settings_theme_system">Apparaatinstelling gebruiken</string>
+    <string name="music_player_hidden">Speler verborgen. Het afspelen gaat door.</string>
+    <string name="music_show_player">Speler tonen</string>
 </resources>

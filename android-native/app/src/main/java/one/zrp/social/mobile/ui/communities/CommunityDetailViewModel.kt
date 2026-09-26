@@ -24,6 +24,7 @@ data class CommunityDetailUiState(
     val nextCursor: String? = null,
     val endReached: Boolean = false,
     val isDeleting: Boolean = false,
+    val isLeaving: Boolean = false,
 )
 
 class CommunityDetailViewModel(
@@ -82,17 +83,32 @@ class CommunityDetailViewModel(
         }
     }
 
-    fun toggleMembership() {
-        val wasMember = _state.value.isMember
+    fun joinCommunity() {
+        if (_state.value.isMember) return
         _state.update { state ->
             state.copy(
-                isMember = !wasMember,
-                community = state.community?.let { it.copy(memberCount = it.memberCount + if (wasMember) -1 else 1) },
+                isMember = true,
+                community = state.community?.let { it.copy(memberCount = it.memberCount + 1) },
             )
         }
         viewModelScope.launch {
-            val result = if (wasMember) repository.leaveCommunity(communityId) else repository.joinCommunity(communityId)
+            repository.joinCommunity(communityId).onFailure { loadCommunity() }
+        }
+    }
+
+    // Leaving is explicit and confirmed (never a silent toggle), and the
+    // screen never offers it to the OWNER: POST .../leave answers 409
+    // for the owner (delete the community instead) - see the web
+    // route. On success the caller navigates back to the list; on
+    // failure the real membership is re-read so nothing stays
+    // optimistically wrong.
+    fun leaveCommunity(onResult: (Result<Unit>) -> Unit) {
+        _state.update { it.copy(isLeaving = true) }
+        viewModelScope.launch {
+            val result = repository.leaveCommunity(communityId).map { }
+            _state.update { it.copy(isLeaving = false) }
             result.onFailure { loadCommunity() }
+            onResult(result)
         }
     }
 

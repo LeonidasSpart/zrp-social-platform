@@ -1,9 +1,7 @@
 package one.zrp.social.mobile.ui.messages
 
 import android.Manifest
-import android.content.Intent
 import android.media.MediaRecorder
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -65,7 +63,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -89,7 +86,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -108,14 +104,20 @@ import one.zrp.social.mobile.network.ChatMessage
 import one.zrp.social.mobile.ui.call.CallViewModel
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.ComposerAttachmentOption
+import one.zrp.social.mobile.ui.components.ComposerAttachmentSheet
+import one.zrp.social.mobile.ui.components.ComposerIconButton
+import one.zrp.social.mobile.ui.components.ComposerSendButton
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.ImageLightbox
 import one.zrp.social.mobile.ui.components.LinkPreviewBlock
 import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.ZrpComposerField
+import one.zrp.social.mobile.ui.components.copyTextWithFeedback
 import one.zrp.social.mobile.ui.components.extractFirstUrl
-import one.zrp.social.mobile.ui.theme.Radius
+import one.zrp.social.mobile.ui.components.openExternalLink
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
@@ -173,11 +175,10 @@ fun ConversationScreen(
     // ~360-412dp phone that's 240dp+ of icons before the input even
     // starts, which is exactly the "message field squeezed, media
     // actions crush the text field" defect. Collapsing them behind one
-    // attach button + a DropdownMenu (the same DropdownMenu already used
-    // a few hundred lines down for the per-message long-press menu) frees
-    // that space back on every device size without hiding any of the
-    // five attachment types on narrower phones the way a responsive
-    // show/hide breakpoint would.
+    // attach button + ComposerAttachmentSheet (a bottom sheet of labelled
+    // tiles) frees that space back on every device size without hiding
+    // any of the five attachment types on narrower phones the way a
+    // responsive show/hide breakpoint would.
     var attachMenuOpen by remember { mutableStateOf(false) }
 
     // Delete-conversation flow reached from ChatContactPopup's own "More"
@@ -756,112 +757,86 @@ fun ConversationScreen(
                 }
             }
         } else {
+            // The composer row: one neutral "+" that opens the attachment
+            // sheet, a pill field that grows to five lines, and a single
+            // trailing slot that is the mic while the draft is empty and
+            // the red Send once there is text (ChatInterface.tsx's own
+            // Send-or-Mic swap). Bottom-aligned so the 48dp controls stay
+            // level with the field's last line as it grows. No
+            // navigationBarsPadding() here: ZrpNavHost's Scaffold already
+            // applies that inset, and the root Column's imePadding() is
+            // what lifts this row above the keyboard.
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
                 verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
-                Box {
-                    IconButton(
-                        onClick = { attachMenuOpen = true },
-                        enabled = !state.isUploadingAttachment,
-                    ) {
-                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.message_add_attachment_cd))
-                    }
-
-                    DropdownMenu(expanded = attachMenuOpen, onDismissRequest = { attachMenuOpen = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.message_open_camera_cd)) },
-                            leadingIcon = { Icon(Icons.Filled.CameraAlt, contentDescription = null) },
-                            onClick = {
-                                attachMenuOpen = false
-                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.message_attach_image_cd)) },
-                            leadingIcon = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
-                            onClick = {
-                                attachMenuOpen = false
-                                imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.composer_add_gif)) },
-                            leadingIcon = { Icon(Icons.Filled.Image, contentDescription = null) },
-                            onClick = {
-                                attachMenuOpen = false
-                                showGifPicker = true
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.message_attach_video_cd)) },
-                            leadingIcon = { Icon(Icons.Filled.VideoLibrary, contentDescription = null) },
-                            onClick = {
-                                attachMenuOpen = false
-                                videoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.message_attach_document_cd)) },
-                            leadingIcon = { Icon(Icons.Filled.Description, contentDescription = null) },
-                            onClick = {
-                                attachMenuOpen = false
-                                documentPickerLauncher.launch(documentMimeTypes)
-                            },
-                        )
-                    }
-                }
-
-                OutlinedTextField(
-                    value = state.draft,
-                    onValueChange = { viewModel.onDraftChange(it) },
-                    placeholder = { Text(stringResource(R.string.chat_message_placeholder, partnerUsername)) },
-                    enabled = !state.isSending,
-                    shape = RoundedCornerShape(Radius.lg),
-                    maxLines = 6,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 4.dp),
+                ComposerIconButton(
+                    icon = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.message_add_attachment_cd),
+                    onClick = { attachMenuOpen = true },
+                    enabled = !state.isUploadingAttachment,
                 )
 
-                // Matches ChatInterface.tsx's own Send-or-Mic swap: an
-                // empty draft shows the mic (tap to start recording), any
-                // typed text shows Send instead - the same toggle, not two
-                // independently-shown buttons.
+                ZrpComposerField(
+                    value = state.draft,
+                    onValueChange = { viewModel.onDraftChange(it) },
+                    placeholder = stringResource(R.string.chat_message_placeholder, partnerUsername),
+                    enabled = !state.isSending,
+                    maxLines = 5,
+                    modifier = Modifier.weight(1f),
+                )
+
                 if (state.draft.isNotBlank()) {
-                    IconButton(
+                    ComposerSendButton(
                         onClick = { viewModel.send() },
-                        enabled = !state.isSending,
-                    ) {
-                        if (state.isSending) {
-                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                        } else {
-                            Icon(
-                                imageVector = Icons.Filled.Send,
-                                contentDescription = stringResource(R.string.message_send_cd),
-                                tint = ZrpRed,
-                            )
-                        }
-                    }
+                        enabled = true,
+                        isSending = state.isSending,
+                        contentDescription = stringResource(R.string.message_send_cd),
+                        icon = Icons.Filled.Send,
+                    )
                 } else {
-                    IconButton(
+                    ComposerIconButton(
+                        icon = Icons.Filled.Mic,
+                        contentDescription = stringResource(R.string.message_record_voice_cd),
                         onClick = {
                             micAccessError = false
                             micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                         },
                         enabled = !state.isUploadingAttachment,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Mic,
-                            contentDescription = stringResource(R.string.message_record_voice_cd),
-                            tint = ZrpRed,
-                        )
-                    }
+                    )
                 }
             }
         }
+    }
+
+    // Every attachment type the old always-visible icon row offered is
+    // still here, wired to the exact same launchers/actions - only the
+    // presentation moved into a sheet.
+    if (attachMenuOpen) {
+        ComposerAttachmentSheet(
+            onDismiss = { attachMenuOpen = false },
+            options = listOf(
+                ComposerAttachmentOption(Icons.Filled.CameraAlt, R.string.message_open_camera_cd) {
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                },
+                ComposerAttachmentOption(Icons.Filled.PhotoLibrary, R.string.message_attach_image_cd) {
+                    imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                ComposerAttachmentOption(Icons.Filled.Image, R.string.composer_add_gif) {
+                    showGifPicker = true
+                },
+                ComposerAttachmentOption(Icons.Filled.VideoLibrary, R.string.message_attach_video_cd) {
+                    videoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
+                },
+                ComposerAttachmentOption(Icons.Filled.Description, R.string.message_attach_document_cd) {
+                    documentPickerLauncher.launch(documentMimeTypes)
+                },
+            ),
+        )
     }
 
     val editMessageId = state.editingMessageId
@@ -1131,8 +1106,9 @@ private fun formatRecordingTime(totalSeconds: Int): String {
 // filename + Download icon, opened in a new tab) - here, an ACTION_VIEW
 // Intent lets whichever app the device already has (a PDF viewer,
 // Office app, etc.) handle the real file.
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ChatFileRow(url: String, fileName: String, isOwnMessage: Boolean) {
+private fun ChatFileRow(url: String, fileName: String, isOwnMessage: Boolean, onLongClick: () -> Unit) {
     val context = LocalContext.current
     val displayName = fileName.ifBlank { stringResource(R.string.chat_attachment_fallback) }
 
@@ -1142,7 +1118,10 @@ private fun ChatFileRow(url: String, fileName: String, isOwnMessage: Boolean) {
             .background(
                 if (isOwnMessage) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
             )
-            .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+            .combinedClickable(
+                onClick = { openExternalLink(context, url) },
+                onLongClick = onLongClick,
+            )
             .padding(horizontal = Spacing.md, vertical = Spacing.sm)
             .widthIn(max = 220.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -1195,6 +1174,7 @@ private fun MessageBubble(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
 
     // Matches PostCard's own previewUrl/linkPreviewFound pair - no
     // preview for an image message (there's nothing left to unfurl),
@@ -1251,7 +1231,10 @@ private fun MessageBubble(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onReplyPreviewClick(replyTo.id) }
+                                .combinedClickable(
+                                    onClick = { onReplyPreviewClick(replyTo.id) },
+                                    onLongClick = { menuOpen = true },
+                                )
                                 .padding(bottom = 6.dp, top = 2.dp)
                                 .padding(start = 6.dp),
                         ) {
@@ -1275,6 +1258,12 @@ private fun MessageBubble(
                             ),
                             onMentionClick = onMentionClick,
                             onHashtagClick = onHashtagClick,
+                            // Long-pressing the words themselves opens the
+                            // same actions menu as the bubble around them
+                            // (Reply / Copy / React / Edit / Delete) - see
+                            // LinkifiedText's own KDoc on why a plain
+                            // ClickableText swallowed that press.
+                            onLongClick = { menuOpen = true },
                             // Own-message bubbles are ZrpRed - the
                             // default link color would be invisible on
                             // that background, so link text stays white
@@ -1290,6 +1279,7 @@ private fun MessageBubble(
                         LinkPreviewBlock(
                             url = previewUrl,
                             onLoaded = { found -> linkPreviewFound = found },
+                            onLongClick = { menuOpen = true },
                         )
                     }
 
@@ -1321,6 +1311,7 @@ private fun MessageBubble(
                                 url = attachmentUrl,
                                 fileName = message.content.removePrefix("📎").trim(),
                                 isOwnMessage = isOwnMessage,
+                                onLongClick = { menuOpen = true },
                             )
                             else -> AsyncImage(
                                 model = attachmentUrl,
@@ -1329,7 +1320,10 @@ private fun MessageBubble(
                                 modifier = Modifier
                                     .size(160.dp)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .clickable { lightboxImage = attachmentUrl },
+                                    .combinedClickable(
+                                        onClick = { lightboxImage = attachmentUrl },
+                                        onLongClick = { menuOpen = true },
+                                    ),
                             )
                         }
                     }
@@ -1410,7 +1404,7 @@ private fun MessageBubble(
                         text = { Text(stringResource(R.string.action_copy)) },
                         onClick = {
                             menuOpen = false
-                            clipboard.setText(AnnotatedString(message.content))
+                            clipboard.copyTextWithFeedback(context, message.content)
                         },
                     )
                 }

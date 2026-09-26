@@ -1,17 +1,22 @@
 package one.zrp.social.mobile.ui.components
 
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -45,6 +50,16 @@ private const val TAG_URL = "url"
  * [linkColor] overrides the token color (default [ZrpRed]) - needed on
  * a surface that itself renders on a red background (an own-message
  * chat bubble), where ZrpRed-on-ZrpRed would be unreadable.
+ *
+ * [onLongClick], when set, is the text's own long-press action. This
+ * is rendered as a plain Text with its own tap detector rather than
+ * foundation's ClickableText: ClickableText consumes the pointer-down
+ * of every press on the words, so a parent bubble's
+ * combinedClickable(onLongClick = ...) never saw a long-press that
+ * started on the text itself - which is most of a message bubble -
+ * and the Reply / Copy / React / Edit / Delete menu only opened from
+ * the bubble's padding or timestamp. Callers route [onLongClick] to
+ * that same menu so long-pressing the words does what users expect.
  */
 @Composable
 fun LinkifiedText(
@@ -54,29 +69,41 @@ fun LinkifiedText(
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onNonLinkClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     suppressUrl: String? = null,
     linkColor: Color = ZrpRed,
 ) {
     val context = LocalContext.current
+    val inAppLinkHandler = LocalInAppLinkHandler.current
     val annotated = remember(text, suppressUrl, linkColor) { buildLinkifiedString(text, suppressUrl, linkColor) }
+    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    ClickableText(
+    Text(
         text = annotated,
         style = style.copy(color = if (style.color == Color.Unspecified) MaterialTheme.colorScheme.onSurface else style.color),
-        modifier = modifier,
-        onClick = { offset ->
-            val mention = annotated.getStringAnnotations(TAG_MENTION, offset, offset).firstOrNull()
-            val hashtag = annotated.getStringAnnotations(TAG_HASHTAG, offset, offset).firstOrNull()
-            val url = annotated.getStringAnnotations(TAG_URL, offset, offset).firstOrNull()
-            when {
-                mention != null -> onMentionClick(mention.item)
-                hashtag != null -> onHashtagClick(hashtag.item)
-                url != null -> {
-                    val href = if (url.item.startsWith("http")) url.item else "https://${url.item}"
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(href)))
-                }
-                else -> onNonLinkClick?.invoke()
-            }
+        onTextLayout = { layoutResult = it },
+        modifier = modifier.pointerInput(annotated, onLongClick, onNonLinkClick, onMentionClick, onHashtagClick) {
+            detectTapGestures(
+                onLongPress = onLongClick?.let { longClick -> { _: Offset -> longClick() } },
+                onTap = { position ->
+                    val offset = layoutResult?.getOffsetForPosition(position) ?: return@detectTapGestures
+                    val mention = annotated.getStringAnnotations(TAG_MENTION, offset, offset).firstOrNull()
+                    val hashtag = annotated.getStringAnnotations(TAG_HASHTAG, offset, offset).firstOrNull()
+                    val url = annotated.getStringAnnotations(TAG_URL, offset, offset).firstOrNull()
+                    when {
+                        mention != null -> onMentionClick(mention.item)
+                        hashtag != null -> onHashtagClick(hashtag.item)
+                        url != null -> {
+                            val href = if (url.item.startsWith("http")) url.item else "https://${url.item}"
+                            // A zrp.one post/profile/hashtag link opens in-app
+                            // (see LocalInAppLinkHandler); anything else opens
+                            // the browser exactly as before.
+                            openLink(context, inAppLinkHandler, href)
+                        }
+                        else -> onNonLinkClick?.invoke()
+                    }
+                },
+            )
         },
     )
 }

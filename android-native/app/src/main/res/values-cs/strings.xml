@@ -2122,6 +2122,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Podat přihlášku znovu</string>
     <string name="ambassadors_dashboard_suspended_title">Status velvyslance pozastaven</string>
     <string name="ambassadors_dashboard_suspended_body">Tvůj status velvyslance je momentálně pozastaven. Pro více informací kontaktuj podporu ZRP.</string>
+    <string name="ambassadors_apply_already_ambassador">Už jsi Ambasadorem ZRP. Svůj stav, úroveň a pozvánkový odkaz najdeš na svém panelu.</string>
     <string name="ambassadors_dashboard_my_country">Moje země</string>
     <string name="ambassadors_dashboard_my_level">Moje úroveň</string>
     <string name="ambassadors_dashboard_my_invitation_link">Můj pozvánkový odkaz</string>
@@ -2251,6 +2252,9 @@
     <string name="communities_detail_delete_confirm_body">Tím se %1$s odstraní pro všechny a nelze to vrátit zpět. Příspěvky s hashtagem #%2$s se nesmažou.</string>
     <string name="communities_detail_delete_confirm_action">Smazat</string>
     <string name="communities_detail_delete_error">Tuto komunitu se nepodařilo smazat. Zkus to znovu.</string>
+    <string name="communities_detail_leave_confirm_title">Opustit tuto komunitu?</string>
+    <string name="communities_detail_leave_confirm_body">Opustíš %1$s. Kdykoli se můžeš znovu připojit.</string>
+    <string name="communities_detail_owner_cannot_leave">Jsi vlastníkem této komunity, takže ji nemůžeš opustit. Smaž ji, pokud ji chceš uzavřít pro všechny.</string>
     <string name="communities_error_load">Načtení komunit se nezdařilo.</string>
     <string name="communities_error_create">Vytvoření komunity se nezdařilo.</string>
     <string name="communities_error_join">Připojení ke komunitě se nezdařilo.</string>
@@ -2374,4 +2378,14 @@
     <string name="auth_username_taken">Toto uživatelské jméno je již obsazené.</string>
     <string name="auth_username_format_hint">3-20 znaků, pouze písmena/číslice/podtržítka</string>
     <string name="quote_post_title">Citovat příspěvek</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Příspěvky ze soukromých účtů nelze sdílet.</string>
+    <string name="post_repost_forbidden_error">Tento příspěvek nelze sdílet.</string>
+    <string name="post_repost_failed">Sdílení se nezdařilo. Zkuste to znovu.</string>
+    <string name="image_viewer_load_failed">Tento obrázek se nepodařilo načíst.</string>
+    <string name="settings_appearance_title">Vzhled</string>
+    <string name="settings_theme_system">Použít nastavení zařízení</string>
+    <string name="music_player_hidden">Přehrávač skryt. Přehrávání pokračuje.</string>
+    <string name="music_show_player">Zobrazit přehrávač</string>
 </resources>

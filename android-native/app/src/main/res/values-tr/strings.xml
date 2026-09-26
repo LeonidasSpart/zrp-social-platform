@@ -2167,6 +2167,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Tekrar başvur</string>
     <string name="ambassadors_dashboard_suspended_title">Elçi durumu askıya alındı</string>
     <string name="ambassadors_dashboard_suspended_body">Elçi durumun şu anda askıya alınmış. Daha fazla bilgi için ZRP desteğiyle iletişime geç.</string>
+    <string name="ambassadors_apply_already_ambassador">Zaten bir ZRP Elçisisin. Durumun, seviyen ve davet bağlantın panelinde.</string>
     <string name="ambassadors_dashboard_my_country">Ülkem</string>
     <string name="ambassadors_dashboard_my_level">Seviyem</string>
     <string name="ambassadors_dashboard_my_invitation_link">Davet Bağlantım</string>
@@ -2296,6 +2297,9 @@
     <string name="communities_detail_delete_confirm_body">Bu, %1$s topluluğunu herkes için kaldırır ve geri alınamaz. #%2$s etiketli gönderiler silinmez.</string>
     <string name="communities_detail_delete_confirm_action">Sil</string>
     <string name="communities_detail_delete_error">Topluluk silinemedi. Tekrar deneyin.</string>
+    <string name="communities_detail_leave_confirm_title">Bu topluluktan ayrılmak istiyor musun?</string>
+    <string name="communities_detail_leave_confirm_body">%1$s topluluğundan ayrılacaksın. İstediğin zaman yeniden katılabilirsin.</string>
+    <string name="communities_detail_owner_cannot_leave">Bu topluluğun sahibi sensin, bu yüzden ayrılamazsın. Herkes için kapatmak istiyorsan topluluğu sil.</string>
     <string name="communities_error_load">Topluluklar yüklenemedi.</string>
     <string name="communities_error_create">Topluluk oluşturulamadı.</string>
     <string name="communities_error_join">Topluluğa katılınamadı.</string>
@@ -2419,4 +2423,14 @@
     <string name="auth_username_taken">Bu kullanıcı adı alınmış.</string>
     <string name="auth_username_format_hint">3-20 karakter, yalnızca harf/rakam/alt çizgi</string>
     <string name="quote_post_title">Gönderiyi alıntıla</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Gizli hesapların gönderileri yeniden paylaşılamaz.</string>
+    <string name="post_repost_forbidden_error">Bu gönderi yeniden paylaşılamaz.</string>
+    <string name="post_repost_failed">Yeniden paylaşılamadı. Lütfen tekrar deneyin.</string>
+    <string name="image_viewer_load_failed">Bu görsel yüklenemedi.</string>
+    <string name="settings_appearance_title">Görünüm</string>
+    <string name="settings_theme_system">Cihaz ayarını kullan</string>
+    <string name="music_player_hidden">Oynatıcı gizlendi. Oynatma devam ediyor.</string>
+    <string name="music_show_player">Oynatıcıyı göster</string>
 </resources>

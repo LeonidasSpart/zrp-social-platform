@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
@@ -57,7 +57,7 @@ fun MusicQueueScreen(player: MusicPlayerViewModel, onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = stringResource(R.string.music_queue_title),
@@ -93,7 +93,7 @@ fun MusicQueueScreen(player: MusicPlayerViewModel, onBack: () -> Unit) {
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    if (currentTrack != null && !state.dismissed) {
+                    if (currentTrack != null) {
                         item {
                             Text(
                                 text = stringResource(R.string.music_queue_now_playing),
@@ -102,20 +102,17 @@ fun MusicQueueScreen(player: MusicPlayerViewModel, onBack: () -> Unit) {
                                 modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
                             )
                         }
+                        // A plain row, not a second MiniPlayerBar: the real
+                        // player bar is now persistent in ZrpNavHost's
+                        // Scaffold on every route including this one, so
+                        // rendering it again here showed two copies of the
+                        // same controls. If the bar was hidden with its X,
+                        // tapping this row is the way to bring it back.
                         item {
-                            MiniPlayerBar(
+                            NowPlayingRow(
                                 track = currentTrack,
-                                isPlaying = state.isPlaying,
-                                isBuffering = state.isBuffering,
-                                positionMs = state.positionMs,
-                                durationMs = state.durationMs,
-                                onTogglePlayPause = { player.togglePlayPause() },
-                                onLikeClick = { /* Liking from the queue's own Now Playing row
-                                                  isn't a real affordance on the website's queue
-                                                  page either - only its persistent player bar
-                                                  (not shown on native's own Queue screen) has a
-                                                  like button there. */ },
-                                onDismiss = { player.dismissPlayer() },
+                                showRestore = state.dismissed,
+                                onShowPlayer = { player.showPlayer() },
                             )
                         }
                         item { HorizontalDivider() }
@@ -139,6 +136,51 @@ fun MusicQueueScreen(player: MusicPlayerViewModel, onBack: () -> Unit) {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NowPlayingRow(track: MusicTrack, showRestore: Boolean, onShowPlayer: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (showRestore) Modifier.clickable(onClick = onShowPlayer, role = Role.Button) else Modifier)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(6.dp)),
+        ) {
+            if (track.coverUrl != null) {
+                AsyncImage(
+                    model = track.coverUrl,
+                    contentDescription = track.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                Icon(imageVector = Icons.Filled.MusicNote, contentDescription = track.title, modifier = Modifier.fillMaxSize())
+            }
+        }
+
+        Column(modifier = Modifier.weight(1f).padding(start = Spacing.sm)) {
+            Text(text = track.title, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                text = track.artist.displayName,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+
+        if (showRestore) {
+            TextButton(onClick = onShowPlayer) {
+                Text(stringResource(R.string.music_show_player))
             }
         }
     }

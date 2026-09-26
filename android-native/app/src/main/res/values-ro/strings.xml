@@ -2118,6 +2118,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Aplică din nou</string>
     <string name="ambassadors_dashboard_suspended_title">Statutul de ambasador este suspendat</string>
     <string name="ambassadors_dashboard_suspended_body">Statutul tău de ambasador este momentan suspendat. Contactează asistența ZRP pentru mai multe informații.</string>
+    <string name="ambassadors_apply_already_ambassador">Ești deja Ambasador ZRP. Statutul, nivelul și linkul tău de invitație se află în panoul tău.</string>
     <string name="ambassadors_dashboard_my_country">Țara mea</string>
     <string name="ambassadors_dashboard_my_level">Nivelul meu</string>
     <string name="ambassadors_dashboard_my_invitation_link">Linkul meu de invitație</string>
@@ -2246,6 +2247,9 @@
     <string name="communities_detail_delete_confirm_body">Aceasta elimină %1$s pentru toată lumea și nu poate fi anulată. Postările marcate cu #%2$s nu sunt șterse.</string>
     <string name="communities_detail_delete_confirm_action">Șterge</string>
     <string name="communities_detail_delete_error">Nu am putut șterge această comunitate. Încearcă din nou.</string>
+    <string name="communities_detail_leave_confirm_title">Părăsești această comunitate?</string>
+    <string name="communities_detail_leave_confirm_body">Vei părăsi %1$s. Te poți alătura din nou oricând.</string>
+    <string name="communities_detail_owner_cannot_leave">Ești proprietarul acestei comunități, așa că nu o poți părăsi. Șterge-o pentru a o închide pentru toată lumea.</string>
     <string name="communities_error_load">Încărcarea comunităților a eșuat.</string>
     <string name="communities_error_create">Crearea comunității a eșuat.</string>
     <string name="communities_error_join">Alăturarea la comunitate a eșuat.</string>
@@ -2369,4 +2373,14 @@
     <string name="auth_username_taken">Acest nume de utilizator este deja luat.</string>
     <string name="auth_username_format_hint">3-20 de caractere, doar litere/cifre/liniuțe de subliniere</string>
     <string name="quote_post_title">Citează postarea</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Postările din conturile private nu pot fi redistribuite.</string>
+    <string name="post_repost_forbidden_error">Această postare nu poate fi redistribuită.</string>
+    <string name="post_repost_failed">Nu s-a putut redistribui. Încearcă din nou.</string>
+    <string name="image_viewer_load_failed">Nu s-a putut încărca această imagine.</string>
+    <string name="settings_appearance_title">Aspect</string>
+    <string name="settings_theme_system">Folosește setarea dispozitivului</string>
+    <string name="music_player_hidden">Player ascuns. Redarea continuă.</string>
+    <string name="music_show_player">Arată playerul</string>
 </resources>

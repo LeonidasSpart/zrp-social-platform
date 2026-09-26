@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">फिर से आवेदन करें</string>
     <string name="ambassadors_dashboard_suspended_title">एंबेसडर स्थिति निलंबित</string>
     <string name="ambassadors_dashboard_suspended_body">आपकी एंबेसडर स्थिति फ़िलहाल निलंबित है। अधिक जानकारी के लिए ZRP सहायता से संपर्क करें।</string>
+    <string name="ambassadors_apply_already_ambassador">आप पहले से ही ZRP एंबेसडर हैं। आपकी स्थिति, स्तर और आमंत्रण लिंक आपके डैशबोर्ड पर हैं।</string>
     <string name="ambassadors_dashboard_my_country">मेरा देश</string>
     <string name="ambassadors_dashboard_my_level">मेरा स्तर</string>
     <string name="ambassadors_dashboard_my_invitation_link">मेरा आमंत्रण लिंक</string>
@@ -2238,6 +2239,9 @@
     <string name="communities_detail_delete_confirm_body">इससे %1$s सभी के लिए हट जाएगा और इसे वापस नहीं लाया जा सकता। #%2$s टैग वाली पोस्ट हटाई नहीं जाएंगी।</string>
     <string name="communities_detail_delete_confirm_action">हटाएं</string>
     <string name="communities_detail_delete_error">समुदाय हटाया नहीं जा सका। फिर से प्रयास करें।</string>
+    <string name="communities_detail_leave_confirm_title">इस समुदाय को छोड़ना चाहते हैं?</string>
+    <string name="communities_detail_leave_confirm_body">आप %1$s छोड़ देंगे। आप कभी भी दोबारा शामिल हो सकते हैं।</string>
+    <string name="communities_detail_owner_cannot_leave">आप इस समुदाय के स्वामी हैं, इसलिए इसे छोड़ नहीं सकते। सभी के लिए इसे बंद करने हेतु इसे हटाएँ।</string>
     <string name="communities_error_load">कम्युनिटी लोड करने में विफल रहा।</string>
     <string name="communities_error_create">कम्युनिटी बनाने में विफल रहा।</string>
     <string name="communities_error_join">कम्युनिटी जॉइन करने में विफल रहा।</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">वह यूज़रनेम पहले से लिया जा चुका है।</string>
     <string name="auth_username_format_hint">3-20 अक्षर, केवल अक्षर/संख्या/अंडरस्कोर</string>
     <string name="quote_post_title">पोस्ट कोट करें</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">निजी खातों की पोस्ट रीपोस्ट नहीं की जा सकतीं।</string>
+    <string name="post_repost_forbidden_error">यह पोस्ट रीपोस्ट नहीं की जा सकती।</string>
+    <string name="post_repost_failed">रीपोस्ट नहीं हो सका। कृपया फिर कोशिश करें।</string>
+    <string name="image_viewer_load_failed">यह छवि लोड नहीं हो सकी।</string>
+    <string name="settings_appearance_title">दिखावट</string>
+    <string name="settings_theme_system">डिवाइस की सेटिंग उपयोग करें</string>
+    <string name="music_player_hidden">प्लेयर छुपा दिया गया। प्लेबैक जारी है।</string>
+    <string name="music_show_player">प्लेयर दिखाएं</string>
 </resources>

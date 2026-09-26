@@ -2167,6 +2167,7 @@
     <string name="ambassadors_dashboard_reapply_cta">重新申请</string>
     <string name="ambassadors_dashboard_suspended_title">大使身份已暂停</string>
     <string name="ambassadors_dashboard_suspended_body">你的大使身份目前已被暂停，请联系 ZRP 支持团队了解更多信息。</string>
+    <string name="ambassadors_apply_already_ambassador">你已经是 ZRP 大使。你的状态、等级和邀请链接都在你的控制面板中。</string>
     <string name="ambassadors_dashboard_my_country">我的国家</string>
     <string name="ambassadors_dashboard_my_level">我的等级</string>
     <string name="ambassadors_dashboard_my_invitation_link">我的邀请链接</string>
@@ -2296,6 +2297,9 @@
     <string name="communities_detail_delete_confirm_body">这会为所有人移除「%1$s」,且无法撤销。带有 #%2$s 标签的帖子不会被删除。</string>
     <string name="communities_detail_delete_confirm_action">删除</string>
     <string name="communities_detail_delete_error">无法删除该社区,请重试。</string>
+    <string name="communities_detail_leave_confirm_title">要退出这个社区吗？</string>
+    <string name="communities_detail_leave_confirm_body">你将退出 %1$s。你可以随时再次加入。</string>
+    <string name="communities_detail_owner_cannot_leave">你是这个社区的所有者，因此无法退出。删除社区即可为所有人关闭它。</string>
     <string name="communities_error_load">加载社区失败。</string>
     <string name="communities_error_create">创建社区失败。</string>
     <string name="communities_error_join">加入社区失败。</string>
@@ -2419,4 +2423,14 @@
     <string name="auth_username_taken">该用户名已被占用。</string>
     <string name="auth_username_format_hint">3-20个字符，仅限字母/数字/下划线</string>
     <string name="quote_post_title">引用帖子</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">无法转发私密账号的帖子。</string>
+    <string name="post_repost_forbidden_error">此帖子无法转发。</string>
+    <string name="post_repost_failed">转发失败，请重试。</string>
+    <string name="image_viewer_load_failed">无法加载此图片。</string>
+    <string name="settings_appearance_title">外观</string>
+    <string name="settings_theme_system">跟随设备设置</string>
+    <string name="music_player_hidden">播放器已隐藏，播放继续。</string>
+    <string name="music_show_player">显示播放器</string>
 </resources>

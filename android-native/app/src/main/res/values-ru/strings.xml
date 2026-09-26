@@ -2167,6 +2167,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Подать заявку снова</string>
     <string name="ambassadors_dashboard_suspended_title">Статус посла приостановлен</string>
     <string name="ambassadors_dashboard_suspended_body">Ваш статус посла в настоящее время приостановлен. Свяжитесь со службой поддержки ZRP для получения дополнительной информации.</string>
+    <string name="ambassadors_apply_already_ambassador">Вы уже Амбассадор ZRP. Ваш статус, уровень и пригласительная ссылка находятся на вашей панели.</string>
     <string name="ambassadors_dashboard_my_country">Моя страна</string>
     <string name="ambassadors_dashboard_my_level">Мой уровень</string>
     <string name="ambassadors_dashboard_my_invitation_link">Моя пригласительная ссылка</string>
@@ -2296,6 +2297,9 @@
     <string name="communities_detail_delete_confirm_body">Это удалит %1$s для всех, и действие нельзя отменить. Публикации с #%2$s не удаляются.</string>
     <string name="communities_detail_delete_confirm_action">Удалить</string>
     <string name="communities_detail_delete_error">Не удалось удалить сообщество. Попробуйте снова.</string>
+    <string name="communities_detail_leave_confirm_title">Покинуть это сообщество?</string>
+    <string name="communities_detail_leave_confirm_body">Вы покинете %1$s. Вы сможете присоединиться снова в любое время.</string>
+    <string name="communities_detail_owner_cannot_leave">Вы владелец этого сообщества, поэтому не можете его покинуть. Удалите его, чтобы закрыть для всех.</string>
     <string name="communities_error_load">Не удалось загрузить сообщества.</string>
     <string name="communities_error_create">Не удалось создать сообщество.</string>
     <string name="communities_error_join">Не удалось вступить в сообщество.</string>
@@ -2419,4 +2423,14 @@
     <string name="auth_username_taken">Это имя пользователя уже занято.</string>
     <string name="auth_username_format_hint">3–20 символов, только буквы/цифры/подчёркивания</string>
     <string name="quote_post_title">Процитировать пост</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Посты из закрытых аккаунтов нельзя репостить.</string>
+    <string name="post_repost_forbidden_error">Этот пост нельзя репостить.</string>
+    <string name="post_repost_failed">Не удалось сделать репост. Попробуйте ещё раз.</string>
+    <string name="image_viewer_load_failed">Не удалось загрузить это изображение.</string>
+    <string name="settings_appearance_title">Оформление</string>
+    <string name="settings_theme_system">Как в настройках устройства</string>
+    <string name="music_player_hidden">Плеер скрыт. Воспроизведение продолжается.</string>
+    <string name="music_show_player">Показать плеер</string>
 </resources>

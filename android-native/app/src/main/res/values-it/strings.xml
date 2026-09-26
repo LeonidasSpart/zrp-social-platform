@@ -2167,6 +2167,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Candidati di nuovo</string>
     <string name="ambassadors_dashboard_suspended_title">Stato di ambasciatore sospeso</string>
     <string name="ambassadors_dashboard_suspended_body">Il tuo stato di ambasciatore è attualmente sospeso. Contatta il supporto ZRP per maggiori informazioni.</string>
+    <string name="ambassadors_apply_already_ambassador">Sei già un Ambassador ZRP. Il tuo stato, il tuo livello e il tuo link di invito sono nella tua dashboard.</string>
     <string name="ambassadors_dashboard_my_country">Il mio paese</string>
     <string name="ambassadors_dashboard_my_level">Il mio livello</string>
     <string name="ambassadors_dashboard_my_invitation_link">Il mio link di invito</string>
@@ -2296,6 +2297,9 @@
     <string name="communities_detail_delete_confirm_body">Questo rimuove %1$s per tutti e non può essere annullato. I post con #%2$s non vengono eliminati.</string>
     <string name="communities_detail_delete_confirm_action">Elimina</string>
     <string name="communities_detail_delete_error">Impossibile eliminare questa community. Riprova.</string>
+    <string name="communities_detail_leave_confirm_title">Lasciare questa community?</string>
+    <string name="communities_detail_leave_confirm_body">Lascerai %1$s. Potrai iscriverti di nuovo in qualsiasi momento.</string>
+    <string name="communities_detail_owner_cannot_leave">Sei il proprietario di questa community, quindi non puoi lasciarla. Eliminala per chiuderla per tutti.</string>
     <string name="communities_error_load">Impossibile caricare le community.</string>
     <string name="communities_error_create">Impossibile creare la community.</string>
     <string name="communities_error_join">Impossibile partecipare alla community.</string>
@@ -2419,4 +2423,14 @@
     <string name="auth_username_taken">Questo nome utente è già in uso.</string>
     <string name="auth_username_format_hint">3-20 caratteri, solo lettere/numeri/trattini bassi</string>
     <string name="quote_post_title">Cita il post</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">I post degli account privati non possono essere ripubblicati.</string>
+    <string name="post_repost_forbidden_error">Questo post non può essere ripubblicato.</string>
+    <string name="post_repost_failed">Impossibile ripubblicare. Riprova.</string>
+    <string name="image_viewer_load_failed">Impossibile caricare questa immagine.</string>
+    <string name="settings_appearance_title">Aspetto</string>
+    <string name="settings_theme_system">Usa impostazione del dispositivo</string>
+    <string name="music_player_hidden">Lettore nascosto. La riproduzione continua.</string>
+    <string name="music_show_player">Mostra il lettore</string>
 </resources>

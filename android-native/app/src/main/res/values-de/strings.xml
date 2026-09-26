@@ -2167,6 +2167,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Erneut bewerben</string>
     <string name="ambassadors_dashboard_suspended_title">Botschafterstatus gesperrt</string>
     <string name="ambassadors_dashboard_suspended_body">Dein Botschafterstatus ist derzeit gesperrt. Kontaktiere den ZRP-Support für weitere Informationen.</string>
+    <string name="ambassadors_apply_already_ambassador">Du bist bereits ZRP-Botschafter. Dein Status, dein Level und dein Einladungslink findest du in deinem Dashboard.</string>
     <string name="ambassadors_dashboard_my_country">Mein Land</string>
     <string name="ambassadors_dashboard_my_level">Meine Stufe</string>
     <string name="ambassadors_dashboard_my_invitation_link">Mein Einladungslink</string>
@@ -2296,6 +2297,9 @@
     <string name="communities_detail_delete_confirm_body">Dadurch wird %1$s für alle entfernt und kann nicht rückgängig gemacht werden. Beiträge mit #%2$s werden nicht gelöscht.</string>
     <string name="communities_detail_delete_confirm_action">Löschen</string>
     <string name="communities_detail_delete_error">Community konnte nicht gelöscht werden. Bitte erneut versuchen.</string>
+    <string name="communities_detail_leave_confirm_title">Diese Community verlassen?</string>
+    <string name="communities_detail_leave_confirm_body">Du verlässt %1$s. Du kannst jederzeit wieder beitreten.</string>
+    <string name="communities_detail_owner_cannot_leave">Du bist Inhaber dieser Community und kannst sie deshalb nicht verlassen. Lösche sie, um sie für alle zu schließen.</string>
     <string name="communities_error_load">Communities konnten nicht geladen werden.</string>
     <string name="communities_error_create">Community konnte nicht erstellt werden.</string>
     <string name="communities_error_join">Beitritt zur Community fehlgeschlagen.</string>
@@ -2419,4 +2423,14 @@
     <string name="auth_username_taken">Dieser Benutzername ist bereits vergeben.</string>
     <string name="auth_username_format_hint">3–20 Zeichen, nur Buchstaben/Zahlen/Unterstriche</string>
     <string name="quote_post_title">Beitrag zitieren</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Beiträge privater Konten können nicht repostet werden.</string>
+    <string name="post_repost_forbidden_error">Dieser Beitrag kann nicht repostet werden.</string>
+    <string name="post_repost_failed">Repost fehlgeschlagen. Bitte erneut versuchen.</string>
+    <string name="image_viewer_load_failed">Dieses Bild konnte nicht geladen werden.</string>
+    <string name="settings_appearance_title">Darstellung</string>
+    <string name="settings_theme_system">Geräteeinstellung verwenden</string>
+    <string name="music_player_hidden">Player ausgeblendet. Die Wiedergabe läuft weiter.</string>
+    <string name="music_show_player">Player anzeigen</string>
 </resources>

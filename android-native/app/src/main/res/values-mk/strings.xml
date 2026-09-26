@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Пријави се повторно</string>
     <string name="ambassadors_dashboard_suspended_title">Статусот на амбасадор е суспендиран</string>
     <string name="ambassadors_dashboard_suspended_body">Твојот статус на амбасадор моментално е суспендиран. Контактирај ја поддршката на ZRP за повеќе информации.</string>
+    <string name="ambassadors_apply_already_ambassador">Веќе си Амбасадор на ZRP. Твојот статус, ниво и линк за покана се на твојата контролна табла.</string>
     <string name="ambassadors_dashboard_my_country">Мојата држава</string>
     <string name="ambassadors_dashboard_my_level">Моето ниво</string>
     <string name="ambassadors_dashboard_my_invitation_link">Мојот линк за покана</string>
@@ -2241,6 +2242,9 @@
     <string name="communities_detail_delete_confirm_body">Ова ја отстранува %1$s за сите и не може да се врати. Објавите означени со #%2$s не се бришат.</string>
     <string name="communities_detail_delete_confirm_action">Избриши</string>
     <string name="communities_detail_delete_error">Не можевме да ја избришеме оваа заедница. Обиди се повторно.</string>
+    <string name="communities_detail_leave_confirm_title">Да ја напуштиш оваа заедница?</string>
+    <string name="communities_detail_leave_confirm_body">Ќе ја напуштиш %1$s. Можеш повторно да се приклучиш во секое време.</string>
+    <string name="communities_detail_owner_cannot_leave">Ти си сопственик на оваа заедница, па не можеш да ја напуштиш. Избриши ја за да ја затвориш за сите.</string>
     <string name="communities_error_load">Вчитувањето на заедниците не успеа.</string>
     <string name="communities_error_create">Создавањето на заедницата не успеа.</string>
     <string name="communities_error_join">Придружувањето кон заедницата не успеа.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">Тоа корисничко име е зафатено.</string>
     <string name="auth_username_format_hint">3-20 знаци, само букви, бројки и долни црти</string>
     <string name="quote_post_title">Цитирај објава</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Објавите од приватни профили не можат повторно да се објават.</string>
+    <string name="post_repost_forbidden_error">Оваа објава не може повторно да се објави.</string>
+    <string name="post_repost_failed">Повторното објавување не успеа. Обидете се повторно.</string>
+    <string name="image_viewer_load_failed">Оваа слика не можеше да се вчита.</string>
+    <string name="settings_appearance_title">Изглед</string>
+    <string name="settings_theme_system">Користи го поставувањето на уредот</string>
+    <string name="music_player_hidden">Плеерот е сокриен. Репродукцијата продолжува.</string>
+    <string name="music_show_player">Прикажи го плеерот</string>
 </resources>

@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Újra jelentkezem</string>
     <string name="ambassadors_dashboard_suspended_title">Nagyköveti státusz felfüggesztve</string>
     <string name="ambassadors_dashboard_suspended_body">A nagyköveti státuszod jelenleg fel van függesztve. További információért vedd fel a kapcsolatot a ZRP ügyfélszolgálatával.</string>
+    <string name="ambassadors_apply_already_ambassador">Már ZRP-nagykövet vagy. Az állapotod, a szinted és a meghívólinked az irányítópultodon található.</string>
     <string name="ambassadors_dashboard_my_country">Az országom</string>
     <string name="ambassadors_dashboard_my_level">A szintem</string>
     <string name="ambassadors_dashboard_my_invitation_link">A meghívólinkem</string>
@@ -2241,6 +2242,9 @@
     <string name="communities_detail_delete_confirm_body">Ez mindenki számára eltávolítja a(z) %1$s közösséget, és nem vonható vissza. A #%2$s hashtaggel megjelölt bejegyzések nem törlődnek.</string>
     <string name="communities_detail_delete_confirm_action">Törlés</string>
     <string name="communities_detail_delete_error">Nem sikerült törölni ezt a közösséget. Próbáld újra.</string>
+    <string name="communities_detail_leave_confirm_title">Kilépsz ebből a közösségből?</string>
+    <string name="communities_detail_leave_confirm_body">Kilépsz innen: %1$s. Bármikor újra csatlakozhatsz.</string>
+    <string name="communities_detail_owner_cannot_leave">Te vagy ennek a közösségnek a tulajdonosa, ezért nem léphetsz ki belőle. Töröld, ha mindenki számára le szeretnéd zárni.</string>
     <string name="communities_error_load">Nem sikerült betölteni a közösségeket.</string>
     <string name="communities_error_create">Nem sikerült létrehozni a közösséget.</string>
     <string name="communities_error_join">Nem sikerült csatlakozni a közösséghez.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">Ez a felhasználónév foglalt.</string>
     <string name="auth_username_format_hint">3-20 karakter, csak betűk/számok/aláhúzások</string>
     <string name="quote_post_title">Bejegyzés idézése</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Privát fiókok bejegyzéseit nem lehet megosztani.</string>
+    <string name="post_repost_forbidden_error">Ezt a bejegyzést nem lehet megosztani.</string>
+    <string name="post_repost_failed">A megosztás nem sikerült. Próbáld újra.</string>
+    <string name="image_viewer_load_failed">Nem sikerült betölteni ezt a képet.</string>
+    <string name="settings_appearance_title">Megjelenés</string>
+    <string name="settings_theme_system">Eszköz beállításának használata</string>
+    <string name="music_player_hidden">Lejátszó elrejtve. A lejátszás folytatódik.</string>
+    <string name="music_show_player">Lejátszó megjelenítése</string>
 </resources>

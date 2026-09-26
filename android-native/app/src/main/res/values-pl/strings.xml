@@ -2122,6 +2122,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Złóż zgłoszenie ponownie</string>
     <string name="ambassadors_dashboard_suspended_title">Status Ambasadora zawieszony</string>
     <string name="ambassadors_dashboard_suspended_body">Twój status Ambasadora jest obecnie zawieszony. Skontaktuj się z pomocą techniczną ZRP, aby uzyskać więcej informacji.</string>
+    <string name="ambassadors_apply_already_ambassador">Jesteś już Ambasadorem ZRP. Twój status, poziom i link z zaproszeniem znajdziesz w swoim panelu.</string>
     <string name="ambassadors_dashboard_my_country">Mój kraj</string>
     <string name="ambassadors_dashboard_my_level">Mój poziom</string>
     <string name="ambassadors_dashboard_my_invitation_link">Mój link zaproszenia</string>
@@ -2251,6 +2252,9 @@
     <string name="communities_detail_delete_confirm_body">To usuwa %1$s dla wszystkich i nie można tego cofnąć. Posty oznaczone #%2$s nie zostaną usunięte.</string>
     <string name="communities_detail_delete_confirm_action">Usuń</string>
     <string name="communities_detail_delete_error">Nie udało się usunąć tej społeczności. Spróbuj ponownie.</string>
+    <string name="communities_detail_leave_confirm_title">Opuścić tę społeczność?</string>
+    <string name="communities_detail_leave_confirm_body">Opuścisz %1$s. Możesz dołączyć ponownie w dowolnym momencie.</string>
+    <string name="communities_detail_owner_cannot_leave">Jesteś właścicielem tej społeczności, więc nie możesz jej opuścić. Usuń ją, aby zamknąć ją dla wszystkich.</string>
     <string name="communities_error_load">Nie udało się wczytać społeczności.</string>
     <string name="communities_error_create">Nie udało się utworzyć społeczności.</string>
     <string name="communities_error_join">Nie udało się dołączyć do społeczności.</string>
@@ -2374,4 +2378,14 @@
     <string name="auth_username_taken">Ta nazwa użytkownika jest zajęta.</string>
     <string name="auth_username_format_hint">3-20 znaków, tylko litery/cyfry/podkreślenia</string>
     <string name="quote_post_title">Zacytuj post</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Wpisów z prywatnych kont nie można repostować.</string>
+    <string name="post_repost_forbidden_error">Tego wpisu nie można repostować.</string>
+    <string name="post_repost_failed">Nie udało się repostować. Spróbuj ponownie.</string>
+    <string name="image_viewer_load_failed">Nie udało się wczytać tego obrazu.</string>
+    <string name="settings_appearance_title">Wygląd</string>
+    <string name="settings_theme_system">Użyj ustawienia urządzenia</string>
+    <string name="music_player_hidden">Odtwarzacz ukryty. Odtwarzanie trwa.</string>
+    <string name="music_show_player">Pokaż odtwarzacz</string>
 </resources>

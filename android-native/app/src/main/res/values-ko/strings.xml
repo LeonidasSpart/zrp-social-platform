@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">다시 신청하기</string>
     <string name="ambassadors_dashboard_suspended_title">앰버서더 자격이 정지되었습니다</string>
     <string name="ambassadors_dashboard_suspended_body">현재 앰버서더 자격이 정지된 상태입니다. 자세한 사항은 ZRP 고객 지원팀에 문의해 주세요.</string>
+    <string name="ambassadors_apply_already_ambassador">이미 ZRP 앰배서더예요. 상태, 레벨, 초대 링크는 대시보드에서 확인할 수 있어요.</string>
     <string name="ambassadors_dashboard_my_country">내 국가</string>
     <string name="ambassadors_dashboard_my_level">내 등급</string>
     <string name="ambassadors_dashboard_my_invitation_link">내 초대 링크</string>
@@ -2238,6 +2239,9 @@
     <string name="communities_detail_delete_confirm_body">모든 사용자에게서 %1$s이(가) 삭제되며 되돌릴 수 없습니다. #%2$s 태그가 지정된 게시물은 삭제되지 않습니다.</string>
     <string name="communities_detail_delete_confirm_action">삭제</string>
     <string name="communities_detail_delete_error">커뮤니티를 삭제할 수 없습니다. 다시 시도해 주세요.</string>
+    <string name="communities_detail_leave_confirm_title">이 커뮤니티를 나가시겠어요?</string>
+    <string name="communities_detail_leave_confirm_body">%1$s에서 나갑니다. 언제든지 다시 가입할 수 있어요.</string>
+    <string name="communities_detail_owner_cannot_leave">이 커뮤니티의 소유자이므로 나갈 수 없어요. 모두에게 닫으려면 커뮤니티를 삭제하세요.</string>
     <string name="communities_error_load">커뮤니티를 불러오지 못했습니다.</string>
     <string name="communities_error_create">커뮤니티를 만들지 못했습니다.</string>
     <string name="communities_error_join">커뮤니티에 가입하지 못했습니다.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">이미 사용 중인 사용자 이름입니다.</string>
     <string name="auth_username_format_hint">3~20자, 영문자/숫자/밑줄만 사용 가능</string>
     <string name="quote_post_title">게시물 인용</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">비공개 계정의 게시물은 리포스트할 수 없습니다.</string>
+    <string name="post_repost_forbidden_error">이 게시물은 리포스트할 수 없습니다.</string>
+    <string name="post_repost_failed">리포스트하지 못했습니다. 다시 시도해 주세요.</string>
+    <string name="image_viewer_load_failed">이 이미지를 불러오지 못했습니다.</string>
+    <string name="settings_appearance_title">화면 모드</string>
+    <string name="settings_theme_system">기기 설정 사용</string>
+    <string name="music_player_hidden">플레이어를 숨겼습니다. 재생은 계속됩니다.</string>
+    <string name="music_show_player">플레이어 표시</string>
 </resources>

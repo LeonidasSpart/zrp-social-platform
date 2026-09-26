@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,6 +22,10 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -29,6 +34,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -124,6 +130,8 @@ import one.zrp.social.mobile.ui.music.ArtistsScreen
 import one.zrp.social.mobile.ui.music.DiscoverScreen
 import one.zrp.social.mobile.ui.music.HistoryScreen
 import one.zrp.social.mobile.ui.music.LikedScreen
+import one.zrp.social.mobile.ui.components.LocalInAppLinkHandler
+import one.zrp.social.mobile.ui.music.MiniPlayerBar
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModel
 import one.zrp.social.mobile.ui.music.StudioScreen
 import one.zrp.social.mobile.ui.music.MusicPlayerViewModelFactory
@@ -497,6 +505,20 @@ fun ZrpNavHost(
             )
         },
     ) {
+    // Music mini player, persistent across every route (the native
+    // equivalent of MusicMiniPlayer.tsx, which MusicProviderMount renders
+    // at the app root, not per page). It used to be rendered only by
+    // MusicScreen and MusicQueueScreen, so leaving either of those - to
+    // an artist page, the feed, anywhere - hid the only on-screen
+    // playback control while the track kept playing. Living in the
+    // Scaffold's bottomBar slot (above ZrpBottomBar) also means the
+    // NavHost's innerPadding grows to include it, so no screen's content
+    // is ever covered by it.
+    val musicPlayerState by musicPlayerViewModel.state.collectAsState()
+    val scaffoldSnackbarHostState = remember { SnackbarHostState() }
+    val playerHiddenText = stringResource(R.string.music_player_hidden)
+    val showPlayerLabel = stringResource(R.string.music_show_player)
+
     Scaffold(
         topBar = {
             if (showZrpTopBar) {
@@ -507,18 +529,71 @@ fun ZrpNavHost(
                 )
             }
         },
+        snackbarHost = { SnackbarHost(hostState = scaffoldSnackbarHostState) },
         bottomBar = {
-            ZrpBottomBar(
-                navController = navController,
-                unreadMessageCount = unreadMessageCount,
-                onOtherTabSelected = {
-                    unreadBadgeViewModel.refresh()
-                    unreadMessagesBadgeViewModel.refresh()
-                },
-                onHomeReselected = { homeScrollToTopEvents.tryEmit(Unit) },
-            )
+            Column {
+                val currentTrack = musicPlayerState.currentTrack
+                if (currentTrack != null && !musicPlayerState.dismissed) {
+                    Surface(color = MaterialTheme.colorScheme.surfaceContainerLowest) {
+                        MiniPlayerBar(
+                            track = currentTrack,
+                            isPlaying = musicPlayerState.isPlaying,
+                            isBuffering = musicPlayerState.isBuffering,
+                            positionMs = musicPlayerState.positionMs,
+                            durationMs = musicPlayerState.durationMs,
+                            onTogglePlayPause = { musicPlayerViewModel.togglePlayPause() },
+                            onLikeClick = { coroutineScope.launch { musicPlayerViewModel.toggleLike(currentTrack) } },
+                            onDismiss = {
+                                // X hides the bar only - playback and the
+                                // queue are untouched (MusicPlayerUiState.
+                                // dismissed's own KDoc) - and says so, with
+                                // the way back right on the same snackbar,
+                                // so hiding is never a silent dead end.
+                                musicPlayerViewModel.dismissPlayer()
+                                coroutineScope.launch {
+                                    val result = scaffoldSnackbarHostState.showSnackbar(
+                                        message = playerHiddenText,
+                                        actionLabel = showPlayerLabel,
+                                        withDismissAction = true,
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                    if (result == SnackbarResult.ActionPerformed) musicPlayerViewModel.showPlayer()
+                                }
+                            },
+                        )
+                    }
+                }
+                ZrpBottomBar(
+                    navController = navController,
+                    unreadMessageCount = unreadMessageCount,
+                    onOtherTabSelected = {
+                        unreadBadgeViewModel.refresh()
+                        unreadMessagesBadgeViewModel.refresh()
+                    },
+                    onHomeReselected = { homeScrollToTopEvents.tryEmit(Unit) },
+                )
+            }
         },
     ) { innerPadding ->
+        // In-app routing for zrp.one URLs tapped inside content (a post
+        // shared into a DM, a profile link in a bio) - see
+        // LocalInAppLinkHandler's own KDoc. Resolved against the very
+        // same deepLinks the routes below register, so /post/{id},
+        // /profile/{username}, /hashtag/{tag}, /messages/... all open
+        // in place; a URL the graph doesn't know returns false and the
+        // caller falls back to the browser.
+        val inAppLinkHandler: (Uri) -> Boolean = remember(navController) {
+            { uri ->
+                val isZrpHost = uri.scheme == "https" && uri.host.equals("zrp.one", ignoreCase = true)
+                if (isZrpHost && runCatching { navController.graph.hasDeepLink(uri) }.getOrDefault(false)) {
+                    navController.navigate(uri)
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+        CompositionLocalProvider(LocalInAppLinkHandler provides inAppLinkHandler) {
         NavHost(
             navController = navController,
             startDestination = ZrpDestination.Home.route,
@@ -1855,6 +1930,7 @@ fun ZrpNavHost(
                 }
             }
         }
+        } // CompositionLocalProvider(LocalInAppLinkHandler)
     }
     } // ModalNavigationDrawer
 }

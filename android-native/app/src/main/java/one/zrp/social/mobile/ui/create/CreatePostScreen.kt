@@ -8,6 +8,8 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -80,6 +82,7 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.ZrpComposerField
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -178,18 +181,21 @@ fun CreatePostScreen(
     // with no way to reach them, which is exactly what real-device
     // testing reported.
     //
-    // imePadding() rather than a scroll container, deliberately: the
-    // main text field below takes .weight(1f) to fill the height, and a
-    // weighted child inside a verticalScroll has unbounded height and
-    // crashes. Insetting instead shrinks the Column by the keyboard,
-    // the weighted field gives up exactly that much room, and
-    // everything under it - poll options, toolbar, Post - stays on
-    // screen. No navigationBarsPadding here: ZrpNavHost's Scaffold
-    // already applies that inset and counting it twice is its own bug.
+    // imePadding() AND a scroll container. The earlier weight(1f) text
+    // field was the real "my typed text is invisible" bug on a phone:
+    // with the keyboard up (~300dp gone) and a media preview attached
+    // (240-280dp), the fixed-height rows below (schedule, toolbar, Post,
+    // poll builder) left the weighted field zero or negative height, so
+    // it collapsed and nothing the user typed could be seen. The field
+    // now has a real minimum height and the whole column scrolls; the
+    // focused field brings its cursor into view on its own. No
+    // navigationBarsPadding here: ZrpNavHost's Scaffold already applies
+    // that inset and counting it twice is its own bug.
     Column(
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
         if (quotePostId != null) {
@@ -259,20 +265,21 @@ fun CreatePostScreen(
             }
         }
 
-        OutlinedTextField(
+        ZrpComposerField(
             value = state.content,
             onValueChange = { viewModel.onContentChange(it) },
             // The quote-post placeholder ("Add your thoughts...") stays
             // English-only on purpose too - QuotePostModal.tsx's own
             // placeholder is hardcoded the same way. The default placeholder
             // uses PostComposer.tsx's real, translated copy.
-            placeholder = {
-                Text(if (quotePostId != null) "Add your thoughts..." else stringResource(R.string.composer_placeholder_default))
-            },
+            placeholder = if (quotePostId != null) "Add your thoughts..." else stringResource(R.string.composer_placeholder_default),
             enabled = !state.isPosting,
+            minLines = 5,
+            maxLines = Int.MAX_VALUE,
+            shape = MaterialTheme.shapes.medium,
+            contentAlignment = Alignment.TopStart,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
                 .padding(top = if (quotePostId != null) Spacing.sm else 0.dp),
         )
 

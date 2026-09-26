@@ -19,10 +19,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -79,6 +77,8 @@ import kotlinx.coroutines.delay
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.StoriesRepository
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpRed
 
 // Matches the website's own StoryViewer duration constant for
@@ -255,7 +255,6 @@ fun StoryViewerScreen(
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .navigationBarsPadding()
                                     .padding(horizontal = 20.dp, vertical = 24.dp),
                             )
                         }
@@ -313,11 +312,24 @@ fun StoryViewerScreen(
                 }
 
                 // ── Top chrome: progress segments + author/view-count/close ──
+                //
+                // No statusBarsPadding()/navigationBarsPadding() anywhere on
+                // this screen (design system §6): it is hosted inside
+                // ZrpNavHost's Scaffold, whose NavHost already applies
+                // Modifier.padding(innerPadding) - with no topBar on this
+                // route, innerPadding.top *is* the status-bar inset, and
+                // innerPadding.bottom is the bottom bar plus the system
+                // navigation bar. Material3's Scaffold hands that padding
+                // to its content without consuming the window insets, so
+                // adding the same inset modifiers here counted each bar
+                // twice: the close button and progress segments sat a
+                // full status bar lower than the screen's top edge, and
+                // the reply bar floated a navigation bar above the bottom
+                // bar. Same fix ShortsScreen already carries.
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                        .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
                         stories.forEachIndexed { segmentIndex, _ ->
@@ -399,7 +411,7 @@ fun StoryViewerScreen(
                         }
 
                         if (isVideo) {
-                            IconButton(onClick = { videoMuted = !videoMuted }) {
+                            IconButton(onClick = { videoMuted = !videoMuted }, modifier = Modifier.size(TouchTarget.min)) {
                                 Icon(
                                     if (videoMuted) Icons.Filled.VolumeOff else Icons.Filled.VolumeUp,
                                     contentDescription = stringResource(
@@ -410,7 +422,7 @@ fun StoryViewerScreen(
                             }
                         }
 
-                        IconButton(onClick = onClose) {
+                        IconButton(onClick = onClose, modifier = Modifier.size(TouchTarget.min)) {
                             Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_close), tint = Color.White)
                         }
                     }
@@ -427,7 +439,6 @@ fun StoryViewerScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomEnd)
-                        .navigationBarsPadding()
                         .imePadding()
                         .padding(20.dp),
                 ) {

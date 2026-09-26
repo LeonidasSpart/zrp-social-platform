@@ -15,6 +15,8 @@ import one.zrp.social.mobile.network.PollVoteUser
 import one.zrp.social.mobile.network.UserPostStats
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.UserReply
+import one.zrp.social.mobile.ui.components.RepostFailure
+import one.zrp.social.mobile.ui.components.toRepostFailure
 
 /**
  * Which upload just failed - CreatePostScreen's own MediaValidationError
@@ -485,12 +487,21 @@ class ProfileViewModel(
         }
     }
 
+    // Same one-shot repost-refusal signal as HomeViewModel.repostFailure -
+    // ProfileScreen shows it as a snackbar and clears it.
+    private val _repostFailure = MutableStateFlow<RepostFailure?>(null)
+    val repostFailure: StateFlow<RepostFailure?> = _repostFailure.asStateFlow()
+
+    fun dismissRepostFailure() {
+        _repostFailure.value = null
+    }
+
     fun toggleRepost(postId: String) {
         val previous = _state.value
         _state.update { it.mapPost(postId, ::applyOptimisticRepost) }
 
         viewModelScope.launch {
-            repository.toggleRepost(postId).onFailure {
+            repository.toggleRepost(postId).onFailure { error ->
                 _state.update { current -> current.copy(
                     posts = previous.posts,
                     pinnedPost = previous.pinnedPost,
@@ -498,6 +509,7 @@ class ProfileViewModel(
                     likesTab = previous.likesTab,
                     repostsTab = previous.repostsTab,
                 ) }
+                _repostFailure.value = error.toRepostFailure()
             }
         }
     }

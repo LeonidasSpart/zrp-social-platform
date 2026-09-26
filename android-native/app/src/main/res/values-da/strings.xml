@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Ansøg igen</string>
     <string name="ambassadors_dashboard_suspended_title">Ambassadørstatus suspenderet</string>
     <string name="ambassadors_dashboard_suspended_body">Din ambassadørstatus er i øjeblikket suspenderet. Kontakt ZRP-support for flere oplysninger.</string>
+    <string name="ambassadors_apply_already_ambassador">Du er allerede ZRP-ambassadør. Din status, dit niveau og dit invitationslink findes på dit dashboard.</string>
     <string name="ambassadors_dashboard_my_country">Mit land</string>
     <string name="ambassadors_dashboard_my_level">Mit niveau</string>
     <string name="ambassadors_dashboard_my_invitation_link">Mit invitationslink</string>
@@ -2241,6 +2242,9 @@
     <string name="communities_detail_delete_confirm_body">Dette fjerner %1$s for alle og kan ikke fortrydes. Opslag mærket #%2$s slettes ikke.</string>
     <string name="communities_detail_delete_confirm_action">Slet</string>
     <string name="communities_detail_delete_error">Kunne ikke slette dette fællesskab. Prøv igen.</string>
+    <string name="communities_detail_leave_confirm_title">Forlad dette fællesskab?</string>
+    <string name="communities_detail_leave_confirm_body">Du forlader %1$s. Du kan blive medlem igen når som helst.</string>
+    <string name="communities_detail_owner_cannot_leave">Du ejer dette fællesskab, så du kan ikke forlade det. Slet det for at lukke det for alle.</string>
     <string name="communities_error_load">Kunne ikke indlæse fællesskaber.</string>
     <string name="communities_error_create">Kunne ikke oprette fællesskab.</string>
     <string name="communities_error_join">Kunne ikke blive medlem af fællesskabet.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">Det brugernavn er optaget.</string>
     <string name="auth_username_format_hint">3-20 tegn, kun bogstaver/tal/understregninger</string>
     <string name="quote_post_title">Citér opslag</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Opslag fra private konti kan ikke deles igen.</string>
+    <string name="post_repost_forbidden_error">Dette opslag kan ikke deles igen.</string>
+    <string name="post_repost_failed">Kunne ikke dele igen. Prøv igen.</string>
+    <string name="image_viewer_load_failed">Kunne ikke indlæse dette billede.</string>
+    <string name="settings_appearance_title">Udseende</string>
+    <string name="settings_theme_system">Brug enhedens indstilling</string>
+    <string name="music_player_hidden">Afspiller skjult. Afspilningen fortsætter.</string>
+    <string name="music_show_player">Vis afspiller</string>
 </resources>
