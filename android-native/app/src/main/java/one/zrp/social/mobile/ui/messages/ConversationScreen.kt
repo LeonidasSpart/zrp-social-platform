@@ -113,11 +113,12 @@ import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.ImageLightbox
 import one.zrp.social.mobile.ui.components.LinkPreviewBlock
 import one.zrp.social.mobile.ui.components.LinkifiedText
+import one.zrp.social.mobile.ui.components.LocalInAppLinkHandler
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.ZrpComposerField
 import one.zrp.social.mobile.ui.components.copyTextWithFeedback
 import one.zrp.social.mobile.ui.components.extractFirstUrl
-import one.zrp.social.mobile.ui.components.openExternalLink
+import one.zrp.social.mobile.ui.components.openLink
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
@@ -1110,6 +1111,7 @@ private fun formatRecordingTime(totalSeconds: Int): String {
 @Composable
 private fun ChatFileRow(url: String, fileName: String, isOwnMessage: Boolean, onLongClick: () -> Unit) {
     val context = LocalContext.current
+    val inAppLinkHandler = LocalInAppLinkHandler.current
     val displayName = fileName.ifBlank { stringResource(R.string.chat_attachment_fallback) }
 
     Row(
@@ -1119,7 +1121,11 @@ private fun ChatFileRow(url: String, fileName: String, isOwnMessage: Boolean, on
                 if (isOwnMessage) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest,
             )
             .combinedClickable(
-                onClick = { openExternalLink(context, url) },
+                // A file attachment is never a zrp.one in-app route, but
+                // routing it through the same openLink() as every other
+                // link keeps this one consistent rather than a second,
+                // bespoke ACTION_VIEW call.
+                onClick = { openLink(context, inAppLinkHandler, url) },
                 onLongClick = onLongClick,
             )
             .padding(horizontal = Spacing.md, vertical = Spacing.sm)
