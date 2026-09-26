@@ -124,7 +124,15 @@ struct CreatePostResponse: Decodable {
 }
 
 protocol PostsRepositoryProtocol: Sendable {
-    func feed(_ tab: FeedTab, cursor: String?) async throws -> PostsPage
+    // forceRefresh only matters for .forYou: GET /api/posts/explore caches
+    // its ranked list server-side for 5 minutes (see that route's own
+    // comment), so an explicit pull-to-refresh must be able to bypass it
+    // or a genuinely new post stays invisible until the cache happens to
+    // expire on its own. .following has no such cache and stays current
+    // either way. Explicit rather than defaulted: HomeViewModel is the
+    // only caller and needs to make the distinction at each call site
+    // (see loadIfNeeded vs refresh/retry) rather than one implicit choice.
+    func feed(_ tab: FeedTab, cursor: String?, forceRefresh: Bool) async throws -> PostsPage
     func createPost(_ request: CreatePostRequest) async throws -> Post
     func post(id: String) async throws -> Post
     func toggleLike(postId: String) async throws -> Bool
@@ -174,11 +182,19 @@ struct PostsRepository: PostsRepositoryProtocol {
     /// though they page differently, so the tab choice is entirely
     /// contained here - the ViewModel just passes the cursor it was last
     /// given back in.
-    func feed(_ tab: FeedTab, cursor: String?) async throws -> PostsPage {
+    func feed(_ tab: FeedTab, cursor: String?, forceRefresh: Bool) async throws -> PostsPage {
         switch tab {
         case .forYou:
+            // "refresh": "1" bypasses this route's own 5-minute server-side
+            // cache of the ranked list for this one request and
+            // re-populates it - see the route's own comment. `nil` (the
+            // default everywhere except an explicit refresh) omits the
+            // query item entirely, identical to the pre-existing request.
             return try await client.send(
-                Endpoint.get("posts/explore", query: [("cursor", cursor)])
+                Endpoint.get("posts/explore", query: [
+                    ("cursor", cursor),
+                    ("refresh", forceRefresh ? "1" : nil),
+                ])
             )
         case .following:
             return try await client.send(

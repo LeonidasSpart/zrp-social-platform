@@ -102,7 +102,7 @@ fun HomeScreen(
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = state.isRefreshing,
-        onRefresh = { viewModel.refresh(activeTab) },
+        onRefresh = { viewModel.refresh(activeTab, forceRefresh = true) },
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -154,7 +154,7 @@ fun HomeScreen(
                 // circle's own size, under Android's accessibility touch
                 // target floor.
                 IconButton(
-                    onClick = { viewModel.refresh(activeTab) },
+                    onClick = { viewModel.refresh(activeTab, forceRefresh = true) },
                     enabled = !state.isRefreshing,
                     modifier = Modifier.align(Alignment.CenterEnd),
                 ) {
@@ -239,7 +239,7 @@ fun HomeScreen(
                         primaryAction = EmptyStateAction(
                             label = stringResource(R.string.feed_retry),
                             icon = Icons.Filled.Refresh,
-                            onClick = { viewModel.refresh(activeTab) },
+                            onClick = { viewModel.refresh(activeTab, forceRefresh = true) },
                         ),
                         modifier = Modifier.align(Alignment.Center),
                     )
@@ -278,7 +278,7 @@ fun HomeScreen(
                             primaryAction = EmptyStateAction(
                                 label = stringResource(R.string.feed_retry),
                                 icon = Icons.Filled.Refresh,
-                                onClick = { viewModel.refresh(activeTab) },
+                                onClick = { viewModel.refresh(activeTab, forceRefresh = true) },
                             ),
                             modifier = Modifier.align(Alignment.Center),
                         )

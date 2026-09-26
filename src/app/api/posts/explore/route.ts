@@ -64,6 +64,23 @@ export async function GET(req: NextRequest) {
     // consistent across pages within the cache window.
     const offset = cursorParam ? Math.max(0, parseInt(cursorParam, 10) || 0) : 0;
     const limit = Math.min(parseInt(searchParams.get("limit") || "20", 10) || 20, 50);
+    // "Refresh feed" (web's floating button/menu item, Android's pull-to-
+    // refresh and its own floating button, iOS's pull-to-refresh) must be
+    // able to see genuinely current content - a real post published a
+    // minute ago must not stay invisible for up to 5 more minutes just
+    // because this exact (userId, sort, scope) key was already cached.
+    // Before this, an explicit refresh issued the identical request an
+    // ordinary page load or pagination would, so it always hit the same
+    // cache entry and could never see anything the cache didn't already
+    // have - "Refresh feed" was a no-op until the TTL below happened to
+    // expire on its own. `refresh=1` is a purely additive, opt-in signal:
+    // a client that never sends it (including every existing client
+    // build) gets byte-identical behavior to before, so this cannot
+    // change the contract for anyone not using it. Only the cache READ
+    // is skipped - the freshly recomputed ranking is still written back
+    // under the same key below, so it also resets the TTL for whoever
+    // reads this key next, rather than the refresh being wasted work.
+    const forceRefresh = searchParams.get("refresh") === "1";
 
     // ─── Exclude blocked / muted users ──────────────────────────────
     let excludedAuthorIds: string[] = [];
@@ -113,7 +130,9 @@ export async function GET(req: NextRequest) {
     // Cached as {ranked, scopeFallback} rather than a bare array so a
     // national-scope fallback decision (see below) survives a cache
     // hit too, not just the request that first computed it.
-    const cachedEntry = await getCached<{ ranked: any[]; scopeFallback: boolean }>(cacheKey);
+    const cachedEntry = forceRefresh
+      ? null
+      : await getCached<{ ranked: any[]; scopeFallback: boolean }>(cacheKey);
     let ranked: any[] | null = cachedEntry?.ranked ?? null;
     // Only true when a national-scope request had too little local
     // activity and fell back to the global leaderboard instead -

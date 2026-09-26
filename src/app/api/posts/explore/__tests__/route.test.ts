@@ -214,6 +214,70 @@ describe.skipIf(!hasRealDatabaseUrl)(
       findUniqueSpy.mockRestore();
     });
 
+    // Regression coverage for the "Refresh feed" bug: pressing refresh
+    // issued the exact same request an ordinary load does, so it always
+    // hit the same 5-minute cache entry and could never see a post
+    // published after that entry was primed - "Refresh feed" was a
+    // no-op until the cache happened to expire on its own.
+    it("a normal request keeps serving the cached ranking after a new post is published, but refresh=1 bypasses it and returns the new post immediately", async () => {
+      const author = await createUser("refresha");
+      const viewer = await createUser("refreshviewera");
+      const firstPost = await prisma.post.create({
+        data: { id: randomUUID(), content: `before refresh ${runId}`, authorId: author.id, status: "published" },
+      });
+      postIds.push(firstPost.id);
+
+      // Primes the 5-minute cache with just firstPost.
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+      const primed = await GET(req());
+      const primedBody = await primed.json();
+      expect(primedBody.posts.some((p: { id: string }) => p.id === firstPost.id)).toBe(true);
+
+      const newPost = await prisma.post.create({
+        data: { id: randomUUID(), content: `after refresh ${runId}`, authorId: author.id, status: "published" },
+      });
+      postIds.push(newPost.id);
+
+      // Same request, no refresh param - still the stale cached ranking.
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+      const stale = await GET(req());
+      const staleBody = await stale.json();
+      expect(staleBody.posts.some((p: { id: string }) => p.id === newPost.id)).toBe(false);
+
+      // The explicit "Refresh feed" signal bypasses the cache read.
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+      const refreshed = await GET(req({ refresh: "1" }));
+      const refreshedBody = await refreshed.json();
+      expect(refreshedBody.posts.some((p: { id: string }) => p.id === newPost.id)).toBe(true);
+    });
+
+    it("an explicit refresh re-primes the cache, so a normal request right after it also sees the fresh data instead of the refresh being wasted work", async () => {
+      const author = await createUser("refreshb");
+      const viewer = await createUser("refreshviewerb");
+      const firstPost = await prisma.post.create({
+        data: { id: randomUUID(), content: `before refresh b ${runId}`, authorId: author.id, status: "published" },
+      });
+      postIds.push(firstPost.id);
+
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+      await GET(req());
+
+      const newPost = await prisma.post.create({
+        data: { id: randomUUID(), content: `after refresh b ${runId}`, authorId: author.id, status: "published" },
+      });
+      postIds.push(newPost.id);
+
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+      await GET(req({ refresh: "1" }));
+
+      // No refresh param this time - the refresh above should already
+      // have written the new ranking back under the same cache key.
+      getServerSession.mockResolvedValueOnce(sessionFor(viewer.id));
+      const after = await GET(req());
+      const afterBody = await after.json();
+      expect(afterBody.posts.some((p: { id: string }) => p.id === newPost.id)).toBe(true);
+    });
+
     it("a vote cast after the ranked list is already cached still shows up immediately, unlike `liked` never waiting out the cache either", async () => {
       const author = await createUser("polld");
       const voter = await createUser("voterd");

@@ -96,18 +96,27 @@ final class HomeViewModel: ObservableObject {
     /// every appearance - it no-ops for an already-loaded tab.
     func loadIfNeeded(_ tab: FeedTab) {
         guard state(for: tab).phase == .idle else { return }
-        load(tab, replacingExisting: true)
+        load(tab, replacingExisting: true, forceRefresh: false)
     }
 
     /// Pull to refresh. Runs to completion so SwiftUI keeps the spinner
     /// up until the new page has actually arrived.
+    ///
+    /// forceRefresh: true - the whole point of an explicit refresh is to
+    /// see genuinely current content, not whatever .forYou's server-side
+    /// ranking cache still holds from up to 5 minutes ago (see
+    /// PostsRepository.feed's own comment). .following ignores the flag;
+    /// it has no such cache.
     func refresh(_ tab: FeedTab) async {
         inFlight[tab]?.cancel()
-        await performLoad(tab, cursor: nil, replacingExisting: true)
+        await performLoad(tab, cursor: nil, replacingExisting: true, forceRefresh: true)
     }
 
     func retry(_ tab: FeedTab) {
-        load(tab, replacingExisting: true)
+        // Same reasoning as refresh() above: someone tapping "retry"
+        // after a failure wants current data, not a cache entry from
+        // before the failure.
+        load(tab, replacingExisting: true, forceRefresh: true)
     }
 
     /// Called as the last few rows come into view.
@@ -124,18 +133,18 @@ final class HomeViewModel: ObservableObject {
             index >= state.posts.count - 3
         else { return }
 
-        load(tab, replacingExisting: false)
+        load(tab, replacingExisting: false, forceRefresh: false)
     }
 
-    private func load(_ tab: FeedTab, replacingExisting: Bool) {
+    private func load(_ tab: FeedTab, replacingExisting: Bool, forceRefresh: Bool) {
         inFlight[tab]?.cancel()
         let cursor = replacingExisting ? nil : states[tab]?.cursor
         inFlight[tab] = Task { [weak self] in
-            await self?.performLoad(tab, cursor: cursor, replacingExisting: replacingExisting)
+            await self?.performLoad(tab, cursor: cursor, replacingExisting: replacingExisting, forceRefresh: forceRefresh)
         }
     }
 
-    private func performLoad(_ tab: FeedTab, cursor: String?, replacingExisting: Bool) async {
+    private func performLoad(_ tab: FeedTab, cursor: String?, replacingExisting: Bool, forceRefresh: Bool) async {
         var state = state(for: tab)
         if replacingExisting {
             // Only show the full-screen loading state when there is
@@ -148,7 +157,7 @@ final class HomeViewModel: ObservableObject {
         states[tab] = state
 
         do {
-            let page = try await repository.feed(tab, cursor: cursor)
+            let page = try await repository.feed(tab, cursor: cursor, forceRefresh: forceRefresh)
             guard !Task.isCancelled else { return }
 
             var updated = self.state(for: tab)
