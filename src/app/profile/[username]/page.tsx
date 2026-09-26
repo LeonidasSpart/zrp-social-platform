@@ -2530,8 +2530,8 @@ export default function ProfilePage(
               "posts" && (
               <>
                 {pinnedPost && (
-                  <div className="relative border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-900/10 rounded-xl p-3 mb-3">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-medium mb-2">
+                  <div className="relative border border-zrp-red/30 dark:border-zrp-red/40 bg-zrp-red/5 dark:bg-zrp-red/10 rounded-xl p-3 mb-3">
+                    <div className="flex items-center gap-2 text-zrp-red text-xs font-medium mb-2">
                       <Pin className="w-3.5 h-3.5" />
 
                       {t(

@@ -58,14 +58,17 @@ function getColorClass(count: number) {
   // structure always reads correctly, regardless of how sparse the
   // actual activity is.
   //
-  // Colored in the secondary blue accent rather than ZRP red: this is a
-  // stats/activity visualization, not a primary brand action, and red
-  // is reserved for that across the app.
+  // The intensity scale is the brand red at four opacity steps (the same
+  // zrp-red token everything else on the profile uses), not the secondary
+  // blue: this graph sits on the public profile as part of ZRP's own
+  // identity, so it carries the brand accent. Keep the steps far enough
+  // apart that each level stays distinguishable on both the white and
+  // #050505 grounds.
   if (count === 0) return "bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600";
-  if (count <= 1) return "bg-zrp-blue/25";
-  if (count <= 3) return "bg-zrp-blue/50";
-  if (count <= 6) return "bg-zrp-blue/75";
-  return "bg-zrp-blue";
+  if (count <= 1) return "bg-zrp-red/25";
+  if (count <= 3) return "bg-zrp-red/50";
+  if (count <= 6) return "bg-zrp-red/75";
+  return "bg-zrp-red";
 }
 
 export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
@@ -166,10 +169,10 @@ export default function ActivityHeatmap({ username }: ActivityHeatmapProps) {
       <div className="flex items-center gap-1.5 mt-2 justify-end">
         <span className="text-[10px] text-gray-400 dark:text-gray-500">{t("activity.less")}</span>
         <div className="w-[10px] h-[10px] rounded-sm bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" />
-        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-blue/25" />
-        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-blue/50" />
-        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-blue/75" />
-        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-blue" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/25" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/50" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red/75" />
+        <div className="w-[10px] h-[10px] rounded-sm bg-zrp-red" />
         <span className="text-[10px] text-gray-400 dark:text-gray-500">{t("activity.more")}</span>
       </div>
     </div>
