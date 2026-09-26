@@ -4,6 +4,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { flagEmoji } from "@/lib/ambassadors/countries";
+import { ambassadorEntryHref, ambassadorEntryLabelKey, type MyAmbassadorStatus } from "@/lib/ambassadors/entry";
 import type { AmbassadorCountryStat } from "@/hooks/useAmbassadorCountries";
 
 /*
@@ -26,9 +27,11 @@ interface CountryPanelProps {
   onClose?: () => void;
   /** Renders as an inline card (explorer) rather than an overlay (map). */
   variant?: "overlay" | "inline";
+  /** The viewer's own real ambassador status (see useMyAmbassadorProfile); null/undefined = no profile known. */
+  myStatus?: MyAmbassadorStatus | null;
 }
 
-export default function CountryPanel({ country, onClose, variant = "overlay" }: CountryPanelProps) {
+export default function CountryPanel({ country, onClose, variant = "overlay", myStatus }: CountryPanelProps) {
   const { t } = useLanguage();
   const hasAmbassadors = country.ambassadors > 0;
 
@@ -93,10 +96,10 @@ export default function CountryPanel({ country, onClose, variant = "overlay" }: 
       </p>
 
       <Link
-        href={`/ambassadors/apply?country=${country.code}`}
+        href={ambassadorEntryHref(myStatus, country.code)}
         className="mt-4 flex w-full items-center justify-center rounded-full bg-zrp-red px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zrp-darkRed"
       >
-        {t("ambassadors.map.becomeCta")}
+        {t(ambassadorEntryLabelKey(myStatus, "ambassadors.map.becomeCta"))}
       </Link>
     </div>
   );

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Globe2, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ambassadorEntryHref, ambassadorEntryLabelKey, type MyAmbassadorStatus } from "@/lib/ambassadors/entry";
 
 /*
  * The one orchestrated moment this page spends its motion budget on
@@ -14,7 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
  * ZRP. Everything below the hero (map, explorer, levels) is static on
  * arrival; nothing here loops or re-triggers.
  */
-export default function AmbassadorHero() {
+export default function AmbassadorHero({ myStatus }: { myStatus?: MyAmbassadorStatus | null }) {
   const { t } = useLanguage();
   const reduceMotion = useReducedMotion();
   const [stats, setStats] = useState<{ totalAmbassadors: number; countriesRepresented: number } | null>(
@@ -85,11 +86,17 @@ export default function AmbassadorHero() {
           transition={{ duration: 0.5, delay: 0.24 }}
           className="mt-9 flex flex-wrap items-center justify-center gap-3"
         >
+          {/* Status-aware: someone who already holds a PENDING/APPROVED/
+              SUSPENDED profile is sent to their dashboard, never back to
+              the application form (see lib/ambassadors/entry.ts). While
+              the real status is still loading (undefined) the public
+              "apply" entry is shown; the apply page itself re-checks
+              and redirects, so nobody can end up on a dead-end form. */}
           <Link
-            href="/ambassadors/apply"
+            href={ambassadorEntryHref(myStatus)}
             className="inline-flex items-center gap-2 rounded-full bg-zrp-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-zrp-darkRed"
           >
-            {t("ambassadors.hero.ctaPrimary")}
+            {t(ambassadorEntryLabelKey(myStatus, "ambassadors.hero.ctaPrimary"))}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
           <a

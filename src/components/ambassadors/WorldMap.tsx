@@ -12,6 +12,7 @@ import iso from "i18n-iso-countries";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { AmbassadorCountryStat } from "@/hooks/useAmbassadorCountries";
 import CountryPanel from "./CountryPanel";
+import type { MyAmbassadorStatus } from "@/lib/ambassadors/entry";
 
 /*
  * The interactive world map itself. Deliberately built on a
@@ -54,6 +55,8 @@ const GEO_URL = "/data/world-countries-50m.json";
 
 interface WorldMapProps {
   countries: AmbassadorCountryStat[];
+  /** The viewer's own real ambassador status, passed through to the CountryPanel CTA. */
+  myStatus?: MyAmbassadorStatus | null;
 }
 
 function fillFor(ambassadors: number, resolvable: boolean, isDark: boolean): string {
@@ -64,7 +67,7 @@ function fillFor(ambassadors: number, resolvable: boolean, isDark: boolean): str
   return "#B10000"; // zrp-darkRed - an established presence
 }
 
-export default function WorldMap({ countries }: WorldMapProps) {
+export default function WorldMap({ countries, myStatus }: WorldMapProps) {
   const { t } = useLanguage();
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
@@ -198,7 +201,7 @@ export default function WorldMap({ countries }: WorldMapProps) {
         </div>
       )}
 
-      {selected && <CountryPanel country={selected} onClose={() => setSelected(null)} />}
+      {selected && <CountryPanel country={selected} onClose={() => setSelected(null)} myStatus={myStatus} />}
     </div>
   );
 }

@@ -18,6 +18,7 @@ type Community = {
   iconUrl: string | null;
   memberCount: number;
   isMember: boolean;
+  myRole: "OWNER" | "ADMIN" | "MEMBER" | null;
 };
 
 const CATEGORIES = [
@@ -98,10 +99,20 @@ export default function CommunitiesPage() {
       const res = await fetch(`/api/communities/${community.id}/${community.isMember ? "leave" : "join"}`, {
         method: "POST",
       });
-      if (!res.ok) throw new Error();
-    } catch {
+      if (!res.ok) throw new Error(String(res.status));
+    } catch (err) {
       load(); // Reconcile with the server on failure.
-      setError(community.isMember ? t("communities.errorLeave") : t("communities.errorJoin"));
+      // 409 = the owner-cannot-leave rule (POST .../leave); say so
+      // instead of a generic "failed" - the card below never offers
+      // Leave to an owner, so this only fires on a stale list.
+      const ownerBlocked = community.isMember && err instanceof Error && err.message === "409";
+      setError(
+        ownerBlocked
+          ? t("communities.detail.ownerCannotLeave")
+          : community.isMember
+            ? t("communities.errorLeave")
+            : t("communities.errorJoin"),
+      );
     }
   };
 
@@ -301,17 +312,27 @@ export default function CommunitiesPage() {
                   <span className="text-xs text-gray-500 dark:text-white/40 shrink-0">
                     {t(c.memberCount === 1 ? "communities.memberCountOne" : "communities.memberCountOther", { n: c.memberCount })}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => toggleMembership(c)}
-                    className={`shrink-0 h-8 px-3.5 rounded-full text-sm font-bold ${
-                      c.isMember
-                        ? "border border-gray-300 dark:border-white/15 text-gray-700 dark:text-white/70"
-                        : "bg-zrp-red text-white"
-                    }`}
-                  >
-                    {c.isMember ? t("communities.joined") : t("communities.join")}
-                  </button>
+                  {c.myRole === "OWNER" ? (
+                    // The owner can't leave (see POST /api/communities/[id]/leave) -
+                    // no toggle here; managing/deleting lives on the detail page.
+                    <span className="shrink-0 h-8 px-3.5 inline-flex items-center rounded-full bg-zrp-red/10 text-zrp-red text-xs font-bold">
+                      {t("communities.detail.ownerBadge")}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => toggleMembership(c)}
+                      aria-label={c.isMember ? t("communities.leave") : t("communities.join")}
+                      title={c.isMember ? t("communities.leave") : undefined}
+                      className={`shrink-0 h-8 px-3.5 rounded-full text-sm font-bold ${
+                        c.isMember
+                          ? "border border-gray-300 dark:border-white/15 text-gray-700 dark:text-white/70"
+                          : "bg-zrp-red text-white"
+                      }`}
+                    >
+                      {c.isMember ? t("communities.joined") : t("communities.join")}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

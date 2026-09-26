@@ -41,10 +41,18 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
         })
       : null;
 
+    // Whether THIS viewer may delete the community - the same rule the
+    // DELETE handler below enforces (OWNER role, creator, or site
+    // admin), so clients show the Delete control off a real server
+    // answer instead of guessing from createdBy alone.
+    const isOwner = membership?.role === "OWNER" || (!!userId && community.createdBy.id === userId);
+    const canDelete = isOwner || (!!session && (await isSessionAdmin(session)));
+
     return NextResponse.json({
       community,
       isMember: !!membership,
       myRole: membership?.role ?? null,
+      canDelete,
     });
   } catch (error) {
     console.error("Error fetching community:", error);
@@ -52,11 +60,14 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
   }
 }
 
-// Only the community's creator, or a site admin, may delete it. Deleting
-// cascades to every CommunityMember row (see the schema's own
-// onDelete: Cascade on that relation) - a community's feed is
-// hashtag-derived, not a separate content table, so no posts are
-// deleted by this: the hashtag simply stops being a browsable community.
+// Only the community's OWNER (the creator holds that role from
+// creation and can never leave - see the leave route), or a site
+// admin, may delete it. Deleting cascades to every CommunityMember
+// row (see the schema's own onDelete: Cascade on that relation) - a
+// community's feed is hashtag-derived, not a separate content table,
+// so no posts are deleted by this: the hashtag simply stops being a
+// browsable community. Anyone else - a MEMBER, an ADMIN-role member,
+// a non-member - gets 403.
 export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
@@ -67,15 +78,25 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
   try {
     const community = await prisma.community.findFirst({
       where: { OR: [{ id }, { slug: id }] },
-      select: { id: true, name: true, createdById: true },
+      select: {
+        id: true,
+        name: true,
+        createdById: true,
+        members: { where: { userId: session.user.id }, select: { role: true } },
+      },
     });
     if (!community) {
       return NextResponse.json({ error: "Community not found" }, { status: 404 });
     }
 
-    const isCreator = community.createdById === session.user.id;
-    const isAdmin = !isCreator && (await isSessionAdmin(session));
-    if (!isCreator && !isAdmin) {
+    // The real membership row's role is the authority (it is what every
+    // client shows the Delete control off); createdById is kept as a
+    // belt-and-braces equivalent for rows created before the
+    // owner-cannot-leave rule existed.
+    const isOwner =
+      community.members[0]?.role === "OWNER" || community.createdById === session.user.id;
+    const isAdmin = !isOwner && (await isSessionAdmin(session));
+    if (!isOwner && !isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
