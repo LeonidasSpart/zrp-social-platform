@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Nie udało się utworzyć listy.";
 "lists.errorAddMember" = "Nie udało się dodać członka.";
 "lists.errorRemoveMember" = "Nie udało się usunąć członka.";
+"auth.showPassword" = "Pokaż hasło";
+"auth.hidePassword" = "Ukryj hasło";
+"verifiedBadge.newsAutomated" = "Oficjalny kanał redakcyjny ZRP (automatyczny)";
+"profile.errLoadPosts" = "Nie udało się tego wczytać. Spróbuj ponownie.";
+"ambassadors.apply.alreadyAmbassador" = "Jesteś już Ambasadorem ZRP. Twój status, poziom i link z zaproszeniem znajdziesz w swoim panelu.";
+"communities.detail.leaveConfirmTitle" = "Opuścić tę społeczność?";
+"communities.detail.leaveConfirmBody" = "Opuścisz {name}. Możesz dołączyć ponownie w dowolnym momencie.";
+"communities.detail.ownerCannotLeave" = "Jesteś właścicielem tej społeczności, więc nie możesz jej opuścić. Usuń ją, aby zamknąć ją dla wszystkich.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    pl. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP potrzebuje dostępu do mikrofonu, aby nagrać wiadomość głosową. Możesz go włączyć w Ustawieniach.";
 "ios.post.applyNow" = "Aplikuj teraz";
 "ios.chat.cameraUnavailable" = "Aparat niedostępny na tym urządzeniu.";
+"ios.chat.addAttachment" = "Dodaj załącznik";
+"ios.chat.sharedPost" = "Udostępniony wpis";
+"ios.chat.sharedPostUnavailable" = "Ten wpis nie jest już dostępny.";
+"ios.post.repostBlocked" = "Tego wpisu nie można ponownie udostępnić, ponieważ konto jest prywatne.";
+"ios.media.loadFailed" = "Nie udało się wczytać tego obrazu.";

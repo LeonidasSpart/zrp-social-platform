@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "리스트를 만들지 못했습니다.";
 "lists.errorAddMember" = "멤버를 추가하지 못했습니다.";
 "lists.errorRemoveMember" = "멤버를 제거하지 못했습니다.";
+"auth.showPassword" = "비밀번호 표시";
+"auth.hidePassword" = "비밀번호 숨기기";
+"verifiedBadge.newsAutomated" = "ZRP 공식 편집 피드 (자동 생성)";
+"profile.errLoadPosts" = "불러오지 못했습니다. 다시 시도해 주세요.";
+"ambassadors.apply.alreadyAmbassador" = "이미 ZRP 앰배서더예요. 상태, 레벨, 초대 링크는 대시보드에서 확인할 수 있어요.";
+"communities.detail.leaveConfirmTitle" = "이 커뮤니티를 나가시겠어요?";
+"communities.detail.leaveConfirmBody" = "{name}에서 나갑니다. 언제든지 다시 가입할 수 있어요.";
+"communities.detail.ownerCannotLeave" = "이 커뮤니티의 소유자이므로 나갈 수 없어요. 모두에게 닫으려면 커뮤니티를 삭제하세요.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ko. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "음성 메시지를 녹음하려면 ZRP에 마이크 접근 권한이 필요합니다. 설정에서 켤 수 있습니다.";
 "ios.post.applyNow" = "지금 지원하기";
 "ios.chat.cameraUnavailable" = "이 기기에서는 카메라를 사용할 수 없습니다.";
+"ios.chat.addAttachment" = "첨부 파일 추가";
+"ios.chat.sharedPost" = "공유된 게시물";
+"ios.chat.sharedPostUnavailable" = "이 게시물은 더 이상 사용할 수 없습니다.";
+"ios.post.repostBlocked" = "계정이 비공개이므로 이 게시물을 리포스트할 수 없습니다.";
+"ios.media.loadFailed" = "이 이미지를 불러올 수 없습니다.";

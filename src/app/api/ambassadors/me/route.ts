@@ -23,7 +23,10 @@ export async function GET() {
       where: { userId: session.user.id },
     });
 
-    return NextResponse.json({ profile });
+    // Status changes the moment an admin approves/suspends - this must
+    // never be served from a browser/proxy cache, or an approved
+    // ambassador keeps seeing their old PENDING (or missing) state.
+    return NextResponse.json({ profile }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("GET /api/ambassadors/me error:", error);
     return NextResponse.json({ error: "Failed to load ambassador profile" }, { status: 500 });

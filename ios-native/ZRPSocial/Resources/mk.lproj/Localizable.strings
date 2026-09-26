@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Создавањето на листата не успеа.";
 "lists.errorAddMember" = "Додавањето на членот не успеа.";
 "lists.errorRemoveMember" = "Отстранувањето на членот не успеа.";
+"auth.showPassword" = "Прикажи лозинка";
+"auth.hidePassword" = "Сокриј лозинка";
+"verifiedBadge.newsAutomated" = "Официјален уреднички канал на ZRP (автоматизиран)";
+"profile.errLoadPosts" = "Не можевме да го вчитаме ова. Обиди се повторно.";
+"ambassadors.apply.alreadyAmbassador" = "Веќе си Амбасадор на ZRP. Твојот статус, ниво и линк за покана се на твојата контролна табла.";
+"communities.detail.leaveConfirmTitle" = "Да ја напуштиш оваа заедница?";
+"communities.detail.leaveConfirmBody" = "Ќе ја напуштиш {name}. Можеш повторно да се приклучиш во секое време.";
+"communities.detail.ownerCannotLeave" = "Ти си сопственик на оваа заедница, па не можеш да ја напуштиш. Избриши ја за да ја затвориш за сите.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    mk. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "На ZRP му е потребен пристап до микрофонот за да сними гласовна порака. Можеш да го овозможиш во Поставки.";
 "ios.post.applyNow" = "Пријави се сега";
 "ios.chat.cameraUnavailable" = "Камерата не е достапна на овој уред.";
+"ios.chat.addAttachment" = "Додај прилог";
+"ios.chat.sharedPost" = "Споделена објава";
+"ios.chat.sharedPostUnavailable" = "Оваа објава веќе не е достапна.";
+"ios.post.repostBlocked" = "Оваа објава не може повторно да се сподели бидејќи профилот е приватен.";
+"ios.media.loadFailed" = "Оваа слика не можеше да се вчита.";

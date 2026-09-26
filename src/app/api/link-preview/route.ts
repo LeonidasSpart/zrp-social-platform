@@ -130,13 +130,6 @@ async function fetchGenericPreview(url: string): Promise<GenericPreviewResult> {
 }
 
 export async function GET(req: NextRequest) {
-  // Each preview request causes an outbound server-side fetch, so cap
-  // how often a single client can trigger new lookups (cached results
-  // above don't count against this, since they skip straight to the
-  // early return).
-  const limit = await rateLimit(req, { limit: 30, window: 60, type: "link-preview" });
-  if (!limit.success) return limit.response;
-
   const { searchParams } = new URL(req.url);
   const rawUrl = searchParams.get("url");
 
@@ -162,6 +155,16 @@ export async function GET(req: NextRequest) {
   if (cached) {
     return NextResponse.json(cached);
   }
+
+  // Each uncached preview request causes an outbound server-side fetch,
+  // so cap how often a single client can trigger new lookups. This must
+  // sit AFTER the cache lookup: it used to run first, so a feed or a
+  // conversation with more than 30 links on screen (the common case for
+  // a message thread full of shared posts) got a 429 for every link past
+  // the 30th even when the preview was already cached - and the client
+  // treats a 429 as "no preview", so those links silently rendered bare.
+  const limit = await rateLimit(req, { limit: 30, window: 60, type: "link-preview" });
+  if (!limit.success) return limit.response;
 
   let preview: LinkPreview | null = null;
   let transient = false;

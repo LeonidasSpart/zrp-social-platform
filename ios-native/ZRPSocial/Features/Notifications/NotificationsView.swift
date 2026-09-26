@@ -219,10 +219,21 @@ struct NotificationsView: View {
                     .padding(.top, 2)
 
                 if let author = notification.fromUser {
-                    AvatarView(
-                        url: author.avatarUrl,
-                        displayName: author.displayName,
-                        size: ZrpMetrics.avatarSmall
+                    // The person is a link in their own right - the row
+                    // opens what they did, the avatar opens who they
+                    // are, as on the web and in every post card here.
+                    Button {
+                        navigator.push(.profile(username: author.username))
+                    } label: {
+                        AvatarView(
+                            url: author.avatarUrl,
+                            displayName: author.displayName,
+                            size: ZrpMetrics.avatarSmall
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(
+                        Text(.iosA11yOpenProfile, ["name": author.displayName])
                     )
                 }
 

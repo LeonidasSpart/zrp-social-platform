@@ -7,6 +7,7 @@ import type { TranslationKey } from "@/lib/translations";
 import { flagEmoji, REGIONS, type ZrpRegion } from "@/lib/ambassadors/countries";
 import type { AmbassadorCountryStat } from "@/hooks/useAmbassadorCountries";
 import CountryPanel from "./CountryPanel";
+import type { MyAmbassadorStatus } from "@/lib/ambassadors/entry";
 
 /*
  * The searchable, complete country list that sits beside the world
@@ -26,6 +27,8 @@ import CountryPanel from "./CountryPanel";
 interface CountryExplorerProps {
   countries: AmbassadorCountryStat[];
   loading: boolean;
+  /** The viewer's own real ambassador status, passed through to every CountryPanel CTA. */
+  myStatus?: MyAmbassadorStatus | null;
 }
 
 const REGION_LABEL_KEY: Record<ZrpRegion, TranslationKey> = {
@@ -38,7 +41,7 @@ const REGION_LABEL_KEY: Record<ZrpRegion, TranslationKey> = {
   ANTARCTICA: "ambassadors.region.antarctica",
 };
 
-export default function CountryExplorer({ countries, loading }: CountryExplorerProps) {
+export default function CountryExplorer({ countries, loading, myStatus }: CountryExplorerProps) {
   const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState<ZrpRegion | "ALL">("ALL");
@@ -138,7 +141,7 @@ export default function CountryExplorer({ countries, loading }: CountryExplorerP
         )}
       </div>
 
-      {selected && <CountryPanel country={selected} onClose={() => setSelected(null)} />}
+      {selected && <CountryPanel country={selected} onClose={() => setSelected(null)} myStatus={myStatus} />}
     </div>
   );
 }

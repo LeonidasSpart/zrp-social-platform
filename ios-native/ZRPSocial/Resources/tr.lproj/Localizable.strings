@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Liste oluşturulamadı.";
 "lists.errorAddMember" = "Üye eklenemedi.";
 "lists.errorRemoveMember" = "Üye kaldırılamadı.";
+"auth.showPassword" = "Şifreyi göster";
+"auth.hidePassword" = "Şifreyi gizle";
+"verifiedBadge.newsAutomated" = "Resmi ZRP editöryel akışı (otomatik)";
+"profile.errLoadPosts" = "Yüklenemedi. Tekrar deneyin.";
+"ambassadors.apply.alreadyAmbassador" = "Zaten bir ZRP Elçisisin. Durumun, seviyen ve davet bağlantın panelinde.";
+"communities.detail.leaveConfirmTitle" = "Bu topluluktan ayrılmak istiyor musun?";
+"communities.detail.leaveConfirmBody" = "{name} topluluğundan ayrılacaksın. İstediğin zaman yeniden katılabilirsin.";
+"communities.detail.ownerCannotLeave" = "Bu topluluğun sahibi sensin, bu yüzden ayrılamazsın. Herkes için kapatmak istiyorsan topluluğu sil.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    tr. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP, sesli mesaj kaydetmek için mikrofona erişim gerektiriyor. Ayarlar'dan açabilirsiniz.";
 "ios.post.applyNow" = "Şimdi başvur";
 "ios.chat.cameraUnavailable" = "Bu cihazda kamera kullanılamıyor.";
+"ios.chat.addAttachment" = "Ek ekle";
+"ios.chat.sharedPost" = "Paylaşılan gönderi";
+"ios.chat.sharedPostUnavailable" = "Bu gönderi artık mevcut değil.";
+"ios.post.repostBlocked" = "Hesap gizli olduğu için bu gönderi yeniden paylaşılamaz.";
+"ios.media.loadFailed" = "Bu görsel yüklenemedi.";

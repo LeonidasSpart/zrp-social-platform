@@ -18,6 +18,8 @@ final class CommunityDetailViewModel: ObservableObject {
     @Published private(set) var isLoadingMore = false
     @Published private(set) var isDeleting = false
     @Published var deleteErrorMessage: String?
+    @Published private(set) var isLeaving = false
+    @Published var leaveErrorMessage: String?
 
     let communityId: String
     private var cursor: String?
@@ -90,22 +92,38 @@ final class CommunityDetailViewModel: ObservableObject {
         }
     }
 
-    func toggleMembership() {
-        guard let community else { return }
-        let wasMember = community.isMember
+    func join() {
+        guard let community, !community.isMember else { return }
         self.community = Community(
             id: community.id, slug: community.slug, name: community.name,
             description: community.description, category: community.category,
             hashtag: community.hashtag, iconUrl: community.iconUrl,
-            memberCount: community.memberCount + (wasMember ? -1 : 1),
-            isMember: !wasMember, myRole: community.myRole
+            memberCount: community.memberCount + 1,
+            isMember: true, myRole: community.myRole
         )
         Task {
             do {
-                _ = wasMember ? try await repository.leave(id: communityId) : try await repository.join(id: communityId)
+                _ = try await repository.join(id: communityId)
             } catch {
                 await loadDetail()
             }
+        }
+    }
+
+    /// Leaving is explicit and confirmed, never a silent toggle - and
+    /// never offered to the OWNER: `POST .../leave` answers 409 for the
+    /// owner (delete the community instead). Returns whether it
+    /// succeeded so the view can pop back to the list.
+    func leave() async -> Bool {
+        isLeaving = true
+        defer { isLeaving = false }
+        do {
+            _ = try await repository.leave(id: communityId)
+            return true
+        } catch {
+            leaveErrorMessage = (error as? ApiError)?.serverMessage ?? L10n.string(.communitiesErrorLeave)
+            await loadDetail()
+            return false
         }
     }
 
@@ -131,6 +149,7 @@ struct CommunityDetailView: View {
     @EnvironmentObject private var interactions: PostInteractionStore
     @Environment(\.dismiss) private var dismiss
     @State private var showDeleteConfirm = false
+    @State private var showLeaveConfirm = false
 
     init(communityId: String) {
         _viewModel = StateObject(wrappedValue: CommunityDetailViewModel(communityId: communityId))
@@ -189,6 +208,34 @@ struct CommunityDetailView: View {
                 )
             }
         }
+        .confirmationDialog(
+            Text(.communitiesDetailLeaveConfirmTitle),
+            isPresented: $showLeaveConfirm,
+            titleVisibility: .visible
+        ) {
+            Button {
+                Task {
+                    if await viewModel.leave() { dismiss() }
+                }
+            } label: {
+                Text(.communitiesLeave)
+            }
+        } message: {
+            if let community = viewModel.community {
+                Text(.communitiesDetailLeaveConfirmBody, ["name": community.name])
+            }
+        }
+        .alert(
+            Text(.iosErrorGenericTitle),
+            isPresented: Binding(
+                get: { viewModel.leaveErrorMessage != nil },
+                set: { if !$0 { viewModel.leaveErrorMessage = nil } }
+            )
+        ) {
+            Button { viewModel.leaveErrorMessage = nil } label: { Text(.actionCancel) }
+        } message: {
+            Text(verbatim: viewModel.leaveErrorMessage ?? "")
+        }
         .alert(
             Text(.iosErrorGenericTitle),
             isPresented: Binding(
@@ -244,18 +291,47 @@ struct CommunityDetailView: View {
                         .accessibilityLabel(Text(.communitiesDetailDeleteButton))
                     }
 
-                    Button(action: { viewModel.toggleMembership() }) {
-                        (community.isMember ? Text(.communitiesJoined) : Text(.communitiesJoin))
+                    if !community.isMember {
+                        Button(action: { viewModel.join() }) {
+                            Text(.communitiesJoin)
+                                .font(.footnote.weight(.semibold))
+                                .padding(.horizontal, ZrpSpacing.lg)
+                                .frame(minHeight: ZrpMetrics.minTouchTarget)
+                                .background(ZrpColor.red)
+                                .foregroundStyle(.white)
+                                .clipShape(Capsule())
+                        }
+                    } else if viewModel.myRole == "OWNER" {
+                        // The owner can't leave (server rule, 409) - a
+                        // non-interactive "Joined" and the hint below.
+                        Text(.communitiesJoined)
                             .font(.footnote.weight(.semibold))
                             .padding(.horizontal, ZrpSpacing.lg)
                             .frame(minHeight: ZrpMetrics.minTouchTarget)
-                            .background(community.isMember ? ZrpColor.surfaceElevated : ZrpColor.red)
-                            .foregroundStyle(community.isMember ? ZrpColor.onSurface : .white)
+                            .background(ZrpColor.surfaceElevated)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
                             .clipShape(Capsule())
+                    } else {
+                        Button(action: { showLeaveConfirm = true }) {
+                            Text(.communitiesLeave)
+                                .font(.footnote.weight(.semibold))
+                                .padding(.horizontal, ZrpSpacing.lg)
+                                .frame(minHeight: ZrpMetrics.minTouchTarget)
+                                .background(ZrpColor.surfaceElevated)
+                                .foregroundStyle(ZrpColor.onSurface)
+                                .clipShape(Capsule())
+                        }
                     }
                 }
                 .font(.caption)
                 .foregroundStyle(ZrpColor.onSurfaceMuted)
+
+                if viewModel.myRole == "OWNER" {
+                    Text(.communitiesDetailOwnerCannotLeave)
+                        .font(.caption)
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(ZrpSpacing.lg)
 

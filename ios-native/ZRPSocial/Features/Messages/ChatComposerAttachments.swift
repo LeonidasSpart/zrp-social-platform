@@ -2,7 +2,16 @@ import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// The paperclip menu and the microphone, shared by both composers.
+/// The "+" attachment menu and the microphone, shared by both composers.
+///
+/// One menu for everything that can be attached - camera, photo library,
+/// GIF, video, document - rather than a row of five separate icons. On a
+/// 375pt phone five 44pt icons plus the microphone and the send button
+/// left the text field itself around 8pt wide: the message box was the
+/// one control in the composer that had no room. Collapsing the
+/// attachment entry points into a single 44pt target is what the
+/// website's own composer does with its paperclip, and gives the field
+/// back the width it needs.
 ///
 /// Video, documents and voice notes send **immediately** rather than
 /// waiting in the composer next to a caption. That is web's behaviour
@@ -17,12 +26,51 @@ struct ChatAttachmentMenu: View {
     let onPick: (PendingChatAttachment) -> Void
     let isBusy: Bool
 
+    /// The host's own photo-library selection, so a picked picture
+    /// lands in the host's pending-image row (where it takes a caption)
+    /// exactly as before. `nil` leaves the photo entry out.
+    var photoSelection: Binding<[PhotosPickerItem]>? = nil
+
+    /// Opens the device camera. `nil` leaves the entry out.
+    var onCamera: (() -> Void)? = nil
+
+    /// Opens the GIF picker. `nil` leaves the entry out.
+    var onGif: (() -> Void)? = nil
+
     @State private var pickedVideo: PhotosPickerItem?
     @State private var isImportingDocument = false
     @State private var importFailed = false
 
     var body: some View {
         Menu {
+            if let onCamera {
+                Button(action: onCamera) {
+                    Label { Text(.chatOpenCamera) } icon: {
+                        Image(systemName: "camera")
+                    }
+                }
+            }
+            if let photoSelection {
+                // One picture per message: the route stores a single
+                // `imageUrl`, so offering a multi-select would promise
+                // something it cannot keep.
+                PhotosPicker(
+                    selection: photoSelection,
+                    maxSelectionCount: 1,
+                    matching: .images
+                ) {
+                    Label { Text(.iosA11yAddPhoto) } icon: {
+                        Image(systemName: "photo")
+                    }
+                }
+            }
+            if let onGif {
+                Button(action: onGif) {
+                    Label { Text(.composerAddGif) } icon: {
+                        Image(systemName: "text.below.photo")
+                    }
+                }
+            }
             PhotosPicker(selection: $pickedVideo, matching: .videos, photoLibrary: .shared()) {
                 Label { Text(.shortsUploadChooseVideo) } icon: {
                     Image(systemName: "film")
@@ -34,12 +82,14 @@ struct ChatAttachmentMenu: View {
                 }
             }
         } label: {
-            Image(systemName: "paperclip")
-                .font(.title3)
+            Image(systemName: "plus.circle.fill")
+                .font(.title2)
                 .foregroundStyle(ZrpColor.onSurfaceMuted)
+                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                .contentShape(Rectangle())
         }
         .disabled(isBusy)
-        .accessibilityLabel(Text(.chatUploadDocument))
+        .accessibilityLabel(Text(.iosChatAddAttachment))
         .onChange(of: pickedVideo) { _, item in
             guard let item else { return }
             pickedVideo = nil
@@ -116,6 +166,8 @@ struct VoiceNoteComposer: View {
             Image(systemName: "mic")
                 .font(.title3)
                 .foregroundStyle(ZrpColor.onSurfaceMuted)
+                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                .contentShape(Rectangle())
         }
         .disabled(isBusy)
         .accessibilityLabel(Text(.chatRecordVoiceMessage))
@@ -133,6 +185,8 @@ struct VoiceNoteComposer: View {
                 Image(systemName: "trash")
                     .font(.title3)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
             }
             .accessibilityLabel(Text(.actionCancel))
 
@@ -164,6 +218,8 @@ struct VoiceNoteComposer: View {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.title2)
                     .foregroundStyle(ZrpColor.red)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .contentShape(Rectangle())
             }
             .accessibilityLabel(Text(.iosA11ySendMessage))
         }

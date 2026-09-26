@@ -1485,23 +1485,20 @@ export default function ProfilePage(
           is now drawn only when there is a photograph. */}
       <div className="relative h-48 bg-gray-100 dark:bg-gray-900">
         {profile.coverUrl && (
-          // The banner had no view action at all, for anyone - unlike
-          // the avatar, which at least worked for someone else's
-          // profile. A plain <img> would never be a valid click target
-          // for a screen reader or keyboard user, so the image itself
-          // becomes a real button that opens the full-size viewer,
-          // matching the avatar's own pattern below.
+          // The image itself is the tap target for everyone, matching
+          // the avatar's own pattern below.
           <button
             type="button"
             onClick={() => setBannerLightboxOpen(true)}
-            aria-label={t("profile.viewPhotoAria", {
+            aria-label={t("profile.viewCoverAria", {
               name: profile.name || profile.username,
             })}
             className="block w-full h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-zrp-red"
           >
+            {/* Decorative: the button above already carries the name. */}
             <img
               src={profile.coverUrl}
-              alt="Cover"
+              alt=""
               className="w-full h-full object-cover"
             />
 
@@ -1510,7 +1507,7 @@ export default function ProfilePage(
         )}
 
         {isOwnProfile && (
-          <div className="absolute bottom-2 right-2">
+          <div className="absolute bottom-2 end-2">
             <button
               onClick={(e) => {
                 // Stops this from also bubbling up to the banner's own
@@ -1614,7 +1611,7 @@ export default function ProfilePage(
                   disabled={
                     uploadingAvatar
                   }
-                  className="absolute bottom-0 right-0 flex items-center justify-center h-11 w-11 bg-black/50 text-white rounded-full hover:bg-black/70 transition border-2 border-white dark:border-zrp-deepBlack"
+                  className="absolute bottom-0 end-0 flex items-center justify-center h-11 w-11 bg-black/50 text-white rounded-full hover:bg-black/70 transition border-2 border-white dark:border-zrp-deepBlack"
                   aria-label={t(
                     "profile.changeAvatar"
                   )}
@@ -1841,7 +1838,7 @@ export default function ProfilePage(
                   </button>
 
                   {moreMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                    <div className="absolute end-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
                       {/* Mute */}
 
                       <button
@@ -2011,7 +2008,7 @@ export default function ProfilePage(
 
             {profile.isPrivate &&
               !isOwnProfile && (
-                <Lock className="w-4 h-4 text-gray-500 dark:text-gray-400 ml-1" />
+                <Lock className="w-4 h-4 text-gray-500 dark:text-gray-400 ms-1" />
               )}
           </div>
 
@@ -2413,7 +2410,7 @@ export default function ProfilePage(
       <div className="relative mt-4 sticky top-14 z-20 bg-white dark:bg-zrp-deepBlack">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent dark:from-zrp-deepBlack lg:hidden"
+          className="pointer-events-none absolute inset-y-0 end-0 z-10 w-10 bg-gradient-to-l rtl:bg-gradient-to-r from-white to-transparent dark:from-zrp-deepBlack lg:hidden"
         />
 
         <div

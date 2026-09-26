@@ -111,7 +111,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
         <button
           onClick={onClose}
           aria-label={t("help.close")}
-          className="absolute top-3 end-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+          className="absolute top-1 end-1 flex h-11 w-11 items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition"
         >
           <X className="w-5 h-5" />
         </button>
@@ -154,7 +154,7 @@ export default function StoryComposer({ onClose, onSuccess }: Props) {
                   setMediaType(null);
                 }}
                 aria-label={t("comment.removeAttachment")}
-                className="absolute top-2 end-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition"
+                className="absolute top-2 end-2 flex h-11 w-11 items-center justify-center bg-black/50 text-white rounded-full hover:bg-black/70 transition"
               >
                 <X className="w-4 h-4" />
               </button>

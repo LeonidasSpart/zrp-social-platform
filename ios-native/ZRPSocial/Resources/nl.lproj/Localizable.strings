@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Aanmaken van lijst mislukt.";
 "lists.errorAddMember" = "Toevoegen van lid mislukt.";
 "lists.errorRemoveMember" = "Verwijderen van lid mislukt.";
+"auth.showPassword" = "Wachtwoord tonen";
+"auth.hidePassword" = "Wachtwoord verbergen";
+"verifiedBadge.newsAutomated" = "Officiële redactionele feed van ZRP (geautomatiseerd)";
+"profile.errLoadPosts" = "Kan dit niet laden. Probeer het opnieuw.";
+"ambassadors.apply.alreadyAmbassador" = "Je bent al ZRP-ambassadeur. Je status, niveau en uitnodigingslink staan op je dashboard.";
+"communities.detail.leaveConfirmTitle" = "Deze community verlaten?";
+"communities.detail.leaveConfirmBody" = "Je verlaat {name}. Je kunt op elk moment opnieuw lid worden.";
+"communities.detail.ownerCannotLeave" = "Je bent eigenaar van deze community en kunt deze daarom niet verlaten. Verwijder de community om deze voor iedereen te sluiten.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    nl. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP heeft toegang tot de microfoon nodig om een spraakbericht op te nemen. Je kunt dit inschakelen in Instellingen.";
 "ios.post.applyNow" = "Nu solliciteren";
 "ios.chat.cameraUnavailable" = "Camera niet beschikbaar op dit apparaat.";
+"ios.chat.addAttachment" = "Bijlage toevoegen";
+"ios.chat.sharedPost" = "Gedeeld bericht";
+"ios.chat.sharedPostUnavailable" = "Dit bericht is niet meer beschikbaar.";
+"ios.post.repostBlocked" = "Dit bericht kan niet opnieuw worden gedeeld omdat het account privé is.";
+"ios.media.loadFailed" = "Deze afbeelding kon niet worden geladen.";

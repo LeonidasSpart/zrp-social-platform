@@ -33,7 +33,14 @@ export default function CookieConsent() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zrp-deepBlack border-t border-gray-200 dark:border-gray-800 shadow-lg p-4 md:p-6">
+    // BottomNav is a fixed, higher-stacked (z-[9999]) bar on phones/
+    // tablets (md:hidden), so bottom-0 here put this banner's own
+    // Accept/Reject buttons directly underneath it - clickable in the
+    // DOM, but visually covered and pointer-blocked by the nav, so a
+    // first-time mobile visitor could never dismiss it. Lifted above
+    // the nav on mobile, matching MusicMiniPlayer's own bottom-[64px]
+    // lg:bottom-0 pattern for the same bar.
+    <div className="fixed bottom-[64px] md:bottom-0 left-0 right-0 z-50 bg-white dark:bg-zrp-deepBlack border-t border-gray-200 dark:border-gray-800 shadow-lg p-4 md:p-6">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="text-sm text-gray-700 dark:text-gray-300 text-center md:text-start">
           <p>

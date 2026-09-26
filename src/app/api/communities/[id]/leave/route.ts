@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { OWNER_CANNOT_LEAVE_MESSAGE } from "@/lib/communities";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
@@ -27,10 +28,19 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       return NextResponse.json({ isMember: false });
     }
 
-    // Owner leaving simply leaves - no successor-transfer flow in v1.
-    // The community keeps working (its feed is hashtag-derived, not
-    // owner-gated) with no owner, same known-limitation shape as an
-    // admin-less TeamMember account elsewhere in this codebase.
+    // The OWNER cannot leave: there is no ownership-transfer flow, and
+    // an owner-less community would have nobody able to delete it (the
+    // only management action that exists). The rule every client
+    // communicates is "delete the community instead" - see
+    // DELETE /api/communities/[id]. Returning 409 (not silently
+    // succeeding) keeps memberCount and the owner's role truthful.
+    if (existing.role === "OWNER") {
+      return NextResponse.json(
+        { error: OWNER_CANNOT_LEAVE_MESSAGE, code: "OWNER_CANNOT_LEAVE", isMember: true, myRole: "OWNER" },
+        { status: 409 }
+      );
+    }
+
     await prisma.$transaction([
       prisma.communityMember.delete({
         where: { communityId_userId: { communityId: community.id, userId } },

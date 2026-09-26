@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Кандидатствай отново</string>
     <string name="ambassadors_dashboard_suspended_title">Статусът на посланик е спрян</string>
     <string name="ambassadors_dashboard_suspended_body">Статусът ти на посланик в момента е спрян. Свържи се с поддръжката на ZRP за повече информация.</string>
+    <string name="ambassadors_apply_already_ambassador">Вече си Посланик на ZRP. Твоят статус, ниво и линк за покана са в твоето табло.</string>
     <string name="ambassadors_dashboard_my_country">Моята държава</string>
     <string name="ambassadors_dashboard_my_level">Моето ниво</string>
     <string name="ambassadors_dashboard_my_invitation_link">Моят линк за покана</string>
@@ -2241,6 +2242,9 @@
     <string name="communities_detail_delete_confirm_body">Това премахва %1$s за всички и не може да бъде отменено. Публикациите, маркирани с #%2$s, няма да бъдат изтрити.</string>
     <string name="communities_detail_delete_confirm_action">Изтрий</string>
     <string name="communities_detail_delete_error">Тази общност не можа да бъде изтрита. Опитай отново.</string>
+    <string name="communities_detail_leave_confirm_title">Да напуснеш ли тази общност?</string>
+    <string name="communities_detail_leave_confirm_body">Ще напуснеш %1$s. Можеш да се присъединиш отново по всяко време.</string>
+    <string name="communities_detail_owner_cannot_leave">Ти си собственик на тази общност, затова не можеш да я напуснеш. Изтрий я, за да я затвориш за всички.</string>
     <string name="communities_error_load">Зареждането на общностите бе неуспешно.</string>
     <string name="communities_error_create">Създаването на общността бе неуспешно.</string>
     <string name="communities_error_join">Присъединяването към общността бе неуспешно.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">Това потребителско име вече е заето.</string>
     <string name="auth_username_format_hint">3-20 символа, само букви/цифри/долни черти</string>
     <string name="quote_post_title">Цитирай публикация</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Публикации от частни профили не могат да се препубликуват.</string>
+    <string name="post_repost_forbidden_error">Тази публикация не може да се препубликува.</string>
+    <string name="post_repost_failed">Препубликуването не успя. Опитайте отново.</string>
+    <string name="image_viewer_load_failed">Това изображение не можа да се зареди.</string>
+    <string name="settings_appearance_title">Външен вид</string>
+    <string name="settings_theme_system">Използвай настройката на устройството</string>
+    <string name="music_player_hidden">Плейърът е скрит. Възпроизвеждането продължава.</string>
+    <string name="music_show_player">Покажи плейъра</string>
 </resources>

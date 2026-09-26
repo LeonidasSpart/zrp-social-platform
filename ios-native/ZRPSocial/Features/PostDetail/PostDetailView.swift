@@ -257,7 +257,7 @@ struct PostDetailView: View {
                 Text(verbatim: CountFormatting.exact(count))
                     .font(.subheadline.monospacedDigit())
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.caption)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
             }
@@ -358,10 +358,24 @@ struct PostDetailView: View {
                     )
                     .focused($isComposerFocused)
                     .font(.subheadline)
+                    // Same treatment as the chat composer: explicit text
+                    // colour on the elevated surface, brand caret, a
+                    // focus ring, and a 44pt minimum height.
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .tint(ZrpColor.red)
                     .lineLimit(1...5)
-                    .padding(ZrpSpacing.md)
+                    .padding(.horizontal, ZrpSpacing.md)
+                    .padding(.vertical, ZrpSpacing.sm)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
                     .background(ZrpColor.surfaceElevated)
                     .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous)
+                            .strokeBorder(
+                                isComposerFocused ? ZrpColor.red : ZrpColor.outline,
+                                lineWidth: 1
+                            )
+                    )
 
                     Button {
                         Task { await viewModel.submit() }
@@ -372,13 +386,13 @@ struct PostDetailView: View {
                         } else {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.title2)
+                                .foregroundStyle(canSubmitComment ? ZrpColor.red : ZrpColor.onSurfaceMuted)
                                 .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                                .contentShape(Rectangle())
                         }
                     }
-                    .disabled(
-                        viewModel.isSubmitting
-                            || viewModel.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                    )
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.isSubmitting || !canSubmitComment)
                     .accessibilityLabel(Text(.postDetailReply))
                 }
                 .padding(.horizontal, ZrpSpacing.lg)
@@ -386,6 +400,10 @@ struct PostDetailView: View {
             }
             .background(.bar)
         }
+    }
+
+    private var canSubmitComment: Bool {
+        !viewModel.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private func editSheet(for comment: Comment) -> some View {

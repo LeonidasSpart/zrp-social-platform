@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Det gick inte att skapa listan.";
 "lists.errorAddMember" = "Det gick inte att lägga till medlemmen.";
 "lists.errorRemoveMember" = "Det gick inte att ta bort medlemmen.";
+"auth.showPassword" = "Visa lösenord";
+"auth.hidePassword" = "Dölj lösenord";
+"verifiedBadge.newsAutomated" = "Officiellt redaktionellt ZRP-flöde (automatiserat)";
+"profile.errLoadPosts" = "Kunde inte läsa in det här. Försök igen.";
+"ambassadors.apply.alreadyAmbassador" = "Du är redan ZRP-ambassadör. Din status, nivå och inbjudningslänk finns på din instrumentpanel.";
+"communities.detail.leaveConfirmTitle" = "Lämna den här communityn?";
+"communities.detail.leaveConfirmBody" = "Du lämnar {name}. Du kan gå med igen när som helst.";
+"communities.detail.ownerCannotLeave" = "Du äger den här communityn och kan därför inte lämna den. Ta bort den för att stänga den för alla.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    sv. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP behöver tillgång till mikrofonen för att spela in ett röstmeddelande. Du kan slå på det i Inställningar.";
 "ios.post.applyNow" = "Ansök nu";
 "ios.chat.cameraUnavailable" = "Kameran är inte tillgänglig på den här enheten.";
+"ios.chat.addAttachment" = "Lägg till bilaga";
+"ios.chat.sharedPost" = "Delat inlägg";
+"ios.chat.sharedPostUnavailable" = "Det här inlägget är inte längre tillgängligt.";
+"ios.post.repostBlocked" = "Det här inlägget kan inte delas igen eftersom kontot är privat.";
+"ios.media.loadFailed" = "Det gick inte att läsa in den här bilden.";

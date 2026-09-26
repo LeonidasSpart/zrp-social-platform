@@ -316,7 +316,7 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
                     type="button"
                     onClick={() => setAttachedImageUrl(null)}
                     aria-label={t("comment.removeAttachment")}
-                    className="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition"
+                    className="absolute -top-2 -end-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition before:absolute before:-inset-2.5 before:content-['']"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>

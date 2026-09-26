@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 // ─── Level formula ─────────────────────────────────────────────────
@@ -82,11 +83,26 @@ export function computeStreak(
 // bonus, streak bonus, duel outcome, achievement reward) goes through,
 // so totalXp/level never drift out of sync across call sites.
 export async function ensurePlayProfile(userId: string) {
-  return prisma.playProfile.upsert({
-    where: { userId },
-    update: {},
-    create: { userId },
-  });
+  try {
+    return await prisma.playProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+  } catch (err) {
+    // Every solo/duel submission calls this before doing anything else,
+    // so a user's very first play can race several requests onto the
+    // same "no profile yet" branch at once (confirmed against real
+    // Postgres: concurrent upserts on a brand-new row can both attempt
+    // the create side and one loses to the unique constraint rather than
+    // falling back to the update, the same non-atomicity documented for
+    // ConsumedPaymentTransaction/AIDailyUsage elsewhere in this
+    // codebase). The loser's profile now genuinely exists - just fetch it.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return prisma.playProfile.findUniqueOrThrow({ where: { userId } });
+    }
+    throw err;
+  }
 }
 
 export async function awardXp(userId: string, amount: number) {

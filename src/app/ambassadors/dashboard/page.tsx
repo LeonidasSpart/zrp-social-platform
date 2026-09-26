@@ -52,7 +52,7 @@ export default function AmbassadorDashboardPage() {
   useEffect(() => {
     if (status !== "authenticated") return;
     let cancelled = false;
-    fetch("/api/ambassadors/me")
+    fetch("/api/ambassadors/me", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : { profile: null }))
       .then((data) => {
         if (!cancelled) setProfile(data.profile);

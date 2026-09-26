@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Vytvoření seznamu se nezdařilo.";
 "lists.errorAddMember" = "Přidání člena se nezdařilo.";
 "lists.errorRemoveMember" = "Odebrání člena se nezdařilo.";
+"auth.showPassword" = "Zobrazit heslo";
+"auth.hidePassword" = "Skrýt heslo";
+"verifiedBadge.newsAutomated" = "Oficiální redakční kanál ZRP (automatizovaný)";
+"profile.errLoadPosts" = "Nepodařilo se to načíst. Zkus to znovu.";
+"ambassadors.apply.alreadyAmbassador" = "Už jsi Ambasadorem ZRP. Svůj stav, úroveň a pozvánkový odkaz najdeš na svém panelu.";
+"communities.detail.leaveConfirmTitle" = "Opustit tuto komunitu?";
+"communities.detail.leaveConfirmBody" = "Opustíš {name}. Kdykoli se můžeš znovu připojit.";
+"communities.detail.ownerCannotLeave" = "Jsi vlastníkem této komunity, takže ji nemůžeš opustit. Smaž ji, pokud ji chceš uzavřít pro všechny.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    cs. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP potřebuje přístup k mikrofonu, aby mohl nahrát hlasovou zprávu. Můžete jej zapnout v Nastavení.";
 "ios.post.applyNow" = "Přihlásit se";
 "ios.chat.cameraUnavailable" = "Fotoaparát na tomto zařízení není k dispozici.";
+"ios.chat.addAttachment" = "Přidat přílohu";
+"ios.chat.sharedPost" = "Sdílený příspěvek";
+"ios.chat.sharedPostUnavailable" = "Tento příspěvek už není dostupný.";
+"ios.post.repostBlocked" = "Tento příspěvek nelze znovu sdílet, protože účet je soukromý.";
+"ios.media.loadFailed" = "Tento obrázek se nepodařilo načíst.";

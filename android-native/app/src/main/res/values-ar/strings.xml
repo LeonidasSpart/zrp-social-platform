@@ -2167,6 +2167,7 @@
     <string name="ambassadors_dashboard_reapply_cta">تقدم بطلب مرة أخرى</string>
     <string name="ambassadors_dashboard_suspended_title">تم تعليق حالة السفير</string>
     <string name="ambassadors_dashboard_suspended_body">حالة سفيرك معلّقة حاليًا. تواصل مع دعم ZRP لمزيد من المعلومات.</string>
+    <string name="ambassadors_apply_already_ambassador">أنت بالفعل سفير ZRP. حالتك ومستواك ورابط الدعوة الخاص بك موجودة في لوحة التحكم.</string>
     <string name="ambassadors_dashboard_my_country">بلدي</string>
     <string name="ambassadors_dashboard_my_level">مستواي</string>
     <string name="ambassadors_dashboard_my_invitation_link">رابط دعوتي</string>
@@ -2296,6 +2297,9 @@
     <string name="communities_detail_delete_confirm_body">سيؤدي هذا إلى إزالة %1$s للجميع ولا يمكن التراجع عنه. لن يتم حذف المنشورات التي تحمل وسم #%2$s.</string>
     <string name="communities_detail_delete_confirm_action">حذف</string>
     <string name="communities_detail_delete_error">تعذر حذف هذا المجتمع. حاول مرة أخرى.</string>
+    <string name="communities_detail_leave_confirm_title">هل تريد مغادرة هذا المجتمع؟</string>
+    <string name="communities_detail_leave_confirm_body">ستغادر %1$s. يمكنك الانضمام مرة أخرى في أي وقت.</string>
+    <string name="communities_detail_owner_cannot_leave">أنت مالك هذا المجتمع، لذا لا يمكنك مغادرته. احذفه لإغلاقه للجميع.</string>
     <string name="communities_error_load">فشل تحميل المجتمعات.</string>
     <string name="communities_error_create">فشل إنشاء المجتمع.</string>
     <string name="communities_error_join">فشل الانضمام إلى المجتمع.</string>
@@ -2419,4 +2423,14 @@
     <string name="auth_username_taken">اسم المستخدم هذا مُستخدم بالفعل.</string>
     <string name="auth_username_format_hint">من 3 إلى 20 حرفًا، أحرف/أرقام/شرطات سفلية فقط</string>
     <string name="quote_post_title">اقتباس المنشور</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">لا يمكن إعادة نشر منشورات الحسابات الخاصة.</string>
+    <string name="post_repost_forbidden_error">لا يمكن إعادة نشر هذا المنشور.</string>
+    <string name="post_repost_failed">تعذّرت إعادة النشر. يرجى المحاولة مرة أخرى.</string>
+    <string name="image_viewer_load_failed">تعذّر تحميل هذه الصورة.</string>
+    <string name="settings_appearance_title">المظهر</string>
+    <string name="settings_theme_system">استخدام إعداد الجهاز</string>
+    <string name="music_player_hidden">تم إخفاء المشغل. التشغيل مستمر.</string>
+    <string name="music_show_player">إظهار المشغل</string>
 </resources>

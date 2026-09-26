@@ -33,6 +33,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -58,6 +60,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.ReportDialog
+import one.zrp.social.mobile.ui.components.repostFailureMessage
 import one.zrp.social.mobile.ui.stories.StoriesRail
 import one.zrp.social.mobile.ui.components.EmptyStateAction
 import one.zrp.social.mobile.ui.components.PostSkeletonList
@@ -96,9 +99,21 @@ fun HomeScreen(
     val followingState by viewModel.followingState.collectAsState()
     val ownUserId by viewModel.ownUserId.collectAsState()
     val ad by viewModel.ad.collectAsState()
+    val repostFailure by viewModel.repostFailure.collectAsState()
     val context = LocalContext.current
 
     val state = if (activeTab == FeedTab.FOR_YOU) forYouState else followingState
+
+    // A refused repost (the server's 403 for a private account's post,
+    // or any other failure) explains itself here instead of the green
+    // highlight silently flashing off again - see RepostFeedback.kt.
+    val snackbarHostState = remember { SnackbarHostState() }
+    val repostFailureText = repostFailure?.let { repostFailureMessage(it) }
+    LaunchedEffect(repostFailureText) {
+        val text = repostFailureText ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(text)
+        viewModel.dismissRepostFailure()
+    }
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = state.isRefreshing,
@@ -446,5 +461,10 @@ fun HomeScreen(
                 )
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }

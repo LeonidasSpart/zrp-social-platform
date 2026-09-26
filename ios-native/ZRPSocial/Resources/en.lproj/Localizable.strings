@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Failed to create list.";
 "lists.errorAddMember" = "Failed to add member.";
 "lists.errorRemoveMember" = "Failed to remove member.";
+"auth.showPassword" = "Show password";
+"auth.hidePassword" = "Hide password";
+"verifiedBadge.newsAutomated" = "Official ZRP editorial feed (automated)";
+"profile.errLoadPosts" = "Couldn't load this. Try again.";
+"ambassadors.apply.alreadyAmbassador" = "You're already a ZRP Ambassador. Your status, level and invitation link are on your dashboard.";
+"communities.detail.leaveConfirmTitle" = "Leave this community?";
+"communities.detail.leaveConfirmBody" = "You'll leave {name}. You can join again at any time.";
+"communities.detail.ownerCannotLeave" = "You own this community, so you can't leave it. Delete it to close it for everyone.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). This is the
    development-language source; every other language emits its own
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP needs access to the microphone to record a voice message. You can turn it on in Settings.";
 "ios.post.applyNow" = "Apply Now";
 "ios.chat.cameraUnavailable" = "Camera unavailable on this device.";
+"ios.chat.addAttachment" = "Add attachment";
+"ios.chat.sharedPost" = "Shared post";
+"ios.chat.sharedPostUnavailable" = "This post is no longer available.";
+"ios.post.repostBlocked" = "This post can't be reposted because the account is private.";
+"ios.media.loadFailed" = "Couldn't load this image.";

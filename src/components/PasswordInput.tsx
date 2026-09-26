@@ -102,7 +102,7 @@ export default function PasswordInput({
           // can size this to sit flush with their other inputs without
           // changing the default every Settings field relies on.
           className={cn(
-            "w-full px-4 py-2 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:cursor-not-allowed disabled:opacity-60",
+            "w-full px-4 py-2 pe-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:cursor-not-allowed disabled:opacity-60",
             className
           )}
         />
@@ -114,8 +114,10 @@ export default function PasswordInput({
           // being a plain <button> it already picks up the app-wide
           // button:focus-visible ring (globals.css) for free - removing
           // an outline here would leave keyboard users with nothing.
-          className="absolute right-3 top-1/2 -translate-y-1/2 rounded text-gray-400 transition hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:text-gray-300"
+          className="absolute end-1 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full text-gray-500 transition hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:text-gray-300"
           aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+          aria-pressed={showPassword}
+          aria-controls={inputId}
         >
           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
         </button>

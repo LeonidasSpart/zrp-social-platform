@@ -73,6 +73,9 @@ struct LanguagePickerView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // The ZRP surface rather than the system grouped-row grey, so
+        // the list matches every other settings screen in dark mode.
+        .listRowBackground(ZrpColor.surface)
         // Read as one control, and announced as chosen - a checkmark
         // alone tells VoiceOver nothing.
         .accessibilityElement(children: .combine)

@@ -24,6 +24,7 @@ import {
   FileText,
   Mic,
   Copy,
+  Plus,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useUploadThing } from "@/lib/uploadthing-client";
@@ -107,6 +108,15 @@ interface ChatInterfaceProps {
   onVideoCall?: () => void;
 }
 
+// True while the viewer has a real (non-collapsed) text selection on
+// the page - the message row's tap-to-toggle must yield to it so that
+// selecting/copying text out of a bubble never also pops the action bar.
+function hasTextSelection(): boolean {
+  if (typeof window === "undefined") return false;
+  const selection = window.getSelection();
+  return !!selection && !selection.isCollapsed && selection.toString().length > 0;
+}
+
 export default function ChatInterface({
   receiverId,
   receiverName,
@@ -132,6 +142,7 @@ export default function ChatInterface({
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
+  const [showAttachSheet, setShowAttachSheet] = useState(false);
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -1978,6 +1989,12 @@ export default function ChatInterface({
                     id={`msg-${message.id}`}
                     key={message.id}
                     onClick={() => {
+                      // A tap toggles the action bar; a drag-select or a
+                      // long-press selection must not. The click that
+                      // ends a selection is the same event, so check for
+                      // a live, non-collapsed selection first.
+                      if (hasTextSelection()) return;
+
                       setActiveMessageActions(
                         (current) =>
                           current ===
@@ -2000,7 +2017,6 @@ export default function ChatInterface({
                       group/message
                       flex
                       w-full
-                      cursor-pointer
                       ${
                         isOwn
                           ? "justify-end"
@@ -2031,6 +2047,7 @@ export default function ChatInterface({
                         className={`
                           relative
                           min-w-0
+                          select-text
                           rounded-2xl
                           px-3
                           py-2
@@ -2828,7 +2845,13 @@ export default function ChatInterface({
                           )
                         )}
 
-                        {/* LINK PREVIEW */}
+                        {/* LINK PREVIEW - LinkPreviewCard itself renders
+                            a ZRP post/profile link as a real in-app card
+                            (see link-preview-internal.ts); this is the
+                            fix for "sharing a post into a DM has no way
+                            to reach its Repost action" - the card links
+                            straight to the real post page, where the
+                            full action bar lives. */}
                         {previewUrl && (
                           <LinkPreviewCard
                             url={previewUrl}
@@ -3202,16 +3225,16 @@ export default function ChatInterface({
               md:px-4
             "
           >
-            {/* CAMERA */}
+            {/* ATTACH (phone-width: one entry point for camera, gallery,
+                video, document and GIF - the individual buttons below
+                only fit from sm: up) */}
 
             <button
               type="button"
-              onClick={() =>
-                cameraInputRef.current?.click()
-              }
-              disabled={
-                uploadingImage
-              }
+              onClick={() => setShowAttachSheet(true)}
+              disabled={uploadingImage}
+              aria-haspopup="dialog"
+              aria-expanded={showAttachSheet}
               className="
                 flex
                 h-10
@@ -3227,6 +3250,54 @@ export default function ChatInterface({
                 disabled:opacity-50
                 dark:text-gray-400
                 dark:hover:bg-gray-700
+                sm:hidden
+              "
+              title={t("chat.attachMenu")}
+              aria-label={t("chat.attachMenu")}
+            >
+              {uploadingImage ? (
+                <div
+                  className="
+                    h-5
+                    w-5
+                    animate-spin
+                    rounded-full
+                    border-2
+                    border-zrp-red
+                    border-t-transparent
+                  "
+                />
+              ) : (
+                <Plus className="h-5 w-5" />
+              )}
+            </button>
+
+            {/* CAMERA */}
+
+            <button
+              type="button"
+              onClick={() =>
+                cameraInputRef.current?.click()
+              }
+              disabled={
+                uploadingImage
+              }
+              className="
+                hidden
+                h-10
+                w-10
+                shrink-0
+                items-center
+                justify-center
+                rounded-full
+                text-gray-500
+                transition
+                hover:bg-gray-100
+                hover:text-zrp-red
+                disabled:opacity-50
+                dark:text-gray-400
+                dark:hover:bg-gray-700
+                sm:flex
               "
               title={t(
                 "chat.openCamera"
@@ -3258,7 +3329,7 @@ export default function ChatInterface({
                 uploadingImage
               }
               className="
-                flex
+                hidden
                 h-10
                 w-10
                 shrink-0
@@ -3272,6 +3343,7 @@ export default function ChatInterface({
                 disabled:opacity-50
                 dark:text-gray-400
                 dark:hover:bg-gray-700
+                sm:flex
               "
               title={t(
                 "chat.uploadImage"
@@ -3423,7 +3495,7 @@ export default function ChatInterface({
                 uploadingImage
               }
               className="
-                flex
+                hidden
                 h-10
                 w-10
                 shrink-0
@@ -3437,6 +3509,7 @@ export default function ChatInterface({
                 disabled:opacity-50
                 dark:text-gray-400
                 dark:hover:bg-gray-700
+                sm:flex
               "
               title={t(
                 "composer.addGif"
@@ -3606,6 +3679,64 @@ export default function ChatInterface({
           </div>
         )}
       </form>
+
+      {/* =====================================================================
+          ATTACHMENT SHEET (phone width)
+      ====================================================================== */}
+
+      {showAttachSheet && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 sm:hidden"
+          onClick={() => setShowAttachSheet(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("chat.attachMenu")}
+            className="w-full rounded-t-2xl bg-white shadow-2xl dark:bg-zrp-deepBlack"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex h-11 items-center justify-between border-b border-gray-200 px-3 dark:border-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                {t("chat.attachMenu")}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAttachSheet(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                aria-label={t("sharePost.close")}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2 p-3">
+              {(
+                [
+                  { icon: Camera, label: t("chat.openCamera"), action: () => cameraInputRef.current?.click() },
+                  { icon: Image, label: t("chat.uploadImage"), action: () => fileInputRef.current?.click() },
+                  { icon: Video, label: t("chat.uploadVideoAria"), action: () => videoInputRef.current?.click() },
+                  { icon: Paperclip, label: t("chat.uploadDocument"), action: () => documentInputRef.current?.click() },
+                  { icon: FileImage, label: t("composer.addGif"), action: () => setShowGifPicker(true) },
+                ] as const
+              ).map(({ icon: Icon, label, action }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    setShowAttachSheet(false);
+                    action();
+                  }}
+                  className="flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-xl bg-gray-100 px-2 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                >
+                  <Icon className="h-6 w-6 text-zrp-red" aria-hidden="true" />
+                  <span className="line-clamp-2 text-center leading-tight">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* =====================================================================
           EMOJI PICKER

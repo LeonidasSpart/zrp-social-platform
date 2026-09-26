@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Υποβολή νέας αίτησης</string>
     <string name="ambassadors_dashboard_suspended_title">Η ιδιότητα πρεσβευτή τέθηκε σε αναστολή</string>
     <string name="ambassadors_dashboard_suspended_body">Η ιδιότητά σου ως πρεσβευτή βρίσκεται προς το παρόν σε αναστολή. Επικοινώνησε με την υποστήριξη του ZRP για περισσότερες πληροφορίες.</string>
+    <string name="ambassadors_apply_already_ambassador">Είσαι ήδη Πρεσβευτής ZRP. Η κατάσταση, το επίπεδο και ο σύνδεσμος πρόσκλησής σου βρίσκονται στον πίνακά σου.</string>
     <string name="ambassadors_dashboard_my_country">Η Χώρα μου</string>
     <string name="ambassadors_dashboard_my_level">Το Επίπεδό μου</string>
     <string name="ambassadors_dashboard_my_invitation_link">Ο Σύνδεσμος Πρόσκλησής μου</string>
@@ -2241,6 +2242,9 @@
     <string name="communities_detail_delete_confirm_body">Αυτό αφαιρεί %1$s για όλους και δεν μπορεί να αναιρεθεί. Οι αναρτήσεις με ετικέτα #%2$s δεν διαγράφονται.</string>
     <string name="communities_detail_delete_confirm_action">Διαγραφή</string>
     <string name="communities_detail_delete_error">Δεν ήταν δυνατή η διαγραφή αυτής της κοινότητας. Δοκίμασε ξανά.</string>
+    <string name="communities_detail_leave_confirm_title">Αποχώρηση από αυτήν την κοινότητα;</string>
+    <string name="communities_detail_leave_confirm_body">Θα αποχωρήσεις από το %1$s. Μπορείς να ξαναγίνεις μέλος όποτε θέλεις.</string>
+    <string name="communities_detail_owner_cannot_leave">Είσαι ο ιδιοκτήτης αυτής της κοινότητας, οπότε δεν μπορείς να αποχωρήσεις. Διάγραψέ την για να την κλείσεις για όλους.</string>
     <string name="communities_error_load">Η φόρτωση κοινοτήτων απέτυχε.</string>
     <string name="communities_error_create">Η δημιουργία κοινότητας απέτυχε.</string>
     <string name="communities_error_join">Η συμμετοχή στην κοινότητα απέτυχε.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">Αυτό το όνομα χρήστη είναι ήδη σε χρήση.</string>
     <string name="auth_username_format_hint">3-20 χαρακτήρες, μόνο γράμματα/αριθμοί/κάτω παύλες</string>
     <string name="quote_post_title">Παράθεση ανάρτησης</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Οι αναρτήσεις ιδιωτικών λογαριασμών δεν μπορούν να αναδημοσιευτούν.</string>
+    <string name="post_repost_forbidden_error">Αυτή η ανάρτηση δεν μπορεί να αναδημοσιευτεί.</string>
+    <string name="post_repost_failed">Η αναδημοσίευση απέτυχε. Δοκιμάστε ξανά.</string>
+    <string name="image_viewer_load_failed">Δεν ήταν δυνατή η φόρτωση αυτής της εικόνας.</string>
+    <string name="settings_appearance_title">Εμφάνιση</string>
+    <string name="settings_theme_system">Χρήση ρύθμισης συσκευής</string>
+    <string name="music_player_hidden">Ο player αποκρύφθηκε. Η αναπαραγωγή συνεχίζεται.</string>
+    <string name="music_show_player">Εμφάνιση player</string>
 </resources>

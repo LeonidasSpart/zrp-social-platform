@@ -544,7 +544,7 @@ export default function ShortUploadModal({
             disabled={
               uploading
             }
-            className="p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+            className="-me-2 flex h-11 w-11 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
             aria-label={t("shorts.upload.close")}
           >
             <X className="w-5 h-5" />
@@ -575,7 +575,7 @@ export default function ShortUploadModal({
                 disabled={
                   uploading
                 }
-                className="absolute top-2 right-2 bg-black/60 rounded-full p-1.5 text-white disabled:opacity-50"
+                className="absolute top-2 end-2 flex h-11 w-11 items-center justify-center bg-black/60 rounded-full text-white disabled:opacity-50"
                 aria-label={t("shorts.upload.removeVideo")}
               >
                 <X className="w-4 h-4" />

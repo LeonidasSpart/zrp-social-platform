@@ -76,6 +76,11 @@ import one.zrp.social.mobile.util.localizedError
 fun AmbassadorApplyScreen(
     onBack: () -> Unit,
     initialCountryCode: String?,
+    // Where an already-pending/approved/suspended viewer is sent instead
+    // of the form. Defaults to onBack (the Ambassadors overview, which
+    // has its own dashboard action) so existing call sites keep working;
+    // ZrpNavHost should pass the dashboard route directly.
+    onOpenDashboard: () -> Unit = onBack,
 ) {
     val viewModel: AmbassadorApplyViewModel = viewModel(
         factory = remember(initialCountryCode) {
@@ -117,6 +122,12 @@ fun AmbassadorApplyScreen(
 
         if (state.success) {
             SuccessBody(onBack = onBack)
+        } else if (state.isCheckingExisting) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (state.hasBlockingProfile) {
+            ExistingProfileBody(status = state.existingStatus, onOpenDashboard = onOpenDashboard)
         } else {
             Column(
                 modifier = Modifier
@@ -378,6 +389,52 @@ private fun CountryPickerContent(
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Shown instead of the form to someone who already has a PENDING,
+ * APPROVED or SUSPENDED profile (see AmbassadorApplyUiState). The copy
+ * is the same status wording the dashboard uses, so both screens agree
+ * on what the viewer is; the only action is opening that dashboard.
+ */
+@Composable
+private fun ExistingProfileBody(status: String?, onOpenDashboard: () -> Unit) {
+    val title = when (status) {
+        "PENDING" -> stringResource(R.string.ambassadors_dashboard_pending_title)
+        "SUSPENDED" -> stringResource(R.string.ambassadors_dashboard_suspended_title)
+        else -> stringResource(R.string.ambassadors_level_ambassador)
+    }
+    val body = when (status) {
+        "PENDING" -> stringResource(R.string.ambassadors_dashboard_pending_body)
+        "SUSPENDED" -> stringResource(R.string.ambassadors_dashboard_suspended_body)
+        else -> stringResource(R.string.ambassadors_apply_already_ambassador)
+    }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(Spacing.xxl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = Spacing.md),
+        )
+        Button(
+            onClick = onOpenDashboard,
+            colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
+            modifier = Modifier.fillMaxWidth().padding(top = Spacing.xl),
+        ) {
+            Text(stringResource(R.string.ambassadors_dashboard_title))
         }
     }
 }

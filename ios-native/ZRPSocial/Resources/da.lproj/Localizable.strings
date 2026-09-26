@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Kunne ikke oprette liste.";
 "lists.errorAddMember" = "Kunne ikke tilføje medlem.";
 "lists.errorRemoveMember" = "Kunne ikke fjerne medlem.";
+"auth.showPassword" = "Vis adgangskode";
+"auth.hidePassword" = "Skjul adgangskode";
+"verifiedBadge.newsAutomated" = "Officielt ZRP-redaktionsfeed (automatisk)";
+"profile.errLoadPosts" = "Kunne ikke indlæse dette. Prøv igen.";
+"ambassadors.apply.alreadyAmbassador" = "Du er allerede ZRP-ambassadør. Din status, dit niveau og dit invitationslink findes på dit dashboard.";
+"communities.detail.leaveConfirmTitle" = "Forlad dette fællesskab?";
+"communities.detail.leaveConfirmBody" = "Du forlader {name}. Du kan blive medlem igen når som helst.";
+"communities.detail.ownerCannotLeave" = "Du ejer dette fællesskab, så du kan ikke forlade det. Slet det for at lukke det for alle.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    da. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP skal bruge adgang til mikrofonen for at optage en talebesked. Du kan slå det til i Indstillinger.";
 "ios.post.applyNow" = "Ansøg nu";
 "ios.chat.cameraUnavailable" = "Kameraet er ikke tilgængeligt på denne enhed.";
+"ios.chat.addAttachment" = "Tilføj vedhæftning";
+"ios.chat.sharedPost" = "Delt opslag";
+"ios.chat.sharedPostUnavailable" = "Dette opslag er ikke længere tilgængeligt.";
+"ios.post.repostBlocked" = "Dette opslag kan ikke genopslås, fordi kontoen er privat.";
+"ios.media.loadFailed" = "Billedet kunne ikke indlæses.";

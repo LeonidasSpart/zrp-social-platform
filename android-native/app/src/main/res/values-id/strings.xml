@@ -2167,6 +2167,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Daftar lagi</string>
     <string name="ambassadors_dashboard_suspended_title">Status duta ditangguhkan</string>
     <string name="ambassadors_dashboard_suspended_body">Status dutamu saat ini ditangguhkan. Hubungi dukungan ZRP untuk informasi lebih lanjut.</string>
+    <string name="ambassadors_apply_already_ambassador">Kamu sudah menjadi Duta ZRP. Status, level, dan tautan undanganmu ada di dasbor.</string>
     <string name="ambassadors_dashboard_my_country">Negaraku</string>
     <string name="ambassadors_dashboard_my_level">Levelku</string>
     <string name="ambassadors_dashboard_my_invitation_link">Tautan Undanganku</string>
@@ -2296,6 +2297,9 @@
     <string name="communities_detail_delete_confirm_body">Ini akan menghapus %1$s untuk semua orang dan tidak dapat dibatalkan. Postingan dengan tag #%2$s tidak akan dihapus.</string>
     <string name="communities_detail_delete_confirm_action">Hapus</string>
     <string name="communities_detail_delete_error">Tidak dapat menghapus komunitas ini. Coba lagi.</string>
+    <string name="communities_detail_leave_confirm_title">Keluar dari komunitas ini?</string>
+    <string name="communities_detail_leave_confirm_body">Kamu akan keluar dari %1$s. Kamu bisa bergabung lagi kapan saja.</string>
+    <string name="communities_detail_owner_cannot_leave">Kamu pemilik komunitas ini, jadi kamu tidak bisa keluar. Hapus komunitas untuk menutupnya bagi semua orang.</string>
     <string name="communities_error_load">Gagal memuat komunitas.</string>
     <string name="communities_error_create">Gagal membuat komunitas.</string>
     <string name="communities_error_join">Gagal bergabung dengan komunitas.</string>
@@ -2419,4 +2423,14 @@
     <string name="auth_username_taken">Nama pengguna itu sudah digunakan.</string>
     <string name="auth_username_format_hint">3-20 karakter, hanya huruf/angka/garis bawah</string>
     <string name="quote_post_title">Kutip postingan</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Postingan dari akun privat tidak dapat diposting ulang.</string>
+    <string name="post_repost_forbidden_error">Postingan ini tidak dapat diposting ulang.</string>
+    <string name="post_repost_failed">Gagal memposting ulang. Silakan coba lagi.</string>
+    <string name="image_viewer_load_failed">Gambar ini tidak dapat dimuat.</string>
+    <string name="settings_appearance_title">Tampilan</string>
+    <string name="settings_theme_system">Ikuti pengaturan perangkat</string>
+    <string name="music_player_hidden">Pemutar disembunyikan. Pemutaran berlanjut.</string>
+    <string name="music_show_player">Tampilkan pemutar</string>
 </resources>

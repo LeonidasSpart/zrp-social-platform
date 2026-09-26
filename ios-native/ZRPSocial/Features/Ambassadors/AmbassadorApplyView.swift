@@ -17,6 +17,21 @@ final class AmbassadorApplyViewModel: ObservableObject {
     @Published private(set) var didSubmit = false
     @Published var errorMessage: String?
 
+    /// The viewer's REAL current status (`GET /api/ambassadors/me`),
+    /// read before the form is ever shown. Someone already PENDING,
+    /// APPROVED or SUSPENDED is never offered the form again - the
+    /// route would refuse it with 409 - and sees their status with a
+    /// way to the dashboard instead. Same rule as the web apply page.
+    @Published private(set) var existingStatus: AmbassadorStatus?
+    @Published private(set) var isCheckingExisting = true
+
+    var hasBlockingProfile: Bool {
+        switch existingStatus {
+        case .pending, .approved, .suspended: return true
+        case .rejected, .unknown, .none: return false
+        }
+    }
+
     private let repository: AmbassadorsRepositoryProtocol
 
     init(repository: AmbassadorsRepositoryProtocol = AmbassadorsRepository()) {
@@ -37,6 +52,13 @@ final class AmbassadorApplyViewModel: ObservableObject {
 
     func loadCountries() async {
         countries = (try? await repository.countries()) ?? []
+    }
+
+    func checkExistingProfile() async {
+        // A failed read shows the form: the server still enforces the
+        // rule, so nothing can be double-submitted.
+        existingStatus = (try? await repository.me())?.status
+        isCheckingExisting = false
     }
 
     func addLanguage(_ value: String) {
@@ -106,6 +128,7 @@ final class AmbassadorApplyViewModel: ObservableObject {
 struct AmbassadorApplyView: View {
 
     @StateObject private var viewModel = AmbassadorApplyViewModel()
+    @EnvironmentObject private var navigator: Navigator
     @State private var languageDraft = ""
     @State private var linkDraft = ""
 
@@ -121,6 +144,16 @@ struct AmbassadorApplyView: View {
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+            } else if viewModel.isCheckingExisting {
+                Section {
+                    HStack {
+                        Spacer()
+                        ProgressView().tint(ZrpColor.red)
+                        Spacer()
+                    }
+                }
+            } else if viewModel.hasBlockingProfile {
+                existingProfileSection
             } else {
                 countrySection
                 languagesSection
@@ -134,7 +167,10 @@ struct AmbassadorApplyView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.ambassadorsApplyTitle))
         .navigationBarTitleDisplayMode(.inline)
-        .task { await viewModel.loadCountries() }
+        .task {
+            await viewModel.checkExistingProfile()
+            await viewModel.loadCountries()
+        }
         .alert(
             Text(.iosErrorGenericTitle),
             isPresented: Binding(
@@ -145,6 +181,45 @@ struct AmbassadorApplyView: View {
             Button { viewModel.errorMessage = nil } label: { Text(.actionCancel) }
         } message: {
             Text(verbatim: viewModel.errorMessage ?? "")
+        }
+    }
+
+    /// Shown instead of the form to someone who already holds a
+    /// PENDING, APPROVED or SUSPENDED profile - the same status wording
+    /// the dashboard uses, so both screens agree on what the viewer is.
+    private var existingProfileSection: some View {
+        Section {
+            switch viewModel.existingStatus {
+            case .pending:
+                Text(.ambassadorsDashboardPendingTitle).font(.headline).foregroundStyle(ZrpColor.onSurface)
+                Text(.ambassadorsDashboardPendingBody)
+                    .font(.subheadline)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            case .suspended:
+                Text(.ambassadorsDashboardSuspendedTitle).font(.headline).foregroundStyle(ZrpColor.onSurface)
+                Text(.ambassadorsDashboardSuspendedBody)
+                    .font(.subheadline)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            default:
+                Text(.ambassadorsLevelsAmbassador).font(.headline).foregroundStyle(ZrpColor.onSurface)
+                Text(.ambassadorsApplyAlreadyAmbassador)
+                    .font(.subheadline)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Button { navigator.push(.ambassadorDashboard) } label: {
+                Text(.ambassadorsDashboardTitle)
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, ZrpSpacing.md)
+                    .background(ZrpColor.red)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
+            }
+            .buttonStyle(.plain)
         }
     }
 

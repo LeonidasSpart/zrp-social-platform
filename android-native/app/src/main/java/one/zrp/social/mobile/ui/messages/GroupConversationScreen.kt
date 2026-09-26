@@ -48,7 +48,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -71,7 +70,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -83,6 +81,10 @@ import one.zrp.social.mobile.network.ConversationDetail
 import one.zrp.social.mobile.network.PostAuthor
 import one.zrp.social.mobile.ui.components.AddReactionDialog
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.ComposerAttachmentOption
+import one.zrp.social.mobile.ui.components.ComposerAttachmentSheet
+import one.zrp.social.mobile.ui.components.ComposerIconButton
+import one.zrp.social.mobile.ui.components.ComposerSendButton
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.GifPickerDialog
 import one.zrp.social.mobile.ui.components.LinkPreviewBlock
@@ -90,7 +92,8 @@ import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.BadgeSize
 import one.zrp.social.mobile.ui.components.extractFirstUrl
-import one.zrp.social.mobile.ui.theme.Radius
+import one.zrp.social.mobile.ui.components.ZrpComposerField
+import one.zrp.social.mobile.ui.components.copyTextWithFeedback
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.TypingIndicator
@@ -389,68 +392,61 @@ fun GroupConversationScreen(
             )
         }
 
+        // Same composer as the 1:1 ConversationScreen: one neutral "+"
+        // opening the attachment sheet, a pill field growing to five
+        // lines, and the red Send as the only primary action. No
+        // navigationBarsPadding() here - ZrpNavHost's Scaffold already
+        // applies that inset; the root Column's imePadding() lifts this
+        // row above the keyboard.
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 6.dp),
+                .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
             verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            Box {
-                IconButton(
-                    onClick = { attachMenuOpen = true },
-                    enabled = !state.isUploadingAttachment,
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.message_add_attachment_cd))
-                }
-
-                DropdownMenu(expanded = attachMenuOpen, onDismissRequest = { attachMenuOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.message_open_camera_cd)) },
-                        leadingIcon = { Icon(Icons.Filled.CameraAlt, contentDescription = null) },
-                        onClick = {
-                            attachMenuOpen = false
-                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.message_attach_image_cd)) },
-                        leadingIcon = { Icon(Icons.Filled.PhotoLibrary, contentDescription = null) },
-                        onClick = {
-                            attachMenuOpen = false
-                            imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.composer_add_gif)) },
-                        leadingIcon = { Icon(Icons.Filled.Image, contentDescription = null) },
-                        onClick = {
-                            attachMenuOpen = false
-                            showGifPicker = true
-                        },
-                    )
-                }
-            }
-
-            OutlinedTextField(
-                value = state.draft,
-                onValueChange = { viewModel.onDraftChange(it) },
-                placeholder = { Text(stringResource(R.string.group_message_placeholder, groupName)) },
-                enabled = !state.isSending,
-                shape = RoundedCornerShape(Radius.lg),
-                maxLines = 6,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp),
+            ComposerIconButton(
+                icon = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.message_add_attachment_cd),
+                onClick = { attachMenuOpen = true },
+                enabled = !state.isUploadingAttachment,
             )
 
-            IconButton(onClick = { viewModel.send() }, enabled = !state.isSending && state.draft.isNotBlank()) {
-                if (state.isSending) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                } else {
-                    Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.message_send_cd), tint = ZrpRed)
-                }
-            }
+            ZrpComposerField(
+                value = state.draft,
+                onValueChange = { viewModel.onDraftChange(it) },
+                placeholder = stringResource(R.string.group_message_placeholder, groupName),
+                enabled = !state.isSending,
+                maxLines = 5,
+                modifier = Modifier.weight(1f),
+            )
+
+            ComposerSendButton(
+                onClick = { viewModel.send() },
+                enabled = state.draft.isNotBlank(),
+                isSending = state.isSending,
+                contentDescription = stringResource(R.string.message_send_cd),
+                icon = Icons.Filled.Send,
+            )
         }
+    }
+
+    if (attachMenuOpen) {
+        ComposerAttachmentSheet(
+            onDismiss = { attachMenuOpen = false },
+            options = listOf(
+                ComposerAttachmentOption(Icons.Filled.CameraAlt, R.string.message_open_camera_cd) {
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                },
+                ComposerAttachmentOption(Icons.Filled.PhotoLibrary, R.string.message_attach_image_cd) {
+                    imagePickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                ComposerAttachmentOption(Icons.Filled.Image, R.string.composer_add_gif) {
+                    showGifPicker = true
+                },
+            ),
+        )
     }
 
     val editMessageId = state.editingMessageId
@@ -576,6 +572,7 @@ private fun GroupMessageBubble(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
 
     // Matches PostCard's own previewUrl/linkPreviewFound pair - no
     // preview for an image message (there's nothing left to unfurl),
@@ -654,7 +651,10 @@ private fun GroupMessageBubble(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { onReplyPreviewClick(replyTo.id) }
+                                    .combinedClickable(
+                                        onClick = { onReplyPreviewClick(replyTo.id) },
+                                        onLongClick = { menuOpen = true },
+                                    )
                                     .padding(bottom = 6.dp, top = 2.dp)
                                     .padding(start = 6.dp),
                             ) {
@@ -675,6 +675,7 @@ private fun GroupMessageBubble(
                                 ),
                                 onMentionClick = onMentionClick,
                                 onHashtagClick = onHashtagClick,
+                                onLongClick = { menuOpen = true },
                                 linkColor = if (isOwnMessage) Color.White else ZrpRed,
                                 suppressUrl = if (linkPreviewFound) previewUrl else null,
                             )
@@ -684,6 +685,7 @@ private fun GroupMessageBubble(
                             LinkPreviewBlock(
                                 url = previewUrl,
                                 onLoaded = { found -> linkPreviewFound = found },
+                                onLongClick = { menuOpen = true },
                             )
                         }
 
@@ -755,7 +757,7 @@ private fun GroupMessageBubble(
                             text = { Text(stringResource(R.string.action_copy)) },
                             onClick = {
                                 menuOpen = false
-                                clipboard.setText(AnnotatedString(message.content))
+                                clipboard.copyTextWithFeedback(context, message.content)
                             },
                         )
                     }

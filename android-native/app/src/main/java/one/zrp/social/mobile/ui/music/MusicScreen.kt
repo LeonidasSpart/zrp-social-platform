@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -112,7 +112,7 @@ fun MusicScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = stringResource(R.string.music_title),
@@ -285,18 +285,36 @@ fun MusicScreen(
             }
         }
 
+        // The mini player itself now lives in ZrpNavHost's Scaffold (see
+        // its bottomBar comment) so it persists on every route, not just
+        // this screen. What remains here is the way back after the bar's
+        // X was tapped: a one-line "now playing" row with Show player, so
+        // a hidden bar is reversible from the place people go looking for
+        // it, not only from the snackbar shown at dismiss time.
         val currentTrack = playerState.currentTrack
-        if (currentTrack != null && !playerState.dismissed) {
-            MiniPlayerBar(
-                track = currentTrack,
-                isPlaying = playerState.isPlaying,
-                isBuffering = playerState.isBuffering,
-                positionMs = playerState.positionMs,
-                durationMs = playerState.durationMs,
-                onTogglePlayPause = { player.togglePlayPause() },
-                onLikeClick = { viewModel.toggleLike(currentTrack) },
-                onDismiss = { player.dismissPlayer() },
-            )
+        if (currentTrack != null && playerState.dismissed) {
+            HorizontalDivider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { player.showPlayer() }, role = Role.Button)
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.music_queue_now_playing) + " · " + currentTrack.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = stringResource(R.string.music_show_player),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = ZrpRed,
+                    modifier = Modifier.padding(start = Spacing.sm),
+                )
+            }
         }
     }
 }

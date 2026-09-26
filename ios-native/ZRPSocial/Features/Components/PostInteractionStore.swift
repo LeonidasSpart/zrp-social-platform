@@ -257,6 +257,13 @@ final class PostInteractionStore: ObservableObject {
             }
             settled.isMutating = false
             interactions[post.id] = settled
+        } catch ApiError.forbidden {
+            interactions[post.id] = previous
+            // The route answers 403 for a private author (and for a
+            // post the viewer may not repost for any other reason) with
+            // an English-only body. That rule is stated here in the
+            // viewer's own language rather than echoed verbatim.
+            actionError = L10n.string(.iosPostRepostBlocked)
         } catch {
             interactions[post.id] = previous
             report(error)

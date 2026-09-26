@@ -2180,6 +2180,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Apply again</string>
     <string name="ambassadors_dashboard_suspended_title">Ambassador status suspended</string>
     <string name="ambassadors_dashboard_suspended_body">Your ambassador status is currently suspended. Contact ZRP support for more information.</string>
+    <string name="ambassadors_apply_already_ambassador">You\'re already a ZRP Ambassador. Your status, level and invitation link are on your dashboard.</string>
     <string name="ambassadors_dashboard_my_country">My Country</string>
     <string name="ambassadors_dashboard_my_level">My Level</string>
     <string name="ambassadors_dashboard_my_invitation_link">My Invitation Link</string>
@@ -2311,6 +2312,9 @@
     <string name="communities_detail_delete_confirm_body">This removes %1$s for everyone and can\'t be undone. Posts tagged #%2$s are not deleted.</string>
     <string name="communities_detail_delete_confirm_action">Delete</string>
     <string name="communities_detail_delete_error">Couldn\'t delete this community. Try again.</string>
+    <string name="communities_detail_leave_confirm_title">Leave this community?</string>
+    <string name="communities_detail_leave_confirm_body">You\'ll leave %1$s. You can join again at any time.</string>
+    <string name="communities_detail_owner_cannot_leave">You own this community, so you can\'t leave it. Delete it to close it for everyone.</string>
     <string name="communities_error_load">Failed to load communities.</string>
     <string name="communities_error_create">Failed to create community.</string>
     <string name="communities_error_join">Failed to join community.</string>
@@ -2434,4 +2438,14 @@
     <string name="auth_username_taken">That username is taken.</string>
     <string name="auth_username_format_hint">3-20 characters, letters/numbers/underscores only</string>
     <string name="quote_post_title">Quote post</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Posts from private accounts can\'t be reposted.</string>
+    <string name="post_repost_forbidden_error">This post can\'t be reposted.</string>
+    <string name="post_repost_failed">Couldn\'t repost. Please try again.</string>
+    <string name="image_viewer_load_failed">Couldn\'t load this image.</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_theme_system">Use device setting</string>
+    <string name="music_player_hidden">Player hidden. Playback continues.</string>
+    <string name="music_show_player">Show player</string>
 </resources>

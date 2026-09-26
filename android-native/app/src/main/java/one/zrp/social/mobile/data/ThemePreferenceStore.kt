@@ -29,6 +29,11 @@ class ThemePreferenceStore(context: Context) {
         prefs.edit().putString(KEY_THEME, if (isDark) VALUE_DARK else VALUE_LIGHT).apply()
     }
 
+    /** Back to "follow the system": removes the explicit choice so [get] returns null again. */
+    fun clear() {
+        prefs.edit().remove(KEY_THEME).apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "zrp_theme_prefs"
         private const val KEY_THEME = "theme_mode"

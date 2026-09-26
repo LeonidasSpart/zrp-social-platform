@@ -192,6 +192,14 @@ class MusicPlayerViewModel(
         _state.update { it.copy(dismissed = true) }
     }
 
+    // The explicit way back from dismissPlayer() without having to pick
+    // a new track: the "Show player" action on the snackbar ZrpNavHost
+    // shows at dismiss time, and MusicScreen's own now-playing restore
+    // row. Nothing about playback or the queue changes.
+    fun showPlayer() {
+        _state.update { it.copy(dismissed = false) }
+    }
+
     fun playFromQueue(track: MusicTrack) {
         _state.update { it.copy(queue = it.queue.filterNot { q -> q.id == track.id }) }
         switchTo(track)

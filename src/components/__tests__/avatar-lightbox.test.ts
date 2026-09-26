@@ -21,13 +21,68 @@ const PROFILE = "src/app/profile/[username]/page.tsx";
 describe("ImageLightbox component", () => {
   const src = read(LIGHTBOX);
 
-  it("renders nothing when there is no image to show", () => {
-    expect(src).toContain("if (!src) return null;");
+  it("renders nothing when there is no image to show (and nothing on the server, where it has no <body> to portal into)", () => {
+    expect(src).toContain('if (!src || typeof document === "undefined") return null;');
   });
 
   it("closes on Escape and an explicit close button", () => {
-    expect(src).toContain('event.key === "Escape"');
-    expect(src).toContain("onClick={onClose}");
+    expect(src).toContain('case "Escape":');
+    expect(src).toContain("onClick={requestClose}");
+  });
+
+  it("is portalled onto <body> above every shell layer, instead of being flattened into its caller's stacking context", () => {
+    // Inline, the profile header's `relative z-10` wrapper (and a
+    // PostCard's article) capped the `fixed` overlay below the sticky
+    // Header (z-50), the cookie banner (z-50), BottomNav (z-[9999]) and
+    // the music mini player (z-[9998]): the image opened, but the shell
+    // drew over it and over its close button.
+    expect(src).toContain('import { createPortal } from "react-dom"');
+    expect(src).toContain("document.body\n  );");
+    expect(src).toMatch(/z-\[10000\]/);
+  });
+
+  it("closes on the Back button via one history entry, and closes by every other route through that same entry", () => {
+    expect(src).toContain('window.history.pushState({ [HISTORY_KEY]: true }, "")');
+    expect(src).toContain('window.addEventListener("popstate", handlePopState)');
+    // requestClose goes back through the pushed entry (so the entry is
+    // consumed, never left stale), and only calls onClose directly when
+    // there is no such entry to go back through.
+    const idx = src.indexOf("const requestClose");
+    expect(idx).toBeGreaterThan(-1);
+    const block = src.slice(idx, idx + 500);
+    expect(block).toContain("window.history.back()");
+    expect(block).toContain("if (!viaHistory) onCloseRef.current()");
+  });
+
+  it("supports pinch/drag on touch, wheel on desktop, double-tap and keyboard zoom, clamped to a sane range", () => {
+    expect(src).toContain("onPointerDown={handlePointerDown}");
+    expect(src).toContain("onPointerMove={handlePointerMove}");
+    expect(src).toContain("onPointerUp={handlePointerUp}");
+    expect(src).toContain("onPointerCancel={handlePointerUp}");
+    // touch-none: otherwise the browser's own pinch-zoom/scroll eats the gesture.
+    expect(src).toMatch(/touch-none/);
+    // Native, non-passive wheel listener - React's onWheel is passive and cannot preventDefault.
+    expect(src).toContain('stage.addEventListener("wheel", handleWheel, { passive: false })');
+    expect(src).toContain("const MIN_SCALE = 1;");
+    expect(src).toContain("const MAX_SCALE = 4;");
+    expect(src).toContain('aria-label={t("ambassadors.map.zoomIn")}');
+    expect(src).toContain('aria-label={t("ambassadors.map.zoomOut")}');
+  });
+
+  it("never captures the pointer for its own buttons (capture would retarget their click to the stage)", () => {
+    const idx = src.indexOf("const handlePointerDown");
+    const block = src.slice(idx, idx + 400);
+    expect(block).toContain('closest("button")) return;');
+  });
+
+  it("moves focus to the close button on open and returns it to the opener on close", () => {
+    expect(src).toContain("closeButtonRef.current?.focus()");
+    expect(src).toContain("openerRef.current = document.activeElement");
+  });
+
+  it("positions its controls with logical (RTL-safe) inset classes", () => {
+    expect(src).not.toMatch(/\b(sm:)?(left|right)-\d/);
+    expect(src).toMatch(/\bend-1\b/);
   });
 
   it("only closes a backdrop click when the click lands directly on the backdrop, never bubbled from a descendant", () => {
@@ -48,7 +103,7 @@ describe("ImageLightbox component", () => {
     // already excludes it.
     const btnIdx = src.indexOf('aria-label={t("post.closeImageAria")}');
     expect(btnIdx).toBeGreaterThan(-1);
-    expect(src.slice(Math.max(0, btnIdx - 100), btnIdx)).toContain("onClick={onClose}");
+    expect(src.slice(Math.max(0, btnIdx - 100), btnIdx)).toContain("onClick={requestClose}");
   });
 
   it("has a real loading state and a real error state, not just the bare image", () => {
@@ -140,7 +195,13 @@ describe("profile page's own avatar and banner", () => {
     expect(idx).toBeGreaterThan(-1);
     const block = src.slice(idx, idx + 700);
     expect(block).toContain("setBannerLightboxOpen(true)");
-    expect(block).toContain('aria-label={t("profile.viewPhotoAria"');
+    // Its own name - "View {name}'s photo" twice on one page (avatar and
+    // banner) left screen-reader users unable to tell the two apart.
+    expect(block).toContain('aria-label={t("profile.viewCoverAria"');
+    // The <img> inside is decorative: the button already carries the
+    // name, and the old untranslated alt="Cover" was read on top of it
+    // (and drawn as stray text while the photo was unreachable).
+    expect(block).toContain('alt=""');
   });
 
   it("moves the owner's own change-banner control to a small corner badge that stops its click from also opening the viewer", () => {

@@ -1,16 +1,15 @@
 package one.zrp.social.mobile.ui.postdetail
 
 import android.content.Intent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -23,7 +22,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,11 +43,13 @@ import one.zrp.social.mobile.network.Comment
 import one.zrp.social.mobile.ui.comments.CommentThread
 import one.zrp.social.mobile.ui.comments.CommentsViewModel
 import one.zrp.social.mobile.ui.comments.CommentsViewModelFactory
+import one.zrp.social.mobile.ui.components.ComposerSendButton
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.ZrpComposerField
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.IconSize
+import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
-import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.localizedError
 
 /**
@@ -255,40 +255,40 @@ fun PostDetailScreen(
             }
         }
 
+        // Comment composer: the shared pill field (explicit onSurface text
+        // colour, red cursor - see ZrpComposerField) plus the one red Send
+        // control, bottom-aligned so it stays level with the field's last
+        // line as it grows. Sits above the keyboard via the root Column's
+        // imePadding(); no navigationBarsPadding() here because ZrpNavHost's
+        // Scaffold already applies that inset.
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            OutlinedTextField(
+            ZrpComposerField(
                 value = commentsState.draft,
                 onValueChange = { commentsViewModel.onDraftChange(it) },
-                placeholder = {
-                    Text(
-                        if (replyingToUsername != null) {
-                            stringResource(R.string.comment_reply_to_placeholder, replyingToUsername)
-                        } else {
-                            stringResource(R.string.comment_write_placeholder)
-                        },
-                    )
+                placeholder = if (replyingToUsername != null) {
+                    stringResource(R.string.comment_reply_to_placeholder, replyingToUsername)
+                } else {
+                    stringResource(R.string.comment_write_placeholder)
                 },
                 enabled = !commentsState.isPosting,
+                maxLines = 5,
                 modifier = Modifier.weight(1f),
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(
+            ComposerSendButton(
                 onClick = { commentsViewModel.submit() },
-                enabled = commentsState.draft.isNotBlank() && !commentsState.isPosting,
-            ) {
-                if (commentsState.isPosting) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                } else {
-                    Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.comment_post_cd), tint = ZrpRed)
-                }
-            }
+                enabled = commentsState.draft.isNotBlank(),
+                isSending = commentsState.isPosting,
+                contentDescription = stringResource(R.string.comment_post_cd),
+                icon = Icons.Filled.Send,
+            )
         }
     }
 

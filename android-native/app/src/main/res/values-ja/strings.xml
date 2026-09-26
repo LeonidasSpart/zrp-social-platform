@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">再応募する</string>
     <string name="ambassadors_dashboard_suspended_title">アンバサダーステータスが停止中です</string>
     <string name="ambassadors_dashboard_suspended_body">現在、アンバサダーステータスは停止されています。詳細についてはZRPサポートにお問い合わせください。</string>
+    <string name="ambassadors_apply_already_ambassador">あなたはすでにZRPアンバサダーです。ステータス、レベル、招待リンクはダッシュボードで確認できます。</string>
     <string name="ambassadors_dashboard_my_country">自分の国</string>
     <string name="ambassadors_dashboard_my_level">自分のレベル</string>
     <string name="ambassadors_dashboard_my_invitation_link">自分の招待リンク</string>
@@ -2238,6 +2239,9 @@
     <string name="communities_detail_delete_confirm_body">これにより、%1$sが全員から削除され、元に戻すことはできません。#%2$s のタグが付いた投稿は削除されません。</string>
     <string name="communities_detail_delete_confirm_action">削除</string>
     <string name="communities_detail_delete_error">コミュニティを削除できませんでした。もう一度お試しください。</string>
+    <string name="communities_detail_leave_confirm_title">このコミュニティを退出しますか？</string>
+    <string name="communities_detail_leave_confirm_body">%1$s を退出します。いつでも再参加できます。</string>
+    <string name="communities_detail_owner_cannot_leave">あなたはこのコミュニティのオーナーなので退出できません。全員に対して閉鎖するにはコミュニティを削除してください。</string>
     <string name="communities_error_load">コミュニティの読み込みに失敗しました。</string>
     <string name="communities_error_create">コミュニティの作成に失敗しました。</string>
     <string name="communities_error_join">コミュニティへの参加に失敗しました。</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">そのユーザー名はすでに使われています。</string>
     <string name="auth_username_format_hint">3〜20文字、英字・数字・アンダースコアのみ</string>
     <string name="quote_post_title">投稿を引用</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">非公開アカウントの投稿はリポストできません。</string>
+    <string name="post_repost_forbidden_error">この投稿はリポストできません。</string>
+    <string name="post_repost_failed">リポストできませんでした。もう一度お試しください。</string>
+    <string name="image_viewer_load_failed">この画像を読み込めませんでした。</string>
+    <string name="settings_appearance_title">外観</string>
+    <string name="settings_theme_system">端末の設定に従う</string>
+    <string name="music_player_hidden">プレイヤーを非表示にしました。再生は続きます。</string>
+    <string name="music_show_player">プレイヤーを表示</string>
 </resources>

@@ -16,6 +16,13 @@ private const val MAX_LINKS = 5
 
 data class AmbassadorApplyUiState(
     val isLoadingCountries: Boolean = true,
+    // Real GET /api/ambassadors/me check, done before the form is ever
+    // shown: someone whose profile is already PENDING, APPROVED or
+    // SUSPENDED must never be offered the application form again (the
+    // server refuses it with 409 anyway) - they get their status and a
+    // way to the dashboard instead. Same rule as the web apply page.
+    val isCheckingExisting: Boolean = true,
+    val existingStatus: String? = null,
     val countries: List<AmbassadorCountry> = emptyList(),
     val countryCode: String? = null,
     val countryPickerQuery: String = "",
@@ -34,6 +41,10 @@ data class AmbassadorApplyUiState(
 ) {
     val selectedCountryName: String?
         get() = countries.find { it.code == countryCode }?.name
+
+    /** True when the viewer already holds a profile the server won't let them re-apply over. */
+    val hasBlockingProfile: Boolean
+        get() = existingStatus == "PENDING" || existingStatus == "APPROVED" || existingStatus == "SUSPENDED"
 
     val filteredCountries: List<AmbassadorCountry>
         get() {
@@ -61,6 +72,19 @@ class AmbassadorApplyViewModel(
 
     init {
         loadCountries()
+        checkExistingProfile()
+    }
+
+    private fun checkExistingProfile() {
+        viewModelScope.launch {
+            repository.getMyProfile()
+                .onSuccess { profile ->
+                    _state.update { it.copy(isCheckingExisting = false, existingStatus = profile?.status) }
+                }
+                // On a network failure the form is shown: the server still
+                // enforces the rule (409), so nothing can be double-submitted.
+                .onFailure { _state.update { it.copy(isCheckingExisting = false, existingStatus = null) } }
+        }
     }
 
     private fun loadCountries() {

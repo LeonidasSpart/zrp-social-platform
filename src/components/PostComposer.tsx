@@ -2909,11 +2909,15 @@ export default function PostComposer({
                         className="
                           absolute
                           top-3
-                          right-3
+                          end-3
+                          flex
+                          h-11
+                          w-11
+                          items-center
+                          justify-center
                           bg-black/60
                           text-white
                           rounded-full
-                          p-2
                           hover:bg-black/80
                           transition
                         "
@@ -2951,10 +2955,7 @@ export default function PostComposer({
                             src={
                               url
                             }
-                            alt={`Upload preview ${
-                              idx +
-                              1
-                            }`}
+                            alt={t("composer.uploadPreviewN", { n: idx + 1 })}
                             className={`
                               w-full
                               object-cover
@@ -2986,18 +2987,19 @@ export default function PostComposer({
                             className="
                               absolute
                               top-2
-                              right-2
+                              end-2
+                              flex
+                              h-11
+                              w-11
+                              items-center
+                              justify-center
                               bg-black/60
                               text-white
                               rounded-full
-                              p-1.5
                               hover:bg-black/80
                               transition
                             "
-                            aria-label={`Remove image ${
-                              idx +
-                              1
-                            }`}
+                            aria-label={t("composer.removeImageN", { n: idx + 1 })}
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -3210,8 +3212,8 @@ export default function PostComposer({
                                     0.1
                                 )
                               )
-                            ? "text-amber-500"
-                            : "text-gray-400 dark:text-gray-500"
+                            ? "text-gray-700 dark:text-gray-200 font-medium"
+                            : "text-gray-500 dark:text-gray-400"
                         }
                       `}
                     >
@@ -3238,7 +3240,7 @@ export default function PostComposer({
                       rounded-full
                       whitespace-nowrap
                     "
-                    title={`Account plan: ${plan}`}
+                    title={t("composer.accountPlan", { plan })}
                   >
                     {plan
                       .charAt(

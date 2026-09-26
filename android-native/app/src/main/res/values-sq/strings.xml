@@ -2167,6 +2167,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Apliko përsëri</string>
     <string name="ambassadors_dashboard_suspended_title">Statusi i ambasadorit i pezulluar</string>
     <string name="ambassadors_dashboard_suspended_body">Statusi yt si ambasador është aktualisht i pezulluar. Kontakto mbështetjen e ZRP për më shumë informacion.</string>
+    <string name="ambassadors_apply_already_ambassador">Ti je tashmë Ambasador i ZRP. Statusi, niveli dhe lidhja jote e ftesës gjenden në panelin tënd.</string>
     <string name="ambassadors_dashboard_my_country">Vendi im</string>
     <string name="ambassadors_dashboard_my_level">Niveli im</string>
     <string name="ambassadors_dashboard_my_invitation_link">Lidhja ime e ftesës</string>
@@ -2296,6 +2297,9 @@
     <string name="communities_detail_delete_confirm_body">Kjo heq %1$s për të gjithë dhe nuk mund të zhbëhet. Postimet me #%2$s nuk fshihen.</string>
     <string name="communities_detail_delete_confirm_action">Fshi</string>
     <string name="communities_detail_delete_error">Komuniteti nuk mund të fshihej. Provo përsëri.</string>
+    <string name="communities_detail_leave_confirm_title">Të largohesh nga ky komunitet?</string>
+    <string name="communities_detail_leave_confirm_body">Do të largohesh nga %1$s. Mund të bashkohesh sërish në çdo kohë.</string>
+    <string name="communities_detail_owner_cannot_leave">Ti je pronari i këtij komuniteti, ndaj nuk mund të largohesh. Fshije për ta mbyllur për të gjithë.</string>
     <string name="communities_error_load">Dështoi ngarkimi i komuniteteve.</string>
     <string name="communities_error_create">Dështoi krijimi i komunitetit.</string>
     <string name="communities_error_join">Dështoi bashkimi me komunitetin.</string>
@@ -2419,4 +2423,14 @@
     <string name="auth_username_taken">Ky emër përdoruesi është i zënë.</string>
     <string name="auth_username_format_hint">3-20 karaktere, vetëm shkronja/numra/nënvija</string>
     <string name="quote_post_title">Cito postimin</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Postimet nga llogaritë private nuk mund të ripostohen.</string>
+    <string name="post_repost_forbidden_error">Ky postim nuk mund të ripostohet.</string>
+    <string name="post_repost_failed">Ripostimi dështoi. Provo përsëri.</string>
+    <string name="image_viewer_load_failed">Kjo imazh nuk u ngarkua dot.</string>
+    <string name="settings_appearance_title">Pamja</string>
+    <string name="settings_theme_system">Përdor cilësimin e pajisjes</string>
+    <string name="music_player_hidden">Luajtësi u fsheh. Luajtja vazhdon.</string>
+    <string name="music_show_player">Shfaq luajtësin</string>
 </resources>

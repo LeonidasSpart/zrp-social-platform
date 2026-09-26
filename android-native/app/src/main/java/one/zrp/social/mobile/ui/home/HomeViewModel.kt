@@ -12,6 +12,8 @@ import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.ServedAd
+import one.zrp.social.mobile.ui.components.RepostFailure
+import one.zrp.social.mobile.ui.components.toRepostFailure
 import one.zrp.social.mobile.util.applyOptimisticVote
 import one.zrp.social.mobile.util.hasAlreadyVotedOnPost
 
@@ -58,6 +60,17 @@ class HomeViewModel(
     // on the signed-in user's own posts here too, matching the
     // website's shared PostCard.tsx (it renders on every feed, not
     // just the profile page).
+    // Why the last repost toggle was refused (a private account's post,
+    // a 403, a network failure) - shown once by HomeScreen as a snackbar,
+    // then cleared via dismissRepostFailure(). Previously the optimistic
+    // green highlight just flashed on and off with no explanation.
+    private val _repostFailure = MutableStateFlow<RepostFailure?>(null)
+    val repostFailure: StateFlow<RepostFailure?> = _repostFailure.asStateFlow()
+
+    fun dismissRepostFailure() {
+        _repostFailure.value = null
+    }
+
     private val _ownUserId = MutableStateFlow<String?>(null)
     val ownUserId: StateFlow<String?> = _ownUserId.asStateFlow()
 
@@ -174,8 +187,9 @@ class HomeViewModel(
         }
 
         viewModelScope.launch {
-            repository.toggleRepost(postId).onFailure {
+            repository.toggleRepost(postId).onFailure { error ->
                 stateFlow.update { it.copy(posts = previousPosts) }
+                _repostFailure.value = error.toRepostFailure()
             }
             pendingToggles.remove(key)
         }

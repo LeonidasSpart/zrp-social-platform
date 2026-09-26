@@ -25,6 +25,7 @@ import {
   Copy,
   Check,
   Reply,
+  Plus,
 } from "lucide-react";
 import { getSocket } from "@/lib/socket-client";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
@@ -107,6 +108,15 @@ interface GroupChatInterfaceProps {
 // chat product does, and what the spec's own "message grouping" item
 // asks for.
 const GROUP_WINDOW_MS = 5 * 60 * 1000;
+
+// True while the viewer has a real (non-collapsed) text selection - the
+// message row's tap-to-toggle yields to it so selecting/copying text out
+// of a bubble never also pops the action bar.
+function hasTextSelection(): boolean {
+  if (typeof window === "undefined") return false;
+  const selection = window.getSelection();
+  return !!selection && !selection.isCollapsed && selection.toString().length > 0;
+}
 
 export default function GroupChatInterface({ conversationId, onLeftGroup }: GroupChatInterfaceProps) {
   const { data: session } = useSession();
@@ -451,6 +461,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
   // Maps messageId -> the exact URL a rich preview card was confirmed
   // for, so that one raw URL token can be hidden from the message text
   // once the card below it is already showing it (matches PostCard).
+  const [showAttachSheet, setShowAttachSheet] = useState(false);
   const [linkPreviewFound, setLinkPreviewFound] = useState<
     Record<string, string | null>
   >({});
@@ -1065,10 +1076,14 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                     key={message.id}
                     id={`msg-${message.id}`}
                     onClick={() => {
+                      // A tap toggles the action bar; a drag-select or a
+                      // long-press selection must not (the click that ends
+                      // a selection is the same event).
+                      if (hasTextSelection()) return;
                       setActiveMessageActions((current) => (current === message.id ? null : message.id));
                       if (reactionPickerFor && reactionPickerFor !== message.id) setReactionPickerFor(null);
                     }}
-                    className={`group/message flex w-full cursor-pointer gap-2 ${
+                    className={`group/message flex w-full gap-2 ${
                       isOwn ? "justify-end" : "justify-start"
                     }`}
                   >
@@ -1107,7 +1122,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                       )}
 
                       <div
-                        className={`relative min-w-0 rounded-2xl px-3 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.06)] sm:px-3.5 ${
+                        className={`relative min-w-0 select-text rounded-2xl px-3 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.06)] sm:px-3.5 ${
                           isOwn
                             ? "rounded-br-md bg-zrp-red text-white"
                             : "rounded-bl-md bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
@@ -1342,7 +1357,9 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
                           </p>
                         )}
 
-                        {/* LINK PREVIEW */}
+                        {/* LINK PREVIEW - LinkPreviewCard itself renders
+                            a ZRP post/profile link as a real in-app card;
+                            see the 1:1 ChatInterface's identical use. */}
                         {previewUrl && (
                           <LinkPreviewCard
                             url={previewUrl}
@@ -1472,11 +1489,30 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
           </div>
         ) : (
           <div className="flex min-w-0 items-end gap-0.5 px-2 py-2 sm:gap-1.5 sm:px-3 md:px-4">
+            {/* ATTACH (phone-width): one entry point for camera, gallery,
+                video, document and GIF - the individual buttons only fit
+                from sm: up */}
+            <button
+              type="button"
+              onClick={() => setShowAttachSheet(true)}
+              disabled={uploadingImage}
+              aria-haspopup="dialog"
+              aria-expanded={showAttachSheet}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 sm:hidden"
+              title={t("chat.attachMenu")}
+              aria-label={t("chat.attachMenu")}
+            >
+              {uploadingImage ? (
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-zrp-red border-t-transparent" />
+              ) : (
+                <Plus className="h-5 w-5" />
+              )}
+            </button>
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
               disabled={uploadingImage}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700"
+              className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 sm:flex"
               title={t("chat.openCamera")}
               aria-label={t("chat.openCamera")}
             >
@@ -1495,7 +1531,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingImage}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700"
+              className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 sm:flex"
               title={t("chat.uploadImage")}
               aria-label={t("chat.uploadImage")}
             >
@@ -1547,7 +1583,7 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
               type="button"
               onClick={() => setShowGifPicker(true)}
               disabled={uploadingImage}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700"
+              className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-zrp-red disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700 sm:flex"
               title={t("composer.addGif")}
               aria-label={t("composer.addGif")}
             >
@@ -1608,6 +1644,59 @@ export default function GroupChatInterface({ conversationId, onLeftGroup }: Grou
           </div>
         )}
       </form>
+
+      {/* ATTACHMENT SHEET (phone width) */}
+      {showAttachSheet && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 sm:hidden"
+          onClick={() => setShowAttachSheet(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("chat.attachMenu")}
+            className="w-full rounded-t-2xl bg-white shadow-2xl dark:bg-zrp-deepBlack"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex h-11 items-center justify-between border-b border-gray-200 px-3 dark:border-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t("chat.attachMenu")}</span>
+              <button
+                type="button"
+                onClick={() => setShowAttachSheet(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                aria-label={t("sharePost.close")}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2 p-3">
+              {(
+                [
+                  { icon: Camera, label: t("chat.openCamera"), action: () => cameraInputRef.current?.click() },
+                  { icon: ImageIcon, label: t("chat.uploadImage"), action: () => fileInputRef.current?.click() },
+                  { icon: Video, label: t("chat.uploadVideoAria"), action: () => videoInputRef.current?.click() },
+                  { icon: Paperclip, label: t("chat.uploadDocument"), action: () => documentInputRef.current?.click() },
+                  { icon: FileImage, label: t("composer.addGif"), action: () => setShowGifPicker(true) },
+                ] as const
+              ).map(({ icon: Icon, label, action }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    setShowAttachSheet(false);
+                    action();
+                  }}
+                  className="flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-xl bg-gray-100 px-2 py-3 text-xs font-medium text-gray-700 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                >
+                  <Icon className="h-6 w-6 text-zrp-red" aria-hidden="true" />
+                  <span className="line-clamp-2 text-center leading-tight">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* EMOJI PICKER */}
       {showEmojiPicker && (

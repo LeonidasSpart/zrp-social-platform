@@ -107,12 +107,12 @@ struct AccountSettingsView: View {
             }
 
             Section {
-                SecureField(
+                ZrpSecureField(
+                    prompt: L10n.string(.settingsCurrentPasswordPlaceholder),
                     text: $currentPassword,
-                    prompt: Text(.settingsCurrentPasswordPlaceholder)
-                ) {
-                    Text(.settingsCurrentPassword)
-                }
+                    contentType: .password,
+                    label: .settingsCurrentPassword
+                )
 
                 TextField(
                     text: $newEmail,

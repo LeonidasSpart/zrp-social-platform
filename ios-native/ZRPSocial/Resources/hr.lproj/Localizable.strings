@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Kreiranje popisa nije uspjelo.";
 "lists.errorAddMember" = "Dodavanje člana nije uspjelo.";
 "lists.errorRemoveMember" = "Uklanjanje člana nije uspjelo.";
+"auth.showPassword" = "Prikaži lozinku";
+"auth.hidePassword" = "Sakrij lozinku";
+"verifiedBadge.newsAutomated" = "Službeni ZRP urednički feed (automatiziran)";
+"profile.errLoadPosts" = "Nije moguće učitati. Pokušaj ponovno.";
+"ambassadors.apply.alreadyAmbassador" = "Već si ZRP ambasador. Tvoj status, razina i pozivna poveznica nalaze se na tvojoj nadzornoj ploči.";
+"communities.detail.leaveConfirmTitle" = "Napustiti ovu zajednicu?";
+"communities.detail.leaveConfirmBody" = "Napustit ćeš {name}. Možeš se ponovno pridružiti bilo kada.";
+"communities.detail.ownerCannotLeave" = "Vlasnik si ove zajednice pa je ne možeš napustiti. Izbriši je da bi je zatvorio za sve.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    hr. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP-u je potreban pristup mikrofonu za snimanje glasovne poruke. Možete ga uključiti u Postavkama.";
 "ios.post.applyNow" = "Prijavi se sada";
 "ios.chat.cameraUnavailable" = "Kamera nije dostupna na ovom uređaju.";
+"ios.chat.addAttachment" = "Dodaj privitak";
+"ios.chat.sharedPost" = "Podijeljena objava";
+"ios.chat.sharedPostUnavailable" = "Ova objava više nije dostupna.";
+"ios.post.repostBlocked" = "Ova se objava ne može ponovno podijeliti jer je račun privatan.";
+"ios.media.loadFailed" = "Ovu sliku nije moguće učitati.";

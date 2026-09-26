@@ -31,6 +31,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -54,6 +55,7 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.CommunitiesRepository
 import one.zrp.social.mobile.network.CommunitySummary
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.localizedError
 
 @Composable
@@ -236,12 +238,22 @@ private fun CommunityCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                if (community.isMember) {
-                    OutlinedButton(onClick = onToggleMembership) {
+                when {
+                    // The owner can't leave (POST .../leave answers 409) - no
+                    // toggle on the card; delete lives on the detail screen.
+                    community.myRole == "OWNER" -> Surface(color = ZrpRed.copy(alpha = 0.12f)) {
+                        Text(
+                            text = stringResource(R.string.communities_detail_owner_badge),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = ZrpRed,
+                            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                        )
+                    }
+                    community.isMember -> OutlinedButton(onClick = onToggleMembership) {
                         Text(stringResource(R.string.communities_joined))
                     }
-                } else {
-                    Button(onClick = onToggleMembership) {
+                    else -> Button(onClick = onToggleMembership) {
                         Text(stringResource(R.string.communities_join))
                     }
                 }

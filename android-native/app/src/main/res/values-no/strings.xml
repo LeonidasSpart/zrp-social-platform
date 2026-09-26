@@ -2114,6 +2114,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Søk på nytt</string>
     <string name="ambassadors_dashboard_suspended_title">Ambassadørstatusen er suspendert</string>
     <string name="ambassadors_dashboard_suspended_body">Ambassadørstatusen din er for øyeblikket suspendert. Kontakt ZRPs kundestøtte for mer informasjon.</string>
+    <string name="ambassadors_apply_already_ambassador">Du er allerede ZRP-ambassadør. Statusen, nivået og invitasjonslenken din finner du på dashbordet ditt.</string>
     <string name="ambassadors_dashboard_my_country">Mitt land</string>
     <string name="ambassadors_dashboard_my_level">Mitt nivå</string>
     <string name="ambassadors_dashboard_my_invitation_link">Min invitasjonslenke</string>
@@ -2241,6 +2242,9 @@
     <string name="communities_detail_delete_confirm_body">Dette fjerner %1$s for alle og kan ikke angres. Innlegg merket med #%2$s blir ikke slettet.</string>
     <string name="communities_detail_delete_confirm_action">Slett</string>
     <string name="communities_detail_delete_error">Kunne ikke slette dette fellesskapet. Prøv igjen.</string>
+    <string name="communities_detail_leave_confirm_title">Forlate dette fellesskapet?</string>
+    <string name="communities_detail_leave_confirm_body">Du forlater %1$s. Du kan bli med igjen når som helst.</string>
+    <string name="communities_detail_owner_cannot_leave">Du eier dette fellesskapet og kan derfor ikke forlate det. Slett det for å stenge det for alle.</string>
     <string name="communities_error_load">Kunne ikke laste fellesskapene.</string>
     <string name="communities_error_create">Kunne ikke opprette fellesskapet.</string>
     <string name="communities_error_join">Kunne ikke bli med i fellesskapet.</string>
@@ -2364,4 +2368,14 @@
     <string name="auth_username_taken">Det brukernavnet er opptatt.</string>
     <string name="auth_username_format_hint">3–20 tegn, kun bokstaver, tall og understreker</string>
     <string name="quote_post_title">Siter innlegg</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Innlegg fra private kontoer kan ikke repostes.</string>
+    <string name="post_repost_forbidden_error">Dette innlegget kan ikke repostes.</string>
+    <string name="post_repost_failed">Kunne ikke reposte. Prøv igjen.</string>
+    <string name="image_viewer_load_failed">Kunne ikke laste inn dette bildet.</string>
+    <string name="settings_appearance_title">Utseende</string>
+    <string name="settings_theme_system">Bruk enhetens innstilling</string>
+    <string name="music_player_hidden">Spilleren er skjult. Avspillingen fortsetter.</string>
+    <string name="music_show_player">Vis spilleren</string>
 </resources>

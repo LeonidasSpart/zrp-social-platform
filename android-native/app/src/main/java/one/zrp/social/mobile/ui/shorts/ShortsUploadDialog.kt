@@ -9,6 +9,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +35,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,6 +62,7 @@ import androidx.media3.ui.PlayerView
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.ui.components.ZrpComposerField
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.getPlanLimits
 import one.zrp.social.mobile.util.localizedError
@@ -109,7 +111,17 @@ fun ShortsUploadDialog(onDismiss: () -> Unit, onPosted: (Post) -> Unit) {
                 .widthIn(max = 420.dp),
             shape = MaterialTheme.shapes.large,
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            // Scrollable: the dialog window shrinks when the keyboard
+            // opens (Compose dialogs resize for the IME), and a 320dp
+            // video preview plus header left the caption field below
+            // the visible area of a non-scrolling column - the user was
+            // typing into a field they could not see. The focused field
+            // scrolls its own cursor into view.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -229,13 +241,15 @@ fun ShortsUploadDialog(onDismiss: () -> Unit, onPosted: (Post) -> Unit) {
                         }
                     }
 
-                    OutlinedTextField(
+                    ZrpComposerField(
                         value = state.caption,
                         onValueChange = { if (it.length <= limits.postLength) viewModel.onCaptionChange(it) },
-                        placeholder = { Text(stringResource(R.string.shorts_upload_caption_placeholder)) },
+                        placeholder = stringResource(R.string.shorts_upload_caption_placeholder),
                         enabled = !state.uploading,
                         minLines = 2,
-                        maxLines = 2,
+                        maxLines = 4,
+                        shape = MaterialTheme.shapes.medium,
+                        contentAlignment = Alignment.TopStart,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 12.dp),

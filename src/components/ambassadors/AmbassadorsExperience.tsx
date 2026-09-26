@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAmbassadorCountries } from "@/hooks/useAmbassadorCountries";
+import { useMyAmbassadorProfile } from "@/lib/ambassadors/useMyAmbassadorProfile";
 import AmbassadorHero from "./AmbassadorHero";
 import AmbassadorLevels from "./AmbassadorLevels";
 import CountryExplorer from "./CountryExplorer";
@@ -29,10 +30,15 @@ const WorldMap = dynamic(() => import("./WorldMap"), {
 export default function AmbassadorsExperience() {
   const { t } = useLanguage();
   const { countries, loading } = useAmbassadorCountries();
+  // The viewer's own real ambassador state, fetched once here and
+  // passed to every entry point below (hero CTA, map/explorer country
+  // panels) so an approved or pending ambassador is offered their
+  // dashboard/status, never the application form again.
+  const { status: myStatus } = useMyAmbassadorProfile();
 
   return (
     <div className="bg-white dark:bg-zrp-deepBlack">
-      <AmbassadorHero />
+      <AmbassadorHero myStatus={myStatus} />
 
       <section id="world-map" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:py-20">
         <div className="mx-auto max-w-2xl text-center">
@@ -45,11 +51,11 @@ export default function AmbassadorsExperience() {
         </div>
 
         <div className="mt-10">
-          <WorldMap countries={countries} />
+          <WorldMap countries={countries} myStatus={myStatus} />
         </div>
 
         <div className="mt-10">
-          <CountryExplorer countries={countries} loading={loading} />
+          <CountryExplorer countries={countries} loading={loading} myStatus={myStatus} />
         </div>
       </section>
 

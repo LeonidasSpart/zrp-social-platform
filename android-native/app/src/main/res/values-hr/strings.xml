@@ -2118,6 +2118,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Prijavi se ponovno</string>
     <string name="ambassadors_dashboard_suspended_title">Status ambasadora suspendiran</string>
     <string name="ambassadors_dashboard_suspended_body">Tvoj status ambasadora trenutačno je suspendiran. Kontaktiraj ZRP podršku za više informacija.</string>
+    <string name="ambassadors_apply_already_ambassador">Već si ZRP ambasador. Tvoj status, razina i pozivna poveznica nalaze se na tvojoj nadzornoj ploči.</string>
     <string name="ambassadors_dashboard_my_country">Moja država</string>
     <string name="ambassadors_dashboard_my_level">Moja razina</string>
     <string name="ambassadors_dashboard_my_invitation_link">Moja pozivna poveznica</string>
@@ -2246,6 +2247,9 @@
     <string name="communities_detail_delete_confirm_body">Ovo uklanja %1$s za sve i ne može se poništiti. Objave označene #%2$s neće biti izbrisane.</string>
     <string name="communities_detail_delete_confirm_action">Izbriši</string>
     <string name="communities_detail_delete_error">Nije bilo moguće izbrisati ovu zajednicu. Pokušaj ponovno.</string>
+    <string name="communities_detail_leave_confirm_title">Napustiti ovu zajednicu?</string>
+    <string name="communities_detail_leave_confirm_body">Napustit ćeš %1$s. Možeš se ponovno pridružiti bilo kada.</string>
+    <string name="communities_detail_owner_cannot_leave">Vlasnik si ove zajednice pa je ne možeš napustiti. Izbriši je da bi je zatvorio za sve.</string>
     <string name="communities_error_load">Učitavanje zajednica nije uspjelo.</string>
     <string name="communities_error_create">Kreiranje zajednice nije uspjelo.</string>
     <string name="communities_error_join">Pridruživanje zajednici nije uspjelo.</string>
@@ -2369,4 +2373,14 @@
     <string name="auth_username_taken">To korisničko ime je zauzeto.</string>
     <string name="auth_username_format_hint">3-20 znakova, samo slova/brojevi/podvlake</string>
     <string name="quote_post_title">Citiraj objavu</string>
+
+    <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
+    <string name="post_repost_private_error">Objave privatnih računa ne mogu se ponovno objaviti.</string>
+    <string name="post_repost_forbidden_error">Ova se objava ne može ponovno objaviti.</string>
+    <string name="post_repost_failed">Ponovna objava nije uspjela. Pokušajte ponovno.</string>
+    <string name="image_viewer_load_failed">Ovu sliku nije moguće učitati.</string>
+    <string name="settings_appearance_title">Izgled</string>
+    <string name="settings_theme_system">Koristi postavku uređaja</string>
+    <string name="music_player_hidden">Player je skriven. Reprodukcija se nastavlja.</string>
+    <string name="music_show_player">Prikaži player</string>
 </resources>

@@ -41,6 +41,9 @@ final class CommunitiesViewModel: ObservableObject {
     }
 
     func toggleMembership(_ community: Community) {
+        // The owner can't leave (server rule, 409) - the row shows an
+        // Owner chip instead of a toggle, so this is only a guard.
+        if community.isMember && community.myRole == "OWNER" { return }
         guard let index = communities.firstIndex(where: { $0.id == community.id }) else { return }
         let wasMember = community.isMember
         communities[index].isMember.toggle()
@@ -217,14 +220,26 @@ private struct CommunityRow: View {
 
                 Spacer()
 
-                Button(action: onToggleMembership) {
-                    (community.isMember ? Text(.communitiesJoined) : Text(.communitiesJoin))
-                        .font(.footnote.weight(.semibold))
-                        .padding(.horizontal, ZrpSpacing.lg)
-                        .frame(minHeight: ZrpMetrics.minTouchTarget)
-                        .background(community.isMember ? ZrpColor.surfaceElevated : ZrpColor.red)
-                        .foregroundStyle(community.isMember ? ZrpColor.onSurface : .white)
+                if community.isMember && community.myRole == "OWNER" {
+                    // The owner can't leave (POST .../leave answers 409) -
+                    // no toggle on the row; delete lives on the detail screen.
+                    Text(.communitiesDetailOwnerBadge)
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, ZrpSpacing.sm)
+                        .padding(.vertical, ZrpSpacing.xs)
+                        .background(ZrpColor.red.opacity(0.12))
+                        .foregroundStyle(ZrpColor.red)
                         .clipShape(Capsule())
+                } else {
+                    Button(action: onToggleMembership) {
+                        (community.isMember ? Text(.communitiesJoined) : Text(.communitiesJoin))
+                            .font(.footnote.weight(.semibold))
+                            .padding(.horizontal, ZrpSpacing.lg)
+                            .frame(minHeight: ZrpMetrics.minTouchTarget)
+                            .background(community.isMember ? ZrpColor.surfaceElevated : ZrpColor.red)
+                            .foregroundStyle(community.isMember ? ZrpColor.onSurface : .white)
+                            .clipShape(Capsule())
+                    }
                 }
             }
         }

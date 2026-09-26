@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,11 +37,12 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -53,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,9 +66,12 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.CommentsRepository
 import one.zrp.social.mobile.network.Comment
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.components.ComposerSendButton
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.LinkifiedText
 import one.zrp.social.mobile.ui.components.VerifiedBadge
+import one.zrp.social.mobile.ui.components.ZrpComposerField
+import one.zrp.social.mobile.ui.components.copyTextWithFeedback
 import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
@@ -218,40 +224,40 @@ fun CommentsScreen(
             }
         }
 
+        // Comment composer: the shared pill field (explicit onSurface text
+        // colour, red cursor - see ZrpComposerField) plus the one red Send
+        // control, bottom-aligned so it stays level with the field's last
+        // line as it grows. Sits above the keyboard via the root Column's
+        // imePadding(); no navigationBarsPadding() here because ZrpNavHost's
+        // Scaffold already applies that inset.
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            OutlinedTextField(
+            ZrpComposerField(
                 value = state.draft,
                 onValueChange = { viewModel.onDraftChange(it) },
-                placeholder = {
-                    Text(
-                        if (replyingToUsername != null) {
-                            stringResource(R.string.comment_reply_to_placeholder, replyingToUsername)
-                        } else {
-                            stringResource(R.string.comment_write_placeholder)
-                        },
-                    )
+                placeholder = if (replyingToUsername != null) {
+                    stringResource(R.string.comment_reply_to_placeholder, replyingToUsername)
+                } else {
+                    stringResource(R.string.comment_write_placeholder)
                 },
                 enabled = !state.isPosting,
+                maxLines = 5,
                 modifier = Modifier.weight(1f),
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(
+            ComposerSendButton(
                 onClick = { viewModel.submit() },
-                enabled = state.draft.isNotBlank() && !state.isPosting,
-            ) {
-                if (state.isPosting) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                } else {
-                    Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.comment_post_cd), tint = ZrpRed)
-                }
-            }
+                enabled = state.draft.isNotBlank(),
+                isSending = state.isPosting,
+                contentDescription = stringResource(R.string.comment_post_cd),
+                icon = Icons.Filled.Send,
+            )
         }
     }
 
@@ -472,13 +478,31 @@ private fun CommentRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            LinkifiedText(
-                text = comment.content,
-                style = MaterialTheme.typography.bodyMedium,
-                onMentionClick = onMentionClick,
-                onHashtagClick = onHashtagClick,
-                modifier = Modifier.padding(top = 2.dp),
-            )
+            // Long-pressing a comment's text offers Copy - there was no
+            // way to copy a comment natively before (the action row has
+            // no copy control, and the text itself swallowed the press).
+            var textMenuOpen by remember { mutableStateOf(false) }
+            val clipboard = LocalClipboardManager.current
+            val context = LocalContext.current
+            Box {
+                LinkifiedText(
+                    text = comment.content,
+                    style = MaterialTheme.typography.bodyMedium,
+                    onMentionClick = onMentionClick,
+                    onHashtagClick = onHashtagClick,
+                    onLongClick = { textMenuOpen = true },
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+                DropdownMenu(expanded = textMenuOpen, onDismissRequest = { textMenuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.action_copy)) },
+                        onClick = {
+                            textMenuOpen = false
+                            clipboard.copyTextWithFeedback(context, comment.content)
+                        },
+                    )
+                }
+            }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,

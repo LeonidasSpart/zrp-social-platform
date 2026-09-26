@@ -70,6 +70,8 @@ fun CommunityDetailScreen(
     var reportError by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var deleteError by remember { mutableStateOf<String?>(null) }
+    var showLeaveConfirm by remember { mutableStateOf(false) }
+    var leaveError by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -154,16 +156,36 @@ fun CommunityDetailScreen(
                                             )
                                         }
                                     }
-                                    if (state.isMember) {
-                                        OutlinedButton(onClick = viewModel::toggleMembership) {
+                                    when {
+                                        !state.isMember -> Button(onClick = viewModel::joinCommunity) {
+                                            Text(stringResource(R.string.communities_join))
+                                        }
+                                        // The owner can't leave (server rule, 409) - a
+                                        // non-interactive "Joined" and the hint below.
+                                        state.myRole == "OWNER" -> OutlinedButton(onClick = {}, enabled = false) {
                                             Text(stringResource(R.string.communities_joined))
                                         }
-                                    } else {
-                                        Button(onClick = viewModel::toggleMembership) {
-                                            Text(stringResource(R.string.communities_join))
+                                        else -> OutlinedButton(onClick = { showLeaveConfirm = true }) {
+                                            Text(stringResource(R.string.communities_leave))
                                         }
                                     }
                                 }
+                            }
+                            if (state.myRole == "OWNER") {
+                                Text(
+                                    text = stringResource(R.string.communities_detail_owner_cannot_leave),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = Spacing.sm),
+                                )
+                            }
+                            if (leaveError != null) {
+                                Text(
+                                    text = leaveError!!,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(top = Spacing.sm),
+                                )
                             }
                             if (deleteError != null) {
                                 Text(
@@ -238,6 +260,41 @@ fun CommunityDetailScreen(
                 viewModel.reportPost(postId, reason, details) { result ->
                     isSubmittingReport = false
                     result.onSuccess { reportingPostId = null }.onFailure { reportError = it.message }
+                }
+            },
+        )
+    }
+
+    if (showLeaveConfirm) {
+        val community = state.community
+        val genericLeaveError = stringResource(R.string.communities_error_leave)
+        AlertDialog(
+            onDismissRequest = { if (!state.isLeaving) showLeaveConfirm = false },
+            title = { Text(stringResource(R.string.communities_detail_leave_confirm_title)) },
+            text = { Text(stringResource(R.string.communities_detail_leave_confirm_body, community?.name ?: "")) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.leaveCommunity { result ->
+                            result
+                                .onSuccess {
+                                    showLeaveConfirm = false
+                                    onBack()
+                                }
+                                .onFailure {
+                                    showLeaveConfirm = false
+                                    leaveError = it.message ?: genericLeaveError
+                                }
+                        }
+                    },
+                    enabled = !state.isLeaving,
+                ) {
+                    Text(stringResource(R.string.communities_leave))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLeaveConfirm = false }, enabled = !state.isLeaving) {
+                    Text(stringResource(R.string.action_cancel))
                 }
             },
         )

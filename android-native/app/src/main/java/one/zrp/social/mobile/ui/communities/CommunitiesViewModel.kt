@@ -55,6 +55,9 @@ class CommunitiesViewModel(private val repository: CommunitiesRepository) : View
     }
 
     fun toggleMembership(community: CommunitySummary) {
+        // The owner can't leave (server rule, 409) - the card shows an
+        // Owner chip instead of a toggle, so this is only a guard.
+        if (community.isMember && community.myRole == "OWNER") return
         val wasMember = community.isMember
         _state.update { state ->
             state.copy(

@@ -16,7 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Article
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CreditCard
@@ -162,7 +162,7 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.nav_back))
             }
             Text(
                 text = stringResource(R.string.settings_title),
@@ -187,8 +187,7 @@ fun SettingsScreen(
             SettingsRow(icon = Icons.Filled.Lock, label = stringResource(R.string.settings_security), onClick = onOpenSecurity)
             SettingsRow(icon = Icons.Filled.Shield, label = stringResource(R.string.settings_privacy_safety), onClick = onOpenPrivacy)
             SettingsRow(icon = Icons.Filled.Language, label = stringResource(R.string.nav_language), onClick = onOpenLanguage)
-            // "Appearance" stays English-only - see AppearanceSettingsScreen's own KDoc.
-            SettingsRow(icon = Icons.Filled.DarkMode, label = "Appearance", onClick = onOpenAppearance)
+            SettingsRow(icon = Icons.Filled.DarkMode, label = stringResource(R.string.settings_appearance_title), onClick = onOpenAppearance)
             SettingsRow(icon = Icons.Filled.Notifications, label = stringResource(R.string.nav_notifications), onClick = onOpenNotifications)
             SettingsRow(icon = Icons.Filled.WorkspacePremium, label = stringResource(R.string.pricing_choose_your_plan), onClick = onOpenPricing)
             // "Monetization" stays English-only - see this file's own KDoc.

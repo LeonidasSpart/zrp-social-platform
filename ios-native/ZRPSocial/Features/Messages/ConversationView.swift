@@ -284,11 +284,13 @@ struct ConversationView: View {
                     Button { viewModel.replyTarget = nil } label: {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundStyle(ZrpColor.onSurfaceMuted)
+                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                            .contentShape(Rectangle())
                     }
                     .accessibilityLabel(Text(.iosCommentCancelReply))
                 }
                 .padding(.horizontal, ZrpSpacing.lg)
-                .padding(.top, ZrpSpacing.sm)
+                .padding(.top, ZrpSpacing.xs)
             }
 
             if let pending = viewModel.pendingImage {
@@ -315,69 +317,27 @@ struct ConversationView: View {
                 .padding(.horizontal, ZrpSpacing.lg)
                 .padding(.vertical, ZrpSpacing.sm)
             } else {
-                HStack(alignment: .bottom, spacing: ZrpSpacing.md) {
-                    // Takes a fresh photo through the device camera,
-                    // distinct from the library picker below - the same
-                    // distinction ChatInterface.tsx's new Camera button
-                    // and Android's CameraAlt button draw from this
-                    // session's own audit (a single ambiguous "photo"
-                    // icon was the reported confusion).
-                    Button {
-                        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                            isShowingCamera = true
-                        } else {
-                            cameraUnavailable = true
-                        }
-                    } label: {
-                        Image(systemName: "camera")
-                            .font(.title3)
-                            .foregroundStyle(ZrpColor.onSurfaceMuted)
-                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                            .contentShape(Rectangle())
-                    }
-                    .disabled(viewModel.isSending)
-                    .accessibilityLabel(Text(.chatOpenCamera))
-
-                    // One picture per message: the route stores a single
-                    // `imageUrl`, so offering a multi-select would promise
-                    // something it cannot keep.
-                    PhotosPicker(
-                        selection: $pickerSelection,
-                        maxSelectionCount: 1,
-                        matching: .images
-                    ) {
-                        Image(systemName: "photo")
-                            .font(.title3)
-                            .foregroundStyle(ZrpColor.onSurfaceMuted)
-                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                            .contentShape(Rectangle())
-                    }
-                    .disabled(viewModel.isSending)
-                    .accessibilityLabel(Text(.iosA11yAddPhoto))
-
-                    Button { isShowingGifPicker = true } label: {
-                        Image(systemName: "text.below.photo")
-                            .font(.title3)
-                            .foregroundStyle(ZrpColor.onSurfaceMuted)
-                            .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
-                            .contentShape(Rectangle())
-                    }
-                    .disabled(viewModel.isSending)
-                    .accessibilityLabel(Text(.composerAddGif))
-
+                HStack(alignment: .bottom, spacing: ZrpSpacing.sm) {
+                    // Camera, photo library, GIF, video and document all
+                    // live behind one "+" - five separate 44pt icons
+                    // left the text field itself ~8pt wide on a 375pt
+                    // phone. The camera is still distinct from the
+                    // library inside the menu (the single ambiguous
+                    // "photo" icon was the reported confusion).
                     ChatAttachmentMenu(
                         onPick: { attachment in
                             Task { await viewModel.send(attachment: attachment) }
                         },
-                        isBusy: viewModel.isSending
-                    )
-
-                    VoiceNoteComposer(
-                        recorder: voiceRecorder,
-                        onRecorded: { attachment in
-                            Task { await viewModel.send(attachment: attachment) }
+                        isBusy: viewModel.isSending,
+                        photoSelection: $pickerSelection,
+                        onCamera: {
+                            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                                isShowingCamera = true
+                            } else {
+                                cameraUnavailable = true
+                            }
                         },
-                        isBusy: viewModel.isSending
+                        onGif: { isShowingGifPicker = true }
                     )
 
                     TextField(
@@ -387,10 +347,34 @@ struct ConversationView: View {
                     )
                     .focused($isComposerFocused)
                     .font(.subheadline)
+                    // Explicit rather than inherited: the field sits on
+                    // `surfaceElevated`, and the primary text colour is
+                    // the one guaranteed to read on it in both
+                    // appearances. The caret follows the brand.
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .tint(ZrpColor.red)
                     .lineLimit(1...5)
-                    .padding(ZrpSpacing.md)
+                    .padding(.horizontal, ZrpSpacing.md)
+                    .padding(.vertical, ZrpSpacing.sm)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
+                    .frame(maxWidth: .infinity)
                     .background(ZrpColor.surfaceElevated)
                     .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: ZrpRadius.lg, style: .continuous)
+                            .strokeBorder(
+                                isComposerFocused ? ZrpColor.red : ZrpColor.outline,
+                                lineWidth: 1
+                            )
+                    )
+
+                    VoiceNoteComposer(
+                        recorder: voiceRecorder,
+                        onRecorded: { attachment in
+                            Task { await viewModel.send(attachment: attachment) }
+                        },
+                        isBusy: viewModel.isSending
+                    )
 
                     Button {
                         Task { await viewModel.send() }
@@ -402,9 +386,16 @@ struct ConversationView: View {
                         } else {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.title2)
+                                // Red only when there is something to
+                                // send: a permanently red send button
+                                // next to an empty field promises a tap
+                                // that does nothing.
+                                .foregroundStyle(viewModel.canSend ? ZrpColor.red : ZrpColor.onSurfaceMuted)
                                 .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                                .contentShape(Rectangle())
                         }
                     }
+                    .buttonStyle(.plain)
                     .disabled(viewModel.isSending || !viewModel.canSend)
                     .accessibilityLabel(Text(.iosA11ySendMessage))
                 }
@@ -472,6 +463,8 @@ struct ConversationView: View {
                     axis: .vertical
                 )
                 .font(.body)
+                .foregroundStyle(ZrpColor.onSurface)
+                .tint(ZrpColor.red)
                 .lineLimit(3...10)
                 .padding(ZrpSpacing.md)
                 .background(ZrpColor.surfaceElevated)
@@ -579,14 +572,29 @@ private struct MessageBubble: View {
                     font: .subheadline
                 )
             }
-            // Same rule PostCardView's own `linkPreview` uses: no
-            // preview once the message already carries an image, and
-            // only the message's own text is scanned for a link -
-            // messages had no preview card at all until now, despite
-            // this exact, already-working component.
-            if message.imageUrl?.isEmpty != false,
-               let target = FirstURL.first(in: message.content) {
-                LinkPreviewCard(url: target)
+            // A ZRP post link is what "Send in Message" sends, so it is
+            // drawn as the post itself and opens the post in-app - not
+            // as a generic web unfurl that opened Safari. Any other link
+            // follows the same rule PostCardView's own `linkPreview`
+            // uses: no preview once the message already carries an
+            // image, and only the message's own text is scanned.
+            if message.imageUrl?.isEmpty != false {
+                switch SharedZrpLink.classify(in: message.content) {
+                case .post(let id)?:
+                    SharedPostCard(postId: id) { post in
+                        navigator.push(.postDetail(postId: post.id, preloaded: post, targetCommentId: nil))
+                    }
+                case .profile(let username)?:
+                    SharedProfileCard(username: username) { navigator.push(.profile(username: $0)) }
+                case .other?:
+                    // The link text above already routes in-app; the generic
+                    // unfurl route cannot read ZRP's own pages.
+                    EmptyView()
+                case nil:
+                    if let target = FirstURL.first(in: message.content) {
+                        LinkPreviewCard(url: target, onZrpLink: { navigator.push($0) })
+                    }
+                }
             }
         }
             .padding(.horizontal, ZrpSpacing.md)

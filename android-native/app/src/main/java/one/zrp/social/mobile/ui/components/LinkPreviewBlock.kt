@@ -1,10 +1,9 @@
 package one.zrp.social.mobile.ui.components
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -77,9 +77,19 @@ fun extractFirstUrl(content: String): String? {
 // [onLoaded] mirrors the reference component's own onLoaded(found)
 // callback, used by callers to decide whether to hide the matching raw
 // URL token in their own linkified text.
+// [onLongClick] lets a host (a message bubble) keep its long-press
+// actions menu reachable from the card too - a plain clickable here
+// consumed the press and made the card a dead zone for that menu.
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LinkPreviewBlock(url: String, onLoaded: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+fun LinkPreviewBlock(
+    url: String,
+    onLoaded: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
+) {
     val context = LocalContext.current
+    val inAppLinkHandler = LocalInAppLinkHandler.current
     val repository = remember { LinkPreviewRepository() }
     var preview by remember(url) { mutableStateOf<LinkPreview?>(null) }
     var loading by remember(url) { mutableStateOf(true) }
@@ -135,9 +145,16 @@ fun LinkPreviewBlock(url: String, onLoaded: (Boolean) -> Unit, modifier: Modifie
             .padding(top = Spacing.sm)
             .clip(MaterialTheme.shapes.medium)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.medium)
-            .clickable {
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(data.url)))
-            },
+            .combinedClickable(
+                role = Role.Button,
+                onLongClick = onLongClick,
+                onClick = {
+                    // Same in-app-first routing as LinkifiedText: a shared
+                    // ZRP post's preview card opens that post here, not in
+                    // a second app task or the browser.
+                    openLink(context, inAppLinkHandler, data.url)
+                },
+            ),
     ) {
         if (data.image != null && !imageErrored) {
             Box(

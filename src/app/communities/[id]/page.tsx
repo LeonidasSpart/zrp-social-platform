@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, Users, Hash, Trash2 } from "lucide-react";
+import { ArrowLeft, Users, Hash, Trash2, LogOut } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import EmptyState from "@/components/ui/EmptyState";
@@ -23,13 +23,20 @@ const CATEGORY_KEY: Record<string, string> = {
 
 export default function CommunityDetailPage() {
   const { t } = useLanguage();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const params = useParams<{ id: string }>();
 
   const [community, setCommunity] = useState<any>(null);
   const [isMember, setIsMember] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
+  // Server-computed (GET /api/communities/[id]): OWNER, creator or site
+  // admin - the exact rule DELETE enforces, so the control is never a
+  // guess from createdBy alone.
+  const [canDelete, setCanDelete] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [membershipError, setMembershipError] = useState<string | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -58,6 +65,7 @@ export default function CommunityDetailPage() {
       setCommunity(data.community);
       setIsMember(data.isMember);
       setMyRole(data.myRole);
+      setCanDelete(!!data.canDelete);
     } catch {
       // A network/server failure previously left `community` null with
       // neither `notFound` nor any error flag set, so it fell through
@@ -91,15 +99,42 @@ export default function CommunityDetailPage() {
     }
   }, [status, loadCommunity, loadFeed]);
 
-  const toggleMembership = async () => {
-    const next = !isMember;
-    setIsMember(next);
-    setCommunity((c: any) => (c ? { ...c, memberCount: c.memberCount + (next ? 1 : -1) } : c));
+  const joinCommunity = async () => {
+    setMembershipError(null);
+    setIsMember(true);
+    setCommunity((c: any) => (c ? { ...c, memberCount: c.memberCount + 1 } : c));
     try {
-      const res = await fetch(`/api/communities/${params.id}/${next ? "join" : "leave"}`, { method: "POST" });
+      const res = await fetch(`/api/communities/${params.id}/join`, { method: "POST" });
       if (!res.ok) throw new Error();
     } catch {
+      setMembershipError(t("communities.errorJoin"));
       loadCommunity();
+    }
+  };
+
+  // Leaving is an explicit, confirmed action (never a silent toggle on
+  // the "Joined" pill), and never offered to the OWNER - the server
+  // refuses that with 409 (see POST /api/communities/[id]/leave); the
+  // owner's only exit is deleting the community, which the UI says.
+  const leaveCommunity = async () => {
+    setLeaving(true);
+    setMembershipError(null);
+    try {
+      const res = await fetch(`/api/communities/${params.id}/leave`, { method: "POST" });
+      if (res.status === 409) {
+        setMembershipError(t("communities.detail.ownerCannotLeave"));
+        setShowLeaveConfirm(false);
+        await loadCommunity();
+        return;
+      }
+      if (!res.ok) throw new Error();
+      router.push("/communities");
+    } catch {
+      setMembershipError(t("communities.errorLeave"));
+      setShowLeaveConfirm(false);
+      await loadCommunity();
+    } finally {
+      setLeaving(false);
     }
   };
 
@@ -116,7 +151,7 @@ export default function CommunityDetailPage() {
     }
   };
 
-  const isCreator = !!session?.user?.id && community?.createdBy?.id === session.user.id;
+  const isOwner = myRole === "OWNER";
 
   if (status === "loading" || loading) {
     return <div className="flex items-center justify-center min-h-screen">{t("action.loading")}</div>;
@@ -184,33 +219,51 @@ export default function CommunityDetailPage() {
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {isCreator && (
+            {canDelete && (
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
                 aria-label={t("communities.detail.deleteButton")}
+                title={t("communities.detail.deleteButton")}
                 className="h-9 w-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-zrp-red dark:text-white/50 dark:hover:bg-white/10"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             )}
-            <button
-              type="button"
-              onClick={toggleMembership}
-              className={`h-9 px-4 rounded-full text-sm font-bold ${
-                isMember
-                  ? "border border-gray-300 dark:border-white/15 text-gray-700 dark:text-white/70"
-                  : "bg-zrp-red text-white"
-              }`}
-            >
-              {isMember ? t("communities.joined") : t("communities.join")}
-            </button>
+            {!isMember ? (
+              <button
+                type="button"
+                onClick={joinCommunity}
+                className="h-9 px-4 rounded-full text-sm font-bold bg-zrp-red text-white"
+              >
+                {t("communities.join")}
+              </button>
+            ) : isOwner ? (
+              <span className="h-9 px-4 inline-flex items-center rounded-full border border-gray-300 dark:border-white/15 text-sm font-bold text-gray-700 dark:text-white/70">
+                {t("communities.joined")}
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowLeaveConfirm(true)}
+                className="h-9 px-4 inline-flex items-center gap-1.5 rounded-full border border-gray-300 dark:border-white/15 text-sm font-bold text-gray-700 dark:text-white/70 hover:bg-gray-50 dark:hover:bg-white/10"
+              >
+                <LogOut className="w-4 h-4 rtl:-scale-x-100" aria-hidden="true" />
+                {t("communities.leave")}
+              </button>
+            )}
           </div>
         </div>
 
-        {deleteError && (
+        {isOwner && (
+          <p className="mt-3 text-xs text-gray-500 dark:text-white/50">
+            {t("communities.detail.ownerCannotLeave")}
+          </p>
+        )}
+
+        {(deleteError || membershipError) && (
           <p role="alert" className="mt-3 text-sm text-zrp-red">
-            {deleteError}
+            {deleteError || membershipError}
           </p>
         )}
 
@@ -245,6 +298,18 @@ export default function CommunityDetailPage() {
           )}
         </div>
       </div>
+
+      {showLeaveConfirm && (
+        <ConfirmModal
+          title={t("communities.detail.leaveConfirmTitle")}
+          body={t("communities.detail.leaveConfirmBody", { name: community.name })}
+          confirmLabel={t("communities.leave")}
+          cancelLabel={t("action.cancel")}
+          busy={leaving}
+          onConfirm={leaveCommunity}
+          onCancel={() => setShowLeaveConfirm(false)}
+        />
+      )}
 
       {showDeleteConfirm && (
         <ConfirmModal

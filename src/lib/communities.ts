@@ -21,6 +21,17 @@ export type CommunityCategoryValue = (typeof COMMUNITY_CATEGORIES)[number];
 
 const HASHTAG_RE = /^[a-z0-9_]{2,32}$/;
 
+/**
+ * The one membership rule beyond join/leave: the OWNER can't leave.
+ * There is no ownership-transfer flow, and an owner-less community
+ * would have nobody able to delete it (the only management action
+ * that exists) - so POST /api/communities/[id]/leave answers 409 with
+ * this message (and code OWNER_CANNOT_LEAVE), and every client hides
+ * "Leave" for the owner and says "delete it instead".
+ */
+export const OWNER_CANNOT_LEAVE_MESSAGE =
+  "The owner can't leave a community. Delete the community instead.";
+
 export function normalizeHashtag(raw: string): string | null {
   const cleaned = raw.trim().replace(/^#/, "").toLowerCase();
   return HASHTAG_RE.test(cleaned) ? cleaned : null;

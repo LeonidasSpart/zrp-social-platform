@@ -279,7 +279,7 @@ export default function MusicMiniPlayer() {
                     className="flex-1 accent-zrp-red"
                   />
 
-                  <span className="text-xs text-white/40 w-8 text-right">
+                  <span className="text-xs text-white/40 w-8 text-end">
                     {Math.round((muted ? 0 : volume) * 100)}
                   </span>
                 </div>
@@ -339,13 +339,13 @@ export default function MusicMiniPlayer() {
 
       {/* Mini Player */}
       {!expanded && (
-        <div className="fixed bottom-[64px] lg:bottom-0 left-0 right-0 lg:left-64 z-[9998]">
+        <div className="fixed bottom-[64px] lg:bottom-0 inset-x-0 lg:start-64 z-[9998]">
           <div className="mx-auto max-w-[1200px] px-2 sm:px-3">
             <div className="relative overflow-hidden rounded-2xl lg:rounded-none border border-white/10 bg-zrp-deepBlack/95 backdrop-blur-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.25)]">
               {/* Progress line */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/10">
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-white/10">
                 <div
-                  className="h-full w-full origin-left bg-zrp-red transition-transform duration-200"
+                  className="h-full w-full origin-left rtl:origin-right bg-zrp-red transition-transform duration-200"
                   style={{
                     transform: `scaleX(${
                       duration ? Math.min(1, progress / duration) : 0
@@ -373,7 +373,7 @@ export default function MusicMiniPlayer() {
                 <button
                   type="button"
                   onClick={() => setExpanded(true)}
-                  className="min-w-0 flex-1 text-left"
+                  className="min-w-0 flex-1 text-start"
                 >
                   <div className="font-semibold text-sm truncate text-white">
                     {current.title}
@@ -475,14 +475,14 @@ export default function MusicMiniPlayer() {
                   <Maximize2 className="w-4 h-4" />
                 </button>
 
-                {/* Dismiss - hides the bar only. Does not pause, does not
-                    clear the current track, and does not touch the queue;
-                    playback (and lock-screen controls) keep working. */}
+                {/* Close - pauses and hides the bar. The track, position
+                    and queue are kept; "Continue listening" on the Music
+                    page (MusicShell) brings it all back. */}
                 <button
                   type="button"
                   onClick={dismiss}
-                  className="shrink-0 w-9 h-9 flex items-center justify-center text-white/50 hover:text-white transition"
-                  aria-label={t("music.player.dismissAria")}
+                  className="shrink-0 w-11 h-11 flex items-center justify-center text-white/50 hover:text-white transition"
+                  aria-label={t("music.player.closeAria")}
                 >
                   <X className="w-4 h-4" />
                 </button>

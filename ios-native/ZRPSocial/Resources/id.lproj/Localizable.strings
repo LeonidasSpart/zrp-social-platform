@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "Gagal membuat daftar.";
 "lists.errorAddMember" = "Gagal menambahkan anggota.";
 "lists.errorRemoveMember" = "Gagal menghapus anggota.";
+"auth.showPassword" = "Tampilkan kata sandi";
+"auth.hidePassword" = "Sembunyikan kata sandi";
+"verifiedBadge.newsAutomated" = "Feed editorial resmi ZRP (otomatis)";
+"profile.errLoadPosts" = "Gagal memuat. Coba lagi.";
+"ambassadors.apply.alreadyAmbassador" = "Kamu sudah menjadi Duta ZRP. Status, level, dan tautan undanganmu ada di dasbor.";
+"communities.detail.leaveConfirmTitle" = "Keluar dari komunitas ini?";
+"communities.detail.leaveConfirmBody" = "Kamu akan keluar dari {name}. Kamu bisa bergabung lagi kapan saja.";
+"communities.detail.ownerCannotLeave" = "Kamu pemilik komunitas ini, jadi kamu tidak bisa keluar. Hapus komunitas untuk menutupnya bagi semua orang.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    id. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP memerlukan akses mikrofon untuk merekam pesan suara. Anda dapat mengaktifkannya di Pengaturan.";
 "ios.post.applyNow" = "Lamar sekarang";
 "ios.chat.cameraUnavailable" = "Kamera tidak tersedia di perangkat ini.";
+"ios.chat.addAttachment" = "Tambahkan lampiran";
+"ios.chat.sharedPost" = "Postingan yang dibagikan";
+"ios.chat.sharedPostUnavailable" = "Postingan ini sudah tidak tersedia.";
+"ios.post.repostBlocked" = "Postingan ini tidak dapat diposting ulang karena akunnya privat.";
+"ios.media.loadFailed" = "Gambar ini tidak dapat dimuat.";

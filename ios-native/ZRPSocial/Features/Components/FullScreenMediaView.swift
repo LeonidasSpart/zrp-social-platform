@@ -105,6 +105,11 @@ private struct ZoomableImage: View {
     @State private var offset: CGSize = .zero
     @State private var committedOffset: CGSize = .zero
 
+    /// Bumped to make `AsyncImage` try the URL again after a failure -
+    /// it has no retry of its own, and a viewer that can only be closed
+    /// and reopened after one dropped packet is not a viewer.
+    @State private var attempt = 0
+
     var body: some View {
         AsyncImage(url: URL(string: url)) { phase in
             switch phase {
@@ -118,15 +123,35 @@ private struct ZoomableImage: View {
                     .simultaneousGesture(drag)
                     .onTapGesture(count: 2) { resetOrZoom() }
             case .failure:
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.largeTitle)
-                    .foregroundStyle(.white.opacity(0.7))
+                // Says what happened, in the viewer's language, and
+                // offers the one useful action - a bare warning glyph
+                // on black told nobody anything.
+                VStack(spacing: ZrpSpacing.md) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundStyle(.white.opacity(0.7))
+                    Text(.iosMediaLoadFailed)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                    Button { attempt += 1 } label: {
+                        Text(.actionRetry)
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, ZrpSpacing.xl)
+                            .frame(minHeight: ZrpMetrics.minTouchTarget)
+                            .background(ZrpColor.red)
+                            .foregroundStyle(.white)
+                            .clipShape(Capsule())
+                    }
+                }
+                .padding(ZrpSpacing.xl)
             case .empty:
                 ProgressView().tint(.white)
             @unknown default:
                 EmptyView()
             }
         }
+        .id(attempt)
     }
 
     private var magnification: some Gesture {

@@ -1196,6 +1196,14 @@
 "lists.errorCreate" = "创建列表失败。";
 "lists.errorAddMember" = "添加成员失败。";
 "lists.errorRemoveMember" = "移除成员失败。";
+"auth.showPassword" = "显示密码";
+"auth.hidePassword" = "隐藏密码";
+"verifiedBadge.newsAutomated" = "ZRP 官方编辑资讯源(自动)";
+"profile.errLoadPosts" = "加载失败,请重试。";
+"ambassadors.apply.alreadyAmbassador" = "你已经是 ZRP 大使。你的状态、等级和邀请链接都在你的控制面板中。";
+"communities.detail.leaveConfirmTitle" = "要退出这个社区吗？";
+"communities.detail.leaveConfirmBody" = "你将退出 {name}。你可以随时再次加入。";
+"communities.detail.ownerCannotLeave" = "你是这个社区的所有者，因此无法退出。删除社区即可为所有人关闭它。";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    zh. A key with no translation yet falls back to the
@@ -1361,3 +1369,8 @@
 "ios.chat.micDenied" = "ZRP 需要访问麦克风以录制语音消息。您可以在设置中开启此权限。";
 "ios.post.applyNow" = "立即申请";
 "ios.chat.cameraUnavailable" = "此设备不支持相机。";
+"ios.chat.addAttachment" = "添加附件";
+"ios.chat.sharedPost" = "分享的帖子";
+"ios.chat.sharedPostUnavailable" = "此帖子已不再可用。";
+"ios.post.repostBlocked" = "由于该账号为私密账号，无法转发此帖子。";
+"ios.media.loadFailed" = "无法加载此图片。";

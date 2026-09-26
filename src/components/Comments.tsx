@@ -751,7 +751,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                     type="button"
                     onClick={() => setReplyImageUrl(null)}
                     aria-label={t("comment.removeAttachment")}
-                    className="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition"
+                    className="absolute -top-2 -end-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition before:absolute before:-inset-2.5 before:content-['']"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -908,7 +908,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 type="button"
                 onClick={() => setNewCommentImageUrl(null)}
                 aria-label={t("comment.removeAttachment")}
-                className="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition"
+                className="absolute -top-2 -end-2 flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white hover:bg-black/90 transition before:absolute before:-inset-2.5 before:content-['']"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -1060,7 +1060,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             <button
               type="button"
               onClick={() => setViewingImageUrl(null)}
-              className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 sm:right-2 sm:top-2"
+              className="absolute end-1 top-[calc(0.25rem+env(safe-area-inset-top))] flex h-11 w-11 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 sm:end-2 sm:top-[calc(0.5rem+env(safe-area-inset-top))]"
               aria-label={t("comment.closeImage")}
             >
               <X className="h-6 w-6" />
