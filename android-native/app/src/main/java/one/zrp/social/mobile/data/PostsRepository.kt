@@ -28,8 +28,8 @@ class PostsRepository {
         ApiClient.authApi.getSession().user?.id
     }
 
-    suspend fun getForYouFeed(cursor: String?): Result<PostsPage> = runCatching {
-        ApiClient.postsApi.getForYouFeed(cursor)
+    suspend fun getForYouFeed(cursor: String?, forceRefresh: Boolean = false): Result<PostsPage> = runCatching {
+        ApiClient.postsApi.getForYouFeed(cursor, refresh = if (forceRefresh) "1" else null)
     }
 
     suspend fun getFollowingFeed(cursor: String?): Result<PostsPage> = runCatching {

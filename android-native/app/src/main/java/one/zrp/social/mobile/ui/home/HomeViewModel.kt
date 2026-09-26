@@ -100,11 +100,18 @@ class HomeViewModel(
         }
     }
 
-    fun refresh(tab: FeedTab = _activeTab.value) {
+    // forceRefresh only matters for FOR_YOU (the explore route's own
+    // 5-minute server-side cache - see PostsApi.getForYouFeed's own
+    // comment); FOLLOWING has no such cache and is always current
+    // regardless. Defaults false so the very first load this ViewModel
+    // issues (see init below) and a same-tab re-select in selectTab()
+    // stay on the cheap cached path - only an explicit pull-to-refresh
+    // or the floating refresh button (HomeScreen.kt) passes true.
+    fun refresh(tab: FeedTab = _activeTab.value, forceRefresh: Boolean = false) {
         val stateFlow = stateFlowFor(tab)
         stateFlow.update { it.copy(isRefreshing = true, error = null) }
         viewModelScope.launch {
-            fetch(tab, cursor = null)
+            fetch(tab, cursor = null, forceRefresh = forceRefresh)
                 .onSuccess { page -> applyFreshPage(stateFlow, page) }
                 .onFailure { error ->
                     stateFlow.update {
@@ -315,8 +322,8 @@ class HomeViewModel(
         )
     }
 
-    private suspend fun fetch(tab: FeedTab, cursor: String?) = when (tab) {
-        FeedTab.FOR_YOU -> repository.getForYouFeed(cursor)
+    private suspend fun fetch(tab: FeedTab, cursor: String?, forceRefresh: Boolean = false) = when (tab) {
+        FeedTab.FOR_YOU -> repository.getForYouFeed(cursor, forceRefresh)
         FeedTab.FOLLOWING -> repository.getFollowingFeed(cursor)
     }
 

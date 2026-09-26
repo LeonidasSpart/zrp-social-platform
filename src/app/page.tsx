@@ -222,18 +222,30 @@ export default function HomePage() {
   const fetchPosts = useCallback(
     async (
       cursor?: string | null,
-      signal?: AbortSignal
+      signal?: AbortSignal,
+      // Only meaningful for /api/posts/explore ("For You"), which caches
+      // its ranked list server-side for 5 minutes - see that route's own
+      // comment. Without this, "Refresh feed" issued the exact same
+      // request an ordinary load does, so it could never see anything
+      // newer than whatever that cache entry already held. Harmless to
+      // pass for the Following endpoint too: it has no such cache, so an
+      // unrecognized query param there is simply ignored.
+      forceRefresh = false
     ) => {
       const endpoint =
         feedType === "for-you"
           ? "/api/posts/explore"
           : "/api/posts";
 
+      const refreshParam = forceRefresh
+        ? "&refresh=1"
+        : "";
+
       const url = cursor
         ? `${endpoint}?cursor=${encodeURIComponent(
             cursor
-          )}&limit=10`
-        : `${endpoint}?limit=10`;
+          )}&limit=10${refreshParam}`
+        : `${endpoint}?limit=10${refreshParam}`;
 
       const res = await fetch(url, {
         signal,
@@ -347,7 +359,15 @@ export default function HomePage() {
         const data =
           await fetchPosts(
             null,
-            controller.signal
+            controller.signal,
+            /*
+             * showRefreshAnimation is exactly "the user (or a mutation
+             * that just happened) explicitly wants current content,"
+             * the same signal the explore route's cache bypass keys
+             * off of - an ordinary first load / tab switch (called
+             * with no argument) stays cached and fast.
+             */
+            showRefreshAnimation
           );
 
         /*

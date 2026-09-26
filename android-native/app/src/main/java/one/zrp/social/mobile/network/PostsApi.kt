@@ -229,8 +229,18 @@ data class CreatePostResponse(val post: Post)
  * ranking logic or invent its own feed algorithm.
  */
 interface PostsApi {
+    // refresh: "1" bypasses the route's own 5-minute server-side cache of
+    // the ranked list for this one request (see the route's own comment)
+    // and re-populates it with a fresh ranking - only sent by an explicit
+    // refresh (pull-to-refresh / the floating refresh button), never by
+    // the initial load or by paginating, so those keep the cheap cached
+    // path. Omitted (null) is byte-identical to the pre-existing
+    // behavior for every caller that doesn't pass it.
     @GET("posts/explore")
-    suspend fun getForYouFeed(@Query("cursor") cursor: String?): PostsPage
+    suspend fun getForYouFeed(
+        @Query("cursor") cursor: String?,
+        @Query("refresh") refresh: String? = null,
+    ): PostsPage
 
     @GET("posts")
     suspend fun getFollowingFeed(
