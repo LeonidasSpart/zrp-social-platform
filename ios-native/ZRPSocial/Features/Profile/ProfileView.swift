@@ -362,7 +362,7 @@ struct ProfileView: View {
                 Text(.profilePinned)
                     .font(.caption.weight(.medium))
             }
-            .foregroundStyle(ZrpColor.blue)
+            .foregroundStyle(ZrpColor.red)
             .padding(.horizontal, ZrpSpacing.lg)
             .padding(.top, ZrpSpacing.md)
 

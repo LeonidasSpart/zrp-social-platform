@@ -245,7 +245,7 @@ struct CommentRowView: View {
             counterButton(
                 systemImage: interaction.bookmarked ? "bookmark.fill" : "bookmark",
                 isOn: interaction.bookmarked,
-                tint: ZrpColor.blue,
+                tint: ZrpColor.red,
                 count: interaction.bookmarkCount,
                 action: onBookmark
             )

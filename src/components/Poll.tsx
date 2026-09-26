@@ -77,14 +77,14 @@ export default function Poll({ pollId, question, options, votes, userVote, expir
               disabled={!canVote || submitting}
               className={`w-full text-left relative p-2 rounded-lg transition ${
                 isSelected
-                  ? "bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-500"
+                  ? "bg-red-50 dark:bg-zrp-red/10 border-2 border-zrp-red"
                   : canVote
                   ? "bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600"
                   : "bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 cursor-default"
               }`}
             >
               <div
-                className="absolute left-0 top-0 h-full bg-blue-100 dark:bg-blue-900/30 rounded-lg transition-all duration-300"
+                className="absolute left-0 top-0 h-full bg-red-50 dark:bg-zrp-red/10 rounded-lg transition-all duration-300"
                 style={{ width: `${percentage}%` }}
               />
               <div className="relative flex items-center justify-between">

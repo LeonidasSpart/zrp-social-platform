@@ -394,7 +394,7 @@ export default function AdminReports() {
                         </button>
                         <button
                           onClick={() => updateStatus(report.id, "reviewed")}
-                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                          className="px-3 py-1 text-sm bg-gray-800 dark:bg-gray-600 text-white rounded-lg hover:bg-gray-900 dark:hover:bg-gray-700 transition"
                         >
                           {t("adminReports.review")}
                         </button>

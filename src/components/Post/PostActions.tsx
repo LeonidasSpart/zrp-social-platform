@@ -144,7 +144,7 @@ export function PostActions({
 
       <button
         onClick={() => window.location.href = `/post/${postId}`}
-        className="flex items-center gap-1 text-sm hover:text-blue-500 transition-colors"
+        className="flex items-center gap-1 text-sm hover:text-zrp-red transition-colors"
       >
         <MessageCircle className="w-5 h-5" />
         <span>{initialComments > 0 && initialComments}</span>
@@ -166,7 +166,7 @@ export function PostActions({
       {onQuote && (
         <button
           onClick={handleQuote}
-          className="flex items-center gap-1 text-sm hover:text-blue-400 transition-colors"
+          className="flex items-center gap-1 text-sm hover:text-zrp-red transition-colors"
           title={t("post.quoteThisPost")}
         >
           <Quote className="w-5 h-5" />
@@ -186,7 +186,7 @@ export function PostActions({
 
       <button
         onClick={handleShare}
-        className="flex items-center gap-1 text-sm hover:text-blue-400 transition-colors"
+        className="flex items-center gap-1 text-sm hover:text-zrp-red transition-colors"
       >
         <Share2 className="w-5 h-5" />
       </button>
@@ -198,8 +198,8 @@ export function PostActions({
           className={cn(
             "flex items-center gap-1 text-sm transition-colors",
             isPinned
-              ? "text-blue-600"
-              : "text-zinc-400 hover:text-blue-600"
+              ? "text-zrp-red"
+              : "text-zinc-400 hover:text-zrp-red"
           )}
           title={isPinned ? t("post.unpinFromProfile") : t("post.pinToProfile")}
         >
