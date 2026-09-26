@@ -69,7 +69,6 @@ import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
-import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
@@ -510,7 +509,7 @@ private fun CommentRow(
                     icon = if (comment.bookmarked == true) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
                     count = comment._count.bookmarks,
                     contentDescription = stringResource(if (comment.bookmarked == true) R.string.action_remove_bookmark else R.string.action_bookmark),
-                    tint = if (comment.bookmarked == true) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (comment.bookmarked == true) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = onBookmarkClick,
                 )
                 IconButton(onClick = onShareClick, modifier = Modifier.size(TouchTarget.min)) {

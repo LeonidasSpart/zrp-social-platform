@@ -352,13 +352,13 @@ fun ProfileScreen(
                                                 Icon(
                                                     imageVector = Icons.Filled.PushPin,
                                                     contentDescription = null,
-                                                    tint = ZrpBlue,
+                                                    tint = ZrpRed,
                                                     modifier = Modifier.size(14.dp),
                                                 )
                                                 Text(
                                                     text = stringResource(R.string.profile_pinned),
                                                     style = MaterialTheme.typography.labelMedium,
-                                                    color = ZrpBlue,
+                                                    color = ZrpRed,
                                                     modifier = Modifier.padding(start = Spacing.xs),
                                                 )
                                             }

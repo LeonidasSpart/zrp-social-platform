@@ -137,7 +137,7 @@ export default function AdminPosts() {
           placeholder={t("adminPosts.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-zrp-red"
         />
       </div>
 

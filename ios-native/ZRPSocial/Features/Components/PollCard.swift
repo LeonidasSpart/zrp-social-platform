@@ -81,7 +81,7 @@ struct PollCard: View {
                 if isChosen {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.caption)
-                        .foregroundStyle(ZrpColor.blue)
+                        .foregroundStyle(ZrpColor.red)
                 }
             }
             .padding(.horizontal, ZrpSpacing.md)
@@ -93,7 +93,7 @@ struct PollCard: View {
                 if showsResults {
                     GeometryReader { proxy in
                         Rectangle()
-                            .fill(ZrpColor.blue.opacity(isChosen ? 0.25 : 0.12))
+                            .fill(ZrpColor.red.opacity(isChosen ? 0.25 : 0.12))
                             .frame(width: proxy.size.width * CGFloat(percent) / 100)
                     }
                 }
@@ -102,7 +102,7 @@ struct PollCard: View {
             .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.sm, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: ZrpRadius.sm, style: .continuous)
-                    .strokeBorder(isChosen ? ZrpColor.blue : ZrpColor.outline, lineWidth: 1)
+                    .strokeBorder(isChosen ? ZrpColor.red : ZrpColor.outline, lineWidth: 1)
             )
             .contentShape(Rectangle())
         }
