@@ -63,6 +63,16 @@ iOS has no build shipped yet.
 
 ### Localization
 
+- **Localization expanded from 29 to 34 languages**: Ukrainian, Finnish,
+  Slovak, Slovenian and Lithuanian added with full key parity across Web,
+  Android and iOS (#407). Slovenian's `<plurals>` correctly use its
+  one/two/few/other grammatical dual, distinct from the one/few/many/
+  other rule used by Ukrainian, Slovak and Lithuanian. A systemic
+  first-pass issue where several feature/product names (Trust Passport,
+  Music Studio, Shorts, etc.) were left in English against established
+  precedent was caught by the existing completeness gate and fixed with
+  real translations before merge, the same pattern previously found
+  during EU Wave 1 below.
 - **Localization expanded from 15 to 25 languages** ("EU Wave 1"): Dutch,
   Polish, Romanian, Czech, Hungarian, Swedish, Danish, Croatian, Bulgarian
   and Greek added with full key parity across Web, Android and iOS

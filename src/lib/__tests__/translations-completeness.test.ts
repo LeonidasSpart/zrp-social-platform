@@ -90,7 +90,7 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   // across every language by construction.
   ".",
   "4",
-  "29",
+  "34",
   // Registered-user count - some languages' translators kept the Western
   // thousands-separator style rather than adapting it, which is a valid
   // locale choice, not a missed translation.
@@ -2185,6 +2185,73 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+  ],
+  // The 5-language 29->34 expansion (Ukrainian, Finnish, Slovak,
+  // Slovenian, Lithuanian): "ZRP Market Plus"/"News"/"Music" as
+  // sub-heading labels, template-only strings ({name}: {msg}, {n} XP,
+  // {count}/1000, "/ 100"), and short international tech/social-media
+  // terms real speakers of each language use untranslated (CTR, vs,
+  // Bio, Video, Status, Portfolio, Blockchain, Slug, Album, Interval,
+  // Premium, Freelancer/Freelance, Hackathon, Trivia, Podcasting,
+  // Catering, Genre, Moderator, Offline, Repost, Tx, Tip, Spam,
+  // ONLINE) - the same category of cognate the existing fr/de/id/etc.
+  // lists above already allow, reviewed one language at a time.
+  uk: [
+    "group.lastMessagePrefix", "investors.platform.news.title", "investors.platform.music.title",
+    "press.emailBadge", "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
+    "help.section.marketplace.title", "ads.dashboard.ctr", "trust.outOf100", "play.xp",
+    "music.studio.explicitBadge", "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
+  ],
+  fi: [
+    "profile.media", "settings.video", "chat.contactVideo", "group.lastMessagePrefix",
+    "analytics.platformWeb", "press.emailBadge", "press.logoLabel", "press.faviconLabel",
+    "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
+    "help.section.marketplace.title", "stories.video", "ads.dashboard.ctr", "trust.outOf100",
+    "adminJournalists.portfolio", "play.vs", "play.xp", "opportunity.typeFreelance",
+    "opportunity.typeHackathon", "nav.premium", "music.shell.genrePlaceholder",
+    "music.duration.minutes", "music.studio.explicitBadge", "tipModal.charCount",
+    "professionalCategory.catering", "professionalCategory.freelancer",
+    "communities.create.hashtagLabel", "adminNewsNetwork.verificationFailedNamed",
+  ],
+  sk: [
+    "action.repost", "onboarding.bio", "settings.video", "settings.bio", "chat.offline",
+    "chat.contactVideo", "group.lastMessagePrefix", "team.roleEditor", "adminPayments.tx",
+    "analytics.platformWeb", "profile.tip", "transparency.hoursValue", "transparency.daysValue",
+    "transparency.reasonSpam", "communityCode.e.category1", "press.emailBadge", "press.logoLabel",
+    "press.faviconLabel", "help.hero.cardStatus", "marketplace.heroTitle", "faq.cat.marketPlus",
+    "faq.whatIsMarketPlus.p1Bold", "help.section.marketplace.title", "stories.video",
+    "journalist.editor.slug", "journalist.editor.slugPlaceholder", "ads.dashboard.ctr",
+    "trust.outOf100", "shorts.repost", "adminNews.slugLabel", "play.typeTrivia", "play.vs",
+    "play.xp", "opportunity.typeFreelance", "opportunity.typeHackathon", "music.duration.minutes",
+    "music.studio.explicitBadge", "music.track.columnAlbum", "music.albumDetail.eyebrow",
+    "tipModal.charCount", "professionalCategory.blockchain", "professionalCategory.podcasting",
+    "professionalCategory.catering", "professionalCategory.freelancer", "time.minutesShort",
+    "time.hoursShort", "time.daysShort", "communities.create.hashtagLabel",
+    "adminNewsNetwork.verificationFailedNamed", "adminSubscriptions.filterInterval",
+    "adminSubscriptionDetail.fieldInterval", "adminSubscriptionDetail.intervalLabel",
+    "adminSubscriptionDetail.colInterval",
+  ],
+  sl: [
+    "settings.video", "chat.contactVideo", "group.lastMessagePrefix", "adminUsers.roleModerator",
+    "adminUsers.colStatus", "investors.platform.music.title", "press.emailBadge",
+    "press.faviconLabel", "faq.adminRoles.modLabel", "marketplace.heroTitle", "faq.cat.marketPlus",
+    "faq.whatIsMarketPlus.p1Bold", "help.section.marketplace.title", "stories.video",
+    "support.ticketDetail.statusLabel", "journalist.editor.slug", "ads.dashboard.ctr",
+    "trust.outOf100", "shorts.premiumLockedTitle", "adminSupport.colStatus",
+    "adminTicket.statusFieldLabel", "adminJournalists.portfolio", "adminNews.slugLabel",
+    "play.xp", "nav.premium", "music.duration.minutes", "music.studio.explicitBadge",
+    "music.track.columnAlbum", "music.albumDetail.eyebrow", "tipModal.charCount",
+    "professionalCategory.blockchain", "professionalCategory.catering",
+    "adminNewsNetwork.verificationFailedNamed", "adminSubscriptions.filterStatus",
+    "adminSubscriptions.filterInterval", "adminSubscriptions.colStatus",
+    "adminSubscriptionDetail.fieldStatus", "adminSubscriptionDetail.fieldInterval",
+    "adminSubscriptionDetail.intervalLabel", "adminSubscriptionDetail.colInterval",
+  ],
+  lt: [
+    "group.lastMessagePrefix", "press.emailBadge", "marketplace.heroTitle", "faq.cat.marketPlus",
+    "faq.whatIsMarketPlus.p1Bold", "help.section.marketplace.title", "ads.dashboard.ctr",
+    "trust.outOf100", "play.xp", "nav.premium", "music.duration.minutes",
+    "music.studio.explicitBadge", "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
   ],
 };
 
