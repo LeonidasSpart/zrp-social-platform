@@ -52,6 +52,11 @@ const DATE_LOCALE_MAP: Record<Language, string> = {
   sr: "sr-Latn-RS",
   bs: "bs-BA",
   mk: "mk-MK",
+  uk: "uk-UA",
+  fi: "fi-FI",
+  sk: "sk-SK",
+  sl: "sl-SI",
+  lt: "lt-LT",
 };
 
 /** BCP-47 tag for `toLocaleDateString`/`toLocaleTimeString`/`toLocaleString`. */

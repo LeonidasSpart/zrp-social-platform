@@ -359,16 +359,17 @@ Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek, Norwegian,
 Serbian (Latin script), Bosnian, Macedonian, Ukrainian, Finnish, Slovak,
 Slovenian and Lithuanian.
 
-The most recent expansion (10 EU languages: Dutch, Polish, Romanian,
-Czech, Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek) shipped
-on Web and Android with full key parity, and on iOS with full parity on
-every key sourced from the shared web dictionary (1,176 keys, verified
-by `ios-native/Tools/generate-localizations.py --check`). iOS also has
-a small set of iOS-only strings with no web counterpart (mostly
-VoiceOver/accessibility labels, 160 keys, `ios-native/Tools/ios-extra-strings.json`)
-; these are now translated into all 24 non-English languages too, with
-completeness enforced by the same `--check` step; see
-[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap--25-language-parity)
+The most recent expansion (5 languages: Ukrainian, Finnish, Slovak,
+Slovenian, Lithuanian) shipped on Web and Android with full key parity,
+and on iOS with full parity on every key sourced from the shared web
+dictionary (1,201 keys, verified by
+`ios-native/Tools/generate-localizations.py --check`). iOS also has a
+small set of iOS-only strings with no web counterpart (mostly
+VoiceOver/accessibility labels, 166 keys,
+`ios-native/Tools/ios-extra-strings.json`); these are translated into
+all 33 non-English languages, with completeness enforced by the same
+`--check` step; see
+[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap-34-language-parity)
 for the verification detail.
 
 Arabic is rendered right-to-left. The web dictionary in
