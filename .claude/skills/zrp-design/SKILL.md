@@ -41,7 +41,7 @@ not a brand change, and is allowed. Changing the asset is never allowed.
 | `zrp-deepBlack` | `#050505` | Dark-mode page ground |
 | `zrp-charcoal` | `#0D0D0D` | Dark-mode raised surface |
 | `zrp-silver` | `#BDBDBD` | Muted metadata |
-| `zrp-blue.*` | `#3B82F6` … | **Secondary only**: trust/info surfaces, data viz, never a primary action |
+| `zrp-blue.*` | `#3B82F6` … | **Secondary only**: trust/info surfaces, admin data viz. Never a primary action or a brand surface (profile activity graph, pinned-post frame, selected/active states are red) |
 
 `yellow`, `amber` and `orange` are deliberately remapped to neutral greys
 in `tailwind.config.js`. That is intentional: ZRP has no warm accent. Do

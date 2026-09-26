@@ -52,7 +52,7 @@ palette, and they already agree:
 | `zrp-deepBlack` / `ZrpDeepBlack` | `#050505` | Dark ground |
 | `zrp-charcoal` / `ZrpCharcoal` | `#0D0D0D` | Dark raised surface |
 | `zrp-silver` / `ZrpSilver` | `#BDBDBD` | Muted metadata |
-| `zrp-blue.*` / `ZrpBlue` | `#3B82F6` | **Secondary only**: trust/info, data viz, never a primary action |
+| `zrp-blue.*` / `ZrpBlue` | `#3B82F6` | **Secondary only**: trust/info, admin data viz. Never a primary action, and never a brand surface: the profile activity graph, pinned-post frame, poll selection, bookmark and pin states are all red |
 | `ZrpGreen` | `#22C55E` | Repost / success only |
 
 `yellow`, `amber` and `orange` are deliberately remapped to neutral greys
