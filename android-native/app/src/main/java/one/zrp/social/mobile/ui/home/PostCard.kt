@@ -111,7 +111,6 @@ import one.zrp.social.mobile.ui.components.extractFirstUrl
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.IconSize
-import one.zrp.social.mobile.ui.theme.ZrpBlue
 import one.zrp.social.mobile.ui.theme.ZrpGreen
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.ViewedPostsTracker
@@ -1033,7 +1032,7 @@ private fun PostActionsMenu(
                             Icon(
                                 imageVector = if (isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
                                 contentDescription = null,
-                                tint = if (isPinned) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = if (isPinned) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
                         text = { Text(stringResource(if (isPinned) R.string.post_unpin_cd else R.string.post_pin_cd)) },
@@ -1411,7 +1410,7 @@ private fun PollBlock(poll: Poll, onVote: (Int) -> Unit, modifier: Modifier = Mo
                     Text(
                         text = stringResource(R.string.poll_voted),
                         style = MaterialTheme.typography.labelSmall,
-                        color = ZrpBlue,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -1429,12 +1428,12 @@ private fun PollOptionRow(
     canVote: Boolean,
     onClick: () -> Unit,
 ) {
-    val borderColor = if (isSelected) ZrpBlue else MaterialTheme.colorScheme.outlineVariant
+    val borderColor = if (isSelected) ZrpRed else MaterialTheme.colorScheme.outlineVariant
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.small)
-            .background(if (isSelected) ZrpBlue.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface)
+            .background(if (isSelected) ZrpRed.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface)
             .border(if (isSelected) 2.dp else 1.dp, borderColor, MaterialTheme.shapes.small)
             .then(if (canVote) Modifier.clickable(onClick = onClick, role = Role.Button) else Modifier),
     ) {
@@ -1448,7 +1447,7 @@ private fun PollOptionRow(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(fraction = pollOptionFraction(percentage))
-                    .background(ZrpBlue.copy(alpha = 0.12f)),
+                    .background(ZrpRed.copy(alpha = 0.12f)),
             )
         }
 
@@ -1558,7 +1557,7 @@ private fun BookmarkButton(bookmarked: Boolean, onClick: () -> Unit) {
         Icon(
             imageVector = if (bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
             contentDescription = stringResource(if (bookmarked) R.string.action_remove_bookmark else R.string.action_bookmark),
-            tint = if (bookmarked) ZrpBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = if (bookmarked) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(IconSize.sm),
         )
     }

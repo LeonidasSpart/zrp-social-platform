@@ -648,7 +648,7 @@ struct PostCardView: View {
             actionButton(
                 systemImage: (interaction.bookmarked ?? false) ? "bookmark.fill" : "bookmark",
                 isActive: interaction.bookmarked ?? false,
-                activeTint: ZrpColor.blue,
+                activeTint: ZrpColor.red,
                 count: nil,
                 label: (interaction.bookmarked ?? false)
                     ? L10n.string(.iosA11yRemoveBookmark)

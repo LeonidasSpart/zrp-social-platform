@@ -750,7 +750,7 @@ private struct MessageBubble: View {
                 // route does as a side effect.
                 Image(systemName: "checkmark.circle.fill")
                     .font(.caption2)
-                    .foregroundStyle(ZrpColor.blue)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
             }
         }
         .accessibilityElement(children: .combine)

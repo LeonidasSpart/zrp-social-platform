@@ -420,10 +420,10 @@ export default function CommentItem({
               aria-label={t("nav.bookmarks")}
               aria-pressed={bookmarked}
               className={`flex items-center gap-1 text-xs transition ${
-                bookmarked ? "text-blue-500" : "text-gray-500 hover:text-blue-500"
+                bookmarked ? "text-zrp-red" : "text-gray-500 hover:text-zrp-red"
               }`}
             >
-              <Bookmark className={`w-3.5 h-3.5 ${bookmarked ? "fill-blue-500" : ""}`} />
+              <Bookmark className={`w-3.5 h-3.5 ${bookmarked ? "fill-zrp-red" : ""}`} />
               {bookmarksCount > 0 && <span className="font-medium">{bookmarksCount}</span>}
             </button>
 

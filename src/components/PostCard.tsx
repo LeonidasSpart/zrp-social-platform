@@ -2735,14 +2735,14 @@ export default function PostCard({
                 <span
                   className={`p-2 rounded-full transition ${
                     commentsEnabled
-                      ? "group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500 group-focus-visible:bg-blue-50 dark:group-focus-visible:bg-blue-900/20 group-focus-visible:text-blue-500"
+                      ? "group-hover:bg-red-50 dark:group-hover:bg-zrp-red/10 group-hover:text-zrp-red group-focus-visible:bg-red-50 dark:group-focus-visible:bg-zrp-red/10 group-focus-visible:text-zrp-red"
                       : ""
                   }`}
                 >
                   <MessageCircle className="w-[18px] h-[18px]" />
                 </span>
 
-                <span className="group-hover:text-blue-500 group-focus-visible:text-blue-500 transition whitespace-nowrap">
+                <span className="group-hover:text-zrp-red group-focus-visible:text-zrp-red transition whitespace-nowrap">
                   {formatCount(
                     commentsCount
                   )}
@@ -2945,10 +2945,10 @@ export default function PostCard({
                   disabled={
                     bookmarkLoading
                   }
-                  className={`group flex h-11 w-11 items-center justify-center rounded-full transition hover:bg-blue-50 dark:hover:bg-blue-900/20 ${
+                  className={`group flex h-11 w-11 items-center justify-center rounded-full transition hover:bg-red-50 dark:hover:bg-zrp-red/10 ${
                     bookmarked
-                      ? "text-blue-500"
-                      : "text-gray-500 dark:text-gray-500 hover:text-blue-500 focus-visible:text-blue-500"
+                      ? "text-zrp-red"
+                      : "text-gray-500 dark:text-gray-500 hover:text-zrp-red focus-visible:text-zrp-red"
                   }`}
                   aria-label={t("nav.bookmarks")}
                   aria-pressed={bookmarked}
@@ -2969,7 +2969,7 @@ export default function PostCard({
                   }
                   aria-label={t("post.share")}
                   title={t("post.share")}
-                  className="flex h-11 w-11 items-center justify-center rounded-full transition text-gray-500 dark:text-gray-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-500 focus-visible:text-blue-500"
+                  className="flex h-11 w-11 items-center justify-center rounded-full transition text-gray-500 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-zrp-red/10 hover:text-zrp-red focus-visible:text-zrp-red"
                 >
                   <Share2 className="w-[18px] h-[18px]" />
                 </button>
