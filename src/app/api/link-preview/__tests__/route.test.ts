@@ -18,13 +18,21 @@ vi.mock("@/lib/redis", () => ({
   getCached: vi.fn(async () => null),
   setCached: vi.fn(async () => {}),
 }));
+// Pass-through by default; individual tests override it to assert the
+// cache-before-limit ordering.
+vi.mock("@/lib/rate-limit", () => ({
+  rateLimit: vi.fn(async () => ({ success: true })),
+}));
 
 import { GET } from "../route";
 import { safeFetch } from "@/lib/ssrf-guard";
-import { setCached } from "@/lib/redis";
+import { getCached, setCached } from "@/lib/redis";
+import { rateLimit } from "@/lib/rate-limit";
 
 const mockedSafeFetch = vi.mocked(safeFetch);
 const mockedSetCached = vi.mocked(setCached);
+const mockedGetCached = vi.mocked(getCached);
+const mockedRateLimit = vi.mocked(rateLimit);
 
 function htmlResponse(html: string, contentType = "text/html; charset=utf-8") {
   return {
@@ -54,6 +62,49 @@ describe("GET /api/link-preview", () => {
   beforeEach(() => {
     mockedSafeFetch.mockReset();
     mockedSetCached.mockReset();
+    mockedGetCached.mockReset();
+    mockedGetCached.mockResolvedValue(null);
+    mockedRateLimit.mockReset();
+    mockedRateLimit.mockResolvedValue({ success: true } as Awaited<ReturnType<typeof rateLimit>>);
+  });
+
+  // A conversation full of shared links (or a feed) can render well
+  // over 30 previews in a minute. Only an uncached lookup costs an
+  // outbound fetch, so only an uncached lookup may count against the
+  // per-client limit - a cached hit must be served even when the
+  // limiter would otherwise refuse, or links past the 30th silently
+  // lose their card.
+  it("serves a cached preview without consulting the rate limiter", async () => {
+    const cached = {
+      url: "https://example.com/a",
+      title: "Cached",
+      description: null,
+      image: null,
+      siteName: "example.com",
+      isVideo: false,
+    };
+    mockedGetCached.mockResolvedValueOnce(cached);
+    mockedRateLimit.mockResolvedValueOnce({
+      success: false,
+      response: NextResponse.json({ error: "Too many" }, { status: 429 }),
+    } as Awaited<ReturnType<typeof rateLimit>>);
+
+    const res = await callGET(req("https://example.com/a"));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(cached);
+    expect(mockedRateLimit).not.toHaveBeenCalled();
+    expect(mockedSafeFetch).not.toHaveBeenCalled();
+  });
+
+  it("still rate-limits an uncached lookup before any outbound fetch", async () => {
+    mockedRateLimit.mockResolvedValueOnce({
+      success: false,
+      response: NextResponse.json({ error: "Too many" }, { status: 429 }),
+    } as Awaited<ReturnType<typeof rateLimit>>);
+
+    const res = await callGET(req("https://example.com/b"));
+    expect(res.status).toBe(429);
+    expect(mockedSafeFetch).not.toHaveBeenCalled();
   });
 
   it("400s when the url parameter is missing", async () => {

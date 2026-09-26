@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, Play } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LinkPreviewInternalCard from "@/components/LinkPreviewInternalCard";
+import { classifyInternalLink } from "@/lib/link-preview-internal";
 
 interface LinkPreview {
   url: string;
@@ -20,6 +22,30 @@ interface LinkPreviewCardProps {
   onLoaded?: (found: boolean) => void;
 }
 
+// One in-flight/settled request per URL per page load. A conversation
+// re-renders its whole message list on every socket event (new message,
+// typing, read receipt), and every PostCard in a feed mounts its own
+// card - without this each of those re-issued the same /api/link-preview
+// request, which both hammered the route and, at 30 lookups/min/IP,
+// tripped its rate limit so that later links on the same page silently
+// got no preview at all. A negative result isn't kept, so a transient
+// failure (429, offline) is retried on the next mount.
+const previewCache = new Map<string, Promise<LinkPreview | null>>();
+
+function fetchPreview(url: string): Promise<LinkPreview | null> {
+  const existing = previewCache.get(url);
+  if (existing) return existing;
+  const promise: Promise<LinkPreview | null> = fetch(`/api/link-preview?url=${encodeURIComponent(url)}`)
+    .then((res) => (res.ok ? (res.json() as Promise<LinkPreview>) : null))
+    .then((data) => (data && (data.title || data.image) ? data : null))
+    .catch(() => null);
+  promise.then((value) => {
+    if (value === null) previewCache.delete(url);
+  });
+  previewCache.set(url, promise);
+  return promise;
+}
+
 export default function LinkPreviewCard({ url, compact = false, onRemove, onLoaded }: LinkPreviewCardProps) {
   const { t } = useLanguage();
   const [preview, setPreview] = useState<LinkPreview | null>(null);
@@ -27,39 +53,53 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
   const [failed, setFailed] = useState(false);
   const [imageErrored, setImageErrored] = useState(false);
 
+  // A link to one of ZRP's own posts or profiles is unfurled from the
+  // live post/user API into an in-app card (see LinkPreviewInternalCard)
+  // - the generic OG scraper can't fetch the app's own origin (SSRF
+  // guard, loopback in dev) and shouldn't need to. Any other internal
+  // page (a hashtag, the home page) gets no card: the plain link text
+  // already navigates in-app.
+  const internal = classifyInternalLink(url);
+  const internalCard = internal && internal.kind !== "other";
+
   useEffect(() => {
+    if (internal) {
+      setLoading(false);
+      setFailed(true);
+      setPreview(null);
+      if (internal.kind === "other") onLoaded?.(false);
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
     setFailed(false);
     setPreview(null);
     setImageErrored(false);
 
-    fetch(`/api/link-preview?url=${encodeURIComponent(url)}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: LinkPreview | null) => {
-        if (cancelled) return;
-        if (data && (data.title || data.image)) {
-          setPreview(data);
-          onLoaded?.(true);
-        } else {
-          setFailed(true);
-          onLoaded?.(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFailed(true);
-          onLoaded?.(false);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    fetchPreview(url).then((data) => {
+      if (cancelled) return;
+      if (data) {
+        setPreview(data);
+        onLoaded?.(true);
+      } else {
+        setFailed(true);
+        onLoaded?.(false);
+      }
+      setLoading(false);
+    });
 
     return () => {
       cancelled = true;
     };
+    // onLoaded is a per-render arrow at every call site; the URL is the
+    // identity that matters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
+
+  if (internalCard) {
+    return <LinkPreviewInternalCard link={internal} onLoaded={onLoaded} />;
+  }
 
   if (loading) {
     return (
@@ -81,11 +121,18 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
   }
 
   let domain = preview.siteName || "";
+  let safeHref: string | null = null;
   try {
-    domain = domain || new URL(preview.url).hostname.replace(/^www\./, "");
+    const parsed = new URL(preview.url);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") safeHref = parsed.toString();
+    domain = domain || parsed.hostname.replace(/^www\./, "");
   } catch {
     // keep whatever we have
   }
+
+  // The href comes back from the server (the canonical URL after
+  // redirects); never render a card whose target isn't plain http(s).
+  if (!safeHref) return null;
 
   // isVideo covers any publisher whose page metadata (og:type=video,
   // twitter:card=player) says so - not just YouTube - so a 20min.ch
@@ -122,7 +169,7 @@ export default function LinkPreviewCard({ url, compact = false, onRemove, onLoad
         </button>
       )}
       <a
-        href={preview.url}
+        href={safeHref}
         target="_blank"
         rel="noopener noreferrer"
         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-zrp-red focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zrp-deepBlack rounded-2xl"
