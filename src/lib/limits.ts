@@ -15,6 +15,7 @@ export interface PlanLimits {
   articlePublishing: boolean;
   teamManagement: boolean;
   apiAccess: boolean;
+  liveAudio: boolean;
   prioritySupport: 'none' | 'standard' | 'priority' | '24/7';
   charityContribution: number;
   priceMonthly: number | null;
@@ -37,6 +38,7 @@ export const PLANS: Record<Plan, PlanLimits> = {
     articlePublishing: false,
     teamManagement: false,
     apiAccess: false,
+    liveAudio: false,
     prioritySupport: 'none',
     charityContribution: 35,
     priceMonthly: 0,
@@ -57,6 +59,7 @@ export const PLANS: Record<Plan, PlanLimits> = {
     articlePublishing: false,
     teamManagement: false,
     apiAccess: false,
+    liveAudio: true,
     prioritySupport: 'standard',
     charityContribution: 35,
     priceMonthly: 9.99,
@@ -77,6 +80,7 @@ export const PLANS: Record<Plan, PlanLimits> = {
     articlePublishing: true,
     teamManagement: true,
     apiAccess: true,
+    liveAudio: true,
     prioritySupport: 'priority',
     charityContribution: 35,
     priceMonthly: 49.99,
@@ -97,6 +101,7 @@ export const PLANS: Record<Plan, PlanLimits> = {
     articlePublishing: true,
     teamManagement: true,
     apiAccess: true,
+    liveAudio: true,
     prioritySupport: '24/7',
     charityContribution: 35,
     priceMonthly: 99.99,

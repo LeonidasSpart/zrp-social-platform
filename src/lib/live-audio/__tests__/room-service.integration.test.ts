@@ -38,15 +38,40 @@ describe.skipIf(!hasRealDatabaseUrl)(
     const roomIds: string[] = [];
     const communityIds: string[] = [];
 
-    async function createUser(label: string) {
+    // Live Audio is a paid feature (see entitlement.ts) - every room-
+    // mechanics test in this file is exercising something OTHER than the
+    // paywall itself, so every user created here defaults to an
+    // ACTIVE "pro" Subscription unless a test explicitly asks for a
+    // free one via { plan: "free", noSubscription: true }. This mirrors
+    // exactly how a real paid user looks in Postgres, rather than
+    // stubbing the entitlement check out.
+    async function createUser(label: string, opts?: { plan?: string; noSubscription?: boolean }) {
+      const plan = opts?.plan ?? "pro";
       const user = await prisma.user.create({
         data: {
           email: `${label}-${runId}@liveaudiotest.example`,
           username: `${label}${runId}`.slice(0, 20),
           password: "x",
+          plan,
         },
       });
       userIds.push(user.id);
+      if (!opts?.noSubscription) {
+        const now = new Date();
+        const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        await prisma.subscription.create({
+          data: {
+            userId: user.id,
+            plan,
+            status: "ACTIVE",
+            billingInterval: "MONTHLY",
+            startedAt: now,
+            currentPeriodStart: now,
+            currentPeriodEnd: periodEnd,
+            nextBillingAt: periodEnd,
+          },
+        });
+      }
       return user;
     }
 
@@ -482,6 +507,174 @@ describe.skipIf(!hasRealDatabaseUrl)(
 
         const { rooms: forHost } = await listDiscoverableRooms({ viewerId: host.id, cursor: null, limit: 50 });
         expect(forHost.map((r) => r.id)).toContain(room.id);
+      });
+    });
+
+    // ─── Paid entitlement (mission: "Live Audio = PAID FEATURE ONLY") ──
+    //
+    // Unlike entitlement.test.ts (pure unit, mocked Prisma, exhaustive
+    // over every SubscriptionStatus/plan combination), these exercise
+    // the REAL gate wired into the REAL room-service functions against
+    // a REAL Postgres row - proving requireLiveAudioAccess() is actually
+    // called on the paths that matter, not just that the helper itself
+    // is correct in isolation.
+    describe("paid entitlement", () => {
+      it("a free user (no Subscription row) cannot create a room", async () => {
+        const free = await createUser("freeu", { plan: "free", noSubscription: true });
+        await expect(
+          createRoom({ hostId: free.id, title: `Room ${runId} paywall-create`, visibility: "PUBLIC" })
+        ).rejects.toMatchObject({ code: "live_audio_paid_feature", status: 403 });
+      });
+
+      it("a free user cannot join an existing (paid host's) room", async () => {
+        const host = await createUser("hostpw");
+        const free = await createUser("freejoinu", { plan: "free", noSubscription: true });
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} paywall-join`, visibility: "PUBLIC" });
+        roomIds.push(room.id);
+
+        await expect(joinRoom(room.id, free.id)).rejects.toMatchObject({
+          code: "live_audio_paid_feature",
+          status: 403,
+        });
+
+        const participantRow = await prisma.liveAudioParticipant.findUnique({
+          where: { roomId_userId: { roomId: room.id, userId: free.id } },
+        });
+        expect(participantRow).toBeNull();
+      });
+
+      it("a free user cannot request to speak, even with a manually-inserted participant row (defense in depth)", async () => {
+        const host = await createUser("hostpw2");
+        const free = await createUser("freespeaku", { plan: "free", noSubscription: true });
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} paywall-speak`, visibility: "PUBLIC" });
+        roomIds.push(room.id);
+        // Bypasses joinRoom's own gate on purpose - simulates a paid
+        // listener whose subscription lapses WHILE already in the room,
+        // which is exactly the mid-session expiration mission §10 covers.
+        await prisma.liveAudioParticipant.create({ data: { roomId: room.id, userId: free.id, role: "LISTENER" } });
+
+        await expect(requestToSpeak(room.id, free.id)).rejects.toMatchObject({
+          code: "live_audio_paid_feature",
+          status: 403,
+        });
+      });
+
+      it("a subscription that expired seconds ago (cron hasn't swept it yet) is denied - status ACTIVE alone is not enough", async () => {
+        const host = await createUser("hostpw3", { noSubscription: true });
+        await prisma.subscription.create({
+          data: {
+            userId: host.id,
+            plan: "pro",
+            status: "ACTIVE", // still ACTIVE in the DB - the cron hasn't run
+            billingInterval: "MONTHLY",
+            startedAt: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000),
+            currentPeriodStart: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000),
+            currentPeriodEnd: new Date(Date.now() - 1000), // lapsed 1s ago
+          },
+        });
+
+        await expect(
+          createRoom({ hostId: host.id, title: `Room ${runId} paywall-lag`, visibility: "PUBLIC" })
+        ).rejects.toMatchObject({ code: "live_audio_paid_feature" });
+      });
+
+      it("a CANCELED subscription is denied even while User.plan/period dates look otherwise valid", async () => {
+        const host = await createUser("hostpw4", { noSubscription: true });
+        await prisma.subscription.create({
+          data: {
+            userId: host.id,
+            plan: "pro",
+            status: "CANCELED",
+            billingInterval: "MONTHLY",
+            startedAt: new Date(),
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+            canceledAt: new Date(),
+          },
+        });
+
+        await expect(
+          createRoom({ hostId: host.id, title: `Room ${runId} paywall-canceled`, visibility: "PUBLIC" })
+        ).rejects.toMatchObject({ code: "live_audio_paid_feature" });
+      });
+
+      it("a legacy paid user with no Subscription row at all (NO_SUBSCRIPTION reconciliation bucket) IS allowed, matching docs/subscriptions.md", async () => {
+        const legacyHost = await createUser("legacyhostpw", { plan: "business", noSubscription: true });
+        const room = await createRoom({
+          hostId: legacyHost.id,
+          title: `Room ${runId} paywall-legacy`,
+          visibility: "PUBLIC",
+        });
+        roomIds.push(room.id);
+        expect(room.status).toBe("LIVE");
+      });
+
+      it("business and enterprise plans (not just pro) can create and join", async () => {
+        const bizHost = await createUser("bizhostpw", { plan: "business" });
+        const entListener = await createUser("entlistenerpw", { plan: "enterprise" });
+        const room = await createRoom({ hostId: bizHost.id, title: `Room ${runId} paywall-biz`, visibility: "PUBLIC" });
+        roomIds.push(room.id);
+
+        const joined = await joinRoom(room.id, entListener.id);
+        expect(joined.participant.role).toBe("LISTENER");
+      });
+
+      it("a scheduled room cannot be started once the host's subscription has lapsed in the meantime", async () => {
+        const host = await createUser("hostpw5", { noSubscription: true });
+        await prisma.subscription.create({
+          data: {
+            userId: host.id,
+            plan: "pro",
+            status: "ACTIVE",
+            billingInterval: "MONTHLY",
+            startedAt: new Date(),
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: new Date(Date.now() + 60 * 60 * 1000), // still valid for now
+          },
+        });
+
+        const room = await createRoom({
+          hostId: host.id,
+          title: `Room ${runId} paywall-scheduled`,
+          visibility: "PUBLIC",
+          scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        });
+        roomIds.push(room.id);
+        expect(room.status).toBe("SCHEDULED");
+
+        // The period lapses before the host actually goes live.
+        await prisma.subscription.update({
+          where: { userId: host.id },
+          data: { status: "EXPIRED", currentPeriodEnd: new Date(Date.now() - 1000), expiredAt: new Date() },
+        });
+
+        const { startScheduledRoom } = await import("../room-service");
+        await expect(startScheduledRoom(room.id, host.id)).rejects.toMatchObject({
+          code: "live_audio_paid_feature",
+        });
+      });
+
+      it("a free user cannot moderate (mute/remove/promote) even by guessing a real roomId/targetUserId", async () => {
+        const host = await createUser("hostpw6");
+        const paidListener = await createUser("paidlistenerpw");
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} paywall-mod`, visibility: "PUBLIC" });
+        roomIds.push(room.id);
+        await joinRoom(room.id, paidListener.id);
+
+        // A free "attacker" who was never a participant at all, calling
+        // moderation actions directly with a real room/target it found -
+        // must be rejected on the paywall before role authority is even
+        // considered.
+        const freeAttacker = await createUser("freeattackerpw", { plan: "free", noSubscription: true });
+        await expect(muteParticipant(room.id, freeAttacker.id, paidListener.id, true)).rejects.toMatchObject({
+          code: "live_audio_paid_feature",
+        });
+        await expect(removeParticipant(room.id, freeAttacker.id, paidListener.id)).rejects.toMatchObject({
+          code: "live_audio_paid_feature",
+        });
+        await expect(promoteToSpeaker(room.id, freeAttacker.id, paidListener.id)).rejects.toMatchObject({
+          code: "live_audio_paid_feature",
+        });
       });
     });
   }
