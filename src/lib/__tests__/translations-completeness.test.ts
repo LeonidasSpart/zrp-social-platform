@@ -2255,6 +2255,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
   ],
   sl: [
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "settings.video", "chat.contactVideo", "group.lastMessagePrefix", "adminUsers.roleModerator",
     "adminUsers.colStatus", "investors.platform.music.title", "press.emailBadge",
     "press.faviconLabel", "faq.adminRoles.modLabel", "marketplace.heroTitle", "faq.cat.marketPlus",
