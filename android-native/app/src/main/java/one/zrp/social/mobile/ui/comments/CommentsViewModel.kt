@@ -13,6 +13,9 @@ import one.zrp.social.mobile.network.Comment
 data class CommentsUiState(
     val comments: List<Comment> = emptyList(),
     val isLoading: Boolean = true,
+    val isLoadingMore: Boolean = false,
+    val nextCursor: String? = null,
+    val endReached: Boolean = false,
     val draft: String = "",
     val isPosting: Boolean = false,
     val replyingToId: String? = null,
@@ -44,10 +47,53 @@ class CommentsViewModel(
     fun refresh() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            repository.getComments(postId)
-                .onSuccess { comments -> _state.update { it.copy(comments = comments, isLoading = false) } }
+            repository.getComments(postId, cursor = null)
+                .onSuccess { page ->
+                    _state.update {
+                        it.copy(
+                            comments = page.comments ?: emptyList(),
+                            isLoading = false,
+                            nextCursor = page.nextCursor,
+                            endReached = page.nextCursor == null,
+                        )
+                    }
+                }
                 .onFailure { error ->
                     _state.update { it.copy(isLoading = false, error = error.message ?: "Couldn't load comments.") }
+                }
+        }
+    }
+
+    /**
+     * Fetches the next page of TOP-LEVEL comment threads (each thread's
+     * own replies already arrived in full on its own page - see
+     * CommentsRepository's own comment) and appends them. Without this,
+     * any post past its first page of 10 top-level comments silently
+     * truncated on Android with no way to reach the rest - a real bug,
+     * not an intentional simplification, since the backend and web
+     * client both fully support paging past it.
+     */
+    fun loadMore() {
+        val current = _state.value
+        if (!canLoadMoreComments(current)) return
+
+        _state.update { it.copy(isLoadingMore = true) }
+        viewModelScope.launch {
+            repository.getComments(postId, cursor = current.nextCursor)
+                .onSuccess { page ->
+                    _state.update {
+                        it.copy(
+                            comments = it.comments + (page.comments ?: emptyList()),
+                            isLoadingMore = false,
+                            nextCursor = page.nextCursor,
+                            endReached = page.nextCursor == null,
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(isLoadingMore = false, error = error.message ?: "Couldn't load more comments.")
+                    }
                 }
         }
     }
@@ -169,6 +215,23 @@ class CommentsViewModel(
             _count = comment._count.copy(bookmarks = comment._count.bookmarks + if (wasBookmarked) -1 else 1),
         )
     }
+}
+
+/**
+ * The pure "is it valid to request another page of top-level comments
+ * right now" guard, factored out of [CommentsViewModel.loadMore] so it's
+ * testable with a plain JUnit test (see PollMathTest.kt /
+ * MessagesViewModelTest.kt for the same pattern already established in
+ * this app - no fake-repository/coroutine-dispatcher test seam exists
+ * for ViewModels yet). Three real failure modes this guards against:
+ * a second request firing while one is already in flight (duplicate
+ * page, wasted call), requesting past the last page (nextCursor null
+ * means the server already said there's nothing more), and requesting
+ * before the first page has ever loaded (isLoading, not isLoadingMore,
+ * covers that - nextCursor is also still null then anyway).
+ */
+internal fun canLoadMoreComments(state: CommentsUiState): Boolean {
+    return !state.isLoadingMore && !state.endReached && state.nextCursor != null
 }
 
 // Comment threads nest to unlimited depth (self-relation, cascade
