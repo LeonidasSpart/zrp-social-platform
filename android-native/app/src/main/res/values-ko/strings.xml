@@ -2372,6 +2372,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">비공개 계정의 게시물은 리포스트할 수 없습니다.</string>
     <string name="post_repost_forbidden_error">이 게시물은 리포스트할 수 없습니다.</string>
+    <string name="post_repost_rate_limited_error">일일 리포스트 한도(%1$d개)에 도달했습니다. 내일 다시 시도하거나 더 높은 한도를 위해 업그레이드하세요.</string>
     <string name="post_repost_failed">리포스트하지 못했습니다. 다시 시도해 주세요.</string>
     <string name="image_viewer_load_failed">이 이미지를 불러오지 못했습니다.</string>
     <string name="settings_appearance_title">화면 모드</string>

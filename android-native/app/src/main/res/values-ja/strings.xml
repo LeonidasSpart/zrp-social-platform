@@ -2372,6 +2372,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">非公開アカウントの投稿はリポストできません。</string>
     <string name="post_repost_forbidden_error">この投稿はリポストできません。</string>
+    <string name="post_repost_rate_limited_error">1日の再投稿の上限(%1$d件)に達しました。明日もう一度お試しいただくか、上限を上げるためにアップグレードしてください。</string>
     <string name="post_repost_failed">リポストできませんでした。もう一度お試しください。</string>
     <string name="image_viewer_load_failed">この画像を読み込めませんでした。</string>
     <string name="settings_appearance_title">外観</string>

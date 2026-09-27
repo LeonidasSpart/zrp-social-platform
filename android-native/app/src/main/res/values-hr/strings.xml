@@ -2377,6 +2377,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Objave privatnih računa ne mogu se ponovno objaviti.</string>
     <string name="post_repost_forbidden_error">Ova se objava ne može ponovno objaviti.</string>
+    <string name="post_repost_rate_limited_error">Dosegnut je dnevni limit reposta (%1$d). Pokušajte ponovno sutra ili nadogradite za veći limit.</string>
     <string name="post_repost_failed">Ponovna objava nije uspjela. Pokušajte ponovno.</string>
     <string name="image_viewer_load_failed">Ovu sliku nije moguće učitati.</string>
     <string name="settings_appearance_title">Izgled</string>

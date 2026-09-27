@@ -2427,6 +2427,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Посты из закрытых аккаунтов нельзя репостить.</string>
     <string name="post_repost_forbidden_error">Этот пост нельзя репостить.</string>
+    <string name="post_repost_rate_limited_error">Достигнут дневной лимит репостов (%1$d). Повторите попытку завтра или перейдите на более высокий тариф.</string>
     <string name="post_repost_failed">Не удалось сделать репост. Попробуйте ещё раз.</string>
     <string name="image_viewer_load_failed">Не удалось загрузить это изображение.</string>
     <string name="settings_appearance_title">Оформление</string>

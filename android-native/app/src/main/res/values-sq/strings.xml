@@ -2427,6 +2427,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Postimet nga llogaritë private nuk mund të ripostohen.</string>
     <string name="post_repost_forbidden_error">Ky postim nuk mund të ripostohet.</string>
+    <string name="post_repost_rate_limited_error">Limiti ditor i ripostimeve u arrit (%1$d). Provo përsëri nesër ose përmirëso planin për një limit më të lartë.</string>
     <string name="post_repost_failed">Ripostimi dështoi. Provo përsëri.</string>
     <string name="image_viewer_load_failed">Kjo imazh nuk u ngarkua dot.</string>
     <string name="settings_appearance_title">Pamja</string>

@@ -2372,6 +2372,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Објавите од приватни профили не можат повторно да се објават.</string>
     <string name="post_repost_forbidden_error">Оваа објава не може повторно да се објави.</string>
+    <string name="post_repost_rate_limited_error">Достигнат е дневниот лимит на реобјави (%1$d). Обидете се повторно утре или надградете за поголем лимит.</string>
     <string name="post_repost_failed">Повторното објавување не успеа. Обидете се повторно.</string>
     <string name="image_viewer_load_failed">Оваа слика не можеше да се вчита.</string>
     <string name="settings_appearance_title">Изглед</string>

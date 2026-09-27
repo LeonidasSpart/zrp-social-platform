@@ -2442,6 +2442,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Posts from private accounts can\'t be reposted.</string>
     <string name="post_repost_forbidden_error">This post can\'t be reposted.</string>
+    <string name="post_repost_rate_limited_error">Daily repost limit reached (%1$d). Try again tomorrow or upgrade for a higher limit.</string>
     <string name="post_repost_failed">Couldn\'t repost. Please try again.</string>
     <string name="image_viewer_load_failed">Couldn\'t load this image.</string>
     <string name="settings_appearance_title">Appearance</string>

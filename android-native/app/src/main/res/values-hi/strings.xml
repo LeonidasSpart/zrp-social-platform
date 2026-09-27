@@ -2372,6 +2372,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">निजी खातों की पोस्ट रीपोस्ट नहीं की जा सकतीं।</string>
     <string name="post_repost_forbidden_error">यह पोस्ट रीपोस्ट नहीं की जा सकती।</string>
+    <string name="post_repost_rate_limited_error">दैनिक रीपोस्ट सीमा (%1$d) पूरी हो गई। कल फिर से कोशिश करें या अधिक सीमा के लिए अपग्रेड करें।</string>
     <string name="post_repost_failed">रीपोस्ट नहीं हो सका। कृपया फिर कोशिश करें।</string>
     <string name="image_viewer_load_failed">यह छवि लोड नहीं हो सकी।</string>
     <string name="settings_appearance_title">दिखावट</string>

@@ -2372,6 +2372,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Innlegg fra private kontoer kan ikke repostes.</string>
     <string name="post_repost_forbidden_error">Dette innlegget kan ikke repostes.</string>
+    <string name="post_repost_rate_limited_error">Daglig repost-grense nådd (%1$d). Prøv igjen i morgen, eller oppgrader for en høyere grense.</string>
     <string name="post_repost_failed">Kunne ikke reposte. Prøv igjen.</string>
     <string name="image_viewer_load_failed">Kunne ikke laste inn dette bildet.</string>
     <string name="settings_appearance_title">Utseende</string>

@@ -2427,6 +2427,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Les publications des comptes privés ne peuvent pas être republiées.</string>
     <string name="post_repost_forbidden_error">Cette publication ne peut pas être republiée.</string>
+    <string name="post_repost_rate_limited_error">Limite quotidienne de partages atteinte (%1$d). Réessayez demain ou passez à un forfait supérieur.</string>
     <string name="post_repost_failed">Impossible de republier. Veuillez réessayer.</string>
     <string name="image_viewer_load_failed">Impossible de charger cette image.</string>
     <string name="settings_appearance_title">Apparence</string>

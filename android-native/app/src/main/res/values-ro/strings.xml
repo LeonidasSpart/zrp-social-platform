@@ -2377,6 +2377,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Postările din conturile private nu pot fi redistribuite.</string>
     <string name="post_repost_forbidden_error">Această postare nu poate fi redistribuită.</string>
+    <string name="post_repost_rate_limited_error">Limita zilnică de repostări a fost atinsă (%1$d). Încearcă din nou mâine sau fă upgrade pentru o limită mai mare.</string>
     <string name="post_repost_failed">Nu s-a putut redistribui. Încearcă din nou.</string>
     <string name="image_viewer_load_failed">Nu s-a putut încărca această imagine.</string>
     <string name="settings_appearance_title">Aspect</string>

@@ -2427,6 +2427,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Gizli hesapların gönderileri yeniden paylaşılamaz.</string>
     <string name="post_repost_forbidden_error">Bu gönderi yeniden paylaşılamaz.</string>
+    <string name="post_repost_rate_limited_error">Günlük repost sınırına ulaşıldı (%1$d). Yarın tekrar deneyin veya daha yüksek bir sınır için yükseltin.</string>
     <string name="post_repost_failed">Yeniden paylaşılamadı. Lütfen tekrar deneyin.</string>
     <string name="image_viewer_load_failed">Bu görsel yüklenemedi.</string>
     <string name="settings_appearance_title">Görünüm</string>

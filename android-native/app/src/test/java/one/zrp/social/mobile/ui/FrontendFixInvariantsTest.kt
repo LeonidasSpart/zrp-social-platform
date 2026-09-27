@@ -67,7 +67,10 @@ class FrontendFixInvariantsTest {
         listOf("home/HomeViewModel.kt", "profile/ProfileViewModel.kt").forEach { path ->
             val src = source(path)
             assertTrue("$path must classify a failed repost via toRepostFailure()", src.contains("toRepostFailure()"))
-            assertTrue("$path must expose repostFailure for the screen", src.contains("val repostFailure: StateFlow<RepostFailure?>"))
+            assertTrue(
+                "$path must expose repostFailure for the screen",
+                src.contains("val repostFailure: StateFlow<RepostFailureInfo?>"),
+            )
         }
         listOf("home/HomeScreen.kt", "profile/ProfileScreen.kt").forEach { path ->
             val src = source(path)
@@ -76,7 +79,12 @@ class FrontendFixInvariantsTest {
         }
         val feedback = source("components/RepostFeedback.kt")
         assertTrue(feedback.contains("R.string.post_repost_private_error"))
-        assertTrue(feedback.contains("http.code() != 403"))
+        // The daily-quota 429 must be its own classification (carrying
+        // the server's real, plan-specific limit), not lumped into the
+        // generic failure the way it used to be - see RepostFailureTest's
+        // own regression coverage for the bug this fixes.
+        assertTrue(feedback.contains("RepostFailure.RATE_LIMITED"))
+        assertTrue(feedback.contains("R.string.post_repost_rate_limited_error"))
     }
 
     @Test

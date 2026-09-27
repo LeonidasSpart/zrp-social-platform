@@ -2381,6 +2381,7 @@
     <string name="quote_post_title">Процитувати допис</string>
     <string name="post_repost_private_error">Дописи з приватних акаунтів не можна репостити.</string>
     <string name="post_repost_forbidden_error">Цей допис не можна репостити.</string>
+    <string name="post_repost_rate_limited_error">Досягнуто денний ліміт репостів (%1$d). Спробуйте ще раз завтра або оновіть план для вищого ліміту.</string>
     <string name="post_repost_failed">Не вдалося зробити репост. Спробуйте ще раз.</string>
     <string name="image_viewer_load_failed">Не вдалося завантажити це зображення.</string>
     <string name="settings_appearance_title">Вигляд</string>

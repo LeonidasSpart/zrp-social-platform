@@ -2372,6 +2372,7 @@
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->
     <string name="post_repost_private_error">Objave s privatnih računa ne mogu se proslijediti.</string>
     <string name="post_repost_forbidden_error">Ova objava ne može se proslijediti.</string>
+    <string name="post_repost_rate_limited_error">Dostignut je dnevni limit reposta (%1$d). Pokušajte ponovo sutra ili nadogradite za veći limit.</string>
     <string name="post_repost_failed">Prosljeđivanje nije uspjelo. Pokušaj ponovo.</string>
     <string name="image_viewer_load_failed">Ova slika nije mogla biti učitana.</string>
     <string name="settings_appearance_title">Izgled</string>
