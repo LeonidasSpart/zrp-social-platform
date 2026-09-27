@@ -182,8 +182,11 @@ Documented honestly rather than silently left out:
   `lastActiveAt` write on every authenticated request (a meaningful
   performance/scope tradeoff not undertaken here); not fabricated as a
   placeholder number.
-- **Admin geography analytics is web-only**, consistent with the existing
-  admin backoffice having no native equivalent.
+- **Admin geography analytics** originally shipped web-only; native
+  Android and iOS admin screens with the same geography/acquisition/
+  platform/language breakdown were added in later work (see git history
+  for `AdminAnalyticsScreen.kt` / `AdminAnalyticsView.swift`) and are not
+  otherwise covered by this document.
 - Historical rows created before this migration carry `signupSource`/
   `signupPlatform` of `UNKNOWN` and `signupCountryCode`/`countryCode` of
   `null` until backfilled (see `scripts/backfill-country-codes.ts` for the
