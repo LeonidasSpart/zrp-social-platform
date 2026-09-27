@@ -156,6 +156,19 @@ class ConversationViewModel(
         val liveSocket = ZrpSocket.connect(tokenStore)
         socket = liveSocket
 
+        // Mirrors GroupConversationViewModel's own EVENT_CONNECT re-join:
+        // Socket.IO's client fires EVENT_CONNECT again on every automatic
+        // reconnect (not just the first connect), so without this the
+        // one-shot "get-status" emit below only ever backfills the
+        // partner's presence for the connection that existed when this
+        // ViewModel was created. After a network drop and reconnect,
+        // partnerOnline stayed frozen at whatever it was before the drop
+        // until the partner's own next unrelated state transition
+        // happened to broadcast a fresh "user-status" - a real staleness
+        // gap, not a cosmetic one, since a stale "online" dot is
+        // actively misleading about whether a message will be seen soon.
+        liveSocket.on(Socket.EVENT_CONNECT, Emitter.Listener { liveSocket.emit("get-status", partnerId) })
+
         liveSocket.on("receive-message", Emitter.Listener { args ->
             val preview = parsePayload(args, SocketMessagePreview::class.java) ?: return@Listener
             if (preview.senderId != partnerId) return@Listener
@@ -239,6 +252,7 @@ class ConversationViewModel(
 
     override fun onCleared() {
         socket?.let { liveSocket ->
+            liveSocket.off(Socket.EVENT_CONNECT)
             liveSocket.off("receive-message")
             liveSocket.off("message-sent")
             liveSocket.off("user-typing")
