@@ -2,9 +2,9 @@
 
 Status: backend MVP implemented (domain model, authorization, realtime
 signaling, moderation, notifications, discovery, cleanup, LiveKit
-integration). This was executed as a backend mission (see the task's own
-title); **no client UI — web, Android, or iOS — was built in this pass**.
-See section 12 for exactly what that leaves for a client to build against.
+integration), plus a functional web client (`/live-audio`,
+`/live-audio/[id]`) built in a follow-up pass. **Android and iOS still
+have no client UI.** See section 12 for exact platform-by-platform status.
 
 ## 1. What already exists, and what this reuses
 
@@ -400,23 +400,29 @@ integration" requirement.
 
 ## 12. Cross-platform status
 
-**No client UI was built for any platform in this pass** — this was run
-as a backend mission (see the task title), and every item below is the
-backend/API/realtime contract a client implements against, not a shipped
-screen.
-
-- **Web/PWA**: `livekit-client` (the browser SDK) is installed
-  (`package.json`) and is the intended client library — ZRP has one web
-  codebase for web and PWA/mobile-browser (see CLAUDE.md), so a single
-  implementation covers both. No page, component, or route under
-  `src/app/live-audio*` exists; a web client would call the REST routes
-  under `/api/live-audio/*` (§9, §11's env vars are server-side only —
-  the client only ever receives a `livekitUrl` + short-lived token from
-  `POST /rooms/[id]/join` or `/token`), connect with
-  `Room.connect(livekitUrl, token)`, and drive UI off LiveKit's own
-  `RoomEvent`s plus this repo's Socket.IO `live-audio:*` broadcasts for
-  moderation-state changes not visible to LiveKit itself (promoted,
-  demoted, room-ended-before-LiveKit-webhook-arrives, etc).
+- **Web/PWA**: **implemented and manually verified** — `src/app/live-audio/page.tsx`
+  (discovery + a "Go Live" create-room modal,
+  `src/components/live-audio/CreateLiveAudioModal.tsx`) and
+  `src/app/live-audio/[id]/page.tsx` (the room screen: joins via
+  `POST /rooms/[id]/join`, connects with `livekit-client`'s
+  `Room.connect(livekitUrl, token)`, publishes/subscribes audio per
+  role, renders participants grouped by role, and exposes speak-request/
+  approve/reject, promote/demote/mute/remove, leave/end — all through
+  the existing REST routes). Realtime updates come from this repo's
+  Socket.IO `live-audio:*` broadcasts (`join-live-audio-room`), not
+  polling. ZRP has one web codebase for web and PWA/mobile-browser (see
+  CLAUDE.md), so this single implementation covers both. Reachable from
+  the Sidebar's primary nav (new `nav.liveAudio` entry, `Radio` icon);
+  all new user-facing strings are translated across all 29 supported
+  languages, verified by the repo's own translation-completeness CI
+  gate. **Manually exercised end-to-end** with Playwright against a real
+  local dev server + Postgres + Redis: login, discovery empty/loaded
+  states, room creation, and the room screen's HOST view — this is how
+  a real, confirmed bug was caught and fixed (see below). **Not
+  exercised**: an actual LiveKit media connection (no deployment exists
+  in this sandbox — the UI's own "Live Audio isn't set up yet" fallback
+  state was what was verified instead, which is the correct, honest
+  behavior for that case) or native mobile browsers specifically.
 - **Android**: backend contract only. `CallViewModel.kt`'s existing
   native WebRTC stack is unrelated (mesh, 1:1) and is not reused or
   touched. A native Live Audio screen would use LiveKit's Android SDK
@@ -425,8 +431,20 @@ screen.
   today; LiveKit's iOS SDK would be the actual mechanism to give it
   audio capability, but building that screen is out of scope here.
 
+**A real bug found and fixed during this web UI pass**: the room page's
+cleanup effect originally called `POST /leave` unconditionally on
+unmount, even when `POST /join` had never succeeded (LiveKit
+unconfigured, a failed request, or React Strict Mode's dev-only double-
+invoke of effects). For a room's own HOST — who never goes through the
+join upsert, since they're seeded directly at room creation — this
+silently marked their already-existing participant row as departed,
+observed directly via the room detail API returning `myRole: null` and
+an empty participant list for the room's own creator. Fixed by only
+firing the leave call when a join had actually completed; re-verified
+via a direct API check showing `myRole: "HOST"` and the participant
+correctly persisted afterward.
+
 This matches the mission's own instruction: implement completely up to
 the external-infrastructure/scope boundary, document what's outside it
 honestly, and never claim a client is done when only the backend
-contract exists — this line was previously wrong (an earlier draft of
-this document claimed "Web: full MVP") and has been corrected.
+contract exists.

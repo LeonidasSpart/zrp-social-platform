@@ -120,6 +120,7 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
  */
 const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   fr: [
+    "liveAudio.visibilityPublic", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.traction.heading",
     "investors.types.familyOffice",
     "investors.platform.music.title",
@@ -287,6 +288,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.scoreLabel",
   ],
   de: [
+    "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.hero.badge",
     "investors.meta.title",
     "investors.roadmap.heading",
@@ -398,6 +402,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colPlan",
   ],
   it: [
+    "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.roadmap.heading",
     "investors.traction.heading",
     "investors.types.vc",
@@ -846,6 +853,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colPlan",
   ],
   id: [
+    "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.marketplace.title",
     "investors.platform.music.title",
     "investors.platform.news.title",
@@ -1074,6 +1083,10 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   nl: [
+    "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.roadmap.heading",
     "investors.technology.crossPlatform.title",
     "investors.types.familyOffice",
@@ -1298,6 +1311,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.scoreLabel",
   ],
   pl: [
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "hashtag.postSingular",
     "adminJournalists.portfolio",
     "adminNews.slugLabel",
@@ -1376,6 +1390,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.actorSystem",
   ],
   ro: [
+    "liveAudio.visibilityPublic", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.types.familyOffice",
     "investors.platform.music.title",
     "investors.platform.news.title",
@@ -1630,6 +1646,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   sv: [
+    "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.types.familyOffice",
     "investors.platform.music.title",
     "investors.platform.news.title",
@@ -1740,6 +1759,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.actorSystem",
   ],
   da: [
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.roadmap.heading",
     "investors.platform.marketplace.title",
     "investors.traction.heading",
@@ -1895,6 +1915,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.scoreLabel",
   ],
   hr: [
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.music.title",
     "investors.platform.news.title",
     "adminJournalists.portfolio",
@@ -2073,6 +2094,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   // Market Plus/Shorts), a short admin/nav label, or a format-only value
   // (e.g. "/ 100", "{count}/1000", "{name}: {msg}", "24/7", "CTR").
   no: [
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.music.title",
     "investors.platform.news.title",
     "sharePost.send",
@@ -2136,6 +2158,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
   ],
   bs: [
+    "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.music.title",
     "investors.platform.news.title",
     "settings.video", "chat.contactVideo", "group.lastMessagePrefix", "adminPayments.tx",
