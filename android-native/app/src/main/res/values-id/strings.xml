@@ -2428,6 +2428,10 @@
     <string name="post_repost_private_error">Postingan dari akun privat tidak dapat diposting ulang.</string>
     <string name="post_repost_forbidden_error">Postingan ini tidak dapat diposting ulang.</string>
     <string name="post_repost_rate_limited_error">Batas repost harian tercapai (%1$d). Coba lagi besok atau tingkatkan paket untuk batas lebih tinggi.</string>
+    <string name="post_recruitment_heading">Peluang kerja</string>
+    <string name="post_recruitment_subtitle">Rekrutmen</string>
+    <string name="post_article_heading">Artikel</string>
+    <string name="post_apply_now">Lamar Sekarang</string>
     <string name="post_repost_failed">Gagal memposting ulang. Silakan coba lagi.</string>
     <string name="image_viewer_load_failed">Gambar ini tidak dapat dimuat.</string>
     <string name="settings_appearance_title">Tampilan</string>

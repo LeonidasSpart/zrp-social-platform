@@ -2373,6 +2373,10 @@
     <string name="post_repost_private_error">Opslag fra private konti kan ikke deles igen.</string>
     <string name="post_repost_forbidden_error">Dette opslag kan ikke deles igen.</string>
     <string name="post_repost_rate_limited_error">Daglig repost-grænse nået (%1$d). Prøv igen i morgen, eller opgrader for en højere grænse.</string>
+    <string name="post_recruitment_heading">Jobmulighed</string>
+    <string name="post_recruitment_subtitle">Rekruttering</string>
+    <string name="post_article_heading">Artikel</string>
+    <string name="post_apply_now">Ansøg nu</string>
     <string name="post_repost_failed">Kunne ikke dele igen. Prøv igen.</string>
     <string name="image_viewer_load_failed">Kunne ikke indlæse dette billede.</string>
     <string name="settings_appearance_title">Udseende</string>

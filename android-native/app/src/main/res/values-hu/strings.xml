@@ -2373,6 +2373,10 @@
     <string name="post_repost_private_error">Privát fiókok bejegyzéseit nem lehet megosztani.</string>
     <string name="post_repost_forbidden_error">Ezt a bejegyzést nem lehet megosztani.</string>
     <string name="post_repost_rate_limited_error">Elérted a napi megosztási limitet (%1$d). Próbáld újra holnap, vagy válts magasabb csomagra a nagyobb limitért.</string>
+    <string name="post_recruitment_heading">Álláslehetőség</string>
+    <string name="post_recruitment_subtitle">Toborzás</string>
+    <string name="post_article_heading">Cikk</string>
+    <string name="post_apply_now">Jelentkezés most</string>
     <string name="post_repost_failed">A megosztás nem sikerült. Próbáld újra.</string>
     <string name="image_viewer_load_failed">Nem sikerült betölteni ezt a képet.</string>
     <string name="settings_appearance_title">Megjelenés</string>

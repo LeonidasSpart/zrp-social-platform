@@ -2373,6 +2373,10 @@
     <string name="post_repost_private_error">Οι αναρτήσεις ιδιωτικών λογαριασμών δεν μπορούν να αναδημοσιευτούν.</string>
     <string name="post_repost_forbidden_error">Αυτή η ανάρτηση δεν μπορεί να αναδημοσιευτεί.</string>
     <string name="post_repost_rate_limited_error">Συμπληρώθηκε το ημερήσιο όριο αναδημοσιεύσεων (%1$d). Δοκιμάστε ξανά αύριο ή αναβαθμίστε για υψηλότερο όριο.</string>
+    <string name="post_recruitment_heading">Ευκαιρία εργασίας</string>
+    <string name="post_recruitment_subtitle">Προσλήψεις</string>
+    <string name="post_article_heading">Άρθρο</string>
+    <string name="post_apply_now">Υποβολή αίτησης</string>
     <string name="post_repost_failed">Η αναδημοσίευση απέτυχε. Δοκιμάστε ξανά.</string>
     <string name="image_viewer_load_failed">Δεν ήταν δυνατή η φόρτωση αυτής της εικόνας.</string>
     <string name="settings_appearance_title">Εμφάνιση</string>

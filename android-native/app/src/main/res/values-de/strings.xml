@@ -2428,6 +2428,10 @@
     <string name="post_repost_private_error">Beiträge privater Konten können nicht repostet werden.</string>
     <string name="post_repost_forbidden_error">Dieser Beitrag kann nicht repostet werden.</string>
     <string name="post_repost_rate_limited_error">Tägliches Repost-Limit erreicht (%1$d). Versuche es morgen erneut oder upgrade für ein höheres Limit.</string>
+    <string name="post_recruitment_heading">Stellenangebot</string>
+    <string name="post_recruitment_subtitle">Rekrutierung</string>
+    <string name="post_article_heading">Artikel</string>
+    <string name="post_apply_now">Jetzt bewerben</string>
     <string name="post_repost_failed">Repost fehlgeschlagen. Bitte erneut versuchen.</string>
     <string name="image_viewer_load_failed">Dieses Bild konnte nicht geladen werden.</string>
     <string name="settings_appearance_title">Darstellung</string>

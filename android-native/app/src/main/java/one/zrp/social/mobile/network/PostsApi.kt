@@ -102,6 +102,21 @@ data class Post(
     // this is never actually absent the way `reposted`/`bookmarked`
     // above are - defaulted only as a Gson-deserialization safeguard.
     val views: Int = 0,
+    // "POST" | "RECRUITMENT" | "ARTICLE" (prisma/schema.prisma's own
+    // Post.type) - defaults to "POST" for Gson-deserialization safety
+    // (an old cached response or a route that doesn't select `type`
+    // should render as a plain post, never as an empty recruitment/
+    // article card). company/location/applyUrl are RECRUITMENT-only;
+    // body is ARTICLE-only (pre-sanitized HTML, same field the website's
+    // rich-text editor writes and PostCard.tsx renders via
+    // dangerouslySetInnerHTML - see PostCard.kt's own ArticleBody for
+    // why that's safe to reuse here via HtmlCompat rather than a second,
+    // Android-only sanitization pass).
+    val type: String = "POST",
+    val company: String? = null,
+    val location: String? = null,
+    val applyUrl: String? = null,
+    val body: String? = null,
 )
 
 data class PostViewResponse(val views: Int?)

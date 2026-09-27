@@ -2428,6 +2428,10 @@
     <string name="post_repost_private_error">无法转发私密账号的帖子。</string>
     <string name="post_repost_forbidden_error">此帖子无法转发。</string>
     <string name="post_repost_rate_limited_error">已达到每日转发限制 (%1$d)。请明天再试,或升级以获得更高的限制。</string>
+    <string name="post_recruitment_heading">招聘信息</string>
+    <string name="post_recruitment_subtitle">招聘</string>
+    <string name="post_article_heading">文章</string>
+    <string name="post_apply_now">立即申请</string>
     <string name="post_repost_failed">转发失败，请重试。</string>
     <string name="image_viewer_load_failed">无法加载此图片。</string>
     <string name="settings_appearance_title">外观</string>

@@ -2428,6 +2428,10 @@
     <string name="post_repost_private_error">Las publicaciones de cuentas privadas no se pueden republicar.</string>
     <string name="post_repost_forbidden_error">Esta publicación no se puede republicar.</string>
     <string name="post_repost_rate_limited_error">Límite diario de reposts alcanzado (%1$d). Inténtalo mañana o mejora tu plan para un límite más alto.</string>
+    <string name="post_recruitment_heading">Oferta de empleo</string>
+    <string name="post_recruitment_subtitle">Contratación</string>
+    <string name="post_article_heading">Artículo</string>
+    <string name="post_apply_now">Postularme ahora</string>
     <string name="post_repost_failed">No se pudo republicar. Inténtalo de nuevo.</string>
     <string name="image_viewer_load_failed">No se pudo cargar esta imagen.</string>
     <string name="settings_appearance_title">Apariencia</string>

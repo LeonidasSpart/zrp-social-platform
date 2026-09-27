@@ -2373,6 +2373,10 @@
     <string name="post_repost_private_error">Objave sa privatnih naloga ne mogu se ponovo objaviti.</string>
     <string name="post_repost_forbidden_error">Ova objava ne može se ponovo objaviti.</string>
     <string name="post_repost_rate_limited_error">Достигнут је дневни лимит репостова (%1$d). Покушајте поново сутра или надоградите за већи лимит.</string>
+    <string name="post_recruitment_heading">Прилика за посао</string>
+    <string name="post_recruitment_subtitle">Регрутовање</string>
+    <string name="post_article_heading">Чланак</string>
+    <string name="post_apply_now">Пријави се сада</string>
     <string name="post_repost_failed">Ponovno objavljivanje nije uspelo. Pokušaj ponovo.</string>
     <string name="image_viewer_load_failed">Ova slika nije mogla da se učita.</string>
     <string name="settings_appearance_title">Izgled</string>

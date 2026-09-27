@@ -2373,6 +2373,10 @@
     <string name="post_repost_private_error">Публикации от частни профили не могат да се препубликуват.</string>
     <string name="post_repost_forbidden_error">Тази публикация не може да се препубликува.</string>
     <string name="post_repost_rate_limited_error">Достигнат е дневният лимит за споделяния (%1$d). Опитайте отново утре или надстройте за по-висок лимит.</string>
+    <string name="post_recruitment_heading">Възможност за работа</string>
+    <string name="post_recruitment_subtitle">Набиране на персонал</string>
+    <string name="post_article_heading">Статия</string>
+    <string name="post_apply_now">Кандидатствай сега</string>
     <string name="post_repost_failed">Препубликуването не успя. Опитайте отново.</string>
     <string name="image_viewer_load_failed">Това изображение не можа да се зареди.</string>
     <string name="settings_appearance_title">Външен вид</string>

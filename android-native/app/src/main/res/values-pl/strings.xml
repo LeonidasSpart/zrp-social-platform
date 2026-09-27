@@ -2383,6 +2383,10 @@
     <string name="post_repost_private_error">Wpisów z prywatnych kont nie można repostować.</string>
     <string name="post_repost_forbidden_error">Tego wpisu nie można repostować.</string>
     <string name="post_repost_rate_limited_error">Osiągnięto dzienny limit repostów (%1$d). Spróbuj ponownie jutro lub ulepsz plan, aby zwiększyć limit.</string>
+    <string name="post_recruitment_heading">Oferta pracy</string>
+    <string name="post_recruitment_subtitle">Rekrutacja</string>
+    <string name="post_article_heading">Artykuł</string>
+    <string name="post_apply_now">Aplikuj teraz</string>
     <string name="post_repost_failed">Nie udało się repostować. Spróbuj ponownie.</string>
     <string name="image_viewer_load_failed">Nie udało się wczytać tego obrazu.</string>
     <string name="settings_appearance_title">Wygląd</string>

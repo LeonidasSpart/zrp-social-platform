@@ -2428,6 +2428,10 @@
     <string name="post_repost_private_error">I post degli account privati non possono essere ripubblicati.</string>
     <string name="post_repost_forbidden_error">Questo post non può essere ripubblicato.</string>
     <string name="post_repost_rate_limited_error">Limite giornaliero di repost raggiunto (%1$d). Riprova domani o esegui l\'upgrade per un limite più alto.</string>
+    <string name="post_recruitment_heading">Offerta di lavoro</string>
+    <string name="post_recruitment_subtitle">Reclutamento</string>
+    <string name="post_article_heading">Articolo</string>
+    <string name="post_apply_now">Candidati ora</string>
     <string name="post_repost_failed">Impossibile ripubblicare. Riprova.</string>
     <string name="image_viewer_load_failed">Impossibile caricare questa immagine.</string>
     <string name="settings_appearance_title">Aspetto</string>

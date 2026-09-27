@@ -509,6 +509,8 @@ fun PostCard(
                     )
                 }
 
+                PostTypeContent(post = post)
+
                 // Matches PostCard.tsx's own render gate exactly:
                 // !post.imageUrl && previewUrl - checked against
                 // imageUrl specifically, not the multi-image imageUrls

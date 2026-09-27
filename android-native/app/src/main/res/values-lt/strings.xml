@@ -2380,6 +2380,10 @@
     <string name="post_repost_private_error">Privačių paskyrų įrašų perskelbti negalima.</string>
     <string name="post_repost_forbidden_error">Šio įrašo perskelbti negalima.</string>
     <string name="post_repost_rate_limited_error">Pasiekta dienos pakartotinių paskelbimų riba (%1$d). Bandykite dar kartą rytoj arba atnaujinkite planą didesnei ribai.</string>
+    <string name="post_recruitment_heading">Darbo galimybė</string>
+    <string name="post_recruitment_subtitle">Įdarbinimas</string>
+    <string name="post_article_heading">Straipsnis</string>
+    <string name="post_apply_now">Pateikti paraišką</string>
     <string name="post_repost_failed">Nepavyko perskelbti. Bandykite dar kartą.</string>
     <string name="image_viewer_load_failed">Nepavyko įkelti šios nuotraukos.</string>
     <string name="settings_appearance_title">Išvaizda</string>

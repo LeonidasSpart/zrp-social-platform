@@ -2383,6 +2383,10 @@
     <string name="post_repost_private_error">Příspěvky ze soukromých účtů nelze sdílet.</string>
     <string name="post_repost_forbidden_error">Tento příspěvek nelze sdílet.</string>
     <string name="post_repost_rate_limited_error">Byl dosažen denní limit repostů (%1$d). Zkuste to zítra znovu nebo si pořiďte vyšší limit.</string>
+    <string name="post_recruitment_heading">Pracovní nabídka</string>
+    <string name="post_recruitment_subtitle">Nábor</string>
+    <string name="post_article_heading">Článek</string>
+    <string name="post_apply_now">Podat žádost</string>
     <string name="post_repost_failed">Sdílení se nezdařilo. Zkuste to znovu.</string>
     <string name="image_viewer_load_failed">Tento obrázek se nepodařilo načíst.</string>
     <string name="settings_appearance_title">Vzhled</string>

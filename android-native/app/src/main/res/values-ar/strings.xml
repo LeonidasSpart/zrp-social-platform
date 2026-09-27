@@ -2428,6 +2428,10 @@
     <string name="post_repost_private_error">لا يمكن إعادة نشر منشورات الحسابات الخاصة.</string>
     <string name="post_repost_forbidden_error">لا يمكن إعادة نشر هذا المنشور.</string>
     <string name="post_repost_rate_limited_error">تم الوصول إلى الحد اليومي لإعادة النشر (%1$d). حاول مرة أخرى غدًا أو قم بالترقية للحصول على حد أعلى.</string>
+    <string name="post_recruitment_heading">فرصة عمل</string>
+    <string name="post_recruitment_subtitle">التوظيف</string>
+    <string name="post_article_heading">مقال</string>
+    <string name="post_apply_now">قدّم الآن</string>
     <string name="post_repost_failed">تعذّرت إعادة النشر. يرجى المحاولة مرة أخرى.</string>
     <string name="image_viewer_load_failed">تعذّر تحميل هذه الصورة.</string>
     <string name="settings_appearance_title">المظهر</string>

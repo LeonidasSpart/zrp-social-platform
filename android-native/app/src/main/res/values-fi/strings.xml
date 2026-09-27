@@ -2370,6 +2370,10 @@
     <string name="post_repost_private_error">Yksityisten tilien julkaisuja ei voi jakaa uudelleen.</string>
     <string name="post_repost_forbidden_error">Tätä julkaisua ei voi jakaa uudelleen.</string>
     <string name="post_repost_rate_limited_error">Päivittäinen uudelleenjulkaisurajoitus saavutettu (%1$d). Yritä huomenna uudelleen tai päivitä saadaksesi suuremman rajan.</string>
+    <string name="post_recruitment_heading">Työmahdollisuus</string>
+    <string name="post_recruitment_subtitle">Rekrytointi</string>
+    <string name="post_article_heading">Artikkeli</string>
+    <string name="post_apply_now">Hae nyt</string>
     <string name="post_repost_failed">Jakaminen epäonnistui. Yritä uudelleen.</string>
     <string name="image_viewer_load_failed">Tätä kuvaa ei voitu ladata.</string>
     <string name="settings_appearance_title">Ulkoasu</string>

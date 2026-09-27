@@ -2382,6 +2382,10 @@ Tega dejanja ni mogoče razveljaviti.</string>
     <string name="post_repost_private_error">Objav zasebnih računov ni mogoče deliti.</string>
     <string name="post_repost_forbidden_error">Te objave ni mogoče deliti.</string>
     <string name="post_repost_rate_limited_error">Dosežena je dnevna omejitev deljenj (%1$d). Poskusite znova jutri ali nadgradite za višjo omejitev.</string>
+    <string name="post_recruitment_heading">Zaposlitvena priložnost</string>
+    <string name="post_recruitment_subtitle">Zaposlovanje</string>
+    <string name="post_article_heading">Članek</string>
+    <string name="post_apply_now">Prijavi se zdaj</string>
     <string name="post_repost_failed">Deljenje ni uspelo. Poskusite znova.</string>
     <string name="image_viewer_load_failed">Te slike ni bilo mogoče naložiti.</string>
     <string name="settings_appearance_title">Videz</string>

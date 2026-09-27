@@ -2382,6 +2382,10 @@ Túto akciu nemožno vrátiť späť.</string>
     <string name="post_repost_private_error">Príspevky zo súkromných účtov nemožno repostovať.</string>
     <string name="post_repost_forbidden_error">Tento príspevok nemožno repostovať.</string>
     <string name="post_repost_rate_limited_error">Bol dosiahnutý denný limit repostov (%1$d). Skúste to zajtra znova alebo si zvýšte limit prostredníctvom vyššieho plánu.</string>
+    <string name="post_recruitment_heading">Pracovná ponuka</string>
+    <string name="post_recruitment_subtitle">Nábor</string>
+    <string name="post_article_heading">Článok</string>
+    <string name="post_apply_now">Podať žiadosť</string>
     <string name="post_repost_failed">Repost sa nepodarilo vytvoriť. Skúste to znova.</string>
     <string name="image_viewer_load_failed">Tento obrázok sa nepodarilo načítať.</string>
     <string name="settings_appearance_title">Vzhľad</string>

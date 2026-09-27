@@ -1006,6 +1006,10 @@ class LocalizationCompletenessTest {
             "play_duels_title",
             "play_level",
             "play_xp",
+            // "Article" - identical spelling and meaning in French, a
+            // genuine cognate (see this file's own header on the
+            // allowlist's intent).
+            "post_article_heading",
             "post_reposts_count",
             "pricing_feature_support",
             "profile_likes",

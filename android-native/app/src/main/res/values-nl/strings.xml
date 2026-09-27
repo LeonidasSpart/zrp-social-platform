@@ -2373,6 +2373,10 @@
     <string name="post_repost_private_error">Berichten van privéaccounts kunnen niet gerepost worden.</string>
     <string name="post_repost_forbidden_error">Dit bericht kan niet gerepost worden.</string>
     <string name="post_repost_rate_limited_error">Dagelijkse repostlimiet bereikt (%1$d). Probeer het morgen opnieuw of upgrade voor een hogere limiet.</string>
+    <string name="post_recruitment_heading">Vacature</string>
+    <string name="post_recruitment_subtitle">Werving</string>
+    <string name="post_article_heading">Artikel</string>
+    <string name="post_apply_now">Nu solliciteren</string>
     <string name="post_repost_failed">Reposten is mislukt. Probeer het opnieuw.</string>
     <string name="image_viewer_load_failed">Deze afbeelding kon niet worden geladen.</string>
     <string name="settings_appearance_title">Weergave</string>
