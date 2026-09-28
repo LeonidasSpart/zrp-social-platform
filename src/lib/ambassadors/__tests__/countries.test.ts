@@ -91,7 +91,7 @@ describe("REGION_BY_CODE covers every country exactly once", () => {
   });
 });
 
-describe("Localization - all 34 ZRP languages", () => {
+describe("Localization - all 38 ZRP languages", () => {
   const LANGS = SUPPORTED_LANGUAGES.map((l) => l.code);
 
   it.each(LANGS)("returns a full, complete list in %s with no missing names", (lang) => {

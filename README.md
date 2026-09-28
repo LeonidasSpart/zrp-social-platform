@@ -26,6 +26,7 @@ visible but **not open source**: see [Licence and intellectual property](#licenc
 - [Platforms](#platforms)
 - [Core features](#core-features)
 - [Messaging](#messaging)
+- [ZRP Live Audio](#zrp-live-audio)
 - [ZRP Music](#zrp-music)
 - [Creator Studio](#creator-studio)
 - [ZRP AI](#zrp-ai)
@@ -33,12 +34,14 @@ visible but **not open source**: see [Licence and intellectual property](#licenc
 - [ZRP Help](#zrp-help)
 - [Opportunities](#opportunities)
 - [Marketplace](#marketplace)
+- [Geography, discovery and analytics](#geography-discovery-and-analytics)
 - [Trust & Safety](#trust--safety)
 - [Privacy](#privacy)
 - [Authentication](#authentication)
 - [Internationalization](#internationalization)
 - [Technology stack](#technology-stack)
 - [Architecture](#architecture)
+- [Reliability & performance](#reliability--performance)
 - [Development setup](#development-setup)
 - [Project structure](#project-structure)
 - [Testing](#testing)
@@ -123,7 +126,9 @@ watching video content.
 
 Dedicated discovery surfaces for trending hashtags, suggested people,
 trending content, search, explore feeds and hashtag feeds. Discovery reads
-real platform data; there is no seeded or placeholder catalogue.
+real platform data; there is no seeded or placeholder catalogue. The "For
+You" feed and Trending also carry an opt-in country signal — see
+[Geography, discovery and analytics](#geography-discovery-and-analytics).
 
 **ZRP Discover** (`/discover`, Web) is a separate, vertical swipeable
 video feed in the style of a ranked short-form feed. It reuses the same
@@ -169,6 +174,37 @@ ZRP includes real-time communication built around privacy and user control:
 Socket connections are authenticated against the user's session; the
 socket server validates identity on the handshake rather than trusting a
 client-supplied user id.
+
+---
+
+## ZRP Live Audio
+
+Scheduled and instant audio rooms (Host / Moderator / Speaker / Listener
+roles), with speak requests, promote/demote/mute/remove moderation
+actions, and room discovery filtered to public rooms plus the caller's
+own community-visibility rooms. Audio transport runs over
+[LiveKit](https://livekit.io) (a self-hostable SFU): access tokens are
+minted server-side with role-scoped grants (a listener's token never
+carries publish rights), and every state transition — join, leave,
+promotion, moderation, room end — is authorized and re-derived from
+Postgres on every request, never trusted from the client. A room ends
+through an explicit host/moderator action, a LiveKit webhook reporting
+the room emptied, or a cron sweep that reclaims an abandoned room after
+its participants have all disconnected or after a 24-hour hard cap.
+Reporting integrates with the existing polymorphic `Report`/`Appeal`
+system rather than a parallel one.
+
+Every Live Audio route fails closed with a `503` when LiveKit's
+credentials are not configured, rather than issuing a fake token.
+
+**Platform status**: implemented and reachable from the main navigation
+on **Web and PWA** (`/live-audio`, `/live-audio/[id]`). **Android and iOS
+currently expose no Live Audio client screens** — the backend/API
+contract exists and is what a native client would build against, but no
+native UI has shipped yet. See
+[`docs/live-audio-architecture.md`](docs/live-audio-architecture.md) for
+the full design, authorization matrix and known limitations (no
+recording, no numeric speaker cap, no plan-gating).
 
 ---
 
@@ -285,6 +321,51 @@ off-platform.
 
 ---
 
+## Geography, discovery and analytics
+
+- **Country normalization.** A user's free-text country is normalized to
+  a canonical ISO 3166-1 alpha-2 `countryCode` (exact, case/diacritic-
+  insensitive matching only — never a fuzzy guess), used consistently for
+  ad targeting, feed ranking and "people near you".
+- **Signup geography and acquisition, tracked immutably.** At
+  registration, `signupCountryCode` (from a local, in-process IP lookup —
+  no raw IP is ever stored) and `signupSource` (`DIRECT` / `REFERRAL` /
+  `CAMPAIGN`, computed from `ref`/`utm_*` parameters, never guessed as
+  "organic") are set once and never rewritten by a later profile edit, so
+  acquisition history stays accurate even if a user later changes their
+  declared country.
+- **Feed geo-boost.** `GET /api/posts/explore` ("For You") applies a
+  small multiplicative boost when the viewer and a post's author share a
+  known country — additive only, never a filter, and never applied to
+  global Trending.
+- **Opt-in national trending.** `GET /api/posts/explore?scope=national`
+  filters Trending to the viewer's own country, falling back to the
+  global pool (with an honest `scopeFallback` flag) when too few national
+  candidates exist, rather than presenting a thin result as complete.
+  This is a real, tested API parameter with **no UI switch on any
+  platform yet** — the same honest scope boundary as the people/business
+  discovery endpoint below.
+- **People and businesses near you** (`GET /api/discover/people`,
+  authenticated only): a working, tested backend endpoint filtered to the
+  viewer's own country. **It has no frontend UI yet on any platform** —
+  a deliberate scope boundary, not an oversight.
+- **Professional profile fields**: `headline`, `company`, `position` and
+  `skills`, editable from Settings on Web, Android and iOS, alongside the
+  platform's existing industry-category taxonomy.
+- **Admin analytics** (`/admin/analytics` on Web, with equivalent screens
+  on Android and iOS, all admin-gated): aggregate, range-filtered
+  breakdowns by country, acquisition source, signup platform and language
+  preference. Any bucket with fewer than 3 users is folded into "Other"
+  rather than shown individually, and no per-user row (email, name, IP)
+  is ever included.
+
+No raw IP address is ever persisted, and no individual's geography is
+ever shown to another ordinary user beyond "we share the same declared
+country". Full detail, including exactly which analytics are and are not
+range-filtered and why: [`docs/user-geography-and-acquisition.md`](docs/user-geography-and-acquisition.md).
+
+---
+
 ## Trust & Safety
 
 Safety is part of the platform architecture rather than a layer on top of
@@ -347,7 +428,7 @@ onboarding gating and plan-gated routes.
 
 ## Internationalization
 
-The interface ships human translations for **34 languages**, verified in
+The interface ships human translations for **38 languages**, verified in
 source (`src/lib/translations.ts`) and present with full key parity
 across Web, `android-native/` (`values-*/strings.xml`) and `ios-native/`
 (`*.lproj`):
@@ -357,19 +438,19 @@ Chinese, Turkish, Bahasa Indonesia, Portuguese (European Portuguese
 usage), Japanese, Korean, Hindi, Dutch, Polish, Romanian, Czech,
 Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek, Norwegian,
 Serbian (Latin script), Bosnian, Macedonian, Ukrainian, Finnish, Slovak,
-Slovenian and Lithuanian.
+Slovenian, Lithuanian, Estonian, Irish, Latvian and Maltese.
 
-The most recent expansion (5 languages: Ukrainian, Finnish, Slovak,
-Slovenian, Lithuanian) shipped on Web and Android with full key parity,
-and on iOS with full parity on every key sourced from the shared web
-dictionary (1,201 keys, verified by
+The most recent expansion (4 languages: Estonian, Irish, Latvian,
+Maltese) shipped on Web and Android with full key parity, and on iOS
+with full parity on every key sourced from the shared web dictionary
+(1,201 keys, verified by
 `ios-native/Tools/generate-localizations.py --check`). iOS also has a
 small set of iOS-only strings with no web counterpart (mostly
 VoiceOver/accessibility labels, 166 keys,
 `ios-native/Tools/ios-extra-strings.json`); these are translated into
-all 33 non-English languages, with completeness enforced by the same
+all 37 non-English languages, with completeness enforced by the same
 `--check` step; see
-[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap-34-language-parity)
+[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap-38-language-parity)
 for the verification detail.
 
 Arabic is rendered right-to-left. The web dictionary in
@@ -403,6 +484,11 @@ Nodemailer
 
 NextAuth · Google · Sign in with Apple · bcrypt · sanitize-html ·
 Redis-backed rate limiting · SSRF guard · Sentry
+
+### Realtime audio
+
+LiveKit (`livekit-server-sdk`, `livekit-client`) — the SFU media transport
+behind ZRP Live Audio (see [ZRP Live Audio](#zrp-live-audio)).
 
 ### Media
 
@@ -466,6 +552,43 @@ At a high level, ZRP is one backend serving several clients:
 The process entrypoint is `server.js`, a custom Node server that hosts the
 Next.js request handler and the Socket.IO server on one port, so realtime
 and HTTP share a single deployment.
+
+---
+
+## Reliability & performance
+
+Backend reliability work, driven by a real, reproduced production
+symptom (intermittent "timeout" errors when navigating between pages):
+
+- **Node HTTP keep-alive tuning.** `server.js` raises the raw HTTP
+  server's `keepAliveTimeout`/`headersTimeout` (65s/66s) above Node's
+  5-second default. Behind a reverse proxy whose own idle timeout is
+  longer than that — Railway's edge included, and a well-documented
+  failure class for Node behind any proxy — the origin could otherwise
+  silently close a connection the proxy still considers reusable, and
+  the next request sent down that stale socket would hang.
+- **Bounded PostgreSQL operations.** The Prisma `pg` driver adapter sets
+  `connectionTimeoutMillis` (5s, since `pg` has no default connection
+  timeout at all) and `statement_timeout`/`query_timeout` (10s each), so
+  a stuck query fails fast and releases its pool slot instead of holding
+  it indefinitely under lock contention or an expensive plan.
+- **Bounded Redis operations.** `src/lib/redis.ts` wraps every cache
+  command in a 300ms timeout, so a "ready but slow" Redis falls back to
+  Postgres within the request's budget instead of hanging. A connection
+  error no longer permanently disables Redis for the process's lifetime
+  (a real prior bug): the client is kept and allowed to self-heal via
+  node-redis's own reconnect strategy, with only the very first,
+  never-yet-connected attempt bounded (8s) so a Redis that is unreachable
+  from boot cannot hang every caller application-wide.
+- **Explore request-path optimization.** `GET /api/posts/explore` now
+  only performs its (real) country lookup when the request actually needs
+  it — national-scope Trending — skipping it entirely on a cache hit or
+  on global Trending, and runs the independent like/poll-vote lookups
+  concurrently instead of sequentially.
+
+These are bounded timeouts and targeted request-path fixes for a
+diagnosed failure class, not a claim that every possible backend hang has
+been eliminated or exhaustively verified under production load.
 
 ---
 
@@ -700,8 +823,10 @@ Direction, not a delivery commitment. Dates are not promised.
 - Complete the blocked backend capabilities the native clients need.
 - Extend Trust & Safety tooling and the public transparency reporting.
 - Broaden ZRP Music, Creator Studio and Opportunities.
-- Continue expanding localization coverage beyond the current 25
+- Continue expanding localization coverage beyond the current 38
   languages as new markets are prioritized.
+- Bring Live Audio to Android and iOS with native client screens against
+  the existing backend contract.
 - Keep tagging Web releases and publishing GitHub Releases going
   forward: see [Versioning and releases](#versioning-and-releases).
 
@@ -754,8 +879,8 @@ release cadence:
 
 - `android-native/` increments `versionCode`/`versionName` in
   `app/build.gradle` on every change destined for a real upload,
-  documented inline at each bump; currently versionCode 31,
-  versionName 4.0.25. It has an **Internal Testing** listing on Google
+  documented inline at each bump; currently versionCode 32,
+  versionName 4.0.26. It has an **Internal Testing** listing on Google
   Play, not a public release.
 - `android/` (the Capacitor shell being superseded) is still at its
   original placeholder `versionCode 1` / `versionName "1.0"`.
@@ -810,6 +935,12 @@ Full terms: [LICENSE](LICENSE).
   Network architecture and operations
 - [`docs/database-migration-deployment.md`](docs/database-migration-deployment.md):
   database migration/deployment procedure
+- [`docs/user-geography-and-acquisition.md`](docs/user-geography-and-acquisition.md):
+  geography, acquisition and professional-profile data model
+- [`docs/live-audio-architecture.md`](docs/live-audio-architecture.md):
+  ZRP Live Audio architecture and platform status
+- [`docs/discover-backend.md`](docs/discover-backend.md): ZRP Discover
+  ranking backend
 - [`ios-native/README.md`](ios-native/README.md): native iOS module
 - [`ios-native/PARITY.md`](ios-native/PARITY.md): cross-platform parity
   matrix

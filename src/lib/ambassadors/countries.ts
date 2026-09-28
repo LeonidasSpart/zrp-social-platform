@@ -33,6 +33,10 @@ import fi from "i18n-iso-countries/langs/fi.json";
 import sk from "i18n-iso-countries/langs/sk.json";
 import sl from "i18n-iso-countries/langs/sl.json";
 import lt from "i18n-iso-countries/langs/lt.json";
+import et from "i18n-iso-countries/langs/et.json";
+import ga from "i18n-iso-countries/langs/ga.json";
+import lv from "i18n-iso-countries/langs/lv.json";
+import mt from "i18n-iso-countries/langs/mt.json";
 import { SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
 
 /*
@@ -62,7 +66,7 @@ import { SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
  * shape against this same package on every run.
  *
  * i18n-iso-countries natively ships localized official names for
- * every one of ZRP's 34 supported languages (see SUPPORTED_LANGUAGES
+ * every one of ZRP's 38 supported languages (see SUPPORTED_LANGUAGES
  * in src/lib/translations.ts) - registered once, below, module-wide.
  * getName() already returns the current ISO short name (e.g.
  * "Turkiye", not the older "Turkey") in every language ZRP supports,
@@ -108,6 +112,10 @@ function ensureLocalesRegistered() {
   iso.registerLocale(sk);
   iso.registerLocale(sl);
   iso.registerLocale(lt);
+  iso.registerLocale(et);
+  iso.registerLocale(ga);
+  iso.registerLocale(lv);
+  iso.registerLocale(mt);
   registered = true;
 }
 ensureLocalesRegistered();

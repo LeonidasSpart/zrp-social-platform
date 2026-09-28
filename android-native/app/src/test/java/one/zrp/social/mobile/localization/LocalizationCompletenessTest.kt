@@ -103,6 +103,7 @@ class LocalizationCompletenessTest {
         "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "pt", "ja", "ko", "hi",
         "nl", "pl", "ro", "cs", "hu", "sv", "da", "hr", "bg", "el", "no", "sr", "bs", "mk",
         "uk", "fi", "sk", "sl", "lt",
+        "et", "ga", "lv", "mt",
     )
 
     private val placeholderRegex = Regex("""%\d+\$[sd]|\{[a-zA-Z]+\}""")
@@ -1674,6 +1675,63 @@ class LocalizationCompletenessTest {
             "admin_analytics_post_counts",
             "admin_news_network_verify_failed",
             "admin_news_network_publication_meta",
+        ),
+        // The 4-language 34->38 expansion (Estonian, Irish, Latvian, Maltese) -
+        // same category of reviewed cognate/template exception as every list
+        // above, verified against already-shipped French/German precedent for
+        // the identical key before being allowlisted here.
+        "et" to setOf(
+            "music_title",
+            "music_album_detail_eyebrow",
+            "music_duration_minutes",
+            "play_xp",
+            "trust_out_of_100",
+            "admin_ticket_admin_badge",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+        ),
+        "ga" to setOf(
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_storage_stat_in_uploadthing",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+        ),
+        "lv" to setOf(
+            "music_title",
+            "music_duration_minutes",
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+        ),
+        "mt" to setOf(
+            "music_title",
+            "music_artist_detail_singles_heading",
+            "music_album_detail_eyebrow",
+            "music_duration_minutes",
+            "opportunity_type_freelance",
+            "opportunity_type_hackathon",
+            "play_xp",
+            "trust_out_of_100",
+            "admin_ticket_admin_badge",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "pricing_support_standard",
+            "communities_create_hashtag_label",
+            "admin_subscription_detail_field_status",
         ),
     )
 
