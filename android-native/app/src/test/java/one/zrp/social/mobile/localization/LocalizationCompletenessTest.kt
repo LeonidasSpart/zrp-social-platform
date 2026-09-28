@@ -281,6 +281,11 @@ class LocalizationCompletenessTest {
             "team_role_admin",
             "trust_category_zrp",
             "trust_out_of_100",
+            // "Article" - identical spelling and meaning in French, a
+            // genuine cognate (see this file's own header on the
+            // allowlist's intent).
+            "post_article_heading",
+            "composer_type_article",
         ),
         "de" to setOf(
             // "Community" - identical spelling and meaning in this language, a
