@@ -61,6 +61,7 @@ const DATE_LOCALE_MAP: Record<Language, string> = {
   ga: "ga-IE",
   lv: "lv-LV",
   mt: "mt-MT",
+  rm: "rm-CH",
 };
 
 /** BCP-47 tag for `toLocaleDateString`/`toLocaleTimeString`/`toLocaleString`. */

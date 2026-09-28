@@ -63,6 +63,17 @@ iOS has no build shipped yet.
 
 ### Localization
 
+- **Localization expanded from 38 to 39 languages**: Romansh (Rumantsch
+  Grischun, `rm`/`rm-CH`) added as the final language in the current
+  European-coverage milestone, with full key parity across Web, Android
+  and iOS (#412). Romansh's `<plurals>` use CLDR's simple one/other
+  shape (same as Estonian and English). The one known limitation: the
+  third-party `i18n-iso-countries` package used for ZRP Global
+  Ambassadors' country-name localization has no Romansh locale data at
+  all (a gap in that package, not something ZRP could translate itself);
+  `getAllCountries()`/`getCountryName()` now fall back to English
+  country names for `rm` rather than silently returning an empty list
+  (`src/lib/ambassadors/countries.ts`).
 - **Localization expanded from 34 to 38 languages**: Estonian, Irish,
   Latvian and Maltese added with full key parity across Web, Android and
   iOS (#411). Each was translated independently against the established
