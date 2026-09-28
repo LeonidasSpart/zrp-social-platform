@@ -1369,3 +1369,12 @@ liveAudio.notConfigured
 liveAudio.genericError
 liveAudio.roomNotFound
 liveAudio.connecting
+
+# ── Calling (WebRTC voice/video, same signaling protocol as web/Android) ─
+chat.callRejected
+chat.connectionError
+chat.micCameraError
+chat.missingCallerId
+chat.connectionFailed
+chat.callNoAnswer
+chat.callUnavailable

@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "कुछ गलत हो गया";
 "liveAudio.roomNotFound" = "यह कमरा उपलब्ध नहीं है";
 "liveAudio.connecting" = "कनेक्ट हो रहा है...";
+"chat.callRejected" = "कॉल अस्वीकार कर दी गई";
+"chat.connectionError" = "कनेक्शन त्रुटि:";
+"chat.micCameraError" = "माइक्रोफ़ोन/कैमरा एक्सेस नहीं किया जा सका:";
+"chat.missingCallerId" = "स्वीकार नहीं कर सकते: कॉलर आईडी गायब है";
+"chat.connectionFailed" = "कनेक्शन विफल हुआ";
+"chat.callNoAnswer" = "कोई जवाब नहीं";
+"chat.callUnavailable" = "यह व्यक्ति अभी उपलब्ध नहीं है";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    hi. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "अनम्यूट करें";
 "ios.ads.sponsored" = "प्रायोजित";
 "ios.a11y.sponsoredPost" = "{name} द्वारा प्रायोजित पोस्ट";
-"ios.call.missedTitle" = "मिस्ड कॉल";
-"ios.call.missedBody" = "{name} ने आपको कॉल करने की कोशिश की। ZRP फ़ॉर iPhone अभी कॉल नहीं ले सकता, आप zrp.one पर जवाब दे सकते हैं।";
-"ios.call.dismiss" = "ठीक है";
-"ios.call.unknownCaller" = "कोई";
 "ios.group.untitled" = "ग्रुप";
 "ios.group.suggested" = "सुझाया गया";
 "ios.group.removePhoto" = "ग्रुप फ़ोटो हटाएं";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "यह पोस्ट अब उपलब्ध नहीं है।";
 "ios.post.repostBlocked" = "यह पोस्ट रीपोस्ट नहीं की जा सकती क्योंकि खाता निजी है।";
 "ios.media.loadFailed" = "यह छवि लोड नहीं हो सकी।";
+"ios.call.noVideo" = "कोई वीडियो नहीं";
+"ios.call.fallbackName" = "कॉल";
+"ios.call.incomingVideo" = "इनकमिंग वीडियो कॉल...";
+"ios.call.incomingVoice" = "इनकमिंग वॉइस कॉल...";
+"ios.call.ringing" = "घंटी बज रही है...";
+"ios.call.voiceCallCd" = "वॉइस कॉल";
+"ios.call.videoCallCd" = "वीडियो कॉल";

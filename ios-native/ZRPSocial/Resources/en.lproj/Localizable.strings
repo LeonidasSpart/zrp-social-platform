@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Something went wrong";
 "liveAudio.roomNotFound" = "This room isn't available";
 "liveAudio.connecting" = "Connecting...";
+"chat.callRejected" = "Call was rejected";
+"chat.connectionError" = "Connection error:";
+"chat.micCameraError" = "Could not access microphone/camera:";
+"chat.missingCallerId" = "Cannot accept: missing caller ID";
+"chat.connectionFailed" = "Connection failed";
+"chat.callNoAnswer" = "No answer";
+"chat.callUnavailable" = "This person is unavailable right now";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). This is the
    development-language source; every other language emits its own
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Unmute";
 "ios.ads.sponsored" = "Sponsored";
 "ios.a11y.sponsoredPost" = "Sponsored post by {name}";
-"ios.call.missedTitle" = "Missed call";
-"ios.call.missedBody" = "{name} tried to call you. ZRP for iPhone can't take calls yet; you can answer on zrp.one.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Someone";
 "ios.group.untitled" = "Group";
 "ios.group.suggested" = "Suggested";
 "ios.group.removePhoto" = "Remove group photo";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "This post is no longer available.";
 "ios.post.repostBlocked" = "This post can't be reposted because the account is private.";
 "ios.media.loadFailed" = "Couldn't load this image.";
+"ios.call.noVideo" = "No video";
+"ios.call.fallbackName" = "Call";
+"ios.call.incomingVideo" = "Incoming video call...";
+"ios.call.incomingVoice" = "Incoming voice call...";
+"ios.call.ringing" = "Ringing...";
+"ios.call.voiceCallCd" = "Voice call";
+"ios.call.videoCallCd" = "Video call";

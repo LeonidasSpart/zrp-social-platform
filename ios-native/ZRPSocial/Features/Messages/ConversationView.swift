@@ -1,3 +1,4 @@
+import AVFoundation
 import PhotosUI
 import SwiftUI
 import UIKit
@@ -7,6 +8,7 @@ struct ConversationView: View {
 
     @EnvironmentObject private var session: SessionController
     @EnvironmentObject private var navigator: Navigator
+    @EnvironmentObject private var calls: CallViewModel
     @StateObject private var viewModel: ConversationViewModel
 
     @FocusState private var isComposerFocused: Bool
@@ -53,6 +55,18 @@ struct ConversationView: View {
                 Task { await loadPickedImage(items) }
             }
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { requestCall(isVideo: false) } label: {
+                        Image(systemName: "phone")
+                    }
+                    .accessibilityLabel(Text(.iosCallVoiceCallCd))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { requestCall(isVideo: true) } label: {
+                        Image(systemName: "video")
+                    }
+                    .accessibilityLabel(Text(.iosCallVideoCallCd))
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { isShowingContact = true } label: {
                         AvatarView(
@@ -452,6 +466,19 @@ struct ConversationView: View {
         guard let media = try? await item.loadTransferable(type: PickedMedia.self) else { return }
         viewModel.pendingImage?.discard()
         viewModel.pendingImage = media
+    }
+
+    /// Matches `getUserMedia`'s own browser permission prompt, asked
+    /// right before a call actually starts rather than up front - the
+    /// Android sibling's own `requestCall` does the same. A declined
+    /// microphone simply never places the call, matching Android's own
+    /// on-denial behavior exactly (no error surfaced for a call that was
+    /// never attempted).
+    private func requestCall(isVideo: Bool) {
+        Task {
+            guard await AVCaptureDevice.requestAccess(for: .audio) else { return }
+            calls.startCall(receiverId: viewModel.partner.id, isVideo: isVideo)
+        }
     }
 
     private func editSheet(for message: Message) -> some View {

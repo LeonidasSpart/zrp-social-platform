@@ -27,10 +27,14 @@ struct MainTabView: View {
     @StateObject private var unread = UnreadBadgeViewModel()
 
     /// Also at shell level, and for the same reason: a call arrives
-    /// while you are anywhere in the app, so a responder owned by the
-    /// conversation view would only answer while you happened to be
-    /// reading that one thread.
-    @StateObject private var calls = IncomingCallResponder()
+    /// while you are anywhere in the app, so a view model owned by the
+    /// conversation view would only ever ring while you happened to be
+    /// reading that one thread. One `CallViewModel` for the whole
+    /// signed-in session, matching the Android sibling's own
+    /// Activity-scoped instance and the website's own `CallContext`
+    /// provider at the app root - a screen that wants to place a call
+    /// reaches this one via `@EnvironmentObject`, never creates its own.
+    @StateObject private var calls = CallViewModel()
 
     @StateObject private var drawer = DrawerState()
 
@@ -57,12 +61,23 @@ struct MainTabView: View {
         .environmentObject(router)
         .environmentObject(unread)
         .environmentObject(drawer)
+        .environmentObject(calls)
         .fullScreenCover(isPresented: $player.isExpanded) {
             NowPlayingView()
         }
-        .incomingCallNotice(calls)
+        // Rendered above the whole tab shell, regardless of which
+        // screen is on any tab's back stack - see `CallView`'s own doc
+        // comment for why an incoming call has to interrupt wherever
+        // you are, matching the website's `CallContext` and the
+        // Android sibling's identical app-root overlay.
+        .fullScreenCover(isPresented: Binding(
+            get: { calls.phase != .idle },
+            set: { _ in }
+        )) {
+            CallView(viewModel: calls)
+        }
         .task {
-            calls.start()
+            calls.connectSignaling()
             presence.start()
             await unread.refresh()
             // A link that arrived before anyone was signed in has been
@@ -81,7 +96,7 @@ struct MainTabView: View {
             Task { await unread.refresh() }
         }
         .onDisappear {
-            calls.stop()
+            calls.disconnectSignaling()
             presence.stop()
         }
     }

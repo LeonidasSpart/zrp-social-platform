@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Valami hiba történt";
 "liveAudio.roomNotFound" = "Ez a szoba nem érhető el";
 "liveAudio.connecting" = "Csatlakozás...";
+"chat.callRejected" = "A hívást elutasították";
+"chat.connectionError" = "Kapcsolódási hiba:";
+"chat.micCameraError" = "Nem sikerült hozzáférni a mikrofonhoz/kamerához:";
+"chat.missingCallerId" = "Nem fogadható el: hiányzó hívóazonosító";
+"chat.connectionFailed" = "Sikertelen kapcsolódás";
+"chat.callNoAnswer" = "Nincs válasz";
+"chat.callUnavailable" = "Ez a személy jelenleg nem elérhető";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    hu. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Némítás feloldása";
 "ios.ads.sponsored" = "Szponzorált";
 "ios.a11y.sponsoredPost" = "{name} szponzorált bejegyzése";
-"ios.call.missedTitle" = "Nem fogadott hívás";
-"ios.call.missedBody" = "{name} megpróbált felhívni. A ZRP iPhone-alkalmazás még nem tudja fogadni a hívásokat; a zrp.one oldalon válaszolhatsz.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Valaki";
 "ios.group.untitled" = "Csoport";
 "ios.group.suggested" = "Ajánlott";
 "ios.group.removePhoto" = "Csoportkép eltávolítása";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Ez a bejegyzés már nem érhető el.";
 "ios.post.repostBlocked" = "Ezt a bejegyzést nem lehet újra megosztani, mert a fiók privát.";
 "ios.media.loadFailed" = "Nem sikerült betölteni ezt a képet.";
+"ios.call.noVideo" = "Nincs videó";
+"ios.call.fallbackName" = "Hívás";
+"ios.call.incomingVideo" = "Bejövő videóhívás...";
+"ios.call.incomingVoice" = "Bejövő hanghívás...";
+"ios.call.ringing" = "Csengés...";
+"ios.call.voiceCallCd" = "Hanghívás";
+"ios.call.videoCallCd" = "Videóhívás";

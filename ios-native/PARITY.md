@@ -227,8 +227,7 @@ own view of "who is in this room").
 | Realtime | Socket.IO (`server.js`, path `/api/socket.io`, websocket transport, session-cookie handshake) | ✅ | ✅ (Socket.IO Java client) | ✅ Engine.IO v4 + Socket.IO framing written directly on `URLSessionWebSocketTask` (no dependency added). Live `receive-message`, `message-edited`, `message-deleted`, `reaction-updated`, `message-read`; polling stays as the fallback while the socket is down (30 s connected, 6 s not) | IMPLEMENTED |
 | Typing indicator | `typing` → `user-typing` relay | ✅ | ✅ | ✅ throttled to one event every 2 s; the indicator clears itself after 5 s in case the "stopped" event is lost with the connection | IMPLEMENTED |
 | Contact drawer (avatar, name, badge, handle, profile, block/mute, shared media) | `POST /api/users/{username}/block`, `POST /api/users/mute` | ✅ `ChatContactDrawer` | 🔶 | ✅ (**without Call and Video**) | PARTIAL |
-| Voice / video calling: placing/answering | WebRTC signalling over the same socket (`call-user`, `accept-call`, …) | ✅ simple-peer | ✅ | ❌ needs a WebRTC stack; LiveKit's Swift SDK is now in this app (see [Live Audio](#zrp-live-audio-livekit-backed-audio-rooms) above) and also supports video/audio calls, which changes this decision - not yet evaluated or built. Two permanently dead buttons would be worse than none (see the note in `ChatContactSheet.swift`) | MISSING (reported) |
-| Voice / video calling: **being called** | `incoming-call` → `reject-call` | ✅ | ✅ | ✅ declines immediately and tells the recipient who called, so the caller is released instead of ringing forever (see `IncomingCallResponder.swift`) | IMPLEMENTED |
+| Voice / video calling: placing/answering/being called | WebRTC signalling over the same socket (`call-user`/`incoming-call`/`accept-call`/`call-accepted`/`reject-call`/`call-rejected`/`end-call`/`call-ended`, non-trickle - one full SDP per side) | ✅ simple-peer | ✅ (`org.webrtc.*`) | ✅ `CallViewModel`/`CallView`, `stasel/WebRTC` (a SwiftPM distribution of Google's own prebuilt libwebrtc binaries - this app's *second* third-party dependency, after LiveKit for Live Audio); mic/camera, mute, speaker toggle, front/back camera switch, the same non-trickle-ICE signal/answer timeouts as the Android sibling. Placed from `ConversationView`'s toolbar (matching where the Android sibling puts the buttons); the incoming-call overlay is shown app-wide (`MainTabView`), superseding the earlier decline-only `IncomingCallResponder` | IMPLEMENTED |
 | Read receipts | side effect of `GET /api/messages/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
@@ -328,7 +327,7 @@ own view of "who is in this room").
 | Notification tap-through | N/A | ✅ | ✅ | ✅ like/comment/repost → post, follow → profile, message → thread, appeal outcome → Appeals, listing decision → My listings (the payload carries no listing id, so it leads to where the outcome is visible rather than guessing at one) | IMPLEMENTED |
 | Unrecognised notification types | N/A | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
-| **Device push** | `POST/DELETE /api/push/fcm` accepts `platform: "ios"` and includes a deep-link `data.url`; delivery goes through `firebase-admin/messaging` | n/a | ✅ FCM | ❌ blocked on an APNs key, a `GoogleService-Info.plist`, **and an unresolved dependency decision**: an FCM token on iOS can only come from the Firebase iOS SDK, which this app's zero-dependency architecture excludes. The alternative is a direct APNs sender server-side, which does not exist | **BLOCKED: [B3](#b3-ios-device-push)** |
+| **Device push** | `POST/DELETE /api/push/fcm` accepts `platform: "ios"` and includes a deep-link `data.url`; delivery goes through `firebase-admin/messaging` | n/a | ✅ FCM | ❌ blocked on an APNs key, a `GoogleService-Info.plist`, **and an unresolved dependency decision**: an FCM token on iOS can only come from the Firebase iOS SDK, a third-party dependency this app has not added (see [B3](#b3-ios-device-push) for why the bar for adding it is higher than LiveKit's or WebRTC's). The alternative is a direct APNs sender server-side, which does not exist | **BLOCKED: [B3](#b3-ios-device-push)** |
 
 ### Music
 
@@ -1366,10 +1365,11 @@ part: **how an iOS client would obtain an FCM token at all.**
    **FCM registration token**. On iOS that token is produced by the
    Firebase iOS SDK; there is no way to obtain one from a raw APNs
    device token on the client. So iOS push needs either:
-   - the **Firebase iOS SDK**, which would be another sizeable
-     third-party dependency (the same category of objection that has
-     kept WebRTC out, see the calling row - though this app is no longer
-     dependency-free now that LiveKit is in it for Live Audio); or
+   - the **Firebase iOS SDK**, which would be a third sizeable
+     third-party dependency - this app is no longer dependency-free
+     (LiveKit for Live Audio, `stasel/WebRTC` for calling; see the
+     calling row), but each addition so far has mapped to a real,
+     working feature with no other path, and the same bar applies here; or
    - a **direct APNs sender added server-side**, letting iOS register its
      raw APNs device token instead. `grep -rl "apns" src/lib src/app/api`
      returns nothing today, so this path does not exist yet; it is real

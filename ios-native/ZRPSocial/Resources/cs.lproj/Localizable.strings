@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Něco se pokazilo";
 "liveAudio.roomNotFound" = "Tato místnost není dostupná";
 "liveAudio.connecting" = "Připojování...";
+"chat.callRejected" = "Hovor byl odmítnut";
+"chat.connectionError" = "Chyba připojení:";
+"chat.micCameraError" = "Nepodařilo se získat přístup k mikrofonu/kameře:";
+"chat.missingCallerId" = "Nelze přijmout: chybí ID volajícího";
+"chat.connectionFailed" = "Připojení selhalo";
+"chat.callNoAnswer" = "Bez odpovědi";
+"chat.callUnavailable" = "Tato osoba je nyní nedostupná";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    cs. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Zrušit ztlumení";
 "ios.ads.sponsored" = "Sponzorováno";
 "ios.a11y.sponsoredPost" = "Sponzorovaný příspěvek od uživatele {name}";
-"ios.call.missedTitle" = "Zmeškaný hovor";
-"ios.call.missedBody" = "{name} se vám pokusil(a) dovolat. ZRP pro iPhone zatím neumí přijímat hovory; odpovědět můžete na zrp.one.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Někdo";
 "ios.group.untitled" = "Skupina";
 "ios.group.suggested" = "Doporučeno";
 "ios.group.removePhoto" = "Odebrat fotku skupiny";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Tento příspěvek už není dostupný.";
 "ios.post.repostBlocked" = "Tento příspěvek nelze znovu sdílet, protože účet je soukromý.";
 "ios.media.loadFailed" = "Tento obrázek se nepodařilo načíst.";
+"ios.call.noVideo" = "Bez videa";
+"ios.call.fallbackName" = "Hovor";
+"ios.call.incomingVideo" = "Příchozí videohovor...";
+"ios.call.incomingVoice" = "Příchozí hlasový hovor...";
+"ios.call.ringing" = "Vyzvání...";
+"ios.call.voiceCallCd" = "Hlasový hovor";
+"ios.call.videoCallCd" = "Videohovor";

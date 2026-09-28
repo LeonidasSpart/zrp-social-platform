@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "問題が発生しました";
 "liveAudio.roomNotFound" = "このルームは利用できません";
 "liveAudio.connecting" = "接続中...";
+"chat.callRejected" = "通話が拒否されました";
+"chat.connectionError" = "接続エラー：";
+"chat.micCameraError" = "マイク／カメラにアクセスできませんでした：";
+"chat.missingCallerId" = "応答できません：発信者IDがありません";
+"chat.connectionFailed" = "接続に失敗しました";
+"chat.callNoAnswer" = "応答なし";
+"chat.callUnavailable" = "この人は現在利用できません";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ja. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "ミュート解除";
 "ios.ads.sponsored" = "広告";
 "ios.a11y.sponsoredPost" = "{name}による広告投稿";
-"ios.call.missedTitle" = "不在着信";
-"ios.call.missedBody" = "{name}さんから着信がありました。ZRP for iPhoneはまだ通話に対応していません。zrp.oneで応答できます。";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "不明な発信者";
 "ios.group.untitled" = "グループ";
 "ios.group.suggested" = "おすすめ";
 "ios.group.removePhoto" = "グループ写真を削除";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "この投稿はもう利用できません。";
 "ios.post.repostBlocked" = "アカウントが非公開のため、この投稿はリポストできません。";
 "ios.media.loadFailed" = "この画像を読み込めませんでした。";
+"ios.call.noVideo" = "映像なし";
+"ios.call.fallbackName" = "通話";
+"ios.call.incomingVideo" = "ビデオ通話の着信...";
+"ios.call.incomingVoice" = "音声通話の着信...";
+"ios.call.ringing" = "呼び出し中...";
+"ios.call.voiceCallCd" = "音声通話";
+"ios.call.videoCallCd" = "ビデオ通話";

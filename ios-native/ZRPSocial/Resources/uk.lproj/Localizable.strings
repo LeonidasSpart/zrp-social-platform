@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Щось пішло не так";
 "liveAudio.roomNotFound" = "Ця кімната недоступна";
 "liveAudio.connecting" = "З'єднання...";
+"chat.callRejected" = "Виклик відхилено";
+"chat.connectionError" = "Помилка з'єднання:";
+"chat.micCameraError" = "Не вдалося отримати доступ до мікрофона/камери:";
+"chat.missingCallerId" = "Неможливо прийняти: відсутній ID абонента";
+"chat.connectionFailed" = "З'єднання не вдалося";
+"chat.callNoAnswer" = "Немає відповіді";
+"chat.callUnavailable" = "Ця людина зараз недоступна";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    uk. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Скасувати приховування";
 "ios.ads.sponsored" = "Спонсоровано";
 "ios.a11y.sponsoredPost" = "Спонсорований допис від {name}";
-"ios.call.missedTitle" = "Пропущений дзвінок";
-"ios.call.missedBody" = "{name} намагався(лася) вам подзвонити. ZRP для iPhone поки не приймає дзвінки; ви можете відповісти на zrp.one.";
-"ios.call.dismiss" = "Гаразд";
-"ios.call.unknownCaller" = "Хтось";
 "ios.group.untitled" = "Група";
 "ios.group.suggested" = "Рекомендовано";
 "ios.group.removePhoto" = "Видалити фото групи";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Цей допис більше не доступний.";
 "ios.post.repostBlocked" = "Цей допис не можна репостити, бо акаунт приватний.";
 "ios.media.loadFailed" = "Не вдалося завантажити це зображення.";
+"ios.call.noVideo" = "Без відео";
+"ios.call.fallbackName" = "Дзвінок";
+"ios.call.incomingVideo" = "Вхідний відеодзвінок...";
+"ios.call.incomingVoice" = "Вхідний голосовий дзвінок...";
+"ios.call.ringing" = "Дзвінок...";
+"ios.call.voiceCallCd" = "Голосовий дзвінок";
+"ios.call.videoCallCd" = "Відеодзвінок";

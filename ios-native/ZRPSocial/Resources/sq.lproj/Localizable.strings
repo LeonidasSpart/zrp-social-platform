@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Ndodhi një gabim";
 "liveAudio.roomNotFound" = "Kjo dhomë nuk është e disponueshme";
 "liveAudio.connecting" = "Duke u lidhur...";
+"chat.callRejected" = "Thirrja u refuzua";
+"chat.connectionError" = "Gabim në lidhje:";
+"chat.micCameraError" = "Nuk mund të qaseshin mikrofonat/kamera:";
+"chat.missingCallerId" = "Nuk mund të pranohet: mungon ID e telefonuesit";
+"chat.connectionFailed" = "Lidhja dështoi";
+"chat.callNoAnswer" = "Pa përgjigje";
+"chat.callUnavailable" = "Ky person nuk është i disponueshëm tani";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    sq. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Rivendos zërin";
 "ios.ads.sponsored" = "Sponsorizuar";
 "ios.a11y.sponsoredPost" = "Postim i sponsorizuar nga {name}";
-"ios.call.missedTitle" = "Telefonatë e humbur";
-"ios.call.missedBody" = "{name} provoi të të telefonojë. ZRP për iPhone ende nuk mund t'i marrë telefonatat; mund t'i përgjigjesh në zrp.one.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Dikush";
 "ios.group.untitled" = "Grup";
 "ios.group.suggested" = "Sugjeruar";
 "ios.group.removePhoto" = "Hiq foton e grupit";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Ky postim nuk është më i disponueshëm.";
 "ios.post.repostBlocked" = "Ky postim nuk mund të ripostohet sepse llogaria është private.";
 "ios.media.loadFailed" = "Ky imazh nuk mund të ngarkohej.";
+"ios.call.noVideo" = "Nuk ka video";
+"ios.call.fallbackName" = "Telefonatë";
+"ios.call.incomingVideo" = "Telefonatë video hyrëse...";
+"ios.call.incomingVoice" = "Telefonatë hyrëse...";
+"ios.call.ringing" = "Duke ju thirrur...";
+"ios.call.voiceCallCd" = "Telefonatë zanore";
+"ios.call.videoCallCd" = "Telefonatë video";

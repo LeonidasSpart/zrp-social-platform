@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Что-то пошло не так";
 "liveAudio.roomNotFound" = "Эта комната недоступна";
 "liveAudio.connecting" = "Подключение...";
+"chat.callRejected" = "Вызов отклонён";
+"chat.connectionError" = "Ошибка соединения:";
+"chat.micCameraError" = "Не удалось получить доступ к микрофону/камере:";
+"chat.missingCallerId" = "Невозможно принять: отсутствует идентификатор вызывающего";
+"chat.connectionFailed" = "Сбой соединения";
+"chat.callNoAnswer" = "Нет ответа";
+"chat.callUnavailable" = "Этот человек сейчас недоступен";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ru. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Включить звук";
 "ios.ads.sponsored" = "Реклама";
 "ios.a11y.sponsoredPost" = "Спонсируемая публикация от {name}";
-"ios.call.missedTitle" = "Пропущенный звонок";
-"ios.call.missedBody" = "{name} пытался(лась) позвонить вам. ZRP для iPhone пока не может принимать звонки; вы можете ответить на zrp.one.";
-"ios.call.dismiss" = "ОК";
-"ios.call.unknownCaller" = "Кто-то";
 "ios.group.untitled" = "Группа";
 "ios.group.suggested" = "Рекомендуется";
 "ios.group.removePhoto" = "Удалить фото группы";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Этот пост больше недоступен.";
 "ios.post.repostBlocked" = "Этот пост нельзя репостнуть, потому что аккаунт закрытый.";
 "ios.media.loadFailed" = "Не удалось загрузить это изображение.";
+"ios.call.noVideo" = "Нет видео";
+"ios.call.fallbackName" = "Звонок";
+"ios.call.incomingVideo" = "Входящий видеозвонок...";
+"ios.call.incomingVoice" = "Входящий звонок...";
+"ios.call.ringing" = "Звонок...";
+"ios.call.voiceCallCd" = "Голосовой звонок";
+"ios.call.videoCallCd" = "Видеозвонок";

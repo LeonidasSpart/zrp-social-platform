@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Kažkas nutiko negerai";
 "liveAudio.roomNotFound" = "Šis kambarys nepasiekiamas";
 "liveAudio.connecting" = "Jungiamasi...";
+"chat.callRejected" = "Skambutis atmestas";
+"chat.connectionError" = "Ryšio klaida:";
+"chat.micCameraError" = "Nepavyko pasiekti mikrofono / kameros:";
+"chat.missingCallerId" = "Negalima priimti: trūksta skambinančiojo ID";
+"chat.connectionFailed" = "Nepavyko prisijungti";
+"chat.callNoAnswer" = "Neatsiliepė";
+"chat.callUnavailable" = "Šiuo metu šis žmogus nepasiekiamas";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    lt. A key with no translation yet falls back to the
@@ -1332,10 +1339,6 @@
 "ios.badge.organization" = "Patvirtinta organizacija";
 "ios.badge.team" = "ZRP komanda";
 "ios.badge.verified" = "Patvirtinta paskyra";
-"ios.call.dismiss" = "Gerai";
-"ios.call.missedBody" = "{name} bandė jums paskambinti. ZRP iPhone programėlė kol kas nepriima skambučių; galite atsiliepti svetainėje zrp.one.";
-"ios.call.missedTitle" = "Praleistas skambutis";
-"ios.call.unknownCaller" = "Kažkas";
 "ios.chat.addAttachment" = "Pridėti priedą";
 "ios.chat.cameraUnavailable" = "Kamera šiame įrenginyje nepasiekiama.";
 "ios.chat.editMessage" = "Redaguoti žinutę";
@@ -1450,3 +1453,10 @@
 "ios.stories.noStoriesDesc" = "Jūsų ir sekamų žmonių istorijos rodomos čia 24 valandas.";
 "ios.stories.viewCount" = "{n} peržiūrų";
 "ios.stories.viewerTitle" = "Istorija";
+"ios.call.noVideo" = "Be vaizdo";
+"ios.call.fallbackName" = "Skambutis";
+"ios.call.incomingVideo" = "Gaunamas vaizdo skambutis...";
+"ios.call.incomingVoice" = "Gaunamas balso skambutis...";
+"ios.call.ringing" = "Skambinama...";
+"ios.call.voiceCallCd" = "Balso skambutis";
+"ios.call.videoCallCd" = "Vaizdo skambutis";

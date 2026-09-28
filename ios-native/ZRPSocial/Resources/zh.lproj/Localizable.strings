@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "出了点问题";
 "liveAudio.roomNotFound" = "该房间不可用";
 "liveAudio.connecting" = "连接中...";
+"chat.callRejected" = "通话被拒绝";
+"chat.connectionError" = "连接错误：";
+"chat.micCameraError" = "无法访问麦克风/摄像头：";
+"chat.missingCallerId" = "无法接听：缺少来电者 ID";
+"chat.connectionFailed" = "连接失败";
+"chat.callNoAnswer" = "无人接听";
+"chat.callUnavailable" = "此人当前不可用";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    zh. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "取消静音";
 "ios.ads.sponsored" = "广告";
 "ios.a11y.sponsoredPost" = "{name} 发布的赞助内容";
-"ios.call.missedTitle" = "未接来电";
-"ios.call.missedBody" = "{name} 尝试给您打电话。ZRP iPhone 版暂不支持接听通话，您可以在 zrp.one 上接听。";
-"ios.call.dismiss" = "确定";
-"ios.call.unknownCaller" = "某人";
 "ios.group.untitled" = "群组";
 "ios.group.suggested" = "推荐";
 "ios.group.removePhoto" = "移除群组头像";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "此帖子已不再可用。";
 "ios.post.repostBlocked" = "由于该账号为私密账号，无法转发此帖子。";
 "ios.media.loadFailed" = "无法加载此图片。";
+"ios.call.noVideo" = "无视频";
+"ios.call.fallbackName" = "通话";
+"ios.call.incomingVideo" = "视频通话来电…";
+"ios.call.incomingVoice" = "语音通话来电…";
+"ios.call.ringing" = "正在呼叫…";
+"ios.call.voiceCallCd" = "语音通话";
+"ios.call.videoCallCd" = "视频通话";

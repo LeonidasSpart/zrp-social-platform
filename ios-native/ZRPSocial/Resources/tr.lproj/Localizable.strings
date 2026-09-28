@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Bir şeyler ters gitti";
 "liveAudio.roomNotFound" = "Bu oda kullanılamıyor";
 "liveAudio.connecting" = "Bağlanıyor...";
+"chat.callRejected" = "Arama reddedildi";
+"chat.connectionError" = "Bağlantı hatası:";
+"chat.micCameraError" = "Mikrofona/kameraya erişilemedi:";
+"chat.missingCallerId" = "Kabul edilemiyor: arayan kimliği eksik";
+"chat.connectionFailed" = "Bağlantı başarısız oldu";
+"chat.callNoAnswer" = "Cevap yok";
+"chat.callUnavailable" = "Bu kişi şu anda müsait değil";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    tr. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Sesi aç";
 "ios.ads.sponsored" = "Sponsorlu";
 "ios.a11y.sponsoredPost" = "{name} tarafından sponsorlu gönderi";
-"ios.call.missedTitle" = "Cevapsız arama";
-"ios.call.missedBody" = "{name} sizi aramaya çalıştı. ZRP iPhone uygulaması henüz arama kabul edemiyor; zrp.one üzerinden yanıtlayabilirsiniz.";
-"ios.call.dismiss" = "Tamam";
-"ios.call.unknownCaller" = "Biri";
 "ios.group.untitled" = "Grup";
 "ios.group.suggested" = "Önerilen";
 "ios.group.removePhoto" = "Grup fotoğrafını kaldır";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Bu gönderi artık mevcut değil.";
 "ios.post.repostBlocked" = "Hesap gizli olduğu için bu gönderi yeniden paylaşılamaz.";
 "ios.media.loadFailed" = "Bu görsel yüklenemedi.";
+"ios.call.noVideo" = "Video yok";
+"ios.call.fallbackName" = "Arama";
+"ios.call.incomingVideo" = "Gelen görüntülü arama...";
+"ios.call.incomingVoice" = "Gelen arama...";
+"ios.call.ringing" = "Çalıyor...";
+"ios.call.voiceCallCd" = "Sesli arama";
+"ios.call.videoCallCd" = "Görüntülü arama";

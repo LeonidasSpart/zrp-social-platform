@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Terjadi kesalahan";
 "liveAudio.roomNotFound" = "Ruang ini tidak tersedia";
 "liveAudio.connecting" = "Menghubungkan...";
+"chat.callRejected" = "Panggilan ditolak";
+"chat.connectionError" = "Kesalahan koneksi:";
+"chat.micCameraError" = "Tidak dapat mengakses mikrofon/kamera:";
+"chat.missingCallerId" = "Tidak dapat menerima: ID penelepon tidak ada";
+"chat.connectionFailed" = "Koneksi gagal";
+"chat.callNoAnswer" = "Tidak ada jawaban";
+"chat.callUnavailable" = "Orang ini sedang tidak tersedia";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    id. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Aktifkan suara";
 "ios.ads.sponsored" = "Bersponsor";
 "ios.a11y.sponsoredPost" = "Postingan bersponsor dari {name}";
-"ios.call.missedTitle" = "Panggilan tak terjawab";
-"ios.call.missedBody" = "{name} mencoba meneleponmu. ZRP untuk iPhone belum dapat menerima panggilan; Anda dapat menjawab di zrp.one.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Seseorang";
 "ios.group.untitled" = "Grup";
 "ios.group.suggested" = "Disarankan";
 "ios.group.removePhoto" = "Hapus foto grup";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Postingan ini sudah tidak tersedia.";
 "ios.post.repostBlocked" = "Postingan ini tidak dapat diposting ulang karena akunnya privat.";
 "ios.media.loadFailed" = "Gambar ini tidak dapat dimuat.";
+"ios.call.noVideo" = "Tidak ada video";
+"ios.call.fallbackName" = "Panggilan";
+"ios.call.incomingVideo" = "Panggilan video masuk...";
+"ios.call.incomingVoice" = "Panggilan suara masuk...";
+"ios.call.ringing" = "Menghubungi...";
+"ios.call.voiceCallCd" = "Panggilan suara";
+"ios.call.videoCallCd" = "Panggilan video";

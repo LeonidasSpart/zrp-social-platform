@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Något gick fel";
 "liveAudio.roomNotFound" = "Det här rummet är inte tillgängligt";
 "liveAudio.connecting" = "Ansluter...";
+"chat.callRejected" = "Samtalet avvisades";
+"chat.connectionError" = "Anslutningsfel:";
+"chat.micCameraError" = "Kunde inte komma åt mikrofon/kamera:";
+"chat.missingCallerId" = "Kan inte acceptera: uppringarens ID saknas";
+"chat.connectionFailed" = "Anslutningen misslyckades";
+"chat.callNoAnswer" = "Inget svar";
+"chat.callUnavailable" = "Den här personen är inte tillgänglig just nu";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    sv. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Slå på ljud";
 "ios.ads.sponsored" = "Sponsrat";
 "ios.a11y.sponsoredPost" = "Sponsrat inlägg från {name}";
-"ios.call.missedTitle" = "Missat samtal";
-"ios.call.missedBody" = "{name} försökte ringa dig. ZRP för iPhone kan inte ta emot samtal än; du kan svara på zrp.one.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Någon";
 "ios.group.untitled" = "Grupp";
 "ios.group.suggested" = "Föreslaget";
 "ios.group.removePhoto" = "Ta bort gruppfoto";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Det här inlägget är inte längre tillgängligt.";
 "ios.post.repostBlocked" = "Det här inlägget kan inte delas igen eftersom kontot är privat.";
 "ios.media.loadFailed" = "Det gick inte att läsa in den här bilden.";
+"ios.call.noVideo" = "Ingen video";
+"ios.call.fallbackName" = "Samtal";
+"ios.call.incomingVideo" = "Inkommande videosamtal...";
+"ios.call.incomingVoice" = "Inkommande röstsamtal...";
+"ios.call.ringing" = "Ringer...";
+"ios.call.voiceCallCd" = "Röstsamtal";
+"ios.call.videoCallCd" = "Videosamtal";

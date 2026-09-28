@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Κάτι πήγε στραβά";
 "liveAudio.roomNotFound" = "Αυτό το δωμάτιο δεν είναι διαθέσιμο";
 "liveAudio.connecting" = "Σύνδεση...";
+"chat.callRejected" = "Η κλήση απορρίφθηκε";
+"chat.connectionError" = "Σφάλμα σύνδεσης:";
+"chat.micCameraError" = "Δεν ήταν δυνατή η πρόσβαση στο μικρόφωνο/κάμερα:";
+"chat.missingCallerId" = "Δεν είναι δυνατή η αποδοχή: λείπει το αναγνωριστικό καλούντος";
+"chat.connectionFailed" = "Η σύνδεση απέτυχε";
+"chat.callNoAnswer" = "Καμία απάντηση";
+"chat.callUnavailable" = "Αυτό το άτομο δεν είναι διαθέσιμο αυτή τη στιγμή";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    el. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Κατάργηση σίγασης";
 "ios.ads.sponsored" = "Χορηγούμενο";
 "ios.a11y.sponsoredPost" = "Χορηγούμενη ανάρτηση από τον/την {name}";
-"ios.call.missedTitle" = "Αναπάντητη κλήση";
-"ios.call.missedBody" = "Ο/Η {name} προσπάθησε να σας καλέσει. Το ZRP για iPhone δεν μπορεί ακόμα να δεχτεί κλήσεις; μπορείτε να απαντήσετε στο zrp.one.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Κάποιος";
 "ios.group.untitled" = "Ομάδα";
 "ios.group.suggested" = "Προτεινόμενο";
 "ios.group.removePhoto" = "Αφαίρεση φωτογραφίας ομάδας";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Αυτή η ανάρτηση δεν είναι πλέον διαθέσιμη.";
 "ios.post.repostBlocked" = "Αυτή η ανάρτηση δεν μπορεί να αναδημοσιευτεί επειδή ο λογαριασμός είναι ιδιωτικός.";
 "ios.media.loadFailed" = "Δεν ήταν δυνατή η φόρτωση αυτής της εικόνας.";
+"ios.call.noVideo" = "Χωρίς βίντεο";
+"ios.call.fallbackName" = "Κλήση";
+"ios.call.incomingVideo" = "Εισερχόμενη βιντεοκλήση...";
+"ios.call.incomingVoice" = "Εισερχόμενη φωνητική κλήση...";
+"ios.call.ringing" = "Χτυπάει...";
+"ios.call.voiceCallCd" = "Φωνητική κλήση";
+"ios.call.videoCallCd" = "Βιντεοκλήση";

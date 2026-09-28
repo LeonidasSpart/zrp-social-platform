@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Ceva nu a funcționat";
 "liveAudio.roomNotFound" = "Această cameră nu este disponibilă";
 "liveAudio.connecting" = "Se conectează...";
+"chat.callRejected" = "Apelul a fost respins";
+"chat.connectionError" = "Eroare de conexiune:";
+"chat.micCameraError" = "Nu s-a putut accesa microfonul/camera:";
+"chat.missingCallerId" = "Nu se poate accepta: lipsește ID-ul apelantului";
+"chat.connectionFailed" = "Conexiune eșuată";
+"chat.callNoAnswer" = "Fără răspuns";
+"chat.callUnavailable" = "Această persoană nu este disponibilă acum";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ro. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Activează sunetul";
 "ios.ads.sponsored" = "Sponsorizat";
 "ios.a11y.sponsoredPost" = "Postare sponsorizată de {name}";
-"ios.call.missedTitle" = "Apel pierdut";
-"ios.call.missedBody" = "{name} a încercat să te sune. ZRP pentru iPhone nu poate primi apeluri încă; poți răspunde pe zrp.one.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Cineva";
 "ios.group.untitled" = "Grup";
 "ios.group.suggested" = "Sugerat";
 "ios.group.removePhoto" = "Elimină fotografia grupului";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Această postare nu mai este disponibilă.";
 "ios.post.repostBlocked" = "Această postare nu poate fi redistribuită deoarece contul este privat.";
 "ios.media.loadFailed" = "Această imagine nu a putut fi încărcată.";
+"ios.call.noVideo" = "Fără video";
+"ios.call.fallbackName" = "Apel";
+"ios.call.incomingVideo" = "Apel video primit...";
+"ios.call.incomingVoice" = "Apel vocal primit...";
+"ios.call.ringing" = "Sună...";
+"ios.call.voiceCallCd" = "Apel vocal";
+"ios.call.videoCallCd" = "Apel video";

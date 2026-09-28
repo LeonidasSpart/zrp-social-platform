@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Nekaj je šlo narobe";
 "liveAudio.roomNotFound" = "Ta soba ni na voljo";
 "liveAudio.connecting" = "Povezovanje...";
+"chat.callRejected" = "Klic je bil zavrnjen";
+"chat.connectionError" = "Napaka povezave:";
+"chat.micCameraError" = "Dostop do mikrofona/kamere ni bil mogoč:";
+"chat.missingCallerId" = "Ni mogoče sprejeti: manjka ID klicatelja";
+"chat.connectionFailed" = "Povezava ni uspela";
+"chat.callNoAnswer" = "Brez odgovora";
+"chat.callUnavailable" = "Ta oseba trenutno ni na voljo";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    sl. A key with no translation yet falls back to the
@@ -1434,10 +1441,6 @@
 "ios.a11y.unmute" = "Prekliči utišanje";
 "ios.ads.sponsored" = "Sponzorirano";
 "ios.a11y.sponsoredPost" = "Sponzorirana objava uporabnika {name}";
-"ios.call.missedTitle" = "Zamujen klic";
-"ios.call.missedBody" = "{name} vas je poskusil/-a poklicati. ZRP za iPhone še ne omogoča sprejemanja klicev; nanj lahko odgovorite na zrp.one.";
-"ios.call.dismiss" = "V redu";
-"ios.call.unknownCaller" = "Nekdo";
 "ios.group.untitled" = "Skupina";
 "ios.group.suggested" = "Predlagano";
 "ios.group.removePhoto" = "Odstrani sliko skupine";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Ta objava ni več na voljo.";
 "ios.post.repostBlocked" = "Te objave ni mogoče deliti, ker je račun zaseben.";
 "ios.media.loadFailed" = "Te slike ni bilo mogoče naložiti.";
+"ios.call.noVideo" = "Brez videa";
+"ios.call.fallbackName" = "Pokliči";
+"ios.call.incomingVideo" = "Dohodni video klic ...";
+"ios.call.incomingVoice" = "Dohodni glasovni klic ...";
+"ios.call.ringing" = "Zvoni ...";
+"ios.call.voiceCallCd" = "Glasovni klic";
+"ios.call.videoCallCd" = "Video klic";

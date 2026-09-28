@@ -1280,6 +1280,13 @@
 "liveAudio.genericError" = "Une erreur est survenue";
 "liveAudio.roomNotFound" = "Ce salon n'est pas disponible";
 "liveAudio.connecting" = "Connexion...";
+"chat.callRejected" = "L'appel a été rejeté";
+"chat.connectionError" = "Erreur de connexion :";
+"chat.micCameraError" = "Impossible d'accéder au micro/à la caméra :";
+"chat.missingCallerId" = "Impossible d'accepter : ID de l'appelant manquant";
+"chat.connectionFailed" = "Échec de la connexion";
+"chat.callNoAnswer" = "Pas de réponse";
+"chat.callUnavailable" = "Cette personne n'est pas disponible pour le moment";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    fr. A key with no translation yet falls back to the
@@ -1433,10 +1440,6 @@
 "ios.a11y.unmute" = "Réactiver le son";
 "ios.ads.sponsored" = "Sponsorisé";
 "ios.a11y.sponsoredPost" = "Publication sponsorisée par {name}";
-"ios.call.missedTitle" = "Appel manqué";
-"ios.call.missedBody" = "{name} a essayé de vous appeler. ZRP pour iPhone ne peut pas encore prendre les appels ; vous pouvez répondre sur zrp.one.";
-"ios.call.dismiss" = "OK";
-"ios.call.unknownCaller" = "Quelqu'un";
 "ios.group.untitled" = "Groupe";
 "ios.group.suggested" = "Suggéré";
 "ios.group.removePhoto" = "Retirer la photo du groupe";
@@ -1450,3 +1453,10 @@
 "ios.chat.sharedPostUnavailable" = "Cette publication n'est plus disponible.";
 "ios.post.repostBlocked" = "Cette publication ne peut pas être repartagée car le compte est privé.";
 "ios.media.loadFailed" = "Impossible de charger cette image.";
+"ios.call.noVideo" = "Pas de vidéo";
+"ios.call.fallbackName" = "Appel";
+"ios.call.incomingVideo" = "Appel vidéo entrant...";
+"ios.call.incomingVoice" = "Appel entrant...";
+"ios.call.ringing" = "Ça sonne...";
+"ios.call.voiceCallCd" = "Appel vocal";
+"ios.call.videoCallCd" = "Appel vidéo";
