@@ -263,6 +263,16 @@ composer.addGif
 composer.errUploadFailed
 composer.errSomethingWrong
 composer.errWriteSomething
+composer.postAs
+composer.placeholderRecruitment
+composer.placeholderArticleTitle
+composer.placeholderArticleBody
+composer.articleMarkdown
+composer.companyPlaceholder
+composer.locationPlaceholder
+composer.applyUrlPlaceholder
+composer.errCompanyRequired
+composer.errArticleRequired
 
 # ── Post detail, comments and replies (Phase 8) ─────────────────────
 postDetail.commentPlaceholder

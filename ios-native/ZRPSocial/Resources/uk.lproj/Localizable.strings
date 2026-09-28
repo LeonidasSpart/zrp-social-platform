@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Завантаження не вдалося. Спробуйте ще раз.";
 "composer.errSomethingWrong" = "Щось пішло не так. Перевірте свою стрічку, щоб побачити, чи опублікувався ваш допис.";
 "composer.errWriteSomething" = "Будь ласка, напишіть щось або задайте питання для опитування.";
+"composer.postAs" = "Публікувати як:";
+"composer.placeholderRecruitment" = "Опишіть вакансію... Використовуйте #хештеги та @згадки";
+"composer.placeholderArticleTitle" = "Заголовок статті / тизер (необов'язково)";
+"composer.placeholderArticleBody" = "Напишіть текст статті в Markdown або HTML...";
+"composer.articleMarkdown" = "Підтримує Markdown і HTML";
+"composer.companyPlaceholder" = "Назва компанії *";
+"composer.locationPlaceholder" = "Місцезнаходження (напр., віддалено, Нью-Йорк, Лондон)";
+"composer.applyUrlPlaceholder" = "URL для подання заявки (необов'язково)";
+"composer.errCompanyRequired" = "Будь ласка, вкажіть назву компанії для дописів про вакансії.";
+"composer.errArticleRequired" = "Будь ласка, напишіть текст статті.";
 "postDetail.commentPlaceholder" = "Напишіть коментар...";
 "postDetail.replyPlaceholder" = "Напишіть відповідь...";
 "postDetail.sending" = "Надсилання...";

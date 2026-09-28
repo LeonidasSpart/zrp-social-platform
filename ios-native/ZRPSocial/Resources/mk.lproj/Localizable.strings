@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Поставувањето не успеа. Обиди се повторно.";
 "composer.errSomethingWrong" = "Нешто тргна наопаку. Провери ги содржините за да видиш дали твојата објава е објавена.";
 "composer.errWriteSomething" = "Напиши нешто или постави прашање за анкета.";
+"composer.postAs" = "Објави како:";
+"composer.placeholderRecruitment" = "Опиши ја работната позиција... Користи #хаштагови и @спомнувања";
+"composer.placeholderArticleTitle" = "Наслов на статијата / најава (опционално)";
+"composer.placeholderArticleBody" = "Напиши ја содржината на статијата во Markdown или HTML...";
+"composer.articleMarkdown" = "Поддржува Markdown и HTML";
+"composer.companyPlaceholder" = "Име на компанијата *";
+"composer.locationPlaceholder" = "Локација (пр. Далечински, Њујорк, Лондон)";
+"composer.applyUrlPlaceholder" = "URL за пријавување (опционално)";
+"composer.errCompanyRequired" = "Внеси име на компанија за објавите за вработување.";
+"composer.errArticleRequired" = "Напиши ја содржината на статијата.";
 "postDetail.commentPlaceholder" = "Напиши коментар...";
 "postDetail.replyPlaceholder" = "Напиши одговор...";
 "postDetail.sending" = "Се испраќа...";

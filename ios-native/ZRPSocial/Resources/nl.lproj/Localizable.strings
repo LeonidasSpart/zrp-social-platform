@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Uploaden mislukt. Probeer het opnieuw.";
 "composer.errSomethingWrong" = "Er is iets misgegaan. Controleer je feed om te zien of je post is geplaatst.";
 "composer.errWriteSomething" = "Schrijf iets of stel een pollvraag.";
+"composer.postAs" = "Plaatsen als:";
+"composer.placeholderRecruitment" = "Beschrijf de vacature... Gebruik #hashtags en @vermeldingen";
+"composer.placeholderArticleTitle" = "Titel/teaser van artikel (optioneel)";
+"composer.placeholderArticleBody" = "Schrijf de inhoud van je artikel in Markdown of HTML...";
+"composer.articleMarkdown" = "Ondersteunt Markdown en HTML";
+"composer.companyPlaceholder" = "Bedrijfsnaam *";
+"composer.locationPlaceholder" = "Locatie (bijv. op afstand, New York, Londen)";
+"composer.applyUrlPlaceholder" = "Sollicitatie-URL (optioneel)";
+"composer.errCompanyRequired" = "Voer een bedrijfsnaam in voor wervingsposts.";
+"composer.errArticleRequired" = "Schrijf de inhoud van het artikel.";
 "postDetail.commentPlaceholder" = "Schrijf een reactie...";
 "postDetail.replyPlaceholder" = "Schrijf een antwoord...";
 "postDetail.sending" = "Verzenden...";

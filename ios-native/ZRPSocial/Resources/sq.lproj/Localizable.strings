@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Ngarkimi dështoi. Ju lutemi riprovojeni.";
 "composer.errSomethingWrong" = "Diçka shkoi gabim. Kontrolloni furnizimin tuaj për të parë nëse postimi u publikua.";
 "composer.errWriteSomething" = "Ju lutemi shkruani diçka ose bëni një pyetje sondazhi.";
+"composer.postAs" = "Publiko si:";
+"composer.placeholderRecruitment" = "Përshkruani mundësinë e punës... Përdorni #hashtags dhe @mentions";
+"composer.placeholderArticleTitle" = "Titulli i artikullit / përmbledhja (opsionale)";
+"composer.placeholderArticleBody" = "Shkruani përmbajtjen e artikullit tuaj në Markdown ose HTML...";
+"composer.articleMarkdown" = "Mbështet Markdown dhe HTML";
+"composer.companyPlaceholder" = "Emri i kompanisë *";
+"composer.locationPlaceholder" = "Vendndodhja (p.sh., Në distancë, Nju Jork, Londër)";
+"composer.applyUrlPlaceholder" = "URL e aplikimit (opsionale)";
+"composer.errCompanyRequired" = "Ju lutemi vendosni emrin e kompanisë për postimet e rrekrutimit.";
+"composer.errArticleRequired" = "Ju lutemi shkruani përmbajtjen e artikullit.";
 "postDetail.commentPlaceholder" = "Shkruaj një koment...";
 "postDetail.replyPlaceholder" = "Shkruaj një përgjigje...";
 "postDetail.sending" = "Duke dërguar...";

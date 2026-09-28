@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Nahrání se nezdařilo. Zkus to prosím znovu.";
 "composer.errSomethingWrong" = "Něco se pokazilo. Zkontroluj svůj feed, zda se tvůj příspěvek zveřejnil.";
 "composer.errWriteSomething" = "Napiš prosím něco nebo vytvoř otázku ankety.";
+"composer.postAs" = "Přidat příspěvek jako:";
+"composer.placeholderRecruitment" = "Popiš pracovní nabídku... Použij #hashtagy a @zmínky";
+"composer.placeholderArticleTitle" = "Název článku / perex (nepovinné)";
+"composer.placeholderArticleBody" = "Napiš obsah článku v Markdownu nebo HTML...";
+"composer.articleMarkdown" = "Podporuje Markdown a HTML";
+"composer.companyPlaceholder" = "Název společnosti *";
+"composer.locationPlaceholder" = "Lokalita (např. odkudkoli, New York, Londýn)";
+"composer.applyUrlPlaceholder" = "URL pro podání přihlášky (nepovinné)";
+"composer.errCompanyRequired" = "Zadej prosím název společnosti pro nabídky práce.";
+"composer.errArticleRequired" = "Napiš prosím obsah článku.";
 "postDetail.commentPlaceholder" = "Napiš komentář...";
 "postDetail.replyPlaceholder" = "Napiš odpověď...";
 "postDetail.sending" = "Odesílání...";

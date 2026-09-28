@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Upload mislykkedes. Prøv igen.";
 "composer.errSomethingWrong" = "Noget gik galt. Tjek dit feed for at se, om dit opslag blev udgivet.";
 "composer.errWriteSomething" = "Skriv venligst noget, eller opret et afstemningsspørgsmål.";
+"composer.postAs" = "Post som:";
+"composer.placeholderRecruitment" = "Beskriv jobmuligheden... Brug #hashtags og @omtaler";
+"composer.placeholderArticleTitle" = "Artikeltitel / teaser (valgfrit)";
+"composer.placeholderArticleBody" = "Skriv din artikel i Markdown eller HTML...";
+"composer.articleMarkdown" = "Understøtter Markdown og HTML";
+"composer.companyPlaceholder" = "Virksomhedsnavn *";
+"composer.locationPlaceholder" = "Placering (f.eks. Remote, New York, London)";
+"composer.applyUrlPlaceholder" = "Ansøgnings-URL (valgfrit)";
+"composer.errCompanyRequired" = "Angiv venligst et virksomhedsnavn til jobopslag.";
+"composer.errArticleRequired" = "Skriv venligst artikelindholdet.";
 "postDetail.commentPlaceholder" = "Skriv en kommentar...";
 "postDetail.replyPlaceholder" = "Skriv et svar...";
 "postDetail.sending" = "Sender...";

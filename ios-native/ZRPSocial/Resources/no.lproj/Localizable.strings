@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Opplastingen mislyktes. Prøv igjen.";
 "composer.errSomethingWrong" = "Noe gikk galt. Sjekk strømmen din for å se om innlegget ble publisert.";
 "composer.errWriteSomething" = "Skriv noe eller still et avstemningsspørsmål.";
+"composer.postAs" = "Publiser som:";
+"composer.placeholderRecruitment" = "Beskriv stillingen ... Bruk #emneknagger og @omtaler";
+"composer.placeholderArticleTitle" = "Artikkeltittel / ingress (valgfritt)";
+"composer.placeholderArticleBody" = "Skriv artikkelinnholdet i Markdown eller HTML ...";
+"composer.articleMarkdown" = "Støtter Markdown og HTML";
+"composer.companyPlaceholder" = "Firmanavn *";
+"composer.locationPlaceholder" = "Sted (f.eks. Hjemmekontor, Oslo, London)";
+"composer.applyUrlPlaceholder" = "Søknadslenke (valgfritt)";
+"composer.errCompanyRequired" = "Oppgi et firmanavn for rekrutteringsinnlegg.";
+"composer.errArticleRequired" = "Skriv innholdet i artikkelen.";
 "postDetail.commentPlaceholder" = "Skriv en kommentar ...";
 "postDetail.replyPlaceholder" = "Skriv et svar ...";
 "postDetail.sending" = "Sender ...";

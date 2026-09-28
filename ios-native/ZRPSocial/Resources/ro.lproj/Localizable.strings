@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Încărcarea a eșuat. Te rugăm să încerci din nou.";
 "composer.errSomethingWrong" = "Ceva nu a funcționat corect. Verifică fluxul tău ca să vezi dacă postarea a fost publicată.";
 "composer.errWriteSomething" = "Te rugăm să scrii ceva sau să pui o întrebare de sondaj.";
+"composer.postAs" = "Postează ca:";
+"composer.placeholderRecruitment" = "Descrie oportunitatea de angajare... Folosește #hashtaguri și @mențiuni";
+"composer.placeholderArticleTitle" = "Titlu / teaser articol (opțional)";
+"composer.placeholderArticleBody" = "Scrie conținutul articolului în Markdown sau HTML...";
+"composer.articleMarkdown" = "Acceptă Markdown și HTML";
+"composer.companyPlaceholder" = "Numele companiei *";
+"composer.locationPlaceholder" = "Locație (ex.: Remote, New York, Londra)";
+"composer.applyUrlPlaceholder" = "URL de aplicare (opțional)";
+"composer.errCompanyRequired" = "Te rugăm să introduci numele companiei pentru postările de recrutare.";
+"composer.errArticleRequired" = "Te rugăm să scrii conținutul articolului.";
 "postDetail.commentPlaceholder" = "Scrie un comentariu...";
 "postDetail.replyPlaceholder" = "Scrie un răspuns...";
 "postDetail.sending" = "Se trimite...";

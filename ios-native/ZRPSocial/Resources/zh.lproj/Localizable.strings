@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "上传失败，请重试。";
 "composer.errSomethingWrong" = "出了点问题。请检查你的信息流，确认帖子是否已发布。";
 "composer.errWriteSomething" = "请输入内容或提出一个投票问题。";
+"composer.postAs" = "发布为：";
+"composer.placeholderRecruitment" = "描述这个职位机会... 使用 #话题标签 和 @提及";
+"composer.placeholderArticleTitle" = "文章标题 / 摘要（可选）";
+"composer.placeholderArticleBody" = "使用 Markdown 或 HTML 撰写文章内容...";
+"composer.articleMarkdown" = "支持 Markdown 和 HTML";
+"composer.companyPlaceholder" = "公司 名称 *";
+"composer.locationPlaceholder" = "地点（例如：远程、纽约、伦敦）";
+"composer.applyUrlPlaceholder" = "申请链接（可选）";
+"composer.errCompanyRequired" = "请为招聘帖子输入公司名称。";
+"composer.errArticleRequired" = "请填写文章内容。";
 "postDetail.commentPlaceholder" = "写下评论...";
 "postDetail.replyPlaceholder" = "写下回复...";
 "postDetail.sending" = "发送中...";

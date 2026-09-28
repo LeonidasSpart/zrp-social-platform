@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Качването бе неуспешно. Опитай отново.";
 "composer.errSomethingWrong" = "Нещо се обърка. Провери емисията си, за да видиш дали публикацията е публикувана.";
 "composer.errWriteSomething" = "Моля, напиши нещо или задай въпрос за анкета.";
+"composer.postAs" = "Публикувай като:";
+"composer.placeholderRecruitment" = "Опиши работната позиция... Използвай #хаштагове и @споменавания";
+"composer.placeholderArticleTitle" = "Заглавие/анонс на статията (незадължително)";
+"composer.placeholderArticleBody" = "Напиши съдържанието на статията в Markdown или HTML...";
+"composer.articleMarkdown" = "Поддържа Markdown и HTML";
+"composer.companyPlaceholder" = "Име на компанията *";
+"composer.locationPlaceholder" = "Местоположение (напр. Дистанционно, Ню Йорк, Лондон)";
+"composer.applyUrlPlaceholder" = "URL адрес за кандидатстване (незадължително)";
+"composer.errCompanyRequired" = "Моля, въведи име на компания за обявите за работа.";
+"composer.errArticleRequired" = "Моля, напиши съдържанието на статията.";
 "postDetail.commentPlaceholder" = "Напиши коментар...";
 "postDetail.replyPlaceholder" = "Напиши отговор...";
 "postDetail.sending" = "Изпращане...";

@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Unggahan gagal. Silakan coba lagi.";
 "composer.errSomethingWrong" = "Terjadi kesalahan. Periksa feed Anda untuk melihat apakah postingan Anda telah dipublikasikan.";
 "composer.errWriteSomething" = "Silakan tulis sesuatu atau ajukan pertanyaan polling.";
+"composer.postAs" = "Kirim sebagai:";
+"composer.placeholderRecruitment" = "Jelaskan peluang kerja... Gunakan #hashtag dan @mention";
+"composer.placeholderArticleTitle" = "Judul artikel / teaser (opsional)";
+"composer.placeholderArticleBody" = "Tulis konten artikel Anda dalam Markdown atau HTML...";
+"composer.articleMarkdown" = "Mendukung Markdown dan HTML";
+"composer.companyPlaceholder" = "Nama perusahaan *";
+"composer.locationPlaceholder" = "Lokasi (misalnya, Remote, New York, London)";
+"composer.applyUrlPlaceholder" = "URL lamaran (opsional)";
+"composer.errCompanyRequired" = "Silakan masukkan nama perusahaan untuk postingan lowongan kerja.";
+"composer.errArticleRequired" = "Silakan tulis konten artikel.";
 "postDetail.commentPlaceholder" = "Tulis komentar...";
 "postDetail.replyPlaceholder" = "Tulis balasan...";
 "postDetail.sending" = "Mengirim...";

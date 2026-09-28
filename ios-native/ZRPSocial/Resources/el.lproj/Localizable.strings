@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Η μεταφόρτωση απέτυχε. Δοκίμασε ξανά.";
 "composer.errSomethingWrong" = "Κάτι πήγε στραβά. Έλεγξε τη ροή σου για να δεις αν δημοσιεύτηκε η ανάρτησή σου.";
 "composer.errWriteSomething" = "Γράψε κάτι ή πρόσθεσε μια ερώτηση δημοσκόπησης.";
+"composer.postAs" = "Δημοσίευση ως:";
+"composer.placeholderRecruitment" = "Περιέγραψε την ευκαιρία εργασίας... Χρησιμοποίησε #hashtags και @αναφορές";
+"composer.placeholderArticleTitle" = "Τίτλος / εισαγωγή άρθρου (προαιρετικό)";
+"composer.placeholderArticleBody" = "Γράψε το περιεχόμενο του άρθρου σου σε Markdown ή HTML...";
+"composer.articleMarkdown" = "Υποστηρίζει Markdown και HTML";
+"composer.companyPlaceholder" = "Όνομα εταιρείας *";
+"composer.locationPlaceholder" = "Τοποθεσία (π.χ. Απομακρυσμένη εργασία, Νέα Υόρκη, Λονδίνο)";
+"composer.applyUrlPlaceholder" = "URL αίτησης (προαιρετικό)";
+"composer.errCompanyRequired" = "Εισήγαγε το όνομα της εταιρείας για αγγελίες εργασίας.";
+"composer.errArticleRequired" = "Γράψε το περιεχόμενο του άρθρου.";
 "postDetail.commentPlaceholder" = "Γράψε ένα σχόλιο...";
 "postDetail.replyPlaceholder" = "Γράψε μια απάντηση...";
 "postDetail.sending" = "Αποστολή...";

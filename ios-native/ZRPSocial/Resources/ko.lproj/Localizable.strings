@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "업로드에 실패했습니다. 다시 시도해 주세요.";
 "composer.errSomethingWrong" = "문제가 발생했습니다. 피드에서 게시물이 등록되었는지 확인해 주세요.";
 "composer.errWriteSomething" = "내용을 입력하거나 설문 질문을 작성해 주세요.";
+"composer.postAs" = "게시 형식:";
+"composer.placeholderRecruitment" = "채용 공고 내용을 작성하세요... #해시태그와 @멘션을 사용할 수 있습니다";
+"composer.placeholderArticleTitle" = "아티클 제목/요약 (선택 사항)";
+"composer.placeholderArticleBody" = "Markdown 또는 HTML로 아티클 내용을 작성하세요...";
+"composer.articleMarkdown" = "Markdown과 HTML을 지원합니다";
+"composer.companyPlaceholder" = "회사명 *";
+"composer.locationPlaceholder" = "위치 (예: 원격 근무, 뉴욕, 런던)";
+"composer.applyUrlPlaceholder" = "지원 URL (선택 사항)";
+"composer.errCompanyRequired" = "채용 게시물에는 회사명을 입력해 주세요.";
+"composer.errArticleRequired" = "아티클 내용을 작성해 주세요.";
 "postDetail.commentPlaceholder" = "댓글을 작성하세요...";
 "postDetail.replyPlaceholder" = "답글을 작성하세요...";
 "postDetail.sending" = "전송 중...";

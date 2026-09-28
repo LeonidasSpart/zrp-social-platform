@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Uppladdningen misslyckades. Försök igen.";
 "composer.errSomethingWrong" = "Något gick fel. Kontrollera ditt flöde för att se om ditt inlägg publicerades.";
 "composer.errWriteSomething" = "Skriv något eller ställ en omröstningsfråga.";
+"composer.postAs" = "Publicera som:";
+"composer.placeholderRecruitment" = "Beskriv jobbmöjligheten... Använd #hashtaggar och @omnämnanden";
+"composer.placeholderArticleTitle" = "Artikeltitel/teaser (valfritt)";
+"composer.placeholderArticleBody" = "Skriv artikelns innehåll i Markdown eller HTML...";
+"composer.articleMarkdown" = "Stöder Markdown och HTML";
+"composer.companyPlaceholder" = "Företagsnamn *";
+"composer.locationPlaceholder" = "Plats (t.ex. Distans, Stockholm, London)";
+"composer.applyUrlPlaceholder" = "Ansökningslänk (valfritt)";
+"composer.errCompanyRequired" = "Ange ett företagsnamn för rekryteringsinlägg.";
+"composer.errArticleRequired" = "Skriv artikelns innehåll.";
 "postDetail.commentPlaceholder" = "Skriv en kommentar...";
 "postDetail.replyPlaceholder" = "Skriv ett svar...";
 "postDetail.sending" = "Skickar...";

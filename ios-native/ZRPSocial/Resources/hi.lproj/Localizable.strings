@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "अपलोड नहीं हो सका। कृपया फिर से कोशिश करें।";
 "composer.errSomethingWrong" = "कुछ गलत हो गया। यह देखने के लिए कि आपकी पोस्ट पब्लिश हुई या नहीं, अपनी फ़ीड देखें।";
 "composer.errWriteSomething" = "कृपया कुछ लिखें या कोई पोल सवाल पूछें।";
+"composer.postAs" = "इस रूप में पोस्ट करें:";
+"composer.placeholderRecruitment" = "नौकरी के अवसर के बारे में बताएं... #हैशटैग और @मेंशन का इस्तेमाल करें";
+"composer.placeholderArticleTitle" = "आर्टिकल का शीर्षक / टीज़र (वैकल्पिक)";
+"composer.placeholderArticleBody" = "अपना आर्टिकल कंटेंट Markdown या HTML में लिखें...";
+"composer.articleMarkdown" = "Markdown और HTML सपोर्ट करता है";
+"composer.companyPlaceholder" = "कंपनी का नाम *";
+"composer.locationPlaceholder" = "स्थान (जैसे, रिमोट, न्यूयॉर्क, लंदन)";
+"composer.applyUrlPlaceholder" = "आवेदन URL (वैकल्पिक)";
+"composer.errCompanyRequired" = "कृपया भर्ती पोस्ट के लिए कंपनी का नाम दर्ज करें।";
+"composer.errArticleRequired" = "कृपया आर्टिकल का कंटेंट लिखें।";
 "postDetail.commentPlaceholder" = "एक कमेंट लिखें...";
 "postDetail.replyPlaceholder" = "एक रिप्लाई लिखें...";
 "postDetail.sending" = "भेजा जा रहा है...";

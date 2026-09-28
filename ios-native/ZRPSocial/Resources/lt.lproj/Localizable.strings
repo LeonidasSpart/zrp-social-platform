@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Įkėlimas nepavyko. Bandykite dar kartą.";
 "composer.errSomethingWrong" = "Kažkas nutiko ne taip. Patikrinkite savo naujienų srautą, ar įrašas buvo paskelbtas.";
 "composer.errWriteSomething" = "Parašykite ką nors arba užduokite apklausos klausimą.";
+"composer.postAs" = "Skelbti kaip:";
+"composer.placeholderRecruitment" = "Aprašykite darbo galimybę... Naudokite #saitažodžius ir @paminėjimus";
+"composer.placeholderArticleTitle" = "Straipsnio pavadinimas / anonsas (neprivaloma)";
+"composer.placeholderArticleBody" = "Rašykite straipsnio turinį Markdown arba HTML formatu...";
+"composer.articleMarkdown" = "Palaiko Markdown ir HTML";
+"composer.companyPlaceholder" = "Įmonės pavadinimas *";
+"composer.locationPlaceholder" = "Vieta (pvz., Nuotoliniu būdu, Niujorkas, Londonas)";
+"composer.applyUrlPlaceholder" = "Paraiškos URL (neprivaloma)";
+"composer.errCompanyRequired" = "Įveskite įmonės pavadinimą darbo skelbimams.";
+"composer.errArticleRequired" = "Parašykite straipsnio turinį.";
 "postDetail.commentPlaceholder" = "Rašykite komentarą...";
 "postDetail.replyPlaceholder" = "Rašykite atsakymą...";
 "postDetail.sending" = "Siunčiama...";

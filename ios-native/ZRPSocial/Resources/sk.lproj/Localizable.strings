@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Nahrávanie zlyhalo. Skúste to znova.";
 "composer.errSomethingWrong" = "Niečo sa pokazilo. Skontrolujte svoj kanál, či bol váš príspevok zverejnený.";
 "composer.errWriteSomething" = "Napíšte, prosím, niečo alebo položte otázku v ankete.";
+"composer.postAs" = "Zverejniť ako:";
+"composer.placeholderRecruitment" = "Opíšte pracovnú príležitosť... Použite #hashtagy a @zmienky";
+"composer.placeholderArticleTitle" = "Názov článku / anotácia (voliteľné)";
+"composer.placeholderArticleBody" = "Napíšte obsah svojho článku v Markdowne alebo HTML...";
+"composer.articleMarkdown" = "Podporuje Markdown a HTML";
+"composer.companyPlaceholder" = "Názov spoločnosti *";
+"composer.locationPlaceholder" = "Lokalita (napr. Na diaľku, New York, Londýn)";
+"composer.applyUrlPlaceholder" = "URL prihlášky (voliteľné)";
+"composer.errCompanyRequired" = "Zadajte, prosím, názov spoločnosti pre náborové príspevky.";
+"composer.errArticleRequired" = "Napíšte, prosím, obsah článku.";
 "postDetail.commentPlaceholder" = "Napíšte komentár...";
 "postDetail.replyPlaceholder" = "Napíšte odpoveď...";
 "postDetail.sending" = "Odosiela sa...";

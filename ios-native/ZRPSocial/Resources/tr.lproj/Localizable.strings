@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Yükleme başarısız oldu. Lütfen tekrar deneyin.";
 "composer.errSomethingWrong" = "Bir şeyler ters gitti. Gönderinizin yayınlanıp yayınlanmadığını görmek için akışınızı kontrol edin.";
 "composer.errWriteSomething" = "Lütfen bir şeyler yazın veya bir anket sorusu sorun.";
+"composer.postAs" = "Şu şekilde gönder:";
+"composer.placeholderRecruitment" = "İş fırsatını açıklayın... #hashtag ve @bahsetme kullanın";
+"composer.placeholderArticleTitle" = "Makale başlığı / tanıtım yazısı (isteğe bağlı)";
+"composer.placeholderArticleBody" = "Makale içeriğinizi Markdown veya HTML olarak yazın...";
+"composer.articleMarkdown" = "Markdown ve HTML desteklenir";
+"composer.companyPlaceholder" = "Şirket adı *";
+"composer.locationPlaceholder" = "Konum (örneğin, Uzaktan, New York, Londra)";
+"composer.applyUrlPlaceholder" = "Başvuru URL'si (isteğe bağlı)";
+"composer.errCompanyRequired" = "Lütfen işe alım gönderileri için bir şirket adı girin.";
+"composer.errArticleRequired" = "Lütfen makale içeriğini yazın.";
 "postDetail.commentPlaceholder" = "Bir yorum yazın...";
 "postDetail.replyPlaceholder" = "Bir yanıt yazın...";
 "postDetail.sending" = "Gönderiliyor...";

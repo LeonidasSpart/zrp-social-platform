@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Lataaminen epäonnistui. Yritä uudelleen.";
 "composer.errSomethingWrong" = "Jotain meni pieleen. Tarkista syötteestäsi, julkaistiinko julkaisusi.";
 "composer.errWriteSomething" = "Kirjoita jotain tai esitä äänestyskysymys.";
+"composer.postAs" = "Julkaise nimellä:";
+"composer.placeholderRecruitment" = "Kuvaile työmahdollisuutta... Käytä #hashtageja ja @mainintoja";
+"composer.placeholderArticleTitle" = "Artikkelin otsikko / esikatselu (valinnainen)";
+"composer.placeholderArticleBody" = "Kirjoita artikkelisi sisältö Markdownilla tai HTML:llä...";
+"composer.articleMarkdown" = "Tukee Markdownia ja HTML:ää";
+"composer.companyPlaceholder" = "Yrityksen nimi *";
+"composer.locationPlaceholder" = "Sijainti (esim. Etätyö, Helsinki, Lontoo)";
+"composer.applyUrlPlaceholder" = "Hakemus-URL (valinnainen)";
+"composer.errCompanyRequired" = "Anna yrityksen nimi rekrytointijulkaisuja varten.";
+"composer.errArticleRequired" = "Kirjoita artikkelin sisältö.";
 "postDetail.commentPlaceholder" = "Kirjoita kommentti...";
 "postDetail.replyPlaceholder" = "Kirjoita vastaus...";
 "postDetail.sending" = "Lähetetään...";

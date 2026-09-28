@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Prijenos nije uspio. Pokušaj ponovno.";
 "composer.errSomethingWrong" = "Nešto je pošlo po zlu. Provjeri svoj feed kako bi vidio/la je li tvoja objava objavljena.";
 "composer.errWriteSomething" = "Napiši nešto ili postavi pitanje ankete.";
+"composer.postAs" = "Objavljuješ kao:";
+"composer.placeholderRecruitment" = "Opiši poslovnu priliku... Koristi #hashtagove i @spominjanja";
+"composer.placeholderArticleTitle" = "Naslov članka / najava (neobavezno)";
+"composer.placeholderArticleBody" = "Napiši sadržaj članka u Markdownu ili HTML-u...";
+"composer.articleMarkdown" = "Podržava Markdown i HTML";
+"composer.companyPlaceholder" = "Naziv tvrtke *";
+"composer.locationPlaceholder" = "Lokacija (npr. rad na daljinu, New York, London)";
+"composer.applyUrlPlaceholder" = "URL za prijavu (neobavezno)";
+"composer.errCompanyRequired" = "Unesi naziv tvrtke za objave o zapošljavanju.";
+"composer.errArticleRequired" = "Napiši sadržaj članka.";
 "postDetail.commentPlaceholder" = "Napiši komentar...";
 "postDetail.replyPlaceholder" = "Napiši odgovor...";
 "postDetail.sending" = "Slanje...";

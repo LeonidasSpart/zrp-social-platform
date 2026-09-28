@@ -129,11 +129,62 @@ final class ComposeViewModel: ObservableObject {
         // A schedule that is not in the future would be refused by the
         // route; saying so by disabling the button beats sending it.
         guard isScheduleValid else { return false }
+        // Mirrors the website's own isSubmitDisabled: a RECRUITMENT post
+        // needs a company, an ARTICLE needs a body - and an ARTICLE is
+        // postable on its body alone, with no separate "has text" floor,
+        // since its title/teaser (`text`) is explicitly optional.
+        switch postType {
+        case .recruitment:
+            guard !company.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return false }
+        case .article:
+            return !articleBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case .post, .unknown:
+            break
+        }
         let hasText = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         // A quote is publishable with no text of its own - the quoted
         // post is the content, exactly as on web. So is a poll: its
         // question becomes the post's text.
         return hasText || !attachments.isEmpty || quotedPost != nil || newPoll != nil
+    }
+
+    // MARK: - Post type (recruitment / article)
+
+    /// Matches PostComposer.tsx's own type-selector pill row: hidden
+    /// entirely for a plan with neither feature, and never shown at all
+    /// while quoting - QuotePostModal.tsx has no type concept, and
+    /// neither does quoting here.
+    var showsTypeSelector: Bool {
+        quotedPost == nil && (limits.recruitmentProfiles || limits.articlePublishing)
+    }
+
+    var canSelectRecruitment: Bool { limits.recruitmentProfiles }
+    var canSelectArticle: Bool { limits.articlePublishing }
+
+    @Published private(set) var postType: PostType = .post
+
+    // Mirrors PostComposer.tsx's own postType/company/location/applyUrl/
+    // articleBody state exactly. `text` above doubles as the
+    // RECRUITMENT/ARTICLE post's own text/title in both cases - there is
+    // no separate field for it, same as web. These four are left as-is
+    // across a type switch, matching handlePostTypeChange never clearing
+    // them.
+    @Published var company = ""
+    @Published var location = ""
+    @Published var applyUrl = ""
+    @Published var articleBody = ""
+
+    /// Matches handlePostTypeChange: a plan without the feature can't
+    /// switch into it at all (the selector doesn't even offer it, but
+    /// this is defense in depth, not the only gate). Switching away from
+    /// POST closes the poll builder - a poll only ever applies to a
+    /// plain post - which also discards it, per `isBuildingPoll`'s own
+    /// `didSet` above.
+    func setPostType(_ type: PostType) {
+        if type == .recruitment, !limits.recruitmentProfiles { return }
+        if type == .article, !limits.articlePublishing { return }
+        postType = type
+        if type != .post { isBuildingPoll = false }
     }
 
     // MARK: - Scheduling
@@ -383,6 +434,14 @@ final class ComposeViewModel: ObservableObject {
             imageUrls: uploaded.isEmpty ? nil : uploaded.map(\.url),
             mediaType: uploaded.first?.type,
             quotePostId: quotedPost?.id,
+            type: postType.rawValue,
+            company: postType == .recruitment
+                ? company.trimmingCharacters(in: .whitespacesAndNewlines) : nil,
+            location: postType == .recruitment
+                ? location.trimmingCharacters(in: .whitespacesAndNewlines) : nil,
+            applyUrl: postType == .recruitment
+                ? applyUrl.trimmingCharacters(in: .whitespacesAndNewlines) : nil,
+            articleBody: postType == .article ? articleBody : nil,
             // A poll post with no text of its own carries the question
             // as its content - what the website sends, so the post reads
             // the same in a timeline on either platform.

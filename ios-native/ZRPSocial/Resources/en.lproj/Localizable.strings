@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Upload failed. Please try again.";
 "composer.errSomethingWrong" = "Something went wrong. Check your feed to see if your post was published.";
 "composer.errWriteSomething" = "Please write something or ask a poll question.";
+"composer.postAs" = "Post as:";
+"composer.placeholderRecruitment" = "Describe the job opportunity... Use #hashtags and @mentions";
+"composer.placeholderArticleTitle" = "Article title / teaser (optional)";
+"composer.placeholderArticleBody" = "Write your article content in Markdown or HTML...";
+"composer.articleMarkdown" = "Supports Markdown and HTML";
+"composer.companyPlaceholder" = "Company name *";
+"composer.locationPlaceholder" = "Location (e.g., Remote, New York, London)";
+"composer.applyUrlPlaceholder" = "Application URL (optional)";
+"composer.errCompanyRequired" = "Please enter a company name for recruitment posts.";
+"composer.errArticleRequired" = "Please write the article content.";
 "postDetail.commentPlaceholder" = "Write a comment...";
 "postDetail.replyPlaceholder" = "Write a reply...";
 "postDetail.sending" = "Sending...";

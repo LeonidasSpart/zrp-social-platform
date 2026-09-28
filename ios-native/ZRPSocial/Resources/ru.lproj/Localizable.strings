@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Не удалось загрузить файл. Пожалуйста, попробуйте снова.";
 "composer.errSomethingWrong" = "Что-то пошло не так. Проверьте ленту, чтобы убедиться, что публикация была размещена.";
 "composer.errWriteSomething" = "Пожалуйста, напишите что-нибудь или задайте вопрос в опросе.";
+"composer.postAs" = "Опубликовать как:";
+"composer.placeholderRecruitment" = "Опишите вакансию... Используйте #хэштеги и @упоминания";
+"composer.placeholderArticleTitle" = "Заголовок статьи / анонс (необязательно)";
+"composer.placeholderArticleBody" = "Напишите содержание статьи в Markdown или HTML...";
+"composer.articleMarkdown" = "Поддерживает Markdown и HTML";
+"composer.companyPlaceholder" = "компания имя *";
+"composer.locationPlaceholder" = "Местоположение (например, удалённо, Нью-Йорк, Лондон)";
+"composer.applyUrlPlaceholder" = "Ссылка для отклика (необязательно)";
+"composer.errCompanyRequired" = "Пожалуйста, укажите название компании для публикации вакансии.";
+"composer.errArticleRequired" = "Пожалуйста, напишите содержание статьи.";
 "postDetail.commentPlaceholder" = "Напишите комментарий...";
 "postDetail.replyPlaceholder" = "Напишите ответ...";
 "postDetail.sending" = "Отправка...";

@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "A feltöltés sikertelen. Próbáld újra.";
 "composer.errSomethingWrong" = "Hiba történt. Ellenőrizd a hírfolyamodat, hogy megjelent-e a bejegyzésed.";
 "composer.errWriteSomething" = "Írj valamit, vagy adj meg egy szavazási kérdést.";
+"composer.postAs" = "Közzététel mint:";
+"composer.placeholderRecruitment" = "Írd le az álláslehetőséget... Használj #hashtageket és @említéseket";
+"composer.placeholderArticleTitle" = "Cikk címe / bevezetője (opcionális)";
+"composer.placeholderArticleBody" = "Írd meg a cikk tartalmát Markdown vagy HTML formátumban...";
+"composer.articleMarkdown" = "Markdown és HTML formátumot is támogat";
+"composer.companyPlaceholder" = "Cég neve *";
+"composer.locationPlaceholder" = "Helyszín (pl. Távmunka, Budapest, London)";
+"composer.applyUrlPlaceholder" = "Jelentkezési URL (opcionális)";
+"composer.errCompanyRequired" = "Add meg a cég nevét a toborzási bejegyzéshez.";
+"composer.errArticleRequired" = "Írd meg a cikk tartalmát.";
 "postDetail.commentPlaceholder" = "Írj egy megjegyzést...";
 "postDetail.replyPlaceholder" = "Írj egy választ...";
 "postDetail.sending" = "Küldés...";

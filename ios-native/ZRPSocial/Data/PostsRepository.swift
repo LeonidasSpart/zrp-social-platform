@@ -29,10 +29,9 @@ enum FeedTab: String, CaseIterable, Identifiable {
 /// The body `POST /api/posts` accepts.
 ///
 /// Only the fields the composer actually sends. The route also takes
-/// `linkUrl`, `poll`, `type`/`company`/`location`/`applyUrl` for
-/// recruitment posts and `articleBody` for articles - none of which the
-/// app composes yet, and all of which the server treats as absent rather
-/// than empty when omitted.
+/// `linkUrl`, none of which the app composes - it is treated as absent
+/// rather than empty when omitted, same as every other optional field
+/// here.
 ///
 /// `mediaType` is sent as the upload's own classification, but the server
 /// re-derives and normalises it regardless (see the route's "Use ONLY the
@@ -43,6 +42,31 @@ struct CreatePostRequest: Encodable {
     let imageUrls: [String]?
     let mediaType: String?
     let quotePostId: String?
+
+    /// `"POST"` (the default the route itself falls back to when this is
+    /// omitted), `"RECRUITMENT"` or `"ARTICLE"` - matches `Post.type` on
+    /// the read side (`Models/Post.swift`'s `PostType`) exactly, but kept
+    /// as a plain string here since encoding only ever needs the three
+    /// literal values the composer's own type selector can produce.
+    var type: String?
+
+    /// RECRUITMENT-only. The route stores these as `null` for any other
+    /// `type` regardless of what is sent, but they are only ever sent at
+    /// all when `type == "RECRUITMENT"` (see `ComposeViewModel.post()`).
+    var company: String?
+    var location: String?
+
+    /// Rendered server-side as the recruitment card's raw "Apply Now"
+    /// href - the route rejects anything but a real http(s)/mailto link
+    /// (`isSafeApplyUrl`), which is the server's own defense against a
+    /// stored `javascript:` URL, not something this client re-implements.
+    var applyUrl: String?
+
+    /// ARTICLE-only. The route Markdown/HTML-renders this server-side
+    /// (`renderArticleBody`); `content` above still doubles as the
+    /// article's own title/teaser, same as a RECRUITMENT post's `content`
+    /// doubles as its headline - there is no separate title field.
+    var articleBody: String?
 
     /// A poll to create alongside the post.
     ///
@@ -103,6 +127,7 @@ struct CreatePostRequest: Encodable {
 
     private enum CodingKeys: String, CodingKey {
         case content, imageUrls, mediaType, quotePostId, poll, isPoll, scheduledAt
+        case type, company, location, applyUrl, articleBody
     }
 
     func encode(to encoder: Encoder) throws {
@@ -114,6 +139,11 @@ struct CreatePostRequest: Encodable {
         try container.encodeIfPresent(poll, forKey: .poll)
         try container.encode(isPoll, forKey: .isPoll)
         try container.encodeIfPresent(scheduledAt, forKey: .scheduledAt)
+        try container.encodeIfPresent(type, forKey: .type)
+        try container.encodeIfPresent(company, forKey: .company)
+        try container.encodeIfPresent(location, forKey: .location)
+        try container.encodeIfPresent(applyUrl, forKey: .applyUrl)
+        try container.encodeIfPresent(articleBody, forKey: .articleBody)
     }
 }
 

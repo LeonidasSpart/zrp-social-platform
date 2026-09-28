@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "فشل رفع الملف. يرجى المحاولة مرة أخرى.";
 "composer.errSomethingWrong" = "حدث خطأ ما. تحقق من خلاصتك لمعرفة ما إذا تم نشر منشورك.";
 "composer.errWriteSomething" = "يرجى كتابة شيء أو طرح سؤال في الاستطلاع.";
+"composer.postAs" = "النشر باسم:";
+"composer.placeholderRecruitment" = "صف الوظيفة الشاغرة... استخدم #هاشتاغات و@إشارات";
+"composer.placeholderArticleTitle" = "عنوان المقال / مقدمة (اختياري)";
+"composer.placeholderArticleBody" = "اكتب محتوى مقالك بصيغة Markdown أو HTML...";
+"composer.articleMarkdown" = "يدعم Markdown و HTML";
+"composer.companyPlaceholder" = "شركة اسم *";
+"composer.locationPlaceholder" = "الموقع (مثال: عن بُعد، نيويورك، لندن)";
+"composer.applyUrlPlaceholder" = "رابط التقديم (اختياري)";
+"composer.errCompanyRequired" = "يرجى إدخال اسم الشركة لمنشورات التوظيف.";
+"composer.errArticleRequired" = "يرجى كتابة محتوى المقالة.";
 "postDetail.commentPlaceholder" = "اكتب تعليقًا...";
 "postDetail.replyPlaceholder" = "اكتب ردًا...";
 "postDetail.sending" = "جارٍ الإرسال...";

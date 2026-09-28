@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "アップロードに失敗しました。もう一度お試しください。";
 "composer.errSomethingWrong" = "問題が発生しました。フィードを確認して投稿が公開されているかご確認ください。";
 "composer.errWriteSomething" = "本文を入力するか、アンケートの質問を作成してください。";
+"composer.postAs" = "投稿タイプ：";
+"composer.placeholderRecruitment" = "求人内容を入力してください。#ハッシュタグや@メンションを使用できます";
+"composer.placeholderArticleTitle" = "記事タイトル／概要（任意）";
+"composer.placeholderArticleBody" = "MarkdownまたはHTMLで記事の内容を入力してください...";
+"composer.articleMarkdown" = "MarkdownとHTMLに対応しています";
+"composer.companyPlaceholder" = "会社名 *";
+"composer.locationPlaceholder" = "勤務地（例：リモート、東京、大阪）";
+"composer.applyUrlPlaceholder" = "応募用URL（任意）";
+"composer.errCompanyRequired" = "求人投稿には会社名を入力してください。";
+"composer.errArticleRequired" = "記事の内容を入力してください。";
 "postDetail.commentPlaceholder" = "コメントを入力...";
 "postDetail.replyPlaceholder" = "返信を入力...";
 "postDetail.sending" = "送信中...";

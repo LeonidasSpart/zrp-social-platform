@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Nalaganje ni uspelo. Poskusite znova.";
 "composer.errSomethingWrong" = "Prišlo je do napake. Na svoji časovnici preverite, ali je bila vaša objava objavljena.";
 "composer.errWriteSomething" = "Napišite nekaj ali postavite vprašanje ankete.";
+"composer.postAs" = "Objavi kot:";
+"composer.placeholderRecruitment" = "Opišite zaposlitveno priložnost ... Uporabite #ključnike in @omembe";
+"composer.placeholderArticleTitle" = "Naslov članka / napoved (neobvezno)";
+"composer.placeholderArticleBody" = "Napišite vsebino svojega članka v Markdownu ali HTML-ju ...";
+"composer.articleMarkdown" = "Podpira Markdown in HTML";
+"composer.companyPlaceholder" = "Ime podjetja *";
+"composer.locationPlaceholder" = "Lokacija (npr. na daljavo, New York, London)";
+"composer.applyUrlPlaceholder" = "URL za prijavo (neobvezno)";
+"composer.errCompanyRequired" = "Za kadrovske objave vnesite ime podjetja.";
+"composer.errArticleRequired" = "Napišite vsebino članka.";
 "postDetail.commentPlaceholder" = "Napišite komentar ...";
 "postDetail.replyPlaceholder" = "Napišite odgovor ...";
 "postDetail.sending" = "Pošiljanje ...";

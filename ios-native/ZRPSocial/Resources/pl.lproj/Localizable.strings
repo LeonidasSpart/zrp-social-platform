@@ -238,6 +238,16 @@
 "composer.errUploadFailed" = "Przesyłanie nie powiodło się. Spróbuj ponownie.";
 "composer.errSomethingWrong" = "Coś poszło nie tak. Sprawdź swój kanał, aby zobaczyć, czy post został opublikowany.";
 "composer.errWriteSomething" = "Napisz coś lub dodaj pytanie do ankiety.";
+"composer.postAs" = "Publikuj jako:";
+"composer.placeholderRecruitment" = "Opisz ofertę pracy... Użyj #hashtagów i @wzmianek";
+"composer.placeholderArticleTitle" = "Tytuł artykułu / zajawka (opcjonalnie)";
+"composer.placeholderArticleBody" = "Napisz treść artykułu w formacie Markdown lub HTML...";
+"composer.articleMarkdown" = "Obsługuje Markdown i HTML";
+"composer.companyPlaceholder" = "Nazwa firmy *";
+"composer.locationPlaceholder" = "Lokalizacja (np. Zdalnie, Nowy Jork, Londyn)";
+"composer.applyUrlPlaceholder" = "Adres URL do aplikowania (opcjonalnie)";
+"composer.errCompanyRequired" = "Podaj nazwę firmy dla postów rekrutacyjnych.";
+"composer.errArticleRequired" = "Napisz treść artykułu.";
 "postDetail.commentPlaceholder" = "Napisz komentarz...";
 "postDetail.replyPlaceholder" = "Napisz odpowiedź...";
 "postDetail.sending" = "Wysyłanie...";
