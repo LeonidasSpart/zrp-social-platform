@@ -167,6 +167,9 @@ class LocalizationCompletenessTest {
      */
     private val perLanguageAllowlist: Map<String, Set<String>> = mapOf(
         "fr" to setOf(
+            // "Public" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_visibility_public",
             // "Date" is the identical French word (same spelling, same
             // meaning) - Subscriptions & Billing payment history.
             "admin_subscription_detail_col_date",
@@ -279,6 +282,13 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "de" to setOf(
+            // "Community" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_visibility_community",
+            "live_audio_community_label",
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Plan"/"Status" are the identical German nouns (der Plan,
             // der Status); "ZRP Team" uses "Team", an established German
             // loanword (das Team) - same reasoning as "Bank" below.
@@ -393,6 +403,13 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "it" to setOf(
+            // "Community" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_visibility_community",
+            "live_audio_community_label",
+            // "Host" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_host_badge",
             // "No" is the identical Italian word - Subscriptions & Billing
             // detail's legacy-backfill flag.
             "admin_subscription_detail_no",
@@ -709,6 +726,12 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "id" to setOf(
+            // "Host" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_host_badge",
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Status"/"Interval" are identical Indonesian loanwords -
             // Subscriptions & Billing detail, same reasoning as
             // "Email"/"Bio"/"Global" already established for this language.
@@ -925,6 +948,16 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "nl" to setOf(
+            // "Community" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_visibility_community",
+            "live_audio_community_label",
+            // "Host" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_host_badge",
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Status"/"Interval" are identical Dutch loanwords -
             // Subscriptions & Billing detail.
             "admin_subscription_detail_field_status",
@@ -1046,6 +1079,9 @@ class LocalizationCompletenessTest {
             "trust_stat_posts",
         ),
         "pl" to setOf(
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Plan"/"Status" are identical Polish loanwords -
             // Subscriptions & Billing detail.
             "admin_subscription_detail_field_plan",
@@ -1078,6 +1114,12 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "ro" to setOf(
+            // "Public" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_visibility_public",
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Plan"/"Status"/"Interval" are identical Romanian cognates -
             // Subscriptions & Billing detail.
             "admin_subscription_detail_field_plan",
@@ -1175,6 +1217,13 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "sv" to setOf(
+            // "Community" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_visibility_community",
+            "live_audio_community_label",
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Plan"/"Status" are identical Swedish loanwords -
             // Subscriptions & Billing detail.
             "admin_subscription_detail_field_plan",
@@ -1221,6 +1270,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "da" to setOf(
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Plan"/"Status"/"Interval" are identical Danish loanwords -
             // Subscriptions & Billing detail.
             "admin_subscription_detail_field_plan",
@@ -1295,6 +1347,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "hr" to setOf(
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Plan"/"Status"/"Interval" are identical Croatian loanwords -
             // Subscriptions & Billing detail.
             "admin_subscription_detail_field_plan",
@@ -1366,6 +1421,9 @@ class LocalizationCompletenessTest {
         // identically to English) plus the format-only/brand strings
         // already allowlisted the same way for every other language here.
         "no" to setOf(
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Status" - Subscriptions & Billing detail, same established
             // Bokmål loanword as the rest of this list's own comment above.
             "admin_subscription_detail_field_status",
@@ -1436,6 +1494,9 @@ class LocalizationCompletenessTest {
             "admin_news_network_publication_meta",
         ),
         "bs" to setOf(
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             // "Plan"/"Status"/"Interval" are identical Bosnian loanwords -
             // Subscriptions & Billing detail.
             "admin_subscription_detail_field_plan",
@@ -1583,6 +1644,9 @@ class LocalizationCompletenessTest {
             "admin_analytics_platform_web",
         ),
         "sl" to setOf(
+            // "Moderator" - identical spelling and meaning in this language, a
+            // genuine cognate (Live Audio room badges/labels).
+            "live_audio_moderator_badge",
             "chat_contact_video",
             "stories_video",
             "music_album_detail_eyebrow",

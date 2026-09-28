@@ -174,4 +174,5 @@ object ApiClient {
     val legalApi: LegalApi by lazy { retrofit.create(LegalApi::class.java) }
     val ambassadorsApi: AmbassadorsApi by lazy { retrofit.create(AmbassadorsApi::class.java) }
     val discoverApi: DiscoverApi by lazy { retrofit.create(DiscoverApi::class.java) }
+    val liveAudioApi: LiveAudioApi by lazy { retrofit.create(LiveAudioApi::class.java) }
 }

@@ -721,6 +721,29 @@ dependencies {
     // by every other production Android WebRTC app since.
     implementation 'io.github.webrtc-sdk:android:125.6422.06.1'
 
+    // ZRP Live Audio - LiveKit's own Android SDK (bundles and owns its
+    // own libwebrtc build internally, entirely separate from the raw
+    // io.github.webrtc-sdk dependency above used only by the 1:1 mesh
+    // call feature - LiveKit's SFU-based Room/RemoteParticipant/
+    // LocalParticipant API expects to own the peer connection lifecycle
+    // end-to-end, so the two coexist rather than one replacing the
+    // other). The REST layer (LiveAudioApi/LiveAudioRepository) hands
+    // this SDK nothing but the server-minted `token` + `livekitUrl` from
+    // POST /live-audio/rooms/{id}/join|token - see LiveAudioRoomViewModel's
+    // own KDoc for the exact connection flow. This version (and the
+    // LiveAudioRoomViewModel connection code written against it) is
+    // NOT build-verified in this environment - there is no Android SDK/
+    // Google Maven access here (see this repo's own established
+    // disclosure on every other Android change this session), and
+    // unlike every other dependency already in this file, this one is
+    // brand new rather than a version bump of something already proven
+    // to resolve and compile here. Confirm this resolves cleanly and
+    // sanity-check the exact API surface (io.livekit.android.LiveKit,
+    // Room.connect, LocalParticipant.setMicrophoneEnabled, the
+    // RoomEvent sealed class) against the current LiveKit Android docs
+    // in a real Android Studio build before shipping.
+    implementation 'io.livekit:livekit-android:2.28.1'
+
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 

@@ -104,6 +104,8 @@ import one.zrp.social.mobile.ui.lists.ListDetailScreen
 import one.zrp.social.mobile.ui.lists.ListsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.discover.DiscoverFeedScreen
+import one.zrp.social.mobile.ui.liveaudio.LiveAudioListScreen
+import one.zrp.social.mobile.ui.liveaudio.LiveAudioRoomScreen
 import one.zrp.social.mobile.ui.followlist.FollowListMode
 import one.zrp.social.mobile.ui.followlist.FollowListScreen
 import one.zrp.social.mobile.ui.hashtag.HashtagScreen
@@ -291,6 +293,8 @@ fun ZrpNavHost(
     val goToNewsArticle: (String) -> Unit = { slug -> navController.navigate("news/article/${Uri.encode(slug)}") }
     val goToShorts: () -> Unit = { navController.navigate("shorts") }
     val goToDiscover: () -> Unit = { navController.navigate("discover") }
+    val goToLiveAudio: () -> Unit = { navController.navigate("live-audio") }
+    val goToLiveAudioRoom: (String) -> Unit = { id -> navController.navigate("live-audio/$id") }
     // Matches PostCard.tsx's own video-tap behavior: opens the same
     // full-screen swipeable video feed as the Shorts tab, starting at
     // this exact post (VideoFeedViewer's own startPostId prop).
@@ -488,6 +492,7 @@ fun ZrpNavHost(
                     goNews = goToNews,
                     goShorts = goToShorts,
                     goDiscover = goToDiscover,
+                    goLiveAudio = goToLiveAudio,
                     goMusic = goToMusic,
                     goMarketplace = goToMarketplace,
                     goOpportunity = goToOpportunity,
@@ -1309,6 +1314,24 @@ fun ZrpNavHost(
                     onOpenComments = goToComments,
                     onAuthorClick = goToProfile,
                 )
+            }
+            composable("live-audio") {
+                LiveAudioListScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenRoom = goToLiveAudioRoom,
+                )
+            }
+            composable(
+                route = "live-audio/{roomId}",
+                arguments = listOf(navArgument("roomId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val roomId = backStackEntry.arguments?.getString("roomId")
+                if (roomId != null) {
+                    LiveAudioRoomScreen(
+                        roomId = roomId,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
             }
             composable(
                 route = "shorts/{postId}",
