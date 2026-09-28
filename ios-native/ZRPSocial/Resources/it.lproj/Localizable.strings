@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Squillo in corso...";
 "ios.call.voiceCallCd" = "Chiamata vocale";
 "ios.call.videoCallCd" = "Videochiamata";
+"ios.search.noHashtags" = "Nessun hashtag trovato.";

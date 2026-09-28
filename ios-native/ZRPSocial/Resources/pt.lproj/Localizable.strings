@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "A tocar...";
 "ios.call.voiceCallCd" = "Chamada de voz";
 "ios.call.videoCallCd" = "Chamada de vídeo";
+"ios.search.noHashtags" = "Nenhuma hashtag encontrada.";

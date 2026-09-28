@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Zvoni ...";
 "ios.call.voiceCallCd" = "Glasovni klic";
 "ios.call.videoCallCd" = "Video klic";
+"ios.search.noHashtags" = "Ni najdenih ključnikov.";

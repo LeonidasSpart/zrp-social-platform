@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Ça sonne...";
 "ios.call.voiceCallCd" = "Appel vocal";
 "ios.call.videoCallCd" = "Appel vidéo";
+"ios.search.noHashtags" = "Aucun hashtag trouvé.";

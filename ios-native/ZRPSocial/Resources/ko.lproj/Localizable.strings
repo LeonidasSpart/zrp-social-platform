@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "전화 거는 중...";
 "ios.call.voiceCallCd" = "음성통화";
 "ios.call.videoCallCd" = "영상통화";
+"ios.search.noHashtags" = "해시태그를 찾을 수 없습니다.";

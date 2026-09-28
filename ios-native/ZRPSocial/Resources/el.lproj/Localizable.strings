@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Χτυπάει...";
 "ios.call.voiceCallCd" = "Φωνητική κλήση";
 "ios.call.videoCallCd" = "Βιντεοκλήση";
+"ios.search.noHashtags" = "Δεν βρέθηκαν hashtags.";

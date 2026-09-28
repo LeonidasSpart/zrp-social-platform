@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Er wordt gebeld...";
 "ios.call.voiceCallCd" = "Spraakoproep";
 "ios.call.videoCallCd" = "Video-oproep";
+"ios.search.noHashtags" = "Geen hashtags gevonden.";

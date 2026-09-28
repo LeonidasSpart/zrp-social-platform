@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "घंटी बज रही है...";
 "ios.call.voiceCallCd" = "वॉइस कॉल";
 "ios.call.videoCallCd" = "वीडियो कॉल";
+"ios.search.noHashtags" = "कोई हैशटैग नहीं मिला।";

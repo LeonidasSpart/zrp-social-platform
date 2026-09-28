@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Звъни...";
 "ios.call.voiceCallCd" = "Гласово обаждане";
 "ios.call.videoCallCd" = "Видео обаждане";
+"ios.search.noHashtags" = "Не са намерени хаштагове.";

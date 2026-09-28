@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Звонок...";
 "ios.call.voiceCallCd" = "Голосовой звонок";
 "ios.call.videoCallCd" = "Видеозвонок";
+"ios.search.noHashtags" = "Хэштеги не найдены.";

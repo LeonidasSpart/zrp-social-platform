@@ -2920,6 +2920,8 @@ enum L10nKey: String, CaseIterable {
     case iosCallVoiceCallCd = "ios.call.voiceCallCd"
     /// en: "Video call"
     case iosCallVideoCallCd = "ios.call.videoCallCd"
+    /// en: "No hashtags found."
+    case iosSearchNoHashtags = "ios.search.noHashtags"
 }
 
 extension L10nKey {

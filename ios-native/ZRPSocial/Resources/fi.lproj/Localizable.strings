@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Soi...";
 "ios.call.voiceCallCd" = "Äänipuhelu";
 "ios.call.videoCallCd" = "Videopuhelu";
+"ios.search.noHashtags" = "Hashtageja ei löytynyt.";

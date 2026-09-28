@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Çalıyor...";
 "ios.call.voiceCallCd" = "Sesli arama";
 "ios.call.videoCallCd" = "Görüntülü arama";
+"ios.search.noHashtags" = "Hashtag bulunamadı.";

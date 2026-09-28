@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "جارٍ الاتصال...";
 "ios.call.voiceCallCd" = "مكالمة صوتية";
 "ios.call.videoCallCd" = "مكالمة فيديو";
+"ios.search.noHashtags" = "لم يتم العثور على وسوم.";

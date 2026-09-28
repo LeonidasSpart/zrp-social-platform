@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Ringer ...";
 "ios.call.voiceCallCd" = "Taleanrop";
 "ios.call.videoCallCd" = "Videoanrop";
+"ios.search.noHashtags" = "Fant ingen emneknagger.";

@@ -13,7 +13,7 @@
     "other missing key does (see L10n.swift), never a raw key.",
     "",
     "Completeness is enforced by generate-localizations.py --check,",
-    "which fails if any of these 169 keys is missing a translation for",
+    "which fails if any of these 170 keys is missing a translation for",
     "any of the 33 non-English languages, or if a translation carries",
     "placeholders that don't match the English source exactly."
   ],
@@ -186,7 +186,8 @@
     "ios.call.incomingVoice": "Incoming voice call...",
     "ios.call.ringing": "Ringing...",
     "ios.call.voiceCallCd": "Voice call",
-    "ios.call.videoCallCd": "Video call"
+    "ios.call.videoCallCd": "Video call",
+    "ios.search.noHashtags": "No hashtags found."
   },
   "translations": {
     "fr": {
@@ -358,7 +359,8 @@
       "ios.call.incomingVoice": "Appel entrant...",
       "ios.call.ringing": "Ça sonne...",
       "ios.call.voiceCallCd": "Appel vocal",
-      "ios.call.videoCallCd": "Appel vidéo"
+      "ios.call.videoCallCd": "Appel vidéo",
+      "ios.search.noHashtags": "Aucun hashtag trouvé."
     },
     "de": {
       "ios.a11y.bookmark": "Merken",
@@ -529,7 +531,8 @@
       "ios.call.incomingVoice": "Eingehender Anruf...",
       "ios.call.ringing": "Es klingelt...",
       "ios.call.voiceCallCd": "Sprachanruf",
-      "ios.call.videoCallCd": "Videoanruf"
+      "ios.call.videoCallCd": "Videoanruf",
+      "ios.search.noHashtags": "Keine Hashtags gefunden."
     },
     "it": {
       "ios.a11y.bookmark": "Salva",
@@ -700,7 +703,8 @@
       "ios.call.incomingVoice": "Chiamata in arrivo...",
       "ios.call.ringing": "Squillo in corso...",
       "ios.call.voiceCallCd": "Chiamata vocale",
-      "ios.call.videoCallCd": "Videochiamata"
+      "ios.call.videoCallCd": "Videochiamata",
+      "ios.search.noHashtags": "Nessun hashtag trovato."
     },
     "sq": {
       "ios.a11y.bookmark": "Ruaje",
@@ -871,7 +875,8 @@
       "ios.call.incomingVoice": "Telefonatë hyrëse...",
       "ios.call.ringing": "Duke ju thirrur...",
       "ios.call.voiceCallCd": "Telefonatë zanore",
-      "ios.call.videoCallCd": "Telefonatë video"
+      "ios.call.videoCallCd": "Telefonatë video",
+      "ios.search.noHashtags": "Nuk u gjet asnjë hashtag."
     },
     "es": {
       "ios.a11y.bookmark": "Guardar",
@@ -1042,7 +1047,8 @@
       "ios.call.incomingVoice": "Llamada entrante...",
       "ios.call.ringing": "Llamando...",
       "ios.call.voiceCallCd": "Llamada de voz",
-      "ios.call.videoCallCd": "Videollamada"
+      "ios.call.videoCallCd": "Videollamada",
+      "ios.search.noHashtags": "No se encontraron hashtags."
     },
     "ru": {
       "ios.a11y.bookmark": "Добавить в закладки",
@@ -1213,7 +1219,8 @@
       "ios.call.incomingVoice": "Входящий звонок...",
       "ios.call.ringing": "Звонок...",
       "ios.call.voiceCallCd": "Голосовой звонок",
-      "ios.call.videoCallCd": "Видеозвонок"
+      "ios.call.videoCallCd": "Видеозвонок",
+      "ios.search.noHashtags": "Хэштеги не найдены."
     },
     "ar": {
       "ios.a11y.bookmark": "حفظ",
@@ -1384,7 +1391,8 @@
       "ios.call.incomingVoice": "مكالمة صوتية واردة...",
       "ios.call.ringing": "جارٍ الاتصال...",
       "ios.call.voiceCallCd": "مكالمة صوتية",
-      "ios.call.videoCallCd": "مكالمة فيديو"
+      "ios.call.videoCallCd": "مكالمة فيديو",
+      "ios.search.noHashtags": "لم يتم العثور على وسوم."
     },
     "zh": {
       "ios.a11y.bookmark": "收藏",
@@ -1555,7 +1563,8 @@
       "ios.call.incomingVoice": "语音通话来电…",
       "ios.call.ringing": "正在呼叫…",
       "ios.call.voiceCallCd": "语音通话",
-      "ios.call.videoCallCd": "视频通话"
+      "ios.call.videoCallCd": "视频通话",
+      "ios.search.noHashtags": "未找到话题标签。"
     },
     "tr": {
       "ios.a11y.bookmark": "Kaydet",
@@ -1726,7 +1735,8 @@
       "ios.call.incomingVoice": "Gelen arama...",
       "ios.call.ringing": "Çalıyor...",
       "ios.call.voiceCallCd": "Sesli arama",
-      "ios.call.videoCallCd": "Görüntülü arama"
+      "ios.call.videoCallCd": "Görüntülü arama",
+      "ios.search.noHashtags": "Hashtag bulunamadı."
     },
     "id": {
       "ios.a11y.bookmark": "Simpan",
@@ -1897,7 +1907,8 @@
       "ios.call.incomingVoice": "Panggilan suara masuk...",
       "ios.call.ringing": "Menghubungi...",
       "ios.call.voiceCallCd": "Panggilan suara",
-      "ios.call.videoCallCd": "Panggilan video"
+      "ios.call.videoCallCd": "Panggilan video",
+      "ios.search.noHashtags": "Tagar tidak ditemukan."
     },
     "pt": {
       "ios.a11y.bookmark": "Guardar",
@@ -2068,7 +2079,8 @@
       "ios.call.incomingVoice": "Chamada de voz a receber...",
       "ios.call.ringing": "A tocar...",
       "ios.call.voiceCallCd": "Chamada de voz",
-      "ios.call.videoCallCd": "Chamada de vídeo"
+      "ios.call.videoCallCd": "Chamada de vídeo",
+      "ios.search.noHashtags": "Nenhuma hashtag encontrada."
     },
     "ja": {
       "ios.a11y.bookmark": "ブックマーク",
@@ -2239,7 +2251,8 @@
       "ios.call.incomingVoice": "音声通話の着信...",
       "ios.call.ringing": "呼び出し中...",
       "ios.call.voiceCallCd": "音声通話",
-      "ios.call.videoCallCd": "ビデオ通話"
+      "ios.call.videoCallCd": "ビデオ通話",
+      "ios.search.noHashtags": "ハッシュタグが見つかりませんでした。"
     },
     "ko": {
       "ios.a11y.bookmark": "북마크",
@@ -2410,7 +2423,8 @@
       "ios.call.incomingVoice": "음성통화가 왔어요...",
       "ios.call.ringing": "전화 거는 중...",
       "ios.call.voiceCallCd": "음성통화",
-      "ios.call.videoCallCd": "영상통화"
+      "ios.call.videoCallCd": "영상통화",
+      "ios.search.noHashtags": "해시태그를 찾을 수 없습니다."
     },
     "hi": {
       "ios.a11y.bookmark": "बुकमार्क करें",
@@ -2581,7 +2595,8 @@
       "ios.call.incomingVoice": "इनकमिंग वॉइस कॉल...",
       "ios.call.ringing": "घंटी बज रही है...",
       "ios.call.voiceCallCd": "वॉइस कॉल",
-      "ios.call.videoCallCd": "वीडियो कॉल"
+      "ios.call.videoCallCd": "वीडियो कॉल",
+      "ios.search.noHashtags": "कोई हैशटैग नहीं मिला।"
     },
     "nl": {
       "ios.a11y.bookmark": "Bewaren",
@@ -2752,7 +2767,8 @@
       "ios.call.incomingVoice": "Inkomende spraakoproep...",
       "ios.call.ringing": "Er wordt gebeld...",
       "ios.call.voiceCallCd": "Spraakoproep",
-      "ios.call.videoCallCd": "Video-oproep"
+      "ios.call.videoCallCd": "Video-oproep",
+      "ios.search.noHashtags": "Geen hashtags gevonden."
     },
     "pl": {
       "ios.a11y.bookmark": "Zapisz",
@@ -2923,7 +2939,8 @@
       "ios.call.incomingVoice": "Przychodzące połączenie głosowe...",
       "ios.call.ringing": "Dzwonienie...",
       "ios.call.voiceCallCd": "Połączenie głosowe",
-      "ios.call.videoCallCd": "Połączenie wideo"
+      "ios.call.videoCallCd": "Połączenie wideo",
+      "ios.search.noHashtags": "Nie znaleziono hashtagów."
     },
     "ro": {
       "ios.a11y.bookmark": "Salvează",
@@ -3094,7 +3111,8 @@
       "ios.call.incomingVoice": "Apel vocal primit...",
       "ios.call.ringing": "Sună...",
       "ios.call.voiceCallCd": "Apel vocal",
-      "ios.call.videoCallCd": "Apel video"
+      "ios.call.videoCallCd": "Apel video",
+      "ios.search.noHashtags": "Niciun hashtag găsit."
     },
     "cs": {
       "ios.a11y.bookmark": "Uložit",
@@ -3265,7 +3283,8 @@
       "ios.call.incomingVoice": "Příchozí hlasový hovor...",
       "ios.call.ringing": "Vyzvání...",
       "ios.call.voiceCallCd": "Hlasový hovor",
-      "ios.call.videoCallCd": "Videohovor"
+      "ios.call.videoCallCd": "Videohovor",
+      "ios.search.noHashtags": "Nebyly nalezeny žádné hashtagy."
     },
     "hu": {
       "ios.a11y.bookmark": "Mentés",
@@ -3436,7 +3455,8 @@
       "ios.call.incomingVoice": "Bejövő hanghívás...",
       "ios.call.ringing": "Csengés...",
       "ios.call.voiceCallCd": "Hanghívás",
-      "ios.call.videoCallCd": "Videóhívás"
+      "ios.call.videoCallCd": "Videóhívás",
+      "ios.search.noHashtags": "Nem található hashtag."
     },
     "sv": {
       "ios.a11y.bookmark": "Spara",
@@ -3607,7 +3627,8 @@
       "ios.call.incomingVoice": "Inkommande röstsamtal...",
       "ios.call.ringing": "Ringer...",
       "ios.call.voiceCallCd": "Röstsamtal",
-      "ios.call.videoCallCd": "Videosamtal"
+      "ios.call.videoCallCd": "Videosamtal",
+      "ios.search.noHashtags": "Inga hashtaggar hittades."
     },
     "da": {
       "ios.a11y.bookmark": "Gem",
@@ -3778,7 +3799,8 @@
       "ios.call.incomingVoice": "Indkommende taleopkald...",
       "ios.call.ringing": "Ringer...",
       "ios.call.voiceCallCd": "Taleopkald",
-      "ios.call.videoCallCd": "Videoopkald"
+      "ios.call.videoCallCd": "Videoopkald",
+      "ios.search.noHashtags": "Ingen hashtags fundet."
     },
     "hr": {
       "ios.a11y.bookmark": "Spremi",
@@ -3949,7 +3971,8 @@
       "ios.call.incomingVoice": "Dolazni glasovni poziv...",
       "ios.call.ringing": "Zvoni...",
       "ios.call.voiceCallCd": "Glasovni poziv",
-      "ios.call.videoCallCd": "Videopoziv"
+      "ios.call.videoCallCd": "Videopoziv",
+      "ios.search.noHashtags": "Hashtagovi nisu pronađeni."
     },
     "sr": {
       "ios.a11y.bookmark": "Obeleži",
@@ -4120,7 +4143,8 @@
       "ios.call.incomingVoice": "Dolazni glasovni poziv...",
       "ios.call.ringing": "Zvoni...",
       "ios.call.voiceCallCd": "Glasovni poziv",
-      "ios.call.videoCallCd": "Video poziv"
+      "ios.call.videoCallCd": "Video poziv",
+      "ios.search.noHashtags": "Nema pronađenih heštegova."
     },
     "bg": {
       "ios.a11y.bookmark": "Запази",
@@ -4291,7 +4315,8 @@
       "ios.call.incomingVoice": "Входящо гласово обаждане...",
       "ios.call.ringing": "Звъни...",
       "ios.call.voiceCallCd": "Гласово обаждане",
-      "ios.call.videoCallCd": "Видео обаждане"
+      "ios.call.videoCallCd": "Видео обаждане",
+      "ios.search.noHashtags": "Не са намерени хаштагове."
     },
     "el": {
       "ios.a11y.bookmark": "Αποθήκευση",
@@ -4462,7 +4487,8 @@
       "ios.call.incomingVoice": "Εισερχόμενη φωνητική κλήση...",
       "ios.call.ringing": "Χτυπάει...",
       "ios.call.voiceCallCd": "Φωνητική κλήση",
-      "ios.call.videoCallCd": "Βιντεοκλήση"
+      "ios.call.videoCallCd": "Βιντεοκλήση",
+      "ios.search.noHashtags": "Δεν βρέθηκαν hashtags."
     },
     "bs": {
       "ios.a11y.bookmark": "Zabilježi",
@@ -4633,7 +4659,8 @@
       "ios.call.incomingVoice": "Dolazni glasovni poziv...",
       "ios.call.ringing": "Zvoni...",
       "ios.call.voiceCallCd": "Glasovni poziv",
-      "ios.call.videoCallCd": "Video poziv"
+      "ios.call.videoCallCd": "Video poziv",
+      "ios.search.noHashtags": "Nije pronađen nijedan hashtag."
     },
     "mk": {
       "ios.a11y.bookmark": "Обележи",
@@ -4804,7 +4831,8 @@
       "ios.call.incomingVoice": "Дојдовен гласовен повик...",
       "ios.call.ringing": "Ѕвони...",
       "ios.call.voiceCallCd": "Гласовен повик",
-      "ios.call.videoCallCd": "Видео повик"
+      "ios.call.videoCallCd": "Видео повик",
+      "ios.search.noHashtags": "Нема пронајдени хаштагови."
     },
     "no": {
       "ios.a11y.bookmark": "Bokmerk",
@@ -4975,7 +5003,8 @@
       "ios.call.incomingVoice": "Innkommende taleanrop ...",
       "ios.call.ringing": "Ringer ...",
       "ios.call.voiceCallCd": "Taleanrop",
-      "ios.call.videoCallCd": "Videoanrop"
+      "ios.call.videoCallCd": "Videoanrop",
+      "ios.search.noHashtags": "Fant ingen emneknagger."
     },
     "uk": {
       "ios.a11y.bookmark": "Закладка",
@@ -5146,7 +5175,8 @@
       "ios.call.incomingVoice": "Вхідний голосовий дзвінок...",
       "ios.call.ringing": "Дзвінок...",
       "ios.call.voiceCallCd": "Голосовий дзвінок",
-      "ios.call.videoCallCd": "Відеодзвінок"
+      "ios.call.videoCallCd": "Відеодзвінок",
+      "ios.search.noHashtags": "Хештегів не знайдено."
     },
     "fi": {
       "ios.a11y.bookmark": "Kirjanmerkki",
@@ -5317,7 +5347,8 @@
       "ios.call.incomingVoice": "Saapuva äänipuhelu...",
       "ios.call.ringing": "Soi...",
       "ios.call.voiceCallCd": "Äänipuhelu",
-      "ios.call.videoCallCd": "Videopuhelu"
+      "ios.call.videoCallCd": "Videopuhelu",
+      "ios.search.noHashtags": "Hashtageja ei löytynyt."
     },
     "sk": {
       "ios.a11y.bookmark": "Záložka",
@@ -5488,7 +5519,8 @@
       "ios.call.incomingVoice": "Prichádzajúci hlasový hovor...",
       "ios.call.ringing": "Vyzváňanie...",
       "ios.call.voiceCallCd": "Hlasový hovor",
-      "ios.call.videoCallCd": "Video hovor"
+      "ios.call.videoCallCd": "Video hovor",
+      "ios.search.noHashtags": "Nenašli sa žiadne hashtagy."
     },
     "sl": {
       "ios.a11y.bookmark": "Zaznamek",
@@ -5659,7 +5691,8 @@
       "ios.call.incomingVoice": "Dohodni glasovni klic ...",
       "ios.call.ringing": "Zvoni ...",
       "ios.call.voiceCallCd": "Glasovni klic",
-      "ios.call.videoCallCd": "Video klic"
+      "ios.call.videoCallCd": "Video klic",
+      "ios.search.noHashtags": "Ni najdenih ključnikov."
     },
     "lt": {
       "ios.a11y.addPhoto": "Pridėti nuotrauką",
@@ -5830,7 +5863,8 @@
       "ios.call.incomingVoice": "Gaunamas balso skambutis...",
       "ios.call.ringing": "Skambinama...",
       "ios.call.voiceCallCd": "Balso skambutis",
-      "ios.call.videoCallCd": "Vaizdo skambutis"
+      "ios.call.videoCallCd": "Vaizdo skambutis",
+      "ios.search.noHashtags": "Saitažodžių nerasta."
     }
   }
 }

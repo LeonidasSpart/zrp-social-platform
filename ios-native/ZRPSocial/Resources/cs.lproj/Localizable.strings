@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "Vyzvání...";
 "ios.call.voiceCallCd" = "Hlasový hovor";
 "ios.call.videoCallCd" = "Videohovor";
+"ios.search.noHashtags" = "Nebyly nalezeny žádné hashtagy.";

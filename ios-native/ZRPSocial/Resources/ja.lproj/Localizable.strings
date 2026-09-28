@@ -1460,3 +1460,4 @@
 "ios.call.ringing" = "呼び出し中...";
 "ios.call.voiceCallCd" = "音声通話";
 "ios.call.videoCallCd" = "ビデオ通話";
+"ios.search.noHashtags" = "ハッシュタグが見つかりませんでした。";
