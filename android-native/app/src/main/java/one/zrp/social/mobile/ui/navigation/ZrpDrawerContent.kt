@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.FormatListBulleted
@@ -73,6 +74,7 @@ data class ZrpDrawerActions(
     val goExplore: () -> Unit,
     val goNotifications: () -> Unit,
     val goMessages: () -> Unit,
+    val goDiscover: () -> Unit,
     val goCommunities: () -> Unit,
     val goPlay: () -> Unit,
     val goNews: () -> Unit,
@@ -161,6 +163,7 @@ fun ZrpDrawerContent(
             DrawerSection(
                 titleRes = R.string.drawer_section_discover,
                 rows = listOf(
+                    DrawerRow(Icons.Filled.Bolt, R.string.nav_discover, onClick = select(actions.goDiscover)),
                     DrawerRow(Icons.Filled.Groups, R.string.nav_communities, onClick = select(actions.goCommunities)),
                     DrawerRow(Icons.Filled.SportsEsports, R.string.nav_play, onClick = select(actions.goPlay)),
                     DrawerRow(Icons.Filled.Newspaper, R.string.nav_news, onClick = select(actions.goNews)),

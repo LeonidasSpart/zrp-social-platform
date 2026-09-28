@@ -103,6 +103,7 @@ import one.zrp.social.mobile.ui.communities.CommunityDetailScreen
 import one.zrp.social.mobile.ui.lists.ListDetailScreen
 import one.zrp.social.mobile.ui.lists.ListsScreen
 import one.zrp.social.mobile.ui.create.CreatePostScreen
+import one.zrp.social.mobile.ui.discover.DiscoverFeedScreen
 import one.zrp.social.mobile.ui.followlist.FollowListMode
 import one.zrp.social.mobile.ui.followlist.FollowListScreen
 import one.zrp.social.mobile.ui.hashtag.HashtagScreen
@@ -289,6 +290,7 @@ fun ZrpNavHost(
     val goToNews: () -> Unit = { navController.navigate("news") }
     val goToNewsArticle: (String) -> Unit = { slug -> navController.navigate("news/article/${Uri.encode(slug)}") }
     val goToShorts: () -> Unit = { navController.navigate("shorts") }
+    val goToDiscover: () -> Unit = { navController.navigate("discover") }
     // Matches PostCard.tsx's own video-tap behavior: opens the same
     // full-screen swipeable video feed as the Shorts tab, starting at
     // this exact post (VideoFeedViewer's own startPostId prop).
@@ -485,6 +487,7 @@ fun ZrpNavHost(
                     goPlay = goToPlay,
                     goNews = goToNews,
                     goShorts = goToShorts,
+                    goDiscover = goToDiscover,
                     goMusic = goToMusic,
                     goMarketplace = goToMarketplace,
                     goOpportunity = goToOpportunity,
@@ -1295,6 +1298,13 @@ fun ZrpNavHost(
             }
             composable("shorts") {
                 ShortsScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenComments = goToComments,
+                    onAuthorClick = goToProfile,
+                )
+            }
+            composable("discover") {
+                DiscoverFeedScreen(
                     onBack = { navController.popBackStack() },
                     onOpenComments = goToComments,
                     onAuthorClick = goToProfile,
