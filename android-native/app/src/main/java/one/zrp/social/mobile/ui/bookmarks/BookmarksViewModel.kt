@@ -7,12 +7,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import one.zrp.social.mobile.data.BookmarkRow
 import one.zrp.social.mobile.data.BookmarksRepository
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PollVoteUser
 
 data class BookmarksUiState(
-    val posts: List<Post> = emptyList(),
+    val rows: List<BookmarkRow> = emptyList(),
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val nextCursor: String? = null,
@@ -22,11 +23,12 @@ data class BookmarksUiState(
 )
 
 /**
- * Drives the Bookmarks screen - real saved posts from the same
- * GET /bookmarks endpoint the website's Bookmarks page uses. Like/
- * repost/bookmark toggles here mirror HomeViewModel's exact optimistic-
- * update pattern, duplicated rather than shared per this codebase's
- * established per-screen convention.
+ * Drives the Bookmarks screen - real saved posts AND saved comments,
+ * merged in one timeline, from the same GET /bookmarks endpoint the
+ * website's Bookmarks page uses. Like/repost/bookmark toggles here
+ * mirror HomeViewModel's exact optimistic-update pattern, duplicated
+ * rather than shared per this codebase's established per-screen
+ * convention.
  */
 class BookmarksViewModel(private val repository: BookmarksRepository) : ViewModel() {
     private val _state = MutableStateFlow(BookmarksUiState())
@@ -42,11 +44,11 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
     fun refresh() {
         _state.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            repository.getBookmarkedPosts(cursor = null)
+            repository.getBookmarks(cursor = null)
                 .onSuccess { page ->
                     _state.update {
                         it.copy(
-                            posts = page.posts,
+                            rows = page.rows,
                             nextCursor = page.nextCursor,
                             isLoading = false,
                             endReached = page.nextCursor == null,
@@ -65,11 +67,11 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
 
         _state.update { it.copy(isLoadingMore = true) }
         viewModelScope.launch {
-            repository.getBookmarkedPosts(current.nextCursor)
+            repository.getBookmarks(current.nextCursor)
                 .onSuccess { page ->
                     _state.update {
                         it.copy(
-                            posts = it.posts + page.posts,
+                            rows = it.rows + page.rows,
                             nextCursor = page.nextCursor,
                             isLoadingMore = false,
                             endReached = page.nextCursor == null,
@@ -82,40 +84,51 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
         }
     }
 
-    // Unbookmarking here removes the post from view immediately, same
+    // Unbookmarking here removes the row from view immediately, same
     // as the website's Bookmarks page - there's nothing left to keep
     // showing once a post's own bookmark is what put it on this screen.
     fun toggleBookmark(postId: String) {
-        val previousPosts = _state.value.posts
-        _state.update { it.copy(posts = it.posts.filterNot { post -> post.id == postId }) }
+        val previousRows = _state.value.rows
+        _state.update { it.copy(rows = it.rows.filterNot { row -> row is BookmarkRow.PostRow && row.post.id == postId }) }
 
         viewModelScope.launch {
             repository.toggleBookmark(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts) }
+                _state.update { it.copy(rows = previousRows) }
+            }
+        }
+    }
+
+    // Same immediate-removal behavior as toggleBookmark above, for a
+    // saved comment's own bookmark toggle.
+    fun toggleCommentBookmark(commentId: String) {
+        val previousRows = _state.value.rows
+        _state.update {
+            it.copy(rows = it.rows.filterNot { row -> row is BookmarkRow.CommentRow && row.comment.id == commentId })
+        }
+
+        viewModelScope.launch {
+            repository.toggleCommentBookmark(commentId).onFailure {
+                _state.update { it.copy(rows = previousRows) }
             }
         }
     }
 
     fun toggleLike(postId: String) {
-        val previousPosts = _state.value.posts
-        _state.update { state ->
-            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticLike(post) else post })
-        }
+        val previousRows = _state.value.rows
+        _state.update { state -> state.copy(rows = state.rows.map { row -> mapPost(row, postId, ::applyOptimisticLike) }) }
         viewModelScope.launch {
             repository.toggleLike(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts) }
+                _state.update { it.copy(rows = previousRows) }
             }
         }
     }
 
     fun toggleRepost(postId: String) {
-        val previousPosts = _state.value.posts
-        _state.update { state ->
-            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticRepost(post) else post })
-        }
+        val previousRows = _state.value.rows
+        _state.update { state -> state.copy(rows = state.rows.map { row -> mapPost(row, postId, ::applyOptimisticRepost) }) }
         viewModelScope.launch {
             repository.toggleRepost(postId).onFailure {
-                _state.update { it.copy(posts = previousPosts) }
+                _state.update { it.copy(rows = previousRows) }
             }
         }
     }
@@ -123,16 +136,19 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
     // Single-select, one vote per user - blocked client-side the same
     // way Poll.tsx's own `if (selected !== null) return` guards it.
     fun votePoll(postId: String, pollId: String, optionIndex: Int) {
-        val alreadyVoted = _state.value.posts.firstOrNull { it.id == postId }?.poll?.userVoteIndex != null
-        if (alreadyVoted) return
+        val targetPost = _state.value.rows
+            .filterIsInstance<BookmarkRow.PostRow>()
+            .map { it.post }
+            .firstOrNull { it.id == postId }
+        if (targetPost?.poll?.userVoteIndex != null) return
 
-        val previousPosts = _state.value.posts
+        val previousRows = _state.value.rows
         _state.update { state ->
-            state.copy(posts = state.posts.map { post -> if (post.id == postId) applyOptimisticVote(post, optionIndex) else post })
+            state.copy(rows = state.rows.map { row -> mapPost(row, postId) { applyOptimisticVote(it, optionIndex) } })
         }
         viewModelScope.launch {
             repository.votePoll(pollId, optionIndex).onFailure {
-                _state.update { it.copy(posts = previousPosts) }
+                _state.update { it.copy(rows = previousRows) }
             }
         }
     }
@@ -145,7 +161,9 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
         viewModelScope.launch {
             val result = repository.deletePost(postId)
             result.onSuccess {
-                _state.update { it.copy(posts = it.posts.filterNot { post -> post.id == postId }) }
+                _state.update {
+                    it.copy(rows = it.rows.filterNot { row -> row is BookmarkRow.PostRow && row.post.id == postId })
+                }
             }
             onResult(result)
         }
@@ -167,10 +185,18 @@ class BookmarksViewModel(private val repository: BookmarksRepository) : ViewMode
         viewModelScope.launch {
             repository.updatePost(postId, content)
                 .onSuccess {
-                    _state.update { it.copy(posts = it.posts.map { post -> if (post.id == postId) post.copy(content = content) else post }) }
+                    _state.update { state -> state.copy(rows = state.rows.map { row -> mapPost(row, postId) { post -> post.copy(content = content) } }) }
                     onResult(Result.success(Unit))
                 }
                 .onFailure { onResult(Result.failure(it)) }
+        }
+    }
+
+    private fun mapPost(row: BookmarkRow, postId: String, transform: (Post) -> Post): BookmarkRow {
+        return if (row is BookmarkRow.PostRow && row.post.id == postId) {
+            BookmarkRow.PostRow(transform(row.post))
+        } else {
+            row
         }
     }
 

@@ -1348,6 +1348,7 @@ fun ZrpNavHost(
                 BookmarksScreen(
                     onAuthorClick = goToProfile,
                     onOpenComments = goToComments,
+                    onOpenPostComment = { postId, commentId -> goToPost(postId, commentId) },
                     onBack = { navController.popBackStack() },
                     onOpenQuotePost = goToQuotePost,
                     onOpenReposts = goToReposts,

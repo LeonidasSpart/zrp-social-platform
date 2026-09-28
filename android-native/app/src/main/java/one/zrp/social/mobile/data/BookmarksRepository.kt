@@ -1,25 +1,49 @@
 package one.zrp.social.mobile.data
 
 import one.zrp.social.mobile.network.ApiClient
+import one.zrp.social.mobile.network.BookmarkItem
 import one.zrp.social.mobile.network.BookmarkResponse
+import one.zrp.social.mobile.network.BookmarkedComment
 import one.zrp.social.mobile.network.CreateReportRequest
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.Post
 import one.zrp.social.mobile.network.PollVoteRequest
 import one.zrp.social.mobile.network.PollVoteResponse
-import one.zrp.social.mobile.network.PostsPage
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdatePostRequest
 import one.zrp.social.mobile.network.zrpErrorMessage
 import retrofit2.HttpException
 
+/** One row of the merged saved-posts/saved-comments timeline GET /bookmarks returns. */
+sealed class BookmarkRow {
+    data class PostRow(val post: Post) : BookmarkRow()
+    data class CommentRow(val comment: BookmarkedComment) : BookmarkRow()
+}
+
+data class BookmarksPageUi(val rows: List<BookmarkRow>, val nextCursor: String?)
+
+/**
+ * Maps GET /bookmarks' raw `type`-discriminated union into typed rows,
+ * preserving the server's own interleaved order - a malformed item
+ * (the discriminant type without its matching payload, or an
+ * unrecognized type) is dropped rather than crashing the screen, since
+ * this is untrusted-shape JSON off the wire.
+ */
+internal fun mapBookmarkItemsToRows(items: List<BookmarkItem>): List<BookmarkRow> {
+    return items.mapNotNull { item ->
+        when (item.type) {
+            "post" -> item.post?.let { post -> BookmarkRow.PostRow(post.copy(bookmarked = true)) }
+            "comment" -> item.comment?.let { BookmarkRow.CommentRow(it) }
+            else -> null
+        }
+    }
+}
+
 /**
  * The website's Bookmarks page (src/app/bookmarks/page.tsx) shows both
- * saved posts and saved comments in one merged list; this screen only
- * has a real comment-viewing surface reached through a comment's
- * parent post, not a standalone comment view, so it shows the saved
- * posts (the overwhelming common case) and leaves saved comments for a
- * later, dedicated pass rather than inventing a bare-comment screen.
+ * saved posts and saved comments in one merged list, in the server's
+ * own interleaved (createdAt DESC) order - reproduced here rather than
+ * splitting into two separately-paginated lists.
  * GET /bookmarks doesn't mark each post's own `bookmarked` flag (only
  * `liked` gets that treatment server-side) even though every post
  * here is definitionally bookmarked, so that's corrected here rather
@@ -30,13 +54,9 @@ class BookmarksRepository {
         ApiClient.authApi.getSession().user?.id
     }
 
-    suspend fun getBookmarkedPosts(cursor: String?): Result<PostsPage> = runCatching {
+    suspend fun getBookmarks(cursor: String?): Result<BookmarksPageUi> = runCatching {
         val page = ApiClient.bookmarksApi.getBookmarks(cursor)
-        val posts = page.items
-            .filter { it.type == "post" }
-            .mapNotNull { it.post }
-            .map { post: Post -> post.copy(bookmarked = true) }
-        PostsPage(posts = posts, nextCursor = page.nextCursor)
+        BookmarksPageUi(rows = mapBookmarkItemsToRows(page.items), nextCursor = page.nextCursor)
     }
 
     suspend fun toggleLike(postId: String): Result<LikeResponse> = runCatching {
@@ -53,6 +73,10 @@ class BookmarksRepository {
 
     suspend fun toggleBookmark(postId: String): Result<BookmarkResponse> = runCatching {
         ApiClient.postsApi.toggleBookmark(postId)
+    }
+
+    suspend fun toggleCommentBookmark(commentId: String): Result<BookmarkResponse> = runCatching {
+        ApiClient.commentsApi.toggleBookmark(commentId)
     }
 
     suspend fun deletePost(postId: String): Result<Unit> = runCatching {
