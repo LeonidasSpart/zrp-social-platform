@@ -63,6 +63,18 @@ iOS has no build shipped yet.
 
 ### Localization
 
+- **Localization expanded from 34 to 38 languages**: Estonian, Irish,
+  Latvian and Maltese added with full key parity across Web, Android and
+  iOS (#411). Each was translated independently against the established
+  precedent-checking process (compared to already-shipped French and
+  German to distinguish genuine gaps from legitimate cognates), not
+  derived from a linguistically related language already in the set.
+  Irish's `<plurals>` correctly use its one/two/few/many/other historical
+  counting system and Maltese its one/few/many/other Semitic paucal
+  system, both distinct from Estonian's one/other and Latvian's
+  zero/one/other (the "zero" category for multiples of ten and the
+  teens, distinct from "other"). `et-EE`, `ga-IE`, `lv-LV` and `mt-MT`
+  locales are registered for date/time/number formatting.
 - **Localization expanded from 29 to 34 languages**: Ukrainian, Finnish,
   Slovak, Slovenian and Lithuanian added with full key parity across Web,
   Android and iOS (#407). Slovenian's `<plurals>` correctly use its
