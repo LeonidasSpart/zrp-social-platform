@@ -1135,6 +1135,9 @@
     <string name="play_type_logic">Логіка</string>
     <string name="play_type_memory">Пам\'ять</string>
     <string name="play_type_trivia">Вікторина</string>
+    <string name="play_type_reaction">Реакція</string>
+    <string name="play_type_sequence">Послідовність</string>
+    <string name="play_challenge_unsupported">Цей тип випробування ще не доступний у цій версії застосунку.</string>
     <string name="play_view_duels">Переглянути всі дуелі</string>
     <string name="play_view_leaderboard">Переглянути таблицю лідерів</string>
     <string name="play_vs">проти</string>

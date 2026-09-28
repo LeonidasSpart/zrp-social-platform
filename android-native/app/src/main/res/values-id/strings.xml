@@ -1143,6 +1143,9 @@
     <string name="play_type_logic">Logika</string>
     <string name="play_type_memory">Memori</string>
     <string name="play_type_trivia">Kuis</string>
+    <string name="play_type_reaction">Reaksi</string>
+    <string name="play_type_sequence">Urutan</string>
+    <string name="play_challenge_unsupported">Jenis tantangan ini belum tersedia di versi aplikasi ini.</string>
     <string name="play_view_duels">Lihat Semua Duel</string>
     <string name="play_view_leaderboard">Lihat Papan Peringkat</string>
     <string name="play_vs">vs</string>

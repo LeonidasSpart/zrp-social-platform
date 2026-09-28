@@ -1127,6 +1127,9 @@
     <string name="play_type_logic">Logika</string>
     <string name="play_type_memory">Memória</string>
     <string name="play_type_trivia">Kvíz</string>
+    <string name="play_type_reaction">Reakció</string>
+    <string name="play_type_sequence">Sorozat</string>
+    <string name="play_challenge_unsupported">Ez a kihívástípus még nem érhető el ebben az alkalmazásverzióban.</string>
     <string name="play_view_duels">Összes párbaj megtekintése</string>
     <string name="play_view_leaderboard">Ranglista megtekintése</string>
     <string name="play_vs">vs</string>

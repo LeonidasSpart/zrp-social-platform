@@ -1131,6 +1131,9 @@
     <string name="play_type_logic">Logică</string>
     <string name="play_type_memory">Memorie</string>
     <string name="play_type_trivia">Cultură generală</string>
+    <string name="play_type_reaction">Reacție</string>
+    <string name="play_type_sequence">Secvență</string>
+    <string name="play_challenge_unsupported">Acest tip de provocare nu este încă disponibil în această versiune a aplicației.</string>
     <string name="play_view_duels">Vezi toate duelurile</string>
     <string name="play_view_leaderboard">Vezi clasamentul</string>
     <string name="play_vs">vs</string>

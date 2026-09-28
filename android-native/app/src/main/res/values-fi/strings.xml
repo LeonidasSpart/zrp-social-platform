@@ -1127,6 +1127,9 @@
     <string name="play_type_logic">Logiikka</string>
     <string name="play_type_memory">Muisti</string>
     <string name="play_type_trivia">Tietovisa</string>
+    <string name="play_type_reaction">Reaktio</string>
+    <string name="play_type_sequence">Sekvenssi</string>
+    <string name="play_challenge_unsupported">Tämäntyyppinen haaste ei ole vielä käytettävissä tässä sovellusversiossa.</string>
     <string name="play_view_duels">Näytä kaikki kaksintaistelut</string>
     <string name="play_view_leaderboard">Näytä tulostaulu</string>
     <string name="play_vs">vs</string>

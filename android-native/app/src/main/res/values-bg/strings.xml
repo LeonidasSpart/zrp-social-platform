@@ -1127,6 +1127,9 @@
     <string name="play_type_logic">Логика</string>
     <string name="play_type_memory">Памет</string>
     <string name="play_type_trivia">Викторина</string>
+    <string name="play_type_reaction">Реакция</string>
+    <string name="play_type_sequence">Последователност</string>
+    <string name="play_challenge_unsupported">Този тип предизвикателство все още не е налично в тази версия на приложението.</string>
     <string name="play_view_duels">Виж всички дуели</string>
     <string name="play_view_leaderboard">Виж класацията</string>
     <string name="play_vs">срещу</string>

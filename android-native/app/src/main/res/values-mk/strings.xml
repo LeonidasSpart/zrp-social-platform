@@ -1127,6 +1127,9 @@
     <string name="play_type_logic">Логика</string>
     <string name="play_type_memory">Меморија</string>
     <string name="play_type_trivia">Знаење</string>
+    <string name="play_type_reaction">Реакција</string>
+    <string name="play_type_sequence">Секвенца</string>
+    <string name="play_challenge_unsupported">Овој тип на предизвик сè уште не е достапен во оваа верзија на апликацијата.</string>
     <string name="play_view_duels">Види ги сите дуели</string>
     <string name="play_view_leaderboard">Види ја ранг-листата</string>
     <string name="play_vs">против</string>

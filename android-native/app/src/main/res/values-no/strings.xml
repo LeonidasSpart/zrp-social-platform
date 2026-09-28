@@ -1127,6 +1127,9 @@
     <string name="play_type_logic">Logikk</string>
     <string name="play_type_memory">Hukommelse</string>
     <string name="play_type_trivia">Quiz</string>
+    <string name="play_type_reaction">Reaksjon</string>
+    <string name="play_type_sequence">Sekvens</string>
+    <string name="play_challenge_unsupported">Denne utfordringstypen er ikke tilgjengelig i denne appversjonen ennå.</string>
     <string name="play_view_duels">Se alle dueller</string>
     <string name="play_view_leaderboard">Se ledertavlen</string>
     <string name="play_vs">mot</string>

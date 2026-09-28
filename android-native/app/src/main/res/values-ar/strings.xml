@@ -1143,6 +1143,9 @@
     <string name="play_type_logic">منطق</string>
     <string name="play_type_memory">ذاكرة</string>
     <string name="play_type_trivia">معلومات عامة</string>
+    <string name="play_type_reaction">رد الفعل</string>
+    <string name="play_type_sequence">التسلسل</string>
+    <string name="play_challenge_unsupported">نوع هذا التحدي غير متاح بعد في هذا الإصدار من التطبيق.</string>
     <string name="play_view_duels">عرض كل المبارزات</string>
     <string name="play_view_leaderboard">عرض لوحة المتصدرين</string>
     <string name="play_vs">ضد</string>

@@ -1126,6 +1126,9 @@
     <string name="play_type_logic">तर्क</string>
     <string name="play_type_memory">स्मृति</string>
     <string name="play_type_trivia">सामान्य ज्ञान</string>
+    <string name="play_type_reaction">प्रतिक्रिया</string>
+    <string name="play_type_sequence">अनुक्रम</string>
+    <string name="play_challenge_unsupported">इस प्रकार की चुनौती इस ऐप वर्शन में अभी उपलब्ध नहीं है।</string>
     <string name="play_view_duels">सभी द्वंद्व देखें</string>
     <string name="play_view_leaderboard">लीडरबोर्ड देखें</string>
     <string name="play_vs">बनाम</string>

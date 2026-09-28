@@ -1143,6 +1143,9 @@
     <string name="play_type_logic">Logik</string>
     <string name="play_type_memory">Gedächtnis</string>
     <string name="play_type_trivia">Quiz</string>
+    <string name="play_type_reaction">Reaktion</string>
+    <string name="play_type_sequence">Sequenz</string>
+    <string name="play_challenge_unsupported">Dieser Herausforderungstyp ist in dieser App-Version noch nicht verfügbar.</string>
     <string name="play_view_duels">Alle Duelle ansehen</string>
     <string name="play_view_leaderboard">Bestenliste ansehen</string>
     <string name="play_vs">gegen</string>

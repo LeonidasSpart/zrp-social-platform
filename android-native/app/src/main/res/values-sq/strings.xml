@@ -1143,6 +1143,9 @@
     <string name="play_type_logic">Logjikë</string>
     <string name="play_type_memory">Memorie</string>
     <string name="play_type_trivia">Kuiz</string>
+    <string name="play_type_reaction">Reagim</string>
+    <string name="play_type_sequence">Sekuencë</string>
+    <string name="play_challenge_unsupported">Ky lloj sfide nuk është ende i disponueshëm në këtë version të aplikacionit.</string>
     <string name="play_view_duels">Shiko të Gjitha Duelet</string>
     <string name="play_view_leaderboard">Shiko Renditjen</string>
     <string name="play_vs">kundër</string>

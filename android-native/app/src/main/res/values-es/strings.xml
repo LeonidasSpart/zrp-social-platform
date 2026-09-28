@@ -1143,6 +1143,9 @@
     <string name="play_type_logic">Lógica</string>
     <string name="play_type_memory">Memoria</string>
     <string name="play_type_trivia">Trivia</string>
+    <string name="play_type_reaction">Reacción</string>
+    <string name="play_type_sequence">Secuencia</string>
+    <string name="play_challenge_unsupported">Este tipo de reto aún no está disponible en esta versión de la app.</string>
     <string name="play_view_duels">Ver Todos los Duelos</string>
     <string name="play_view_leaderboard">Ver Clasificación</string>
     <string name="play_vs">contra</string>

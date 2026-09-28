@@ -1135,6 +1135,9 @@
     <string name="play_type_logic">Logika</string>
     <string name="play_type_memory">Pamięć</string>
     <string name="play_type_trivia">Wiedza</string>
+    <string name="play_type_reaction">Reakcja</string>
+    <string name="play_type_sequence">Sekwencja</string>
+    <string name="play_challenge_unsupported">Ten typ wyzwania nie jest jeszcze dostępny w tej wersji aplikacji.</string>
     <string name="play_view_duels">Zobacz wszystkie pojedynki</string>
     <string name="play_view_leaderboard">Zobacz ranking</string>
     <string name="play_vs">vs</string>

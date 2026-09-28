@@ -1127,6 +1127,9 @@
     <string name="play_type_logic">Logika</string>
     <string name="play_type_memory">Memorija</string>
     <string name="play_type_trivia">Kviz</string>
+    <string name="play_type_reaction">Reakcija</string>
+    <string name="play_type_sequence">Sekvenca</string>
+    <string name="play_challenge_unsupported">Ova vrsta izazova još uvijek nije dostupna u ovoj verziji aplikacije.</string>
     <string name="play_view_duels">Pogledaj sve dvoboje</string>
     <string name="play_view_leaderboard">Pogledaj rang-listu</string>
     <string name="play_vs">protiv</string>

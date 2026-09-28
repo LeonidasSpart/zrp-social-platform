@@ -1135,6 +1135,9 @@
     <string name="play_type_logic">Logika</string>
     <string name="play_type_memory">Paměť</string>
     <string name="play_type_trivia">Kvíz</string>
+    <string name="play_type_reaction">Reakce</string>
+    <string name="play_type_sequence">Sekvence</string>
+    <string name="play_challenge_unsupported">Tento typ výzvy zatím není v této verzi aplikace k dispozici.</string>
     <string name="play_view_duels">Zobrazit všechny souboje</string>
     <string name="play_view_leaderboard">Zobrazit žebříček</string>
     <string name="play_vs">vs</string>

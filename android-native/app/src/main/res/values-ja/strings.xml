@@ -1126,6 +1126,9 @@
     <string name="play_type_logic">ロジック</string>
     <string name="play_type_memory">メモリー</string>
     <string name="play_type_trivia">トリビア</string>
+    <string name="play_type_reaction">反応</string>
+    <string name="play_type_sequence">シーケンス</string>
+    <string name="play_challenge_unsupported">このチャレンジの種類は、このアプリバージョンではまだご利用いただけません。</string>
     <string name="play_view_duels">すべての対戦を見る</string>
     <string name="play_view_leaderboard">リーダーボードを見る</string>
     <string name="play_vs">vs</string>

@@ -1127,6 +1127,9 @@
     <string name="play_type_logic">Λογική</string>
     <string name="play_type_memory">Μνήμη</string>
     <string name="play_type_trivia">Trivia</string>
+    <string name="play_type_reaction">Αντίδραση</string>
+    <string name="play_type_sequence">Ακολουθία</string>
+    <string name="play_challenge_unsupported">Αυτός ο τύπος πρόκλησης δεν είναι ακόμη διαθέσιμος σε αυτήν την έκδοση της εφαρμογής.</string>
     <string name="play_view_duels">Προβολή Όλων των Αναμετρήσεων</string>
     <string name="play_view_leaderboard">Προβολή Πίνακα Κατάταξης</string>
     <string name="play_vs">εναντίον</string>

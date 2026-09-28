@@ -1154,6 +1154,9 @@
     <string name="play_type_logic">Logic</string>
     <string name="play_type_memory">Memory</string>
     <string name="play_type_trivia">Trivia</string>
+    <string name="play_type_reaction">Reaction</string>
+    <string name="play_type_sequence">Sequence</string>
+    <string name="play_challenge_unsupported">This challenge type isn\'t available in this app version yet.</string>
     <string name="play_view_duels">View All Duels</string>
     <string name="play_view_leaderboard">View Leaderboard</string>
     <string name="play_vs">vs</string>

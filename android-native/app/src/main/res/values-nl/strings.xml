@@ -1127,6 +1127,9 @@
     <string name="play_type_logic">Logica</string>
     <string name="play_type_memory">Geheugen</string>
     <string name="play_type_trivia">Trivia</string>
+    <string name="play_type_reaction">Reactie</string>
+    <string name="play_type_sequence">Reeks</string>
+    <string name="play_challenge_unsupported">Dit uitdagingstype is nog niet beschikbaar in deze app-versie.</string>
     <string name="play_view_duels">Alle duels bekijken</string>
     <string name="play_view_leaderboard">Ranglijst bekijken</string>
     <string name="play_vs">vs</string>

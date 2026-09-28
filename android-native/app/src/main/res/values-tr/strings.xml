@@ -1143,6 +1143,9 @@
     <string name="play_type_logic">Mantık</string>
     <string name="play_type_memory">Hafıza</string>
     <string name="play_type_trivia">Bilgi Yarışması</string>
+    <string name="play_type_reaction">Tepki</string>
+    <string name="play_type_sequence">Dizi</string>
+    <string name="play_challenge_unsupported">Bu meydan okuma türü bu uygulama sürümünde henüz kullanılamıyor.</string>
     <string name="play_view_duels">Tüm Düelloları Gör</string>
     <string name="play_view_leaderboard">Skor Tablosunu Gör</string>
     <string name="play_vs">vs</string>

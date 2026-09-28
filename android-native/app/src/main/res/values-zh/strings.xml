@@ -1143,6 +1143,9 @@
     <string name="play_type_logic">逻辑</string>
     <string name="play_type_memory">记忆</string>
     <string name="play_type_trivia">知识问答</string>
+    <string name="play_type_reaction">反应</string>
+    <string name="play_type_sequence">序列</string>
+    <string name="play_challenge_unsupported">此挑战类型在此应用版本中尚不可用。</string>
     <string name="play_view_duels">查看所有对决</string>
     <string name="play_view_leaderboard">查看排行榜</string>
     <string name="play_vs">对战</string>

@@ -1135,6 +1135,9 @@
     <string name="play_type_logic">Logika</string>
     <string name="play_type_memory">Atmintis</string>
     <string name="play_type_trivia">Žinios</string>
+    <string name="play_type_reaction">Reakcija</string>
+    <string name="play_type_sequence">Seka</string>
+    <string name="play_challenge_unsupported">Šio tipo iššūkis šioje programos versijoje dar nepasiekiamas.</string>
     <string name="play_view_duels">Peržiūrėti visas dvikovas</string>
     <string name="play_view_leaderboard">Peržiūrėti lyderių lentelę</string>
     <string name="play_vs">prieš</string>
