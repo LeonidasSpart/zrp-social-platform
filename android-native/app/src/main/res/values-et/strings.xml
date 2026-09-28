@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ZRP Social</string>
     <string name="notification_channel_general_name">Üldine</string>
     <string name="settings_title">Seaded</string>
     <string name="settings_account">Konto</string>
@@ -193,17 +192,17 @@
     <string name="nav_search">Otsing</string>
     <string name="nav_explore">Avasta</string>
     <string name="nav_communities">Kogukonnad</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">Mängud</string>
     <string name="nav_news">Uudised</string>
     <string name="nav_music">Muusika</string>
-    <string name="nav_marketplace">Marketplace</string>
-    <string name="nav_opportunity">Opportunity</string>
+    <string name="nav_marketplace">Kaubaplats</string>
+    <string name="nav_opportunity">Võimalused</string>
     <string name="nav_aid">Abi</string>
     <string name="nav_ambassadors">Globaalsed suursaadikud</string>
     <string name="nav_ai">ZRP AI</string>
-    <string name="nav_creator_studio">Creator Studio</string>
+    <string name="nav_creator_studio">Sisulooja stuudio</string>
     <string name="nav_admin">Admin</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Lühivideod</string>
     <string name="nav_help_center">Abikeskus</string>
     <string name="drawer_section_core">Põhifunktsioonid</string>
     <string name="drawer_section_discover">Avasta</string>
@@ -238,7 +237,7 @@
     <string name="chat_typing">Kirjutab...</string>
     <string name="chat_contact_profile">Profiil</string>
     <string name="chat_contact_call">Helista</string>
-    <string name="chat_contact_video">Video</string>
+    <string name="chat_contact_video">Videod</string>
     <string name="chat_contact_more">Rohkem</string>
     <string name="chat_block">Blokeeri</string>
     <string name="chat_unblock">Tühista blokeering</string>
@@ -464,7 +463,7 @@
     <string name="stories_share_story">Jaga lugu</string>
     <string name="stories_whats_on_your_mind">Mida mõtled?</string>
     <string name="stories_image">Pilt</string>
-    <string name="stories_video">Video</string>
+    <string name="stories_video">Videod</string>
     <string name="stories_uploading">Üleslaadimine...</string>
     <string name="stories_err_file_too_large">Fail on liiga suur. Maksimaalselt 16MB.</string>
     <string name="stories_err_unsupported_type">Toetatud on ainult pildid ja videod.</string>
@@ -1207,7 +1206,7 @@
     <string name="shorts_upload_err_internal_server">Üleslaadimisel läks midagi valesti meie poolel. Palun proovi hetke pärast uuesti.</string>
     <string name="caption_view_more">Näita rohkem</string>
     <string name="caption_view_less">Näita vähem</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Lühivideod</string>
     <string name="creator_amount_usdc_label">Summa (USDC)</string>
     <string name="creator_available_balance">Saadaval saldo: %1$s</string>
     <string name="creator_enter_amount_placeholder">Sisesta summa</string>
@@ -1234,7 +1233,7 @@
     <string name="creator_stat_total_tips">Jootrahad kokku</string>
     <string name="creator_stat_withdrawn">Välja võetud</string>
     <string name="creator_studio_subtitle">Teenistus, sisu tulemuslikkus ja publiku kasv.</string>
-    <string name="creator_studio_title">Creator Studio</string>
+    <string name="creator_studio_title">Sisulooja stuudio</string>
     <string name="creator_tab_audience">Publik</string>
     <string name="creator_tab_content">Sisu</string>
     <string name="creator_tab_overview">Ülevaade</string>
@@ -1756,7 +1755,7 @@
     <string name="transparency_last_30_days_label">Teated viimase 30 päeva jooksul</string>
     <string name="transparency_actions_taken_label">Tehtud toimingud</string>
     <string name="transparency_median_resolution_label">Mediaan lahendamisaeg</string>
-    <string name="transparency_hours_value">%1$dh</string>
+    <string name="transparency_hours_value">%1$dt</string>
     <string name="transparency_days_value">%1$dp</string>
     <string name="transparency_trend_heading">Teated aja jooksul</string>
     <string name="transparency_legend_received">Laekunud</string>

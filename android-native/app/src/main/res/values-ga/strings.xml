@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ZRP Social</string>
     <string name="notification_channel_general_name">Ginearálta</string>
     <string name="settings_title">Socruithe</string>
     <string name="settings_account">Cuntas</string>

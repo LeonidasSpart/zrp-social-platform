@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ZRP Social</string>
     <string name="notification_channel_general_name">Ġenerali</string>
     <string name="settings_title">Issettjar</string>
     <string name="settings_account">Kont</string>
@@ -61,7 +60,7 @@
     <string name="team_team_members">Membri tat-Tim</string>
     <string name="team_member_count">%1$d membru%2$s</string>
     <string name="team_col_user">Utent</string>
-    <string name="team_col_email">Email</string>
+    <string name="team_col_email">Imejl</string>
     <string name="team_col_role">Rwol</string>
     <string name="team_col_joined">Ingħaqad</string>
     <string name="team_col_actions">Azzjonijiet</string>
@@ -196,14 +195,14 @@
     <string name="nav_play">PLAY</string>
     <string name="nav_news">Aħbarijiet</string>
     <string name="nav_music">Mużika</string>
-    <string name="nav_marketplace">Marketplace</string>
-    <string name="nav_opportunity">Opportunity</string>
+    <string name="nav_marketplace">Suq</string>
+    <string name="nav_opportunity">Opportunitajiet</string>
     <string name="nav_aid">Għajnuna</string>
     <string name="nav_ambassadors">Ambaxxaturi Globali</string>
     <string name="nav_ai">ZRP AI</string>
-    <string name="nav_creator_studio">Creator Studio</string>
+    <string name="nav_creator_studio">Studio tal-Kreatur</string>
     <string name="nav_admin">Admin</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Vidjows Qosra</string>
     <string name="nav_help_center">Ċentru tal-Għajnuna</string>
     <string name="drawer_section_core">Ewlieni</string>
     <string name="drawer_section_discover">Skopri</string>
@@ -225,7 +224,7 @@
     <string name="auth_sign_in_subtitle">Idħol biex tingħaqad mal-komunità</string>
     <string name="auth_email_or_username">Email jew Isem tal-Utent</string>
     <string name="auth_signing_in">Qed jidħol...</string>
-    <string name="auth_password">Password</string>
+    <string name="auth_password">Kelma Sigrieta</string>
     <string name="messages_no_messages_yet">Għad m\'hemm l-ebda messaġġ.</string>
     <string name="chat_back_to_messages">Lura għall-messaġġi</string>
     <string name="chat_message_placeholder">Ibgħat messaġġ lil %1$s...</string>
@@ -233,7 +232,7 @@
     <string name="chat_say_hello">Għid hello lil %1$s!</string>
     <string name="chat_delete_message">Ħassar il-messaġġ</string>
     <string name="chat_delete_message_confirm">Int ċert li trid tħassar dan il-messaġġ?</string>
-    <string name="chat_live">Live</string>
+    <string name="chat_live">Onlajn</string>
     <string name="chat_offline">Offline</string>
     <string name="chat_typing">Qed jikteb...</string>
     <string name="chat_contact_profile">Profil</string>
@@ -366,7 +365,7 @@
     <string name="gif_type_to_search">Ikteb biex tfittex il-GIFs</string>
     <string name="reaction_react_action">Irreaġixxi</string>
     <string name="post_quote_action">Ikkwota</string>
-    <string name="post_reposts_count">%1$s reposts</string>
+    <string name="post_reposts_count">%1$s ripostijiet</string>
     <string name="post_quotes_count">%1$s kwotazzjonijiet</string>
     <string name="call_no_video">L-ebda vidjo</string>
     <string name="call_fallback_name">Sejħa</string>
@@ -388,21 +387,21 @@
     <string name="search_discover_section_title">Esplora ZRP</string>
     <string name="search_discover_section_subtitle">Mużika, marketplace, xogħol, logħob, aħbarijiet, AI u aktar</string>
     <string name="search_users_tab">Utenti (%1$d)</string>
-    <string name="search_posts_tab">Posts (%1$d)</string>
+    <string name="search_posts_tab">Pubblikazzjonijiet (%1$d)</string>
     <string name="search_no_users">L-ebda utent ma nstab.</string>
     <string name="search_no_posts">L-ebda post ma nstab.</string>
     <string name="home_trending_on_zrp">Popolari fuq ZRP</string>
     <string name="home_see_all">Ara kollox</string>
     <string name="right_panel_who_to_follow">Lil min issegwi</string>
     <string name="right_panel_trending">Popolari</string>
-    <string name="right_panel_posts_count">%1$d posts</string>
+    <string name="right_panel_posts_count">%1$d pubblikazzjonijiet</string>
     <string name="right_panel_no_trending">Għad m\'hemm l-ebda hashtag popolari.</string>
     <string name="home_discover_music">Skopri mużika ġdida</string>
     <string name="action_follow">Segwi</string>
     <string name="action_following">Qed Issegwi</string>
     <string name="action_requested">Mitlub</string>
     <string name="action_message">Messaġġ</string>
-    <string name="profile_posts">Posts</string>
+    <string name="profile_posts">Pubblikazzjonijiet</string>
     <string name="profile_followers">Segwaċi</string>
     <string name="profile_following">Segwiti</string>
     <string name="profile_more_actions">Aktar azzjonijiet</string>
@@ -414,7 +413,7 @@
     <string name="profile_replies">Tweġibiet</string>
     <string name="profile_media">Midja</string>
     <string name="profile_likes">Għoġbiet</string>
-    <string name="profile_reposts">Reposts</string>
+    <string name="profile_reposts">Ripostijiet</string>
     <string name="profile_pinned">Iddikjegat</string>
     <string name="profile_follows_you">Isegwik</string>
     <string name="profile_blocked_state">Imblukkat</string>
@@ -474,8 +473,8 @@
     <string name="stories_err_unsupported_type">Ritratti u vidjows biss huma appoġġjati.</string>
     <string name="stories_err_empty_content">Jekk jogħġbok żid xi kontenut jew fajl tal-midja.</string>
     <string name="stories_err_create_failed">Falla l-ħolqien tal-istorja. Jekk jogħġbok erġa\' pprova.</string>
-    <string name="reposts_title">Reposts</string>
-    <string name="reposts_count">%1$d reposts</string>
+    <string name="reposts_title">Ripostijiet</string>
+    <string name="reposts_count">%1$d ripostijiet</string>
     <string name="reposts_empty">Għad m\'hemm l-ebda repost.</string>
     <string name="quotes_title">Kwotazzjonijiet</string>
     <string name="quotes_count">%1$d kwotazzjonijiet</string>
@@ -573,7 +572,7 @@
     <string name="auth_continue_with_google">Kompli b\'Google</string>
     <string name="auth_full_name">Isem Sħiħ</string>
     <string name="auth_username">Isem tal-Utent</string>
-    <string name="auth_email">Email</string>
+    <string name="auth_email">Imejl</string>
     <string name="auth_create_password">Oħloq password</string>
     <string name="auth_password_min_length">Trid tkun mill-inqas 6 karattri</string>
     <string name="auth_creating_account">Qed jinħoloq il-kont...</string>
@@ -644,7 +643,7 @@
     <string name="music_artist_detail_not_found">L-artist ma nstabx</string>
     <string name="music_artist_detail_following">Qed Issegwi</string>
     <string name="music_artist_detail_follow">Segwi</string>
-    <string name="music_artist_detail_albums_heading">Albums</string>
+    <string name="music_artist_detail_albums_heading">Albumi</string>
     <string name="music_artist_detail_tracks_heading">Traċċi</string>
     <string name="music_artist_detail_no_tracks">Għad m\'hemm l-ebda traċċa ppubblikata</string>
     <string name="music_artist_detail_singles_heading">Singles</string>
@@ -653,7 +652,7 @@
     <string name="music_album_detail_no_tracks">Għad m\'hemm l-ebda traċċa ppubblikata f\'dan l-album</string>
     <string name="music_album_detail_released_label">Ħareġ</string>
     <string name="music_common_play_all">Doqq Kollox</string>
-    <string name="music_common_shuffle">Shuffle</string>
+    <string name="music_common_shuffle">Każwali</string>
     <string name="music_common_add_to_queue">Żid mal-kju</string>
     <string name="music_common_play_next">Doqq li jmiss</string>
     <string name="music_track_empty_default_title">Għad m\'hemm xejn hawn</string>
@@ -676,10 +675,10 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">L-Aħħar Albums</string>
     <string name="music_shell_popular_artists_heading">Artisti Popolari</string>
-    <string name="music_albums_title">Albums</string>
+    <string name="music_albums_title">Albumi</string>
     <string name="music_albums_search_placeholder">Fittex albums...</string>
     <string name="music_albums_none_found">L-ebda album ma nstab</string>
-    <string name="music_playlists_title">Playlists</string>
+    <string name="music_playlists_title">Listi tad-Daqq</string>
     <string name="music_playlists_page_title">Il-Playlists Tiegħek</string>
     <string name="music_playlists_new_playlist">Playlist ġdida</string>
     <string name="music_playlists_name_placeholder">Isem il-playlist</string>
@@ -784,7 +783,7 @@
     <string name="music_studio_album_deleted_msg">L-album tħassar. It-traċċi tiegħek inżammu u għadhom disponibbli.</string>
     <string name="music_studio_track_deleted_msg">It-traċċa tħassret.</string>
     <string name="music_studio_track_updated_msg">It-traċċa ġiet aġġornata.</string>
-    <string name="music_studio_tab_albums">Albums</string>
+    <string name="music_studio_tab_albums">Albumi</string>
     <string name="marketplace_discover_entry">Esplora ZRP Market Plus</string>
     <string name="marketplace_category_luxury_cars">Karozzi ta\' Lussu u Esotiċi</string>
     <string name="marketplace_category_yachts_boats">Yachts u Dgħajjes</string>
@@ -940,14 +939,14 @@
     <string name="opportunity_type_collaboration">Kollaborazzjoni</string>
     <string name="opportunity_type_freelance">Freelance</string>
     <string name="opportunity_type_hackathon">Hackathon</string>
-    <string name="opportunity_type_internship">Internship</string>
+    <string name="opportunity_type_internship">Taħriġ ta\' Xogħol</string>
     <string name="opportunity_type_job">Xogħol</string>
     <string name="opportunity_type_label">Tip</string>
-    <string name="opportunity_type_mentorship">Mentorship</string>
+    <string name="opportunity_type_mentorship">Mentorija</string>
     <string name="opportunity_type_partnership">Sħubija</string>
     <string name="opportunity_type_remote">Xogħol mill-Bogħod</string>
     <string name="opportunity_type_scholarship">Borża ta\' Studju</string>
-    <string name="opportunity_type_sponsorship">Sponsorship</string>
+    <string name="opportunity_type_sponsorship">Sponsorjar</string>
     <string name="opportunity_type_training">Taħriġ</string>
     <string name="opportunity_uploading">Qed jittella\'...</string>
     <string name="opportunity_view_applicants">Applikanti (%1$d)</string>
@@ -1215,7 +1214,7 @@
     <string name="shorts_upload_err_internal_server">Xi ħaġa marret ħażin min-naħa tagħna waqt it-tella\'. Jekk jogħġbok erġa\' pprova fi ftit ħin.</string>
     <string name="caption_view_more">Ara aktar</string>
     <string name="caption_view_less">Ara inqas</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Vidjows Qosra</string>
     <string name="creator_amount_usdc_label">Ammont (USDC)</string>
     <string name="creator_available_balance">Bilanċ disponibbli: %1$s</string>
     <string name="creator_enter_amount_placeholder">Daħħal l-ammont</string>
@@ -1242,7 +1241,7 @@
     <string name="creator_stat_total_tips">Total ta\' Tips</string>
     <string name="creator_stat_withdrawn">Irtirat</string>
     <string name="creator_studio_subtitle">Qligħ, prestazzjoni tal-kontenut, u tkabbir tal-udjenza.</string>
-    <string name="creator_studio_title">Creator Studio</string>
+    <string name="creator_studio_title">Studio tal-Kreatur</string>
     <string name="creator_tab_audience">Udjenza</string>
     <string name="creator_tab_content">Kontenut</string>
     <string name="creator_tab_overview">Ħarsa Ġenerali</string>
@@ -1250,7 +1249,7 @@
     <string name="creator_table_date">Data</string>
     <string name="creator_table_from">Minn</string>
     <string name="creator_table_message">Messaġġ</string>
-    <string name="creator_tips_label">Tips</string>
+    <string name="creator_tips_label">Bonamani</string>
     <string name="creator_withdraw_button">Irtira</string>
     <string name="creator_withdraw_funds_title">Irtira l-Fondi</string>
     <string name="creator_withdrawals_processed_hint">L-irtirar jiġi pproċessat fi żmien 24-48 siegħa.</string>
@@ -1259,10 +1258,10 @@
     <string name="creator_content_engagement_title">Involviment, l-aħħar 30 jum</string>
     <string name="creator_content_engagement_tooltip_plural">%1$s: %2$d involvimenti</string>
     <string name="creator_content_engagement_tooltip_singular">%1$s: %2$d involviment</string>
-    <string name="creator_content_likes">Likes</string>
+    <string name="creator_content_likes">Għoġbiet</string>
     <string name="creator_content_media_post_fallback">(post bil-midja)</string>
     <string name="creator_content_no_posts_yet">Għad m\'hemm l-ebda post.</string>
-    <string name="creator_content_reposts">Reposts</string>
+    <string name="creator_content_reposts">Ripostijiet</string>
     <string name="creator_content_top_posts_title">L-aħjar posts</string>
     <string name="creator_content_views">Dehriet</string>
     <string name="creator_audience_follower_growth_subtitle">Total ta\' segwaċi matul l-aħħar 30 jum.</string>
@@ -1335,7 +1334,7 @@
     <string name="trust_signal_website_title">Sit elettroniku miżjud</string>
     <string name="trust_stat_followers">Segwaċi</string>
     <string name="trust_stat_on_zrp">Fuq ZRP</string>
-    <string name="trust_stat_posts">Posts</string>
+    <string name="trust_stat_posts">Pubblikazzjonijiet</string>
     <string name="trust_transparency_notice">It-Trust Passport ta\' ZRP hija bbażata fuq sinjali tal-kont u tal-komunità disponibbli fuq ZRP. Il-punteġġi jerġgħu jiġu kkalkulati awtomatikament meta tinbidel l-informazzjoni jew l-attività sottostanti tal-kont. Il-passaport ma tesponix indirizzi tal-email, indirizzi IP, messaġġi privati, rapporti ta\' moderazzjoni, jew informazzjoni privata oħra tal-kont.</string>
     <string name="trust_trust_signals_subtitle">Sinjali pubbliċi użati biex tiġi kkalkulata din il-passaport.</string>
     <string name="trust_trust_signals_title">Sinjali ta\' fiduċja</string>
@@ -1443,7 +1442,7 @@
     <string name="settings_success_wallet_updated">Il-kartiera Solana ġiet aġġornata b\'suċċess!</string>
     <string name="settings_err_wallet_update_failed">Falla l-aġġornament tal-indirizz tal-kartiera.</string>
     <string name="support_category_account">Kont</string>
-    <string name="support_category_bug">Bug</string>
+    <string name="support_category_bug">Difett</string>
     <string name="support_category_content">Kontenut</string>
     <string name="support_category_feature_request">Talba għal Karatteristika</string>
     <string name="support_category_general">Ġenerali</string>
@@ -1483,7 +1482,7 @@
     <string name="support_detail_resolved_notice">Dan it-ticket ġie solvut. Jekk għad għandek bżonn l-għajnuna, tista\' toħloq ticket ġdid.</string>
     <string name="support_detail_send_reply">Ibgħat Tweġiba</string>
     <string name="support_detail_sending">Qed tintbagħat...</string>
-    <string name="support_detail_status_label">Status:</string>
+    <string name="support_detail_status_label">Stat:</string>
     <string name="support_detail_support_badge">Appoġġ</string>
     <string name="support_tickets_category_prefix">Kategorija:</string>
     <string name="support_tickets_confirm_delete">Int ċert li trid tħassar dan it-ticket? Din l-azzjoni ma tistax titreġġa\' lura.</string>
@@ -1502,7 +1501,7 @@
     <string name="support_tickets_status_resolved">Solvut</string>
     <string name="settings_new_ticket">Ticket Ġdid</string>
     <string name="admin_nav_label">Admin</string>
-    <string name="admin_dash_title">Dashboard</string>
+    <string name="admin_dash_title">Pannell ta\' Kontroll</string>
     <string name="admin_dash_total_users">Total ta\' Utenti</string>
     <string name="admin_dash_total_posts">Total ta\' Posts</string>
     <string name="admin_dash_total_comments">Total ta\' Kummenti</string>
@@ -1553,7 +1552,7 @@
     <string name="admin_reports_err_select_action_type">Jekk jogħġbok agħżel tip ta\' azzjoni.</string>
     <string name="admin_users_title">Utenti</string>
     <string name="admin_users_search_placeholder">Fittex utenti...</string>
-    <string name="admin_users_total">Total</string>
+    <string name="admin_users_total">Ammont Totali</string>
     <string name="admin_users_active">Attivi</string>
     <string name="admin_users_banned">Imċaħħda</string>
     <string name="admin_users_admins">Amministraturi</string>
@@ -1567,7 +1566,7 @@
     <string name="admin_users_status_banned">Imċaħħad</string>
     <string name="admin_users_col_user">Utent</string>
     <string name="admin_users_col_role">Rwol</string>
-    <string name="admin_users_col_status">Status</string>
+    <string name="admin_users_col_status">Stat</string>
     <string name="admin_users_col_actions">Azzjonijiet</string>
     <string name="admin_users_no_match">L-ebda utent ma jaqbel mal-filtri tiegħek.</string>
     <string name="admin_users_unban">Neħħi ċ-Ċaħda</string>
@@ -1579,7 +1578,7 @@
     <string name="admin_users_delete_confirm">Ħassar dan l-utent? Din ma tistax titreġġa\' lura.</string>
     <string name="admin_users_ban_confirm">Int ċert li trid %1$s lil dan l-utent?</string>
     <string name="admin_users_err_toggle_ban">Falla l-bidla taċ-ċaħda</string>
-    <string name="admin_posts_title">Posts</string>
+    <string name="admin_posts_title">Pubblikazzjonijiet</string>
     <string name="admin_posts_search_placeholder">Fittex posts...</string>
     <string name="admin_posts_by">Minn %1$s</string>
     <string name="admin_posts_delete">Ħassar</string>
@@ -1674,7 +1673,7 @@
     <string name="admin_support_all_status">L-Istatuses Kollha</string>
     <string name="admin_support_all_priority">Il-Prijoritajiet Kollha</string>
     <string name="admin_support_no_tickets">L-ebda ticket ma nstab</string>
-    <string name="admin_support_stat_total">Total</string>
+    <string name="admin_support_stat_total">Ammont Totali</string>
     <string name="admin_support_assigned_to">Assenjat: %1$s</string>
     <string name="admin_support_unassigned">Mhux assenjat</string>
     <string name="admin_support_previous">Ta\' Qabel</string>
@@ -1683,7 +1682,7 @@
     <string name="admin_ticket_from">Minn: @%1$s</string>
     <string name="admin_ticket_plan">Pjan: %1$s</string>
     <string name="admin_ticket_resolve">Solvi</string>
-    <string name="admin_ticket_status_field">Status</string>
+    <string name="admin_ticket_status_field">Stat</string>
     <string name="admin_ticket_priority_field">Prijorità</string>
     <string name="admin_ticket_assign_to">Assenja lil</string>
     <string name="admin_ticket_assign_hint">Ħalliha vojta biex tneħħi l-assenjazzjoni.</string>
@@ -1709,7 +1708,7 @@
     <string name="admin_plan_none">L-ebda pjan</string>
     <string name="admin_payments_title">Talbiet ta\' Ħlas</string>
     <string name="admin_payments_none">L-ebda talba ta\' ħlas pendenti.</string>
-    <string name="admin_payments_tx">Tx: %1$s</string>
+    <string name="admin_payments_tx">Tranżazzjoni: %1$s</string>
     <string name="admin_payments_tx_none">Mhux ipprovdut</string>
     <string name="admin_payments_verify">Ivverifika</string>
     <string name="admin_payments_verify_confirm">Ivverifika dan il-ħlas ta\' %1$s u mexxi lil @%2$s għall-pjan %3$s? L-aċċess imħallas jingħata minnufih u ma jistax jiġi rrevertit minn hawn.</string>
@@ -1751,7 +1750,7 @@
     <string name="legal_about">Dwar ZRP</string>
     <string name="legal_careers">Karrieri</string>
     <string name="legal_charity">Karità</string>
-    <string name="legal_press">Press Kit</string>
+    <string name="legal_press">Kit tal-Istampa</string>
     <string name="legal_investors">Investituri</string>
     <string name="legal_faq">Mistoqsijiet Frekwenti</string>
     <string name="settings_group_company">Kumpanija</string>
@@ -1805,7 +1804,7 @@
     <string name="profile_milestone_new_member">Membru ġdid</string>
     <string name="profile_milestone_posts_500">500+ post</string>
     <string name="profile_milestone_posts_100">100+ post</string>
-    <string name="profile_milestone_posts_10">10+ posts</string>
+    <string name="profile_milestone_posts_10">10+ pubblikazzjonijiet</string>
     <string name="profile_milestone_followers_1k">1K+ segwaċi</string>
     <string name="profile_milestone_followers_100">100+ segwaċi</string>
     <string name="home_empty_following_title">Il-feed \'Segwiti\' tiegħek qed jistenna lilek.</string>
@@ -1820,10 +1819,10 @@
     <string name="admin_analytics_last_30_days">L-aħħar 30 jum</string>
     <string name="admin_analytics_failed">Falla t-tagħbija tad-data tal-analitika.</string>
     <string name="admin_analytics_users">Utenti</string>
-    <string name="admin_analytics_posts">Posts</string>
+    <string name="admin_analytics_posts">Pubblikazzjonijiet</string>
     <string name="admin_analytics_comments">Kummenti</string>
-    <string name="admin_analytics_likes">Likes</string>
-    <string name="admin_analytics_reposts">Reposts</string>
+    <string name="admin_analytics_likes">Għoġbiet</string>
+    <string name="admin_analytics_reposts">Ripostijiet</string>
     <string name="admin_analytics_engagement_breakdown">Ripartizzjoni tal-Involviment</string>
     <string name="admin_analytics_avg_likes_per_post">Medja ta\' Likes għal kull Post</string>
     <string name="admin_analytics_avg_comments_per_post">Medja ta\' Kummenti għal kull Post</string>
@@ -1909,7 +1908,7 @@
     <string name="admin_news_network_never">Qatt</string>
     <string name="admin_news_network_last_cycle_failed">L-aħħar ċiklu falla: %1$s</string>
     <string name="admin_news_network_tab_overview">Ħarsa Ġenerali</string>
-    <string name="admin_news_network_tab_feeds">Feeds</string>
+    <string name="admin_news_network_tab_feeds">Kanali</string>
     <string name="admin_news_network_tab_sources">Sorsi</string>
     <string name="admin_news_network_tab_queue">Kju editorjali</string>
     <string name="admin_news_network_tab_publications">Pubblikazzjonijiet</string>
@@ -2021,7 +2020,7 @@
     <string name="admin_news_view_article_title">Ara l-artiklu</string>
     <string name="admin_news_edit_article_title">Editja l-artiklu</string>
     <string name="admin_news_delete_article_title">Ħassar l-artiklu</string>
-    <string name="admin_news_feedback_prefix">Feedback: %1$s</string>
+    <string name="admin_news_feedback_prefix">Rispons: %1$s</string>
     <string name="admin_news_edit_title">Editja Artiklu tal-Aħbarijiet</string>
     <string name="admin_news_create_title">Oħloq Artiklu tal-Aħbarijiet</string>
     <string name="admin_news_editing_slug">Qed jeditja %1$s</string>
@@ -2189,7 +2188,7 @@
     <string name="upgrade_request_price_label">Prezz: CHF %1$s / xahar</string>
     <string name="upgrade_request_bank_instructions_title">Istruzzjonijiet għat-Trasferiment Bankarju</string>
     <string name="upgrade_request_bank_transfer_instruction">Jekk jogħġbok ittrasferixxi l-ammont lil dan il-kont bankarju:</string>
-    <string name="upgrade_request_bank_label">Bank:</string>
+    <string name="upgrade_request_bank_label">Il-Bank:</string>
     <string name="upgrade_request_account_label">Kont:</string>
     <string name="upgrade_request_iban_label">IBAN:</string>
     <string name="upgrade_request_bic_label">BIC:</string>
@@ -2365,7 +2364,7 @@
     <string name="admin_analytics_source_unknown">Mhux Magħruf</string>
     <string name="admin_analytics_platform_android">Android</string>
     <string name="admin_analytics_platform_ios">iOS</string>
-    <string name="admin_analytics_platform_web">Web</string>
+    <string name="admin_analytics_platform_web">Sit Elettroniku</string>
     <string name="admin_analytics_platform_unknown">Mhux Magħruf</string>
     <string name="admin_badge_verified">Ivverifikat</string>
     <string name="admin_badge_organization">Organizzazzjoni</string>

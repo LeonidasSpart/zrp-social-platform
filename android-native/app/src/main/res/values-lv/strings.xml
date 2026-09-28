@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ZRP Social</string>
     <string name="notification_channel_general_name">Vispārīgi</string>
     <string name="settings_title">Iestatījumi</string>
     <string name="settings_account">Konts</string>
@@ -193,17 +192,17 @@
     <string name="nav_search">Meklēt</string>
     <string name="nav_explore">Atklāt</string>
     <string name="nav_communities">Kopienas</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">Spēles</string>
     <string name="nav_news">Ziņas</string>
     <string name="nav_music">Mūzika</string>
     <string name="nav_marketplace">Tirdziņš</string>
-    <string name="nav_opportunity">Opportunity</string>
+    <string name="nav_opportunity">Iespējas</string>
     <string name="nav_aid">Palīdzība</string>
     <string name="nav_ambassadors">Globālie vēstnieki</string>
     <string name="nav_ai">ZRP AI</string>
     <string name="nav_creator_studio">Satura veidotāja studija</string>
     <string name="nav_admin">Administrēšana</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Īsie video</string>
     <string name="nav_help_center">Palīdzības centrs</string>
     <string name="drawer_section_core">Galvenais</string>
     <string name="drawer_section_discover">Atklāt</string>
@@ -238,7 +237,7 @@
     <string name="chat_typing">Raksta...</string>
     <string name="chat_contact_profile">Profils</string>
     <string name="chat_contact_call">Zvanīt</string>
-    <string name="chat_contact_video">Video</string>
+    <string name="chat_contact_video">Videoklipi</string>
     <string name="chat_contact_more">Vairāk</string>
     <string name="chat_block">Bloķēt</string>
     <string name="chat_unblock">Atbloķēt</string>
@@ -466,7 +465,7 @@
     <string name="stories_share_story">Publicēt stāstu</string>
     <string name="stories_whats_on_your_mind">Par ko tu domā?</string>
     <string name="stories_image">Attēls</string>
-    <string name="stories_video">Video</string>
+    <string name="stories_video">Videoklipi</string>
     <string name="stories_uploading">Augšupielādē...</string>
     <string name="stories_err_file_too_large">Fails ir pārāk liels. Maksimums 16 MB.</string>
     <string name="stories_err_unsupported_type">Atbalstīti tikai attēli un video.</string>
@@ -1169,7 +1168,7 @@
     <string name="news_category_technology">Tehnoloģijas</string>
     <string name="news_category_crypto">Kriptovalūtas</string>
     <string name="news_category_science">Zinātne</string>
-    <string name="news_category_sports">Sports</string>
+    <string name="news_category_sports">Sporta ziņas</string>
     <string name="news_category_culture">Kultūra</string>
     <string name="news_category_community">Kopiena</string>
     <string name="news_title">ZRP News</string>
@@ -1211,7 +1210,7 @@
     <string name="shorts_upload_err_internal_server">Augšupielādes laikā mūsu pusē radās kļūda. Lūdzu, mēģini vēlreiz pēc brīža.</string>
     <string name="caption_view_more">Skatīt vairāk</string>
     <string name="caption_view_less">Skatīt mazāk</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Īsie video</string>
     <string name="creator_amount_usdc_label">Summa (USDC)</string>
     <string name="creator_available_balance">Pieejamā bilance: %1$s</string>
     <string name="creator_enter_amount_placeholder">Ievadi summu</string>
@@ -1760,8 +1759,8 @@
     <string name="transparency_last_30_days_label">Sūdzības pēdējās 30 dienās</string>
     <string name="transparency_actions_taken_label">Veiktās darbības</string>
     <string name="transparency_median_resolution_label">Vidējais atrisināšanas laiks</string>
-    <string name="transparency_hours_value">%1$dh</string>
-    <string name="transparency_days_value">%1$dd</string>
+    <string name="transparency_hours_value">%1$d h</string>
+    <string name="transparency_days_value">%1$d d</string>
     <string name="transparency_trend_heading">Sūdzības laika gaitā</string>
     <string name="transparency_legend_received">Saņemtas</string>
     <string name="transparency_legend_actioned">Ar veiktu darbību</string>
