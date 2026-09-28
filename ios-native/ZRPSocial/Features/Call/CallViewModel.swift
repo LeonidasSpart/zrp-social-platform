@@ -546,8 +546,8 @@ final class CallViewModel: NSObject, ObservableObject {
         session.lockForConfiguration()
         defer { session.unlockForConfiguration() }
         do {
-            try session.setCategory(AVAudioSession.Category.playAndRecord.rawValue)
-            try session.setMode((video ? AVAudioSession.Mode.videoChat : .voiceChat).rawValue)
+            try session.setCategory(AVAudioSession.Category.playAndRecord)
+            try session.setMode(video ? AVAudioSession.Mode.videoChat : .voiceChat)
             try session.setActive(true)
         } catch {
             // Best-effort - see this method's own doc comment. A failure

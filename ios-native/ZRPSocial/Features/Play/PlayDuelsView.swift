@@ -129,16 +129,21 @@ struct PlayDuelsView: View {
                         ownUserId: session.currentUser?.id,
                         busy: viewModel.busyDuelId == duel.id,
                         onOpen: { navigator.push(.playDuelDetail(id: duel.id)) },
-                        onAccept: respondable
-                            ? { Task { await viewModel.respond(duelId: duel.id, accept: true) } }
-                            : nil,
-                        onDecline: respondable
-                            ? { Task { await viewModel.respond(duelId: duel.id, accept: false) } }
-                            : nil
+                        onAccept: respondable ? { respond(to: duel, accept: true) } : nil,
+                        onDecline: respondable ? { respond(to: duel, accept: false) } : nil
                     )
                 }
             }
         }
+    }
+
+    // Pulled out of the ternary above: an inline `Task { ... }` inside a
+    // `condition ? { ... } : nil` closure left the compiler unable to
+    // settle on a `Task.init` overload (ambiguous use of
+    // `init(name:priority:operation:)`) before it could even infer the
+    // closure's own type from the surrounding `nil` branch.
+    private func respond(to duel: PlayDuel, accept: Bool) {
+        Task { await viewModel.respond(duelId: duel.id, accept: accept) }
     }
 }
 
