@@ -3,10 +3,12 @@ import { prisma } from "@/lib/db";
 import { getAllCountries } from "@/lib/ambassadors/countries";
 import { SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
 
-// Every ZRP-supported language has a registered locale in
-// src/lib/ambassadors/countries.ts (via i18n-iso-countries), so this
-// validates the `lang` query param against the same canonical catalog
-// the rest of the app uses instead of maintaining a second list here.
+// Almost every ZRP-supported language has a registered locale in
+// src/lib/ambassadors/countries.ts (via i18n-iso-countries; Romansh
+// falls back to English country names there - see that file's
+// resolvableLocale()), so this validates the `lang` query param against
+// the same canonical catalog the rest of the app uses instead of
+// maintaining a second list here.
 const SUPPORTED_LANGUAGE_CODES: Language[] = SUPPORTED_LANGUAGES.map((l) => l.code);
 
 /**

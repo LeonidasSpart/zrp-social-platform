@@ -90,7 +90,7 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   // across every language by construction.
   ".",
   "4",
-  "38",
+  "39",
   // Registered-user count - some languages' translators kept the Western
   // thousands-separator style rather than adapting it, which is a valid
   // locale choice, not a missed translation.
@@ -2339,6 +2339,21 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptions.filterStatus", "adminSubscriptions.colStatus", "adminSubscriptionDetail.fieldStatus",
     "transparency.reasonSpam", "communityCode.e.category1", "marketplace.heroTitle",
     "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold", "help.section.marketplace.title",
+  ],
+  // The 1-language 38->39 expansion (Romansh / Rumantsch Grischun).
+  // Reviewed against French and German precedent for each key: genuine
+  // cross-language cognates/technical terms (Spam, CTR, Album, Hashtag,
+  // Favicon, an email address, a numeric "/ 100" format, a single-letter
+  // content-rating badge) or an internal admin-only name kept
+  // untranslated in every other language too (ZRP News Network).
+  rm: [
+    "group.lastMessagePrefix", "transparency.reasonSpam", "communityCode.e.category1",
+    "investors.traction.heading", "press.emailBadge", "press.faviconLabel",
+    "privacy.dataCollected.cookiesTitle", "ads.dashboard.ctr", "trust.outOf100",
+    "opportunity.typeHackathon", "music.studio.explicitBadge", "music.track.columnAlbum",
+    "music.albumDetail.eyebrow", "tipModal.charCount", "professionalCategory.blockchain",
+    "professionalCategory.podcasting", "communities.create.hashtagLabel",
+    "adminNewsNetwork.title", "adminNewsNetwork.verificationFailedNamed",
   ],
 };
 
