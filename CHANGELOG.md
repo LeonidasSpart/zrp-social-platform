@@ -66,7 +66,7 @@ iOS has no build shipped yet.
 - **Localization expanded from 38 to 39 languages**: Romansh (Rumantsch
   Grischun, `rm`/`rm-CH`) added as the final language in the current
   European-coverage milestone, with full key parity across Web, Android
-  and iOS (#412). Romansh's `<plurals>` use CLDR's simple one/other
+  and iOS (#413). Romansh's `<plurals>` use CLDR's simple one/other
   shape (same as Estonian and English). The one known limitation: the
   third-party `i18n-iso-countries` package used for ZRP Global
   Ambassadors' country-name localization has no Romansh locale data at
