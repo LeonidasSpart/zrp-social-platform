@@ -7,6 +7,13 @@ protocol PlayRepositoryProtocol: Sendable {
     func submit(challengeId: String, submission: PlaySubmission) async throws -> PlayResult
     func createChallenge(_ request: CreateChallengeRequest) async throws -> PlayChallenge
     func generateChallenge(topic: String, type: String, difficulty: String) async throws -> GeneratedChallenge
+    /// `GET /api/play/duels` - every duel the viewer is either side of.
+    /// Requires a session. The route paginates; this app shows the first
+    /// page only, same as PlayDuelsScreen.kt.
+    func duels(status: PlayDuelStatus?) async throws -> [PlayDuel]
+    func duel(id: String) async throws -> PlayDuelDetail
+    func createDuel(challengeId: String, opponentId: String) async throws -> PlayDuel
+    func respondToDuel(id: String, accept: Bool) async throws -> PlayDuelDetail
 }
 
 /// `POST /api/play/challenges`. `content`'s shape depends on `type`, so it
@@ -110,6 +117,11 @@ struct PlaySubmission: Encodable, Equatable {
     var answerText: String?
     /// How long it took, which feeds the server's own scoring.
     var timeMs: Int?
+    /// Set when this challenge is being played as one side of a duel.
+    /// The route reads this to score both sides against the shared
+    /// challenge and settle the duel once both have submitted - see
+    /// `PlayResult.duelCompleted`.
+    var duelId: String?
 }
 
 struct PlayRepository: PlayRepositoryProtocol {
@@ -187,5 +199,57 @@ struct PlayRepository: PlayRepositoryProtocol {
                 body: Body(topic: topic, type: type, difficulty: difficulty)
             )
         )
+    }
+
+    // MARK: - Duels
+
+    func duels(status: PlayDuelStatus? = nil) async throws -> [PlayDuel] {
+        struct Response: Decodable {
+            let duels: [PlayDuel]?
+        }
+        let response: Response = try await client.send(
+            Endpoint.get("play/duels", query: [("status", status?.rawValue)])
+        )
+        return response.duels ?? []
+    }
+
+    func duel(id: String) async throws -> PlayDuelDetail {
+        struct Response: Decodable { let duel: PlayDuelDetail }
+        let response: Response = try await client.send(
+            Endpoint.get("play/duels/\(Endpoint.segment(id))")
+        )
+        return response.duel
+    }
+
+    /// `POST /api/play/duels`. The route blocks a self-challenge, an
+    /// opponent either side has blocked, and any target that isn't a
+    /// real active challenge - each with its own message, surfaced as
+    /// the route sent it rather than re-derived here.
+    func createDuel(challengeId: String, opponentId: String) async throws -> PlayDuel {
+        struct Body: Encodable {
+            let challengeId: String
+            let opponentId: String
+        }
+        struct Response: Decodable { let duel: PlayDuel }
+        let response: Response = try await client.send(
+            try Endpoint.post("play/duels", body: Body(challengeId: challengeId, opponentId: opponentId))
+        )
+        return response.duel
+    }
+
+    /// `PUT /api/play/duels/{id}`. Only the challenged side may call
+    /// this, and only once - a double-tap or a race between two taps
+    /// resolves through the route's own conditional update, not a
+    /// client-side guard.
+    func respondToDuel(id: String, accept: Bool) async throws -> PlayDuelDetail {
+        struct Body: Encodable { let action: String }
+        struct Response: Decodable { let duel: PlayDuelDetail }
+        let response: Response = try await client.send(
+            try Endpoint.put(
+                "play/duels/\(Endpoint.segment(id))",
+                body: Body(action: accept ? "accept" : "decline")
+            )
+        )
+        return response.duel
     }
 }

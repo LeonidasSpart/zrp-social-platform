@@ -107,7 +107,7 @@ enum DeepLink {
         case "play":
             // /play, and /play/challenge/{id} for one challenge.
             if second == "challenge", let id = third {
-                return DeepLinkTarget(.home, .playChallenge(id: id))
+                return DeepLinkTarget(.home, .playChallenge(id: id, duelId: nil))
             }
             return DeepLinkTarget(.home, .play)
 

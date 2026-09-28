@@ -309,7 +309,7 @@ struct PlayCreateChallengeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: viewModel.createdChallengeId) { _, id in
             guard let id else { return }
-            navigator.push(.playChallenge(id: id))
+            navigator.push(.playChallenge(id: id, duelId: nil))
         }
     }
 

@@ -154,4 +154,13 @@ struct PlayResult: Decodable, Equatable {
     let unlockedAchievements: [Achievement]?
     /// Set when this was a duel and the other player has not finished.
     let waitingForOpponent: Bool?
+
+    /// Set when this submission was the one that completed a duel (both
+    /// sides had scored). `winnerId` is `nil` for a tie - never guessed
+    /// client-side, since the server determines it from the two stored
+    /// `PlayAttempt` rows, not from either client's own claim.
+    let duelCompleted: Bool?
+    let winnerId: String?
+    let challengerScore: Int?
+    let opponentScore: Int?
 }

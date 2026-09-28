@@ -38,10 +38,8 @@ final class PlayHomeViewModel: ObservableObject {
 /// the viewer's own standing - all from `GET /api/play/home`, which
 /// serves a signed-out reader too with the personal parts absent.
 ///
-/// **Duels are not here.** They need opponent search, an invitation
-/// lifecycle (pending / accepted / declined / expired) and a result
-/// screen that waits for the other player - a module of their own rather
-/// than a corner of this one. Recorded in PARITY.md.
+/// Duels (`PlayDuelsView`) are reached from the toolbar's own icon, not
+/// shown inline here - the same split PlayScreen.kt makes.
 struct PlayHomeView: View {
 
     @EnvironmentObject private var navigator: Navigator
@@ -71,6 +69,14 @@ struct PlayHomeView: View {
             // session, so the entry point stays hidden rather than
             // reaching a 401 after filling out a whole form.
             if session.currentUser != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        navigator.push(.playDuels)
+                    } label: {
+                        Image(systemName: "flag.2.crossed")
+                    }
+                    .accessibilityLabel(Text(.playDuelsTitle))
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         navigator.push(.playCreateChallenge)
@@ -154,7 +160,7 @@ struct PlayHomeView: View {
 
             if let challenge {
                 Button {
-                    navigator.push(.playChallenge(id: challenge.id))
+                    navigator.push(.playChallenge(id: challenge.id, duelId: nil))
                 } label: {
                     PlayChallengeCard(challenge: challenge, isDaily: true)
                 }
@@ -181,7 +187,7 @@ struct PlayHomeView: View {
             } else {
                 ForEach(challenges) { challenge in
                     Button {
-                        navigator.push(.playChallenge(id: challenge.id))
+                        navigator.push(.playChallenge(id: challenge.id, duelId: nil))
                     } label: {
                         PlayChallengeCard(challenge: challenge, isDaily: false)
                     }
