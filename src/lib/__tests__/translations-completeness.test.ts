@@ -90,7 +90,7 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   // across every language by construction.
   ".",
   "4",
-  "34",
+  "38",
   // Registered-user count - some languages' translators kept the Western
   // thousands-separator style rather than adapting it, which is a valid
   // locale choice, not a missed translation.
