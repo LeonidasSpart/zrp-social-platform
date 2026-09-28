@@ -72,6 +72,33 @@ export async function canViewPrivateContent(
 }
 
 /**
+ * The full set of author/user ids `viewerId` should never see content
+ * from: everyone they've blocked, everyone who's blocked them, and
+ * everyone they've muted. Symmetric on blocks (either direction hides
+ * content both ways) but one-directional on mutes (only the muter is
+ * shielded - the muted party is never told and keeps seeing the muter).
+ *
+ * This is the exact query five call sites (GET /api/search,
+ * /api/posts/explore, /api/posts, /api/videos, /api/play/duels) already
+ * duplicated inline before Advanced Search centralized it here - new
+ * callers should use this instead of re-inlining the three findMany
+ * calls.
+ */
+export async function getExcludedAuthorIds(viewerId: string | null | undefined): Promise<string[]> {
+  if (!viewerId) return [];
+  const [blocked, blockers, muted] = await Promise.all([
+    prisma.blocked.findMany({ where: { blockerId: viewerId }, select: { blockedId: true } }),
+    prisma.blocked.findMany({ where: { blockedId: viewerId }, select: { blockerId: true } }),
+    prisma.mute.findMany({ where: { muterId: viewerId }, select: { mutedId: true } }),
+  ]);
+  return [
+    ...blocked.map((b) => b.blockedId),
+    ...blockers.map((b) => b.blockerId),
+    ...muted.map((m) => m.mutedId),
+  ];
+}
+
+/**
  * Check if a user is a member of a specific team (account owner's team).
  * Returns true if they are an OWNER (admin) or a regular member.
  */

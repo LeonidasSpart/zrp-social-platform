@@ -1,150 +1,118 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { viewablePostAuthorFilter } from "@/lib/permissions";
-import { applyPremiumGating } from "@/lib/premium-content";
+import { getExcludedAuthorIds } from "@/lib/permissions";
+import { parseSearchCategory, parseSearchFilters, parseSearchSort } from "@/lib/search/params";
+import type { SearchCategory, SearchQueryParams } from "@/lib/search/types";
+import { searchUsers } from "@/lib/search/categories/users";
+import { searchPosts } from "@/lib/search/categories/posts";
+import { searchHashtags } from "@/lib/search/categories/hashtags";
+import { searchCommunities } from "@/lib/search/categories/communities";
+import { searchNews } from "@/lib/search/categories/news";
+import { searchMusic } from "@/lib/search/categories/music";
+import { searchOpportunities } from "@/lib/search/categories/opportunities";
+import { searchMarketplace } from "@/lib/search/categories/marketplace";
+
+// ─── GET /api/search — Advanced Search ────────────────────────────────
+// See docs/advanced-search-architecture.md for the full contract.
+//
+// ?q=<query>                          required, min 2 chars
+// &type=all|users|posts|hashtags|communities|news|music|opportunities|marketplace
+// &sort=relevance|recent|engagement|trending
+// &dateRange=any|24h|7d|30d|custom    (&dateFrom=, &dateTo= for custom)
+// &language=<ISO 639-1>  &country=<ISO 3166-1 alpha-2>
+// &media=image|video|gif|poll|none    (Posts only)
+// &verified=true  &professional=true  &creator=true
+// &community=<slug>                   (scopes Posts/Hashtags to one Community)
+// &cursor=<opaque>  &limit=<n>
+//
+// type=all (the default, and the ONLY mode the pre-existing callers
+// below ever use) returns the pre-existing {users, posts} shape
+// UNCHANGED, plus the same shape for every other category - additive,
+// not a breaking change. It is a fixed-size teaser per category
+// (`cursor` is ignored in this mode); a client asking for "more" of one
+// category switches to type=<category>, which honors `cursor`/`limit`
+// for genuine pagination and returns {results, nextCursor, category,
+// sort}. Existing callers that only read `.users`/`.posts` - the Web
+// mention-autocomplete's own call, Android's SearchViewModel/
+// OpponentSearchView/UserMultiSelectField/CreatePostViewModel and iOS's
+// SearchViewModel/PlayChallengeView/PeoplePickerView - keep working
+// unchanged, since they never read the new keys.
+const ALL_MODE_LIMITS: Partial<Record<SearchCategory, number>> = {
+  // Preserves the exact pre-existing counts those callers already
+  // depend on (10 users for mention-autocomplete-style pickers, 20
+  // posts) - every other category is new, so 5 is a reasonable teaser
+  // size with no legacy expectation to match.
+  users: 10,
+  posts: 20,
+};
+const ALL_MODE_DEFAULT_LIMIT = 5;
+const SINGLE_CATEGORY_DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 50;
+
+const CATEGORY_SEARCHERS: Record<SearchCategory, (params: SearchQueryParams) => Promise<{ items: unknown[]; nextCursor: string | null }>> = {
+  users: searchUsers,
+  posts: searchPosts,
+  hashtags: searchHashtags,
+  communities: searchCommunities,
+  news: searchNews,
+  music: searchMusic,
+  opportunities: searchOpportunities,
+  marketplace: searchMarketplace,
+};
+
+function parseLimit(req: NextRequest, fallback: number): number {
+  const raw = parseInt(req.nextUrl.searchParams.get("limit") || "", 10);
+  return Number.isFinite(raw) && raw > 0 ? Math.min(raw, MAX_LIMIT) : fallback;
+}
 
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("q") || "";
-  const type = req.nextUrl.searchParams.get("type") || "all";
 
-  if (query.length < 2) {
-    return NextResponse.json({ users: [], posts: [] });
+  const category = parseSearchCategory(req);
+  const sort = parseSearchSort(req);
+  const filters = parseSearchFilters(req);
+
+  if (query.trim().length < 2) {
+    // Preserves the exact pre-existing empty-query shape for `type=all`
+    // callers; a single-category request gets the single-category
+    // empty shape instead of a bare {users:[], posts:[]}.
+    return category === "all"
+      ? NextResponse.json({ users: [], posts: [] })
+      : NextResponse.json({ results: [], nextCursor: null, category, sort });
   }
 
   try {
     const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
+    const viewerId: string | null = session?.user?.id ?? null;
+    const excludedAuthorIds = await getExcludedAuthorIds(viewerId);
 
-    // ─── Get excluded users (blocked + blockers + muted) ──────────
-    let excludedAuthorIds: string[] = [];
-    if (userId) {
-      const [blocked, blockers, muted] = await Promise.all([
-        prisma.blocked.findMany({
-          where: { blockerId: userId },
-          select: { blockedId: true },
-        }),
-        prisma.blocked.findMany({
-          where: { blockedId: userId },
-          select: { blockerId: true },
-        }),
-        prisma.mute.findMany({
-          where: { muterId: userId },
-          select: { mutedId: true },
-        }),
-      ]);
-      const blockedIds = blocked.map(b => b.blockedId);
-      const blockerIds = blockers.map(b => b.blockerId);
-      const mutedIds = muted.map(m => m.mutedId);
-      excludedAuthorIds = [...blockedIds, ...blockerIds, ...mutedIds];
+    if (category !== "all") {
+      const cursor = req.nextUrl.searchParams.get("cursor");
+      const limit = parseLimit(req, SINGLE_CATEGORY_DEFAULT_LIMIT);
+      const params: SearchQueryParams = { query, sort, filters, viewerId, excludedAuthorIds, cursor, limit };
+      const { items, nextCursor } = await CATEGORY_SEARCHERS[category](params);
+      return NextResponse.json({ results: items, nextCursor, category, sort });
     }
 
-    const results: any = {};
+    const categories = Object.keys(CATEGORY_SEARCHERS) as SearchCategory[];
+    const entries = await Promise.all(
+      categories.map(async (cat) => {
+        const limit = ALL_MODE_LIMITS[cat] ?? ALL_MODE_DEFAULT_LIMIT;
+        const params: SearchQueryParams = { query, sort, filters, viewerId, excludedAuthorIds, cursor: null, limit };
+        const page = await CATEGORY_SEARCHERS[cat](params);
+        return [cat, page] as const;
+      })
+    );
 
-    // ─── Search users ──────────────────────────────────────────────
-    if (type === "users" || type === "all") {
-      const users = await prisma.user.findMany({
-        where: {
-          AND: [
-            {
-              OR: [
-                { username: { contains: query, mode: "insensitive" } },
-                { name: { contains: query, mode: "insensitive" } },
-              ],
-            },
-            { id: { notIn: excludedAuthorIds } }, // ✅ exclude blocked/muted
-            { banned: false },
-          ],
-        },
-        select: {
-          id: true,
-          username: true,
-          name: true,
-          avatarUrl: true,
-          badgeType: true,
-        },
-        take: 10, // limit to 10 for mention autocomplete
-      });
-      results.users = users;
+    const results: Record<string, unknown> = {};
+    const nextCursors: Record<string, string | null> = {};
+    for (const [cat, page] of entries) {
+      results[cat] = page.items;
+      nextCursors[cat] = page.nextCursor;
     }
 
-    // ─── Search posts ──────────────────────────────────────────────
-    if (type === "posts" || type === "all") {
-      const posts = await prisma.post.findMany({
-        where: {
-          AND: [
-            {
-              OR: [
-                { content: { contains: query, mode: "insensitive" } },
-                { hashtags: { has: query.toLowerCase() } },
-              ],
-            },
-            { authorId: { notIn: excludedAuthorIds } },
-            { status: "published" },
-            { author: viewablePostAuthorFilter(userId) },
-          ],
-        },
-        orderBy: { createdAt: "desc" },
-        take: 20,
-        include: {
-          author: {
-            select: {
-              id: true,
-              username: true,
-              name: true,
-              avatarUrl: true,
-              badgeType: true,
-            },
-          },
-          quotePost: {
-            include: {
-              author: {
-                select: {
-                  id: true,
-                  username: true,
-                  name: true,
-                  avatarUrl: true,
-                  badgeType: true,
-                },
-              },
-              _count: {
-                select: {
-                  likes: true,
-                  comments: true,
-                  reposts: true,
-                  quotedBy: true,
-                },
-              },
-            },
-          },
-          poll: {
-            include: {
-              votes_user: {
-                where: userId ? { userId } : undefined,
-                select: { optionIndex: true },
-              },
-            },
-          },
-          _count: {
-            select: {
-              likes: true,
-              comments: true,
-              reposts: true,
-              quotedBy: true,
-            },
-          },
-        },
-      });
-      // ⚠️ SECURITY (N5): search was reading Post rows directly and
-      // returning them unredacted - a matched (or quoted) premium post's
-      // full content/media was fully readable via search regardless of
-      // purchase status, and even to logged-out visitors. See
-      // src/lib/premium-content.ts.
-      results.posts = await applyPremiumGating(posts, userId);
-    }
-
-    return NextResponse.json(results);
+    return NextResponse.json({ ...results, nextCursors, sort });
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json({ error: "Search failed" }, { status: 500 });

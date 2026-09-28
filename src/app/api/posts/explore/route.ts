@@ -5,44 +5,18 @@ import { prisma } from "@/lib/db";
 import { getCached, setCached } from "@/lib/redis";
 import { viewablePostAuthorFilter } from "@/lib/permissions";
 import { applyPremiumGating } from "@/lib/premium-content";
-import { applyGeoBoost } from "@/lib/feed/geo-boost";
+import {
+  calculateScore,
+  calculateTrendingScore,
+  TRENDING_WINDOW_HOURS,
+} from "@/lib/feed/scoring";
 
 export const dynamic = 'force-dynamic';
 
-// ─── Score = engagement / age_in_hours (capped to avoid Infinity),
-// with a modest same-country boost folded in - see
-// src/lib/feed/geo-boost.ts for why this is additive, not a filter. ──
-function calculateScore(post: any, viewerCountryCode: string | null) {
-  const likes = post._count?.likes || 0;
-  const comments = post._count?.comments || 0;
-  const reposts = post._count?.reposts || 0;
-
-  // Engagement weight: reposts > comments > likes
-  const engagement = likes + comments * 2 + reposts * 3;
-
-  const ageMs = Date.now() - new Date(post.createdAt).getTime();
-  // Minimum 0.001 hour (~3.6 seconds) to avoid division by zero
-  const ageHours = Math.max(0.001, ageMs / (1000 * 60 * 60));
-
-  // New posts get a huge score, older posts get proportionally lower
-  const baseScore = engagement / ageHours;
-  return applyGeoBoost(baseScore, viewerCountryCode, post.author?.countryCode ?? null);
-}
-
-// "Trending" (the Explore tab of that name) is a genuinely different
-// ranking from "For You", not the same feed relabeled: raw engagement
-// over a fixed recent window, no age decay. A post that is a day old
-// with heavy engagement stays trending even though the age-decayed
-// "For You" score would have buried it under everything posted in the
-// last hour. Same 200-candidate pool and post shape either way.
-const TRENDING_WINDOW_HOURS = 48;
-
-function calculateTrendingScore(post: any) {
-  const likes = post._count?.likes || 0;
-  const comments = post._count?.comments || 0;
-  const reposts = post._count?.reposts || 0;
-  return likes + comments * 2 + reposts * 3;
-}
+// calculateScore/calculateTrendingScore/TRENDING_WINDOW_HOURS now live in
+// src/lib/feed/scoring.ts (unchanged formulas, byte-identical output) so
+// Advanced Search's "engagement"/"trending" sort can reuse the exact
+// same, already-shipped ranking instead of a second, divergent one.
 
 export async function GET(req: NextRequest) {
   try {
