@@ -107,6 +107,10 @@ struct RouteDestinationView: View {
             ShortsView(startId: startId)
         case .discover:
             DiscoverView()
+        case .liveAudio:
+            LiveAudioListView()
+        case .liveAudioRoom(let id):
+            LiveAudioRoomView(roomId: id)
         case .news:
             NewsView()
         case .newsArticle(let slug):

@@ -85,6 +85,10 @@ enum Route: Hashable {
     /// feed (`GET /api/discover`), a distinct backend concern from
     /// Search's own "Discover" pre-search state despite the shared name.
     case discover
+    /// ZRP Live Audio - LiveKit-backed audio rooms (Twitter Spaces/
+    /// Clubhouse-style), paid-gated to pro/business/enterprise server-side.
+    case liveAudio
+    case liveAudioRoom(id: String)
     case news
     case newsArticle(slug: String)
     case explore

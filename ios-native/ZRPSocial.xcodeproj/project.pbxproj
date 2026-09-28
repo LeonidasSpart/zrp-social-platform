@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1A0000000000000000000020 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A000000000000000000001F /* LiveKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		1A0000000000000000000003 /* ZRPSocial.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZRPSocial.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A0000000000000000000011 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A0000000000000000000020 /* LiveKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +89,7 @@
 			);
 			name = ZRPSocial;
 			packageProductDependencies = (
+				1A000000000000000000001F /* LiveKit */,
 			);
 			productName = ZRPSocial;
 			productReference = 1A0000000000000000000003 /* ZRPSocial.app */;
@@ -168,6 +174,9 @@
 			);
 			mainGroup = 1A0000000000000000000005;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1A000000000000000000001E /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1A0000000000000000000006 /* Products */;
 			projectDirPath = "";
@@ -396,6 +405,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1A000000000000000000001E /* XCRemoteSwiftPackageReference "client-sdk-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/livekit/client-sdk-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.17.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1A000000000000000000001F /* LiveKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1A000000000000000000001E /* XCRemoteSwiftPackageReference "client-sdk-swift" */;
+			productName = LiveKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1A0000000000000000000001 /* Project object */;
 }

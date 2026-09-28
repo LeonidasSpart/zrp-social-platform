@@ -157,6 +157,39 @@ backend contract.
 | Locked premium item | `premiumPost: {price, currency, previewContent, locked}`, `media.url` withheld while locked | ✅ real preview + a "View post" link (not a purchase action) | ✅ preview text only, no button at all (a stricter, also-honest choice) | ✅ matches web: preview, price/currency shown as plain text, and a "View post" link to the post's own detail screen - never a purchase button, since this app has no purchase flow for any feature (store policy) | IMPLEMENTED |
 | Comments | tapping the comment action | ✅ in-place sheet | 🔶 opens the standalone comments screen instead of an in-place sheet (this app has never had one) | 🔶 opens `postDetail`, same reasoning | PARTIAL (by design) |
 
+### ZRP Live Audio (LiveKit-backed audio rooms)
+
+Twitter Spaces/Clubhouse-style live audio rooms under `live-audio/rooms/...`
+(15 REST routes) plus 8 `live-audio:*` Socket.IO events
+(`src/lib/live-audio/room-service.ts`'s own `emitToLiveAudioRoom`/
+`emitToUser` calls). Paid-gated server-side to pro/business/enterprise
+(`requireLiveAudioAccess`, `liveAudio` in `PLANS`) for creating/joining a
+room; the discovery list itself works signed-out for PUBLIC rooms. Was
+missing on both Android and iOS; Android built it first this pass and iOS
+mirrors it here against the same backend contract. This is the app's
+first third-party dependency: LiveKit's Swift SDK (`livekit-client-sdk-swift`,
+2.17.0), added the same way Android added `livekit-android` - real-time
+audio transport only, never consulted for room/participant membership
+(that stays entirely socket/DB-backed, so a client never trusts LiveKit's
+own view of "who is in this room").
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Room discovery list | `GET /live-audio/rooms` (`{cursor}` → `{rooms,nextCursor}`, works signed-out for PUBLIC rooms) | ✅ `/live-audio` | ✅ | ✅ `LiveAudioListView`, cursor-paginated | IMPLEMENTED |
+| Create room | `POST /live-audio/rooms` (title/description/category/visibility/communityId, paid-gated) | ✅ | ✅ | ✅ title/description/category, PUBLIC/COMMUNITY/PRIVATE segmented picker, community picker reusing `CommunitiesRepository` filtered to membership client-side (no dedicated "my communities" route) | IMPLEMENTED |
+| Join room + LiveKit connect | `POST /live-audio/rooms/{id}/join` → `{participant,token,livekitUrl}`; `Room.connect(url:token:)` | ✅ livekit-client | ✅ livekit-android | ✅ `LiveAudioRoomViewModel.connect`, LiveKit Swift SDK | IMPLEMENTED |
+| Token refresh on role change | `POST /live-audio/rooms/{id}/token` - reissued after a `role-changed` event names the caller, since a LiveKit token's grants are baked in at mint time and cannot be upgraded in place | ✅ | ✅ | ✅ `reconnectWithFreshToken()` reconnects the same `Room` instance | IMPLEMENTED |
+| Leave room | `POST /live-audio/rooms/{id}/leave` | ✅ | ✅ | ✅ called from `leave()` on every exit path (`.onDisappear`), not a teardown hook - a class's own deinit/onCleared is not guaranteed a live task context to await a network call in | IMPLEMENTED |
+| End room (host) | `POST /live-audio/rooms/{id}/end` | ✅ | ✅ | ✅ confirmation dialog, host-only | IMPLEMENTED |
+| Mic on/off | LiveKit `LocalParticipant.setMicrophone(enabled:)`; every participant starts muted, including the host - no auto-unmute on join, matching web | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Raise hand / speak request | `POST /live-audio/rooms/{id}/speak/request` → `live-audio:speaker-request` socket event to the room's authority | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Approve/reject speak request | `POST /live-audio/rooms/{id}/speak/approve`, `/speak/reject` | ✅ | ✅ | ✅ pending-requests panel, host/moderator only | IMPLEMENTED |
+| Promote/demote speaker | `POST /live-audio/rooms/{id}/promote`, `/demote` | ✅ | ✅ | ✅ per-participant menu, host/moderator only, never offered against the caller's own tile | IMPLEMENTED |
+| Mute/unmute another participant | `POST /live-audio/rooms/{id}/mute` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Remove participant | `POST /live-audio/rooms/{id}/remove` | ✅ | ✅ | ✅ confirmation dialog | IMPLEMENTED |
+| Realtime room/participant state | 8 `live-audio:*` Socket.IO events (`participant-joined/left/removed`, `room-ended`, `role-changed`, `mute-changed`, `you-were-removed`, `speaker-request`) over the app's existing `ZrpSocket` | ✅ | ✅ | ✅ every event re-fetches `GET /live-audio/rooms/{id}` rather than trusting the payload as the full state, matching the web page's own approach | IMPLEMENTED |
+| Active-speaker highlight | LiveKit `RoomEvent.ActiveSpeakersChanged` | ✅ | ✅ | ✅ `RoomDelegate.room(_:didUpdateSpeakingParticipants:)`, a red ring on the speaking participant's avatar | IMPLEMENTED |
+
 ### Comments & replies
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
@@ -194,7 +227,7 @@ backend contract.
 | Realtime | Socket.IO (`server.js`, path `/api/socket.io`, websocket transport, session-cookie handshake) | ✅ | ✅ (Socket.IO Java client) | ✅ Engine.IO v4 + Socket.IO framing written directly on `URLSessionWebSocketTask` (no dependency added). Live `receive-message`, `message-edited`, `message-deleted`, `reaction-updated`, `message-read`; polling stays as the fallback while the socket is down (30 s connected, 6 s not) | IMPLEMENTED |
 | Typing indicator | `typing` → `user-typing` relay | ✅ | ✅ | ✅ throttled to one event every 2 s; the indicator clears itself after 5 s in case the "stopped" event is lost with the connection | IMPLEMENTED |
 | Contact drawer (avatar, name, badge, handle, profile, block/mute, shared media) | `POST /api/users/{username}/block`, `POST /api/users/mute` | ✅ `ChatContactDrawer` | 🔶 | ✅ (**without Call and Video**) | PARTIAL |
-| Voice / video calling: placing/answering | WebRTC signalling over the same socket (`call-user`, `accept-call`, …) | ✅ simple-peer | ✅ | ❌ needs a WebRTC stack, which would be this app's first third-party dependency and a large one. Two permanently dead buttons would be worse than none (see the note in `ChatContactSheet.swift`) | MISSING (reported) |
+| Voice / video calling: placing/answering | WebRTC signalling over the same socket (`call-user`, `accept-call`, …) | ✅ simple-peer | ✅ | ❌ needs a WebRTC stack; LiveKit's Swift SDK is now in this app (see [Live Audio](#zrp-live-audio-livekit-backed-audio-rooms) above) and also supports video/audio calls, which changes this decision - not yet evaluated or built. Two permanently dead buttons would be worse than none (see the note in `ChatContactSheet.swift`) | MISSING (reported) |
 | Voice / video calling: **being called** | `incoming-call` → `reject-call` | ✅ | ✅ | ✅ declines immediately and tells the recipient who called, so the caller is released instead of ringing forever (see `IncomingCallResponder.swift`) | IMPLEMENTED |
 | Read receipts | side effect of `GET /api/messages/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
@@ -1333,9 +1366,10 @@ part: **how an iOS client would obtain an FCM token at all.**
    **FCM registration token**. On iOS that token is produced by the
    Firebase iOS SDK; there is no way to obtain one from a raw APNs
    device token on the client. So iOS push needs either:
-   - the **Firebase iOS SDK**, which would be this app's first
-     third-party dependency and a large one (the same objection that
-     keeps WebRTC out, see the calling row); or
+   - the **Firebase iOS SDK**, which would be another sizeable
+     third-party dependency (the same category of objection that has
+     kept WebRTC out, see the calling row - though this app is no longer
+     dependency-free now that LiveKit is in it for Live Audio); or
    - a **direct APNs sender added server-side**, letting iOS register its
      raw APNs device token instead. `grep -rl "apns" src/lib src/app/api`
      returns nothing today, so this path does not exist yet; it is real
