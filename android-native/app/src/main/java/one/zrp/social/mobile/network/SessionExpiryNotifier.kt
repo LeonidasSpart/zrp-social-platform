@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asSharedFlow
  * [hadSessionToken] is what separates the two: a 401 with no session
  * cookie attached at all means the request was never authenticated in
  * the first place (nothing to expire), so it's left alone. The
- * mobile/auth/* endpoints are excluded outright because they 401 for
+ * mobile/auth endpoints are excluded outright because they 401 for
  * ordinary reasons that have nothing to do with an existing session -
  * POST mobile/auth/login itself returns 401 for a plain wrong password
  * (src/app/api/mobile/auth/login/route.ts's own CredentialsAuthError),
