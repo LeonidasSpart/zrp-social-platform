@@ -189776,6 +189776,8 @@ export const translations: Record<Language, TranslationDict> = {
     "pricing.featureNoVerifiedBadge": "Nagin distintiv verifitgà",
     "pricing.featureCustomUrl": "URL persunalisà dal profil",
     "pricing.featureNoCustomUrl": "Nagin URL persunalisà",
+    "pricing.featureLiveAudio": "Audio en direct",
+    "pricing.featureNoLiveAudio": "Senza audio en direct",
     "pricing.featureRecruitment": "Profils da recrutament",
     "pricing.featureNoRecruitment": "Nagin recrutament",
     "pricing.featureArticles": "Publicaziun d'artitgels",
