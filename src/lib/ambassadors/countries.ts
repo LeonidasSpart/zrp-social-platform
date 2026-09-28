@@ -66,13 +66,17 @@ import { SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
  * shape against this same package on every run.
  *
  * i18n-iso-countries natively ships localized official names for
- * every one of ZRP's 38 supported languages (see SUPPORTED_LANGUAGES
- * in src/lib/translations.ts) - registered once, below, module-wide.
+ * 38 of ZRP's 39 supported languages (see SUPPORTED_LANGUAGES in
+ * src/lib/translations.ts) - registered once, below, module-wide.
  * getName() already returns the current ISO short name (e.g.
- * "Turkiye", not the older "Turkey") in every language ZRP supports,
+ * "Turkiye", not the older "Turkey") in every one of those languages,
  * including the "Etats-Unis d'Amerique" / "Turquie" style local names
  * the ambassador search is required to understand - no ZRP-specific
- * translation work was needed for this.
+ * translation work was needed for this. The one exception is Romansh
+ * ("rm"): the package has no Romansh locale file at all, a real gap in
+ * its own data. getAllCountries()/getCountryName() fall back to English
+ * country names for "rm" (see resolvableLocale() below) rather than
+ * silently returning nothing.
  */
 
 let registered = false;
@@ -421,24 +425,40 @@ export interface AmbassadorCountry {
 const LOCALE_CODES: Language[] = SUPPORTED_LANGUAGES.map((l) => l.code);
 
 /**
+ * i18n-iso-countries itself does not ship a Romansh (`rm`) locale file -
+ * every other ZRP language does, but this is a real gap in the
+ * third-party package's data, not something ZRP can fabricate.
+ * `iso.getNames("rm", ...)`/`iso.getName(code, "rm", ...)` return an
+ * empty result rather than throwing, which would otherwise silently
+ * leave Romansh users with a blank world map/country explorer. Falling
+ * back to English country names (rather than nothing) is the same
+ * "never a confident wrong answer, but never silently broken either"
+ * principle this module already applies to search matching.
+ */
+function resolvableLocale(language: Language): Language {
+  return iso.getSupportedLanguages().includes(language) ? language : "en";
+}
+
+/**
  * The full, unfiltered list of all 250 countries/territories, localized
  * to the given ZRP UI language and sorted by that language's collation
  * order. This is the single array every ambassador surface (map,
  * explorer, search, stats merge) is built from.
  */
 export function getAllCountries(language: Language = "en"): AmbassadorCountry[] {
-  const names = iso.getNames(language, { select: "official" });
+  const locale = resolvableLocale(language);
+  const names = iso.getNames(locale, { select: "official" });
   return Object.keys(names)
     .map((code) => ({
       code,
       name: names[code],
       region: REGION_BY_CODE[code],
     }))
-    .sort((a, b) => a.name.localeCompare(b.name, language));
+    .sort((a, b) => a.name.localeCompare(b.name, locale));
 }
 
 export function getCountryName(code: string, language: Language = "en"): string | undefined {
-  return iso.getName(code.toUpperCase(), language, { select: "official" });
+  return iso.getName(code.toUpperCase(), resolvableLocale(language), { select: "official" });
 }
 
 export function isValidCountryCode(code: string | null | undefined): code is string {
