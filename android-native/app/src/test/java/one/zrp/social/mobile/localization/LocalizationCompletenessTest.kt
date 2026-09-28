@@ -1665,6 +1665,21 @@ class LocalizationCompletenessTest {
             "communities_create_hashtag_label",
             "admin_subscription_detail_field_status",
         ),
+        // The 1-language 38->39 expansion (Romansh / Rumantsch Grischun).
+        "rm" to setOf(
+            "music_album_detail_eyebrow",
+            "opportunity_type_hackathon",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_dash_news_network",
+            "admin_news_network_title",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_label",
+            "admin_ads_budget",
+        ),
     )
 
     private val englishResources by lazy { parseStringsXml(File(resDir, "values/strings.xml")) }

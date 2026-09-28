@@ -25,7 +25,7 @@
 "play.viewLeaderboard" = "Vesair la classifica";
 "play.noLeaderboardData" = "Anc naginas datas da classifica.";
 "play.level" = "Nivel {n}";
-"play.xp" = "{n} XP";
+"play.xp" = "{n} PE";
 "play.xpEarned" = "XP guadagnads";
 "play.longestStreak" = "Retscha la pli lunga";
 "play.challengesCompleted" = "Challenges cumplettads";
@@ -51,7 +51,7 @@
 "play.errLoadFailed" = "Impussibel da chargiar il challenge.";
 "opportunity.allTypes" = "Tut ils tips";
 "opportunity.remoteOnly" = "Mo remote";
-"opportunity.remote" = "Remote";
+"opportunity.remote" = "Lavur remote";
 "opportunity.isPaid" = "Quai è pajà";
 "opportunity.noListingsYet" = "Naginas annunzias correspundan anc a Voss filters.";
 "opportunity.viewApplicants" = "Candidats ({n})";
@@ -60,7 +60,7 @@
 "opportunity.typeInternship" = "Stage";
 "opportunity.typeScholarship" = "Bursa da studi";
 "opportunity.typeMentorship" = "Mentorat";
-"opportunity.typeFreelance" = "Freelance";
+"opportunity.typeFreelance" = "Lavur freelance";
 "opportunity.typePartnership" = "Partenadi";
 "opportunity.typeSponsorship" = "Sponsuraziun";
 "opportunity.typeHackathon" = "Hackathon";
@@ -139,7 +139,7 @@
 "bookmarks.replyingTo" = "En resposta a";
 "nav.more" = "Dapli";
 "nav.aboutZrp" = "Davart ZRP";
-"footer.legalHeading" = "Legal";
+"footer.legalHeading" = "Giuridic";
 "footer.termsOfService" = "Termins da servetsch";
 "footer.privacyPolicy" = "Directiva da protecziun da datas";
 "footer.helpCenter" = "Center d'agid";
@@ -278,7 +278,7 @@
 "support.subjectLabel" = "Object";
 "support.subjectPlaceholder" = "Curt resumaziun da Voss problem";
 "support.categoryLabel" = "Categoria";
-"support.categoryGeneral" = "General";
+"support.categoryGeneral" = "Generalitads";
 "support.categoryAccount" = "Conto";
 "support.categoryPrivacy" = "Protecziun da datas";
 "support.categoryContent" = "Cuntegn";
@@ -307,7 +307,7 @@
 "support.tickets.statusAwaitingReply" = "En spetga da resposta";
 "support.tickets.statusResolved" = "Decidì";
 "support.tickets.statusClosed" = "Serrà";
-"support.ticketDetail.statusLabel" = "Status:";
+"support.ticketDetail.statusLabel" = "Stadi:";
 "support.ticketDetail.categoryLabel" = "Categoria:";
 "support.ticketDetail.priorityLabel" = "Prioritad:";
 "support.ticketDetail.createdLabel" = "Creà:";
@@ -315,7 +315,7 @@
 "support.ticketDetail.priorityNormal" = "Normala";
 "support.ticketDetail.priorityHigh" = "Auta";
 "support.ticketDetail.priorityUrgent" = "Urgenta";
-"support.ticketDetail.supportBadge" = "Support";
+"support.ticketDetail.supportBadge" = "Team da sustegn";
 "support.ticketDetail.internalNote" = "Nota interna";
 "support.ticketDetail.replyPlaceholder" = "Scrivai Vossa resposta…";
 "support.ticketDetail.sendReply" = "Trametter la resposta";
@@ -347,15 +347,15 @@
 "music.queue.emptyBody" = "Agiuntai tracks a Vossa coda dad ord «Scuvrir», dad in artist u dad in album.";
 "music.nav.likedTitle" = "Musica cun gugent";
 "music.nav.historyTitle" = "Ditg tadlà dacurt";
-"music.nav.playlistsTitle" = "Playlists";
-"music.nav.artistsTitle" = "Artists";
-"music.nav.albumsTitle" = "Albums";
+"music.nav.playlistsTitle" = "Las playlists";
+"music.nav.artistsTitle" = "Ils artists";
+"music.nav.albumsTitle" = "Ils albums";
 "music.nav.discoverTitle" = "Scuvrir";
 "music.history.title" = "Ditg tadlà dacurt";
 "music.liked.title" = "Musica cun gugent";
-"music.albums.title" = "Albums";
-"music.artists.title" = "Artists";
-"music.count.tracksOther" = "{count} tracks";
+"music.albums.title" = "Ils albums";
+"music.artists.title" = "Ils artists";
+"music.count.tracksOther" = "{count} titels";
 "music.discover.browseByGenre" = "Traversar tenor gender";
 "music.discover.allTracks" = "Tut las tracks";
 "music.discover.searchPlaceholder" = "Tschertgar chanzuns, artists, genders…";
@@ -367,8 +367,8 @@
 "music.albums.noneFound" = "Nagins albums chattads";
 "music.artistDetail.follow" = "Suandar";
 "music.artistDetail.following" = "Suandà";
-"music.artistDetail.tracksHeading" = "Tracks";
-"music.artistDetail.albumsHeading" = "Albums";
+"music.artistDetail.tracksHeading" = "Titels";
+"music.artistDetail.albumsHeading" = "Ils albums";
 "music.artistDetail.noTracks" = "Anc naginas tracks publitgadas";
 "music.artistDetail.notFound" = "Artist betg chattà";
 "music.albumDetail.noTracks" = "Anc naginas tracks publitgadas en quest album";
@@ -404,8 +404,8 @@
 "music.shell.uploadFailedDefault" = "L'upload n'ha betg reussì. Empruvai anc ina giada.";
 "music.shell.emptyFileError" = "«{name}» n'ha betg pudì vegnir legì - forsa è el anc en telechargiament dad iCloud u da Voss fornitur da archivadi cloud. Spetgai fin ch'il telechargiament saja terminà, ed empruvai lura anc ina giada.";
 "music.shell.unreadableFileError" = "«{name}» n'ha betg pudì vegnir legì. Forsa è el anc en telechargiament u en decriptaziun en Vossa app da archivadi cloud (Google Drive, MEGA, Dropbox, iCloud, etc.). Avrì il fichier là avant, uschia ch'el saja cumplettamain disponibel offline, ed empruvai lura anc ina giada.";
-"music.studio.tabTracks" = "Tracks";
-"music.studio.tabAlbums" = "Albums";
+"music.studio.tabTracks" = "Titels";
+"music.studio.tabAlbums" = "Ils albums";
 "music.studio.tabArtist" = "Profil d'artist";
 "music.studio.deleteTrackTitle" = "Stizzar la track";
 "music.studio.deleteTrackBody" = "Stizzar «{title}»? Quai na po betg vegnir revocà - la track, sias vesitas e ses gugents vegnan allontanads definitivamain.";
@@ -456,7 +456,7 @@
 "music.studio.albumDeletedMsg" = "Album stizzà. Vossas tracks èn restadas e restan disponiblas.";
 "music.studio.trackDeletedMsg" = "Track stizzada.";
 "music.studio.trackUpdatedMsg" = "Track actualisada.";
-"music.count.tracksOne" = "{count} track";
+"music.count.tracksOne" = "{count} titel";
 "marketplace.categoryLuxuryCars" = "Autos da luxus ed exoticas";
 "marketplace.categoryYachtsBoats" = "Yachts e bots";
 "marketplace.categoryPrivateAircraft" = "Aviuns privats ed helicopters";
@@ -480,7 +480,7 @@
 "marketplace.browseCategories" = "Traversar las categorias";
 "marketplace.recentListings" = "Annunzias recentas";
 "marketplace.noListingsYet" = "Anc naginas annunzias. Sajas il/la emprim/a da preschentar insatge extraordinari.";
-"marketplace.filters" = "Filters";
+"marketplace.filters" = "Criteris";
 "marketplace.allCategories" = "Tut las categorias";
 "marketplace.locationPlaceholder" = "Lieu";
 "marketplace.minPrice" = "Pretsch min.";
@@ -647,7 +647,7 @@
 "onboarding.bio" = "Biografia";
 "onboarding.bioPlaceholder" = "Rachuntai insatge davart Vus…";
 "onboarding.locationLabel" = "Lieu";
-"onboarding.website" = "Website";
+"onboarding.website" = "Pagina web";
 "onboarding.websitePlaceholder" = "https://voss-website.com";
 "onboarding.profilePicture" = "Maletg da profil";
 "onboarding.upload" = "Chargiar si";
@@ -675,7 +675,7 @@
 "settings.displayName" = "Num mussà";
 "settings.bio" = "Biografia";
 "settings.bioPlaceholder" = "Rachuntai insatge davart Vus…";
-"settings.website" = "Website";
+"settings.website" = "Pagina web";
 "settings.websitePlaceholder" = "https://voss-website.com";
 "settings.city" = "Citad";
 "settings.country" = "Pajais";
@@ -722,7 +722,7 @@
 "quotes.empty" = "Anc naginas citaziuns.";
 "quotes.count" = "{n} citaziuns";
 "profile.replies" = "Respostas";
-"profile.media" = "Media";
+"profile.media" = "Medias";
 "profile.likes" = "Gugents";
 "profile.reposts" = "Republicaziuns";
 "profile.noReplies" = "Anc naginas respostas.";
@@ -874,7 +874,7 @@
 "group.info.leaveConfirm" = "Bandunar questa gruppa? Vus perdais l'access a sis messadis, exceptà sche insatgi Vus reagiunta.";
 "group.info.rename" = "Renumnar la gruppa";
 "group.info.changePhoto" = "Midar il maletg da la gruppa";
-"chat.attachment" = "Document";
+"chat.attachment" = "Agiunta";
 "chat.uploadDocument" = "Agiuntar in document";
 "chat.recordVoiceMessage" = "Registrar in messadi vocal";
 "chat.uploadImage" = "Chargiar si in maletg";
@@ -889,8 +889,8 @@
 "transparency.last30DaysLabel" = "Annunzias durant ils ultims 30 dis";
 "transparency.actionsTakenLabel" = "Mesiras prendidas";
 "transparency.medianResolutionLabel" = "Temp median per la soluziun";
-"transparency.hoursValue" = "{n}h";
-"transparency.daysValue" = "{n}d";
+"transparency.hoursValue" = "{n} h";
+"transparency.daysValue" = "{n} dis";
 "transparency.trendHeading" = "Annunzias en il decurs dal temp";
 "transparency.reportsReceivedLegend" = "Retschertas";
 "transparency.reportsActionedLegend" = "Tractadas";
@@ -964,7 +964,7 @@
 "ambassadors.levels.ambassadorDesc" = "Approvà per represchentar Voss pajais e per far crescher la preschientscha da ZRP là.";
 "ambassadors.levels.communityLeader" = "Manader da communitad";
 "ambassadors.levels.communityLeaderDesc" = "Ha construì e mantegnì ina communitad reala ed activa enturn ZRP.";
-"ambassadors.levels.explorer" = "Explorer";
+"ambassadors.levels.explorer" = "Explorator";
 "ambassadors.levels.explorerDesc" = "Mintga ambassadur cumenza qua - scuvrind ZRP e la communitad enturn el.";
 "ambassadors.levels.globalAmbassador" = "Ambassadur global";
 "ambassadors.levels.globalAmbassadorDesc" = "Renconuschì per in impact durabel en tut la communitad globala da ZRP.";
@@ -978,14 +978,14 @@
 "ambassadors.map.sectionSubtitle" = "Mintga pajais. In moviment che crescha.";
 "ambassadors.map.sectionTitle" = "Il mund da ZRP";
 "ambassadors.navLabel" = "Ambassadurs globals";
-"ambassadors.region.africa" = "Africa";
-"ambassadors.region.antarctica" = "Antarctica";
-"ambassadors.region.asia" = "Asia";
+"ambassadors.region.africa" = "L'Africa";
+"ambassadors.region.antarctica" = "L'Antarctica";
+"ambassadors.region.asia" = "L'Asia";
 "ambassadors.region.europe" = "Europa";
 "ambassadors.region.northAmerica" = "America dal Nord";
-"ambassadors.region.oceania" = "Oceania";
+"ambassadors.region.oceania" = "L'Oceania";
 "ambassadors.region.southAmerica" = "America dal Sid";
-"newsCategory.gaming" = "Gaming";
+"newsCategory.gaming" = "Gieus video";
 "journalist.editor.category" = "Categoria";
 "journalist.editor.content" = "Cuntegn";
 "journalist.editor.contentPlaceholder" = "Scrivai qua l'artitgel cumplet…";
@@ -1100,7 +1100,7 @@
 "team.upgradeBusinessDesc" = "La gestiun da la squadra pretenda in plan Business u Enterprise.";
 "team.upgradeRequired" = "Upgrade necessari";
 "footer.faq" = "Dumondas frequentas";
-"footer.contact" = "Contact";
+"footer.contact" = "Contactar";
 "footer.careers" = "Vacanzas";
 "footer.investors" = "Investiturs";
 "footer.pressKit" = "Kit da premsa";
@@ -1111,7 +1111,7 @@
 "nav.journalistDashboard" = "Survista dal giornalist";
 "nav.teamManagement" = "Gestiun da la squadra";
 "nav.apiKeys" = "Clavs API";
-"footer.supportHeading" = "Support";
+"footer.supportHeading" = "Sustegn";
 "footer.myTickets" = "Mes tickets";
 "footer.transparency" = "Transparenza";
 "footer.charity" = "Chargità";
@@ -1135,7 +1135,7 @@
 "communities.category.technology" = "Tecnologia";
 "communities.category.healthFitness" = "Sanadad e Fitness";
 "communities.category.artDesign" = "Art e Design";
-"communities.category.general" = "General";
+"communities.category.general" = "Generalitads";
 "communities.join" = "Sa participar";
 "communities.joined" = "Participà";
 "communities.leave" = "Bandunar";

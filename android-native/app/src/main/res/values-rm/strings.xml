@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="notification_channel_general_name">General</string>
+    <string name="notification_channel_general_name">Generalitads</string>
     <string name="settings_title">Configuraziuns</string>
     <string name="settings_account">Conto</string>
     <string name="settings_profile_category">Profil</string>
@@ -237,7 +237,7 @@
     <string name="chat_typing">Scriva…</string>
     <string name="chat_contact_profile">Profil</string>
     <string name="chat_contact_call">Clamar</string>
-    <string name="chat_contact_video">Video</string>
+    <string name="chat_contact_video">Videoclip</string>
     <string name="chat_contact_more">Dapli</string>
     <string name="chat_block">Bloccar</string>
     <string name="chat_unblock">Debloccar</string>
@@ -332,7 +332,7 @@
     <string name="chat_voice_play_cd">Gieus</string>
     <string name="chat_voice_pause_cd">Pausa</string>
     <string name="chat_err_mic_access">Impussibel d\\'acceder a Voss microfon. Controllai per plaschair Vossas autorisaziuns.</string>
-    <string name="chat_attachment_fallback">Document</string>
+    <string name="chat_attachment_fallback">Agiunta</string>
     <string name="comment_post_cd">Publitgar il coment</string>
     <string name="action_show_password">Mussar il pled-clav</string>
     <string name="action_hide_password">Zuppentar il pled-clav</string>
@@ -355,7 +355,7 @@
     <string name="story_reply_sent">Tramess!</string>
     <string name="comment_repost_cd">Republitgar</string>
     <string name="comment_undo_repost_cd">Revocar la republicaziun</string>
-    <string name="createpost_media_count_cd">%1$d/%2$d media</string>
+    <string name="createpost_media_count_cd">%1$d/%2$d medias</string>
     <string name="createpost_media_unavailable_cd">Media betg disponibla per quest plan</string>
     <string name="comment_cancel_reply_cd">Interrumper la resposta</string>
     <string name="comment_replying_to">En resposta a @%1$s</string>
@@ -411,7 +411,7 @@
     <string name="profile_unblock">Debloccar</string>
     <string name="profile_report_user">Annunziar</string>
     <string name="profile_replies">Respostas</string>
-    <string name="profile_media">Media</string>
+    <string name="profile_media">Medias</string>
     <string name="profile_likes">Gugents</string>
     <string name="profile_reposts">Republicaziuns</string>
     <string name="profile_pinned">Ancurà</string>
@@ -463,7 +463,7 @@
     <string name="stories_share_story">Cundivider la Story</string>
     <string name="stories_whats_on_your_mind">Tge pensas ti?</string>
     <string name="stories_image">Maletg</string>
-    <string name="stories_video">Video</string>
+    <string name="stories_video">Videoclip</string>
     <string name="stories_uploading">Chargiar si…</string>
     <string name="stories_err_file_too_large">Il fichier è memia gross. Maximum 16 MB.</string>
     <string name="stories_err_unsupported_type">Mo maletgs e videos èn sustegnids.</string>
@@ -486,7 +486,7 @@
     <string name="moderation_muted_explanation">Utilisaders che Vus silenziais na pon betg interagir cun Vus, e lur contribuziuns vegnan zuppadas en Voss flux.</string>
     <string name="moderation_muted_count">%1$d silenziads</string>
     <string name="moderation_muted_on">Silenzià %1$s</string>
-    <string name="music_title">ZRP Music</string>
+    <string name="music_title">ZRP Musica</string>
     <string name="music_verified_artist">Artist verifitgà</string>
     <string name="music_like">Gugent</string>
     <string name="music_pause">Pausa</string>
@@ -633,14 +633,14 @@
     <string name="music_queue_up_next">Proxim (%1$d)</string>
     <string name="music_queue_play_now_aria">Far ir %1$s ussa</string>
     <string name="music_queue_remove_aria">Allontanar %1$s da la coda</string>
-    <string name="music_artists_title">Artists</string>
+    <string name="music_artists_title">Ils artists</string>
     <string name="music_artists_search_placeholder">Tschertgar artists…</string>
     <string name="music_artists_none_found">Nagins artists chattads</string>
     <string name="music_artist_detail_not_found">Artist betg chattà</string>
     <string name="music_artist_detail_following">Suandà</string>
     <string name="music_artist_detail_follow">Suandar</string>
-    <string name="music_artist_detail_albums_heading">Albums</string>
-    <string name="music_artist_detail_tracks_heading">Tracks</string>
+    <string name="music_artist_detail_albums_heading">Ils albums</string>
+    <string name="music_artist_detail_tracks_heading">Titels</string>
     <string name="music_artist_detail_no_tracks">Anc naginas tracks publitgadas</string>
     <string name="music_artist_detail_singles_heading">Singels</string>
     <string name="music_album_detail_not_found">Album betg chattà</string>
@@ -652,7 +652,7 @@
     <string name="music_common_add_to_queue">Agiuntar a la coda</string>
     <string name="music_common_play_next">Far ir sco proxim</string>
     <string name="music_track_empty_default_title">Anc nagut qua</string>
-    <string name="music_duration_minutes">%1$d min</string>
+    <string name="music_duration_minutes">%1$d min.</string>
     <string name="music_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="music_duration_hours_only">%1$d h</string>
     <string name="music_shell_play_track_aria">Far ir %1$s</string>
@@ -667,10 +667,10 @@
     </plurals>
     <string name="music_shell_latest_albums_heading">Ultims albums</string>
     <string name="music_shell_popular_artists_heading">Artists populars</string>
-    <string name="music_albums_title">Albums</string>
+    <string name="music_albums_title">Ils albums</string>
     <string name="music_albums_search_placeholder">Tschertgar albums…</string>
     <string name="music_albums_none_found">Nagins albums chattads</string>
-    <string name="music_playlists_title">Playlists</string>
+    <string name="music_playlists_title">Las playlists</string>
     <string name="music_playlists_page_title">Vossas playlists</string>
     <string name="music_playlists_new_playlist">Nova playlist</string>
     <string name="music_playlists_name_placeholder">Num da la playlist</string>
@@ -723,7 +723,7 @@
     <string name="music_studio_change_banner">Midar il banner</string>
     <string name="music_studio_uploading">Chargiar si…</string>
     <string name="music_studio_change_avatar">Midar l\\'avatar</string>
-    <string name="music_studio_tab_tracks">Tracks</string>
+    <string name="music_studio_tab_tracks">Titels</string>
     <string name="music_studio_tab_artist">Profil d\\'artist</string>
     <string name="music_shell_upload_music">Chargiar si musica</string>
     <string name="music_shell_song_title_placeholder">Titel da la chanzun</string>
@@ -775,7 +775,7 @@
     <string name="music_studio_album_deleted_msg">Album stizzà. Vossas tracks èn restadas e restan disponiblas.</string>
     <string name="music_studio_track_deleted_msg">Track stizzada.</string>
     <string name="music_studio_track_updated_msg">Track actualisada.</string>
-    <string name="music_studio_tab_albums">Albums</string>
+    <string name="music_studio_tab_albums">Ils albums</string>
     <string name="marketplace_discover_entry">Explorar ZRP Market Plus</string>
     <string name="marketplace_category_luxury_cars">Autos da luxus ed exoticas</string>
     <string name="marketplace_category_yachts_boats">Yachts e bots</string>
@@ -913,7 +913,7 @@
     <string name="opportunity_post_opportunity">Publitgar in\\'annunzia</string>
     <string name="opportunity_publish">Publitgar l\\'annunzia</string>
     <string name="opportunity_publishing">Publitgond…</string>
-    <string name="opportunity_remote">Remote</string>
+    <string name="opportunity_remote">Lavur remote</string>
     <string name="opportunity_remote_only">Mo remote</string>
     <string name="opportunity_resume_label">CV (facultativ)</string>
     <string name="opportunity_save">Salvar</string>
@@ -929,7 +929,7 @@
     <string name="opportunity_submitting">Trametter…</string>
     <string name="opportunity_title_label">Titel</string>
     <string name="opportunity_type_collaboration">Collavuraziun</string>
-    <string name="opportunity_type_freelance">Freelance</string>
+    <string name="opportunity_type_freelance">Lavur freelance</string>
     <string name="opportunity_type_hackathon">Hackathon</string>
     <string name="opportunity_type_internship">Stage</string>
     <string name="opportunity_type_job">Pust</string>
@@ -1058,7 +1058,7 @@
     <string name="play_duel_sent">Sfida da duel tramessa!</string>
     <string name="play_duels_played">Duels giugads</string>
     <string name="play_duels_subtitle">Sfidai Vossas amitgs a duels 1v1 ZRP PLAY.</string>
-    <string name="play_duels_title">Duels</string>
+    <string name="play_duels_title">Ils duels</string>
     <string name="play_duels_won">Duels vinciuts</string>
     <string name="play_err_create_failed">Impussibel da crear il challenge. Empruvai anc ina giada.</string>
     <string name="play_err_duel_create_failed">Impussibel da trametter la sfida da duel.</string>
@@ -1131,7 +1131,7 @@
     <string name="play_view_leaderboard">Vesair la classifica</string>
     <string name="play_vs">cunter</string>
     <string name="play_waiting_for_opponent">En spetga che Voss avversari termineschia…</string>
-    <string name="play_xp">%1$d XP</string>
+    <string name="play_xp">%1$d PE</string>
     <string name="play_xp_earned">XP guadagnads</string>
     <string name="play_you_lost">Vus avais pers</string>
     <string name="play_you_won">Vus avais vinciu</string>
@@ -1437,7 +1437,7 @@
     <string name="support_category_bug">Sbagl</string>
     <string name="support_category_content">Cuntegn</string>
     <string name="support_category_feature_request">Dumonda da funcziun</string>
-    <string name="support_category_general">General</string>
+    <string name="support_category_general">Generalitads</string>
     <string name="support_category_label">Categoria</string>
     <string name="support_category_moderation">Moderaziun</string>
     <string name="support_category_monetisation">Monetarisaziun</string>
@@ -1474,8 +1474,8 @@
     <string name="support_detail_resolved_notice">Quest ticket è vegnì decidì. Sche Vus basegnais anc agid, pudais Vus crear in nov ticket.</string>
     <string name="support_detail_send_reply">Trametter la resposta</string>
     <string name="support_detail_sending">Trametter…</string>
-    <string name="support_detail_status_label">Status:</string>
-    <string name="support_detail_support_badge">Support</string>
+    <string name="support_detail_status_label">Stadi:</string>
+    <string name="support_detail_support_badge">Sustegn</string>
     <string name="support_tickets_category_prefix">Categoria:</string>
     <string name="support_tickets_confirm_delete">Essas Vus segir/a da voler stizzar quest ticket? Questa acziun na po betg vegnir revocada.</string>
     <string name="support_tickets_create_first">Creai Voss emprim ticket</string>
@@ -1544,7 +1544,7 @@
     <string name="admin_reports_err_select_action_type">Tscherni per plaschair in tip da mesira.</string>
     <string name="admin_users_title">Utilisaders</string>
     <string name="admin_users_search_placeholder">Tschertgar utilisaders…</string>
-    <string name="admin_users_total">Total</string>
+    <string name="admin_users_total">Summa</string>
     <string name="admin_users_active">Activs</string>
     <string name="admin_users_banned">Bandids</string>
     <string name="admin_users_admins">Administraturs</string>
@@ -1558,7 +1558,7 @@
     <string name="admin_users_status_banned">Bandids</string>
     <string name="admin_users_col_user">Utilisader</string>
     <string name="admin_users_col_role">Rolla</string>
-    <string name="admin_users_col_status">Status</string>
+    <string name="admin_users_col_status">Stadi</string>
     <string name="admin_users_col_actions">Acziuns</string>
     <string name="admin_users_no_match">Nagins utilisaders correspundan a Voss filter.</string>
     <string name="admin_users_unban">Debandir</string>
@@ -1665,16 +1665,16 @@
     <string name="admin_support_all_status">Tut ils status</string>
     <string name="admin_support_all_priority">Tut las prioritads</string>
     <string name="admin_support_no_tickets">Nagins tickets chattads</string>
-    <string name="admin_support_stat_total">Total</string>
+    <string name="admin_support_stat_total">Summa</string>
     <string name="admin_support_assigned_to">Attribuì: %1$s</string>
     <string name="admin_support_unassigned">Betg attribuì</string>
     <string name="admin_support_previous">Enavos</string>
     <string name="admin_support_next">Vinavant</string>
     <string name="admin_support_page_of">Pagina %1$s da %2$s</string>
     <string name="admin_ticket_from">Da: @%1$s</string>
-    <string name="admin_ticket_plan">Plan: %1$s</string>
+    <string name="admin_ticket_plan">Tariffa: %1$s</string>
     <string name="admin_ticket_resolve">Decider</string>
-    <string name="admin_ticket_status_field">Status</string>
+    <string name="admin_ticket_status_field">Stadi</string>
     <string name="admin_ticket_priority_field">Prioritar</string>
     <string name="admin_ticket_assign_to">Attribuir a</string>
     <string name="admin_ticket_assign_hint">Laschai vid per betg attribuir.</string>
@@ -1700,13 +1700,13 @@
     <string name="admin_plan_none">Nagin plan</string>
     <string name="admin_payments_title">Dumondas da pagament</string>
     <string name="admin_payments_none">Naginas dumondas da pagament pendentas.</string>
-    <string name="admin_payments_tx">Tx: %1$s</string>
+    <string name="admin_payments_tx">Transacziun: %1$s</string>
     <string name="admin_payments_tx_none">Betg inditgà</string>
     <string name="admin_payments_verify">Verifitgar</string>
     <string name="admin_payments_verify_confirm">Verifitgar quest pagament da %1$s e spustar @%2$s al plan %3$s? L\\'access pajà vegn conceduì immediatamain e na po betg vegnir revocà qua.</string>
     <string name="admin_withdrawals_title">Retratgas</string>
     <string name="admin_withdrawals_none">Naginas retratgas da mussar.</string>
-    <string name="admin_withdrawals_wallet">Wallet: %1$s</string>
+    <string name="admin_withdrawals_wallet">Adressa dal wallet: %1$s</string>
     <string name="admin_withdrawals_tx_hash">Transacziun: %1$s</string>
     <string name="admin_withdrawals_approve_confirm">Trametter %1$s al wallet da @%2$s ussa? Il transferiment va on-chain e na po betg vegnir revocà.</string>
     <string name="admin_withdrawals_reject_confirm">Refusar questa retratga da %1$s? L\\'import turna al solda disponibel da @%2$s.</string>
@@ -1738,7 +1738,7 @@
     <string name="legal_guidelines">Directivas da la Communitad</string>
     <string name="legal_community_code">Code da la Communitad e da Manadi</string>
     <string name="legal_help">Center d\\'agid</string>
-    <string name="legal_contact">Contact</string>
+    <string name="legal_contact">Contactar</string>
     <string name="legal_about">Davart ZRP</string>
     <string name="legal_careers">Vacanzas</string>
     <string name="legal_charity">Chargità</string>
@@ -1746,7 +1746,7 @@
     <string name="legal_investors">Investiturs</string>
     <string name="legal_faq">Dumondas frequentas</string>
     <string name="settings_group_company">Interpresa</string>
-    <string name="settings_group_support">Support</string>
+    <string name="settings_group_support">Sustegn</string>
     <string name="settings_group_legal">Legal</string>
     <string name="transparency_title">Transparenza da la moderaziun</string>
     <string name="transparency_privacy_note">Questa pagina mussa mo dumbers aggregads. Ella n\\'includa mai nums d\\'utilisaders, il cuntegn da messadis u da contribuziuns, u tgi ch\\'ha annunzià tge: la protecziun da datas da la moderaziun resta la medema sco adina.</string>
@@ -1755,8 +1755,8 @@
     <string name="transparency_last_30_days_label">Annunzias durant ils ultims 30 dis</string>
     <string name="transparency_actions_taken_label">Mesiras prendidas</string>
     <string name="transparency_median_resolution_label">Temp median per la soluziun</string>
-    <string name="transparency_hours_value">%1$dh</string>
-    <string name="transparency_days_value">%1$dd</string>
+    <string name="transparency_hours_value">%1$d h</string>
+    <string name="transparency_days_value">%1$d dis</string>
     <string name="transparency_trend_heading">Annunzias en il decurs dal temp</string>
     <string name="transparency_legend_received">Retschertas</string>
     <string name="transparency_legend_actioned">Tractà</string>
@@ -1830,7 +1830,7 @@
     <string name="admin_analytics_post_counts">%1$s   ❤ %2$s   💬 %3$s   🔁 %4$s</string>
     <string name="admin_audit_title">Log da controlla</string>
     <string name="admin_audit_subtitle">Mintga mesira administrativa registrada, la pli nova avant.</string>
-    <string name="admin_audit_filters">Filters</string>
+    <string name="admin_audit_filters">Criteris</string>
     <string name="admin_audit_no_entries">Anc naginas endataziuns registradas.</string>
     <string name="admin_audit_load_more">Chargiar dapli</string>
     <string name="admin_audit_filter_action">Mesira</string>
@@ -1928,7 +1928,7 @@
     <string name="admin_news_network_provision_all_confirm">Configurar l\\'entira glista editoriala? Quai crea 100+ contos editorials, tuts deactivads. Nagut na vegn publitgà fin che Vus activais ils fluxs in per in.</string>
     <string name="admin_news_network_provisioned">%1$d creads, %2$d actualisads, %3$d sursiglids. Mintga flux è deactivà.</string>
     <string name="admin_news_network_no_feeds">Anc nagin flux editorial è vegnì configurà. Cumenzai cun ils fluxs pilot, verifitgai els, e extendai lura.</string>
-    <string name="admin_news_network_pilot">Pilot</string>
+    <string name="admin_news_network_pilot">Experimental</string>
     <string name="admin_news_network_state_enabled">Activà</string>
     <string name="admin_news_network_state_disabled">Deactivà</string>
     <string name="admin_news_network_feed_banned">Il conto da quest flux è bandì.</string>
@@ -1965,7 +1965,7 @@
     <string name="admin_news_network_source_enabled_done">Funtauna activada.</string>
     <string name="admin_news_network_source_disabled_done">Funtauna deactivada.</string>
     <string name="admin_news_network_no_stories">Naginas istorgias en questa coda.</string>
-    <string name="admin_news_network_story_meta">%1$s · %2$s · score %3$s</string>
+    <string name="admin_news_network_story_meta">%1$s · %2$s · puncts %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d funtaunas</string>
     <string name="admin_news_network_flag_sensitive">Sensibel - controlla umana necessaria</string>
     <string name="admin_news_network_flag_breaking">Urgent</string>
@@ -2053,13 +2053,13 @@
     <string name="ambassadors_explorer_search_placeholder">Tschertgar in pajais…</string>
     <string name="ambassadors_explorer_all_regions">Tut las regiuns</string>
     <string name="ambassadors_explorer_no_results">Nagin pajais correspunda a Vossa tschertga.</string>
-    <string name="ambassadors_region_africa">Africa</string>
-    <string name="ambassadors_region_asia">Asia</string>
+    <string name="ambassadors_region_africa">L\'Africa</string>
+    <string name="ambassadors_region_asia">L\'Asia</string>
     <string name="ambassadors_region_europe">Europa</string>
     <string name="ambassadors_region_north_america">America dal Nord</string>
     <string name="ambassadors_region_south_america">America dal Sid</string>
-    <string name="ambassadors_region_oceania">Oceania</string>
-    <string name="ambassadors_region_antarctica">Antarctica</string>
+    <string name="ambassadors_region_oceania">L\'Oceania</string>
+    <string name="ambassadors_region_antarctica">L\'Antarctica</string>
     <string name="ambassadors_country_label_ambassadors">Ambassadurs ZRP</string>
     <string name="ambassadors_country_label_communities">Communitads activas</string>
     <string name="ambassadors_country_label_members">Commembers activs</string>
@@ -2069,7 +2069,7 @@
     <string name="ambassadors_country_close">Serrar</string>
     <string name="ambassadors_levels_title">Voss chaminaton vers in impact global</string>
     <string name="ambassadors_levels_subtitle">La progressiun vegn guadagnada tras activitad reala en la communitad, betg simplamain tras la registraziun.</string>
-    <string name="ambassadors_level_explorer">Explorer</string>
+    <string name="ambassadors_level_explorer">Explorator</string>
     <string name="ambassadors_level_explorer_desc">Mintga ambassadur cumenza qua - scuvrind ZRP e la communitad enturn el.</string>
     <string name="ambassadors_level_ambassador">Ambassadur</string>
     <string name="ambassadors_level_ambassador_desc">Approvà per represchentar Voss pajais e per far crescher la preschientscha da ZRP là.</string>
@@ -2164,14 +2164,14 @@
     <string name="pricing_feature_no_team_management">Nagina gestiun da squadra</string>
     <string name="pricing_feature_api_access">Access API</string>
     <string name="pricing_feature_no_api_access">Nagin API</string>
-    <string name="pricing_feature_support">Support: %1$s</string>
+    <string name="pricing_feature_support">Sustegn: %1$s</string>
     <string name="pricing_feature_charity">%1$d%% a la chargità</string>
-    <string name="pricing_analytics_basic">Basic</string>
+    <string name="pricing_analytics_basic">Fundamental</string>
     <string name="pricing_analytics_advanced">Avanzada</string>
     <string name="pricing_analytics_full">Cumplessiva</string>
     <string name="pricing_analytics_custom">Persunalisà</string>
     <string name="pricing_support_none">Nagin</string>
-    <string name="pricing_support_standard">Standard</string>
+    <string name="pricing_support_standard">Regular</string>
     <string name="pricing_support_priority">Prioritar</string>
     <string name="pricing_support_247">Permanent</string>
     <string name="pricing_upgrade_web_only">Ils upgrades dal plan vegnan actualmain administrads sin ZRP Web.</string>
@@ -2213,7 +2213,7 @@
     <string name="communities_category_technology">Tecnologia</string>
     <string name="communities_category_health_fitness">Sanadad e Fitness</string>
     <string name="communities_category_art_design">Art e Design</string>
-    <string name="communities_category_general">General</string>
+    <string name="communities_category_general">Generalitads</string>
     <string name="communities_join">Sa participar</string>
     <string name="communities_joined">Participà</string>
     <string name="communities_leave">Bandunar</string>
@@ -2304,8 +2304,8 @@
     <string name="admin_subscriptions_last_payment">Ultim pagament</string>
     <string name="admin_subscriptions_plan_all">Tuttas</string>
     <string name="admin_subscription_detail_current_subscription">Abunament actual</string>
-    <string name="admin_subscription_detail_field_plan">Plan</string>
-    <string name="admin_subscription_detail_field_status">Status</string>
+    <string name="admin_subscription_detail_field_plan">Tariffa</string>
+    <string name="admin_subscription_detail_field_status">Stadi</string>
     <string name="admin_subscription_detail_field_interval">Intervall</string>
     <string name="admin_subscription_detail_field_days_remaining">Dis restants</string>
     <string name="admin_subscription_detail_field_period_start">Cumenzament da la perioda</string>
@@ -2320,7 +2320,7 @@
     <string name="admin_subscription_detail_no">Na</string>
     <string name="admin_subscription_detail_no_subscription_record">Nagin register d\\'abunament - quest utilisader n\\'ha mai gì in dretg pajà registrà da quest sistem.</string>
     <string name="admin_subscription_detail_admin_controls">Controls d\\'administraziun</string>
-    <string name="admin_subscription_detail_plan_label">Plan</string>
+    <string name="admin_subscription_detail_plan_label">Tariffa</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
     <string name="admin_subscription_detail_plan_business">Business</string>
     <string name="admin_subscription_detail_plan_enterprise">Enterprise</string>
@@ -2350,11 +2350,11 @@
     <string name="admin_analytics_unknown_bucket">Nunenconuschent</string>
     <string name="admin_analytics_source_referral">Recumandaziun</string>
     <string name="admin_analytics_source_campaign">Campagna</string>
-    <string name="admin_analytics_source_direct">Direct</string>
+    <string name="admin_analytics_source_direct">Access direct</string>
     <string name="admin_analytics_source_unknown">Nunenconuschent</string>
     <string name="admin_analytics_platform_android">Android</string>
     <string name="admin_analytics_platform_ios">iOS</string>
-    <string name="admin_analytics_platform_web">Web</string>
+    <string name="admin_analytics_platform_web">Sit web</string>
     <string name="admin_analytics_platform_unknown">Nunenconuschent</string>
     <string name="admin_badge_verified">Verifitgà</string>
     <string name="admin_badge_organization">Organisaziun</string>
