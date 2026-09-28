@@ -159,7 +159,7 @@ struct DiscoverSlideView: View {
                         Text(verbatim: item.author.displayName)
                             .font(.subheadline.weight(.semibold))
                         VerifiedBadge(badgeType: item.author.badgeType)
-                        Text(verbatim: "· \(RelativeTime.compact(from: item.createdAt))")
+                        Text(verbatim: RelativeTime.compact(from: item.createdAt))
                             .font(.footnote)
                             .foregroundStyle(.white.opacity(0.7))
                     }
