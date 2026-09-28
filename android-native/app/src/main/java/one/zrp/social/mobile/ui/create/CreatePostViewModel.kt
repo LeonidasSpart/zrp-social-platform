@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,10 +18,13 @@ import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.ComposerDraftStore
 import one.zrp.social.mobile.data.MediaUploadRepository
 import one.zrp.social.mobile.data.PostsRepository
+import one.zrp.social.mobile.data.SearchRepository
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.GifResult
 import one.zrp.social.mobile.network.PollCreateRequest
 import one.zrp.social.mobile.network.Post
+import one.zrp.social.mobile.network.SearchUser
+import one.zrp.social.mobile.ui.components.findMentionQuery
 import one.zrp.social.mobile.util.PollLimits
 import one.zrp.social.mobile.util.getPlanLimits
 
@@ -66,6 +71,11 @@ data class CreatePostUiState(
     val pollQuestion: String = "",
     val pollOptions: List<String> = listOf("", ""),
     val pollExpiryMillis: Long? = null,
+    // @mention autocomplete (PostComposer.tsx's own MentionAutocomplete)
+    // - non-empty only while the cursor sits inside an in-progress
+    // "@partial" token; cleared the moment it doesn't (finished mention,
+    // cursor moved elsewhere, or the debounced search comes back empty).
+    val mentionSuggestions: List<SearchUser> = emptyList(),
 ) {
     val validPollOptions: List<String> get() = pollOptions.map { it.trim() }.filter { it.isNotEmpty() }
     val isPollValid: Boolean get() = pollQuestion.trim().isNotEmpty() && validPollOptions.size >= 2
@@ -99,6 +109,7 @@ class CreatePostViewModel(
     private val quotePostId: String? = null,
     private val mediaUploadRepository: MediaUploadRepository = MediaUploadRepository(),
     private val draftStore: ComposerDraftStore = ApiClient.getComposerDraftStore(),
+    private val searchRepository: SearchRepository = SearchRepository(),
 ) : ViewModel() {
     private val _state = MutableStateFlow(CreatePostUiState())
     val state: StateFlow<CreatePostUiState> = _state.asStateFlow()
@@ -146,8 +157,33 @@ class CreatePostViewModel(
         }
     }
 
-    fun onContentChange(content: String) {
+    private var mentionSearchJob: Job? = null
+
+    // [cursor] is the current selection end within [content] - see
+    // findMentionQuery's own KDoc for why this, not just the text
+    // itself, is what decides whether a mention search is even running.
+    fun onContentChange(content: String, cursor: Int) {
         _state.update { it.copy(content = content, error = null) }
+
+        val query = findMentionQuery(content, cursor)
+        mentionSearchJob?.cancel()
+        if (query == null) {
+            _state.update { it.copy(mentionSuggestions = emptyList()) }
+            return
+        }
+        // Matches MentionAutocomplete.tsx's own 200ms debounce - avoids
+        // firing a real GET /search on every keystroke of a fast typist.
+        mentionSearchJob = viewModelScope.launch {
+            delay(200)
+            searchRepository.searchUsers(query)
+                .onSuccess { users -> _state.update { it.copy(mentionSuggestions = users) } }
+                .onFailure { _state.update { it.copy(mentionSuggestions = emptyList()) } }
+        }
+    }
+
+    fun dismissMentionSuggestions() {
+        mentionSearchJob?.cancel()
+        _state.update { it.copy(mentionSuggestions = emptyList()) }
     }
 
     // Matches handleGifSelect exactly: a GIF is rejected the same way

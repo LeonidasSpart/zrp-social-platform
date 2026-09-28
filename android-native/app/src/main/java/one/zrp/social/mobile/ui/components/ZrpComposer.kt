@@ -42,6 +42,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -98,30 +99,97 @@ fun ZrpComposerField(
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         modifier = modifier,
         decorationBox = { innerTextField ->
-            Box(
-                modifier = Modifier
-                    .clip(shape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
-                    .defaultMinSize(minHeight = TouchTarget.min)
-                    // 12dp vertical + bodyLarge's 24sp line height = 48dp
-                    // for one line, i.e. exactly TouchTarget.min.
-                    .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            ComposerFieldDecoration(
+                isEmpty = value.isEmpty(),
+                placeholder = placeholder,
+                shape = shape,
+                textStyle = textStyle,
                 contentAlignment = contentAlignment,
-            ) {
-                if (value.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        style = textStyle,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                innerTextField()
-            }
+                innerTextField = innerTextField,
+            )
         },
     )
+}
+
+/**
+ * Same field as above, but cursor/selection-aware ([TextFieldValue])
+ * rather than a bare [String] - needed by a caller that must know
+ * where the cursor is while typing (the post composer's @mention
+ * autocomplete detects an in-progress "@partial" token relative to the
+ * cursor, the same way MentionAutocomplete.tsx's own cursorPosition
+ * prop does on web). Every other caller keeps using the String overload
+ * above - this is additive, not a replacement.
+ */
+@Composable
+fun ZrpComposerField(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    minLines: Int = 1,
+    maxLines: Int = 5,
+    shape: Shape = RoundedCornerShape(Radius.lg),
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    contentAlignment: Alignment = Alignment.CenterStart,
+) {
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val resolvedTextStyle = textStyle.copy(color = if (enabled) textColor else textColor.copy(alpha = 0.6f))
+
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        enabled = enabled,
+        textStyle = resolvedTextStyle,
+        cursorBrush = SolidColor(ZrpRed),
+        minLines = minLines,
+        maxLines = maxLines,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+        modifier = modifier,
+        decorationBox = { innerTextField ->
+            ComposerFieldDecoration(
+                isEmpty = value.text.isEmpty(),
+                placeholder = placeholder,
+                shape = shape,
+                textStyle = textStyle,
+                contentAlignment = contentAlignment,
+                innerTextField = innerTextField,
+            )
+        },
+    )
+}
+
+@Composable
+private fun ComposerFieldDecoration(
+    isEmpty: Boolean,
+    placeholder: String,
+    shape: Shape,
+    textStyle: TextStyle,
+    contentAlignment: Alignment,
+    innerTextField: @Composable () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            .defaultMinSize(minHeight = TouchTarget.min)
+            // 12dp vertical + bodyLarge's 24sp line height = 48dp
+            // for one line, i.e. exactly TouchTarget.min.
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        contentAlignment = contentAlignment,
+    ) {
+        if (isEmpty) {
+            Text(
+                text = placeholder,
+                style = textStyle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        innerTextField()
+    }
 }
 
 /**

@@ -64,6 +64,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -81,8 +83,10 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.PostsRepository
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.GifPickerDialog
+import one.zrp.social.mobile.ui.components.MentionSuggestionsRow
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.ZrpComposerField
+import one.zrp.social.mobile.ui.components.applyMentionSelection
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -133,6 +137,20 @@ fun CreatePostScreen(
     )
     val state by viewModel.state.collectAsState()
     val contentResolver = LocalContext.current.contentResolver
+
+    // The ViewModel's own `content` is the source of truth (submit(),
+    // the draft store, and the poll-question content fallback all read
+    // it), but @mention detection needs the cursor position too, which
+    // a bare String can't carry - see ZrpComposerField's TextFieldValue
+    // overload and findMentionQuery's own KDoc. This mirrors
+    // PostComposer.tsx's own text/cursorPosition pair, just carried in
+    // one TextFieldValue instead of two separate pieces of state.
+    var composerField by remember { mutableStateOf(TextFieldValue(state.content)) }
+    LaunchedEffect(state.content) {
+        if (composerField.text != state.content) {
+            composerField = TextFieldValue(state.content, TextRange(state.content.length))
+        }
+    }
 
     var showGifPicker by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -265,9 +283,29 @@ fun CreatePostScreen(
             }
         }
 
+        if (state.mentionSuggestions.isNotEmpty()) {
+            MentionSuggestionsRow(
+                suggestions = state.mentionSuggestions,
+                onSelect = { user ->
+                    val (newText, newCursor) = applyMentionSelection(
+                        composerField.text,
+                        composerField.selection.end,
+                        user.username,
+                    )
+                    val newValue = TextFieldValue(newText, TextRange(newCursor))
+                    composerField = newValue
+                    viewModel.onContentChange(newValue.text, newValue.selection.end)
+                },
+            )
+            Spacer(modifier = Modifier.height(Spacing.xs))
+        }
+
         ZrpComposerField(
-            value = state.content,
-            onValueChange = { viewModel.onContentChange(it) },
+            value = composerField,
+            onValueChange = { newValue ->
+                composerField = newValue
+                viewModel.onContentChange(newValue.text, newValue.selection.end)
+            },
             // The quote-post placeholder ("Add your thoughts...") stays
             // English-only on purpose too - QuotePostModal.tsx's own
             // placeholder is hardcoded the same way. The default placeholder
