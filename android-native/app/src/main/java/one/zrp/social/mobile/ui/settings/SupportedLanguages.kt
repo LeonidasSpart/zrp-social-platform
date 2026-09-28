@@ -1,7 +1,7 @@
 package one.zrp.social.mobile.ui.settings
 
 /**
- * The same 34 official ZRP languages as src/lib/translations.ts's
+ * The same 38 official ZRP languages as src/lib/translations.ts's
  * SUPPORTED_LANGUAGES - same codes, same native-script labels (a
  * language's own name is never itself translated, on web or here).
  * "pt" is European/International Portuguese (the same variant web/iOS
@@ -47,4 +47,8 @@ val SUPPORTED_LANGUAGES = listOf(
     SupportedLanguage("sk", "Slovenčina"),
     SupportedLanguage("sl", "Slovenščina"),
     SupportedLanguage("lt", "Lietuvių"),
+    SupportedLanguage("et", "Eesti"),
+    SupportedLanguage("ga", "Gaeilge"),
+    SupportedLanguage("lv", "Latviešu"),
+    SupportedLanguage("mt", "Malti"),
 )

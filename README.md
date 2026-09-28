@@ -428,7 +428,7 @@ onboarding gating and plan-gated routes.
 
 ## Internationalization
 
-The interface ships human translations for **34 languages**, verified in
+The interface ships human translations for **38 languages**, verified in
 source (`src/lib/translations.ts`) and present with full key parity
 across Web, `android-native/` (`values-*/strings.xml`) and `ios-native/`
 (`*.lproj`):
@@ -438,19 +438,19 @@ Chinese, Turkish, Bahasa Indonesia, Portuguese (European Portuguese
 usage), Japanese, Korean, Hindi, Dutch, Polish, Romanian, Czech,
 Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek, Norwegian,
 Serbian (Latin script), Bosnian, Macedonian, Ukrainian, Finnish, Slovak,
-Slovenian and Lithuanian.
+Slovenian, Lithuanian, Estonian, Irish, Latvian and Maltese.
 
-The most recent expansion (5 languages: Ukrainian, Finnish, Slovak,
-Slovenian, Lithuanian) shipped on Web and Android with full key parity,
-and on iOS with full parity on every key sourced from the shared web
-dictionary (1,201 keys, verified by
+The most recent expansion (4 languages: Estonian, Irish, Latvian,
+Maltese) shipped on Web and Android with full key parity, and on iOS
+with full parity on every key sourced from the shared web dictionary
+(1,201 keys, verified by
 `ios-native/Tools/generate-localizations.py --check`). iOS also has a
 small set of iOS-only strings with no web counterpart (mostly
 VoiceOver/accessibility labels, 166 keys,
 `ios-native/Tools/ios-extra-strings.json`); these are translated into
-all 33 non-English languages, with completeness enforced by the same
+all 37 non-English languages, with completeness enforced by the same
 `--check` step; see
-[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap-34-language-parity)
+[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap-38-language-parity)
 for the verification detail.
 
 Arabic is rendered right-to-left. The web dictionary in
@@ -823,7 +823,7 @@ Direction, not a delivery commitment. Dates are not promised.
 - Complete the blocked backend capabilities the native clients need.
 - Extend Trust & Safety tooling and the public transparency reporting.
 - Broaden ZRP Music, Creator Studio and Opportunities.
-- Continue expanding localization coverage beyond the current 34
+- Continue expanding localization coverage beyond the current 38
   languages as new markets are prioritized.
 - Bring Live Audio to Android and iOS with native client screens against
   the existing backend contract.
