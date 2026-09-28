@@ -130,7 +130,8 @@ class MainActivity : AppCompatActivity() {
  */
 internal fun isWebOnlyDeepLinkPath(host: String?, path: String?): Boolean {
     if (host != "zrp.one" || path == null) return false
-    return path == "/verify-email" || path.startsWith("/reset-password/")
+    return path == "/verify-email" ||
+        (path.startsWith("/reset-password/") && path.length > "/reset-password/".length)
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
