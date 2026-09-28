@@ -247,7 +247,7 @@ own view of "who is in this room").
 | XP, level, streak, achievements | computed by the submit route and `xpProgress` | ✅ | ✅ | ✅ every figure is the server's; the level curve is never recomputed here | IMPLEMENTED |
 | Leaderboard | `GET /api/play/leaderboard` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Duels | `GET`/`POST /api/play/duels`, `/duels/{id}` | ✅ | ✅ | ⬜ opponent search, an invitation lifecycle (pending / accepted / declined / expired) and a result screen that waits for the other player, a module of its own | MISSING |
-| Create a challenge | `POST /api/play/challenges`, `/challenges/generate` | ✅ | ✅ | ⬜ a builder for three different content shapes, plus the AI generator | MISSING |
+| Create a challenge | `POST /api/play/challenges`, `/challenges/generate` | ✅ | ✅ | ✅ a manual builder for the three content shapes this app can also play (TRIVIA/MEMORY/LOGIC - REACTION/SEQUENCE are excluded here for the same reason `PlayChallengeType` decodes them to `.unknown`, see its own KDoc), plus an AI-generate tab sharing the ZRP AI chat quota; reached from a "+" on the PLAY home screen, signed-in only | IMPLEMENTED |
 
 ### ZRP OPPORTUNITY
 

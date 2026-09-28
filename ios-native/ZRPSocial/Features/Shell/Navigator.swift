@@ -109,6 +109,10 @@ enum Route: Hashable {
     case play
     case playChallenge(id: String)
     case playLeaderboard
+    /// The TRIVIA/MEMORY/LOGIC create form - manual builder or AI-generate,
+    /// both publishing via `POST /api/play/challenges`. Reachable only
+    /// while signed in, same as `PlayCreateChallengeScreen` on Android.
+    case playCreateChallenge
     /// Creator Studio - the analytics half only. The website's earnings
     /// tab is excluded by store policy; see `CreatorStudioView`.
     case creatorStudio

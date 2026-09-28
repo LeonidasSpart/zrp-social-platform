@@ -45,6 +45,7 @@ final class PlayHomeViewModel: ObservableObject {
 struct PlayHomeView: View {
 
     @EnvironmentObject private var navigator: Navigator
+    @EnvironmentObject private var session: SessionController
     @StateObject private var viewModel = PlayHomeViewModel()
 
     var body: some View {
@@ -63,6 +64,23 @@ struct PlayHomeView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.navPlay))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // Matches PlayScreen.kt's own `state.isSignedIn` gate - a
+            // signed-out reader can browse and play, but creating a
+            // challenge is `POST /api/play/challenges` requiring a
+            // session, so the entry point stays hidden rather than
+            // reaching a 401 after filling out a whole form.
+            if session.currentUser != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        navigator.push(.playCreateChallenge)
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel(Text(.playCreateChallenge))
+                }
+            }
+        }
         .task { await viewModel.loadIfNeeded() }
     }
 

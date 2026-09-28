@@ -143,6 +143,8 @@ struct RouteDestinationView: View {
             PlayChallengeView(challengeId: id)
         case .playLeaderboard:
             PlayLeaderboardView()
+        case .playCreateChallenge:
+            PlayCreateChallengeView()
         case .creatorStudio:
             CreatorStudioView()
         case .charityTransparency:
