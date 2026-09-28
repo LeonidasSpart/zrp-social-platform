@@ -15,8 +15,16 @@ data class CreateReportRequest(
     val postId: String? = null,
     val commentId: String? = null,
     val listingId: String? = null,
+    // ZRP PLAY user-created challenges (PlayChallenge) - the backend's
+    // Report model has supported this target since it was added, but
+    // this app never had the field, so it was impossible for any future
+    // Android reporting UI on a PLAY challenge to reach it.
+    val challengeId: String? = null,
     val opportunityId: String? = null,
     val campaignId: String? = null,
+    // Live Audio rooms (abusive/illegal content spoken in a room,
+    // harassment by a host/speaker) - same gap as challengeId above.
+    val liveAudioRoomId: String? = null,
     // A bare profile report (harassment, impersonation, fake account)
     // with no single post/comment/listing attached - see the backend's
     // reportedUserId field in prisma/schema.prisma.
