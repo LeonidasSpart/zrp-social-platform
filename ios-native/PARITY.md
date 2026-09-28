@@ -137,6 +137,26 @@ called and the real response being handled.
 | Hashtag / mention tap-through in post text | N/A | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Explore / trending pages | `GET /api/posts/explore` | ✅ | 🔶 (For You tab) | 🔶 For You tab + a discover surface (trending tags, suggested people) | PARTIAL |
 
+### ZRP Discover (video feed)
+
+A server-ranked, TikTok-style vertical video feed - `GET /api/discover` -
+entirely distinct from the "Discovery" table above (Search's own
+pre-search suggestions). Was missing on both Android and iOS; Android
+built it first this pass and iOS mirrors it here against the same
+backend contract.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Video feed | `GET /api/discover` (`{cursor}` → `{items,nextCursor}`, works signed-out; server ranks/diversifies/paginates) | ✅ `/discover` | ✅ | ✅ `DiscoverView`/`DiscoverSlideView`, paged vertically through the app's existing shared `FeedVideoCoordinator` (`ShortsView`'s own player, not a second one) | IMPLEMENTED |
+| Watch-event reporting | `POST /api/discover/events` (`{postId, eventType, watchedMs?}` → `{recorded}`; IMPRESSION/START/PROGRESS_25/50/75/COMPLETE/SKIP, same dedup rules as `src/lib/discover-watch-client.ts`) | ✅ | ✅ | ✅ `DiscoverWatchEvents` is a direct Swift port of the same pure threshold/dedup logic, polling the shared player's own position every 250ms while its slide is active | IMPLEMENTED |
+| Like / repost / save / follow | same routes every other feed uses (`/api/posts/{id}/like` etc., `/api/users/{username}/follow`) | ✅ | ✅ | ✅ optimistic, reconciled against the server's own answer, restored on failure - a follow toggle also resolves to a pending "requested" state for a private account, matching `FollowState` on web | IMPLEMENTED |
+| Not interested | `POST /api/discover/not-interested` (`{postId}` → `{dismissed}`, signed-in only) | ✅ | ✅ | ✅ removed from the feed immediately; a failure surfaces a toast but does not restore it | IMPLEMENTED |
+| Mute / block creator from the feed | `POST /api/users/mute`, `POST /api/users/{username}/block` | ✅ | ✅ | ✅ removes every item by that author from the feed on success | IMPLEMENTED |
+| Report | `POST /api/reports` | ✅ | ✅ | ✅ reuses the app's own `ReportSheet` (`target: .post(item.id)`) - nothing Discover-specific to build | IMPLEMENTED |
+| "Why am I seeing this?" | `reason: "recent" \| "popular"` on the item itself - the real ranking reason, never a fabricated personalization claim | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Locked premium item | `premiumPost: {price, currency, previewContent, locked}`, `media.url` withheld while locked | ✅ real preview + a "View post" link (not a purchase action) | ✅ preview text only, no button at all (a stricter, also-honest choice) | ✅ matches web: preview, price/currency shown as plain text, and a "View post" link to the post's own detail screen - never a purchase button, since this app has no purchase flow for any feature (store policy) | IMPLEMENTED |
+| Comments | tapping the comment action | ✅ in-place sheet | 🔶 opens the standalone comments screen instead of an in-place sheet (this app has never had one) | 🔶 opens `postDetail`, same reasoning | PARTIAL (by design) |
+
 ### Comments & replies
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |

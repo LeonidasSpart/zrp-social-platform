@@ -18,6 +18,7 @@ nav.profile
 nav.bookmarks
 nav.creatorStudio
 nav.shorts
+nav.discover
 nav.news
 nav.aiAssistant
 nav.help
@@ -141,6 +142,31 @@ shorts.repost
 shorts.share
 shorts.mute
 shorts.unmute
+shorts.premiumLockedTitle
+shorts.premiumLockedBody
+shorts.premiumLockedCta
+
+# ── Discover (the TikTok-style server-ranked feed, GET /api/discover -
+#    distinct from Search's own "Discover" pre-search state) ──────────
+discover.loadFailed
+discover.endOfFeed
+discover.playbackError
+discover.comments
+discover.more
+discover.notInterested
+discover.notInterestedConfirmed
+discover.notInterestedFailed
+discover.muteCreator
+discover.creatorMuted
+discover.blockCreator
+discover.creatorBlocked
+discover.actionFailed
+discover.whyAmISeeing
+discover.closeExplanation
+discover.reasonPopular
+discover.reasonRecent
+action.requested
+
 bookmarks.empty
 bookmarks.emptyDesc
 bookmarks.replyingTo

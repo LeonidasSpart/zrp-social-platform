@@ -81,6 +81,10 @@ enum Route: Hashable {
     /// ZRP Shorts. `startId` opens the feed on one particular video -
     /// what tapping a video elsewhere in the app leads to.
     case shorts(startId: String?)
+    /// ZRP Discover - the server-ranked, TikTok-style vertical video
+    /// feed (`GET /api/discover`), a distinct backend concern from
+    /// Search's own "Discover" pre-search state despite the shared name.
+    case discover
     case news
     case newsArticle(slug: String)
     case explore
