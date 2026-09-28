@@ -2277,6 +2277,60 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100", "play.xp", "nav.premium", "music.duration.minutes",
     "music.studio.explicitBadge", "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
   ],
+  // The 4-language 34->38 expansion (Estonian, Irish, Latvian, Maltese) -
+  // same category of reviewed cognate/format exception as every list
+  // above, verified against already-shipped French/German precedent for
+  // the identical key before being allowlisted here.
+  et: [
+    "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
+    "press.emailBadge", "press.logoLabel", "press.faviconLabel",
+    "faq.avatarSize.maxFileSizeVal", "faq.avatarSize.formatsVal", "faq.avatarSize.resolutionVal", "faq.avatarSize.ratioVal",
+    "faq.bannerSize.maxFileSizeVal", "faq.bannerSize.formatsVal", "faq.bannerSize.resolutionVal", "faq.bannerSize.ratioVal",
+    "faq.postImageSize.maxFileSizeVal", "faq.postImageSize.formatsVal", "faq.postImageSize.resolutionVal", "faq.postImageSize.ratioVal",
+    "faq.postVideoSize.maxFileSizeVal", "faq.postVideoSize.formatsVal", "faq.postVideoSize.encodingVal",
+    "faq.chatImageSize.maxFileSizeVal", "faq.chatImageSize.formatsVal", "faq.chatImageSize.resolutionVal",
+    "ads.dashboard.ctr", "trust.outOf100", "play.xp", "music.duration.minutes",
+    "music.track.columnAlbum", "music.albumDetail.eyebrow", "tipModal.charCount",
+    "adminNewsNetwork.verificationFailedNamed",
+  ],
+  ga: [
+    "group.lastMessagePrefix", "communityCode.version", "investors.platform.news.title",
+    "investors.traction.stat1Value", "press.emailBadge", "press.faviconLabel",
+    "faq.avatarSize.maxFileSizeVal", "faq.avatarSize.formatsVal", "faq.avatarSize.resolutionVal", "faq.avatarSize.ratioVal",
+    "faq.bannerSize.maxFileSizeVal", "faq.bannerSize.formatsVal", "faq.bannerSize.resolutionVal", "faq.bannerSize.ratioVal",
+    "faq.postImageSize.maxFileSizeVal", "faq.postImageSize.formatsVal", "faq.postImageSize.resolutionVal", "faq.postImageSize.ratioVal",
+    "faq.postVideoSize.maxFileSizeVal", "faq.postVideoSize.formatsVal", "faq.postVideoSize.encodingVal",
+    "faq.chatImageSize.maxFileSizeVal", "faq.chatImageSize.formatsVal", "faq.chatImageSize.resolutionVal",
+    "ads.dashboard.ctr", "trust.outOf100", "adminStorage.statInUploadThing", "play.xp",
+    "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
+  ],
+  lv: [
+    "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
+    "press.emailBadge", "press.faviconLabel",
+    "faq.avatarSize.maxFileSizeVal", "faq.avatarSize.formatsVal", "faq.avatarSize.resolutionVal", "faq.avatarSize.ratioVal",
+    "faq.bannerSize.maxFileSizeVal", "faq.bannerSize.formatsVal", "faq.bannerSize.resolutionVal", "faq.bannerSize.ratioVal",
+    "faq.postImageSize.maxFileSizeVal", "faq.postImageSize.formatsVal", "faq.postImageSize.resolutionVal", "faq.postImageSize.ratioVal",
+    "faq.postVideoSize.maxFileSizeVal", "faq.postVideoSize.formatsVal", "faq.postVideoSize.encodingVal",
+    "faq.chatImageSize.maxFileSizeVal", "faq.chatImageSize.formatsVal", "faq.chatImageSize.resolutionVal",
+    "ads.dashboard.ctr", "trust.outOf100", "adminJournalists.portfolio", "play.xp",
+    "music.duration.minutes", "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
+  ],
+  mt: [
+    "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
+    "investors.traction.heading", "investors.traction.stat1Value", "investors.traction.stat2Date",
+    "press.emailBadge", "press.logoLabel", "press.faviconLabel",
+    "faq.avatarSize.maxFileSizeVal", "faq.avatarSize.formatsVal", "faq.avatarSize.resolutionVal", "faq.avatarSize.ratioVal",
+    "faq.bannerSize.maxFileSizeVal", "faq.bannerSize.formatsVal", "faq.bannerSize.resolutionVal", "faq.bannerSize.ratioVal",
+    "faq.postImageSize.maxFileSizeVal", "faq.postImageSize.formatsVal", "faq.postImageSize.resolutionVal", "faq.postImageSize.ratioVal",
+    "faq.postVideoSize.maxFileSizeVal", "faq.postVideoSize.formatsVal", "faq.postVideoSize.encodingVal",
+    "faq.chatImageSize.maxFileSizeVal", "faq.chatImageSize.formatsVal", "faq.chatImageSize.resolutionVal",
+    "privacy.dataCollected.cookiesTitle", "pricing.supportStandard", "ads.dashboard.ctr", "trust.outOf100",
+    "adminSupport.colTicket", "play.xp", "opportunity.typeFreelance", "opportunity.typeHackathon",
+    "music.duration.minutes", "music.track.columnAlbum", "music.artistDetail.singlesHeading", "music.albumDetail.eyebrow",
+    "tipModal.charCount", "professionalCategory.blockchain", "professionalCategory.podcasting",
+    "communities.create.hashtagLabel", "adminNewsNetwork.verificationFailedNamed",
+    "adminSubscriptions.filterStatus", "adminSubscriptions.colStatus", "adminSubscriptionDetail.fieldStatus",
+  ],
 };
 
 const perLanguageCognateSets: Record<string, Set<string>> = Object.fromEntries(
