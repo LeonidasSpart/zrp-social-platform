@@ -70,8 +70,18 @@ struct MainTabView: View {
         // comment for why an incoming call has to interrupt wherever
         // you are, matching the website's `CallContext` and the
         // Android sibling's identical app-root overlay.
+        //
+        // Stays presented while `calls.error` is set even after `phase`
+        // has already returned to `.idle` (every failure path sets both
+        // in the same update) - gating on `phase != .idle` alone, as the
+        // Android sibling's own `CallScreen` call site still does, means
+        // the overlay - and the error text inside it - unmounts in the
+        // same render pass the error is set, so a person can never
+        // actually read why their call ended. `CallView` itself decides
+        // what to show for this idle-with-error case; `dismissError()`
+        // is what clears it back to a true idle state.
         .fullScreenCover(isPresented: Binding(
-            get: { calls.phase != .idle },
+            get: { calls.phase != .idle || calls.error != nil },
             set: { _ in }
         )) {
             CallView(viewModel: calls)

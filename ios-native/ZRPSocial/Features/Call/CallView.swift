@@ -14,50 +14,24 @@ struct CallView: View {
     @State private var durationSeconds = 0
     @State private var durationTask: Task<Void, Never>?
 
+    /// True once a call has already ended (`phase == .idle`) but the
+    /// reason is still up to be shown - see `MainTabView`'s own doc
+    /// comment on why the overlay now stays presented for this case
+    /// instead of unmounting before `viewModel.error` could ever be
+    /// read.
+    private var isShowingError: Bool {
+        viewModel.phase == .idle && viewModel.error != nil
+    }
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            if viewModel.isVideo, let remoteTrack = viewModel.remoteVideoTrack {
-                CallVideoView(track: remoteTrack)
-                    .ignoresSafeArea()
+            if isShowingError {
+                errorOverlay
             } else {
-                centerPlaceholder
+                liveCallContent
             }
-
-            if viewModel.isVideo, viewModel.isVideoEnabled, let localTrack = viewModel.localVideoTrack {
-                CallVideoView(track: localTrack, mirror: true)
-                    .frame(width: 120, height: 160)
-                    .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
-                    .padding(ZrpSpacing.lg)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-            }
-
-            VStack(spacing: ZrpSpacing.xs) {
-                Text(viewModel.callerName.isEmpty ? L10n.string(.iosCallFallbackName) : viewModel.callerName)
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.white)
-
-                if let statusText {
-                    Text(verbatim: statusText)
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.75))
-                }
-
-                if let error = viewModel.error {
-                    Text(verbatim: callErrorMessage(error))
-                        .font(.caption)
-                        .foregroundStyle(ZrpColor.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, ZrpSpacing.xs)
-                }
-            }
-            .padding(.top, 56)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .padding(.horizontal, ZrpSpacing.xl)
-
-            controls
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
         .onChange(of: viewModel.phase) { _, phase in
             restartDurationTimer(active: phase == .active && viewModel.hasRemoteStream)
@@ -66,6 +40,66 @@ struct CallView: View {
             restartDurationTimer(active: viewModel.phase == .active && hasStream)
         }
         .onDisappear { durationTask?.cancel() }
+    }
+
+    @ViewBuilder
+    private var liveCallContent: some View {
+        if viewModel.isVideo, let remoteTrack = viewModel.remoteVideoTrack {
+            CallVideoView(track: remoteTrack)
+                .ignoresSafeArea()
+        } else {
+            centerPlaceholder
+        }
+
+        if viewModel.isVideo, viewModel.isVideoEnabled, let localTrack = viewModel.localVideoTrack {
+            CallVideoView(track: localTrack, mirror: true)
+                .frame(width: 120, height: 160)
+                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
+                .padding(ZrpSpacing.lg)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        }
+
+        VStack(spacing: ZrpSpacing.xs) {
+            Text(viewModel.callerName.isEmpty ? L10n.string(.iosCallFallbackName) : viewModel.callerName)
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(.white)
+
+            if let statusText {
+                Text(verbatim: statusText)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.75))
+            }
+        }
+        .padding(.top, 56)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.horizontal, ZrpSpacing.xl)
+
+        controls
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+    }
+
+    /// Shown once a call has ended with something to say about why -
+    /// rejected, unavailable, no answer, a connection failure - long
+    /// enough for a person to actually read it, dismissed only by their
+    /// own tap (`viewModel.dismissError()`), never by a timer racing
+    /// their reading speed.
+    private var errorOverlay: some View {
+        VStack(spacing: ZrpSpacing.lg) {
+            Image(systemName: "phone.down.fill")
+                .font(.system(size: 40))
+                .foregroundStyle(ZrpColor.red)
+
+            if let error = viewModel.error {
+                Text(verbatim: callErrorMessage(error))
+                    .font(.body)
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, ZrpSpacing.xl)
+            }
+
+            callButton(systemImage: "xmark", background: Color(white: 0.22), action: viewModel.dismissError)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Center content

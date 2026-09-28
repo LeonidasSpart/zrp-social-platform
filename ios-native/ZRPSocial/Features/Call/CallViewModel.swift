@@ -55,14 +55,19 @@ func formatCallDuration(_ seconds: Int) -> String {
 ///
 /// ```
 /// emit "call-user"   {receiverId, signal, isVideo}
-/// on   "incoming-call" {callerId, callerName, signal, isVideo}
-/// emit "accept-call" {callerId, signal}
+/// on   "incoming-call" {callerId, callerName, signal, isVideo, callId?}
+/// emit "accept-call" {callerId, signal, callId?}
 /// on   "call-accepted" {signal}
-/// emit "reject-call" {callerId}
+/// emit "reject-call" {callerId, callId?}
 /// on   "call-rejected" {reason?}
-/// emit "end-call"    {callerId}
+/// emit "end-call"    {callerId, callId?}
 /// on   "call-ended"  {}
 /// ```
+///
+/// `callId?` is sent on this side's own accept/reject/end only when it
+/// was learned from an `incoming-call` (the callee side) - see
+/// `currentCallId`'s own doc comment for why the caller side cannot
+/// learn its outgoing call's id today, and what that leaves unprotected.
 ///
 /// simple-peer runs with `trickle:false` (page.tsx's own `new
 /// Peer({trickle: false, ...})`), so each side sends exactly ONE signal
@@ -109,6 +114,20 @@ final class CallViewModel: NSObject, ObservableObject {
     private var otherPartyId: String?
     private var endingCall = false
     private var incomingSignal: CallSignal?
+    // Only ever known on the callee side, from `incoming-call`'s own
+    // `callId` field (`server.js`'s `calls.start()` mints it; there is
+    // no way for this side to learn its OWN outgoing call's id, since
+    // that only comes back via `call-user`'s socket.io ACK, and
+    // `ZrpSocket.emit` does not support acks - see this property's own
+    // read sites below for exactly what that limits). Threaded into
+    // `accept-call`/`reject-call`/`end-call` when this side is the one
+    // that received the call, so a network-delayed one of those can't
+    // land on a brand-new call the same two people started since - see
+    // `socket-authz.js`'s own GENERATION RACE comment on
+    // `createCallRegistry` for the exact race this closes. Sent only
+    // when non-nil: omitting it entirely (as before) is what an
+    // unpatched client already did and the server still accepts.
+    private var currentCallId: String?
 
     // See CALL_SIGNAL_TIMEOUT/CALL_ANSWER_TIMEOUT below - both are
     // non-trickle-ICE timeouts: this side never sends anything to the
@@ -163,6 +182,7 @@ final class CallViewModel: NSObject, ObservableObject {
         let callerName: String?
         let isVideo: Bool?
         let signal: CallSignal
+        let callId: String?
     }
 
     private struct CallAcceptedPayload: Decodable {
@@ -207,12 +227,14 @@ final class CallViewModel: NSObject, ObservableObject {
         error = nil
         otherPartyId = nil
         incomingSignal = nil
+        currentCallId = nil
     }
 
     private func handleIncomingCall(_ data: Data) {
         guard let payload = try? JSONDecoder().decode(IncomingCallPayload.self, from: data) else { return }
         otherPartyId = payload.callerId
         incomingSignal = payload.signal
+        currentCallId = payload.callId
         phase = .incoming
         isVideo = payload.isVideo ?? false
         callerName = payload.callerName ?? ""
@@ -238,6 +260,7 @@ final class CallViewModel: NSObject, ObservableObject {
         phase = .idle
         error = callErrorForRejectReason(reason)
         otherPartyId = nil
+        currentCallId = nil
     }
 
     private func handleCallEnded() {
@@ -246,6 +269,7 @@ final class CallViewModel: NSObject, ObservableObject {
         phase = .idle
         error = nil
         otherPartyId = nil
+        currentCallId = nil
     }
 
     // MARK: - Placing / accepting
@@ -364,13 +388,15 @@ final class CallViewModel: NSObject, ObservableObject {
                                     self.error = .missingCallerId
                                     return
                                 }
-                                self.socket.emit("accept-call", [
+                                var payload: [String: Any] = [
                                     "callerId": callerId,
                                     "signal": [
                                         "type": RTCSessionDescription.string(for: local.type),
                                         "sdp": local.sdp,
                                     ],
-                                ])
+                                ]
+                                if let callId = self.currentCallId { payload["callId"] = callId }
+                                self.socket.emit("accept-call", payload)
                             }
                         }
                     }
@@ -387,12 +413,17 @@ final class CallViewModel: NSObject, ObservableObject {
     /// site keeps the default of no error.
     func rejectCall(error: CallError? = nil) {
         clearCallTimeouts()
-        if let id = otherPartyId { socket.emit("reject-call", ["callerId": id]) }
+        if let id = otherPartyId {
+            var payload: [String: Any] = ["callerId": id]
+            if let callId = currentCallId { payload["callId"] = callId }
+            socket.emit("reject-call", payload)
+        }
         teardownPeer()
         phase = .idle
         self.error = error
         otherPartyId = nil
         incomingSignal = nil
+        currentCallId = nil
     }
 
     /// `error` lets the answer-timeout path above surface `.noAnswer`;
@@ -401,12 +432,17 @@ final class CallViewModel: NSObject, ObservableObject {
     func endCall(error: CallError? = nil) {
         clearCallTimeouts()
         endingCall = true
-        if let id = otherPartyId { socket.emit("end-call", ["callerId": id]) }
+        if let id = otherPartyId {
+            var payload: [String: Any] = ["callerId": id]
+            if let callId = currentCallId { payload["callId"] = callId }
+            socket.emit("end-call", payload)
+        }
         teardownPeer()
         phase = .idle
         self.error = error
         otherPartyId = nil
         incomingSignal = nil
+        currentCallId = nil
     }
 
     func dismissError() {
@@ -542,6 +578,7 @@ final class CallViewModel: NSObject, ObservableObject {
     /// calls to earpiece - mirrors the Android sibling's own
     /// `setupCallAudio(defaultToSpeaker:)`.
     private func configureCallAudioSession(video: Bool) {
+        observeAudioSessionEvents()
         let session = RTCAudioSession.sharedInstance()
         session.lockForConfiguration()
         defer { session.unlockForConfiguration() }
@@ -566,10 +603,100 @@ final class CallViewModel: NSObject, ObservableObject {
     }
 
     private func teardownCallAudioSession() {
+        removeAudioSessionObservers()
         let session = RTCAudioSession.sharedInstance()
         session.lockForConfiguration()
         defer { session.unlockForConfiguration() }
         try? session.setActive(false)
+    }
+
+    // MARK: - Interruptions / route changes
+
+    private var interruptionObserver: NSObjectProtocol?
+    private var routeChangeObserver: NSObjectProtocol?
+
+    /// Interruptions (Siri, an alarm, another app briefly taking the
+    /// audio session) and route changes (headphones/Bluetooth connected
+    /// or disconnected mid-call) are real conditions a live call has to
+    /// react to, exactly like `MusicPlayer`'s own `observeSystemEvents()`
+    /// already does for playback - unlike a music track, a call is not
+    /// paused; only the local audio session needs re-activating once an
+    /// interruption ends, and `isSpeakerOn` needs to stay honest about
+    /// where audio is actually going after a route the person didn't
+    /// choose through this app's own controls (e.g. AirPods connecting).
+    /// Registered only while a call is live (from
+    /// `configureCallAudioSession`) and removed in
+    /// `teardownCallAudioSession`, not for the view model's whole
+    /// lifetime, since neither notification means anything outside an
+    /// active call.
+    private func observeAudioSessionEvents() {
+        guard interruptionObserver == nil else { return }
+        interruptionObserver = NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            MainActor.assumeIsolated {
+                self?.handleAudioInterruption(notification)
+            }
+        }
+        routeChangeObserver = NotificationCenter.default.addObserver(
+            forName: AVAudioSession.routeChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.syncSpeakerStateFromCurrentRoute()
+            }
+        }
+    }
+
+    private func removeAudioSessionObservers() {
+        if let interruptionObserver { NotificationCenter.default.removeObserver(interruptionObserver) }
+        if let routeChangeObserver { NotificationCenter.default.removeObserver(routeChangeObserver) }
+        interruptionObserver = nil
+        routeChangeObserver = nil
+    }
+
+    private func handleAudioInterruption(_ notification: Notification) {
+        guard
+            let info = notification.userInfo,
+            let rawType = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+            let type = AVAudioSession.InterruptionType(rawValue: rawType)
+        else { return }
+
+        switch type {
+        case .began:
+            // The system has already deactivated the audio session; the
+            // peer connection and its ICE state are untouched, so the
+            // call itself keeps running (unlike a paused music track)
+            // and simply carries no local audio until the interruption
+            // ends.
+            break
+        case .ended:
+            guard
+                let rawOptions = info[AVAudioSessionInterruptionOptionKey] as? UInt,
+                AVAudioSession.InterruptionOptions(rawValue: rawOptions).contains(.shouldResume)
+            else { return }
+            let session = RTCAudioSession.sharedInstance()
+            session.lockForConfiguration()
+            try? session.setActive(true)
+            session.unlockForConfiguration()
+            syncSpeakerStateFromCurrentRoute()
+        @unknown default:
+            break
+        }
+    }
+
+    /// `isSpeakerOn` is this app's own UI toggle, not necessarily the
+    /// truth once a route change happens outside it (AirPods
+    /// auto-connecting, a Bluetooth headset disconnecting) - re-derived
+    /// from the session's actual current output after any route change,
+    /// so the speaker button never claims a state the audio itself left
+    /// behind.
+    private func syncSpeakerStateFromCurrentRoute() {
+        let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
+        isSpeakerOn = outputs.contains { $0.portType == .builtInSpeaker }
     }
 }
 
@@ -594,13 +721,20 @@ extension CallViewModel: RTCPeerConnectionDelegate {
     nonisolated func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {}
 
     nonisolated func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        // Matches the website's own `newPeer.on("error", ...)` handler:
-        // a benign teardown (`endingCall` already true) never shows as a
-        // scary connection error, only a real mid-call drop does.
+        // Matches the website's own `newPeer.on("iceStateChange", ...)`
+        // handler: `.failed` is a terminal WebRTC state (no route exists
+        // between the two peers, TURN unreachable/misconfigured) that
+        // will never recover on its own, so the call is actually ended -
+        // notifying the other party and releasing the camera/mic - not
+        // just flagged with an error while the "connected" UI and its
+        // controls keep running over a peer connection that can no
+        // longer carry media. A benign teardown (`endingCall` already
+        // true, this side already hanging up) never shows as a scary
+        // connection error, only a real mid-call drop does.
         guard newState == .failed else { return }
         Task { @MainActor [weak self] in
             guard let self, !self.endingCall else { return }
-            self.error = .connectionError("\(newState.rawValue)")
+            self.endCall(error: .connectionError("\(newState.rawValue)"))
         }
     }
 

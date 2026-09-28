@@ -11,9 +11,11 @@ have no client UI.** See section 12 for exact platform-by-platform status.
 ZRP already has one realtime voice/video primitive: 1:1 WebRTC calls
 (`server.js`'s `call-user`/`accept-call`/`reject-call`/`end-call` Socket.IO
 events, `socket-authz.js`'s `createCallRegistry`, `/api/turn-credentials`,
-`simple-peer` on web, native WebRTC on Android, **nothing on iOS** —
-`IncomingCallResponder.swift` auto-declines every call today because this
-app has no WebRTC dependency on iOS at all). That stack is a **mesh**
+`simple-peer` on web, native WebRTC on Android **and iOS**
+(`CallViewModel.swift`, `stasel/WebRTC` - the old decline-only
+`IncomingCallResponder.swift` this paragraph used to describe was
+superseded once iOS gained a real WebRTC dependency; see
+`ios-native/PARITY.md`'s own calling row for current detail). That stack is a **mesh**
 design: each call is exactly one peer-to-peer connection between two
 parties, signaled over Socket.IO, NAT-traversed via STUN/TURN
 (Metered, proxied through `/api/turn-credentials`).
