@@ -498,6 +498,16 @@
     <string name="music_play">Odtwórz</string>
     <string name="music_unlike">Cofnij polubienie</string>
     <string name="composer_placeholder_default">Co się dzieje? Użyj #hashtagów i @wzmianek</string>
+    <string name="composer_post_as">Publikuj jako:</string>
+    <string name="composer_type_recruitment">Rekrutacja</string>
+    <string name="composer_type_article">Artykuł</string>
+    <string name="composer_placeholder_recruitment">Opisz ofertę pracy... Użyj #hashtagów i @wzmianek</string>
+    <string name="composer_placeholder_article_title">Tytuł artykułu / zajawka (opcjonalnie)</string>
+    <string name="composer_placeholder_article_body">Napisz treść artykułu w formacie Markdown lub HTML...</string>
+    <string name="composer_article_markdown_hint">Obsługuje Markdown i HTML</string>
+    <string name="composer_company_placeholder">Nazwa firmy *</string>
+    <string name="composer_location_placeholder">Lokalizacja (np. Zdalnie, Nowy Jork, Londyn)</string>
+    <string name="composer_apply_url_placeholder">Adres URL do aplikowania (opcjonalnie)</string>
     <string name="composer_post_button">Opublikuj</string>
     <string name="comments_title">Komentarze</string>
     <string name="followers_title">Obserwujący</string>

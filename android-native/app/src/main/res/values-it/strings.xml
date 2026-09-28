@@ -496,6 +496,16 @@
     <string name="music_play">Riproduci</string>
     <string name="music_unlike">Non mi piace più</string>
     <string name="composer_placeholder_default">Cosa sta succedendo? Usa #hashtag e @menzioni</string>
+    <string name="composer_post_as">Pubblica come:</string>
+    <string name="composer_type_recruitment">Offerta di lavoro</string>
+    <string name="composer_type_article">Articolo</string>
+    <string name="composer_placeholder_recruitment">Descrivi l\'opportunità di lavoro... Usa #hashtag e @menzioni</string>
+    <string name="composer_placeholder_article_title">Titolo articolo / anteprima (opzionale)</string>
+    <string name="composer_placeholder_article_body">Scrivi il tuo articolo in Markdown o HTML...</string>
+    <string name="composer_article_markdown_hint">Supporta Markdown e HTML</string>
+    <string name="composer_company_placeholder">Nome azienda *</string>
+    <string name="composer_location_placeholder">Sede (es. Remoto, Milano, Roma)</string>
+    <string name="composer_apply_url_placeholder">URL candidatura (opzionale)</string>
     <string name="composer_post_button">Pubblica</string>
     <string name="comments_title">Commenti</string>
     <string name="followers_title">Follower</string>

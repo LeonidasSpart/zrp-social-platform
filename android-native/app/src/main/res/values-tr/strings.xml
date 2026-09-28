@@ -496,6 +496,16 @@
     <string name="music_play">Oynat</string>
     <string name="music_unlike">Beğenmekten vazgeç</string>
     <string name="composer_placeholder_default">Neler oluyor? #hashtag ve @bahsetme kullanın</string>
+    <string name="composer_post_as">Şu şekilde gönder:</string>
+    <string name="composer_type_recruitment">İşe Alım</string>
+    <string name="composer_type_article">Makale</string>
+    <string name="composer_placeholder_recruitment">İş fırsatını açıklayın... #hashtag ve @bahsetme kullanın</string>
+    <string name="composer_placeholder_article_title">Makale başlığı / tanıtım yazısı (isteğe bağlı)</string>
+    <string name="composer_placeholder_article_body">Makale içeriğinizi Markdown veya HTML olarak yazın...</string>
+    <string name="composer_article_markdown_hint">Markdown ve HTML desteklenir</string>
+    <string name="composer_company_placeholder">Şirket adı *</string>
+    <string name="composer_location_placeholder">Konum (örneğin, Uzaktan, New York, Londra)</string>
+    <string name="composer_apply_url_placeholder">Başvuru URL\'si (isteğe bağlı)</string>
     <string name="composer_post_button">Gönder</string>
     <string name="comments_title">Yorumlar</string>
     <string name="followers_title">Takipçiler</string>

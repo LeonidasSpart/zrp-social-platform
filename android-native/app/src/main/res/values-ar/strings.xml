@@ -496,6 +496,16 @@
     <string name="music_play">تشغيل</string>
     <string name="music_unlike">إلغاء الإعجاب</string>
     <string name="composer_placeholder_default">ما الجديد؟ استخدم #هاشتاغات و@إشارات</string>
+    <string name="composer_post_as">النشر باسم:</string>
+    <string name="composer_type_recruitment">توظيف</string>
+    <string name="composer_type_article">مقالة</string>
+    <string name="composer_placeholder_recruitment">صف الوظيفة الشاغرة... استخدم #هاشتاغات و@إشارات</string>
+    <string name="composer_placeholder_article_title">عنوان المقال / مقدمة (اختياري)</string>
+    <string name="composer_placeholder_article_body">اكتب محتوى مقالك بصيغة Markdown أو HTML...</string>
+    <string name="composer_article_markdown_hint">يدعم Markdown و HTML</string>
+    <string name="composer_company_placeholder">شركة اسم *</string>
+    <string name="composer_location_placeholder">الموقع (مثال: عن بُعد، نيويورك، لندن)</string>
+    <string name="composer_apply_url_placeholder">رابط التقديم (اختياري)</string>
     <string name="composer_post_button">نشر</string>
     <string name="comments_title">تعليقات</string>
     <string name="followers_title">المتابعون</string>

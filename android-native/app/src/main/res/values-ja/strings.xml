@@ -493,6 +493,16 @@
     <string name="music_play">再生</string>
     <string name="music_unlike">いいねを取り消す</string>
     <string name="composer_placeholder_default">いまどうしてる？ #ハッシュタグや@メンションを使ってみましょう</string>
+    <string name="composer_post_as">投稿タイプ：</string>
+    <string name="composer_type_recruitment">求人</string>
+    <string name="composer_type_article">記事</string>
+    <string name="composer_placeholder_recruitment">求人内容を入力してください。#ハッシュタグや@メンションを使用できます</string>
+    <string name="composer_placeholder_article_title">記事タイトル／概要（任意）</string>
+    <string name="composer_placeholder_article_body">MarkdownまたはHTMLで記事の内容を入力してください...</string>
+    <string name="composer_article_markdown_hint">MarkdownとHTMLに対応しています</string>
+    <string name="composer_company_placeholder">会社名 *</string>
+    <string name="composer_location_placeholder">勤務地（例：リモート、東京、大阪）</string>
+    <string name="composer_apply_url_placeholder">応募用URL（任意）</string>
     <string name="composer_post_button">投稿</string>
     <string name="comments_title">コメント</string>
     <string name="followers_title">フォロワー</string>

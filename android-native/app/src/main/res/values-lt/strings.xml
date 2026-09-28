@@ -498,6 +498,16 @@
     <string name="music_play">Groti</string>
     <string name="music_unlike">Nebepatinka</string>
     <string name="composer_placeholder_default">Kas vyksta? Naudokite #saitažodžius ir @paminėjimus</string>
+    <string name="composer_post_as">Skelbti kaip:</string>
+    <string name="composer_type_recruitment">Darbo skelbimas</string>
+    <string name="composer_type_article">Straipsnis</string>
+    <string name="composer_placeholder_recruitment">Aprašykite darbo galimybę... Naudokite #saitažodžius ir @paminėjimus</string>
+    <string name="composer_placeholder_article_title">Straipsnio pavadinimas / anonsas (neprivaloma)</string>
+    <string name="composer_placeholder_article_body">Rašykite straipsnio turinį Markdown arba HTML formatu...</string>
+    <string name="composer_article_markdown_hint">Palaiko Markdown ir HTML</string>
+    <string name="composer_company_placeholder">Įmonės pavadinimas *</string>
+    <string name="composer_location_placeholder">Vieta (pvz., Nuotoliniu būdu, Niujorkas, Londonas)</string>
+    <string name="composer_apply_url_placeholder">Paraiškos URL (neprivaloma)</string>
     <string name="composer_post_button">Skelbti</string>
     <string name="comments_title">Komentarai</string>
     <string name="followers_title">Sekėjai</string>

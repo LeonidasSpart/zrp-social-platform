@@ -494,6 +494,16 @@
     <string name="music_play">Lejátszás</string>
     <string name="music_unlike">Kedvelés visszavonása</string>
     <string name="composer_placeholder_default">Mi történik? Használj #hashtageket és @említéseket</string>
+    <string name="composer_post_as">Közzététel mint:</string>
+    <string name="composer_type_recruitment">Toborzás</string>
+    <string name="composer_type_article">Cikk</string>
+    <string name="composer_placeholder_recruitment">Írd le az álláslehetőséget... Használj #hashtageket és @említéseket</string>
+    <string name="composer_placeholder_article_title">Cikk címe / bevezetője (opcionális)</string>
+    <string name="composer_placeholder_article_body">Írd meg a cikk tartalmát Markdown vagy HTML formátumban...</string>
+    <string name="composer_article_markdown_hint">Markdown és HTML formátumot is támogat</string>
+    <string name="composer_company_placeholder">Cég neve *</string>
+    <string name="composer_location_placeholder">Helyszín (pl. Távmunka, Budapest, London)</string>
+    <string name="composer_apply_url_placeholder">Jelentkezési URL (opcionális)</string>
     <string name="composer_post_button">Közzététel</string>
     <string name="comments_title">Megjegyzések</string>
     <string name="followers_title">Követők</string>

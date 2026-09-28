@@ -494,6 +494,16 @@
     <string name="music_play">Spill av</string>
     <string name="music_unlike">Fjern likerklikk</string>
     <string name="composer_placeholder_default">Hva skjer? Bruk #emneknagger og @omtaler</string>
+    <string name="composer_post_as">Publiser som:</string>
+    <string name="composer_type_recruitment">Rekruttering</string>
+    <string name="composer_type_article">Artikkel</string>
+    <string name="composer_placeholder_recruitment">Beskriv stillingen ... Bruk #emneknagger og @omtaler</string>
+    <string name="composer_placeholder_article_title">Artikkeltittel / ingress (valgfritt)</string>
+    <string name="composer_placeholder_article_body">Skriv artikkelinnholdet i Markdown eller HTML ...</string>
+    <string name="composer_article_markdown_hint">Støtter Markdown og HTML</string>
+    <string name="composer_company_placeholder">Firmanavn *</string>
+    <string name="composer_location_placeholder">Sted (f.eks. Hjemmekontor, Oslo, London)</string>
+    <string name="composer_apply_url_placeholder">Søknadslenke (valgfritt)</string>
     <string name="composer_post_button">Publiser</string>
     <string name="comments_title">Kommentarer</string>
     <string name="followers_title">Følgere</string>

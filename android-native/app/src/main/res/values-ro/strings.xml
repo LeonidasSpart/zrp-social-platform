@@ -496,6 +496,16 @@
     <string name="music_play">Redă</string>
     <string name="music_unlike">Anulează aprecierea</string>
     <string name="composer_placeholder_default">Ce se întâmplă? Folosește #hashtaguri și @mențiuni</string>
+    <string name="composer_post_as">Postează ca:</string>
+    <string name="composer_type_recruitment">Recrutare</string>
+    <string name="composer_type_article">Articol</string>
+    <string name="composer_placeholder_recruitment">Descrie oportunitatea de angajare... Folosește #hashtaguri și @mențiuni</string>
+    <string name="composer_placeholder_article_title">Titlu / teaser articol (opțional)</string>
+    <string name="composer_placeholder_article_body">Scrie conținutul articolului în Markdown sau HTML...</string>
+    <string name="composer_article_markdown_hint">Acceptă Markdown și HTML</string>
+    <string name="composer_company_placeholder">Numele companiei *</string>
+    <string name="composer_location_placeholder">Locație (ex.: Remote, New York, Londra)</string>
+    <string name="composer_apply_url_placeholder">URL de aplicare (opțional)</string>
     <string name="composer_post_button">Postează</string>
     <string name="comments_title">Comentarii</string>
     <string name="followers_title">Urmăritori</string>

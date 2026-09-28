@@ -494,6 +494,16 @@
     <string name="music_play">Αναπαραγωγή</string>
     <string name="music_unlike">Κατάργηση «Μου αρέσει»</string>
     <string name="composer_placeholder_default">Τι συμβαίνει; Χρησιμοποίησε #hashtags και @αναφορές</string>
+    <string name="composer_post_as">Δημοσίευση ως:</string>
+    <string name="composer_type_recruitment">Αγγελία εργασίας</string>
+    <string name="composer_type_article">Άρθρο</string>
+    <string name="composer_placeholder_recruitment">Περιέγραψε την ευκαιρία εργασίας... Χρησιμοποίησε #hashtags και @αναφορές</string>
+    <string name="composer_placeholder_article_title">Τίτλος / εισαγωγή άρθρου (προαιρετικό)</string>
+    <string name="composer_placeholder_article_body">Γράψε το περιεχόμενο του άρθρου σου σε Markdown ή HTML...</string>
+    <string name="composer_article_markdown_hint">Υποστηρίζει Markdown και HTML</string>
+    <string name="composer_company_placeholder">Όνομα εταιρείας *</string>
+    <string name="composer_location_placeholder">Τοποθεσία (π.χ. Απομακρυσμένη εργασία, Νέα Υόρκη, Λονδίνο)</string>
+    <string name="composer_apply_url_placeholder">URL αίτησης (προαιρετικό)</string>
     <string name="composer_post_button">Δημοσίευση</string>
     <string name="comments_title">Σχόλια</string>
     <string name="followers_title">Ακόλουθοι</string>

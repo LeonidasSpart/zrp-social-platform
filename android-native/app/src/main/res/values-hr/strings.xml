@@ -496,6 +496,16 @@
     <string name="music_play">Pusti</string>
     <string name="music_unlike">Ukloni sviđanje</string>
     <string name="composer_placeholder_default">Što se događa? Koristi #hashtagove i @spominjanja</string>
+    <string name="composer_post_as">Objavljuješ kao:</string>
+    <string name="composer_type_recruitment">Zapošljavanje</string>
+    <string name="composer_type_article">Članak</string>
+    <string name="composer_placeholder_recruitment">Opiši poslovnu priliku... Koristi #hashtagove i @spominjanja</string>
+    <string name="composer_placeholder_article_title">Naslov članka / najava (neobavezno)</string>
+    <string name="composer_placeholder_article_body">Napiši sadržaj članka u Markdownu ili HTML-u...</string>
+    <string name="composer_article_markdown_hint">Podržava Markdown i HTML</string>
+    <string name="composer_company_placeholder">Naziv tvrtke *</string>
+    <string name="composer_location_placeholder">Lokacija (npr. rad na daljinu, New York, London)</string>
+    <string name="composer_apply_url_placeholder">URL za prijavu (neobavezno)</string>
     <string name="composer_post_button">Objavi</string>
     <string name="comments_title">Komentari</string>
     <string name="followers_title">Pratitelji</string>

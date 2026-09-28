@@ -9,11 +9,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +67,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -283,6 +286,47 @@ fun CreatePostScreen(
             }
         }
 
+        // Matches PostComposer.tsx's own type-selector pill row exactly:
+        // hidden entirely (not just disabled) for a plan without either
+        // feature, and never shown for the quote-post variant at all
+        // (QuotePostModal.tsx is a genuinely separate, simpler web
+        // component with no type concept - see this screen's own KDoc
+        // on why quoting is folded into this one screen here instead).
+        if (quotePostId == null && (limits.recruitmentProfiles || limits.articlePublishing)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = Spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.composer_post_as),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                PostTypePill(
+                    label = stringResource(R.string.action_post),
+                    selected = state.postType == PostCreationType.POST,
+                    onClick = { viewModel.onPostTypeChange(PostCreationType.POST) },
+                )
+                if (limits.recruitmentProfiles) {
+                    PostTypePill(
+                        label = stringResource(R.string.composer_type_recruitment),
+                        selected = state.postType == PostCreationType.RECRUITMENT,
+                        onClick = { viewModel.onPostTypeChange(PostCreationType.RECRUITMENT) },
+                    )
+                }
+                if (limits.articlePublishing) {
+                    PostTypePill(
+                        label = stringResource(R.string.composer_type_article),
+                        selected = state.postType == PostCreationType.ARTICLE,
+                        onClick = { viewModel.onPostTypeChange(PostCreationType.ARTICLE) },
+                    )
+                }
+            }
+        }
+
         if (state.mentionSuggestions.isNotEmpty()) {
             MentionSuggestionsRow(
                 suggestions = state.mentionSuggestions,
@@ -300,26 +344,88 @@ fun CreatePostScreen(
             Spacer(modifier = Modifier.height(Spacing.xs))
         }
 
-        ZrpComposerField(
-            value = composerField,
-            onValueChange = { newValue ->
-                composerField = newValue
-                viewModel.onContentChange(newValue.text, newValue.selection.end)
-            },
-            // The quote-post placeholder ("Add your thoughts...") stays
-            // English-only on purpose too - QuotePostModal.tsx's own
-            // placeholder is hardcoded the same way. The default placeholder
-            // uses PostComposer.tsx's real, translated copy.
-            placeholder = if (quotePostId != null) "Add your thoughts..." else stringResource(R.string.composer_placeholder_default),
-            enabled = !state.isPosting,
-            minLines = 5,
-            maxLines = Int.MAX_VALUE,
-            shape = MaterialTheme.shapes.medium,
-            contentAlignment = Alignment.TopStart,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = if (quotePostId != null) Spacing.sm else 0.dp),
-        )
+        // Matches PostComposer.tsx's own `postType !== "ARTICLE" ? <main
+        // field> : <title + body>` branch: everywhere else (POST,
+        // RECRUITMENT, and the quote-post case) this same field is the
+        // post's entire text, its placeholder switching to the
+        // recruitment-specific copy only when relevant; ARTICLE splits
+        // into its own title field below instead.
+        if (state.postType != PostCreationType.ARTICLE) {
+            ZrpComposerField(
+                value = composerField,
+                onValueChange = { newValue ->
+                    composerField = newValue
+                    viewModel.onContentChange(newValue.text, newValue.selection.end)
+                },
+                // The quote-post placeholder ("Add your thoughts...") stays
+                // English-only on purpose too - QuotePostModal.tsx's own
+                // placeholder is hardcoded the same way. The default placeholder
+                // uses PostComposer.tsx's real, translated copy.
+                placeholder = when {
+                    quotePostId != null -> "Add your thoughts..."
+                    state.postType == PostCreationType.RECRUITMENT -> stringResource(R.string.composer_placeholder_recruitment)
+                    else -> stringResource(R.string.composer_placeholder_default)
+                },
+                enabled = !state.isPosting,
+                minLines = 5,
+                maxLines = Int.MAX_VALUE,
+                shape = MaterialTheme.shapes.medium,
+                contentAlignment = Alignment.TopStart,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = if (quotePostId != null) Spacing.sm else 0.dp),
+            )
+        } else {
+            // The article's own title/teaser - still the same `content`
+            // field underneath (mentions still work here, same as web),
+            // just single-line-ish and visually distinct from the body.
+            ZrpComposerField(
+                value = composerField,
+                onValueChange = { newValue ->
+                    composerField = newValue
+                    viewModel.onContentChange(newValue.text, newValue.selection.end)
+                },
+                placeholder = stringResource(R.string.composer_placeholder_article_title),
+                enabled = !state.isPosting,
+                minLines = 1,
+                maxLines = 3,
+                shape = MaterialTheme.shapes.medium,
+                textStyle = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            OutlinedTextField(
+                value = state.articleBody,
+                onValueChange = { viewModel.onArticleBodyChange(it) },
+                enabled = !state.isPosting,
+                placeholder = { Text(stringResource(R.string.composer_placeholder_article_body)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.sm),
+                minLines = 8,
+            )
+            Text(
+                text = stringResource(R.string.composer_article_markdown_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = Spacing.xs),
+            )
+        }
+
+        if (state.postType == PostCreationType.RECRUITMENT) {
+            RecruitmentFields(
+                company = state.company,
+                location = state.location,
+                applyUrl = state.applyUrl,
+                enabled = !state.isPosting,
+                onCompanyChange = { viewModel.onCompanyChange(it) },
+                onLocationChange = { viewModel.onLocationChange(it) },
+                onApplyUrlChange = { viewModel.onApplyUrlChange(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.sm),
+            )
+        }
 
         if (state.isUploading) {
             LinearProgressIndicator(
@@ -494,15 +600,20 @@ fun CreatePostScreen(
                     // absent (`explicit === null ? true : explicit`);
                     // native has no feature-flag fetch of its own, so
                     // this always shows, matching that same default.
-                    IconButton(
-                        onClick = { viewModel.onTogglePollBuilder() },
-                        enabled = !state.isPosting,
-                    ) {
-                        Icon(
-                            Icons.Filled.Poll,
-                            contentDescription = stringResource(R.string.createpost_poll_toggle_cd),
-                            tint = if (state.showPollBuilder) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                    // Hidden outright (not just disabled) for RECRUITMENT/
+                    // ARTICLE - a poll only ever applies to a plain post,
+                    // same as web's own `postType === "POST" && ...` gate.
+                    if (state.postType == PostCreationType.POST) {
+                        IconButton(
+                            onClick = { viewModel.onTogglePollBuilder() },
+                            enabled = !state.isPosting,
+                        ) {
+                            Icon(
+                                Icons.Filled.Poll,
+                                contentDescription = stringResource(R.string.createpost_poll_toggle_cd),
+                                tint = if (state.showPollBuilder) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
             } else {
@@ -517,10 +628,19 @@ fun CreatePostScreen(
 
             Button(
                 onClick = { viewModel.submit() },
-                enabled = (state.content.isNotBlank() || state.mediaUrls.isNotEmpty()) &&
-                    !(state.isScheduling && state.scheduledAtMillis == null) &&
-                    !state.isPosting &&
-                    !state.isUploading,
+                enabled = !isCreatePostSubmitBlocked(
+                    content = state.content.trim(),
+                    hasMedia = state.mediaUrls.isNotEmpty(),
+                    hasPoll = state.showPollBuilder,
+                    isPollValid = state.isPollValid,
+                    isScheduling = state.isScheduling,
+                    hasScheduledAt = state.scheduledAtMillis != null,
+                    postType = state.postType,
+                    company = state.company,
+                    articleBody = state.articleBody,
+                    isPosting = state.isPosting,
+                    isUploading = state.isUploading,
+                ),
                 colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
             ) {
                 if (state.isPosting) {
@@ -667,6 +787,87 @@ private fun mediaErrorMessage(error: MediaValidationError): String = when (error
     is MediaValidationError.GifLimit -> stringResource(R.string.composer_err_gif_limit, error.maxImages)
     is MediaValidationError.UploadFailed ->
         stringResource(R.string.composer_err_upload_failed) + ": " + (localizedError(error.detail) ?: error.detail)
+}
+
+/**
+ * One pill in the "Post as:" type selector - the selected type filled
+ * solid [ZrpRed], the others outlined, matching PostComposer.tsx's own
+ * `postType === X ? "bg-zrp-red text-white ..." : "border-gray-300 ..."`
+ * pill styling exactly.
+ */
+@Composable
+private fun PostTypePill(label: String, selected: Boolean, onClick: () -> Unit) {
+    if (selected) {
+        Button(
+            onClick = onClick,
+            contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs),
+            colors = ButtonDefaults.buttonColors(containerColor = ZrpRed),
+        ) {
+            Text(label, style = MaterialTheme.typography.labelMedium)
+        }
+    } else {
+        OutlinedButton(
+            onClick = onClick,
+            contentPadding = PaddingValues(horizontal = Spacing.md, vertical = Spacing.xs),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+        ) {
+            Text(label, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+/**
+ * The RECRUITMENT-only fields, shown right below the main content field
+ * - matches PostComposer.tsx's own company (required)/location/applyUrl
+ * block exactly, right down to applyUrl using a URL-flavored keyboard
+ * (web's bare `type="url"` input) rather than a plain one. No client-
+ * side URL-shape validation beyond that keyboard hint - the real check
+ * is server-side (isSafeApplyUrl in src/app/api/posts/route.ts), same
+ * as web.
+ */
+@Composable
+private fun RecruitmentFields(
+    company: String,
+    location: String,
+    applyUrl: String,
+    enabled: Boolean,
+    onCompanyChange: (String) -> Unit,
+    onLocationChange: (String) -> Unit,
+    onApplyUrlChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.shapes.medium)
+            .padding(Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        OutlinedTextField(
+            value = company,
+            onValueChange = onCompanyChange,
+            enabled = enabled,
+            singleLine = true,
+            placeholder = { Text(stringResource(R.string.composer_company_placeholder)) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            value = location,
+            onValueChange = onLocationChange,
+            enabled = enabled,
+            singleLine = true,
+            placeholder = { Text(stringResource(R.string.composer_location_placeholder)) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            value = applyUrl,
+            onValueChange = onApplyUrlChange,
+            enabled = enabled,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            placeholder = { Text(stringResource(R.string.composer_apply_url_placeholder)) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 /**

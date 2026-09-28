@@ -493,6 +493,16 @@
     <string name="music_play">재생</string>
     <string name="music_unlike">좋아요 취소</string>
     <string name="composer_placeholder_default">무슨 일이 일어나고 있나요? #해시태그와 @멘션을 사용해 보세요</string>
+    <string name="composer_post_as">게시 형식:</string>
+    <string name="composer_type_recruitment">채용</string>
+    <string name="composer_type_article">아티클</string>
+    <string name="composer_placeholder_recruitment">채용 공고 내용을 작성하세요... #해시태그와 @멘션을 사용할 수 있습니다</string>
+    <string name="composer_placeholder_article_title">아티클 제목/요약 (선택 사항)</string>
+    <string name="composer_placeholder_article_body">Markdown 또는 HTML로 아티클 내용을 작성하세요...</string>
+    <string name="composer_article_markdown_hint">Markdown과 HTML을 지원합니다</string>
+    <string name="composer_company_placeholder">회사명 *</string>
+    <string name="composer_location_placeholder">위치 (예: 원격 근무, 뉴욕, 런던)</string>
+    <string name="composer_apply_url_placeholder">지원 URL (선택 사항)</string>
     <string name="composer_post_button">게시</string>
     <string name="comments_title">댓글</string>
     <string name="followers_title">팔로워</string>

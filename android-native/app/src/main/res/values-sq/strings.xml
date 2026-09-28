@@ -496,6 +496,16 @@
     <string name="music_play">Luaj</string>
     <string name="music_unlike">Hiq pëlqimin</string>
     <string name="composer_placeholder_default">Çfarë po ndodh? Përdorni #hashtags dhe @mentions</string>
+    <string name="composer_post_as">Publiko si:</string>
+    <string name="composer_type_recruitment">Rrekrutim</string>
+    <string name="composer_type_article">Artikull</string>
+    <string name="composer_placeholder_recruitment">Përshkruani mundësinë e punës... Përdorni #hashtags dhe @mentions</string>
+    <string name="composer_placeholder_article_title">Titulli i artikullit / përmbledhja (opsionale)</string>
+    <string name="composer_placeholder_article_body">Shkruani përmbajtjen e artikullit tuaj në Markdown ose HTML...</string>
+    <string name="composer_article_markdown_hint">Mbështet Markdown dhe HTML</string>
+    <string name="composer_company_placeholder">Emri i kompanisë *</string>
+    <string name="composer_location_placeholder">Vendndodhja (p.sh., Në distancë, Nju Jork, Londër)</string>
+    <string name="composer_apply_url_placeholder">URL e aplikimit (opsionale)</string>
     <string name="composer_post_button">Publiko</string>
     <string name="comments_title">Komentet</string>
     <string name="followers_title">Ndjekësit</string>

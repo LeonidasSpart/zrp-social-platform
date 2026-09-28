@@ -494,6 +494,16 @@
     <string name="music_play">Afspil</string>
     <string name="music_unlike">Fjern synes godt om</string>
     <string name="composer_placeholder_default">Hvad sker der? Brug #hashtags og @omtaler</string>
+    <string name="composer_post_as">Post som:</string>
+    <string name="composer_type_recruitment">Jobopslag</string>
+    <string name="composer_type_article">Artikel</string>
+    <string name="composer_placeholder_recruitment">Beskriv jobmuligheden... Brug #hashtags og @omtaler</string>
+    <string name="composer_placeholder_article_title">Artikeltitel / teaser (valgfrit)</string>
+    <string name="composer_placeholder_article_body">Skriv din artikel i Markdown eller HTML...</string>
+    <string name="composer_article_markdown_hint">Understøtter Markdown og HTML</string>
+    <string name="composer_company_placeholder">Virksomhedsnavn *</string>
+    <string name="composer_location_placeholder">Placering (f.eks. Remote, New York, London)</string>
+    <string name="composer_apply_url_placeholder">Ansøgnings-URL (valgfrit)</string>
     <string name="composer_post_button">Post</string>
     <string name="comments_title">Kommentarer</string>
     <string name="followers_title">Følgere</string>

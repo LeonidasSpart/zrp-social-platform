@@ -498,6 +498,16 @@
     <string name="music_play">Prehrať</string>
     <string name="music_unlike">Zrušiť lajk</string>
     <string name="composer_placeholder_default">Čo sa deje? Použite #hashtagy a @zmienky</string>
+    <string name="composer_post_as">Zverejniť ako:</string>
+    <string name="composer_type_recruitment">Nábor</string>
+    <string name="composer_type_article">Článok</string>
+    <string name="composer_placeholder_recruitment">Opíšte pracovnú príležitosť... Použite #hashtagy a @zmienky</string>
+    <string name="composer_placeholder_article_title">Názov článku / anotácia (voliteľné)</string>
+    <string name="composer_placeholder_article_body">Napíšte obsah svojho článku v Markdowne alebo HTML...</string>
+    <string name="composer_article_markdown_hint">Podporuje Markdown a HTML</string>
+    <string name="composer_company_placeholder">Názov spoločnosti *</string>
+    <string name="composer_location_placeholder">Lokalita (napr. Na diaľku, New York, Londýn)</string>
+    <string name="composer_apply_url_placeholder">URL prihlášky (voliteľné)</string>
     <string name="composer_post_button">Príspevok</string>
     <string name="comments_title">Komentáre</string>
     <string name="followers_title">Sledovatelia</string>

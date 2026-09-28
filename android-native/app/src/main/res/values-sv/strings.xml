@@ -494,6 +494,16 @@
     <string name="music_play">Spela</string>
     <string name="music_unlike">Sluta gilla</string>
     <string name="composer_placeholder_default">Vad händer? Använd #hashtaggar och @omnämnanden</string>
+    <string name="composer_post_as">Publicera som:</string>
+    <string name="composer_type_recruitment">Rekrytering</string>
+    <string name="composer_type_article">Artikel</string>
+    <string name="composer_placeholder_recruitment">Beskriv jobbmöjligheten... Använd #hashtaggar och @omnämnanden</string>
+    <string name="composer_placeholder_article_title">Artikeltitel/teaser (valfritt)</string>
+    <string name="composer_placeholder_article_body">Skriv artikelns innehåll i Markdown eller HTML...</string>
+    <string name="composer_article_markdown_hint">Stöder Markdown och HTML</string>
+    <string name="composer_company_placeholder">Företagsnamn *</string>
+    <string name="composer_location_placeholder">Plats (t.ex. Distans, Stockholm, London)</string>
+    <string name="composer_apply_url_placeholder">Ansökningslänk (valfritt)</string>
     <string name="composer_post_button">Publicera</string>
     <string name="comments_title">Kommentarer</string>
     <string name="followers_title">Följare</string>

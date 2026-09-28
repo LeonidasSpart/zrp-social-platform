@@ -494,6 +494,16 @@
     <string name="music_play">Pelit</string>
     <string name="music_unlike">Poista tykkäys</string>
     <string name="composer_placeholder_default">Mitä sinulle kuuluu? Käytä #hashtageja ja @mainintoja</string>
+    <string name="composer_post_as">Julkaise nimellä:</string>
+    <string name="composer_type_recruitment">Rekrytointi</string>
+    <string name="composer_type_article">Artikkeli</string>
+    <string name="composer_placeholder_recruitment">Kuvaile työmahdollisuutta... Käytä #hashtageja ja @mainintoja</string>
+    <string name="composer_placeholder_article_title">Artikkelin otsikko / esikatselu (valinnainen)</string>
+    <string name="composer_placeholder_article_body">Kirjoita artikkelisi sisältö Markdownilla tai HTML:llä...</string>
+    <string name="composer_article_markdown_hint">Tukee Markdownia ja HTML:ää</string>
+    <string name="composer_company_placeholder">Yrityksen nimi *</string>
+    <string name="composer_location_placeholder">Sijainti (esim. Etätyö, Helsinki, Lontoo)</string>
+    <string name="composer_apply_url_placeholder">Hakemus-URL (valinnainen)</string>
     <string name="composer_post_button">Julkaise</string>
     <string name="comments_title">Kommentit</string>
     <string name="followers_title">Seuraajat</string>

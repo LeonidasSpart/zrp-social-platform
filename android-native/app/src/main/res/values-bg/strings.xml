@@ -494,6 +494,16 @@
     <string name="music_play">Пусни</string>
     <string name="music_unlike">Премахни харесването</string>
     <string name="composer_placeholder_default">Какво се случва? Използвай #хаштагове и @споменавания</string>
+    <string name="composer_post_as">Публикувай като:</string>
+    <string name="composer_type_recruitment">Обява за работа</string>
+    <string name="composer_type_article">Статия</string>
+    <string name="composer_placeholder_recruitment">Опиши работната позиция... Използвай #хаштагове и @споменавания</string>
+    <string name="composer_placeholder_article_title">Заглавие/анонс на статията (незадължително)</string>
+    <string name="composer_placeholder_article_body">Напиши съдържанието на статията в Markdown или HTML...</string>
+    <string name="composer_article_markdown_hint">Поддържа Markdown и HTML</string>
+    <string name="composer_company_placeholder">Име на компанията *</string>
+    <string name="composer_location_placeholder">Местоположение (напр. Дистанционно, Ню Йорк, Лондон)</string>
+    <string name="composer_apply_url_placeholder">URL адрес за кандидатстване (незадължително)</string>
     <string name="composer_post_button">Публикувай</string>
     <string name="comments_title">Коментари</string>
     <string name="followers_title">Последователи</string>

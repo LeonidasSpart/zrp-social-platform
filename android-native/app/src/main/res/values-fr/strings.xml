@@ -496,6 +496,16 @@
     <string name="music_play">Lecture</string>
     <string name="music_unlike">Je n\'aime plus</string>
     <string name="composer_placeholder_default">Quoi de neuf ? Utilisez #hashtags et @mentions</string>
+    <string name="composer_post_as">Publier en tant que :</string>
+    <string name="composer_type_recruitment">Recrutement</string>
+    <string name="composer_type_article">Article</string>
+    <string name="composer_placeholder_recruitment">Décrivez l\'offre d\'emploi... Utilisez #hashtags et @mentions</string>
+    <string name="composer_placeholder_article_title">Titre de l\'article / accroche (facultatif)</string>
+    <string name="composer_placeholder_article_body">Rédigez votre article en Markdown ou HTML...</string>
+    <string name="composer_article_markdown_hint">Markdown et HTML pris en charge</string>
+    <string name="composer_company_placeholder">Nom de l\'entreprise *</string>
+    <string name="composer_location_placeholder">Lieu (ex : Télétravail, Paris, Lyon)</string>
+    <string name="composer_apply_url_placeholder">URL de candidature (facultatif)</string>
     <string name="composer_post_button">Publier</string>
     <string name="comments_title">Commentaires</string>
     <string name="followers_title">Abonnés</string>

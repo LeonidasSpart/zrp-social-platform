@@ -29,6 +29,56 @@ import one.zrp.social.mobile.util.PollLimits
 import one.zrp.social.mobile.util.getPlanLimits
 
 /**
+ * "POST" | "RECRUITMENT" | "ARTICLE" - the same three values
+ * Post.type takes server-side, as a real enum rather than the bare
+ * string PostComposer.tsx's own `postType` state uses, since Kotlin
+ * has no risk of a typo'd literal the way that string does.
+ */
+enum class PostCreationType { POST, RECRUITMENT, ARTICLE }
+
+/**
+ * Pure port of PostComposer.tsx's own `isSubmitDisabled` (the
+ * RECRUITMENT/ARTICLE-relevant subset of it - the image-count/length-
+ * overLimit checks it also has aren't reachable in this app's composer,
+ * whose text field and media picker already enforce those caps at
+ * input time). Extracted out of submit() itself so the gating logic is
+ * directly unit-testable without a ViewModel/repository/coroutine.
+ */
+internal fun isCreatePostSubmitBlocked(
+    content: String,
+    hasMedia: Boolean,
+    hasPoll: Boolean,
+    isPollValid: Boolean,
+    isScheduling: Boolean,
+    hasScheduledAt: Boolean,
+    postType: PostCreationType,
+    company: String,
+    articleBody: String,
+    isPosting: Boolean,
+    isUploading: Boolean,
+): Boolean {
+    return (content.isEmpty() && !hasMedia && !hasPoll && postType != PostCreationType.ARTICLE) ||
+        (isScheduling && !hasScheduledAt) ||
+        (hasPoll && !isPollValid) ||
+        (postType == PostCreationType.RECRUITMENT && company.trim().isEmpty()) ||
+        (postType == PostCreationType.ARTICLE && articleBody.trim().isEmpty()) ||
+        isPosting ||
+        isUploading
+}
+
+/**
+ * Pure port of PostComposer.tsx's own submit-payload content fallback:
+ * an ARTICLE's title never borrows the poll question (a poll can't even
+ * be open for one - see CreatePostViewModel.onPostTypeChange) and stays
+ * exactly what was typed (possibly empty); every other type falls back
+ * to the poll question so the post never ends up with no content at all
+ * just because the user only typed a question.
+ */
+internal fun resolveCreatePostContent(content: String, pollQuestion: String, postType: PostCreationType): String {
+    return if (postType == PostCreationType.ARTICLE) content else content.ifEmpty { pollQuestion.trim() }
+}
+
+/**
  * A validation problem the composer needs to show translated - kept
  * separate from [CreatePostUiState.error] (server/network failures,
  * already-resolved messages) because a plain ViewModel can't resolve
@@ -76,6 +126,19 @@ data class CreatePostUiState(
     // "@partial" token; cleared the moment it doesn't (finished mention,
     // cursor moved elsewhere, or the debounced search comes back empty).
     val mentionSuggestions: List<SearchUser> = emptyList(),
+    // Mirrors PostComposer.tsx's own postType/company/location/applyUrl/
+    // articleBody state exactly. `content` above doubles as the
+    // RECRUITMENT/ARTICLE post's own text/title in both cases - there's
+    // no separate field for it, same as web. These four are left as-is
+    // across a type switch (handlePostTypeChange never clears them),
+    // and are NOT persisted to the draft store (see the class KDoc's
+    // own note on why - native drafts stay content/media/type-agnostic
+    // for now).
+    val postType: PostCreationType = PostCreationType.POST,
+    val company: String = "",
+    val location: String = "",
+    val applyUrl: String = "",
+    val articleBody: String = "",
 ) {
     val validPollOptions: List<String> get() = pollOptions.map { it.trim() }.filter { it.isNotEmpty() }
     val isPollValid: Boolean get() = pollQuestion.trim().isNotEmpty() && validPollOptions.size >= 2
@@ -371,6 +434,43 @@ class CreatePostViewModel(
         _state.update { it.copy(pollExpiryMillis = millis, error = null) }
     }
 
+    // Matches PostComposer.tsx's own handlePostTypeChange: a plan
+    // without the feature can't switch into it at all (the type-
+    // selector button is hidden entirely on web for the same reason -
+    // this is defense in depth, not the only gate). Switching away from
+    // POST closes the poll builder (a poll only ever applies to a plain
+    // post) without clearing the underlying question/options/expiry -
+    // switching back to POST later still has them, same as web leaving
+    // that state untouched.
+    fun onPostTypeChange(type: PostCreationType) {
+        val limits = getPlanLimits(_state.value.plan)
+        if (type == PostCreationType.RECRUITMENT && !limits.recruitmentProfiles) return
+        if (type == PostCreationType.ARTICLE && !limits.articlePublishing) return
+        _state.update {
+            it.copy(
+                postType = type,
+                showPollBuilder = if (type == PostCreationType.POST) it.showPollBuilder else false,
+                error = null,
+            )
+        }
+    }
+
+    fun onCompanyChange(value: String) {
+        _state.update { it.copy(company = value, error = null) }
+    }
+
+    fun onLocationChange(value: String) {
+        _state.update { it.copy(location = value, error = null) }
+    }
+
+    fun onApplyUrlChange(value: String) {
+        _state.update { it.copy(applyUrl = value, error = null) }
+    }
+
+    fun onArticleBodyChange(value: String) {
+        _state.update { it.copy(articleBody = value, error = null) }
+    }
+
     private val scheduledAtFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US)
 
     fun submit() {
@@ -381,18 +481,21 @@ class CreatePostViewModel(
         val isScheduling = current.isScheduling
         val scheduledAtMillis = current.scheduledAtMillis
         val hasPoll = current.showPollBuilder
-        // Matches PostComposer.tsx's own isSubmitDisabled: a post needs
-        // real text OR real media - not necessarily both - toggling
-        // "Schedule" on without yet picking a date/time blocks submit
-        // (web's own `schedulePost && !scheduledAt` check), and a poll
-        // builder left open with fewer than 2 real options blocks it
-        // too (web's own `hasPoll && !isPollValid` check).
+        val postType = current.postType
         if (
-            (content.isEmpty() && mediaUrls.isEmpty() && !hasPoll) ||
-            (isScheduling && scheduledAtMillis == null) ||
-            (hasPoll && !current.isPollValid) ||
-            current.isPosting ||
-            current.isUploading
+            isCreatePostSubmitBlocked(
+                content = content,
+                hasMedia = mediaUrls.isNotEmpty(),
+                hasPoll = hasPoll,
+                isPollValid = current.isPollValid,
+                isScheduling = isScheduling,
+                hasScheduledAt = scheduledAtMillis != null,
+                postType = postType,
+                company = current.company,
+                articleBody = current.articleBody,
+                isPosting = current.isPosting,
+                isUploading = current.isUploading,
+            )
         ) {
             return
         }
@@ -407,11 +510,7 @@ class CreatePostViewModel(
         val scheduledAtOffsetMinutes = scheduledAtMillis?.let {
             -(java.util.TimeZone.getDefault().getOffset(it) / 60_000)
         }
-        // Matches PostComposer.tsx's own content fallback: an empty
-        // text field falls back to the poll question itself when a
-        // poll is being posted, so the post never ends up with no
-        // content at all just because the user only typed a question.
-        val effectiveContent = content.ifEmpty { current.pollQuestion.trim() }
+        val effectiveContent = resolveCreatePostContent(content, current.pollQuestion, postType)
         val poll = if (hasPoll) {
             PollCreateRequest(
                 question = current.pollQuestion.trim(),
@@ -424,7 +523,20 @@ class CreatePostViewModel(
 
         _state.update { it.copy(isPosting = true, error = null) }
         viewModelScope.launch {
-            repository.createPost(effectiveContent, quotePostId, mediaUrls, mediaType, scheduledAt, poll, scheduledAtOffsetMinutes)
+            repository.createPost(
+                content = effectiveContent,
+                quotePostId = quotePostId,
+                mediaUrls = mediaUrls,
+                mediaType = mediaType,
+                scheduledAt = scheduledAt,
+                poll = poll,
+                scheduledAtOffsetMinutes = scheduledAtOffsetMinutes,
+                type = postType.name,
+                company = if (postType == PostCreationType.RECRUITMENT) current.company.trim() else null,
+                location = if (postType == PostCreationType.RECRUITMENT) current.location.trim() else null,
+                applyUrl = if (postType == PostCreationType.RECRUITMENT) current.applyUrl.trim() else null,
+                articleBody = if (postType == PostCreationType.ARTICLE) current.articleBody else null,
+            )
                 .onSuccess {
                     if (quotePostId == null) draftStore.clear()
                     _state.update { it.copy(isPosting = false, posted = true) }

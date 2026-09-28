@@ -498,6 +498,16 @@
     <string name="music_play">Predvajaj</string>
     <string name="music_unlike">Odstrani všeček</string>
     <string name="composer_placeholder_default">Kaj se dogaja? Uporabite #ključnike in @omembe</string>
+    <string name="composer_post_as">Objavi kot:</string>
+    <string name="composer_type_recruitment">Zaposlovanje</string>
+    <string name="composer_type_article">Članek</string>
+    <string name="composer_placeholder_recruitment">Opišite zaposlitveno priložnost ... Uporabite #ključnike in @omembe</string>
+    <string name="composer_placeholder_article_title">Naslov članka / napoved (neobvezno)</string>
+    <string name="composer_placeholder_article_body">Napišite vsebino svojega članka v Markdownu ali HTML-ju ...</string>
+    <string name="composer_article_markdown_hint">Podpira Markdown in HTML</string>
+    <string name="composer_company_placeholder">Ime podjetja *</string>
+    <string name="composer_location_placeholder">Lokacija (npr. na daljavo, New York, London)</string>
+    <string name="composer_apply_url_placeholder">URL za prijavo (neobvezno)</string>
     <string name="composer_post_button">Objavi</string>
     <string name="comments_title">Komentarji</string>
     <string name="followers_title">Sledilci</string>

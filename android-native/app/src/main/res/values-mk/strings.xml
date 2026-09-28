@@ -494,6 +494,16 @@
     <string name="music_play">Пушти</string>
     <string name="music_unlike">Отстрани допаѓање</string>
     <string name="composer_placeholder_default">Што се случува? Користи #хаштагови и @спомнувања</string>
+    <string name="composer_post_as">Објави како:</string>
+    <string name="composer_type_recruitment">Вработување</string>
+    <string name="composer_type_article">Статија</string>
+    <string name="composer_placeholder_recruitment">Опиши ја работната позиција... Користи #хаштагови и @спомнувања</string>
+    <string name="composer_placeholder_article_title">Наслов на статијата / најава (опционално)</string>
+    <string name="composer_placeholder_article_body">Напиши ја содржината на статијата во Markdown или HTML...</string>
+    <string name="composer_article_markdown_hint">Поддржува Markdown и HTML</string>
+    <string name="composer_company_placeholder">Име на компанијата *</string>
+    <string name="composer_location_placeholder">Локација (пр. Далечински, Њујорк, Лондон)</string>
+    <string name="composer_apply_url_placeholder">URL за пријавување (опционално)</string>
     <string name="composer_post_button">Објави</string>
     <string name="comments_title">Коментари</string>
     <string name="followers_title">Следбеници</string>

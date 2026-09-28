@@ -496,6 +496,16 @@
     <string name="music_play">播放</string>
     <string name="music_unlike">取消喜欢</string>
     <string name="composer_placeholder_default">有什么新鲜事？使用 #话题标签 和 @提及</string>
+    <string name="composer_post_as">发布为：</string>
+    <string name="composer_type_recruitment">招聘</string>
+    <string name="composer_type_article">文章</string>
+    <string name="composer_placeholder_recruitment">描述这个职位机会... 使用 #话题标签 和 @提及</string>
+    <string name="composer_placeholder_article_title">文章标题 / 摘要（可选）</string>
+    <string name="composer_placeholder_article_body">使用 Markdown 或 HTML 撰写文章内容...</string>
+    <string name="composer_article_markdown_hint">支持 Markdown 和 HTML</string>
+    <string name="composer_company_placeholder">公司 名称 *</string>
+    <string name="composer_location_placeholder">地点（例如：远程、纽约、伦敦）</string>
+    <string name="composer_apply_url_placeholder">申请链接（可选）</string>
     <string name="composer_post_button">发布</string>
     <string name="comments_title">评论</string>
     <string name="followers_title">粉丝</string>

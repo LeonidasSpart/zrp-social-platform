@@ -498,6 +498,16 @@
     <string name="music_play">Відтворити</string>
     <string name="music_unlike">Прибрати вподобання</string>
     <string name="composer_placeholder_default">Що відбувається? Використовуйте #хештеги та @згадки</string>
+    <string name="composer_post_as">Публікувати як:</string>
+    <string name="composer_type_recruitment">Вакансія</string>
+    <string name="composer_type_article">Стаття</string>
+    <string name="composer_placeholder_recruitment">Опишіть вакансію... Використовуйте #хештеги та @згадки</string>
+    <string name="composer_placeholder_article_title">Заголовок статті / тизер (необов\'язково)</string>
+    <string name="composer_placeholder_article_body">Напишіть текст статті в Markdown або HTML...</string>
+    <string name="composer_article_markdown_hint">Підтримує Markdown і HTML</string>
+    <string name="composer_company_placeholder">Назва компанії *</string>
+    <string name="composer_location_placeholder">Місцезнаходження (напр., віддалено, Нью-Йорк, Лондон)</string>
+    <string name="composer_apply_url_placeholder">URL для подання заявки (необов\'язково)</string>
     <string name="composer_post_button">Опублікувати</string>
     <string name="comments_title">Коментарі</string>
     <string name="followers_title">Підписники</string>

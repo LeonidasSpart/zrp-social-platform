@@ -1010,6 +1010,7 @@ class LocalizationCompletenessTest {
             // genuine cognate (see this file's own header on the
             // allowlist's intent).
             "post_article_heading",
+            "composer_type_article",
             "post_reposts_count",
             "pricing_feature_support",
             "profile_likes",

@@ -506,6 +506,16 @@
     <string name="music_play">Play</string>
     <string name="music_unlike">Unlike</string>
     <string name="composer_placeholder_default">What\'s happening? Use #hashtags and @mentions</string>
+    <string name="composer_post_as">Post as:</string>
+    <string name="composer_type_recruitment">Recruitment</string>
+    <string name="composer_type_article">Article</string>
+    <string name="composer_placeholder_recruitment">Describe the job opportunity... Use #hashtags and @mentions</string>
+    <string name="composer_placeholder_article_title">Article title / teaser (optional)</string>
+    <string name="composer_placeholder_article_body">Write your article content in Markdown or HTML...</string>
+    <string name="composer_article_markdown_hint">Supports Markdown and HTML</string>
+    <string name="composer_company_placeholder">Company name *</string>
+    <string name="composer_location_placeholder">Location (e.g., Remote, New York, London)</string>
+    <string name="composer_apply_url_placeholder">Application URL (optional)</string>
     <string name="composer_post_button">Post</string>
     <string name="comments_title">Comments</string>
     <string name="followers_title">Followers</string>

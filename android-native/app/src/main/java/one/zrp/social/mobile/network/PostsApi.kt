@@ -218,6 +218,24 @@ data class CreatePostRequest(
     val scheduledAt: String? = null,
     val scheduledAtOffsetMinutes: Int? = null,
     val poll: PollCreateRequest? = null,
+    // "POST" (default, omitted) | "RECRUITMENT" | "ARTICLE" - matches
+    // PostComposer.tsx's own postType state and the same server-side
+    // plan gate (canPostRecruitment/canPublishArticle in
+    // src/lib/feature-status.ts) already enforced regardless of what
+    // the client sends. company/location/applyUrl are RECRUITMENT-only;
+    // applyUrl is validated server-side as a real http(s)/mailto URL
+    // (src/app/api/posts/route.ts's isSafeApplyUrl) - no client-side
+    // shape check beyond a plain URL keyboard, same as web's bare
+    // `type="url"` input. articleBody is ARTICLE-only, raw Markdown
+    // text (the server renders+sanitizes it into Post.body via
+    // src/lib/sanitize.ts's renderArticleBody - never sent pre-
+    // rendered), with `content` above doubling as the article's title,
+    // same as web.
+    val type: String? = null,
+    val company: String? = null,
+    val location: String? = null,
+    val applyUrl: String? = null,
+    val articleBody: String? = null,
 )
 
 data class PollVoteRequest(val optionIndex: Int)

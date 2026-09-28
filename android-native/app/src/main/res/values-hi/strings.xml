@@ -493,6 +493,16 @@
     <string name="music_play">प्ले करें</string>
     <string name="music_unlike">लाइक हटाएं</string>
     <string name="composer_placeholder_default">क्या हो रहा है? #हैशटैग और @मेंशन का इस्तेमाल करें</string>
+    <string name="composer_post_as">इस रूप में पोस्ट करें:</string>
+    <string name="composer_type_recruitment">भर्ती</string>
+    <string name="composer_type_article">आर्टिकल</string>
+    <string name="composer_placeholder_recruitment">नौकरी के अवसर के बारे में बताएं... #हैशटैग और @मेंशन का इस्तेमाल करें</string>
+    <string name="composer_placeholder_article_title">आर्टिकल का शीर्षक / टीज़र (वैकल्पिक)</string>
+    <string name="composer_placeholder_article_body">अपना आर्टिकल कंटेंट Markdown या HTML में लिखें...</string>
+    <string name="composer_article_markdown_hint">Markdown और HTML सपोर्ट करता है</string>
+    <string name="composer_company_placeholder">कंपनी का नाम *</string>
+    <string name="composer_location_placeholder">स्थान (जैसे, रिमोट, न्यूयॉर्क, लंदन)</string>
+    <string name="composer_apply_url_placeholder">आवेदन URL (वैकल्पिक)</string>
     <string name="composer_post_button">पोस्ट करें</string>
     <string name="comments_title">टिप्पणियां</string>
     <string name="followers_title">फ़ॉलोअर</string>
