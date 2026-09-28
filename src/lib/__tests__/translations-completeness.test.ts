@@ -2292,6 +2292,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "ads.dashboard.ctr", "trust.outOf100", "play.xp", "music.duration.minutes",
     "music.track.columnAlbum", "music.albumDetail.eyebrow", "tipModal.charCount",
     "adminNewsNetwork.verificationFailedNamed",
+    "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
+    "help.section.marketplace.title", "music.studio.explicitBadge",
   ],
   ga: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.news.title",
@@ -2303,6 +2305,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "faq.chatImageSize.maxFileSizeVal", "faq.chatImageSize.formatsVal", "faq.chatImageSize.resolutionVal",
     "ads.dashboard.ctr", "trust.outOf100", "adminStorage.statInUploadThing", "play.xp",
     "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
+    "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
+    "help.section.marketplace.title",
   ],
   lv: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
@@ -2314,6 +2318,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "faq.chatImageSize.maxFileSizeVal", "faq.chatImageSize.formatsVal", "faq.chatImageSize.resolutionVal",
     "ads.dashboard.ctr", "trust.outOf100", "adminJournalists.portfolio", "play.xp",
     "music.duration.minutes", "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
+    "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
+    "help.section.marketplace.title", "music.studio.explicitBadge",
   ],
   mt: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
@@ -2327,9 +2333,12 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "privacy.dataCollected.cookiesTitle", "pricing.supportStandard", "ads.dashboard.ctr", "trust.outOf100",
     "adminSupport.colTicket", "play.xp", "opportunity.typeFreelance", "opportunity.typeHackathon",
     "music.duration.minutes", "music.track.columnAlbum", "music.artistDetail.singlesHeading", "music.albumDetail.eyebrow",
+    "music.studio.explicitBadge",
     "tipModal.charCount", "professionalCategory.blockchain", "professionalCategory.podcasting",
     "communities.create.hashtagLabel", "adminNewsNetwork.verificationFailedNamed",
     "adminSubscriptions.filterStatus", "adminSubscriptions.colStatus", "adminSubscriptionDetail.fieldStatus",
+    "transparency.reasonSpam", "communityCode.e.category1", "marketplace.heroTitle",
+    "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold", "help.section.marketplace.title",
   ],
 };
 
