@@ -102,6 +102,21 @@ data class Post(
     // this is never actually absent the way `reposted`/`bookmarked`
     // above are - defaulted only as a Gson-deserialization safeguard.
     val views: Int = 0,
+    // "POST" | "RECRUITMENT" | "ARTICLE" (prisma/schema.prisma's own
+    // Post.type) - defaults to "POST" for Gson-deserialization safety
+    // (an old cached response or a route that doesn't select `type`
+    // should render as a plain post, never as an empty recruitment/
+    // article card). company/location/applyUrl are RECRUITMENT-only;
+    // body is ARTICLE-only (pre-sanitized HTML, same field the website's
+    // rich-text editor writes and PostCard.tsx renders via
+    // dangerouslySetInnerHTML - see PostCard.kt's own ArticleBody for
+    // why that's safe to reuse here via HtmlCompat rather than a second,
+    // Android-only sanitization pass).
+    val type: String = "POST",
+    val company: String? = null,
+    val location: String? = null,
+    val applyUrl: String? = null,
+    val body: String? = null,
 )
 
 data class PostViewResponse(val views: Int?)
@@ -203,6 +218,24 @@ data class CreatePostRequest(
     val scheduledAt: String? = null,
     val scheduledAtOffsetMinutes: Int? = null,
     val poll: PollCreateRequest? = null,
+    // "POST" (default, omitted) | "RECRUITMENT" | "ARTICLE" - matches
+    // PostComposer.tsx's own postType state and the same server-side
+    // plan gate (canPostRecruitment/canPublishArticle in
+    // src/lib/feature-status.ts) already enforced regardless of what
+    // the client sends. company/location/applyUrl are RECRUITMENT-only;
+    // applyUrl is validated server-side as a real http(s)/mailto URL
+    // (src/app/api/posts/route.ts's isSafeApplyUrl) - no client-side
+    // shape check beyond a plain URL keyboard, same as web's bare
+    // `type="url"` input. articleBody is ARTICLE-only, raw Markdown
+    // text (the server renders+sanitizes it into Post.body via
+    // src/lib/sanitize.ts's renderArticleBody - never sent pre-
+    // rendered), with `content` above doubling as the article's title,
+    // same as web.
+    val type: String? = null,
+    val company: String? = null,
+    val location: String? = null,
+    val applyUrl: String? = null,
+    val articleBody: String? = null,
 )
 
 data class PollVoteRequest(val optionIndex: Int)

@@ -213,7 +213,25 @@ fun PlayChallengeScreen(
                                 onSubmit = { answerIndex, answerText, timeMs -> viewModel.submitLogic(answerIndex, answerText, timeMs) },
                                 submitting = state.isSubmitting,
                             )
-                            null -> {}
+                            // A loaded challenge (state.challenge != null)
+                            // whose content still didn't parse means its
+                            // type isn't one this app has a player view
+                            // for (REACTION/SEQUENCE today - see
+                            // parsedContent()'s own KDoc). PlayViewModel's
+                            // trending grid already filters these out of
+                            // browsing, but the daily-challenge slot is a
+                            // single server pick with no client-side
+                            // substitute, and a shared duel/deep link can
+                            // still point straight at one - this used to
+                            // silently render nothing at all.
+                            null -> if (state.challenge != null) {
+                                Text(
+                                    text = stringResource(R.string.play_challenge_unsupported),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
                         }
                     } else if (result.waitingForOpponent) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(top = 32.dp)) {

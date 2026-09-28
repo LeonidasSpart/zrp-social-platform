@@ -90,7 +90,7 @@ called and the real response being handled.
 | Recruitment posts (reading) | `POST /api/posts` writes `company`/`location`/`applyUrl` only when `type === "RECRUITMENT"`; every feed route selects all three | ✅ job card with company, location and an Apply link | ⬜ | ✅ **fixed**: the `Post` model decoded none of these fields, so a job listing arrived as its text alone and everything a Pro subscriber had paid to publish was dropped silently. Now a card with the company, the location and an Apply button; the link is https-only and opens in Safari, where the address bar shows where it leads | IMPLEMENTED |
 | Article posts (reading) | same route, `body` column | ✅ a collapsed 300-character plain-text preview, expandable to sanitised HTML | ⬜ | 🔶 **fixed to web's collapsed state**: the badge and the same 300-character preview, from the same tag strip. The expanded, formatted HTML is not rendered natively; `content` (headline and teaser) was all iOS showed before | PARTIAL |
 | Post type badge | `type` on every post | ✅ outlined pill beside the timestamp | ⬜ | ✅ the same pill, same two labels, nothing at all on an ordinary post | IMPLEMENTED |
-| Create recruitment / article post | `POST /api/posts` + `type`, plan-gated (`canPostRecruitment`, `canPublishArticle`) | ✅ | ⬜ | ⬜ composing either is still web-only; reading them is not | MISSING |
+| Create recruitment / article post | `POST /api/posts` + `type`, plan-gated (`canPostRecruitment`, `canPublishArticle`) | ✅ | ✅ | ✅ a type-selector pill row above the composer field, shown only on a Business/Enterprise plan and never while quoting; RECRUITMENT adds company (required)/location/apply-link fields, ARTICLE splits into its own title and body fields. Client-side gating mirrors the route's own checks (company required, article body required); `applyUrl` itself is validated server-side (`isSafeApplyUrl`), not re-implemented here | IMPLEMENTED |
 | Inline translation | `POST /api/translate` (session required, 30/min, 2000-char cap; MyMemory with `autodetect` as the source, and it reports no detected language) | ✅ | ✅ | ✅ posts and comments, target = the app's current language; offered from the post/comment menu rather than as a permanent line under every card as on the web, and not offered at all when signed out since the route answers 401 | IMPLEMENTED |
 | Link previews | `GET /api/link-preview?url=…` → a fully-null shape with a **200** for a link it could not read, not an error | ✅ | ⬜ | ✅ shown only when the post carries no image of its own and the route returned a title or an image, matching the web; the URL is `linkUrl` first then the first URL in the text, using a port of the website's own extractor so both platforms unfurl the same link. A greyed placeholder of the card's own shape is drawn while the route answers (web's own skeleton); a zrp.one link in the card opens the app's own screen for it rather than Safari. In chat (1:1 and group), a `zrp.one/post/{id}` link - what "Send in Message" sends - is drawn as a native post card from `GET /api/posts/{id}` and a `/profile/{username}` link as a profile card from `GET /api/users/{username}`, each opening in-app; other zrp.one links get no unfurl, because this route cannot read ZRP's own pages (the website's `classifyInternalLink` rule) | IMPLEMENTED |
 
@@ -132,10 +132,63 @@ called and the real response being handled.
 | --- | --- | --- | --- | --- | --- |
 | Search (users + posts) | `GET /api/search?q=&type=all` (min 2 chars; 10 users / 20 posts, unpaginated) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Trending hashtags | `GET /api/hashtags/trending` (bare array, server-cached, limit clamped 1–50) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Hashtag search | `GET /api/hashtags/search?q=` (new - prefix match against every real hashtag, ranked by usage, `{items,nextCursor}`; distinct from the row above, which only exact-matches a tag already typed out in full as part of a broader post search) | ⬜ no search-as-you-type hashtag UI on any client yet | ⬜ | ⬜ backend-only so far - not built on any client | MISSING |
+| Hashtag search | `GET /api/hashtags/search?q=` (prefix match against every real hashtag, ranked by usage, `{items,nextCursor}`, cursor-paginated; distinct from the row above, which only exact-matches a tag already typed out in full as part of a broader post search) | ⬜ no search-as-you-type hashtag UI yet | ⬜ | ✅ typing "#" into the Search tab's own search field switches it from the ordinary users/posts search to this one - a live, debounced, cursor-paginated list of matching hashtags, each opening the same hashtag timeline the trending-tags row already does. Built here first since no other client had it | IMPLEMENTED |
 | Hashtag timeline | `GET /api/posts/hashtag/{tag}`: now cursor-paginated on request, same `?cursor=`/`?limit=` → `{items,nextCursor}` convention as every other paginated route; a request with neither still gets the unchanged bare array capped at 50 (**FIXED server-side**) | ✅ (unchanged, legacy shape) | ✅ | ✅ same field available to consume; older posts under a popular hashtag were previously unreachable past the first 50 | IMPLEMENTED |
 | Hashtag / mention tap-through in post text | N/A | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Explore / trending pages | `GET /api/posts/explore` | ✅ | 🔶 (For You tab) | 🔶 For You tab + a discover surface (trending tags, suggested people) | PARTIAL |
+
+### ZRP Discover (video feed)
+
+A server-ranked, TikTok-style vertical video feed - `GET /api/discover` -
+entirely distinct from the "Discovery" table above (Search's own
+pre-search suggestions). Was missing on both Android and iOS; Android
+built it first this pass and iOS mirrors it here against the same
+backend contract.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Video feed | `GET /api/discover` (`{cursor}` → `{items,nextCursor}`, works signed-out; server ranks/diversifies/paginates) | ✅ `/discover` | ✅ | ✅ `DiscoverView`/`DiscoverSlideView`, paged vertically through the app's existing shared `FeedVideoCoordinator` (`ShortsView`'s own player, not a second one) | IMPLEMENTED |
+| Watch-event reporting | `POST /api/discover/events` (`{postId, eventType, watchedMs?}` → `{recorded}`; IMPRESSION/START/PROGRESS_25/50/75/COMPLETE/SKIP, same dedup rules as `src/lib/discover-watch-client.ts`) | ✅ | ✅ | ✅ `DiscoverWatchEvents` is a direct Swift port of the same pure threshold/dedup logic, polling the shared player's own position every 250ms while its slide is active | IMPLEMENTED |
+| Like / repost / save / follow | same routes every other feed uses (`/api/posts/{id}/like` etc., `/api/users/{username}/follow`) | ✅ | ✅ | ✅ optimistic, reconciled against the server's own answer, restored on failure - a follow toggle also resolves to a pending "requested" state for a private account, matching `FollowState` on web | IMPLEMENTED |
+| Not interested | `POST /api/discover/not-interested` (`{postId}` → `{dismissed}`, signed-in only) | ✅ | ✅ | ✅ removed from the feed immediately; a failure surfaces a toast but does not restore it | IMPLEMENTED |
+| Mute / block creator from the feed | `POST /api/users/mute`, `POST /api/users/{username}/block` | ✅ | ✅ | ✅ removes every item by that author from the feed on success | IMPLEMENTED |
+| Report | `POST /api/reports` | ✅ | ✅ | ✅ reuses the app's own `ReportSheet` (`target: .post(item.id)`) - nothing Discover-specific to build | IMPLEMENTED |
+| "Why am I seeing this?" | `reason: "recent" \| "popular"` on the item itself - the real ranking reason, never a fabricated personalization claim | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Locked premium item | `premiumPost: {price, currency, previewContent, locked}`, `media.url` withheld while locked | ✅ real preview + a "View post" link (not a purchase action) | ✅ preview text only, no button at all (a stricter, also-honest choice) | ✅ matches web: preview, price/currency shown as plain text, and a "View post" link to the post's own detail screen - never a purchase button, since this app has no purchase flow for any feature (store policy) | IMPLEMENTED |
+| Comments | tapping the comment action | ✅ in-place sheet | 🔶 opens the standalone comments screen instead of an in-place sheet (this app has never had one) | 🔶 opens `postDetail`, same reasoning | PARTIAL (by design) |
+
+### ZRP Live Audio (LiveKit-backed audio rooms)
+
+Twitter Spaces/Clubhouse-style live audio rooms under `live-audio/rooms/...`
+(15 REST routes) plus 8 `live-audio:*` Socket.IO events
+(`src/lib/live-audio/room-service.ts`'s own `emitToLiveAudioRoom`/
+`emitToUser` calls). Paid-gated server-side to pro/business/enterprise
+(`requireLiveAudioAccess`, `liveAudio` in `PLANS`) for creating/joining a
+room; the discovery list itself works signed-out for PUBLIC rooms. Was
+missing on both Android and iOS; Android built it first this pass and iOS
+mirrors it here against the same backend contract. This is the app's
+first third-party dependency: LiveKit's Swift SDK (`livekit-client-sdk-swift`,
+2.17.0), added the same way Android added `livekit-android` - real-time
+audio transport only, never consulted for room/participant membership
+(that stays entirely socket/DB-backed, so a client never trusts LiveKit's
+own view of "who is in this room").
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Room discovery list | `GET /live-audio/rooms` (`{cursor}` → `{rooms,nextCursor}`, works signed-out for PUBLIC rooms) | ✅ `/live-audio` | ✅ | ✅ `LiveAudioListView`, cursor-paginated | IMPLEMENTED |
+| Create room | `POST /live-audio/rooms` (title/description/category/visibility/communityId, paid-gated) | ✅ | ✅ | ✅ title/description/category, PUBLIC/COMMUNITY/PRIVATE segmented picker, community picker reusing `CommunitiesRepository` filtered to membership client-side (no dedicated "my communities" route) | IMPLEMENTED |
+| Join room + LiveKit connect | `POST /live-audio/rooms/{id}/join` → `{participant,token,livekitUrl}`; `Room.connect(url:token:)` | ✅ livekit-client | ✅ livekit-android | ✅ `LiveAudioRoomViewModel.connect`, LiveKit Swift SDK | IMPLEMENTED |
+| Token refresh on role change | `POST /live-audio/rooms/{id}/token` - reissued after a `role-changed` event names the caller, since a LiveKit token's grants are baked in at mint time and cannot be upgraded in place | ✅ | ✅ | ✅ `reconnectWithFreshToken()` reconnects the same `Room` instance | IMPLEMENTED |
+| Leave room | `POST /live-audio/rooms/{id}/leave` | ✅ | ✅ | ✅ called from `leave()` on every exit path (`.onDisappear`), not a teardown hook - a class's own deinit/onCleared is not guaranteed a live task context to await a network call in | IMPLEMENTED |
+| End room (host) | `POST /live-audio/rooms/{id}/end` | ✅ | ✅ | ✅ confirmation dialog, host-only | IMPLEMENTED |
+| Mic on/off | LiveKit `LocalParticipant.setMicrophone(enabled:)`; every participant starts muted, including the host - no auto-unmute on join, matching web | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Raise hand / speak request | `POST /live-audio/rooms/{id}/speak/request` → `live-audio:speaker-request` socket event to the room's authority | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Approve/reject speak request | `POST /live-audio/rooms/{id}/speak/approve`, `/speak/reject` | ✅ | ✅ | ✅ pending-requests panel, host/moderator only | IMPLEMENTED |
+| Promote/demote speaker | `POST /live-audio/rooms/{id}/promote`, `/demote` | ✅ | ✅ | ✅ per-participant menu, host/moderator only, never offered against the caller's own tile | IMPLEMENTED |
+| Mute/unmute another participant | `POST /live-audio/rooms/{id}/mute` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Remove participant | `POST /live-audio/rooms/{id}/remove` | ✅ | ✅ | ✅ confirmation dialog | IMPLEMENTED |
+| Realtime room/participant state | 8 `live-audio:*` Socket.IO events (`participant-joined/left/removed`, `room-ended`, `role-changed`, `mute-changed`, `you-were-removed`, `speaker-request`) over the app's existing `ZrpSocket` | ✅ | ✅ | ✅ every event re-fetches `GET /live-audio/rooms/{id}` rather than trusting the payload as the full state, matching the web page's own approach | IMPLEMENTED |
+| Active-speaker highlight | LiveKit `RoomEvent.ActiveSpeakersChanged` | ✅ | ✅ | ✅ `RoomDelegate.room(_:didUpdateSpeakingParticipants:)`, a red ring on the speaking participant's avatar | IMPLEMENTED |
 
 ### Comments & replies
 
@@ -174,8 +227,7 @@ called and the real response being handled.
 | Realtime | Socket.IO (`server.js`, path `/api/socket.io`, websocket transport, session-cookie handshake) | ✅ | ✅ (Socket.IO Java client) | ✅ Engine.IO v4 + Socket.IO framing written directly on `URLSessionWebSocketTask` (no dependency added). Live `receive-message`, `message-edited`, `message-deleted`, `reaction-updated`, `message-read`; polling stays as the fallback while the socket is down (30 s connected, 6 s not) | IMPLEMENTED |
 | Typing indicator | `typing` → `user-typing` relay | ✅ | ✅ | ✅ throttled to one event every 2 s; the indicator clears itself after 5 s in case the "stopped" event is lost with the connection | IMPLEMENTED |
 | Contact drawer (avatar, name, badge, handle, profile, block/mute, shared media) | `POST /api/users/{username}/block`, `POST /api/users/mute` | ✅ `ChatContactDrawer` | 🔶 | ✅ (**without Call and Video**) | PARTIAL |
-| Voice / video calling: placing/answering | WebRTC signalling over the same socket (`call-user`, `accept-call`, …) | ✅ simple-peer | ✅ | ❌ needs a WebRTC stack, which would be this app's first third-party dependency and a large one. Two permanently dead buttons would be worse than none (see the note in `ChatContactSheet.swift`) | MISSING (reported) |
-| Voice / video calling: **being called** | `incoming-call` → `reject-call` | ✅ | ✅ | ✅ declines immediately and tells the recipient who called, so the caller is released instead of ringing forever (see `IncomingCallResponder.swift`) | IMPLEMENTED |
+| Voice / video calling: placing/answering/being called | WebRTC signalling over the same socket (`call-user`/`incoming-call`/`accept-call`/`call-accepted`/`reject-call`/`call-rejected`/`end-call`/`call-ended`, non-trickle - one full SDP per side) | ✅ simple-peer | ✅ (`org.webrtc.*`) | ✅ `CallViewModel`/`CallView`, `stasel/WebRTC` (a SwiftPM distribution of Google's own prebuilt libwebrtc binaries - this app's *second* third-party dependency, after LiveKit for Live Audio); mic/camera, mute, speaker toggle, front/back camera switch, the same non-trickle-ICE signal/answer timeouts as the Android sibling. Placed from `ConversationView`'s toolbar (matching where the Android sibling puts the buttons); the incoming-call overlay is shown app-wide (`MainTabView`), superseding the earlier decline-only `IncomingCallResponder`. Hardening pass: the overlay used to unmount (and take its own error text with it) in the same render pass a failure set `phase = .idle` - a person could never actually read why a call ended; it now stays up for that case until `dismissError()` is tapped. An ICE `.failed` state used to only set an error flag while leaving the "connected" UI running over a peer connection that could no longer carry media (the Android sibling still does); it now calls `endCall()`, matching the website. `accept-call`/`reject-call`/`end-call` now carry the `callId` `incoming-call` supplied (`socket-authz.js`'s own GENERATION RACE protection) when this side is the callee; the caller side still cannot learn its own outgoing call's id, since that requires a socket.io ACK `ZrpSocket` does not implement. Audio session interruptions (Siri, another app) and route changes (AirPods connecting/disconnecting) are now handled, mirroring `MusicPlayer`'s own observers. CallKit/VoIP push was evaluated and deliberately not added: it would require a working iOS push-delivery path, which does not exist yet for any feature (see [B3](#b3-ios-device-push)) - a CallKit UI with no way to be triggered while backgrounded would be exactly the "capability added blindly" this file warns against elsewhere. `ZRPSocialTests/CallViewModelTests.swift` covers the pure logic (error classification, duration formatting); no CI job runs `xcodebuild test` for this or any other iOS test target today - `ios-native-build.yml` only builds and archives, so this suite is automated but not CI-verified, a pre-existing gap wider than calling | IMPLEMENTED |
 | Read receipts | side effect of `GET /api/messages/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
@@ -194,8 +246,8 @@ called and the real response being handled.
 | Scoring | `scoreTrivia` / `scoreMemory` / `scoreLogic`, server-side | ✅ | ✅ | ✅ **nothing is scored on the client.** `stripAnswers` removes the answers before the content leaves the server, so this app could not score a challenge even if it wanted to; it sends what the player did and displays what the server made of it | IMPLEMENTED |
 | XP, level, streak, achievements | computed by the submit route and `xpProgress` | ✅ | ✅ | ✅ every figure is the server's; the level curve is never recomputed here | IMPLEMENTED |
 | Leaderboard | `GET /api/play/leaderboard` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Duels | `GET`/`POST /api/play/duels`, `/duels/{id}` | ✅ | ✅ | ⬜ opponent search, an invitation lifecycle (pending / accepted / declined / expired) and a result screen that waits for the other player, a module of its own | MISSING |
-| Create a challenge | `POST /api/play/challenges`, `/challenges/generate` | ✅ | ✅ | ⬜ a builder for three different content shapes, plus the AI generator | MISSING |
+| Duels | `GET`/`POST /api/play/duels`, `/duels/{id}` | ✅ | ✅ | ✅ My Duels (incoming/active/history from `GET /api/play/duels`, accept/decline inline), a detail screen (participants, scores, Play/waiting/outcome), and a "Challenge a Friend" panel on the play screen itself (opponent search reuses `GET /api/search?type=all`, `POST /api/play/duels`); playing a duel's shared challenge sends `duelId` on submit and the result screen shows the server-determined won/lost/tied outcome, never a client guess | IMPLEMENTED |
+| Create a challenge | `POST /api/play/challenges`, `/challenges/generate` | ✅ | ✅ | ✅ a manual builder for the three content shapes this app can also play (TRIVIA/MEMORY/LOGIC - REACTION/SEQUENCE are excluded here for the same reason `PlayChallengeType` decodes them to `.unknown`, see its own KDoc), plus an AI-generate tab sharing the ZRP AI chat quota; reached from a "+" on the PLAY home screen, signed-in only | IMPLEMENTED |
 
 ### ZRP OPPORTUNITY
 
@@ -206,7 +258,7 @@ called and the real response being handled.
 | Listing detail | `GET /api/opportunity/{id}`: attaches `alreadyApplied` for a signed-in viewer | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Apply | `POST /api/opportunity/{id}/apply` | ✅ | ✅ | ✅ cover note; the route's own refusals ("already applied", "your own listing", "note too long") are shown as written | IMPLEMENTED |
 | Apply externally | `externalUrl` on the listing | ✅ | ✅ | ✅ opens the link instead of posting an application; the field exists precisely so ZRP does not collect it | IMPLEMENTED |
-| Attach a CV | `resumeUrl` on the apply body | ✅ | ✅ | ⬜ the field is sent as absent rather than empty; a résumé picker is not built | MISSING |
+| Attach a CV | `resumeUrl` on the apply body | ✅ | ✅ | ✅ the apply sheet's own file picker (no MIME filter, matching the website's own unrestricted `<input type="file">`), uploaded through the existing `chatFile` UploadThing router before the application is submitted | IMPLEMENTED |
 | Save a listing | `POST`/`DELETE /api/opportunity/{id}/save`; the detail route now reports `alreadySaved` (PR #150) | ✅ (web now hydrates from `alreadySaved`, was always `false` on load) | ✅ | ✅ the bookmark reflects real saved state on load. It stays indeterminate rather than showing "not saved" only when the route genuinely reports nothing: a signed-out viewer, who has nothing saved and no way to save it | IMPLEMENTED |
 | Post a listing | `POST /api/opportunity`: created as `PENDING_REVIEW` | ✅ | ✅ | ✅ full composer: all eleven types, skills editor, deadline picker, paid/remote toggles, external URL. The route's own limits are mirrored so a refusal is not how anyone learns them, and the note says the listing is not live yet | IMPLEMENTED |
 | Edit a listing | `PUT /api/opportunity/{id}`: poster or staff | ✅ | ✅ | ✅ same composer. A **substantive** edit (type, title, description, compensation) returns a live listing to `PENDING_REVIEW`; the warning appears only when the route's own four fields actually changed | IMPLEMENTED |
@@ -275,7 +327,7 @@ called and the real response being handled.
 | Notification tap-through | N/A | ✅ | ✅ | ✅ like/comment/repost → post, follow → profile, message → thread, appeal outcome → Appeals, listing decision → My listings (the payload carries no listing id, so it leads to where the outcome is visible rather than guessing at one) | IMPLEMENTED |
 | Unrecognised notification types | N/A | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
-| **Device push** | `POST/DELETE /api/push/fcm` accepts `platform: "ios"` and includes a deep-link `data.url`; delivery goes through `firebase-admin/messaging` | n/a | ✅ FCM | ❌ blocked on an APNs key, a `GoogleService-Info.plist`, **and an unresolved dependency decision**: an FCM token on iOS can only come from the Firebase iOS SDK, which this app's zero-dependency architecture excludes. The alternative is a direct APNs sender server-side, which does not exist | **BLOCKED: [B3](#b3-ios-device-push)** |
+| **Device push** | `POST/DELETE /api/push/fcm` accepts `platform: "ios"` and includes a deep-link `data.url`; delivery goes through `firebase-admin/messaging` | n/a | ✅ FCM | ❌ blocked on an APNs key, a `GoogleService-Info.plist`, **and an unresolved dependency decision**: an FCM token on iOS can only come from the Firebase iOS SDK, a third-party dependency this app has not added (see [B3](#b3-ios-device-push) for why the bar for adding it is higher than LiveKit's or WebRTC's). The alternative is a direct APNs sender server-side, which does not exist | **BLOCKED: [B3](#b3-ios-device-push)** |
 
 ### Music
 
@@ -1313,9 +1365,11 @@ part: **how an iOS client would obtain an FCM token at all.**
    **FCM registration token**. On iOS that token is produced by the
    Firebase iOS SDK; there is no way to obtain one from a raw APNs
    device token on the client. So iOS push needs either:
-   - the **Firebase iOS SDK**, which would be this app's first
-     third-party dependency and a large one (the same objection that
-     keeps WebRTC out, see the calling row); or
+   - the **Firebase iOS SDK**, which would be a third sizeable
+     third-party dependency - this app is no longer dependency-free
+     (LiveKit for Live Audio, `stasel/WebRTC` for calling; see the
+     calling row), but each addition so far has mapped to a real,
+     working feature with no other path, and the same bar applies here; or
    - a **direct APNs sender added server-side**, letting iOS register its
      raw APNs device token instead. `grep -rl "apns" src/lib src/app/api`
      returns nothing today, so this path does not exist yet; it is real

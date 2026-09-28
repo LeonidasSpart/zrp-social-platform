@@ -18,8 +18,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FlipCameraAndroid
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.VolumeDown
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.material3.CircularProgressIndicator
@@ -169,52 +172,81 @@ fun CallScreen(
             }
         }
 
-        Row(
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 48.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // Secondary row: speaker/camera-switch, kept separate from
+            // the primary row below so it only ever adds up to 2 extra
+            // buttons regardless of call type, rather than risking up to
+            // 6 buttons crammed into one row on a narrow phone.
             if (state.phase == CallPhase.ACTIVE && state.hasRemoteStream) {
-                CallControlButton(
-                    icon = if (state.isMuted) Icons.Filled.MicOff else Icons.Filled.Mic,
-                    background = if (state.isMuted) MaterialTheme.colorScheme.error else Color(0xFF3A3A3C),
-                    onClick = { viewModel.toggleMute() },
-                )
-                if (state.isVideo) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                ) {
                     CallControlButton(
-                        icon = if (state.isVideoEnabled) Icons.Filled.Videocam else Icons.Filled.VideocamOff,
-                        background = if (!state.isVideoEnabled) MaterialTheme.colorScheme.error else Color(0xFF3A3A3C),
-                        onClick = { viewModel.toggleVideo() },
+                        icon = if (state.isSpeakerOn) Icons.Filled.VolumeUp else Icons.Filled.VolumeDown,
+                        background = if (state.isSpeakerOn) MaterialTheme.colorScheme.primary else Color(0xFF3A3A3C),
+                        onClick = { viewModel.toggleSpeaker() },
                     )
+                    if (state.isVideo && state.isVideoEnabled) {
+                        CallControlButton(
+                            icon = Icons.Filled.FlipCameraAndroid,
+                            background = Color(0xFF3A3A3C),
+                            onClick = { viewModel.switchCamera() },
+                        )
+                    }
                 }
             }
 
-            CallControlButton(
-                icon = if (state.phase == CallPhase.INCOMING) Icons.Filled.Call else Icons.Filled.CallEnd,
-                background = if (state.phase == CallPhase.INCOMING) Color(0xFF22C55E) else MaterialTheme.colorScheme.error,
-                large = true,
-                onClick = {
-                    if (state.phase == CallPhase.INCOMING) {
-                        val permissions = if (state.isVideo) {
-                            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA)
-                        } else {
-                            arrayOf(Manifest.permission.RECORD_AUDIO)
-                        }
-                        acceptPermissionLauncher.launch(permissions)
-                    } else {
-                        viewModel.endCall()
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (state.phase == CallPhase.ACTIVE && state.hasRemoteStream) {
+                    CallControlButton(
+                        icon = if (state.isMuted) Icons.Filled.MicOff else Icons.Filled.Mic,
+                        background = if (state.isMuted) MaterialTheme.colorScheme.error else Color(0xFF3A3A3C),
+                        onClick = { viewModel.toggleMute() },
+                    )
+                    if (state.isVideo) {
+                        CallControlButton(
+                            icon = if (state.isVideoEnabled) Icons.Filled.Videocam else Icons.Filled.VideocamOff,
+                            background = if (!state.isVideoEnabled) MaterialTheme.colorScheme.error else Color(0xFF3A3A3C),
+                            onClick = { viewModel.toggleVideo() },
+                        )
                     }
-                },
-            )
+                }
 
-            if (state.phase == CallPhase.INCOMING) {
                 CallControlButton(
-                    icon = Icons.Filled.Close,
-                    background = MaterialTheme.colorScheme.error,
-                    onClick = { viewModel.rejectCall() },
+                    icon = if (state.phase == CallPhase.INCOMING) Icons.Filled.Call else Icons.Filled.CallEnd,
+                    background = if (state.phase == CallPhase.INCOMING) Color(0xFF22C55E) else MaterialTheme.colorScheme.error,
+                    large = true,
+                    onClick = {
+                        if (state.phase == CallPhase.INCOMING) {
+                            val permissions = if (state.isVideo) {
+                                arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA)
+                            } else {
+                                arrayOf(Manifest.permission.RECORD_AUDIO)
+                            }
+                            acceptPermissionLauncher.launch(permissions)
+                        } else {
+                            viewModel.endCall()
+                        }
+                    },
                 )
+
+                if (state.phase == CallPhase.INCOMING) {
+                    CallControlButton(
+                        icon = Icons.Filled.Close,
+                        background = MaterialTheme.colorScheme.error,
+                        onClick = { viewModel.rejectCall() },
+                    )
+                }
             }
         }
     }

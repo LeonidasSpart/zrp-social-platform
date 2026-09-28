@@ -75,6 +75,11 @@ class PostsRepository {
         scheduledAt: String? = null,
         poll: PollCreateRequest? = null,
         scheduledAtOffsetMinutes: Int? = null,
+        type: String? = null,
+        company: String? = null,
+        location: String? = null,
+        applyUrl: String? = null,
+        articleBody: String? = null,
     ): Result<Post> {
         return try {
             val request = CreatePostRequest(
@@ -85,6 +90,11 @@ class PostsRepository {
                 scheduledAt = scheduledAt,
                 scheduledAtOffsetMinutes = scheduledAtOffsetMinutes,
                 poll = poll,
+                type = type,
+                company = company,
+                location = location,
+                applyUrl = applyUrl,
+                articleBody = articleBody,
             )
             Result.success(ApiClient.postsApi.createPost(request).post)
         } catch (e: HttpException) {

@@ -32,11 +32,34 @@ final class PlayChallengeViewModel: ObservableObject {
 
     private var startedAt = Date()
     private let challengeId: String
+    /// Set only when this challenge is being played as one side of a duel
+    /// (reached from `PlayDuelDetailView`'s Play button) - carried along
+    /// in every submission so the route scores it as that duel's side
+    /// rather than a plain solo attempt. `nil` for every other entry
+    /// point, which is also what makes `isDuelPlay` false and shows the
+    /// "Challenge a Friend" panel below.
+    private let duelId: String?
     private let repository: PlayRepositoryProtocol
+    private let searchRepository: SearchRepositoryProtocol
 
-    init(challengeId: String, repository: PlayRepositoryProtocol = PlayRepository()) {
+    var isDuelPlay: Bool { duelId != nil }
+
+    /// Set by the view from the real session, purely to keep a viewer
+    /// from seeing themself in their own opponent search - the route's
+    /// own "You can't duel yourself" refusal is what actually enforces
+    /// it.
+    var ownUserId: String?
+
+    init(
+        challengeId: String,
+        duelId: String? = nil,
+        repository: PlayRepositoryProtocol = PlayRepository(),
+        searchRepository: SearchRepositoryProtocol = SearchRepository()
+    ) {
         self.challengeId = challengeId
+        self.duelId = duelId
         self.repository = repository
+        self.searchRepository = searchRepository
     }
 
     func load() async {
@@ -79,6 +102,87 @@ final class PlayChallengeViewModel: ObservableObject {
         memory.flip(index)
     }
 
+    // MARK: - Challenge a Friend
+
+    /// Shown only outside duel play (`!isDuelPlay`) and only once signed
+    /// in - the same split PlayChallengePage.tsx makes, since sending a
+    /// duel is `POST /api/play/duels`, which requires a session.
+    @Published var showDuelPanel = false
+    @Published var opponentQuery = ""
+    @Published private(set) var opponentResults: [PostAuthor] = []
+    @Published private(set) var isSearchingOpponents = false
+    @Published var selectedOpponent: PostAuthor?
+    @Published private(set) var isSendingDuel = false
+    @Published private(set) var duelSent = false
+
+    private var opponentSearchTask: Task<Void, Never>?
+
+    func openDuelPanel() {
+        showDuelPanel = true
+    }
+
+    /// Debounced the same way SearchViewModel's own hashtag search is -
+    /// cancels the superseded request rather than letting it race the one
+    /// the user is actually waiting on. Reuses the general
+    /// `GET /api/search?type=all` the rest of the app already searches
+    /// users with, filtered to just `.users` and to exclude the viewer's
+    /// own account.
+    func scheduleOpponentSearch() {
+        opponentSearchTask?.cancel()
+
+        let term = opponentQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard term.count >= SearchRepository.minimumQueryLength else {
+            opponentResults = []
+            isSearchingOpponents = false
+            return
+        }
+
+        opponentSearchTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            guard let self, !Task.isCancelled else { return }
+
+            self.isSearchingOpponents = true
+            defer { self.isSearchingOpponents = false }
+
+            do {
+                let found = try await self.searchRepository.search(query: term)
+                guard !Task.isCancelled else { return }
+                self.opponentResults = found.users.filter { $0.id != self.ownUserId }
+            } catch is CancellationError {
+                return
+            } catch {
+                guard !Task.isCancelled else { return }
+                self.opponentResults = []
+            }
+        }
+    }
+
+    func chooseOpponent(_ opponent: PostAuthor) {
+        selectedOpponent = opponent
+        opponentSearchTask?.cancel()
+        opponentQuery = ""
+        opponentResults = []
+    }
+
+    /// `POST /api/play/duels`. The route itself blocks a self-challenge,
+    /// a blocked-either-way opponent, and any non-active challenge - each
+    /// with its own message, surfaced as sent rather than re-derived here.
+    func sendDuel() async {
+        guard let opponent = selectedOpponent, !isSendingDuel else { return }
+        isSendingDuel = true
+        errorMessage = nil
+        defer { isSendingDuel = false }
+
+        do {
+            _ = try await repository.createDuel(challengeId: challengeId, opponentId: opponent.id)
+            duelSent = true
+        } catch let error as ApiError {
+            errorMessage = error.userFacingMessage
+        } catch {
+            errorMessage = L10n.string(.playErrDuelCreateFailed)
+        }
+    }
+
     // MARK: - Submitting
 
     /// Builds the shape this challenge's type calls for, and sends it.
@@ -93,6 +197,7 @@ final class PlayChallengeViewModel: ObservableObject {
 
         var submission = PlaySubmission()
         submission.timeMs = Int(Date().timeIntervalSince(startedAt) * 1000)
+        submission.duelId = duelId
 
         switch challenge.type {
         case .trivia:
@@ -195,9 +300,9 @@ struct PlayChallengeView: View {
     @EnvironmentObject private var session: SessionController
     @StateObject private var viewModel: PlayChallengeViewModel
 
-    init(challengeId: String) {
+    init(challengeId: String, duelId: String? = nil) {
         _viewModel = StateObject(
-            wrappedValue: PlayChallengeViewModel(challengeId: challengeId)
+            wrappedValue: PlayChallengeViewModel(challengeId: challengeId, duelId: duelId)
         )
     }
 
@@ -213,13 +318,16 @@ struct PlayChallengeView: View {
             case .playing(let challenge):
                 board(challenge)
             case .finished(let result):
-                PlayResultView(result: result)
+                PlayResultView(result: result, ownUserId: session.currentUser?.id)
             }
         }
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.navPlay))
         .navigationBarTitleDisplayMode(.inline)
-        .task { await viewModel.load() }
+        .task {
+            viewModel.ownUserId = session.currentUser?.id
+            await viewModel.load()
+        }
         .alert(
             Text(.iosErrorGenericTitle),
             isPresented: Binding(
@@ -248,6 +356,8 @@ struct PlayChallengeView: View {
                     Text(.opportunityLoginToApply)
                         .font(.footnote)
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
+                } else if !viewModel.isDuelPlay {
+                    duelPanel
                 }
 
                 switch challenge.type {
@@ -456,12 +566,137 @@ struct PlayChallengeView: View {
         }
         .buttonStyle(.plain)
     }
+
+    // MARK: - Challenge a Friend
+
+    /// Ported from PlayChallengeScreen.kt's own duel panel: a collapsed
+    /// link that expands into opponent search, then a "sent" note once
+    /// `POST /api/play/duels` succeeds.
+    @ViewBuilder
+    private var duelPanel: some View {
+        if viewModel.duelSent {
+            Text(.playDuelSent)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(ZrpColor.green)
+        } else if !viewModel.showDuelPanel {
+            Button {
+                viewModel.openDuelPanel()
+            } label: {
+                HStack(spacing: ZrpSpacing.xs) {
+                    Image(systemName: "flag.2.crossed")
+                    Text(.playChallengeFriend)
+                        .font(.subheadline.weight(.semibold))
+                }
+                .foregroundStyle(ZrpColor.red)
+            }
+            .buttonStyle(.plain)
+        } else {
+            VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+                Text(.playSelectOpponent)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(ZrpColor.onSurface)
+
+                opponentSearchField
+
+                Button {
+                    Task { await viewModel.sendDuel() }
+                } label: {
+                    if viewModel.isSendingDuel {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text(.playSendChallenge)
+                    }
+                }
+                .font(.footnote.weight(.semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, ZrpSpacing.sm)
+                .buttonStyle(.borderedProminent)
+                .tint(ZrpColor.red)
+                .disabled(viewModel.selectedOpponent == nil || viewModel.isSendingDuel)
+            }
+            .padding(ZrpSpacing.md)
+            .background(ZrpColor.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
+        }
+    }
+
+    @ViewBuilder
+    private var opponentSearchField: some View {
+        if let opponent = viewModel.selectedOpponent {
+            HStack(spacing: ZrpSpacing.sm) {
+                AvatarView(url: opponent.avatarUrl, displayName: opponent.displayName, size: ZrpMetrics.avatarSmall)
+                Text(verbatim: opponent.handle)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .lineLimit(1)
+                VerifiedBadge(badgeType: opponent.badgeType)
+                Spacer(minLength: 0)
+                Button {
+                    viewModel.selectedOpponent = nil
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                }
+                .accessibilityLabel(Text(.playSelectOpponent))
+            }
+            .padding(ZrpSpacing.sm)
+            .background(ZrpColor.background)
+            .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.sm, style: .continuous))
+        } else {
+            VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
+                TextField(L10n.string(.playSearchUsers), text: $viewModel.opponentQuery)
+                    .textFieldStyle(.roundedBorder)
+                    .onChange(of: viewModel.opponentQuery) { _, _ in
+                        viewModel.scheduleOpponentSearch()
+                    }
+
+                if viewModel.isSearchingOpponents {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, ZrpSpacing.sm)
+                } else if !viewModel.opponentResults.isEmpty {
+                    VStack(spacing: 0) {
+                        ForEach(viewModel.opponentResults) { user in
+                            Button {
+                                viewModel.chooseOpponent(user)
+                            } label: {
+                                HStack(spacing: ZrpSpacing.sm) {
+                                    AvatarView(
+                                        url: user.avatarUrl,
+                                        displayName: user.displayName,
+                                        size: ZrpMetrics.avatarSmall
+                                    )
+                                    Text(verbatim: user.handle)
+                                        .font(.subheadline)
+                                        .foregroundStyle(ZrpColor.onSurface)
+                                        .lineLimit(1)
+                                    VerifiedBadge(badgeType: user.badgeType)
+                                    Spacer(minLength: 0)
+                                }
+                                .padding(ZrpSpacing.sm)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .background(ZrpColor.background)
+                    .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.sm, style: .continuous))
+                }
+            }
+        }
+    }
 }
 
 /// What the server made of it.
 private struct PlayResultView: View {
 
+    @EnvironmentObject private var navigator: Navigator
+
     let result: PlayResult
+    /// So a completed duel's outcome (won/lost/tied) can be worked out
+    /// from `result.winnerId` - never guessed, since the server is what
+    /// determined it.
+    let ownUserId: String?
 
     var body: some View {
         ScrollView {
@@ -474,11 +709,30 @@ private struct PlayResultView: View {
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(ZrpColor.red)
 
-                if result.waitingForOpponent == true {
+                if let duelOutcomeKey {
+                    Label {
+                        Text(duelOutcomeKey)
+                    } icon: {
+                        Image(systemName: "trophy.fill")
+                    }
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(duelOutcomeKey == .playYouWon ? ZrpColor.green : ZrpColor.onSurface)
+                } else if result.waitingForOpponent == true {
                     Text(.playWaitingForOpponent)
                         .font(.subheadline)
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
                         .multilineTextAlignment(.center)
+                }
+
+                if result.waitingForOpponent == true || duelOutcomeKey != nil {
+                    Button {
+                        navigator.push(.playDuels)
+                    } label: {
+                        Text(.playDuelsTitle)
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(ZrpColor.red)
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 HStack(spacing: ZrpSpacing.xl) {
@@ -506,6 +760,15 @@ private struct PlayResultView: View {
             return CountFormatting.exact(result.score)
         }
         return "\(CountFormatting.exact(result.score))/\(CountFormatting.exact(max))"
+    }
+
+    /// `nil` unless this submission was the one that completed a duel.
+    /// `winnerId == nil` is a real tie, not "unknown" - the route only
+    /// ever sends it once both scores are in.
+    private var duelOutcomeKey: L10nKey? {
+        guard result.duelCompleted == true else { return nil }
+        if result.winnerId == nil { return .playTied }
+        return result.winnerId == ownUserId ? .playYouWon : .playYouLost
     }
 
     private func figure(_ key: L10nKey, value: Int) -> some View {

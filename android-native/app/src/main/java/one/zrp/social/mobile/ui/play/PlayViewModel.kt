@@ -53,7 +53,19 @@ class PlayViewModel(private val repository: PlayRepository) : ViewModel() {
                         it.copy(
                             isLoading = false,
                             dailyChallenge = home.dailyChallenge,
-                            trending = home.trending,
+                            // Android has no player view for REACTION/
+                            // SEQUENCE challenges yet (see
+                            // PlayChallengeScreen's own handling of an
+                            // unsupported type) - filtered out of
+                            // browsing here so tapping a trending card
+                            // can never land on that state. The daily
+                            // challenge slot is a single server pick with
+                            // no client-side substitute, so it's left as
+                            // is; PlayChallengeScreen shows a real
+                            // "not supported" message rather than a
+                            // blank screen if the daily happens to be
+                            // one of those two types.
+                            trending = filterPlayableChallenges(home.trending) { it.type },
                             topLeaderboard = home.topLeaderboard,
                             myProfile = home.myProfile,
                             isSignedIn = ownUserId != null,

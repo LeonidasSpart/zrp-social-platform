@@ -33,7 +33,13 @@ data class LoginResponse(
 // identical session token either way (see the route's own comment).
 data class GoogleLoginRequest(val idToken: String)
 
-data class ApiErrorBody(val error: String?, val code: String? = null)
+// `limit` is only ever present on POST /posts/{id}/repost's 429 body
+// (src/app/api/posts/[id]/repost/route.ts) - null everywhere else, same
+// as `code`. See RepostFeedback.kt for why this needs its own field
+// rather than just re-displaying `error` verbatim: the message embeds
+// this same number, but only in English, with no way to build a
+// correctly localized string from the sentence alone.
+data class ApiErrorBody(val error: String?, val code: String? = null, val limit: Int? = null)
 
 // ─── Registration (POST /auth/register) ────────────────────────────
 // Shared with the website - no mobile-specific equivalent exists (only

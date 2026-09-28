@@ -20,15 +20,37 @@ enum PlanLimits {
         let postLength: Int
         let imagesPerPost: Int
         let videoUploadMB: Int
+        let recruitmentProfiles: Bool
+        let articlePublishing: Bool
     }
 
-    private static let free = Limits(postLength: 280, imagesPerPost: 1, videoUploadMB: 32)
-    private static let pro = Limits(postLength: 1_000, imagesPerPost: 4, videoUploadMB: 100)
-    private static let business = Limits(postLength: 5_000, imagesPerPost: 10, videoUploadMB: 500)
+    private static let free = Limits(
+        postLength: 280,
+        imagesPerPost: 1,
+        videoUploadMB: 32,
+        recruitmentProfiles: false,
+        articlePublishing: false
+    )
+    private static let pro = Limits(
+        postLength: 1_000,
+        imagesPerPost: 4,
+        videoUploadMB: 100,
+        recruitmentProfiles: false,
+        articlePublishing: false
+    )
+    private static let business = Limits(
+        postLength: 5_000,
+        imagesPerPost: 10,
+        videoUploadMB: 500,
+        recruitmentProfiles: true,
+        articlePublishing: true
+    )
     private static let enterprise = Limits(
         postLength: 999_999,
         imagesPerPost: 999_999,
-        videoUploadMB: 2_048
+        videoUploadMB: 2_048,
+        recruitmentProfiles: true,
+        articlePublishing: true
     )
 
     /// Unknown or absent plan values resolve to `free`, matching

@@ -82,6 +82,10 @@ function PricingCard({ plan, limits, isCurrent, isAdmin, onUpgrade }: PricingCar
       text: limits.customProfileUrl ? t("pricing.featureCustomUrl") : t("pricing.featureNoCustomUrl"),
     },
     {
+      icon: limits.liveAudio ? "check" : "cross",
+      text: limits.liveAudio ? t("pricing.featureLiveAudio") : t("pricing.featureNoLiveAudio"),
+    },
+    {
       icon: limits.recruitmentProfiles ? "check" : "cross",
       text: limits.recruitmentProfiles ? t("pricing.featureRecruitment") : t("pricing.featureNoRecruitment"),
     },

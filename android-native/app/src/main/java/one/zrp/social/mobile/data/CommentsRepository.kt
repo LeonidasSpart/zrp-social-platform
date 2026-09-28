@@ -3,6 +3,7 @@ package one.zrp.social.mobile.data
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.Comment
+import one.zrp.social.mobile.network.CommentsPage
 import one.zrp.social.mobile.network.CreateCommentRequest
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.RepostResponse
@@ -21,8 +22,15 @@ class CommentsRepository {
         ApiClient.authApi.getSession().user?.id
     }
 
-    suspend fun getComments(postId: String): Result<List<Comment>> = runCatching {
-        ApiClient.commentsApi.getComments(postId, cursor = null).comments ?: emptyList()
+    // Backend paginates top-level threads 10 at a time (each thread's own
+    // replies come back in full, unpaginated, on that same page - see
+    // src/app/api/posts/[id]/comments/route.ts). Returning the raw
+    // CommentsPage (not just its comments list, as this used to) is what
+    // lets the ViewModel actually request page 2+ via nextCursor instead
+    // of silently truncating any post with more than 10 top-level
+    // comments - the real bug this fixes.
+    suspend fun getComments(postId: String, cursor: String? = null): Result<CommentsPage> = runCatching {
+        ApiClient.commentsApi.getComments(postId, cursor)
     }
 
     suspend fun createComment(postId: String, content: String, parentId: String? = null): Result<Comment> {

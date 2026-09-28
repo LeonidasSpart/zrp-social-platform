@@ -13,6 +13,13 @@
          own getUserMedia permission prompt at the same point in the flow. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Normal (install-time, no runtime prompt) permission required for
+         AudioManager.setMode()/setSpeakerphoneOn() - CallViewModel's own
+         setupCallAudio()/toggleSpeaker() calls both need this to put a
+         call into real "phone call" audio mode and route to the
+         speaker; without it these silently no-op or throw depending on
+         OS version. -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <!-- Real background playback for ZRP Music (MusicPlaybackService) -

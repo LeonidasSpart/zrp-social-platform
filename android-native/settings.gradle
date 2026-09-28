@@ -11,6 +11,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // LiveKit's Android SDK (ZRP Live Audio) pulls in
+        // com.github.davidliu:audioswitch as a transitive dependency, which is
+        // only published on JitPack, not Maven Central/Google.
+        maven { url 'https://jitpack.io' }
     }
 }
 

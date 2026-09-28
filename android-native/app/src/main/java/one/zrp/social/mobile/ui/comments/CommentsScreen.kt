@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -48,6 +49,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -165,7 +167,26 @@ fun CommentsScreen(
                     }
                 }
                 else -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    val listState = rememberLazyListState()
+
+                    // Same near-end-of-list pagination trigger HomeScreen
+                    // already uses for the feed - see loadMore()'s own
+                    // KDoc for the bug this fixes (top-level comments
+                    // silently truncating past the first page of 10).
+                    val shouldLoadMore by remember {
+                        derivedStateOf {
+                            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                            val totalItems = listState.layoutInfo.totalItemsCount
+                            totalItems > 0 && lastVisible >= totalItems - 3
+                        }
+                    }
+                    LaunchedEffect(shouldLoadMore) {
+                        if (shouldLoadMore) {
+                            viewModel.loadMore()
+                        }
+                    }
+
+                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                         items(state.comments, key = { it.id }) { comment ->
                             CommentThread(
                                 comment = comment,
@@ -185,6 +206,17 @@ fun CommentsScreen(
                                 onHashtagClick = onOpenHashtag,
                             )
                             HorizontalDivider()
+                        }
+
+                        if (state.isLoadingMore) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                }
+                            }
                         }
                     }
                 }

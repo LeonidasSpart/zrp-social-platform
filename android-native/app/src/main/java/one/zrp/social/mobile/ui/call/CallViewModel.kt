@@ -1,6 +1,10 @@
 package one.zrp.social.mobile.ui.call
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.os.Build
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.socket.client.Socket
@@ -22,6 +26,7 @@ import one.zrp.social.mobile.network.ZrpSocket
 import org.json.JSONObject as OrgJsonObject
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Enumerator
+import org.webrtc.CameraVideoCapturer
 import org.webrtc.DataChannel
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
@@ -80,6 +85,7 @@ data class CallUiState(
     val callerName: String = "",
     val isMuted: Boolean = false,
     val isVideoEnabled: Boolean = true,
+    val isSpeakerOn: Boolean = false,
     val hasRemoteStream: Boolean = false,
     val error: CallError? = null,
 )
@@ -156,6 +162,27 @@ class CallViewModel(
     private var surfaceTextureHelper: SurfaceTextureHelper? = null
     private var localAudioTrack: AudioTrack? = null
     private var localVideoTrack: VideoTrack? = null
+
+    // Neither this app nor page.tsx's own browser RTCPeerConnection call
+    // did anything with AudioManager before this - a browser call gets
+    // "is this a phone call" audio routing/echo-cancellation for free
+    // from the OS's WebRTC-aware audio stack, which a bare Android
+    // AudioTrack does not. Without MODE_IN_COMMUNICATION + real audio
+    // focus, call audio plays back like any other app sound (wrong
+    // volume curve, no automatic echo cancellation tuning, no ducking of
+    // other apps) rather than as a call.
+    private var audioManager: AudioManager? = null
+    // AudioFocusRequest (and requestAudioFocus(AudioFocusRequest)/
+    // abandonAudioFocusRequest(AudioFocusRequest)) is API 26+ only - this
+    // app's minSdkVersion is 24, so a device on 7.0/7.1 must go through
+    // the older requestAudioFocus(listener, streamType, durationHint)/
+    // abandonAudioFocus(listener) pair instead, or this crashes with
+    // NoClassDefFoundError the moment setupCallAudio() actually runs on
+    // one of those OS versions - this field is therefore only ever
+    // populated on API 26+; see setupCallAudio/teardownCallAudio's own
+    // SDK_INT branches.
+    private var audioFocusRequest: AudioFocusRequest? = null
+    private var legacyAudioFocusListener: AudioManager.OnAudioFocusChangeListener? = null
 
     private val _localVideoTrack = MutableStateFlow<VideoTrack?>(null)
     val localVideoTrackFlow: StateFlow<VideoTrack?> = _localVideoTrack.asStateFlow()
@@ -499,6 +526,8 @@ class CallViewModel(
         val factory = peerConnectionFactory ?: return
         val base = eglBase ?: return
 
+        setupCallAudio(context, defaultToSpeaker = isVideo)
+
         val audioSource = factory.createAudioSource(MediaConstraints())
         val audioTrack = factory.createAudioTrack("zrp-audio", audioSource)
         localAudioTrack = audioTrack
@@ -543,6 +572,77 @@ class CallViewModel(
         localAudioTrack = null
         _localVideoTrack.value = null
         _remoteVideoTrack.value = null
+        teardownCallAudio()
+    }
+
+    /**
+     * Puts the device into real "phone call" audio mode - see this
+     * class's own field-level KDoc on why a bare AudioTrack doesn't get
+     * this from the OS automatically the way a browser's WebRTC stack
+     * does. [defaultToSpeaker] matches how every mainstream calling app
+     * defaults video calls to speaker (typically held at a distance) and
+     * voice calls to earpiece.
+     */
+    private fun setupCallAudio(context: Context, defaultToSpeaker: Boolean) {
+        val manager = context.applicationContext.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            ?: return
+        audioManager = manager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val attributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build()
+            val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(attributes)
+                .build()
+            audioFocusRequest = request
+            manager.requestAudioFocus(request)
+        } else {
+            val listener = AudioManager.OnAudioFocusChangeListener { }
+            legacyAudioFocusListener = listener
+            @Suppress("DEPRECATION")
+            manager.requestAudioFocus(listener, AudioManager.STREAM_VOICE_CALL, AudioManager.AUDIOFOCUS_GAIN)
+        }
+
+        manager.mode = AudioManager.MODE_IN_COMMUNICATION
+        manager.isSpeakerphoneOn = defaultToSpeaker
+        _state.update { it.copy(isSpeakerOn = defaultToSpeaker) }
+    }
+
+    private fun teardownCallAudio() {
+        val manager = audioManager ?: return
+        manager.isSpeakerphoneOn = false
+        manager.mode = AudioManager.MODE_NORMAL
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest?.let { manager.abandonAudioFocusRequest(it) }
+            audioFocusRequest = null
+        } else {
+            @Suppress("DEPRECATION")
+            legacyAudioFocusListener?.let { manager.abandonAudioFocus(it) }
+            legacyAudioFocusListener = null
+        }
+        audioManager = null
+    }
+
+    /** Earpiece <-> speaker, for a call already in progress. */
+    fun toggleSpeaker() {
+        val manager = audioManager ?: return
+        val nowOn = !_state.value.isSpeakerOn
+        manager.isSpeakerphoneOn = nowOn
+        _state.update { it.copy(isSpeakerOn = nowOn) }
+    }
+
+    /**
+     * Front <-> back camera, for a video call already in progress.
+     * CameraVideoCapturer.switchCamera() is itself async (it tears down
+     * and restarts capture on a background thread) - a null handler is
+     * a legitimate no-callback call per the WebRTC API, matching how
+     * this class already treats camera/capture teardown elsewhere as
+     * best-effort with no result to react to.
+     */
+    fun switchCamera() {
+        (videoCapturer as? CameraVideoCapturer)?.switchCamera(null)
     }
 
     override fun onCleared() {

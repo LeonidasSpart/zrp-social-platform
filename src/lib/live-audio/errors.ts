@@ -26,6 +26,12 @@ export const LiveAudioErrors = {
   forbidden: (message = "You don't have permission to do that.") =>
     new LiveAudioError("forbidden", message, 403),
   banned: () => new LiveAudioError("banned", "Your account is banned.", 403),
+  paidFeatureRequired: () =>
+    new LiveAudioError(
+      "live_audio_paid_feature",
+      "Live Audio is available only to paid ZRP accounts. Upgrade your plan to access Live Audio.",
+      403
+    ),
   blocked: () => new LiveAudioError("blocked", "You can't join this room.", 403),
   removed: () =>
     new LiveAudioError("removed_from_room", "You were removed from this room.", 403),

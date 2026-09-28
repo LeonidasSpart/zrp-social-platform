@@ -96,9 +96,29 @@ object ApiClient {
         chain.proceed(request)
     }
 
+    // Closes the "any other route silently 401s and nothing happens"
+    // gap: before this, only two specific mutations (profile update,
+    // onboarding-complete) had any handling at all for a session that's
+    // gone dead server-side (ACCOUNT_NOT_FOUND) - see
+    // OnboardingRepository's own KDoc - and every other one of the
+    // ~220 protected routes just left the caller's screen showing a
+    // generic failure with no path back to login. See
+    // shouldTreatAsSessionExpired's own KDoc for exactly which 401s
+    // this does (and deliberately does not) react to.
+    private val sessionExpiryInterceptor = okhttp3.Interceptor { chain ->
+        val request = chain.request()
+        val hadSessionToken = tokenStore.getSessionToken() != null
+        val response = chain.proceed(request)
+        if (shouldTreatAsSessionExpired(request.url.encodedPath, response.code, hadSessionToken)) {
+            SessionExpiryNotifier.notifySessionExpired()
+        }
+        response
+    }
+
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(sessionCookieInterceptor)
         .addInterceptor(platformHeaderInterceptor)
+        .addInterceptor(sessionExpiryInterceptor)
         .addInterceptor(loggingInterceptor)
         .build()
 
@@ -153,4 +173,6 @@ object ApiClient {
     val apiKeysApi: ApiKeysApi by lazy { retrofit.create(ApiKeysApi::class.java) }
     val legalApi: LegalApi by lazy { retrofit.create(LegalApi::class.java) }
     val ambassadorsApi: AmbassadorsApi by lazy { retrofit.create(AmbassadorsApi::class.java) }
+    val discoverApi: DiscoverApi by lazy { retrofit.create(DiscoverApi::class.java) }
+    val liveAudioApi: LiveAudioApi by lazy { retrofit.create(LiveAudioApi::class.java) }
 }

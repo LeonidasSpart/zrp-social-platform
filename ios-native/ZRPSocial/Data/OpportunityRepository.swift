@@ -8,7 +8,7 @@ protocol OpportunityRepositoryProtocol: Sendable {
         cursor: String?
     ) async throws -> OpportunitiesPage
     func listing(id: String) async throws -> Opportunity
-    func apply(id: String, coverNote: String) async throws
+    func apply(id: String, coverNote: String, resumeUrl: String?) async throws
     func setSaved(id: String, saved: Bool) async throws -> Bool
     func create(_ draft: OpportunityDraft) async throws -> String
     func update(id: String, draft: OpportunityDraft) async throws
@@ -145,10 +145,10 @@ struct OpportunityRepository: OpportunityRepositoryProtocol {
 
     private struct ApplyRequest: Encodable {
         let coverNote: String?
-        /// Attaching a CV is a file upload, which this app does not offer
-        /// here yet - the field is sent as absent rather than as an empty
+        /// The already-uploaded resume's UploadThing URL - `nil` when no
+        /// resume was attached, sent as absent rather than as an empty
         /// string, which the route would treat as a value.
-        let resumeUrl: String? = nil
+        let resumeUrl: String?
     }
 
     /// `GET /api/opportunity` - active listings, cursor-paginated, with
@@ -190,12 +190,12 @@ struct OpportunityRepository: OpportunityRepositoryProtocol {
     /// `POST /api/opportunity/{id}/apply`. The route refuses a second
     /// application, an application to your own listing, and a cover note
     /// over 3000 characters - each with its own message.
-    func apply(id: String, coverNote: String) async throws {
+    func apply(id: String, coverNote: String, resumeUrl: String?) async throws {
         let trimmed = coverNote.trimmingCharacters(in: .whitespacesAndNewlines)
         try await client.sendIgnoringResponse(
             try Endpoint.post(
                 "opportunity/\(Endpoint.segment(id))/apply",
-                body: ApplyRequest(coverNote: trimmed.isEmpty ? nil : trimmed)
+                body: ApplyRequest(coverNote: trimmed.isEmpty ? nil : trimmed, resumeUrl: resumeUrl)
             )
         )
     }

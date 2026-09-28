@@ -6,6 +6,7 @@ import { sendPushNotification } from "@/lib/push-notifications";
 import { emitToLiveAudioRoom, emitToUser, evictUserFromLiveAudioRoom } from "@/lib/socket-emit";
 import { mintLiveKitToken, forceDisconnectParticipant, getLiveKitConfig } from "./livekit";
 import { canViewRoom, canPromoteSpeaker, isRoomAuthority } from "./permissions";
+import { requireLiveAudioAccess } from "./entitlement";
 import { LiveAudioErrors } from "./errors";
 
 /*
@@ -92,6 +93,8 @@ export interface CreateRoomInput {
 }
 
 export async function createRoom(input: CreateRoomInput): Promise<LiveAudioRoom> {
+  await requireLiveAudioAccess(input.hostId);
+
   const title = input.title.trim();
   if (!title || title.length > 200) {
     throw LiveAudioErrors.validation("Title must be 1-200 characters.");
@@ -147,6 +150,10 @@ export async function createRoom(input: CreateRoomInput): Promise<LiveAudioRoom>
 export async function startScheduledRoom(roomId: string, actorId: string): Promise<LiveAudioRoom> {
   const room = await getRoomOrThrow(roomId);
   if (room.hostId !== actorId) throw LiveAudioErrors.forbidden("Only the host can start this room.");
+  // Re-checked at start time, not just at scheduling time - the host's
+  // paid period may have lapsed in between (mission requirement: an
+  // expired subscription must not let a scheduled room go live).
+  await requireLiveAudioAccess(actorId);
   if (room.status !== "SCHEDULED") throw LiveAudioErrors.invalidState("This room is not scheduled.");
 
   const result = await prisma.liveAudioRoom.updateMany({
@@ -278,6 +285,12 @@ async function displayNameFor(userId: string): Promise<string> {
 }
 
 export async function joinRoom(roomId: string, userId: string): Promise<JoinResult> {
+  // Checked before anything else, including whether the room itself
+  // exists - a free user gets the exact same paywall response for any
+  // roomId, so this can never be used as an enumeration oracle for
+  // room existence/visibility (mission §7/§28).
+  await requireLiveAudioAccess(userId);
+
   const config = getLiveKitConfig();
   if (!config) throw LiveAudioErrors.notConfigured();
 
@@ -342,6 +355,13 @@ export async function leaveRoom(roomId: string, userId: string): Promise<void> {
  * mint time and are never mutated in place.
  */
 export async function reissueToken(roomId: string, userId: string): Promise<{ token: string; livekitUrl: string }> {
+  // The LiveKit token endpoint is the most security-critical Live Audio
+  // entry point (mission §7): a lapsed subscriber already inside a room
+  // must not be able to mint a FRESH token once their period ends, even
+  // though their already-issued token remains valid for its own TTL
+  // (see TOKEN_TTL in livekit.ts - a documented, bounded limitation).
+  await requireLiveAudioAccess(userId);
+
   const config = getLiveKitConfig();
   if (!config) throw LiveAudioErrors.notConfigured();
 
@@ -446,6 +466,7 @@ async function logModerationAction(
 }
 
 export async function promoteToSpeaker(roomId: string, actorId: string, targetUserId: string): Promise<void> {
+  await requireLiveAudioAccess(actorId);
   const actorRole = await getMyRole(roomId, actorId);
   if (!canPromoteSpeaker(actorRole)) throw LiveAudioErrors.forbidden();
 
@@ -463,6 +484,7 @@ export async function promoteToSpeaker(roomId: string, actorId: string, targetUs
 }
 
 export async function demoteToListener(roomId: string, actorId: string, targetUserId: string): Promise<void> {
+  await requireLiveAudioAccess(actorId);
   const actorRole = await getMyRole(roomId, actorId);
   if (!canPromoteSpeaker(actorRole)) throw LiveAudioErrors.forbidden();
 
@@ -477,6 +499,7 @@ export async function demoteToListener(roomId: string, actorId: string, targetUs
 }
 
 export async function muteParticipant(roomId: string, actorId: string, targetUserId: string, muted: boolean): Promise<void> {
+  await requireLiveAudioAccess(actorId);
   const actorRole = await getMyRole(roomId, actorId);
   if (!canPromoteSpeaker(actorRole)) throw LiveAudioErrors.forbidden();
 
@@ -519,6 +542,7 @@ async function forceMuteAtMediaLayer(roomId: string, userId: string): Promise<vo
 }
 
 export async function removeParticipant(roomId: string, actorId: string, targetUserId: string, reason?: string): Promise<void> {
+  await requireLiveAudioAccess(actorId);
   const actorRole = await getMyRole(roomId, actorId);
   if (!isRoomAuthority(actorRole)) throw LiveAudioErrors.forbidden();
 
@@ -550,6 +574,7 @@ export async function removeParticipant(roomId: string, actorId: string, targetU
 // ─── Speaker requests ────────────────────────────────────────────────
 
 export async function requestToSpeak(roomId: string, userId: string): Promise<void> {
+  await requireLiveAudioAccess(userId);
   const role = await getMyRole(roomId, userId);
   if (role !== "LISTENER") {
     throw LiveAudioErrors.invalidState("Only an active listener can request to speak.");
@@ -578,6 +603,7 @@ export async function resolveSpeakerRequest(
   targetUserId: string,
   approve: boolean
 ): Promise<void> {
+  await requireLiveAudioAccess(actorId);
   const actorRole = await getMyRole(roomId, actorId);
   if (!isRoomAuthority(actorRole)) throw LiveAudioErrors.forbidden();
 

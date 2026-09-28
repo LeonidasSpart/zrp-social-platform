@@ -15,7 +15,7 @@ import one.zrp.social.mobile.network.PollVoteUser
 import one.zrp.social.mobile.network.UserPostStats
 import one.zrp.social.mobile.network.UserProfile
 import one.zrp.social.mobile.network.UserReply
-import one.zrp.social.mobile.ui.components.RepostFailure
+import one.zrp.social.mobile.ui.components.RepostFailureInfo
 import one.zrp.social.mobile.ui.components.toRepostFailure
 
 /**
@@ -489,8 +489,8 @@ class ProfileViewModel(
 
     // Same one-shot repost-refusal signal as HomeViewModel.repostFailure -
     // ProfileScreen shows it as a snackbar and clears it.
-    private val _repostFailure = MutableStateFlow<RepostFailure?>(null)
-    val repostFailure: StateFlow<RepostFailure?> = _repostFailure.asStateFlow()
+    private val _repostFailure = MutableStateFlow<RepostFailureInfo?>(null)
+    val repostFailure: StateFlow<RepostFailureInfo?> = _repostFailure.asStateFlow()
 
     fun dismissRepostFailure() {
         _repostFailure.value = null

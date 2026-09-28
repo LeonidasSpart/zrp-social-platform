@@ -11,9 +11,11 @@ have no client UI.** See section 12 for exact platform-by-platform status.
 ZRP already has one realtime voice/video primitive: 1:1 WebRTC calls
 (`server.js`'s `call-user`/`accept-call`/`reject-call`/`end-call` Socket.IO
 events, `socket-authz.js`'s `createCallRegistry`, `/api/turn-credentials`,
-`simple-peer` on web, native WebRTC on Android, **nothing on iOS** —
-`IncomingCallResponder.swift` auto-declines every call today because this
-app has no WebRTC dependency on iOS at all). That stack is a **mesh**
+`simple-peer` on web, native WebRTC on Android **and iOS**
+(`CallViewModel.swift`, `stasel/WebRTC` - the old decline-only
+`IncomingCallResponder.swift` this paragraph used to describe was
+superseded once iOS gained a real WebRTC dependency; see
+`ios-native/PARITY.md`'s own calling row for current detail). That stack is a **mesh**
 design: each call is exactly one peer-to-peer connection between two
 parties, signaled over Socket.IO, NAT-traversed via STUN/TURN
 (Metered, proxied through `/api/turn-credentials`).
@@ -266,11 +268,11 @@ leaves one stuck LIVE forever:
 
 | Action | HOST | MODERATOR | SPEAKER | LISTENER | Non-member |
 |---|---|---|---|---|---|
-| Create room | (any active user) | — | — | — | — |
+| Create room | (any active user **with Live Audio entitlement** — see §13) | — | — | — | — |
 | View public room | yes | yes | yes | yes | yes |
 | View community room | yes | yes | yes | yes | only if community member |
 | View private room | yes | yes | yes | yes | **no** |
-| Join room | yes | yes | yes | yes | yes, if visibility allows |
+| Join room | yes | yes | yes | yes | yes, if visibility allows **and Live Audio entitlement holds (§13)** |
 | End room | yes | yes | no | no | no |
 | Cancel scheduled room | yes | no | no | no | no |
 | Promote listener to speaker | yes | yes | no | no | no |
@@ -413,7 +415,7 @@ integration" requirement.
   polling. ZRP has one web codebase for web and PWA/mobile-browser (see
   CLAUDE.md), so this single implementation covers both. Reachable from
   the Sidebar's primary nav (new `nav.liveAudio` entry, `Radio` icon);
-  all new user-facing strings are translated across all 29 supported
+  all new user-facing strings are translated across all 34 supported
   languages, verified by the repo's own translation-completeness CI
   gate. **Manually exercised end-to-end** with Playwright against a real
   local dev server + Postgres + Redis: login, discovery empty/loaded
@@ -448,3 +450,91 @@ This matches the mission's own instruction: implement completely up to
 the external-infrastructure/scope boundary, document what's outside it
 honestly, and never claim a client is done when only the backend
 contract exists.
+
+## 13. Live Audio as a paid feature
+
+Live Audio is gated behind an active paid subscription — `pro`,
+`business`, and `enterprise` (`liveAudio: true` in `PLANS`,
+`src/lib/limits.ts`); `free` never has it. This reuses ZRP's existing
+subscription/payment architecture end to end (see `docs/subscriptions.md`)
+— there is no second payment system, no second subscription table, and no
+Live-Audio-specific pricing.
+
+**Enforcement point**: `requireLiveAudioAccess(userId)` /
+`checkLiveAudioAccess(userId)` (`src/lib/live-audio/entitlement.ts`),
+called at the top of every room-service function that constitutes actual
+participation: `createRoom`, `startScheduledRoom`, `joinRoom`,
+`reissueToken`, `requestToSpeak`, `resolveSpeakerRequest`,
+`promoteToSpeaker`, `demoteToListener`, `muteParticipant`,
+`removeParticipant`. Every one of these is reached from exactly one
+route each under `src/app/api/live-audio/**`, so gating room-service.ts
+covers every entry point without duplicating the check per-route. It is
+**not** applied to `leaveRoom`, `endRoom`, `cancelScheduledRoom`, or the
+two read-only discovery endpoints (`GET /rooms`, `GET /rooms/[id]`) —
+a lapsed subscriber must still be able to see the upgrade CTA and get out
+of a room cleanly, and this can never be an enumeration oracle either way
+since `joinRoom`'s own gate runs before the room is even looked up.
+
+**What "entitled" means, precisely** (fails closed on every ambiguous
+case, per mission requirement):
+
+1. A `Subscription` row exists for the user: it alone decides. Must be
+   `status: ACTIVE` **and** `currentPeriodEnd` still in the future,
+   re-checked against the clock on every call — not just the stored
+   `status` — so a period that lapsed minutes ago is denied even before
+   the hourly `expireDueSubscriptions` cron sweeps it to `EXPIRED`
+   (see `docs/subscriptions.md`'s expiration engine section). `PENDING`
+   and `CANCELED` rows, and already-swept `EXPIRED` rows, are all denied.
+2. No `Subscription` row exists at all: this is the documented
+   `NO_SUBSCRIPTION` reconciliation bucket from `docs/subscriptions.md`
+   ("Admin Subscriptions & Billing") — a free user who never paid, or a
+   legacy-paid user (`User.plan != "free"`) who predates the
+   `Subscription` model and hasn't been run through
+   `scripts/backfill-subscriptions.ts` yet. Falling back to `User.plan`
+   here is a deliberate, documented exception, not a loophole: it is
+   exactly what every other paid feature in this app already grants that
+   same user (`hasFeature(getUserPlan(user), ...)` in
+   `feature-status.ts`), and denying it would be revoking access this
+   user is already, legitimately, receiving everywhere else.
+
+**Never cached.** Both `User` and `Subscription` are read fresh from
+Postgres on every protected call — this deliberately bypasses the
+JWT/auth-state ~30s cache (`auth-state.ts`), because the actual
+requirement is "a lapsed subscription loses access immediately," not
+"within one cache window." No wiring into `invalidateUserAuthState()` was
+needed for this reason: there is nothing here to invalidate.
+
+**Response shape**: every denial — free, expired, canceled, pending, or
+an unrecognized plan — returns the exact same
+`LiveAudioErrors.paidFeatureRequired()` (`code: "live_audio_paid_feature"`,
+403, `"Live Audio is available only to paid ZRP accounts. Upgrade your
+plan to access Live Audio."`). Deliberately not run through the app's
+`localizeApiMessage` curated-translation list, matching how every other
+`LiveAudioError` in this file already behaves — this file's existing
+convention (see `src/lib/api-error-i18n.ts`'s own doc comment) is raw,
+un-translated English passthrough for Live-Audio-specific messages, and
+the pricing page's own feature row (`pricing.featureLiveAudio` /
+`pricing.featureNoLiveAudio`) is what's actually translated, across all
+34 supported languages.
+
+**Security properties**: `userId` is always the authenticated session's
+own id (`requireActiveUser()`, never a client-supplied `userId`/`plan`/
+`isPaid` field — no Live Audio route or room-service function accepts any
+of those as an acting-user identity), so there is no plan/identity value
+in a request body to spoof in the first place; the target of a moderation
+action (e.g. `mute`'s `body.userId`) is a *different* user, already
+authorized independently against the room via the existing role checks in
+`permissions.ts`, and is never treated as the acting identity for the
+entitlement check itself.
+
+**Known, documented limitation**: an already-minted LiveKit token remains
+valid for its own TTL (`TOKEN_TTL = "6h"`, `livekit.ts`) even if the
+holder's subscription expires seconds after the token was issued — the
+entitlement gate blocks every subsequent *server-side* action (a new
+join, a token refresh, any moderation call) but does not reach into
+LiveKit to revoke a token already in a client's hands. This mirrors the
+same tradeoff already accepted for the WebRTC call registry's 6h "active"
+TTL and is not unique to this feature; closing it completely would mean
+either much shorter tokens (re-authenticating a legitimate long room
+conversation far more often) or a live LiveKit-side revocation call wired
+to `expireDueSubscriptions`, both out of scope for this pass.

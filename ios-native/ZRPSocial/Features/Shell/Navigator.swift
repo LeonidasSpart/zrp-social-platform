@@ -81,6 +81,14 @@ enum Route: Hashable {
     /// ZRP Shorts. `startId` opens the feed on one particular video -
     /// what tapping a video elsewhere in the app leads to.
     case shorts(startId: String?)
+    /// ZRP Discover - the server-ranked, TikTok-style vertical video
+    /// feed (`GET /api/discover`), a distinct backend concern from
+    /// Search's own "Discover" pre-search state despite the shared name.
+    case discover
+    /// ZRP Live Audio - LiveKit-backed audio rooms (Twitter Spaces/
+    /// Clubhouse-style), paid-gated to pro/business/enterprise server-side.
+    case liveAudio
+    case liveAudioRoom(id: String)
     case news
     case newsArticle(slug: String)
     case explore
@@ -99,8 +107,21 @@ enum Route: Hashable {
     case myOpportunities
     case opportunityApplicants(listingId: String)
     case play
-    case playChallenge(id: String)
+    /// `duelId` is set only when this challenge is being played as one
+    /// side of a duel (reached from `playDuelDetail`'s own Play button) -
+    /// carried along so the submission can settle that duel rather than
+    /// scoring as a plain solo attempt. `nil` for every other entry point
+    /// (the daily challenge, trending, a deep link).
+    case playChallenge(id: String, duelId: String?)
     case playLeaderboard
+    /// The TRIVIA/MEMORY/LOGIC create form - manual builder or AI-generate,
+    /// both publishing via `POST /api/play/challenges`. Reachable only
+    /// while signed in, same as `PlayCreateChallengeScreen` on Android.
+    case playCreateChallenge
+    /// My Duels - incoming invites, active duels, and history, from
+    /// `GET /api/play/duels`. Reachable only while signed in.
+    case playDuels
+    case playDuelDetail(id: String)
     /// Creator Studio - the analytics half only. The website's earnings
     /// tab is excluded by store policy; see `CreatorStudioView`.
     case creatorStudio

@@ -14,6 +14,7 @@ import one.zrp.social.mobile.data.GoogleSignInAttemptMarker
 import one.zrp.social.mobile.data.GoogleSignInCancelledException
 import one.zrp.social.mobile.data.PushRepository
 import one.zrp.social.mobile.network.MobileUser
+import one.zrp.social.mobile.network.SessionExpiryNotifier
 
 sealed interface AuthUiState {
     data object LoggedOut : AuthUiState
@@ -90,6 +91,19 @@ class AuthViewModel(
                 }
             }
             hydrateSessionUser()
+        }
+
+        // The global counterpart to the ACCOUNT_NOT_FOUND-only handling
+        // above: ApiClient's own response interceptor fires this the
+        // moment ANY authenticated request 401s (a ban taking effect
+        // mid-session, a token invalidated server-side, a deleted
+        // account hit through a route other than the two this ViewModel
+        // already knew about) - see SessionExpiryNotifier's own KDoc.
+        // Lives for as long as this ViewModel does (MainActivity's
+        // top-level auth gate), so it's always listening regardless of
+        // which screen is on screen when the 401 actually happens.
+        viewModelScope.launch {
+            SessionExpiryNotifier.events.collect { logoutWithSessionExpired() }
         }
     }
 

@@ -1,9 +1,11 @@
 package one.zrp.social.mobile
 
 import android.Manifest
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -60,6 +62,10 @@ class MainActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (redirectToBrowserIfWebOnlyDeepLink(intent?.data)) {
+            finish()
+            return
+        }
         enableEdgeToEdge()
         setContent {
             // Real window-width detection (tablet/large-screen two-pane
@@ -75,6 +81,57 @@ class MainActivity : AppCompatActivity() {
             ZrpSocialApp(windowSizeClass = windowSizeClass)
         }
     }
+
+    /**
+     * A handful of zrp.one paths deliberately have no native screen -
+     * password reset (`/reset-password/{token}`) and email verification
+     * (`/verify-email`) are completed by the exact same web pages every
+     * other client uses (`src/app/reset-password/[token]`,
+     * `src/app/verify-email`), so there's no separate flow to build and
+     * keep in sync natively.
+     *
+     * Because the release App Link intent-filter (see
+     * AndroidManifest.xml's own comment) verifies the WHOLE zrp.one host
+     * with no path restriction, tapping either link now opens this app
+     * directly instead of a browser. ZrpNavHost's `deepLinks` entries
+     * have no route registered for these two paths, so without this
+     * check Jetpack Navigation silently falls through to whatever the
+     * default logged-in/logged-out screen is, and the reset/verification
+     * token is dropped with no error shown - a real regression once App
+     * Link verification went live in production (confirmed: was fine
+     * before release signing/assetlinks.json were live, since the OS
+     * would show a disambiguation dialog or default to the browser).
+     *
+     * Chrome Custom Tabs, not a plain `ACTION_VIEW` Intent back to the
+     * same URL, is required here specifically: a normal Intent would
+     * just resolve back into this same verified App Link and loop
+     * forever. Custom Tabs bypass App Link resolution by design, so they
+     * reliably land in the user's actual browser.
+     *
+     * Returns true (and the caller must `finish()` this Activity
+     * instance) when the intent was one of these web-only paths;
+     * false otherwise, meaning normal app startup should proceed.
+     */
+    private fun redirectToBrowserIfWebOnlyDeepLink(uri: Uri?): Boolean {
+        if (uri == null || !isWebOnlyDeepLinkPath(uri.host, uri.path)) return false
+        CustomTabsIntent.Builder().build().launchUrl(this, uri)
+        return true
+    }
+}
+
+/**
+ * The pure "does this host/path pair belong to a web-only zrp.one flow"
+ * decision, factored out of [MainActivity.redirectToBrowserIfWebOnlyDeepLink]
+ * so it's testable with a plain JVM unit test - `android.net.Uri` itself
+ * is a framework stub outside instrumentation/Robolectric (neither of
+ * which this module currently pulls in), but the actual routing logic
+ * has nothing to do with Uri parsing itself, only with the already-
+ * extracted host/path strings.
+ */
+internal fun isWebOnlyDeepLinkPath(host: String?, path: String?): Boolean {
+    if (host != "zrp.one" || path == null) return false
+    return path == "/verify-email" ||
+        (path.startsWith("/reset-password/") && path.length > "/reset-password/".length)
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)

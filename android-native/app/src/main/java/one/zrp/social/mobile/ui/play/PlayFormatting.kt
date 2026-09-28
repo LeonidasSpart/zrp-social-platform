@@ -1,9 +1,11 @@
 package one.zrp.social.mobile.ui.play
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -11,10 +13,21 @@ import one.zrp.social.mobile.R
 import one.zrp.social.mobile.network.PLAY_CHALLENGE_TYPES
 import one.zrp.social.mobile.network.PlayAchievement
 
-/** Ported from src/lib/play/types.ts's own TYPE_LABEL_KEYS / ChallengeCard.tsx's TYPE_ICON. */
+/**
+ * Ported from src/lib/play/types.ts's own TYPE_LABEL_KEYS / ChallengeCard.tsx's TYPE_ICON.
+ * REACTION/SEQUENCE (src/lib/play/registry.ts's other two server game
+ * types - see PLAY_CHALLENGE_TYPES's own KDoc on why this app has no
+ * player view for either yet) still need a real icon/label here even
+ * though Android can't play them, because the daily-challenge slot can
+ * still surface one by server selection - falling through the `else`
+ * to LOGIC's icon/label used to actively mislabel a REACTION challenge
+ * as "Logic" rather than just omitting an icon.
+ */
 fun challengeTypeIcon(type: String): ImageVector = when (type) {
     "TRIVIA" -> Icons.Filled.Psychology
     "MEMORY" -> Icons.Filled.GridView
+    "REACTION" -> Icons.Filled.Bolt
+    "SEQUENCE" -> Icons.Filled.Repeat
     else -> Icons.Filled.Extension
 }
 
@@ -22,10 +35,23 @@ fun challengeTypeIcon(type: String): ImageVector = when (type) {
 fun challengeTypeLabel(type: String): String = when (type) {
     "TRIVIA" -> stringResource(R.string.play_type_trivia)
     "MEMORY" -> stringResource(R.string.play_type_memory)
+    "REACTION" -> stringResource(R.string.play_type_reaction)
+    "SEQUENCE" -> stringResource(R.string.play_type_sequence)
     else -> stringResource(R.string.play_type_logic)
 }
 
 val allChallengeTypes: List<String> get() = PLAY_CHALLENGE_TYPES
+
+/**
+ * Keeps only challenges this app actually has a player view for -
+ * PlayViewModel's trending grid uses this so browsing can never surface
+ * a REACTION/SEQUENCE card that would land on the "not supported"
+ * message when tapped (see PlayChallengeScreen). Pulled out as a plain
+ * function (not inlined in the ViewModel) so it has real JUnit coverage
+ * without needing a fake PlayRepository/coroutine test seam.
+ */
+fun <T> filterPlayableChallenges(challenges: List<T>, typeOf: (T) -> String): List<T> =
+    challenges.filter { typeOf(it) in PLAY_CHALLENGE_TYPES }
 
 /** Ported from src/lib/play/types.ts's own DIFFICULTY_LABEL_KEYS. */
 @Composable

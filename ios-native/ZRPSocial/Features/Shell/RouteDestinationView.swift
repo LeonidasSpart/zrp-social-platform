@@ -105,6 +105,12 @@ struct RouteDestinationView: View {
             ListDetailView(listId: id)
         case .shorts(let startId):
             ShortsView(startId: startId)
+        case .discover:
+            DiscoverView()
+        case .liveAudio:
+            LiveAudioListView()
+        case .liveAudioRoom(let id):
+            LiveAudioRoomView(roomId: id)
         case .news:
             NewsView()
         case .newsArticle(let slug):
@@ -133,10 +139,16 @@ struct RouteDestinationView: View {
             OpportunityApplicantsView(listingId: listingId)
         case .play:
             PlayHomeView()
-        case .playChallenge(let id):
-            PlayChallengeView(challengeId: id)
+        case .playChallenge(let id, let duelId):
+            PlayChallengeView(challengeId: id, duelId: duelId)
         case .playLeaderboard:
             PlayLeaderboardView()
+        case .playCreateChallenge:
+            PlayCreateChallengeView()
+        case .playDuels:
+            PlayDuelsView()
+        case .playDuelDetail(let id):
+            PlayDuelDetailView(duelId: id)
         case .creatorStudio:
             CreatorStudioView()
         case .charityTransparency:

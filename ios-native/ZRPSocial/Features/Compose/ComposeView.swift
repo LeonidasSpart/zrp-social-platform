@@ -30,7 +30,10 @@ struct ComposeView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
+                    postTypeSelector
                     editor
+                    articleBodyField
+                    recruitmentFields
                     quotedPreview
                     scheduler
                     pollBuilder
@@ -140,6 +143,10 @@ struct ComposeView: View {
             || !viewModel.attachments.isEmpty
             || !viewModel.pollQuestion.isEmpty
             || viewModel.pollOptions.contains { !$0.isEmpty }
+            || !viewModel.company.isEmpty
+            || !viewModel.location.isEmpty
+            || !viewModel.applyUrl.isEmpty
+            || !viewModel.articleBody.isEmpty
     }
 
     // MARK: - Sections
@@ -153,16 +160,117 @@ struct ComposeView: View {
             )
             .accessibilityHidden(true)
 
+            // The same field doubles as a RECRUITMENT post's own text and
+            // an ARTICLE's title/teaser - matching PostComposer.tsx and
+            // CreatePostScreen.kt, which both use one `content` field for
+            // every type rather than a separate title field.
             TextField(
-                L10n.string(.composerPlaceholderDefault),
+                L10n.string(editorPlaceholderKey),
                 text: $viewModel.text,
                 axis: .vertical
             )
             .focused($isTextFocused)
             .font(.body)
             .foregroundStyle(ZrpColor.onSurface)
-            .lineLimit(6...)
-            .accessibilityLabel(Text(.composerPlaceholderDefault))
+            // Both branches as a `ClosedRange` (rather than the default
+            // case's more natural `6...`) so the ternary type-checks -
+            // `ClosedRange<Int>` and `PartialRangeFrom<Int>` are not the
+            // same type, and 999 is unbounded in any real post anyway.
+            .lineLimit(viewModel.postType == .article ? 1...3 : 6...999)
+            .accessibilityLabel(Text(editorPlaceholderKey))
+        }
+    }
+
+    private var editorPlaceholderKey: L10nKey {
+        switch viewModel.postType {
+        case .recruitment: return .composerPlaceholderRecruitment
+        case .article: return .composerPlaceholderArticleTitle
+        case .post, .unknown: return .composerPlaceholderDefault
+        }
+    }
+
+    /// Shown only while a plan allows RECRUITMENT or ARTICLE, and never
+    /// while quoting - matches `ComposeViewModel.showsTypeSelector`.
+    @ViewBuilder
+    private var postTypeSelector: some View {
+        if viewModel.showsTypeSelector {
+            HStack(spacing: ZrpSpacing.sm) {
+                Text(.composerPostAs)
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+
+                PostTypePill(
+                    title: L10n.string(.actionPost),
+                    isSelected: viewModel.postType == .post,
+                    onTap: { viewModel.setPostType(.post) }
+                )
+                if viewModel.canSelectRecruitment {
+                    PostTypePill(
+                        title: L10n.string(.composerRecruitment),
+                        isSelected: viewModel.postType == .recruitment,
+                        onTap: { viewModel.setPostType(.recruitment) }
+                    )
+                }
+                if viewModel.canSelectArticle {
+                    PostTypePill(
+                        title: L10n.string(.composerArticle),
+                        isSelected: viewModel.postType == .article,
+                        onTap: { viewModel.setPostType(.article) }
+                    )
+                }
+            }
+        }
+    }
+
+    /// An ARTICLE's body, separate from `editor`'s title/teaser field -
+    /// matches CreatePostScreen.kt's own split.
+    @ViewBuilder
+    private var articleBodyField: some View {
+        if viewModel.postType == .article {
+            VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
+                TextField(
+                    L10n.string(.composerPlaceholderArticleBody),
+                    text: $viewModel.articleBody,
+                    axis: .vertical
+                )
+                .font(.body)
+                .foregroundStyle(ZrpColor.onSurface)
+                .lineLimit(8...)
+                .padding(ZrpSpacing.md)
+                .background(ZrpColor.surfaceElevated)
+                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
+                .accessibilityLabel(Text(.composerPlaceholderArticleBody))
+
+                Text(.composerArticleMarkdown)
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+            }
+        }
+    }
+
+    /// Company (required), location and an apply link - matches
+    /// CreatePostScreen.kt's `RecruitmentFields`. The route itself
+    /// validates `applyUrl` (`isSafeApplyUrl`, http(s)/mailto only,
+    /// since it is rendered as a raw href); this client sends whatever
+    /// was typed and surfaces the route's own refusal rather than
+    /// re-implementing that check.
+    @ViewBuilder
+    private var recruitmentFields: some View {
+        if viewModel.postType == .recruitment {
+            VStack(spacing: ZrpSpacing.sm) {
+                TextField(L10n.string(.composerCompanyPlaceholder), text: $viewModel.company)
+                    .textFieldStyle(.roundedBorder)
+                TextField(L10n.string(.composerLocationPlaceholder), text: $viewModel.location)
+                    .textFieldStyle(.roundedBorder)
+                TextField(L10n.string(.composerApplyUrlPlaceholder), text: $viewModel.applyUrl)
+                    .textFieldStyle(.roundedBorder)
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
+            .padding(ZrpSpacing.sm)
+            .background(ZrpColor.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
         }
     }
 
@@ -454,6 +562,25 @@ struct ComposeView: View {
         pickerSelection = []
         guard !loaded.isEmpty else { return }
         viewModel.add(loaded)
+    }
+}
+
+/// One option in the RECRUITMENT/ARTICLE type-selector row.
+private struct PostTypePill: View {
+    let title: String
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            Text(verbatim: title)
+                .font(.footnote.weight(.semibold))
+                .padding(.horizontal, ZrpSpacing.md)
+                .padding(.vertical, ZrpSpacing.xs)
+                .background(isSelected ? ZrpColor.red : ZrpColor.surfaceElevated)
+                .foregroundStyle(isSelected ? .white : ZrpColor.onSurface)
+                .clipShape(Capsule())
+        }
     }
 }
 

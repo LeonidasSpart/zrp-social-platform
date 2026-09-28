@@ -9,6 +9,15 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+// The server (src/lib/play/registry.ts) has 5 real game types - this
+// app only has a player view for these 3. REACTION and SEQUENCE exist
+// and are fully playable on web/iOS; a challenge of either type can
+// still reach this app (the daily-challenge slot is a single server
+// pick with no client-side substitute, and a shared duel/challenge link
+// can point straight at one) - see PlayChallengeScreen's own handling
+// of an unparsed content type for how that's shown instead of a blank
+// screen, and PlayViewModel's trending-grid filter for keeping browsing
+// itself limited to types this app can actually play.
 val PLAY_CHALLENGE_TYPES = listOf("TRIVIA", "MEMORY", "LOGIC")
 val PLAY_DIFFICULTIES = listOf("easy", "medium", "hard")
 

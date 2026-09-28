@@ -7,14 +7,9 @@ import SwiftUI
 /// blocking, deleting the conversation, and the pictures already
 /// exchanged in this thread.
 ///
-/// **Call and video are deliberately absent, not forgotten.** ZRP's
-/// calling is WebRTC - `server.js` relays simple-peer SDP offers over the
-/// same socket - and iOS has no WebRTC without adding the app's first
-/// third-party dependency, a large one. The website disables those two
-/// buttons when it has no handler for them; showing two permanently dead
-/// controls here would be worse than not showing them, and pretending
-/// otherwise is exactly what a fake feature looks like. Recorded as an
-/// open gap in PARITY.md rather than hidden.
+/// Call and video live in `ConversationView`'s own toolbar rather than
+/// here, matching where the Android sibling puts them (the conversation
+/// screen's top bar, not its contact-info sheet) - see `CallViewModel`.
 struct ChatContactSheet: View {
 
     let partner: PostAuthor
