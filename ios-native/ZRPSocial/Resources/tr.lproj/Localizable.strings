@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Bağlantı başarısız oldu";
 "chat.callNoAnswer" = "Cevap yok";
 "chat.callUnavailable" = "Bu kişi şu anda müsait değil";
+"opportunity.resumeLabel" = "Özgeçmiş (isteğe bağlı)";
+"opportunity.attachResume" = "Özgeçmiş ekle";
+"opportunity.uploading" = "Yükleniyor...";
+"opportunity.errResumeUploadFailed" = "Özgeçmişin yüklenemedi.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    tr. A key with no translation yet falls back to the

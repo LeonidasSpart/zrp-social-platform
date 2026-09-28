@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "कनेक्शन विफल हुआ";
 "chat.callNoAnswer" = "कोई जवाब नहीं";
 "chat.callUnavailable" = "यह व्यक्ति अभी उपलब्ध नहीं है";
+"opportunity.resumeLabel" = "रिज़्यूमे (वैकल्पिक)";
+"opportunity.attachResume" = "रिज़्यूमे संलग्न करें";
+"opportunity.uploading" = "अपलोड किया जा रहा है...";
+"opportunity.errResumeUploadFailed" = "आपका रिज़्यूमे अपलोड करने में विफल।";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    hi. A key with no translation yet falls back to the

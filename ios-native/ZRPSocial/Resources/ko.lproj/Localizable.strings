@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "연결 실패";
 "chat.callNoAnswer" = "응답 없음";
 "chat.callUnavailable" = "이 사용자는 현재 이용할 수 없습니다";
+"opportunity.resumeLabel" = "이력서(선택 사항)";
+"opportunity.attachResume" = "이력서 첨부";
+"opportunity.uploading" = "업로드하는 중...";
+"opportunity.errResumeUploadFailed" = "이력서 업로드에 실패했어요.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ko. A key with no translation yet falls back to the

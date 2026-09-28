@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Yhteys epäonnistui";
 "chat.callNoAnswer" = "Ei vastausta";
 "chat.callUnavailable" = "Tämä henkilö ei ole tavoitettavissa juuri nyt";
+"opportunity.resumeLabel" = "Ansioluettelo (valinnainen)";
+"opportunity.attachResume" = "Liitä ansioluettelo";
+"opportunity.uploading" = "Ladataan...";
+"opportunity.errResumeUploadFailed" = "Ansioluettelosi lataaminen epäonnistui.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    fi. A key with no translation yet falls back to the

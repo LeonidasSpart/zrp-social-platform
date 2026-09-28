@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Koneksi gagal";
 "chat.callNoAnswer" = "Tidak ada jawaban";
 "chat.callUnavailable" = "Orang ini sedang tidak tersedia";
+"opportunity.resumeLabel" = "Resume (opsional)";
+"opportunity.attachResume" = "Lampirkan resume";
+"opportunity.uploading" = "Mengunggah...";
+"opportunity.errResumeUploadFailed" = "Gagal mengunggah resume-mu.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    id. A key with no translation yet falls back to the

@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Pripojenie zlyhalo";
 "chat.callNoAnswer" = "Žiadna odpoveď";
 "chat.callUnavailable" = "Táto osoba je momentálne nedostupná";
+"opportunity.resumeLabel" = "Životopis (voliteľné)";
+"opportunity.attachResume" = "Priložiť životopis";
+"opportunity.uploading" = "Nahráva sa...";
+"opportunity.errResumeUploadFailed" = "Nepodarilo sa nahrať váš životopis.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    sk. A key with no translation yet falls back to the

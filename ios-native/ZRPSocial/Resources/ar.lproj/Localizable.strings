@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "فشل الاتصال";
 "chat.callNoAnswer" = "لا يوجد رد";
 "chat.callUnavailable" = "هذا الشخص غير متاح الآن";
+"opportunity.resumeLabel" = "السيرة الذاتية (اختياري)";
+"opportunity.attachResume" = "إرفاق السيرة الذاتية";
+"opportunity.uploading" = "جارٍ الرفع...";
+"opportunity.errResumeUploadFailed" = "فشل رفع سيرتك الذاتية.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ar. A key with no translation yet falls back to the

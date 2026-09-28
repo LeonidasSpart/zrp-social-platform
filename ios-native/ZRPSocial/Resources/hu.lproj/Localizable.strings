@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Sikertelen kapcsolódás";
 "chat.callNoAnswer" = "Nincs válasz";
 "chat.callUnavailable" = "Ez a személy jelenleg nem elérhető";
+"opportunity.resumeLabel" = "Önéletrajz (opcionális)";
+"opportunity.attachResume" = "Önéletrajz csatolása";
+"opportunity.uploading" = "Feltöltés...";
+"opportunity.errResumeUploadFailed" = "Nem sikerült feltölteni az önéletrajzodat.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    hu. A key with no translation yet falls back to the

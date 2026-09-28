@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "接続に失敗しました";
 "chat.callNoAnswer" = "応答なし";
 "chat.callUnavailable" = "この人は現在利用できません";
+"opportunity.resumeLabel" = "履歴書（任意）";
+"opportunity.attachResume" = "履歴書を添付";
+"opportunity.uploading" = "アップロード中...";
+"opportunity.errResumeUploadFailed" = "履歴書のアップロードに失敗しました。";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ja. A key with no translation yet falls back to the

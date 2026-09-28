@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Η σύνδεση απέτυχε";
 "chat.callNoAnswer" = "Καμία απάντηση";
 "chat.callUnavailable" = "Αυτό το άτομο δεν είναι διαθέσιμο αυτή τη στιγμή";
+"opportunity.resumeLabel" = "Βιογραφικό Σημείωμα (προαιρετικό)";
+"opportunity.attachResume" = "Επισύναψε βιογραφικό σημείωμα";
+"opportunity.uploading" = "Μεταφόρτωση...";
+"opportunity.errResumeUploadFailed" = "Η μεταφόρτωση του βιογραφικού σου απέτυχε.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    el. A key with no translation yet falls back to the

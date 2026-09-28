@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Connection failed";
 "chat.callNoAnswer" = "No answer";
 "chat.callUnavailable" = "This person is unavailable right now";
+"opportunity.resumeLabel" = "Resume (optional)";
+"opportunity.attachResume" = "Attach resume";
+"opportunity.uploading" = "Uploading...";
+"opportunity.errResumeUploadFailed" = "Failed to upload your resume.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json). This is the
    development-language source; every other language emits its own

@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Verbinding mislukt";
 "chat.callNoAnswer" = "Geen antwoord";
 "chat.callUnavailable" = "Deze persoon is momenteel niet beschikbaar";
+"opportunity.resumeLabel" = "Cv (optioneel)";
+"opportunity.attachResume" = "Cv bijvoegen";
+"opportunity.uploading" = "Uploaden...";
+"opportunity.errResumeUploadFailed" = "Uploaden van je cv mislukt.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    nl. A key with no translation yet falls back to the

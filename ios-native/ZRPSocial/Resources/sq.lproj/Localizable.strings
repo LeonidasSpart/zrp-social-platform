@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Lidhja dështoi";
 "chat.callNoAnswer" = "Pa përgjigje";
 "chat.callUnavailable" = "Ky person nuk është i disponueshëm tani";
+"opportunity.resumeLabel" = "CV (opsional)";
+"opportunity.attachResume" = "Bashkangjit CV";
+"opportunity.uploading" = "Duke ngarkuar...";
+"opportunity.errResumeUploadFailed" = "Ngarkimi i CV-së dështoi.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    sq. A key with no translation yet falls back to the

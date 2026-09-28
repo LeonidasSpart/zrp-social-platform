@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Поврзувањето не успеа";
 "chat.callNoAnswer" = "Нема одговор";
 "chat.callUnavailable" = "Оваа личност моментално не е достапна";
+"opportunity.resumeLabel" = "Биографија (опционално)";
+"opportunity.attachResume" = "Прикачи биографија";
+"opportunity.uploading" = "Се поставува...";
+"opportunity.errResumeUploadFailed" = "Поставувањето на твојата биографија не успеа.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    mk. A key with no translation yet falls back to the

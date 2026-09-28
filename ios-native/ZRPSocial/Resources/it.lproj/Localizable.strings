@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Connessione non riuscita";
 "chat.callNoAnswer" = "Nessuna risposta";
 "chat.callUnavailable" = "Questa persona non è disponibile al momento";
+"opportunity.resumeLabel" = "CV (facoltativo)";
+"opportunity.attachResume" = "Allega CV";
+"opportunity.uploading" = "Caricamento in corso...";
+"opportunity.errResumeUploadFailed" = "Impossibile caricare il tuo CV.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    it. A key with no translation yet falls back to the

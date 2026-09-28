@@ -1378,3 +1378,9 @@ chat.missingCallerId
 chat.connectionFailed
 chat.callNoAnswer
 chat.callUnavailable
+
+# ── Opportunity: attach a CV to a job application ──────────────────────
+opportunity.resumeLabel
+opportunity.attachResume
+opportunity.uploading
+opportunity.errResumeUploadFailed

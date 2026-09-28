@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "连接失败";
 "chat.callNoAnswer" = "无人接听";
 "chat.callUnavailable" = "此人当前不可用";
+"opportunity.resumeLabel" = "简历（可选）";
+"opportunity.attachResume" = "附加简历";
+"opportunity.uploading" = "正在上传...";
+"opportunity.errResumeUploadFailed" = "简历上传失败。";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    zh. A key with no translation yet falls back to the

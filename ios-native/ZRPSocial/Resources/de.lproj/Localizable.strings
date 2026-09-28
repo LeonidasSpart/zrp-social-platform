@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Verbindung fehlgeschlagen";
 "chat.callNoAnswer" = "Keine Antwort";
 "chat.callUnavailable" = "Diese Person ist gerade nicht erreichbar";
+"opportunity.resumeLabel" = "Lebenslauf (optional)";
+"opportunity.attachResume" = "Lebenslauf anhängen";
+"opportunity.uploading" = "Wird hochgeladen...";
+"opportunity.errResumeUploadFailed" = "Dein Lebenslauf konnte nicht hochgeladen werden.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    de. A key with no translation yet falls back to the

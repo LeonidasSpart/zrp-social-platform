@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Povezava ni uspela";
 "chat.callNoAnswer" = "Brez odgovora";
 "chat.callUnavailable" = "Ta oseba trenutno ni na voljo";
+"opportunity.resumeLabel" = "Življenjepis (neobvezno)";
+"opportunity.attachResume" = "Priloži življenjepis";
+"opportunity.uploading" = "Nalaganje ...";
+"opportunity.errResumeUploadFailed" = "Nalaganje vašega življenjepisa ni uspelo.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    sl. A key with no translation yet falls back to the

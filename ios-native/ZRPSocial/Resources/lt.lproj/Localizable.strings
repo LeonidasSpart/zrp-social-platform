@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Nepavyko prisijungti";
 "chat.callNoAnswer" = "Neatsiliepė";
 "chat.callUnavailable" = "Šiuo metu šis žmogus nepasiekiamas";
+"opportunity.resumeLabel" = "Gyvenimo aprašymas (neprivaloma)";
+"opportunity.attachResume" = "Prisegti gyvenimo aprašymą";
+"opportunity.uploading" = "Įkeliama...";
+"opportunity.errResumeUploadFailed" = "Nepavyko įkelti jūsų gyvenimo aprašymo.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    lt. A key with no translation yet falls back to the

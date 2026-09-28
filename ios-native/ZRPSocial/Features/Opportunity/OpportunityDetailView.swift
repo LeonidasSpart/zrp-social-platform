@@ -47,13 +47,13 @@ final class OpportunityDetailViewModel: ObservableObject {
         }
     }
 
-    func apply(coverNote: String) async -> Bool {
+    func apply(coverNote: String, resumeUrl: String?) async -> Bool {
         guard !isBusy else { return false }
         isBusy = true
         defer { isBusy = false }
 
         do {
-            try await repository.apply(id: listingId, coverNote: coverNote)
+            try await repository.apply(id: listingId, coverNote: coverNote, resumeUrl: resumeUrl)
             hasApplied = true
             notice = L10n.string(.opportunityApplicationSent)
             return true
@@ -118,7 +118,7 @@ struct OpportunityDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
         .sheet(isPresented: $isApplying) {
-            ApplySheet { note in await viewModel.apply(coverNote: note) }
+            ApplySheet { note, resumeUrl in await viewModel.apply(coverNote: note, resumeUrl: resumeUrl) }
         }
         .alert(
             Text(.iosErrorGenericTitle),
@@ -323,19 +323,25 @@ struct OpportunityDetailView: View {
     }
 }
 
-/// The cover note.
+/// The cover note, plus an optional résumé attachment.
 private struct ApplySheet: View {
 
-    let onSend: (String) async -> Bool
+    let onSend: (String, String?) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var note = ""
     @State private var isSending = false
 
+    @State private var resumeUrl: String?
+    @State private var resumeName: String?
+    @State private var isUploadingResume = false
+    @State private var isPickingResume = false
+    @State private var resumeError: String?
+
     /// The route caps the cover note at 3000 characters and accepts an
     /// empty one, so this only prevents a request that could only fail.
     private var canSend: Bool {
-        !isSending && note.count <= 3000
+        !isSending && !isUploadingResume && note.count <= 3000
     }
 
     var body: some View {
@@ -356,6 +362,8 @@ private struct ApplySheet: View {
                 .background(ZrpColor.surfaceElevated)
                 .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
 
+                resumeField
+
                 Spacer()
             }
             .padding(ZrpSpacing.lg)
@@ -370,7 +378,7 @@ private struct ApplySheet: View {
                     Button {
                         isSending = true
                         Task {
-                            let sent = await onSend(note)
+                            let sent = await onSend(note, resumeUrl)
                             isSending = false
                             if sent { dismiss() }
                         }
@@ -383,7 +391,98 @@ private struct ApplySheet: View {
                     .disabled(!canSend)
                 }
             }
+            // No `accept` restriction, deliberately - a cloud-storage
+            // provider's own file picker frequently doesn't tag a résumé
+            // with a MIME type any narrower filter would recognise, and
+            // the server (`chatFile`'s pdf/text/blob categories) already
+            // accepts whatever comes through, matching the website's own
+            // unrestricted `<input type="file">` for this same field.
+            .fileImporter(
+                isPresented: $isPickingResume,
+                allowedContentTypes: [.item],
+                allowsMultipleSelection: false
+            ) { result in
+                guard case .success(let urls) = result, let url = urls.first else { return }
+                uploadResume(from: url)
+            }
         }
         .presentationDetents([.medium, .large])
+    }
+
+    @ViewBuilder
+    private var resumeField: some View {
+        VStack(alignment: .leading, spacing: ZrpSpacing.xs) {
+            Text(.opportunityResumeLabel)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+
+            if let resumeName {
+                HStack(spacing: ZrpSpacing.sm) {
+                    Image(systemName: "paperclip")
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    Text(verbatim: resumeName)
+                        .font(.footnote)
+                        .foregroundStyle(ZrpColor.onSurface)
+                        .lineLimit(1)
+                }
+                .padding(.horizontal, ZrpSpacing.md)
+                .frame(minHeight: ZrpMetrics.minTouchTarget)
+                .background(ZrpColor.surfaceElevated)
+                .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
+            } else {
+                Button {
+                    isPickingResume = true
+                } label: {
+                    HStack(spacing: ZrpSpacing.sm) {
+                        if isUploadingResume {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "paperclip")
+                        }
+                        Text(isUploadingResume ? L10nKey.opportunityUploading : L10nKey.opportunityAttachResume)
+                            .font(.footnote)
+                    }
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .padding(.horizontal, ZrpSpacing.md)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous)
+                            .strokeBorder(ZrpColor.outline, style: StrokeStyle(lineWidth: 1, dash: [4]))
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(isUploadingResume)
+            }
+
+            if let resumeError {
+                Text(verbatim: resumeError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+        }
+    }
+
+    private func uploadResume(from url: URL) {
+        guard let document = try? PickedDocument(copying: url) else {
+            resumeError = L10n.string(.opportunityErrResumeUploadFailed)
+            return
+        }
+        isUploadingResume = true
+        resumeError = nil
+        Task {
+            defer { document.discard() }
+            do {
+                let uploaded = try await UploadThingClient().upload(
+                    document.asUploadCandidate(),
+                    to: .chatFile,
+                    onProgress: { _ in }
+                )
+                resumeUrl = uploaded.url
+                resumeName = document.fileName
+            } catch {
+                resumeError = L10n.string(.opportunityErrResumeUploadFailed)
+            }
+            isUploadingResume = false
+        }
     }
 }

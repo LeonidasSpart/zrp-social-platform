@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Forbindelsen mislykkedes";
 "chat.callNoAnswer" = "Intet svar";
 "chat.callUnavailable" = "Denne person er ikke tilgængelig lige nu";
+"opportunity.resumeLabel" = "CV (valgfrit)";
+"opportunity.attachResume" = "Vedhæft CV";
+"opportunity.uploading" = "Uploader...";
+"opportunity.errResumeUploadFailed" = "Kunne ikke uploade dit CV.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    da. A key with no translation yet falls back to the

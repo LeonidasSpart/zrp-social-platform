@@ -1287,6 +1287,10 @@
 "chat.connectionFailed" = "Сбой соединения";
 "chat.callNoAnswer" = "Нет ответа";
 "chat.callUnavailable" = "Этот человек сейчас недоступен";
+"opportunity.resumeLabel" = "Резюме (необязательно)";
+"opportunity.attachResume" = "Прикрепить резюме";
+"opportunity.uploading" = "Загрузка...";
+"opportunity.errResumeUploadFailed" = "Не удалось загрузить резюме.";
 
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    ru. A key with no translation yet falls back to the
