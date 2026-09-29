@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Popularne</string>
     <string name="right_panel_posts_count">Posty: %1$d</string>
     <string name="right_panel_no_trending">Brak popularnych hashtagów.</string>
+    <string name="explore_people_near_you_title">Osoby w pobliżu</string>
+    <string name="explore_people_near_you_subtitle">Ten sam kraj co Ty</string>
+    <string name="explore_people_near_you_empty">Nikogo w pobliżu jeszcze nie ma.</string>
     <string name="home_discover_music">Odkrywaj nową muzykę</string>
     <string name="action_follow">Obserwuj</string>
     <string name="action_following">Obserwujesz</string>

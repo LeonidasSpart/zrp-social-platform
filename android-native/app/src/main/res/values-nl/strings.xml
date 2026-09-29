@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Trending</string>
     <string name="right_panel_posts_count">%1$d posts</string>
     <string name="right_panel_no_trending">Nog geen trending hashtags.</string>
+    <string name="explore_people_near_you_title">Mensen in jouw buurt</string>
+    <string name="explore_people_near_you_subtitle">Zelfde land als jij</string>
+    <string name="explore_people_near_you_empty">Nog niemand in de buurt.</string>
     <string name="home_discover_music">Ontdek nieuwe muziek</string>
     <string name="action_follow">Volgen</string>
     <string name="action_following">Volgend</string>

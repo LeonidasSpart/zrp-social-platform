@@ -434,6 +434,9 @@
     <string name="right_panel_trending">Popolari</string>
     <string name="right_panel_posts_count">%1$d pubblikazzjonijiet</string>
     <string name="right_panel_no_trending">Għad m\'hemm l-ebda hashtag popolari.</string>
+    <string name="explore_people_near_you_title">Nies fil-viċinanza tiegħek</string>
+    <string name="explore_people_near_you_subtitle">L-istess pajjiż bħalek</string>
+    <string name="explore_people_near_you_empty">Għadu m\'hemm ħadd fil-viċinanza.</string>
     <string name="home_discover_music">Skopri mużika ġdida</string>
     <string name="action_follow">Segwi</string>
     <string name="action_following">Qed Issegwi</string>

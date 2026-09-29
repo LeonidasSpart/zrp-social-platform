@@ -513,6 +513,9 @@
     <string name="right_panel_trending">Im Trend</string>
     <string name="right_panel_posts_count">%1$d Beiträge</string>
     <string name="right_panel_no_trending">Noch keine Trend-Hashtags.</string>
+    <string name="explore_people_near_you_title">Personen in deiner Nähe</string>
+    <string name="explore_people_near_you_subtitle">Gleiches Land wie du</string>
+    <string name="explore_people_near_you_empty">Noch niemand in der Nähe.</string>
     <string name="home_discover_music">Neue Musik entdecken</string>
     <string name="action_follow">Folgen</string>
     <string name="action_following">Gefolgt</string>

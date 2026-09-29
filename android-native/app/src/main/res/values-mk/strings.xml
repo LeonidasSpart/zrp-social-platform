@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Популарно</string>
     <string name="right_panel_posts_count">%1$d објави</string>
     <string name="right_panel_no_trending">Сè уште нема популарни хаштагови.</string>
+    <string name="explore_people_near_you_title">Луѓе блиску до тебе</string>
+    <string name="explore_people_near_you_subtitle">Иста држава како тебе</string>
+    <string name="explore_people_near_you_empty">Сè уште нема никого блиску.</string>
     <string name="home_discover_music">Откриј нова музика</string>
     <string name="action_follow">Следи</string>
     <string name="action_following">Следите</string>

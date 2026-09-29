@@ -513,6 +513,9 @@
     <string name="right_panel_trending">Kryesore</string>
     <string name="right_panel_posts_count">%1$d postime</string>
     <string name="right_panel_no_trending">Nuk ka hashtags kryesorë ende.</string>
+    <string name="explore_people_near_you_title">Njerëz pranë jush</string>
+    <string name="explore_people_near_you_subtitle">I njëjti vend si ju</string>
+    <string name="explore_people_near_you_empty">Ende nuk ka njeri pranë.</string>
     <string name="home_discover_music">Zbulo muzikë të re</string>
     <string name="action_follow">Ndiq</string>
     <string name="action_following">Duke ndjekur</string>

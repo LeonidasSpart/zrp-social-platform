@@ -35,9 +35,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
+import one.zrp.social.mobile.data.DiscoverRepository
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.data.SearchRepository
-import one.zrp.social.mobile.network.SearchUser
 import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.ZrpRed
@@ -50,11 +50,21 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
  * POST /users/{username}/follow every other follow button in this app
  * calls. Matches the reference page's own "row stays, button just
  * disables" behavior on success - no unfollow from this screen.
+ *
+ * Also shows a second, independent "People near you" section backed by
+ * GET /api/discover/people - a real, tested backend capability that
+ * previously had no frontend consumer on any platform (Task #3 parity
+ * audit finding). That endpoint matches only on the viewer's own
+ * countryCode field - there is no GPS/device-location capability
+ * anywhere in this codebase - so the section is deliberately captioned
+ * "Same country as you" rather than implying real proximity.
  */
 @Composable
 fun ExplorePeopleScreen(onBack: () -> Unit, onAuthorClick: (String) -> Unit) {
     val viewModel: ExplorePeopleViewModel = viewModel(
-        factory = remember { ExplorePeopleViewModelFactory(SearchRepository(), ProfileRepository()) },
+        factory = remember {
+            ExplorePeopleViewModelFactory(SearchRepository(), ProfileRepository(), DiscoverRepository())
+        },
     )
     val state by viewModel.state.collectAsState()
 
@@ -76,31 +86,95 @@ fun ExplorePeopleScreen(onBack: () -> Unit, onAuthorClick: (String) -> Unit) {
         }
         HorizontalDivider()
 
-        when {
-            state.isLoading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+        // Both sections load independently - one still loading or empty
+        // must never hide the other. A full-screen spinner only makes
+        // sense while both are in their initial load.
+        if (state.isLoading && state.isLoadingNearby) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-            state.users.isEmpty() -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            return@Column
+        }
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            if (state.isLoading) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else if (state.users.isEmpty()) {
+                item {
                     Text(
                         text = stringResource(R.string.onboarding_no_suggestions),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(24.dp),
+                        modifier = Modifier.fillMaxWidth().padding(24.dp),
+                    )
+                }
+            } else {
+                items(state.users, key = { "suggested-${it.id}" }) { user ->
+                    ExplorePeopleRow(
+                        name = user.name ?: user.username,
+                        username = user.username,
+                        avatarUrl = user.avatarUrl,
+                        badgeType = user.badgeType,
+                        subtitle = null,
+                        isFollowed = user.id in state.followedIds,
+                        isRequested = user.id in state.requestedIds,
+                        isLoading = state.followLoadingId == user.id,
+                        onClick = { onAuthorClick(user.username) },
+                        onFollowClick = { viewModel.follow(user.id, user.username) },
                     )
                 }
             }
-            else -> {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.users, key = { it.id }) { user ->
+
+            // Hidden entirely when the viewer has no known country - a
+            // real, actionable reason distinct from "nobody nearby."
+            if (!state.nearbyUnknownCountry) {
+                item {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        HorizontalDivider()
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                            Text(
+                                text = stringResource(R.string.explore_people_near_you_title),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = stringResource(R.string.explore_people_near_you_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+
+                if (state.isLoadingNearby) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                } else if (state.nearbyUsers.isEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.explore_people_near_you_empty),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
+                } else {
+                    items(state.nearbyUsers, key = { "nearby-${it.id}" }) { user ->
                         ExplorePeopleRow(
-                            user = user,
+                            name = user.name ?: user.username,
+                            username = user.username,
+                            avatarUrl = user.avatarUrl,
+                            badgeType = user.badgeType,
+                            subtitle = user.headline ?: user.company,
                             isFollowed = user.id in state.followedIds,
                             isRequested = user.id in state.requestedIds,
                             isLoading = state.followLoadingId == user.id,
                             onClick = { onAuthorClick(user.username) },
-                            onFollowClick = { viewModel.follow(user) },
+                            onFollowClick = { viewModel.follow(user.id, user.username) },
                         )
                     }
                 }
@@ -111,7 +185,14 @@ fun ExplorePeopleScreen(onBack: () -> Unit, onAuthorClick: (String) -> Unit) {
 
 @Composable
 private fun ExplorePeopleRow(
-    user: SearchUser,
+    name: String,
+    username: String,
+    avatarUrl: String?,
+    badgeType: String?,
+    // The nearby-people list's headline/company - shown in place of the
+    // plain @username line when present, so a "People near you" row
+    // reads as more than a bare handle. Suggested-users rows pass null.
+    subtitle: String?,
     isFollowed: Boolean,
     isRequested: Boolean,
     isLoading: Boolean,
@@ -125,25 +206,27 @@ private fun ExplorePeopleRow(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Avatar(url = user.avatarUrl, name = user.name ?: user.username, size = 44.dp)
+        Avatar(url = avatarUrl, name = name, size = 44.dp)
 
         Spacer(modifier = Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = user.name ?: user.username,
+                    text = name,
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                VerifiedBadge(badgeType = user.badgeType)
+                VerifiedBadge(badgeType = badgeType)
             }
             Text(
-                text = "@${user.username}",
+                text = subtitle?.takeIf { it.isNotBlank() } ?: "@$username",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
 

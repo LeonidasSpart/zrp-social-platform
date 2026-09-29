@@ -511,6 +511,9 @@
     <string name="right_panel_trending">V trendu</string>
     <string name="right_panel_posts_count">%1$d objav</string>
     <string name="right_panel_no_trending">Še ni priljubljenih ključnikov.</string>
+    <string name="explore_people_near_you_title">Ljudje v bližini</string>
+    <string name="explore_people_near_you_subtitle">Ista država kot vi</string>
+    <string name="explore_people_near_you_empty">Trenutno ni nikogar v bližini.</string>
     <string name="home_discover_music">Odkrijte novo glasbo</string>
     <string name="action_follow">Sledi</string>
     <string name="action_following">Sledite</string>

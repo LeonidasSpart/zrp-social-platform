@@ -10,6 +10,7 @@ import one.zrp.social.mobile.network.DiscoverNotInterestedRequest
 import one.zrp.social.mobile.network.DiscoverPage
 import one.zrp.social.mobile.network.FollowToggleResponse
 import one.zrp.social.mobile.network.LikeResponse
+import one.zrp.social.mobile.network.NearbyPeoplePage
 import one.zrp.social.mobile.network.MuteToggleRequest
 import one.zrp.social.mobile.network.MuteToggleResponse
 import one.zrp.social.mobile.network.RepostResponse
@@ -32,6 +33,15 @@ class DiscoverRepository {
 
     suspend fun getFeed(cursor: String?): Result<DiscoverPage> = runCatching {
         ApiClient.discoverApi.getFeed(cursor)
+    }
+
+    // "People near you" (country-based, never GPS - see NearbyUser's own
+    // KDoc). Requires an authenticated session; the server itself returns
+    // an honest empty result rather than a 401 for a signed-in viewer
+    // with no known country, so this only fails on a real network/auth
+    // error.
+    suspend fun getNearbyPeople(limit: Int = 20): Result<NearbyPeoplePage> = runCatching {
+        ApiClient.discoverApi.getNearbyPeople(limit = limit)
     }
 
     // Watch-event/not-interested failures must never surface to the

@@ -510,6 +510,9 @@
     <string name="right_panel_trending">ट्रेंडिंग</string>
     <string name="right_panel_posts_count">%1$d पोस्ट</string>
     <string name="right_panel_no_trending">अभी तक कोई ट्रेंडिंग हैशटैग नहीं है।</string>
+    <string name="explore_people_near_you_title">आपके आस-पास के लोग</string>
+    <string name="explore_people_near_you_subtitle">आपके जैसा ही देश</string>
+    <string name="explore_people_near_you_empty">अभी तक आस-पास कोई नहीं है।</string>
     <string name="home_discover_music">नया संगीत खोजें</string>
     <string name="action_follow">फ़ॉलो करें</string>
     <string name="action_following">फ़ॉलो कर रहे हैं</string>

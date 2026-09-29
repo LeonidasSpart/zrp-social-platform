@@ -434,6 +434,9 @@
     <string name="right_panel_trending">Populārākais</string>
     <string name="right_panel_posts_count">%1$d ieraksti</string>
     <string name="right_panel_no_trending">Vēl nav populāru tēmturu.</string>
+    <string name="explore_people_near_you_title">Cilvēki tuvumā</string>
+    <string name="explore_people_near_you_subtitle">Tā pati valsts, kas jums</string>
+    <string name="explore_people_near_you_empty">Pagaidām neviena tuvumā nav.</string>
     <string name="home_discover_music">Atklāj jaunu mūziku</string>
     <string name="action_follow">Sekot</string>
     <string name="action_following">Seko</string>

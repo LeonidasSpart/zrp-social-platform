@@ -523,6 +523,9 @@
     <string name="right_panel_trending">Trending</string>
     <string name="right_panel_posts_count">%1$d posts</string>
     <string name="right_panel_no_trending">No trending hashtags yet.</string>
+    <string name="explore_people_near_you_title">People near you</string>
+    <string name="explore_people_near_you_subtitle">Same country as you</string>
+    <string name="explore_people_near_you_empty">No one else nearby yet.</string>
     <string name="home_discover_music">Discover new music</string>
     <string name="action_follow">Follow</string>
     <string name="action_following">Following</string>

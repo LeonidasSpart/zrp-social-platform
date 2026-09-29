@@ -8,16 +8,34 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import one.zrp.social.mobile.data.DiscoverRepository
 import one.zrp.social.mobile.data.ProfileRepository
 import one.zrp.social.mobile.data.SearchRepository
+import one.zrp.social.mobile.network.NearbyUser
 import one.zrp.social.mobile.network.SearchUser
 
 data class ExplorePeopleUiState(
     val users: List<SearchUser> = emptyList(),
     val isLoading: Boolean = true,
+    // "People near you" (GET /api/discover/people) - a real, tested
+    // backend capability that had no frontend consumer on any platform
+    // before this. Country-based only (see NearbyUser's KDoc), fetched
+    // and shown as its own section rather than merged into `users` -
+    // the two lists come from different ranking rules (follower-count
+    // leaderboard vs. same-country) and conflating them would misrepresent
+    // why a given row is being suggested.
+    val nearbyUsers: List<NearbyUser> = emptyList(),
+    val isLoadingNearby: Boolean = true,
+    // Set only when the server reports "unknown_viewer_country" - the
+    // section is hidden rather than shown empty in that case, since
+    // there is a real, actionable reason (no country on file) rather
+    // than "nobody nearby right now."
+    val nearbyUnknownCountry: Boolean = false,
     // Once a row's follow completes, it just disables in place - matching
     // explore/people/page.tsx's own followingIds Set exactly (no unfollow
-    // affordance on this screen, and the row is never removed).
+    // affordance on this screen, and the row is never removed). Shared
+    // across both the suggested and nearby lists since a row is keyed by
+    // user id either way.
     val followedIds: Set<String> = emptySet(),
     val requestedIds: Set<String> = emptySet(),
     val followLoadingId: String? = null,
@@ -36,31 +54,47 @@ data class ExplorePeopleUiState(
 class ExplorePeopleViewModel(
     private val searchRepository: SearchRepository,
     private val profileRepository: ProfileRepository,
+    private val discoverRepository: DiscoverRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ExplorePeopleUiState())
     val state: StateFlow<ExplorePeopleUiState> = _state.asStateFlow()
 
     init {
+        // Independent requests - one failing (or a viewer with no known
+        // country) must never blank the other section.
         viewModelScope.launch {
             searchRepository.getSuggestedUsers(limit = 50)
                 .onSuccess { users -> _state.update { it.copy(isLoading = false, users = users) } }
                 .onFailure { _state.update { it.copy(isLoading = false) } }
         }
+        viewModelScope.launch {
+            discoverRepository.getNearbyPeople(limit = 20)
+                .onSuccess { page ->
+                    _state.update {
+                        it.copy(
+                            isLoadingNearby = false,
+                            nearbyUsers = page.users,
+                            nearbyUnknownCountry = page.reason == "unknown_viewer_country",
+                        )
+                    }
+                }
+                .onFailure { _state.update { it.copy(isLoadingNearby = false) } }
+        }
     }
 
-    fun follow(user: SearchUser) {
+    fun follow(userId: String, username: String) {
         val current = _state.value
-        if (user.id in current.followedIds || user.id in current.requestedIds || current.followLoadingId != null) return
+        if (userId in current.followedIds || userId in current.requestedIds || current.followLoadingId != null) return
 
-        _state.update { it.copy(followLoadingId = user.id) }
+        _state.update { it.copy(followLoadingId = userId) }
         viewModelScope.launch {
-            profileRepository.toggleFollow(user.username)
+            profileRepository.toggleFollow(username)
                 .onSuccess { result ->
                     _state.update {
                         it.copy(
                             followLoadingId = null,
-                            followedIds = if (result.following) it.followedIds + user.id else it.followedIds,
-                            requestedIds = if (result.requested) it.requestedIds + user.id else it.requestedIds,
+                            followedIds = if (result.following) it.followedIds + userId else it.followedIds,
+                            requestedIds = if (result.requested) it.requestedIds + userId else it.requestedIds,
                         )
                     }
                 }
@@ -74,9 +108,10 @@ class ExplorePeopleViewModel(
 class ExplorePeopleViewModelFactory(
     private val searchRepository: SearchRepository,
     private val profileRepository: ProfileRepository,
+    private val discoverRepository: DiscoverRepository,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ExplorePeopleViewModel(searchRepository, profileRepository) as T
+        return ExplorePeopleViewModel(searchRepository, profileRepository, discoverRepository) as T
     }
 }

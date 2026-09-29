@@ -513,6 +513,9 @@
     <string name="right_panel_trending">Sedang Tren</string>
     <string name="right_panel_posts_count">%1$d postingan</string>
     <string name="right_panel_no_trending">Belum ada tagar yang sedang tren.</string>
+    <string name="explore_people_near_you_title">Orang di dekat Anda</string>
+    <string name="explore_people_near_you_subtitle">Negara yang sama dengan Anda</string>
+    <string name="explore_people_near_you_empty">Belum ada orang di dekat Anda.</string>
     <string name="home_discover_music">Temukan musik baru</string>
     <string name="action_follow">Ikuti</string>
     <string name="action_following">Mengikuti</string>

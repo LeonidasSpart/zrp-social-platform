@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Populært</string>
     <string name="right_panel_posts_count">%1$d opslag</string>
     <string name="right_panel_no_trending">Ingen populære hashtags endnu.</string>
+    <string name="explore_people_near_you_title">Personer i nærheden</string>
+    <string name="explore_people_near_you_subtitle">Samme land som dig</string>
+    <string name="explore_people_near_you_empty">Ingen i nærheden endnu.</string>
     <string name="home_discover_music">Find ny musik</string>
     <string name="action_follow">Følg</string>
     <string name="action_following">Følger</string>

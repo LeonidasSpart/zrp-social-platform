@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Nousussa</string>
     <string name="right_panel_posts_count">%1$d julkaisua</string>
     <string name="right_panel_no_trending">Ei vielä nousevia hashtageja.</string>
+    <string name="explore_people_near_you_title">Ihmisiä lähelläsi</string>
+    <string name="explore_people_near_you_subtitle">Sama maa kuin sinulla</string>
+    <string name="explore_people_near_you_empty">Ei vielä ketään lähellä.</string>
     <string name="home_discover_music">Löydä uutta musiikkia</string>
     <string name="action_follow">Seuraa</string>
     <string name="action_following">Seurataan</string>
