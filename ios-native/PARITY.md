@@ -146,6 +146,18 @@ pre-search suggestions). Was missing on both Android and iOS; Android
 built it first this pass and iOS mirrors it here against the same
 backend contract.
 
+Task #3's parity audit found this ViewModel (and Home's own For You/
+Following feed ViewModel) had zero test coverage beyond the pure watch-
+event decision logic (`DiscoverWatchEvents`/`DiscoverWatchEventsTests`
+on both platforms). Added: `HomeViewModelTest.kt`/`DiscoverViewModelTest.kt`
+(Android - pure pagination-guard and optimistic-toggle functions, since
+this project's plain-JUnit test setup has no Robolectric/coroutines-test
+dependency to support instantiating a `viewModelScope`-launching
+ViewModel directly) and `HomeViewModelTests.swift`/`ExploreViewModelTests.swift`/
+`DiscoverViewModelTests.swift` (iOS - real async ViewModel tests against
+stub repositories, following the existing `PlayDuelsViewModelTests.swift`
+pattern, since iOS's protocol-based repository DI makes that feasible).
+
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Video feed | `GET /api/discover` (`{cursor}` → `{items,nextCursor}`, works signed-out; server ranks/diversifies/paginates) | ✅ `/discover` | ✅ | ✅ `DiscoverView`/`DiscoverSlideView`, paged vertically through the app's existing shared `FeedVideoCoordinator` (`ShortsView`'s own player, not a second one) | IMPLEMENTED |
@@ -304,9 +316,10 @@ own view of "who is in this room").
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Explore: people | `GET /api/users/suggested?limit=50` | ✅ `/explore/people` | ⬜ | ✅ full list with follow, at the same fifty the website asks for rather than the ten Search previews | IMPLEMENTED |
-| Explore: trending tags | `GET /api/hashtags/trending?limit=50` | ✅ `/explore/trending` | ⬜ | ✅ | IMPLEMENTED |
-| Explore: trending posts | `GET /api/posts/explore` | ✅ `/explore` | ⬜ | ✅ **as the Home "For You" tab**: the same route and the same feed. Rebuilding it inside Explore would be a second copy of a screen one tap away | IMPLEMENTED (elsewhere) |
+| Explore: people | `GET /api/users/suggested?limit=50` | ✅ `/explore/people` | ✅ `ExplorePeopleScreen` (corrected in Task #3's parity audit - this row previously read Android ⬜, which was stale: the screen already existed) | ✅ full list with follow, at the same fifty the website asks for rather than the ten Search previews | IMPLEMENTED |
+| Explore: trending tags | `GET /api/hashtags/trending?limit=50` | ✅ `/explore/trending` | ✅ `ExploreTrendingScreen` (same Task #3 correction as above) | ✅ | IMPLEMENTED |
+| Explore: trending posts | `GET /api/posts/explore` | ✅ `/explore` | ✅ **as the Home "For You" tab**, same reasoning as iOS's own row | ✅ **as the Home "For You" tab**: the same route and the same feed. Rebuilding it inside Explore would be a second copy of a screen one tap away | IMPLEMENTED (elsewhere) |
+| People near you (country-based) | `GET /api/discover/people` - a real, tested backend endpoint that had **no frontend consumer on any platform** before Task #3 | ⬜ no web UI built for this endpoint yet | ✅ a "People near you" section inside `ExplorePeopleScreen`, added in Task #3 | ✅ a "People near you" section inside `ExploreView`'s people tab, added in Task #3 | IMPLEMENTED (Android/iOS only) |
 | Follow from a list | `POST /api/users/{username}/follow` | ✅ | ✅ | ✅ the route is a toggle and its own answer is what is recorded, never an assumption about what the tap did | IMPLEMENTED |
 
 ### ZRP News
@@ -975,6 +988,38 @@ in For You shows up immediately, not up to 5 minutes later.
 
 What remains is client-side: actually rendering a poll encountered while
 browsing For You. Not built here.
+
+### L6. `GET /api/posts/explore` did not exclude banned authors - **FIXED server-side**
+
+Found during Task #3's Discover/Explore parity audit, and already
+documented as a known, unfixed gap in `docs/discover-backend.md` at the
+time: `viewablePostAuthorFilter` alone only governs private-account
+visibility, not the ban flag, and explore's own candidate query never
+added `banned: false` the way `GET /api/discover` (the video feed) and
+`GET /api/hashtags/search` already had. A banned account's posts could
+keep surfacing in For You/Trending indefinitely.
+
+`explore/route.ts` now adds `banned: false` inside the `author` filter,
+matching Discover's own `candidates.ts`, with a regression test covering
+both `sort=forYou` and `sort=trending`. The cache key was bumped (`v8`
+-> `v9`) so no cached ranking from before the fix could keep serving a
+banned author's posts for up to 5 more minutes afterward.
+
+### L7. `GET /api/hashtags/trending` had no block/mute/banned filtering - **FIXED server-side**
+
+Found in the same Task #3 audit: this route ran its own inline,
+unfiltered "scan the most recent 1000 posts, tally hashtags" query,
+duplicating - and under-filtering relative to - the shared, already-
+filtered `getAllHashtagCounts()` (`src/lib/hashtags/counts.ts`) that
+`GET /api/hashtags/search` and Advanced Search's hashtags category
+already used (published/non-scheduled/non-banned-author posts only). A
+tag that only existed on a removed, still-scheduled, or banned author's
+posts could still count toward "trending."
+
+The route now calls that same shared module instead of its own query,
+removing both the duplicate implementation and the filtering gap in one
+change, with a regression test covering the ranking, limit-clamping, and
+filtering behavior.
 
 ## Reported defects in web / backend
 
