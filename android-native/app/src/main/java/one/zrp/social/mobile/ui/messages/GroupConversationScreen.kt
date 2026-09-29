@@ -180,9 +180,10 @@ fun GroupConversationScreen(
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
         cameraLauncher.launch(uri)
     }
+    var cameraAccessError by remember { mutableStateOf(false) }
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-    ) { granted -> if (granted) launchCamera() }
+    ) { granted -> if (granted) launchCamera() else cameraAccessError = true }
 
     if (state.leftConversation) {
         onBack()
@@ -392,6 +393,15 @@ fun GroupConversationScreen(
             )
         }
 
+        if (cameraAccessError) {
+            Text(
+                text = stringResource(R.string.chat_err_camera_access),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            )
+        }
+
         // Same composer as the 1:1 ConversationScreen: one neutral "+"
         // opening the attachment sheet, a pill field growing to five
         // lines, and the red Send as the only primary action. No
@@ -437,6 +447,7 @@ fun GroupConversationScreen(
             onDismiss = { attachMenuOpen = false },
             options = listOf(
                 ComposerAttachmentOption(Icons.Filled.CameraAlt, R.string.message_open_camera_cd) {
+                    cameraAccessError = false
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 },
                 ComposerAttachmentOption(Icons.Filled.PhotoLibrary, R.string.message_attach_image_cd) {
