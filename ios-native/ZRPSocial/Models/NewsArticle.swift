@@ -25,7 +25,7 @@ struct NewsArticle: Decodable, Identifiable, Equatable {
     let author: PostAuthor?
 }
 
-/// The eleven categories `NewsArticleCategory` defines in the schema.
+/// The twelve categories `NewsArticleCategory` defines in the schema.
 ///
 /// Decoded leniently: a category added to the enum server-side must not
 /// make a whole page of news fail to decode on an app that predates it.
