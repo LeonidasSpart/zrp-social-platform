@@ -1,214 +1,8 @@
 import SwiftUI
 
-/// The part of a "#"-led query worth sending to `GET /api/hashtags/
-/// search`, or `nil` when there's nothing there yet - just "#" typed so
-/// far, or not a hashtag query at all. Pure and free of the view model
-/// so it can be unit tested directly, mirroring `DiscoverWatchEvents`'s
-/// own extraction of parsing logic out of its owning type.
-func hashtagSearchTerm(from query: String) -> String? {
-    let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard trimmed.hasPrefix("#") else { return nil }
-    let term = String(trimmed.dropFirst()).trimmingCharacters(in: .whitespaces)
-    return term.isEmpty ? nil : term
-}
-
-@MainActor
-final class SearchViewModel: ObservableObject {
-
-    enum Mode: String, CaseIterable, Identifiable {
-        case users
-        case posts
-
-        var id: String { rawValue }
-    }
-
-    @Published var query = ""
-    @Published var mode: Mode = .users
-    @Published private(set) var results = SearchResults(users: [], posts: [])
-    @Published private(set) var isSearching = false
-    @Published private(set) var searchError: ApiError?
-
-    /// The pre-search state: who to follow and what is trending. Both are
-    /// real endpoints the website's own sidebar uses, not filler.
-    @Published private(set) var suggested: [PostAuthor] = []
-    @Published private(set) var trending: [TrendingHashtag] = []
-
-    /// `GET /api/hashtags/search` search-as-you-type results - a real
-    /// prefix match against every hashtag in use, ranked by usage.
-    /// Distinct from the plain `results.posts` above, which only
-    /// exact-matches a hashtag already typed out in full as part of a
-    /// broader post-content search (see the route's own doc comment).
-    /// Not built on any ZRP client before this.
-    @Published private(set) var hashtagMatches: [TrendingHashtag] = []
-    @Published private(set) var isSearchingHashtags = false
-    @Published private(set) var isLoadingMoreHashtags = false
-    @Published private(set) var hashtagSearchError: ApiError?
-    private var hashtagNextCursor: String?
-    private var hashtagSearchTask: Task<Void, Never>?
-
-    private let repository: SearchRepositoryProtocol
-    private weak var interactions: PostInteractionStore?
-    private var searchTask: Task<Void, Never>?
-
-    init(repository: SearchRepositoryProtocol = SearchRepository()) {
-        self.repository = repository
-    }
-
-    func attach(interactions: PostInteractionStore) {
-        self.interactions = interactions
-    }
-
-    var trimmedQuery: String {
-        query.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    /// True once the query is long enough for the route to return
-    /// anything - below this it always answers empty, so the UI says so
-    /// instead of showing "no results".
-    var isQueryLongEnough: Bool {
-        trimmedQuery.count >= SearchRepository.minimumQueryLength
-    }
-
-    var isSearchActive: Bool { !trimmedQuery.isEmpty }
-
-    /// A "#"-led query is hashtag search-as-you-type, not the plain
-    /// users/posts search below - the same distinction the backend
-    /// itself draws between `/api/hashtags/search` and `/api/search`.
-    var isHashtagQuery: Bool { trimmedQuery.hasPrefix("#") }
-
-    func loadDiscover() async {
-        // Failures here are silent: the discover state is a convenience,
-        // and an error banner over it would be louder than it deserves.
-        async let people = try? repository.suggestedUsers(limit: 10)
-        async let tags = try? repository.trendingHashtags(limit: 10)
-        let (peopleResult, tagsResult) = await (people, tags)
-        if let peopleResult { suggested = peopleResult }
-        if let tagsResult { trending = tagsResult }
-    }
-
-    /// Routes a query change to whichever search it actually means - a
-    /// "#"-led query never runs the plain users/posts search below (and
-    /// vice versa), so switching between the two clears the other's
-    /// stale results rather than leaving them to flash back on screen
-    /// when the query flips back.
-    func handleQueryChange() {
-        if isHashtagQuery {
-            searchTask?.cancel()
-            results = SearchResults(users: [], posts: [])
-            isSearching = false
-            searchError = nil
-            scheduleHashtagSearch()
-        } else {
-            hashtagSearchTask?.cancel()
-            hashtagMatches = []
-            isSearchingHashtags = false
-            hashtagSearchError = nil
-            hashtagNextCursor = nil
-            scheduleSearch()
-        }
-    }
-
-    /// Debounced, and cancels the superseded request rather than letting
-    /// it race the one the user is actually waiting on.
-    func scheduleSearch() {
-        searchTask?.cancel()
-
-        guard isQueryLongEnough else {
-            results = SearchResults(users: [], posts: [])
-            isSearching = false
-            searchError = nil
-            return
-        }
-
-        let term = trimmedQuery
-        searchTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(300))
-            guard let self, !Task.isCancelled else { return }
-
-            self.isSearching = true
-            defer { self.isSearching = false }
-
-            do {
-                let found = try await self.repository.search(query: term)
-                guard !Task.isCancelled else { return }
-                self.results = found
-                self.searchError = nil
-                self.interactions?.seed(found.posts, replacing: true)
-            } catch is CancellationError {
-                return
-            } catch ApiError.cancelled {
-                return
-            } catch {
-                guard !Task.isCancelled else { return }
-                self.searchError = error as? ApiError ?? .transport(underlying: "\(error)")
-            }
-        }
-    }
-
-    /// Debounced the same way `scheduleSearch()` is, and re-callable
-    /// directly (the error state's own retry button) since it reads the
-    /// current query itself rather than taking one as an argument.
-    func scheduleHashtagSearch() {
-        hashtagSearchTask?.cancel()
-
-        guard let text = hashtagSearchTerm(from: query) else {
-            hashtagMatches = []
-            isSearchingHashtags = false
-            hashtagSearchError = nil
-            hashtagNextCursor = nil
-            return
-        }
-
-        hashtagSearchTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(300))
-            guard let self, !Task.isCancelled else { return }
-
-            self.isSearchingHashtags = true
-            defer { self.isSearchingHashtags = false }
-
-            do {
-                let page = try await self.repository.searchHashtags(query: text, cursor: nil)
-                guard !Task.isCancelled else { return }
-                self.hashtagMatches = page.items
-                self.hashtagNextCursor = page.nextCursor
-                self.hashtagSearchError = nil
-            } catch is CancellationError {
-                return
-            } catch ApiError.cancelled {
-                return
-            } catch {
-                guard !Task.isCancelled else { return }
-                self.hashtagSearchError = error as? ApiError ?? .transport(underlying: "\(error)")
-            }
-        }
-    }
-
-    /// Not debounced - triggered by scroll position the same way
-    /// `NewsViewModel.loadMoreIfNeeded` is, so a duplicate in-flight
-    /// request is guarded by `isLoadingMoreHashtags` instead of a timer.
-    func loadMoreHashtagsIfNeeded(current: TrendingHashtag) async {
-        guard
-            !isSearchingHashtags,
-            !isLoadingMoreHashtags,
-            let cursor = hashtagNextCursor,
-            let index = hashtagMatches.firstIndex(of: current),
-            index >= hashtagMatches.count - 3,
-            let text = hashtagSearchTerm(from: query)
-        else { return }
-
-        isLoadingMoreHashtags = true
-        defer { isLoadingMoreHashtags = false }
-
-        if let page = try? await repository.searchHashtags(query: text, cursor: cursor) {
-            let existing = Set(hashtagMatches.map(\.tag))
-            hashtagMatches.append(contentsOf: page.items.filter { !existing.contains($0.tag) })
-            hashtagNextCursor = page.nextCursor
-        }
-    }
-}
-
-/// Search across people and posts, with a real discover state before a
-/// query is typed.
+/// Search across people, posts and (Task #2) six more Advanced Search
+/// categories, with a real discover state before a query is typed, and
+/// hashtag search-as-you-type for a "#"-led query.
 struct SearchView: View {
 
     @EnvironmentObject private var navigator: Navigator
@@ -256,13 +50,423 @@ struct SearchView: View {
                 title: .iosSearchMinLength,
                 subtitle: nil
             )
+        } else {
+            advancedSearchBody
+        }
+    }
+
+    // MARK: - Advanced Search (Task #2)
+
+    private var advancedSearchBody: some View {
+        VStack(spacing: 0) {
+            categoryTabs
+            sortAndFiltersRow
+            if viewModel.showFilters {
+                filtersPanel
+            }
+            resultsArea
+        }
+    }
+
+    private var categoryTabs: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: ZrpSpacing.sm) {
+                ForEach(SearchCategory.allCases) { category in
+                    categoryChip(category)
+                }
+            }
+            .padding(.horizontal, ZrpSpacing.lg)
+            .padding(.vertical, ZrpSpacing.sm)
+        }
+    }
+
+    private func categoryChip(_ category: SearchCategory) -> some View {
+        let selected = viewModel.category == category
+        return Button {
+            viewModel.category = category
+        } label: {
+            Text(category.titleKey)
+                .font(.subheadline.weight(selected ? .semibold : .regular))
+                .padding(.horizontal, ZrpSpacing.md)
+                .padding(.vertical, ZrpSpacing.sm)
+                .background(selected ? ZrpColor.red : ZrpColor.surfaceHighest)
+                .foregroundStyle(selected ? Color.white : ZrpColor.onSurface)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var sortAndFiltersRow: some View {
+        HStack {
+            Menu {
+                ForEach(SearchSortOption.allCases) { option in
+                    Button {
+                        viewModel.sort = option
+                    } label: {
+                        if viewModel.sort == option {
+                            Label { Text(option.titleKey) } icon: { Image(systemName: "checkmark") }
+                        } else {
+                            Text(option.titleKey)
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(.searchSort)
+                    Text(viewModel.sort.titleKey)
+                        .fontWeight(.semibold)
+                    Image(systemName: "chevron.down")
+                        .font(.caption2)
+                }
+                .font(.subheadline)
+                .foregroundStyle(ZrpColor.onSurface)
+            }
+
+            Spacer(minLength: 0)
+
+            Button {
+                viewModel.showFilters.toggle()
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "line.3.horizontal.decrease.circle" + (viewModel.showFilters || viewModel.filters.isActive ? ".fill" : ""))
+                    Text(.searchFilters)
+                }
+                .font(.subheadline.weight(viewModel.filters.isActive ? .semibold : .regular))
+                .foregroundStyle(viewModel.filters.isActive ? ZrpColor.red : ZrpColor.onSurface)
+            }
+        }
+        .padding(.horizontal, ZrpSpacing.lg)
+        .padding(.vertical, ZrpSpacing.xs)
+    }
+
+    private var showsMediaFilter: Bool { viewModel.category == .all || viewModel.category == .posts }
+    private var showsPersonFilters: Bool {
+        [.all, .people, .posts, .opportunities, .marketplace].contains(viewModel.category)
+    }
+
+    private var filtersPanel: some View {
+        VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+            Text(.searchDateRange)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: ZrpSpacing.sm) {
+                    ForEach(SearchDateRangeOption.allCases) { option in
+                        filterChoiceChip(
+                            title: option.titleKey,
+                            selected: viewModel.filters.dateRange == option
+                        ) {
+                            viewModel.filters.dateRange = option
+                        }
+                    }
+                }
+            }
+
+            if viewModel.filters.dateRange == .custom {
+                HStack(spacing: ZrpSpacing.sm) {
+                    TextField(L10n.string(.searchDateFrom), text: Binding(
+                        get: { viewModel.filters.dateFrom ?? "" },
+                        set: { viewModel.filters.dateFrom = $0.isEmpty ? nil : $0 }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                    TextField(L10n.string(.searchDateTo), text: Binding(
+                        get: { viewModel.filters.dateTo ?? "" },
+                        set: { viewModel.filters.dateTo = $0.isEmpty ? nil : $0 }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                }
+            }
+
+            if showsMediaFilter {
+                Text(.searchMedia)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .padding(.top, ZrpSpacing.xs)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: ZrpSpacing.sm) {
+                        filterChoiceChip(title: .searchMediaAll, selected: viewModel.filters.media == nil) {
+                            viewModel.filters.media = nil
+                        }
+                        ForEach(SearchMediaFilterOption.allCases) { option in
+                            filterChoiceChip(title: option.titleKey, selected: viewModel.filters.media == option) {
+                                viewModel.filters.media = option
+                            }
+                        }
+                    }
+                }
+            }
+
+            if showsPersonFilters {
+                HStack(spacing: ZrpSpacing.sm) {
+                    TextField(L10n.string(.navLanguage), text: Binding(
+                        get: { viewModel.filters.language ?? "" },
+                        set: { viewModel.filters.language = $0.isEmpty ? nil : $0 }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                    TextField(L10n.string(.settingsCountry), text: Binding(
+                        get: { viewModel.filters.country ?? "" },
+                        set: { viewModel.filters.country = $0.isEmpty ? nil : $0 }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                }
+                .padding(.top, ZrpSpacing.xs)
+
+                Toggle(isOn: $viewModel.filters.verified) { Text(.searchVerified) }
+                Toggle(isOn: $viewModel.filters.professional) { Text(.searchProfessional) }
+                Toggle(isOn: $viewModel.filters.creator) { Text(.searchCreator) }
+            }
+
+            if viewModel.filters.isActive {
+                Button {
+                    viewModel.clearFilters()
+                } label: {
+                    Text(.searchClearFilters)
+                        .font(.footnote.weight(.semibold))
+                }
+                .padding(.top, ZrpSpacing.xs)
+            }
+        }
+        .padding(.horizontal, ZrpSpacing.lg)
+        .padding(.vertical, ZrpSpacing.sm)
+    }
+
+    private func filterChoiceChip(title: L10nKey, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption.weight(selected ? .semibold : .regular))
+                .padding(.horizontal, ZrpSpacing.sm)
+                .padding(.vertical, 6)
+                .background(selected ? ZrpColor.red.opacity(0.15) : ZrpColor.surfaceHighest)
+                .foregroundStyle(selected ? ZrpColor.red : ZrpColor.onSurface)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var resultsArea: some View {
+        if viewModel.isSearching && isCurrentBucketEmpty {
+            TimelineStateView.loading()
         } else if let error = viewModel.searchError {
             TimelineStateView.error(error) { viewModel.scheduleSearch() }
-        } else if viewModel.isSearching && viewModel.results.isEmpty {
-            TimelineStateView.loading()
+        } else if viewModel.category == .all {
+            allModeSections
         } else {
-            resultsBody
+            singleCategoryResults
         }
+    }
+
+    private var isCurrentBucketEmpty: Bool {
+        switch viewModel.category {
+        case .all: return !viewModel.hasAnyAllModeResults
+        case .people: return viewModel.results.users.isEmpty
+        case .posts: return viewModel.results.posts.isEmpty
+        case .hashtags: return viewModel.results.hashtags.isEmpty
+        case .communities: return viewModel.results.communities.isEmpty
+        case .news: return viewModel.results.news.isEmpty
+        case .music: return viewModel.results.music.isEmpty
+        case .opportunities: return viewModel.results.opportunities.isEmpty
+        case .marketplace: return viewModel.results.marketplace.isEmpty
+        }
+    }
+
+    // MARK: - type=all teaser sections
+
+    private var allModeSections: some View {
+        Group {
+            if !viewModel.hasAnyAllModeResults {
+                TimelineStateView.empty(systemImage: "magnifyingglass", title: .iosSearchNoResults, subtitle: nil)
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: ZrpSpacing.lg) {
+                        if !viewModel.results.users.isEmpty {
+                            sectionHeader(.searchPeopleTab) { viewModel.category = .people }
+                            ForEach(viewModel.results.users) { userRow($0) }
+                        }
+                        if !viewModel.results.posts.isEmpty {
+                            sectionHeader(.searchPostsTab) { viewModel.category = .posts }
+                            PostListView(posts: viewModel.results.posts, isLoadingMore: false, hasMore: false, header: { EmptyView() })
+                        }
+                        if !viewModel.results.hashtags.isEmpty {
+                            sectionHeader(.searchHashtagsTab) { viewModel.category = .hashtags }
+                            ForEach(viewModel.results.hashtags) { hashtagRow($0) }
+                        }
+                        if !viewModel.results.communities.isEmpty {
+                            sectionHeader(.navCommunities) { viewModel.category = .communities }
+                            ForEach(viewModel.results.communities) { communityRow($0) }
+                        }
+                        if !viewModel.results.news.isEmpty {
+                            sectionHeader(.navNews) { viewModel.category = .news }
+                            ForEach(viewModel.results.news) { newsRow($0) }
+                        }
+                        if !viewModel.results.music.isEmpty {
+                            sectionHeader(.navMusic) { viewModel.category = .music }
+                            ForEach(viewModel.results.music) { musicRow($0) }
+                        }
+                        if !viewModel.results.opportunities.isEmpty {
+                            sectionHeader(.navOpportunity) { viewModel.category = .opportunities }
+                            ForEach(viewModel.results.opportunities) { listing in
+                                Button {
+                                    navigator.push(.opportunityDetail(id: listing.id))
+                                } label: {
+                                    OpportunityRow(listing: listing)
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal, ZrpSpacing.lg)
+                            }
+                        }
+                        if !viewModel.results.marketplace.isEmpty {
+                            sectionHeader(.navMarketplace) { viewModel.category = .marketplace }
+                            ForEach(viewModel.results.marketplace) { listing in
+                                Button {
+                                    navigator.push(.listingDetail(id: listing.id))
+                                } label: {
+                                    ListingCardView(listing: listing)
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal, ZrpSpacing.lg)
+                            }
+                        }
+                    }
+                    .padding(.vertical, ZrpSpacing.lg)
+                    .frame(maxWidth: ZrpMetrics.contentMaxWidth)
+                    .frame(maxWidth: .infinity)
+                }
+            }
+        }
+    }
+
+    private func sectionHeader(_ titleKey: L10nKey, onSeeAll: @escaping () -> Void) -> some View {
+        HStack {
+            Text(titleKey)
+                .font(.headline)
+                .foregroundStyle(ZrpColor.onSurface)
+            Spacer(minLength: 0)
+            Button(action: onSeeAll) {
+                Text(.searchSeeAll)
+                    .font(.subheadline)
+            }
+        }
+        .padding(.horizontal, ZrpSpacing.lg)
+    }
+
+    // MARK: - Single-category paginated results
+
+    private var singleCategoryResults: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                switch viewModel.category {
+                case .all:
+                    EmptyView()
+                case .people:
+                    if viewModel.results.users.isEmpty {
+                        TimelineStateView.empty(systemImage: "person.slash", title: .searchNoUsers, subtitle: nil)
+                    } else {
+                        ForEach(viewModel.results.users) { user in
+                            userRow(user)
+                                .onAppear { loadMoreIfLast(user.id, viewModel.results.users) }
+                        }
+                    }
+                case .posts:
+                    if viewModel.results.posts.isEmpty {
+                        TimelineStateView.empty(systemImage: "doc.text.magnifyingglass", title: .searchNoPosts, subtitle: nil)
+                    } else {
+                        PostListView(
+                            posts: viewModel.results.posts,
+                            isLoadingMore: viewModel.isLoadingMore,
+                            hasMore: viewModel.canLoadMore,
+                            onAppear: { post in loadMoreIfLast(post.id, viewModel.results.posts) },
+                            header: { EmptyView() }
+                        )
+                    }
+                case .hashtags:
+                    if viewModel.results.hashtags.isEmpty {
+                        TimelineStateView.empty(systemImage: "number", title: .searchNoHashtags, subtitle: nil)
+                    } else {
+                        ForEach(viewModel.results.hashtags) { hashtag in
+                            hashtagRow(hashtag)
+                                .onAppear { loadMoreIfLast(hashtag.id, viewModel.results.hashtags) }
+                        }
+                    }
+                case .communities:
+                    if viewModel.results.communities.isEmpty {
+                        TimelineStateView.empty(systemImage: "person.3", title: .searchNoCommunities, subtitle: nil)
+                    } else {
+                        ForEach(viewModel.results.communities) { community in
+                            communityRow(community)
+                                .onAppear { loadMoreIfLast(community.id, viewModel.results.communities) }
+                        }
+                    }
+                case .news:
+                    if viewModel.results.news.isEmpty {
+                        TimelineStateView.empty(systemImage: "newspaper", title: .searchNoNews, subtitle: nil)
+                    } else {
+                        ForEach(viewModel.results.news) { article in
+                            newsRow(article)
+                                .onAppear { loadMoreIfLast(article.id, viewModel.results.news) }
+                        }
+                    }
+                case .music:
+                    if viewModel.results.music.isEmpty {
+                        TimelineStateView.empty(systemImage: "music.note", title: .searchNoMusic, subtitle: nil)
+                    } else {
+                        ForEach(viewModel.results.music) { item in
+                            musicRow(item)
+                                .onAppear { loadMoreIfLast(item.id, viewModel.results.music) }
+                        }
+                    }
+                case .opportunities:
+                    if viewModel.results.opportunities.isEmpty {
+                        TimelineStateView.empty(systemImage: "briefcase", title: .searchNoOpportunities, subtitle: nil)
+                    } else {
+                        ForEach(viewModel.results.opportunities) { listing in
+                            Button {
+                                navigator.push(.opportunityDetail(id: listing.id))
+                            } label: {
+                                OpportunityRow(listing: listing)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, ZrpSpacing.lg)
+                            .padding(.vertical, ZrpSpacing.sm)
+                            .onAppear { loadMoreIfLast(listing.id, viewModel.results.opportunities) }
+                        }
+                    }
+                case .marketplace:
+                    if viewModel.results.marketplace.isEmpty {
+                        TimelineStateView.empty(systemImage: "cart", title: .searchNoMarketplace, subtitle: nil)
+                    } else {
+                        ForEach(viewModel.results.marketplace) { listing in
+                            Button {
+                                navigator.push(.listingDetail(id: listing.id))
+                            } label: {
+                                ListingCardView(listing: listing)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, ZrpSpacing.lg)
+                            .padding(.vertical, ZrpSpacing.sm)
+                            .onAppear { loadMoreIfLast(listing.id, viewModel.results.marketplace) }
+                        }
+                    }
+                }
+
+                if viewModel.isLoadingMore {
+                    ProgressView()
+                        .tint(ZrpColor.onSurfaceMuted)
+                        .padding(ZrpSpacing.lg)
+                }
+            }
+            .frame(maxWidth: ZrpMetrics.contentMaxWidth)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    /// Triggers `loadMoreIfNeeded()` once the second-to-last row appears,
+    /// the same threshold `OpportunityView`'s own infinite scroll uses.
+    private func loadMoreIfLast<Item: Identifiable>(_ id: Item.ID, _ items: [Item]) {
+        guard id == items.last?.id else { return }
+        Task { await viewModel.loadMoreIfNeeded() }
     }
 
     // MARK: - Hashtag search-as-you-type
@@ -304,23 +508,6 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-    }
-
-    private func hashtagRow(_ hashtag: TrendingHashtag) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: "#\(hashtag.tag)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(ZrpColor.onSurface)
-                Text(.explorePostCount, ["n": CountFormatting.exact(hashtag.count)])
-                    .font(.caption)
-                    .foregroundStyle(ZrpColor.onSurfaceMuted)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, ZrpSpacing.lg)
-        .frame(minHeight: ZrpMetrics.minTouchTarget)
-        .contentShape(Rectangle())
     }
 
     // MARK: - Discover
@@ -385,61 +572,7 @@ struct SearchView: View {
         }
     }
 
-    // MARK: - Results
-
-    private var resultsBody: some View {
-        VStack(spacing: 0) {
-            Picker("", selection: $viewModel.mode) {
-                Text(.searchUsersTab, ["n": "\(viewModel.results.users.count)"])
-                    .tag(SearchViewModel.Mode.users)
-                Text(.searchPostsTab, ["n": "\(viewModel.results.posts.count)"])
-                    .tag(SearchViewModel.Mode.posts)
-            }
-            .pickerStyle(.segmented)
-            .padding(ZrpSpacing.md)
-
-            switch viewModel.mode {
-            case .users:
-                if viewModel.results.users.isEmpty {
-                    TimelineStateView.empty(
-                        systemImage: "person.slash",
-                        title: .searchNoUsers,
-                        subtitle: nil
-                    )
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(viewModel.results.users) { user in
-                                userRow(user)
-                            }
-                        }
-                        .frame(maxWidth: ZrpMetrics.contentMaxWidth)
-                        .frame(maxWidth: .infinity)
-                    }
-                }
-
-            case .posts:
-                if viewModel.results.posts.isEmpty {
-                    TimelineStateView.empty(
-                        systemImage: "doc.text.magnifyingglass",
-                        title: .searchNoPosts,
-                        subtitle: nil
-                    )
-                } else {
-                    ScrollView {
-                        PostListView(
-                            posts: viewModel.results.posts,
-                            isLoadingMore: false,
-                            // The route caps posts at 20 with no cursor,
-                            // so there is nothing further to page.
-                            hasMore: false,
-                            header: { EmptyView() }
-                        )
-                    }
-                }
-            }
-        }
-    }
+    // MARK: - Shared rows
 
     private func userRow(_ user: PostAuthor) -> some View {
         Button {
@@ -473,5 +606,122 @@ struct SearchView: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text(.iosA11yOpenProfile, ["name": user.displayName]))
+    }
+
+    private func hashtagRow(_ hashtag: TrendingHashtag) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: "#\(hashtag.tag)")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(ZrpColor.onSurface)
+                Text(.explorePostCount, ["n": CountFormatting.exact(hashtag.count)])
+                    .font(.caption)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, ZrpSpacing.lg)
+        .frame(minHeight: ZrpMetrics.minTouchTarget)
+        .contentShape(Rectangle())
+        .onTapGesture { navigator.push(.hashtag(tag: hashtag.tag)) }
+    }
+
+    private func communityRow(_ community: Community) -> some View {
+        Button {
+            navigator.push(.communityDetail(id: community.id))
+        } label: {
+            HStack(spacing: ZrpSpacing.md) {
+                AvatarView(url: community.iconUrl, displayName: community.name, size: ZrpMetrics.avatarMedium)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: community.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(ZrpColor.onSurface)
+                        .lineLimit(1)
+                    Text(verbatim: community.description)
+                        .font(.footnote)
+                        .foregroundStyle(ZrpColor.onSurfaceMuted)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, ZrpSpacing.lg)
+            .padding(.vertical, ZrpSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func newsRow(_ article: NewsArticle) -> some View {
+        Button {
+            navigator.push(.newsArticle(slug: article.slug))
+        } label: {
+            HStack(spacing: ZrpSpacing.md) {
+                Image(systemName: "newspaper")
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: article.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(ZrpColor.onSurface)
+                        .lineLimit(2)
+                    if let sourceName = article.sourceName, !sourceName.isEmpty {
+                        Text(verbatim: sourceName)
+                            .font(.footnote)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, ZrpSpacing.lg)
+            .padding(.vertical, ZrpSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// Tapping a track surfaces its artist page (where it can be played
+    /// from) rather than wiring a dedicated track detail/playback route
+    /// into Search - there is no such route today (tracks play from a
+    /// queue, not a detail screen).
+    private func musicRow(_ item: SearchMusicResult) -> some View {
+        let subtitle: String? = (item.kind == "album" || item.kind == "track") ? item.artist?.displayName : nil
+        return Button {
+            switch item.kind {
+            case "artist": navigator.push(.musicArtist(id: item.id))
+            case "album": navigator.push(.musicAlbum(id: item.id))
+            case "track":
+                if let artistId = item.artist?.id { navigator.push(.musicArtist(id: artistId)) }
+            case "playlist": navigator.push(.musicPlaylist(id: item.id))
+            default: break
+            }
+        } label: {
+            HStack(spacing: ZrpSpacing.md) {
+                AvatarView(url: item.avatarUrl ?? item.coverUrl ?? item.artist?.avatarUrl, displayName: item.displayTitle, size: ZrpMetrics.avatarMedium)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: ZrpSpacing.xs) {
+                        Text(verbatim: item.displayTitle)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(ZrpColor.onSurface)
+                            .lineLimit(1)
+                        if item.verified {
+                            VerifiedBadge(badgeType: "verified", size: 12)
+                        }
+                    }
+                    if let subtitle, !subtitle.isEmpty {
+                        Text(verbatim: subtitle)
+                            .font(.footnote)
+                            .foregroundStyle(ZrpColor.onSurfaceMuted)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, ZrpSpacing.lg)
+            .padding(.vertical, ZrpSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }

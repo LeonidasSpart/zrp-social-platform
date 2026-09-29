@@ -1,9 +1,8 @@
 # ZRP Advanced Search — Architecture
 
 Status: backend contract fully implemented (`GET /api/search`, `src/lib/search/`),
-Postgres trigram indexes in place, Web UI rebuilt against the new contract.
-**Android and iOS still speak the old users/posts-only contract** — see §8 for
-exact per-platform status.
+Postgres trigram indexes in place, Web/Android/iOS UIs all rebuilt against the
+new contract — see §8 for exact per-platform status.
 
 ## 1. What existed before this
 
@@ -239,8 +238,8 @@ future migration.
 | Platform | Status |
 | --- | --- |
 | Web | Rebuilt (`src/app/search/page.tsx`): all 8 categories, filters, sort, cursor pagination via "Load more", loading/empty/error states, reuses `PostCard`/`ListingCard`/`opportunity/ListingCard` rather than duplicating result rendering. |
-| Android | Not yet updated — still the pre-existing 2-category, unpaginated `SearchViewModel`/`SearchScreen`. Backward-compatible with the new contract (still reads `.users`/`.posts` from `type=all`). |
-| iOS | Not yet updated beyond its existing hashtag-search-as-you-type mode. Still backward-compatible. |
+| Android | Rebuilt (`SearchViewModel`/`SearchScreen`): all 8 categories, sort dropdown, filter panel, real cursor pagination via `loadMore()` (following `OpportunityViewModel`'s own pattern), reuses `PostCard`/`OpportunityCardView`/`ListingCardView`. Music uses a new flat, kind-discriminated `SearchMusicResult` since Gson has no polymorphic dispatch and the backend merges 4 models with no shared table. |
+| iOS | Rebuilt (`SearchViewModel`/`SearchView`): same 8 categories/sort/filters/pagination, reuses `Community`/`NewsArticle`/`Opportunity`/`Listing`/`PostAuthor` (already `Decodable` with graceful defaults for the fields Advanced Search's leaner `SELECT` omits) and adds the same kind-discriminated `SearchMusicResult` for Music. The pre-existing hashtag search-as-you-type mode (`GET /api/hashtags/search`) is untouched and still takes priority for a "#"-led query. |
 
 ## 9. Known limitations (honestly documented, not hidden)
 
