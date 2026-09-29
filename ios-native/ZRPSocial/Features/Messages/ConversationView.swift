@@ -544,7 +544,12 @@ private struct MessageBubble: View {
             if isOwn { Spacer(minLength: 40) }
 
             VStack(alignment: isOwn ? .trailing : .leading, spacing: ZrpSpacing.xs) {
-                if let replyTo = message.replyTo {
+                // Never both at once (see `Message.story`'s own doc
+                // comment) - a story reply is its own kind of DM, not a
+                // reply to another message.
+                if let story = message.story {
+                    storyContext(story)
+                } else if let replyTo = message.replyTo {
                     replyContext(replyTo)
                 }
 
@@ -721,6 +726,44 @@ private struct MessageBubble: View {
             }
         }
         .padding(.horizontal, ZrpSpacing.sm)
+        .frame(maxWidth: 260, alignment: .leading)
+    }
+
+    /// A reply to the other party's story (see `Message.story`'s own doc
+    /// comment) - a thumbnail plus "Replied to their/your story", the
+    /// same quote badge `ChatInterface.tsx` renders on web. The model
+    /// already decoded this on every thread fetch; this bubble simply
+    /// never looked at it before.
+    private func storyContext(_ story: RepliedStory) -> some View {
+        HStack(spacing: ZrpSpacing.xs) {
+            if let mediaUrl = story.mediaUrl, !mediaUrl.isEmpty {
+                if story.mediaType == "video" {
+                    ZStack {
+                        Color.black.opacity(0.2)
+                        Image(systemName: "play.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.white)
+                    }
+                    .frame(width: 28, height: 28)
+                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                } else {
+                    RemoteImage(url: mediaUrl, targetSize: 28) {
+                        Color.black.opacity(0.2)
+                    }
+                    .frame(width: 28, height: 28)
+                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                }
+            }
+            // Deliberately not localized - matches `ChatInterface.tsx`'s
+            // own hardcoded English string, which this mirrors exactly.
+            Text(verbatim: isOwn ? "Replied to their story" : "Replied to your story")
+                .font(.caption2)
+                .foregroundStyle(ZrpColor.onSurfaceMuted)
+        }
+        .padding(.horizontal, ZrpSpacing.sm)
+        .padding(.vertical, 6)
+        .background(ZrpColor.surfaceHighest.opacity(0.6))
+        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         .frame(maxWidth: 260, alignment: .leading)
     }
 
