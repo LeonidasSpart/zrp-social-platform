@@ -382,6 +382,7 @@
     <string name="post_delete_confirm_body">この操作は取り消せません。</string>
     <string name="comment_edit_cd">コメントを編集</string>
     <string name="comment_delete_cd">コメントを削除</string>
+    <string name="comment_report_cd">コメントを報告</string>
     <string name="comment_delete_confirm_title">コメントを削除しますか？</string>
     <string name="comment_delete_confirm_body">この操作は取り消せません。返信もすべて削除されます。</string>
     <string name="comment_write_placeholder">コメントを書く...</string>
@@ -408,6 +409,7 @@
     <string name="chat_voice_play_cd">再生</string>
     <string name="chat_voice_pause_cd">一時停止</string>
     <string name="chat_err_mic_access">マイクにアクセスできませんでした。権限設定をご確認ください。</string>
+    <string name="chat_err_camera_access">カメラにアクセスできませんでした。権限設定をご確認ください。</string>
     <string name="chat_attachment_fallback">ファイル</string>
     <string name="comment_post_cd">コメントを投稿</string>
     <string name="action_show_password">パスワードを表示</string>
@@ -1297,6 +1299,7 @@
     <string name="news_category_sports">スポーツ</string>
     <string name="news_category_culture">文化</string>
     <string name="news_category_community">コミュニティ</string>
+    <string name="news_category_gaming">ゲーム</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">ZRP Newsを見る</string>
     <string name="shorts_back">戻る</string>
@@ -1334,6 +1337,9 @@
     <string name="shorts_upload_err_too_large_plan">この動画はお使いのプランには大きすぎます。より小さいファイルを試すか、プランをアップグレードしてください。</string>
     <string name="shorts_upload_err_url_gen_failed">アップロードを開始できませんでした。一時的な接続の問題である可能性があります。もう一度お試しください。</string>
     <string name="shorts_upload_err_internal_server">アップロード中にサーバー側で問題が発生しました。しばらくしてからもう一度お試しください。</string>
+    <string name="shorts_premium_locked_title">プレミアム動画</string>
+    <string name="shorts_premium_locked_body">%1$s %2$sでこの動画のロックを解除</string>
+    <string name="shorts_premium_locked_cta">投稿を見る</string>
     <string name="caption_view_more">もっと見る</string>
     <string name="caption_view_less">表示を減らす</string>
     <string name="shorts_title">ショート</string>

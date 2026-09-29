@@ -6,7 +6,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-// The same 11 real categories NewsApi's own NEWS_CATEGORIES already
+// The same 12 real categories NewsApi's own NEWS_CATEGORIES already
 // lists (src/app/news/page.tsx's categories array minus "ALL",
 // the NewsArticleCategory Prisma enum) - a journalist article's
 // category is written from this exact same set, so this reuses

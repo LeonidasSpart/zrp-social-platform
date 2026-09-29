@@ -840,7 +840,7 @@ data class AdminNewsArticle(
     val coverImage: String?,
     val sourceName: String?,
     val sourceUrl: String?,
-    // The real UPPERCASE NewsArticleCategory enum - the same 11 values
+    // The real UPPERCASE NewsArticleCategory enum - the same 12 values
     // NewsApi's own NEWS_CATEGORIES already lists.
     val category: String,
     // The real UPPERCASE NewsArticleStatus enum:

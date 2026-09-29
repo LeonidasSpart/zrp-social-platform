@@ -306,6 +306,7 @@
     <string name="post_delete_confirm_body">Din ma tistax titreġġa\' lura.</string>
     <string name="comment_edit_cd">Editja l-kumment</string>
     <string name="comment_delete_cd">Ħassar il-kumment</string>
+    <string name="comment_report_cd">Irrapporta l-kumment</string>
     <string name="comment_delete_confirm_title">Ħassar il-kumment?</string>
     <string name="comment_delete_confirm_body">Din ma tistax titreġġa\' lura. Kwalunkwe tweġiba għaliha titħassar ukoll.</string>
     <string name="comment_write_placeholder">Ikteb kumment...</string>
@@ -332,6 +333,7 @@
     <string name="chat_voice_play_cd">Doqq</string>
     <string name="chat_voice_pause_cd">Ipparja</string>
     <string name="chat_err_mic_access">Ma stajniex naċċessaw il-mikrofonu tiegħek. Jekk jogħġbok iċċekkja l-permessi tiegħek.</string>
+    <string name="chat_err_camera_access">Ma stajniex naċċessaw il-kamera tiegħek. Jekk jogħġbok iċċekkja l-permessi tiegħek.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Ippostja l-kumment</string>
     <string name="action_show_password">Uri l-password</string>
@@ -1216,6 +1218,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultura</string>
     <string name="news_category_community">Komunità</string>
+    <string name="news_category_gaming">Logħob</string>
     <string name="news_title">Aħbarijiet ta\' ZRP</string>
     <string name="news_discover_entry">Skopri l-Aħbarijiet ta\' ZRP</string>
     <string name="shorts_back">Lura</string>
@@ -1253,6 +1256,9 @@
     <string name="shorts_upload_err_too_large_plan">Dan il-vidjo huwa kbir wisq għall-pjan tiegħek. Ipprova fajl iżgħar jew tejjeb il-pjan tiegħek.</string>
     <string name="shorts_upload_err_url_gen_failed">Ma stajniex nibdew it-tella\' - dan normalment huwa problema temporanja ta\' konnessjoni. Jekk jogħġbok erġa\' pprova.</string>
     <string name="shorts_upload_err_internal_server">Xi ħaġa marret ħażin min-naħa tagħna waqt it-tella\'. Jekk jogħġbok erġa\' pprova fi ftit ħin.</string>
+    <string name="shorts_premium_locked_title">Vidjo Premium</string>
+    <string name="shorts_premium_locked_body">Iftaħ dan il-vidjo għal %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Ara l-post</string>
     <string name="caption_view_more">Ara aktar</string>
     <string name="caption_view_less">Ara inqas</string>
     <string name="shorts_title">Vidjows Qosra</string>

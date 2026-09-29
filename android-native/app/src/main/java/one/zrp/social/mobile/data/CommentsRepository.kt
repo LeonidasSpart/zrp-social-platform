@@ -5,6 +5,7 @@ import one.zrp.social.mobile.network.BookmarkResponse
 import one.zrp.social.mobile.network.Comment
 import one.zrp.social.mobile.network.CommentsPage
 import one.zrp.social.mobile.network.CreateCommentRequest
+import one.zrp.social.mobile.network.CreateReportRequest
 import one.zrp.social.mobile.network.LikeResponse
 import one.zrp.social.mobile.network.RepostResponse
 import one.zrp.social.mobile.network.UpdateCommentRequest
@@ -67,5 +68,12 @@ class CommentsRepository {
 
     suspend fun deleteComment(commentId: String): Result<Unit> = runCatching {
         ApiClient.commentsApi.deleteComment(commentId)
+    }
+
+    // Same generic POST /api/reports the website's Comments.tsx already
+    // uses for a comment (commentId, not postId) - the moderation queue
+    // treats it identically to any other report target.
+    suspend fun reportComment(commentId: String, reason: String, details: String?): Result<Unit> = runCatching {
+        ApiClient.reportsApi.createReport(CreateReportRequest(commentId = commentId, reason = reason, details = details))
     }
 }

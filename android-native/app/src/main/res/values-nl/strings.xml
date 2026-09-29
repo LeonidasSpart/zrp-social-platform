@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Dit kan niet ongedaan worden gemaakt.</string>
     <string name="comment_edit_cd">Reactie bewerken</string>
     <string name="comment_delete_cd">Reactie verwijderen</string>
+    <string name="comment_report_cd">Reactie rapporteren</string>
     <string name="comment_delete_confirm_title">Reactie verwijderen?</string>
     <string name="comment_delete_confirm_body">Dit kan niet ongedaan worden gemaakt. Eventuele antwoorden erop worden ook verwijderd.</string>
     <string name="comment_write_placeholder">Schrijf een reactie...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Afspelen</string>
     <string name="chat_voice_pause_cd">Pauzeren</string>
     <string name="chat_err_mic_access">Kon geen toegang krijgen tot je microfoon. Controleer je machtigingen.</string>
+    <string name="chat_err_camera_access">Kon geen toegang krijgen tot je camera. Controleer je machtigingen.</string>
     <string name="chat_attachment_fallback">Document</string>
     <string name="comment_post_cd">Reactie plaatsen</string>
     <string name="action_show_password">Wachtwoord tonen</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Cultuur</string>
     <string name="news_category_community">Community</string>
+    <string name="news_category_gaming">Gaming</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Ontdek ZRP News</string>
     <string name="shorts_back">Terug</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Deze video is te groot voor je abonnement. Probeer een kleiner bestand of upgrade je abonnement.</string>
     <string name="shorts_upload_err_url_gen_failed">Kon de upload niet starten - dit is meestal een tijdelijk verbindingsprobleem. Probeer het opnieuw.</string>
     <string name="shorts_upload_err_internal_server">Er is iets misgegaan aan onze kant tijdens het uploaden. Probeer het over een moment opnieuw.</string>
+    <string name="shorts_premium_locked_title">Premium video</string>
+    <string name="shorts_premium_locked_body">Ontgrendel deze video voor %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Post bekijken</string>
     <string name="caption_view_more">Meer weergeven</string>
     <string name="caption_view_less">Minder weergeven</string>
     <string name="shorts_title">Shorts</string>

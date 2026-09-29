@@ -4,13 +4,13 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-// The same 11 real categories src/app/news/page.tsx's own `categories`
+// The same 12 real categories src/app/news/page.tsx's own `categories`
 // array (minus the "ALL" client-side filter option) and the
 // NewsArticleCategory Prisma enum use, kept as plain strings matching
 // the wire values verbatim.
 val NEWS_CATEGORIES = listOf(
     "WORLD", "EUROPE", "SWITZERLAND", "POLITICS", "BUSINESS", "TECHNOLOGY",
-    "CRYPTO", "SCIENCE", "SPORTS", "CULTURE", "COMMUNITY",
+    "CRYPTO", "SCIENCE", "SPORTS", "CULTURE", "COMMUNITY", "GAMING",
 )
 
 data class NewsAuthor(

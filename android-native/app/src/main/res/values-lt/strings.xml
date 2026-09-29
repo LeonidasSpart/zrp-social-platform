@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Šio veiksmo anuliuoti negalėsite.</string>
     <string name="comment_edit_cd">Redaguoti komentarą</string>
     <string name="comment_delete_cd">Ištrinti komentarą</string>
+    <string name="comment_report_cd">Pranešti apie komentarą</string>
     <string name="comment_delete_confirm_title">Ištrinti komentarą?</string>
     <string name="comment_delete_confirm_body">Šio veiksmo anuliuoti negalėsite. Visi atsakymai į jį taip pat bus ištrinti.</string>
     <string name="comment_write_placeholder">Rašykite komentarą...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Groti</string>
     <string name="chat_voice_pause_cd">Pristabdyti</string>
     <string name="chat_err_mic_access">Nepavyko pasiekti mikrofono. Patikrinkite leidimus.</string>
+    <string name="chat_err_camera_access">Nepavyko pasiekti kameros. Patikrinkite leidimus.</string>
     <string name="chat_attachment_fallback">Dokumentas</string>
     <string name="comment_post_cd">Skelbti komentarą</string>
     <string name="action_show_password">Rodyti slaptažodį</string>
@@ -1306,6 +1308,7 @@
     <string name="news_category_sports">Sportas</string>
     <string name="news_category_culture">Kultūra</string>
     <string name="news_category_community">Bendruomenė</string>
+    <string name="news_category_gaming">Žaidimai</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Atraskite ZRP News</string>
     <string name="shorts_back">Atgal</string>
@@ -1343,6 +1346,9 @@
     <string name="shorts_upload_err_too_large_plan">Šis vaizdo įrašas per didelis jūsų planui. Pabandykite mažesnį failą arba atnaujinkite planą.</string>
     <string name="shorts_upload_err_url_gen_failed">Nepavyko pradėti įkėlimo - dažniausiai tai laikina ryšio problema. Bandykite dar kartą.</string>
     <string name="shorts_upload_err_internal_server">Įkeliant įvyko klaida mūsų pusėje. Bandykite dar kartą po akimirkos.</string>
+    <string name="shorts_premium_locked_title">Premium vaizdo įrašas</string>
+    <string name="shorts_premium_locked_body">Atrakinkite šį vaizdo įrašą už %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Peržiūrėti įrašą</string>
     <string name="caption_view_more">Rodyti daugiau</string>
     <string name="caption_view_less">Rodyti mažiau</string>
     <string name="shorts_title">Trumpi vaizdo įrašai</string>

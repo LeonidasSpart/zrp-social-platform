@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Αυτό δεν μπορεί να αναιρεθεί.</string>
     <string name="comment_edit_cd">Επεξεργασία σχολίου</string>
     <string name="comment_delete_cd">Διαγραφή σχολίου</string>
+    <string name="comment_report_cd">Αναφορά σχολίου</string>
     <string name="comment_delete_confirm_title">Διαγραφή σχολίου;</string>
     <string name="comment_delete_confirm_body">Αυτό δεν μπορεί να αναιρεθεί. Τυχόν απαντήσεις σε αυτό θα διαγραφούν επίσης.</string>
     <string name="comment_write_placeholder">Γράψε ένα σχόλιο...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Αναπαραγωγή</string>
     <string name="chat_voice_pause_cd">Παύση</string>
     <string name="chat_err_mic_access">Δεν ήταν δυνατή η πρόσβαση στο μικρόφωνό σου. Έλεγξε τα δικαιώματα.</string>
+    <string name="chat_err_camera_access">Δεν ήταν δυνατή η πρόσβαση στην κάμερά σου. Έλεγξε τα δικαιώματα.</string>
     <string name="chat_attachment_fallback">Έγγραφο</string>
     <string name="comment_post_cd">Δημοσίευση σχολίου</string>
     <string name="action_show_password">Εμφάνιση κωδικού</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Αθλητικά</string>
     <string name="news_category_culture">Πολιτισμός</string>
     <string name="news_category_community">Κοινότητα</string>
+    <string name="news_category_gaming">Gaming</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Ανακάλυψε το ZRP News</string>
     <string name="shorts_back">Πίσω</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Αυτό το βίντεο είναι πολύ μεγάλο για το πλάνο σου. Δοκίμασε ένα μικρότερο αρχείο ή αναβάθμισε το πλάνο σου.</string>
     <string name="shorts_upload_err_url_gen_failed">Δεν ήταν δυνατή η έναρξη της μεταφόρτωσης - συνήθως πρόκειται για προσωρινό πρόβλημα σύνδεσης. Δοκίμασε ξανά.</string>
     <string name="shorts_upload_err_internal_server">Κάτι πήγε στραβά από την πλευρά μας κατά τη μεταφόρτωση. Δοκίμασε ξανά σε λίγο.</string>
+    <string name="shorts_premium_locked_title">Premium βίντεο</string>
+    <string name="shorts_premium_locked_body">Ξεκλείδωσε αυτό το βίντεο για %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Προβολή ανάρτησης</string>
     <string name="caption_view_more">Δες περισσότερα</string>
     <string name="caption_view_less">Δες λιγότερα</string>
     <string name="shorts_title">Σύντομα Βίντεο</string>

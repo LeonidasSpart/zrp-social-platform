@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">此操作无法撤销。</string>
     <string name="comment_edit_cd">编辑评论</string>
     <string name="comment_delete_cd">删除评论</string>
+    <string name="comment_report_cd">举报评论</string>
     <string name="comment_delete_confirm_title">删除这条评论？</string>
     <string name="comment_delete_confirm_body">此操作无法撤销。对该评论的所有回复也将被删除。</string>
     <string name="comment_write_placeholder">写评论…</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">播放</string>
     <string name="chat_voice_pause_cd">暂停</string>
     <string name="chat_err_mic_access">无法访问你的麦克风，请检查你的权限设置。</string>
+    <string name="chat_err_camera_access">无法访问你的相机，请检查你的权限设置。</string>
     <string name="chat_attachment_fallback">文档</string>
     <string name="comment_post_cd">发布评论</string>
     <string name="action_show_password">显示密码</string>
@@ -1315,6 +1317,7 @@
     <string name="news_category_sports">体育</string>
     <string name="news_category_culture">文化</string>
     <string name="news_category_community">社区</string>
+    <string name="news_category_gaming">游戏</string>
     <string name="news_title">ZRP 新闻</string>
     <string name="news_discover_entry">发现 ZRP News</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1354,6 +1357,9 @@
     <string name="shorts_upload_err_too_large_plan">此视频超出您套餐的大小限制。请尝试更小的文件或升级套餐。</string>
     <string name="shorts_upload_err_url_gen_failed">无法开始上传，这通常是暂时的网络连接问题。请重试。</string>
     <string name="shorts_upload_err_internal_server">上传时我们这边出了点问题。请稍后再试。</string>
+    <string name="shorts_premium_locked_title">付费视频</string>
+    <string name="shorts_premium_locked_body">支付 %1$s %2$s 以解锁此视频</string>
+    <string name="shorts_premium_locked_cta">查看帖子</string>
     <string name="caption_view_more">查看更多</string>
     <string name="caption_view_less">收起</string>
     <!-- ZRP Creator Studio (native parity) -->

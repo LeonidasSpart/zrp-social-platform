@@ -17,8 +17,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -48,7 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.MarketplaceRepository
+import one.zrp.social.mobile.ui.components.EmptyStateAction
 import one.zrp.social.mobile.ui.components.ZrpEmptyState
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * ZRP Market Plus browse - MarketplaceHomePage/CategoryPage/SearchPage
@@ -166,6 +170,24 @@ fun MarketplaceScreen(
             state.isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            }
+            // A genuine load failure (offline, timeout, server error) used
+            // to render identically to "no listings yet" - state.error was
+            // already tracked by the ViewModel but never read here, so a
+            // network error looked exactly like an honestly-empty
+            // marketplace with no way to tell the two apart or retry.
+            state.error != null && state.listings.isEmpty() -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    ZrpEmptyState(
+                        icon = Icons.Filled.CloudOff,
+                        title = localizedError(state.error) ?: stringResource(R.string.marketplace_no_listings_found),
+                        primaryAction = EmptyStateAction(
+                            label = stringResource(R.string.action_retry),
+                            icon = Icons.Filled.Refresh,
+                            onClick = { viewModel.refresh() },
+                        ),
+                    )
                 }
             }
             state.listings.isEmpty() -> {

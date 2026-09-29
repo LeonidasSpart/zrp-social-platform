@@ -382,6 +382,7 @@
     <string name="post_delete_confirm_body">Esta ação não pode ser desfeita.</string>
     <string name="comment_edit_cd">Editar comentário</string>
     <string name="comment_delete_cd">Eliminar comentário</string>
+    <string name="comment_report_cd">Denunciar comentário</string>
     <string name="comment_delete_confirm_title">Eliminar comentário?</string>
     <string name="comment_delete_confirm_body">Esta ação não pode ser desfeita. As respostas a este comentário também serão eliminadas.</string>
     <string name="comment_write_placeholder">Escreve um comentário...</string>
@@ -408,6 +409,7 @@
     <string name="chat_voice_play_cd">Reproduzir</string>
     <string name="chat_voice_pause_cd">Pausar</string>
     <string name="chat_err_mic_access">Não foi possível aceder ao teu microfone. Verifica as tuas permissões.</string>
+    <string name="chat_err_camera_access">Não foi possível aceder à tua câmara. Verifica as tuas permissões.</string>
     <string name="chat_attachment_fallback">Documento</string>
     <string name="comment_post_cd">Publicar comentário</string>
     <string name="action_show_password">Mostrar palavra-passe</string>
@@ -1297,6 +1299,7 @@
     <string name="news_category_sports">Desporto</string>
     <string name="news_category_culture">Cultura</string>
     <string name="news_category_community">Comunidade</string>
+    <string name="news_category_gaming">Jogos</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Descobrir o ZRP News</string>
     <string name="shorts_back">Voltar</string>
@@ -1334,6 +1337,9 @@
     <string name="shorts_upload_err_too_large_plan">Este vídeo é demasiado grande para o teu plano. Tenta um ficheiro mais pequeno ou faz upgrade do teu plano.</string>
     <string name="shorts_upload_err_url_gen_failed">Não foi possível iniciar o carregamento - normalmente é um problema de ligação temporário. Tenta novamente.</string>
     <string name="shorts_upload_err_internal_server">Ocorreu um erro do nosso lado durante o carregamento. Tenta novamente dentro de momentos.</string>
+    <string name="shorts_premium_locked_title">Vídeo premium</string>
+    <string name="shorts_premium_locked_body">Desbloqueie este vídeo por %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Ver publicação</string>
     <string name="caption_view_more">Ver mais</string>
     <string name="caption_view_less">Ver menos</string>
     <string name="shorts_title">Vídeos Curtos</string>

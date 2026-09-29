@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Tindakan ini tidak dapat dibatalkan.</string>
     <string name="comment_edit_cd">Edit komentar</string>
     <string name="comment_delete_cd">Hapus komentar</string>
+    <string name="comment_report_cd">Laporkan komentar</string>
     <string name="comment_delete_confirm_title">Hapus komentar?</string>
     <string name="comment_delete_confirm_body">Tindakan ini tidak dapat dibatalkan. Semua balasan untuk komentar ini juga akan dihapus.</string>
     <string name="comment_write_placeholder">Tulis komentar...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Putar</string>
     <string name="chat_voice_pause_cd">Jeda</string>
     <string name="chat_err_mic_access">Tidak dapat mengakses mikrofon Anda. Silakan periksa izin Anda.</string>
+    <string name="chat_err_camera_access">Tidak dapat mengakses kamera Anda. Silakan periksa izin Anda.</string>
     <string name="chat_attachment_fallback">Dokumen</string>
     <string name="comment_post_cd">Kirim komentar</string>
     <string name="action_show_password">Tampilkan kata sandi</string>
@@ -1315,6 +1317,7 @@
     <string name="news_category_sports">Olahraga</string>
     <string name="news_category_culture">Budaya</string>
     <string name="news_category_community">Komunitas</string>
+    <string name="news_category_gaming">Game</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Temukan ZRP News</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1354,6 +1357,9 @@
     <string name="shorts_upload_err_too_large_plan">Video ini terlalu besar untuk paket Anda. Coba file yang lebih kecil atau tingkatkan paket Anda.</string>
     <string name="shorts_upload_err_url_gen_failed">Tidak dapat memulai unggahan - ini biasanya masalah koneksi sementara. Silakan coba lagi.</string>
     <string name="shorts_upload_err_internal_server">Terjadi kesalahan di sistem kami saat mengunggah. Silakan coba lagi sesaat lagi.</string>
+    <string name="shorts_premium_locked_title">Video premium</string>
+    <string name="shorts_premium_locked_body">Buka video ini seharga %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Lihat postingan</string>
     <string name="caption_view_more">Lihat selengkapnya</string>
     <string name="caption_view_less">Lihat lebih sedikit</string>
     <!-- ZRP Creator Studio (native parity) -->

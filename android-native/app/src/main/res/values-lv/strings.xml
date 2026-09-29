@@ -306,6 +306,7 @@
     <string name="post_delete_confirm_body">Šo darbību nevar atsaukt.</string>
     <string name="comment_edit_cd">Rediģēt komentāru</string>
     <string name="comment_delete_cd">Dzēst komentāru</string>
+    <string name="comment_report_cd">Ziņot par komentāru</string>
     <string name="comment_delete_confirm_title">Dzēst komentāru?</string>
     <string name="comment_delete_confirm_body">Šo darbību nevar atsaukt. Visas tā atbildes arī tiks dzēstas.</string>
     <string name="comment_write_placeholder">Raksti komentāru...</string>
@@ -332,6 +333,7 @@
     <string name="chat_voice_play_cd">Atskaņot</string>
     <string name="chat_voice_pause_cd">Pauzēt</string>
     <string name="chat_err_mic_access">Neizdevās piekļūt tavam mikrofonam. Lūdzu, pārbaudi atļaujas.</string>
+    <string name="chat_err_camera_access">Neizdevās piekļūt tavai kamerai. Lūdzu, pārbaudi atļaujas.</string>
     <string name="chat_attachment_fallback">Dokuments</string>
     <string name="comment_post_cd">Publicēt komentāru</string>
     <string name="action_show_password">Rādīt paroli</string>
@@ -1212,6 +1214,7 @@
     <string name="news_category_sports">Sporta ziņas</string>
     <string name="news_category_culture">Kultūra</string>
     <string name="news_category_community">Kopiena</string>
+    <string name="news_category_gaming">Spēles</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Atklāj ZRP News</string>
     <string name="shorts_back">Atpakaļ</string>
@@ -1249,6 +1252,9 @@
     <string name="shorts_upload_err_too_large_plan">Šis video ir pārāk liels tavam plānam. Mēģini mazāku failu vai jaunini savu plānu.</string>
     <string name="shorts_upload_err_url_gen_failed">Neizdevās sākt augšupielādi - tā parasti ir īslaicīga savienojuma problēma. Lūdzu, mēģini vēlreiz.</string>
     <string name="shorts_upload_err_internal_server">Augšupielādes laikā mūsu pusē radās kļūda. Lūdzu, mēģini vēlreiz pēc brīža.</string>
+    <string name="shorts_premium_locked_title">Maksas video</string>
+    <string name="shorts_premium_locked_body">Atbloķē šo video par %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Skatīt ierakstu</string>
     <string name="caption_view_more">Skatīt vairāk</string>
     <string name="caption_view_less">Skatīt mazāk</string>
     <string name="shorts_title">Īsie video</string>

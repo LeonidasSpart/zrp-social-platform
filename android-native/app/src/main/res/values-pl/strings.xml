@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Tej czynności nie można cofnąć.</string>
     <string name="comment_edit_cd">Edytuj komentarz</string>
     <string name="comment_delete_cd">Usuń komentarz</string>
+    <string name="comment_report_cd">Zgłoś komentarz</string>
     <string name="comment_delete_confirm_title">Usunąć komentarz?</string>
     <string name="comment_delete_confirm_body">Tej czynności nie można cofnąć. Odpowiedzi na niego również zostaną usunięte.</string>
     <string name="comment_write_placeholder">Napisz komentarz...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Odtwórz</string>
     <string name="chat_voice_pause_cd">Wstrzymaj</string>
     <string name="chat_err_mic_access">Nie udało się uzyskać dostępu do mikrofonu. Sprawdź uprawnienia.</string>
+    <string name="chat_err_camera_access">Nie udało się uzyskać dostępu do aparatu. Sprawdź uprawnienia.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Opublikuj komentarz</string>
     <string name="action_show_password">Pokaż hasło</string>
@@ -1306,6 +1308,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultura</string>
     <string name="news_category_community">Społeczność</string>
+    <string name="news_category_gaming">Gry</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Odkrywaj ZRP News</string>
     <string name="shorts_back">Wstecz</string>
@@ -1343,6 +1346,9 @@
     <string name="shorts_upload_err_too_large_plan">To wideo jest za duże jak na Twój plan. Spróbuj mniejszego pliku lub zmień plan na wyższy.</string>
     <string name="shorts_upload_err_url_gen_failed">Nie udało się rozpocząć przesyłania: zwykle jest to tymczasowy problem z połączeniem. Spróbuj ponownie.</string>
     <string name="shorts_upload_err_internal_server">Coś poszło nie tak po naszej stronie podczas przesyłania. Spróbuj ponownie za chwilę.</string>
+    <string name="shorts_premium_locked_title">Wideo premium</string>
+    <string name="shorts_premium_locked_body">Odblokuj to wideo za %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Zobacz post</string>
     <string name="caption_view_more">Pokaż więcej</string>
     <string name="caption_view_less">Pokaż mniej</string>
     <string name="shorts_title">Shorts</string>

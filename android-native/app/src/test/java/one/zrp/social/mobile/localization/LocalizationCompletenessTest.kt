@@ -985,6 +985,10 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "nl" to setOf(
+            // "Gaming" and "Premium video" are identical Dutch loanwords -
+            // Task #4's news category and Shorts premium-lock strings.
+            "news_category_gaming",
+            "shorts_premium_locked_title",
             // "Hashtags"/"Filters"/"Trending"/"Media"/"GIFs" are identical
         // Dutch loanwords - Advanced Search category tab, filters toggle,
         // sort option and media filter options.
@@ -1162,6 +1166,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "ro" to setOf(
+            // "Gaming" is the identical Romanian loanword - Task #4's news
+            // category string.
+            "news_category_gaming",
             // "Media" is the identical Romanian loanword - Advanced Search
         // filter panel section label.
             "search_media",
@@ -1271,6 +1278,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "sv" to setOf(
+            // "Gaming" is the identical Swedish loanword - Task #4's news
+            // category string.
+            "news_category_gaming",
             // "Media"/"All media" are identical Swedish loanwords - Advanced
         // Search filter panel section label and its "no filter" option.
             "search_media",
@@ -1328,6 +1338,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "da" to setOf(
+            // "Gaming" is the identical Danish loanword - Task #4's news
+            // category string.
+            "news_category_gaming",
             // "Hashtags"/"Trending" are identical Danish loanwords -
         // Advanced Search category tab and sort option.
             "search_category_hashtags",
@@ -1409,6 +1422,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "hr" to setOf(
+            // "Premium video" is the identical Croatian phrase - Task #4's
+            // Shorts premium-lock title.
+            "shorts_premium_locked_title",
             // "Moderator" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_moderator_badge",
@@ -1462,6 +1478,10 @@ class LocalizationCompletenessTest {
         // to "Βοήθεια"/"Σύντομα Βίντεο") and have been fixed in
         // values-el/strings.xml instead of allowlisted.
         "el" to setOf(
+            // "Gaming" stays English, matching this exact word's own real,
+            // already-live web translation (src/lib/translations.ts'
+            // newsCategory.gaming) - Task #4's news category string.
+            "news_category_gaming",
             // "Hashtags" stays English, the same established choice already
         // made for this exact word elsewhere in Greek (see this file's own
         // header comment on the "el" block) - Advanced Search category tab.
@@ -1487,6 +1507,10 @@ class LocalizationCompletenessTest {
         // identically to English) plus the format-only/brand strings
         // already allowlisted the same way for every other language here.
         "no" to setOf(
+            // "Gaming" is the identical Bokmål loanword, same established
+            // choice as this list's own header comment - Task #4's news
+            // category string.
+            "news_category_gaming",
             // "Media" is the identical Bokmål loanword, same established
         // choice as this list's own header comment - Advanced Search
         // filter panel section label.
@@ -1564,6 +1588,9 @@ class LocalizationCompletenessTest {
             "admin_news_network_publication_meta",
         ),
         "bs" to setOf(
+            // "Premium video" is the identical Bosnian phrase - Task #4's
+            // Shorts premium-lock title.
+            "shorts_premium_locked_title",
             // "Moderator" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_moderator_badge",
@@ -1717,6 +1744,9 @@ class LocalizationCompletenessTest {
             "admin_analytics_platform_web",
         ),
         "sl" to setOf(
+            // "Premium video" is the identical Slovenian phrase - Task #4's
+            // Shorts premium-lock title.
+            "shorts_premium_locked_title",
             // "Moderator" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_moderator_badge",

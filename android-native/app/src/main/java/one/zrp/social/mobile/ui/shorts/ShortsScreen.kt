@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.VolumeOff
@@ -94,6 +95,7 @@ fun ShortsScreen(
     onBack: () -> Unit,
     onOpenComments: (String) -> Unit,
     onAuthorClick: (String) -> Unit,
+    onViewPost: (String) -> Unit,
     startPostId: String? = null,
 ) {
     val viewModel: ShortsViewModel = viewModel(
@@ -147,6 +149,7 @@ fun ShortsScreen(
                     onComment = { onOpenComments(post.id) },
                     onAuthorClick = { onAuthorClick(post.author.username) },
                     onPlaybackError = { viewModel.removeBrokenPost(post.id) },
+                    onViewPost = { onViewPost(post.id) },
                 )
             }
         }
@@ -215,9 +218,11 @@ private fun ShortItem(
     onComment: () -> Unit,
     onAuthorClick: () -> Unit,
     onPlaybackError: () -> Unit,
+    onViewPost: () -> Unit,
 ) {
     val context = LocalContext.current
     val videoUrl = post.imageUrl
+    val premiumPost = post.premiumPost
     // A tap pauses/resumes; matches shorts/page.tsx's own single-tap
     // handler on the <video> element itself.
     var manuallyPaused by remember(post.id) { mutableStateOf(false) }
@@ -237,6 +242,55 @@ private fun ShortItem(
                 onPlaybackError = onPlaybackError,
                 modifier = Modifier.fillMaxSize(),
             )
+        } else if (premiumPost != null) {
+            // A locked, unpurchased pay-per-view Short - mirrors web's
+            // VideoFeedViewer.tsx/DiscoverSlide.tsx locked treatment
+            // exactly (lock icon, honest preview text, real price, a
+            // link to the post - never a purchase button, since this
+            // app has no crypto/money purchase flow). imageUrl is
+            // redacted to null server-side for a locked post (same
+            // gating GET /api/videos applies to every other endpoint),
+            // so without this branch the screen showed a blank surface
+            // with no explanation at all.
+            Column(
+                modifier = Modifier.fillMaxSize().padding(Spacing.xl),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(40.dp),
+                )
+                Text(
+                    text = stringResource(R.string.shorts_premium_locked_title),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = Spacing.lg),
+                )
+                Text(
+                    text = premiumPost.previewContent,
+                    color = Color.White.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = Spacing.sm),
+                )
+                Text(
+                    text = stringResource(R.string.shorts_premium_locked_body, premiumPost.price, premiumPost.currency),
+                    color = Color.White.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = Spacing.xs),
+                )
+                Button(
+                    onClick = onViewPost,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.15f)),
+                    modifier = Modifier.padding(top = Spacing.lg),
+                ) {
+                    Text(stringResource(R.string.shorts_premium_locked_cta), color = Color.White)
+                }
+            }
         }
 
         AnimatedVisibility(

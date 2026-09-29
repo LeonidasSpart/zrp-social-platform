@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Това не може да бъде отменено.</string>
     <string name="comment_edit_cd">Редактирай коментара</string>
     <string name="comment_delete_cd">Изтрий коментара</string>
+    <string name="comment_report_cd">Докладвай коментара</string>
     <string name="comment_delete_confirm_title">Да изтрия ли коментара?</string>
     <string name="comment_delete_confirm_body">Това не може да бъде отменено. Всички отговори към него също ще бъдат изтрити.</string>
     <string name="comment_write_placeholder">Напиши коментар...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Пусни</string>
     <string name="chat_voice_pause_cd">Пауза</string>
     <string name="chat_err_mic_access">Не бе получен достъп до микрофона ти. Провери разрешенията си.</string>
+    <string name="chat_err_camera_access">Не бе получен достъп до камерата ти. Провери разрешенията си.</string>
     <string name="chat_attachment_fallback">Документ</string>
     <string name="comment_post_cd">Публикувай коментар</string>
     <string name="action_show_password">Покажи паролата</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Спорт</string>
     <string name="news_category_culture">Култура</string>
     <string name="news_category_community">Общност</string>
+    <string name="news_category_gaming">Гейминг</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Открий ZRP News</string>
     <string name="shorts_back">Назад</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Това видео е твърде голямо за твоя план. Опитай с по-малък файл или надгради плана си.</string>
     <string name="shorts_upload_err_url_gen_failed">Качването не можа да започне: обикновено това е временен проблем с връзката. Опитай отново.</string>
     <string name="shorts_upload_err_internal_server">Нещо се обърка от наша страна по време на качването. Опитай отново след малко.</string>
+    <string name="shorts_premium_locked_title">Платено видео</string>
+    <string name="shorts_premium_locked_body">Отключи това видео за %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Виж публикацията</string>
     <string name="caption_view_more">Виж повече</string>
     <string name="caption_view_less">Виж по-малко</string>
     <string name="shorts_title">Кратки видеа</string>

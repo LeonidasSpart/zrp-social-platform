@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Det här kan inte ångras.</string>
     <string name="comment_edit_cd">Redigera kommentar</string>
     <string name="comment_delete_cd">Ta bort kommentar</string>
+    <string name="comment_report_cd">Anmäl kommentar</string>
     <string name="comment_delete_confirm_title">Ta bort kommentar?</string>
     <string name="comment_delete_confirm_body">Det här kan inte ångras. Eventuella svar på den tas också bort.</string>
     <string name="comment_write_placeholder">Skriv en kommentar...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Spela</string>
     <string name="chat_voice_pause_cd">Pausa</string>
     <string name="chat_err_mic_access">Kunde inte komma åt din mikrofon. Kontrollera dina behörigheter.</string>
+    <string name="chat_err_camera_access">Kunde inte komma åt din kamera. Kontrollera dina behörigheter.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Publicera kommentar</string>
     <string name="action_show_password">Visa lösenord</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultur</string>
     <string name="news_category_community">Community</string>
+    <string name="news_category_gaming">Gaming</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Upptäck ZRP News</string>
     <string name="shorts_back">Tillbaka</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Den här videon är för stor för din plan. Prova en mindre fil eller uppgradera din plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Det gick inte att starta uppladdningen – det här beror vanligtvis på ett tillfälligt anslutningsproblem. Försök igen.</string>
     <string name="shorts_upload_err_internal_server">Något gick fel på vår sida under uppladdningen. Försök igen om en liten stund.</string>
+    <string name="shorts_premium_locked_title">Premiumvideo</string>
+    <string name="shorts_premium_locked_body">Lås upp den här videon för %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Visa inlägg</string>
     <string name="caption_view_more">Visa mer</string>
     <string name="caption_view_less">Visa mindre</string>
     <string name="shorts_title">Shorts</string>

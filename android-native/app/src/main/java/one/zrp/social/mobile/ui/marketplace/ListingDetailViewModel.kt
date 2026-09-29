@@ -9,11 +9,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.MarketplaceRepository
+import one.zrp.social.mobile.data.ZrpErrors
 import one.zrp.social.mobile.network.ListingDetail
+import one.zrp.social.mobile.network.zrpErrorMessage
+import retrofit2.HttpException
 
 data class ListingDetailUiState(
     val isLoading: Boolean = true,
     val notFound: Boolean = false,
+    // A genuine load failure (offline, timeout, 500) distinct from
+    // notFound (a real 404 - the listing was deleted/never existed).
+    // Both used to collapse into the same notFound=true branch, so a
+    // transient network error showed the exact same "listing not
+    // found, go back to marketplace" dead end as a real 404, with no
+    // way to retry.
+    val error: String? = null,
     val listing: ListingDetail? = null,
     val activeImageIndex: Int = 0,
     val favorited: Boolean = false,
@@ -48,7 +58,7 @@ class ListingDetailViewModel(
     }
 
     private fun load() {
-        _state.update { it.copy(isLoading = true, notFound = false) }
+        _state.update { it.copy(isLoading = true, notFound = false, error = null) }
         viewModelScope.launch {
             repository.getListing(listingId)
                 .onSuccess { listing ->
@@ -62,11 +72,17 @@ class ListingDetailViewModel(
                         )
                     }
                 }
-                .onFailure {
-                    _state.update { it.copy(isLoading = false, notFound = true) }
+                .onFailure { failure ->
+                    if (isListingNotFound(failure)) {
+                        _state.update { it.copy(isLoading = false, notFound = true) }
+                    } else {
+                        _state.update { it.copy(isLoading = false, error = listingLoadErrorMessage(failure)) }
+                    }
                 }
         }
     }
+
+    fun refresh() = load()
 
     fun onImageSelect(index: Int) {
         _state.update { it.copy(activeImageIndex = index) }
@@ -141,3 +157,19 @@ class ListingDetailViewModelFactory(
         return ListingDetailViewModel(listingId, repository) as T
     }
 }
+
+/**
+ * True only for a real 404 (the listing was deleted or never existed) -
+ * every other failure (offline, timeout, a 500) is a transient load
+ * error, not "not found", and should offer a retry rather than the
+ * dead-end "go back to marketplace" message a 404 gets. Pulled out as a
+ * pure function for direct JUnit coverage (same "plain JVM, build the
+ * real Retrofit HttpException" pattern RepostFailureTest.kt already
+ * established), since ListingDetailViewModel itself can't be
+ * instantiated in this project's plain-JUnit test setup.
+ */
+internal fun isListingNotFound(failure: Throwable): Boolean = (failure as? HttpException)?.code() == 404
+
+/** The message shown for a non-404 load failure - the server's own error text when there is one, else a generic network message. */
+internal fun listingLoadErrorMessage(failure: Throwable): String =
+    (failure as? HttpException)?.zrpErrorMessage() ?: ZrpErrors.NETWORK

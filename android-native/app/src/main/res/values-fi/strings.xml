@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Tätä ei voi perua.</string>
     <string name="comment_edit_cd">Muokkaa kommenttia</string>
     <string name="comment_delete_cd">Poista kommentti</string>
+    <string name="comment_report_cd">Ilmoita kommentista</string>
     <string name="comment_delete_confirm_title">Poistetaanko kommentti?</string>
     <string name="comment_delete_confirm_body">Tätä ei voi perua. Myös sen vastaukset poistetaan.</string>
     <string name="comment_write_placeholder">Kirjoita kommentti...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Pelit</string>
     <string name="chat_voice_pause_cd">Keskeytä</string>
     <string name="chat_err_mic_access">Mikrofoniin ei saatu yhteyttä. Tarkista käyttöoikeutesi.</string>
+    <string name="chat_err_camera_access">Kameraan ei saatu yhteyttä. Tarkista käyttöoikeutesi.</string>
     <string name="chat_attachment_fallback">Asiakirja</string>
     <string name="comment_post_cd">Julkaise kommentti</string>
     <string name="action_show_password">Näytä salasana</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Urheilu</string>
     <string name="news_category_culture">Kulttuuri</string>
     <string name="news_category_community">Yhteisö</string>
+    <string name="news_category_gaming">Pelit</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Löydä ZRP News</string>
     <string name="shorts_back">Takaisin</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Tämä video on liian suuri pakettiisi nähden. Kokeile pienempää tiedostoa tai päivitä pakettisi.</string>
     <string name="shorts_upload_err_url_gen_failed">Latausta ei voitu käynnistää - tämä on yleensä tilapäinen yhteysongelma. Yritä uudelleen.</string>
     <string name="shorts_upload_err_internal_server">Jotain meni pieleen palvelimellamme latauksen aikana. Yritä uudelleen hetken kuluttua.</string>
+    <string name="shorts_premium_locked_title">Premium-video</string>
+    <string name="shorts_premium_locked_body">Avaa tämä video hintaan %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Näytä julkaisu</string>
     <string name="caption_view_more">Näytä lisää</string>
     <string name="caption_view_less">Näytä vähemmän</string>
     <string name="shorts_title">Lyhyet videot</string>

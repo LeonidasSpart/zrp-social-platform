@@ -15,6 +15,8 @@ import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.ConversationSummary
 import one.zrp.social.mobile.network.GroupConversationSummary
 import one.zrp.social.mobile.network.SocketConversationDeletedPayload
+import one.zrp.social.mobile.network.SocketGroupMessagePreview
+import one.zrp.social.mobile.network.SocketMessagePreview
 import one.zrp.social.mobile.network.SocketUserStatusPayload
 import one.zrp.social.mobile.network.ZrpSocket
 import org.json.JSONObject
@@ -70,6 +72,61 @@ fun mergeConversations(direct: List<ConversationSummary>, group: List<GroupConve
 fun conversationsAfterDirectDelete(items: List<ConversationListItem>, partnerId: String): List<ConversationListItem> =
     items.filterNot { it is ConversationListItem.Direct && it.summary.partner.id == partnerId }
 
+/**
+ * Updates an already-listed 1:1 row's preview/timestamp for a just-
+ * arrived message and bumps its unread count, re-sorting the whole list
+ * (a fresh message always belongs at/near the top). Returns [items]
+ * unchanged when [preview]'s sender has no existing row - a live socket
+ * preview never carries the partner's PostAuthor (username/avatar/badge),
+ * so it can't create a well-formed brand-new row on its own; the caller
+ * falls back to a full refresh() for that case instead of inventing one.
+ * A pure function, like [conversationsAfterDirectDelete] above, for a
+ * direct JUnit test independent of the ViewModel's socket plumbing.
+ */
+internal fun applyIncomingDirectMessage(items: List<ConversationListItem>, preview: SocketMessagePreview): List<ConversationListItem> {
+    val direct = items.filterIsInstance<ConversationListItem.Direct>()
+    val matchIndex = direct.indexOfFirst { it.summary.partner.id == preview.senderId }
+    if (matchIndex == -1) return items
+    val updatedDirect = direct.toMutableList()
+    val existing = updatedDirect[matchIndex]
+    updatedDirect[matchIndex] = existing.copy(
+        summary = existing.summary.copy(lastMessage = preview.toChatMessage(), unreadCount = existing.summary.unreadCount + 1),
+    )
+    val group = items.filterIsInstance<ConversationListItem.Group>()
+    return mergeConversations(updatedDirect.map { it.summary }, group.map { it.summary })
+}
+
+/**
+ * Same idea as [applyIncomingDirectMessage] for a message THIS account
+ * just sent (the "message-sent" echo to the sender's own room - e.g.
+ * sent from another of this account's open sessions), matched by
+ * receiverId instead of senderId and never touching unreadCount.
+ */
+internal fun applyOutgoingDirectMessage(items: List<ConversationListItem>, preview: SocketMessagePreview): List<ConversationListItem> {
+    val direct = items.filterIsInstance<ConversationListItem.Direct>()
+    val matchIndex = direct.indexOfFirst { it.summary.partner.id == preview.receiverId }
+    if (matchIndex == -1) return items
+    val updatedDirect = direct.toMutableList()
+    val existing = updatedDirect[matchIndex]
+    updatedDirect[matchIndex] = existing.copy(summary = existing.summary.copy(lastMessage = preview.toChatMessage()))
+    val group = items.filterIsInstance<ConversationListItem.Group>()
+    return mergeConversations(updatedDirect.map { it.summary }, group.map { it.summary })
+}
+
+/** Group-row equivalent of [applyIncomingDirectMessage], matched by conversationId. */
+internal fun applyIncomingGroupMessage(items: List<ConversationListItem>, preview: SocketGroupMessagePreview): List<ConversationListItem> {
+    val group = items.filterIsInstance<ConversationListItem.Group>()
+    val matchIndex = group.indexOfFirst { it.summary.id == preview.conversationId }
+    if (matchIndex == -1) return items
+    val updatedGroup = group.toMutableList()
+    val existing = updatedGroup[matchIndex]
+    updatedGroup[matchIndex] = existing.copy(
+        summary = existing.summary.copy(lastMessage = preview.toChatMessage(), unreadCount = existing.summary.unreadCount + 1),
+    )
+    val direct = items.filterIsInstance<ConversationListItem.Direct>()
+    return mergeConversations(direct.map { it.summary }, updatedGroup.map { it.summary })
+}
+
 data class MessagesUiState(
     val items: List<ConversationListItem> = emptyList(),
     val isLoading: Boolean = true,
@@ -112,6 +169,60 @@ class MessagesViewModel(private val repository: MessagesRepository) : ViewModel(
         val liveSocket = ZrpSocket.connect(tokenStore)
         socket = liveSocket
 
+        // Same fix as ConversationViewModel's/GroupConversationViewModel's
+        // own EVENT_CONNECT handlers (see their KDocs): Socket.IO's client
+        // fires EVENT_CONNECT again on every automatic reconnect, not just
+        // the first connect. Without this, every conversation row's
+        // presence dot froze at its pre-drop value after any network blip
+        // for the rest of this screen's lifetime - requestStatusForConversations
+        // alone only ever asks once per partner (by design, to avoid
+        // spamming get-status on every load()), so nothing else would ever
+        // re-ask after a drop.
+        liveSocket.on(Socket.EVENT_CONNECT, Emitter.Listener { reRequestAllPartnerStatus() })
+
+        // Live list updates for a message that arrives/is sent while this
+        // screen is open - previously this list only ever refreshed on
+        // pull-to-refresh or on returning to this tab, unlike web's
+        // useConversationList.ts, which listens to these same three
+        // events specifically so previews/ordering/unread counts don't
+        // go stale while the user is sitting on the tab watching new
+        // messages come in elsewhere.
+        liveSocket.on("receive-message", Emitter.Listener { args ->
+            val preview = parsePayload(args, SocketMessagePreview::class.java) ?: return@Listener
+            val hasRow = _state.value.items.filterIsInstance<ConversationListItem.Direct>()
+                .any { it.summary.partner.id == preview.senderId }
+            if (hasRow) {
+                _state.update { it.copy(items = applyIncomingDirectMessage(it.items, preview)) }
+            } else {
+                // A first-ever message from a brand-new partner - the
+                // preview alone can't build a well-formed row (no
+                // PostAuthor), so fetch the real thing instead.
+                refresh()
+            }
+        })
+
+        liveSocket.on("message-sent", Emitter.Listener { args ->
+            val preview = parsePayload(args, SocketMessagePreview::class.java) ?: return@Listener
+            val hasRow = _state.value.items.filterIsInstance<ConversationListItem.Direct>()
+                .any { it.summary.partner.id == preview.receiverId }
+            if (hasRow) {
+                _state.update { it.copy(items = applyOutgoingDirectMessage(it.items, preview)) }
+            } else {
+                refresh()
+            }
+        })
+
+        liveSocket.on("receive-group-message", Emitter.Listener { args ->
+            val preview = parsePayload(args, SocketGroupMessagePreview::class.java) ?: return@Listener
+            val hasRow = _state.value.items.filterIsInstance<ConversationListItem.Group>()
+                .any { it.summary.id == preview.conversationId }
+            if (hasRow) {
+                _state.update { it.copy(items = applyIncomingGroupMessage(it.items, preview)) }
+            } else {
+                refresh()
+            }
+        })
+
         liveSocket.on("user-status", Emitter.Listener { args ->
             val json = args.getOrNull(0) as? JSONObject ?: return@Listener
             val payload = try {
@@ -139,8 +250,21 @@ class MessagesViewModel(private val repository: MessagesRepository) : ViewModel(
         })
     }
 
+    private fun <T> parsePayload(args: Array<out Any>, type: Class<T>): T? {
+        val json = args.getOrNull(0) as? JSONObject ?: return null
+        return try {
+            gson.fromJson(json.toString(), type)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     override fun onCleared() {
         socket?.let { liveSocket ->
+            liveSocket.off(Socket.EVENT_CONNECT)
+            liveSocket.off("receive-message")
+            liveSocket.off("message-sent")
+            liveSocket.off("receive-group-message")
             liveSocket.off("user-status")
             liveSocket.off("conversation-deleted")
             liveSocket.disconnect()
@@ -190,6 +314,17 @@ class MessagesViewModel(private val repository: MessagesRepository) : ViewModel(
             if (requestedStatusFor.add(partnerId)) {
                 liveSocket.emit("get-status", partnerId)
             }
+        }
+    }
+
+    // Re-requests presence for every currently-listed direct-conversation
+    // partner, unconditionally (bypassing requestStatusForConversations's
+    // own requestedStatusFor dedup gate) - called on every socket
+    // reconnect. A no-op until the list has loaded at least once.
+    private fun reRequestAllPartnerStatus() {
+        val liveSocket = socket ?: return
+        _state.value.items.filterIsInstance<ConversationListItem.Direct>().forEach { item ->
+            liveSocket.emit("get-status", item.summary.partner.id)
         }
     }
 

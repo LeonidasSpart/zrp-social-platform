@@ -306,6 +306,7 @@
     <string name="post_delete_confirm_body">Quai na po betg vegnir revocà.</string>
     <string name="comment_edit_cd">Modifitgar il coment</string>
     <string name="comment_delete_cd">Stizzar il coment</string>
+    <string name="comment_report_cd">Annunziar il coment</string>
     <string name="comment_delete_confirm_title">Stizzar il coment?</string>
     <string name="comment_delete_confirm_body">Quai na po betg vegnir revocà. Er las respostas ad el vegnan stizzadas.</string>
     <string name="comment_write_placeholder">Scriver in coment…</string>
@@ -332,6 +333,7 @@
     <string name="chat_voice_play_cd">Gieus</string>
     <string name="chat_voice_pause_cd">Pausa</string>
     <string name="chat_err_mic_access">Impussibel d\'acceder a Voss microfon. Controllai per plaschair Vossas autorisaziuns.</string>
+    <string name="chat_err_camera_access">Impussibel d\'acceder a Vossa camera. Controllai per plaschair Vossas autorisaziuns.</string>
     <string name="chat_attachment_fallback">Agiunta</string>
     <string name="comment_post_cd">Publitgar il coment</string>
     <string name="action_show_password">Mussar il pled-clav</string>
@@ -1208,6 +1210,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Cultura</string>
     <string name="news_category_community">Communitad</string>
+    <string name="news_category_gaming">Gieus video</string>
     <string name="news_title">ZRP Novitads</string>
     <string name="news_discover_entry">Scuvrir ZRP Novitads</string>
     <string name="shorts_back">Enavos</string>
@@ -1245,6 +1248,9 @@
     <string name="shorts_upload_err_too_large_plan">Quest video è memia gross per Voss plan. Empruvai in fichier pli pitschen u fajai in upgrade da Voss plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Impussibel da cumenzar l\'upload - quai è usualmain in problem da connexiun temporar. Empruvai per plaschair anc ina giada.</string>
     <string name="shorts_upload_err_internal_server">Insatge è ì mal tar nus durant l\'upload. Empruvai per plaschair anc ina giada en in mument.</string>
+    <string name="shorts_premium_locked_title">Video Premium</string>
+    <string name="shorts_premium_locked_body">Debloccar quest video per %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Vesair la contribuziun</string>
     <string name="caption_view_more">Vesair dapli</string>
     <string name="caption_view_less">Vesair damain</string>
     <string name="shorts_title">Videos curts</string>

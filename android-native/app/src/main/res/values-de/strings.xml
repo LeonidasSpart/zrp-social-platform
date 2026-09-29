@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Dies kann nicht rückgängig gemacht werden.</string>
     <string name="comment_edit_cd">Kommentar bearbeiten</string>
     <string name="comment_delete_cd">Kommentar löschen</string>
+    <string name="comment_report_cd">Kommentar melden</string>
     <string name="comment_delete_confirm_title">Kommentar löschen?</string>
     <string name="comment_delete_confirm_body">Dies kann nicht rückgängig gemacht werden. Antworten darauf werden ebenfalls gelöscht.</string>
     <string name="comment_write_placeholder">Schreibe einen Kommentar...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Abspielen</string>
     <string name="chat_voice_pause_cd">Pause</string>
     <string name="chat_err_mic_access">Zugriff auf das Mikrofon nicht möglich. Bitte überprüfe deine Berechtigungen.</string>
+    <string name="chat_err_camera_access">Zugriff auf die Kamera nicht möglich. Bitte überprüfe deine Berechtigungen.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Kommentar posten</string>
     <string name="action_show_password">Passwort anzeigen</string>
@@ -1315,6 +1317,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultur</string>
     <string name="news_category_community">Community</string>
+    <string name="news_category_gaming">Spiele</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">ZRP News entdecken</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1354,6 +1357,9 @@
     <string name="shorts_upload_err_too_large_plan">Dieses Video ist für deinen Plan zu groß. Versuche eine kleinere Datei oder upgrade deinen Plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Der Upload konnte nicht gestartet werden - das liegt normalerweise an einem vorübergehenden Verbindungsproblem. Bitte versuche es erneut.</string>
     <string name="shorts_upload_err_internal_server">Beim Hochladen ist auf unserer Seite etwas schiefgelaufen. Bitte versuche es in Kürze erneut.</string>
+    <string name="shorts_premium_locked_title">Premium-Video</string>
+    <string name="shorts_premium_locked_body">Schalte dieses Video für %1$s %2$s frei</string>
+    <string name="shorts_premium_locked_cta">Beitrag ansehen</string>
     <string name="caption_view_more">Mehr anzeigen</string>
     <string name="caption_view_less">Weniger anzeigen</string>
     <!-- ZRP Creator Studio (native parity) -->

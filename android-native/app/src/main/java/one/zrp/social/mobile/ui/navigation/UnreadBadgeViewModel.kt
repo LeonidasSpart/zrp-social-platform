@@ -3,6 +3,7 @@ package one.zrp.social.mobile.ui.navigation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,6 +11,18 @@ import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.MessagesRepository
 import one.zrp.social.mobile.data.NotificationsRepository
 import one.zrp.social.mobile.util.aggregateUnreadCount
+
+// Same 30s interval web's UnreadCountContext.tsx polls both unread
+// counts at, in addition to its live socket listeners - this app has no
+// app-wide socket these nav-level ViewModels could listen on the way
+// web does (see ZrpSocket's own one-socket-per-screen convention; the
+// only session-long socket is CallViewModel's own signaling connection,
+// which carries no unread-count events), so without this poll a new DM
+// or notification never bumped either badge until the user switched
+// tabs (UnreadBadgeViewModelFactory's own scope above ZrpNavHost) or
+// pulled to refresh a relevant screen - the badge could sit stale for
+// the user's entire time on one tab.
+private const val UNREAD_POLL_INTERVAL_MS = 30_000L
 
 /**
  * Backs the bottom nav's unread-notifications badge - real
@@ -25,11 +38,21 @@ class UnreadBadgeViewModel(private val repository: NotificationsRepository) : Vi
 
     init {
         refresh()
+        pollForUpdates()
     }
 
     fun refresh() {
         viewModelScope.launch {
             repository.getUnreadCount().onSuccess { count -> _unreadCount.value = count }
+        }
+    }
+
+    private fun pollForUpdates() {
+        viewModelScope.launch {
+            while (true) {
+                delay(UNREAD_POLL_INTERVAL_MS)
+                repository.getUnreadCount().onSuccess { count -> _unreadCount.value = count }
+            }
         }
     }
 
@@ -70,6 +93,7 @@ class UnreadMessagesBadgeViewModel(private val repository: MessagesRepository) :
 
     init {
         refresh()
+        pollForUpdates()
     }
 
     fun refresh() {
@@ -77,6 +101,17 @@ class UnreadMessagesBadgeViewModel(private val repository: MessagesRepository) :
             val directCount = repository.getUnreadCount().getOrDefault(0)
             val groupConversations = repository.getGroupConversations().getOrDefault(emptyList())
             _unreadCount.value = aggregateUnreadCount(directCount, groupConversations)
+        }
+    }
+
+    private fun pollForUpdates() {
+        viewModelScope.launch {
+            while (true) {
+                delay(UNREAD_POLL_INTERVAL_MS)
+                val directCount = repository.getUnreadCount().getOrDefault(0)
+                val groupConversations = repository.getGroupConversations().getOrDefault(emptyList())
+                _unreadCount.value = aggregateUnreadCount(directCount, groupConversations)
+            }
         }
     }
 }

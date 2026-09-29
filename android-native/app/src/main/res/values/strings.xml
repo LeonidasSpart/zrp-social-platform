@@ -393,6 +393,7 @@
     <string name="post_delete_confirm_body">This can\'t be undone.</string>
     <string name="comment_edit_cd">Edit comment</string>
     <string name="comment_delete_cd">Delete comment</string>
+    <string name="comment_report_cd">Report comment</string>
     <string name="comment_delete_confirm_title">Delete comment?</string>
     <string name="comment_delete_confirm_body">This can\'t be undone. Any replies to it will be deleted too.</string>
     <string name="comment_write_placeholder">Write a comment...</string>
@@ -419,6 +420,7 @@
     <string name="chat_voice_play_cd">Play</string>
     <string name="chat_voice_pause_cd">Pause</string>
     <string name="chat_err_mic_access">Couldn\'t access your microphone. Please check your permissions.</string>
+    <string name="chat_err_camera_access">Couldn\'t access your camera. Please check your permissions.</string>
     <string name="chat_attachment_fallback">Document</string>
     <string name="comment_post_cd">Post comment</string>
     <string name="action_show_password">Show password</string>
@@ -1326,6 +1328,7 @@
     <string name="news_category_sports">Sports</string>
     <string name="news_category_culture">Culture</string>
     <string name="news_category_community">Community</string>
+    <string name="news_category_gaming">Gaming</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Discover ZRP News</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1364,6 +1367,9 @@
     <string name="shorts_upload_err_too_large_plan">This video is too large for your plan. Try a smaller file or upgrade your plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Couldn\'t start the upload - this is usually a temporary connection issue. Please try again.</string>
     <string name="shorts_upload_err_internal_server">Something went wrong on our end while uploading. Please try again in a moment.</string>
+    <string name="shorts_premium_locked_title">Premium video</string>
+    <string name="shorts_premium_locked_body">Unlock this video for %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">View post</string>
     <string name="caption_view_more">View more</string>
     <string name="caption_view_less">View less</string>
     <string name="shorts_title">Shorts</string>

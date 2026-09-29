@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Dette kan ikke fortrydes.</string>
     <string name="comment_edit_cd">Rediger kommentar</string>
     <string name="comment_delete_cd">Slet kommentar</string>
+    <string name="comment_report_cd">Anmeld kommentar</string>
     <string name="comment_delete_confirm_title">Slet kommentar?</string>
     <string name="comment_delete_confirm_body">Dette kan ikke fortrydes. Eventuelle svar på den slettes også.</string>
     <string name="comment_write_placeholder">Skriv en kommentar...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Afspil</string>
     <string name="chat_voice_pause_cd">Pause</string>
     <string name="chat_err_mic_access">Kunne ikke tilgå din mikrofon. Tjek dine tilladelser.</string>
+    <string name="chat_err_camera_access">Kunne ikke tilgå dit kamera. Tjek dine tilladelser.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Post kommentar</string>
     <string name="action_show_password">Vis adgangskode</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultur</string>
     <string name="news_category_community">Fællesskab</string>
+    <string name="news_category_gaming">Gaming</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Opdag ZRP News</string>
     <string name="shorts_back">Tilbage</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Denne video er for stor til din plan. Prøv en mindre fil, eller opgrader din plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Kunne ikke starte uploaden - dette skyldes som regel et midlertidigt forbindelsesproblem. Prøv igen.</string>
     <string name="shorts_upload_err_internal_server">Noget gik galt i vores ende under upload. Prøv igen om et øjeblik.</string>
+    <string name="shorts_premium_locked_title">Premium-video</string>
+    <string name="shorts_premium_locked_body">Lås denne video op for %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Se opslag</string>
     <string name="caption_view_more">Se mere</string>
     <string name="caption_view_less">Se mindre</string>
     <string name="shorts_title">Shorts</string>

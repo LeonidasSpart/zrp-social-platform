@@ -119,6 +119,7 @@ import one.zrp.social.mobile.ui.components.ZrpComposerField
 import one.zrp.social.mobile.ui.components.copyTextWithFeedback
 import one.zrp.social.mobile.ui.components.extractFirstUrl
 import one.zrp.social.mobile.ui.components.openLink
+import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
@@ -264,9 +265,10 @@ fun ConversationScreen(
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
         cameraLauncher.launch(uri)
     }
+    var cameraAccessError by remember { mutableStateOf(false) }
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-    ) { granted -> if (granted) launchCamera() }
+    ) { granted -> if (granted) launchCamera() else cameraAccessError = true }
 
     // Matches ChatInterface.tsx's own handleVideoUpload - same real
     // chatVideo UploadThing router (see ConversationViewModel.onVideoPicked).
@@ -702,6 +704,15 @@ fun ConversationScreen(
             )
         }
 
+        if (cameraAccessError) {
+            Text(
+                text = stringResource(R.string.chat_err_camera_access),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            )
+        }
+
         if (state.isRecording) {
             // Matches ChatInterface.tsx's own isRecording sub-bar exactly:
             // cancel (trash), a pulsing dot, the live m:ss timer, a
@@ -822,6 +833,7 @@ fun ConversationScreen(
             onDismiss = { attachMenuOpen = false },
             options = listOf(
                 ComposerAttachmentOption(Icons.Filled.CameraAlt, R.string.message_open_camera_cd) {
+                    cameraAccessError = false
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 },
                 ComposerAttachmentOption(Icons.Filled.PhotoLibrary, R.string.message_attach_image_cd) {
@@ -1232,6 +1244,70 @@ private fun MessageBubble(
                     },
             ) {
                 Column(modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm)) {
+                    // A story-reply message (see MessageStoryRef's own
+                    // KDoc) - mirrors ChatInterface.tsx's own quote badge
+                    // (thumbnail + "Replied to your/their story"), which
+                    // this recipient-side bubble never rendered before
+                    // despite the field already arriving on every
+                    // GET /messages response.
+                    val storyRef = message.story
+                    if (storyRef != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 6.dp, top = 2.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(
+                                    if (isOwnMessage) Color.White.copy(alpha = 0.1f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                                )
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                        ) {
+                            if (storyRef.mediaUrl != null) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(Color.Black.copy(alpha = 0.2f)),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (storyRef.mediaType == "video") {
+                                        // A live video frame is more than this
+                                        // 28dp badge thumbnail needs - a play
+                                        // glyph over the same dark tile honestly
+                                        // signals "this was a video" without
+                                        // pulling in a player for a quote badge.
+                                        Icon(
+                                            Icons.Filled.PlayArrow,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(IconSize.sm),
+                                        )
+                                    } else {
+                                        AsyncImage(
+                                            model = storyRef.mediaUrl,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                    }
+                                }
+                            }
+                            Text(
+                                // "Replied to their/your story" stays
+                                // English-only on purpose, matching
+                                // ChatInterface.tsx's own hardcoded string
+                                // here - same established convention as
+                                // replyTo's "📷 Image" fallback just below.
+                                text = if (isOwnMessage) "Replied to their story" else "Replied to your story",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (isOwnMessage) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+
                     val replyTo = message.replyTo
                     if (replyTo != null) {
                         Column(

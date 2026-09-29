@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Kjo nuk mund të zhbëhet.</string>
     <string name="comment_edit_cd">Ndrysho komentin</string>
     <string name="comment_delete_cd">Fshi komentin</string>
+    <string name="comment_report_cd">Raporto komentin</string>
     <string name="comment_delete_confirm_title">Të fshihet komenti?</string>
     <string name="comment_delete_confirm_body">Kjo nuk mund të zhbëhet. Të gjitha përgjigjet ndaj tij do të fshihen gjithashtu.</string>
     <string name="comment_write_placeholder">Shkruani një koment...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Luaj</string>
     <string name="chat_voice_pause_cd">Pauzë</string>
     <string name="chat_err_mic_access">Nuk mund të aksesohej mikrofoni. Kontrolloni lejet tuaja.</string>
+    <string name="chat_err_camera_access">Nuk mund të aksesohej kamera. Kontrolloni lejet tuaja.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Posto komentin</string>
     <string name="action_show_password">Shfaq fjalëkalimin</string>
@@ -1315,6 +1317,7 @@
     <string name="news_category_sports">Sporti</string>
     <string name="news_category_culture">Kultura</string>
     <string name="news_category_community">Komuniteti</string>
+    <string name="news_category_gaming">Lojëra Video</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Zbulo ZRP News</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1354,6 +1357,9 @@
     <string name="shorts_upload_err_too_large_plan">Kjo video është shumë e madhe për planin tënd. Provo një skedar më të vogël ose përmirëso planin tënd.</string>
     <string name="shorts_upload_err_url_gen_failed">Nuk mund të fillonte ngarkimi - kjo zakonisht është një problem i përkohshëm lidhjeje. Ju lutemi provoni përsëri.</string>
     <string name="shorts_upload_err_internal_server">Diçka shkoi keq nga ana jonë gjatë ngarkimit. Ju lutemi provoni përsëri pas pak.</string>
+    <string name="shorts_premium_locked_title">Video premium</string>
+    <string name="shorts_premium_locked_body">Zhblloko këtë video për %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Shiko postimin</string>
     <string name="caption_view_more">Shiko më shumë</string>
     <string name="caption_view_less">Shiko më pak</string>
     <!-- ZRP Creator Studio (native parity) -->
