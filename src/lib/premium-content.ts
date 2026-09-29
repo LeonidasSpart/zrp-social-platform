@@ -74,7 +74,7 @@ type GateablePost = {
 // would make a caller's own type-checked access to
 // `result.quotePost.premiumPost` fail even though the value is
 // genuinely there at runtime.
-type Gated<T extends GateablePost> = Omit<T, "quotePost"> & {
+export type Gated<T extends GateablePost> = Omit<T, "quotePost"> & {
   premiumPost?: PremiumGateSummary;
   quotePost?: T["quotePost"] extends GateablePost | null | undefined
     ? T["quotePost"] extends null | undefined

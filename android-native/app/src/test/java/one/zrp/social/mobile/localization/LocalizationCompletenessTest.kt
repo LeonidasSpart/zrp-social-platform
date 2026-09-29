@@ -169,6 +169,11 @@ class LocalizationCompletenessTest {
      */
     private val perLanguageAllowlist: Map<String, Set<String>> = mapOf(
         "fr" to setOf(
+            // "Hashtags"/"Photos"/"GIFs" are identical French loanwords -
+        // Advanced Search category tab and media filter options.
+            "search_category_hashtags",
+            "search_media_image",
+            "search_media_gif",
             // "Public" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_visibility_public",
@@ -289,6 +294,11 @@ class LocalizationCompletenessTest {
             "composer_type_article",
         ),
         "de" to setOf(
+            // "Hashtags"/"Videos"/"GIFs" are identical German loanwords -
+        // Advanced Search category tab and media filter options.
+            "search_category_hashtags",
+            "search_media_video",
+            "search_media_gif",
             // "Community" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_visibility_community",
@@ -410,6 +420,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "it" to setOf(
+            // "Media" is the identical Italian loanword - Advanced Search
+        // filter panel section label.
+            "search_media",
             // "Community" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_visibility_community",
@@ -494,6 +507,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "sq" to setOf(
+            // "Media" is the identical Albanian loanword - Advanced Search
+        // filter panel section label.
+            "search_media",
             "communities_create_hashtag_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
@@ -546,6 +562,10 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "es" to setOf(
+            // "Hashtags"/"GIFs" are identical Spanish loanwords - Advanced
+        // Search category tab and media filter option.
+            "search_category_hashtags",
+            "search_media_gif",
             // "Plan"/"No" are the identical Spanish words - Subscriptions
             // & Billing detail.
             "admin_subscription_detail_field_plan",
@@ -733,6 +753,10 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "id" to setOf(
+            // "Trending"/"Media" are identical Indonesian loanwords -
+        // Advanced Search sort option and filter panel section label.
+            "search_sort_trending",
+            "search_media",
             // "Host" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_host_badge",
@@ -824,6 +848,12 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "pt" to setOf(
+            // "Hashtags"/"Media"/"GIFs" are identical Portuguese loanwords -
+        // Advanced Search category tab, filter panel section label and
+        // media filter option.
+            "search_category_hashtags",
+            "search_media",
+            "search_media_gif",
             "communities_create_hashtag_label",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
@@ -955,6 +985,14 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "nl" to setOf(
+            // "Hashtags"/"Filters"/"Trending"/"Media"/"GIFs" are identical
+        // Dutch loanwords - Advanced Search category tab, filters toggle,
+        // sort option and media filter options.
+            "search_category_hashtags",
+            "search_filters",
+            "search_sort_trending",
+            "search_media",
+            "search_media_gif",
             // "Community" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_visibility_community",
@@ -1086,6 +1124,9 @@ class LocalizationCompletenessTest {
             "trust_stat_posts",
         ),
         "pl" to setOf(
+            // "Media" is the identical Polish loanword - Advanced Search
+        // filter panel section label.
+            "search_media",
             // "Moderator" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_moderator_badge",
@@ -1121,6 +1162,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "ro" to setOf(
+            // "Media" is the identical Romanian loanword - Advanced Search
+        // filter panel section label.
+            "search_media",
             // "Public" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_visibility_public",
@@ -1180,6 +1224,9 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "cs" to setOf(
+            // "Relevance" is the identical Czech word (used as a loanword
+        // in this exact technical/search-ranking sense) - Advanced Search sort option.
+            "search_sort_relevance",
             // "Interval" is the identical Czech word - Subscriptions &
             // Billing detail.
             "admin_subscription_detail_field_interval",
@@ -1224,6 +1271,10 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "sv" to setOf(
+            // "Media"/"All media" are identical Swedish loanwords - Advanced
+        // Search filter panel section label and its "no filter" option.
+            "search_media",
+            "search_media_all",
             // "Community" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_visibility_community",
@@ -1277,6 +1328,10 @@ class LocalizationCompletenessTest {
             "trust_out_of_100",
         ),
         "da" to setOf(
+            // "Hashtags"/"Trending" are identical Danish loanwords -
+        // Advanced Search category tab and sort option.
+            "search_category_hashtags",
+            "search_sort_trending",
             // "Moderator" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_moderator_badge",
@@ -1407,6 +1462,10 @@ class LocalizationCompletenessTest {
         // to "Βοήθεια"/"Σύντομα Βίντεο") and have been fixed in
         // values-el/strings.xml instead of allowlisted.
         "el" to setOf(
+            // "Hashtags" stays English, the same established choice already
+        // made for this exact word elsewhere in Greek (see this file's own
+        // header comment on the "el" block) - Advanced Search category tab.
+            "search_category_hashtags",
             "admin_analytics_daily_range",
             "admin_analytics_post_counts",
             "admin_news_network_publication_meta",
@@ -1428,6 +1487,10 @@ class LocalizationCompletenessTest {
         // identically to English) plus the format-only/brand strings
         // already allowlisted the same way for every other language here.
         "no" to setOf(
+            // "Media" is the identical Bokmål loanword, same established
+        // choice as this list's own header comment - Advanced Search
+        // filter panel section label.
+            "search_media",
             // "Moderator" - identical spelling and meaning in this language, a
             // genuine cognate (Live Audio room badges/labels).
             "live_audio_moderator_badge",
@@ -1606,6 +1669,9 @@ class LocalizationCompletenessTest {
             "admin_news_network_publication_meta",
         ),
         "fi" to setOf(
+            // "Media" is the identical Finnish loanword - Advanced Search
+        // filter panel section label.
+            "search_media",
             "chat_contact_video",
             "profile_media",
             "stories_video",
@@ -1721,6 +1787,11 @@ class LocalizationCompletenessTest {
             "admin_news_network_publication_meta",
         ),
         "mt" to setOf(
+            // "Posts"/"Hashtags"/"GIFs" are identical Maltese loanwords -
+        // Advanced Search category tabs and media filter option.
+            "search_category_posts",
+            "search_category_hashtags",
+            "search_media_gif",
             "music_title",
             "music_artist_detail_singles_heading",
             "music_album_detail_eyebrow",
@@ -1741,6 +1812,14 @@ class LocalizationCompletenessTest {
         ),
         // The 1-language 38->39 expansion (Romansh / Rumantsch Grischun).
         "rm" to setOf(
+            // "Hashtags"/"Filters"/"Media"/"Videos"/"GIFs" are identical
+        // Romansh loanwords - Advanced Search category tab, filters
+        // toggle and media filter options.
+            "search_category_hashtags",
+            "search_filters",
+            "search_media",
+            "search_media_video",
+            "search_media_gif",
             "music_album_detail_eyebrow",
             "opportunity_type_hackathon",
             "trust_out_of_100",

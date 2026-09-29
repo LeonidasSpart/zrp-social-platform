@@ -48,6 +48,21 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   "Pro",
   "Business",
   "Enterprise",
+  // Advanced Search: international tech loanwords that French (and
+  // several other Latin-script languages, already caught by this same
+  // exception via the shared English value) genuinely renders
+  // unchanged - "Hashtag(s)" and "GIF(s)" are acronyms/coinages with no
+  // native equivalent, and "Photos" happens to be spelled identically
+  // in French.
+  "Hashtags",
+  "Photos",
+  "GIFs",
+  "Videos",
+  "Media",
+  "All media",
+  "Trending",
+  "Filters",
+  "Relevance",
   // File formats / technical standards - not language-specific
   "JPEG, PNG, GIF, WebP",
   "MP4, MOV, AVI, WebM",

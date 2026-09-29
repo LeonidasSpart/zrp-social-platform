@@ -11,6 +11,20 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─── Advanced Search trigram indexes ────────────────────────────────
+// Migration 20260928120000_add_search_trigram_indexes adds pg_trgm +
+// GIN(gin_trgm_ops) indexes on User.username/name/headline/company,
+// Post.content, Community.name/description, MusicArtist.displayName,
+// MusicAlbum.title, MusicTrack.title, MusicPlaylist.name,
+// OpportunityListing.title/description, Listing.title/description, and
+// NewsArticle.title/excerpt (plus a plain GIN index on Post.hashtags
+// and OpportunityListing.skills for array-containment filters). These
+// are hand-authored raw SQL, not `@@index` here: expressing a non-
+// default operator class requires the `postgresqlExtensions`/
+// `extendedIndexes` preview features, which this schema deliberately
+// doesn't enable (see the Prisma 7+ note above on staying
+// conservative). See that migration file for the full rationale.
+
 enum Role {
   USER
   MODERATOR
