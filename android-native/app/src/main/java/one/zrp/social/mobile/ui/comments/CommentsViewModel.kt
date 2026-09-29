@@ -192,6 +192,12 @@ class CommentsViewModel(
         }
     }
 
+    fun reportComment(commentId: String, reason: String, details: String?, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.reportComment(commentId, reason, details))
+        }
+    }
+
     private fun applyOptimisticLike(comment: Comment): Comment {
         val wasLiked = comment.liked == true
         return comment.copy(

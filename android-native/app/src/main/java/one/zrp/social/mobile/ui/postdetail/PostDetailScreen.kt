@@ -45,6 +45,7 @@ import one.zrp.social.mobile.ui.comments.CommentsViewModel
 import one.zrp.social.mobile.ui.comments.CommentsViewModelFactory
 import one.zrp.social.mobile.ui.components.ComposerSendButton
 import one.zrp.social.mobile.ui.components.EditPostDialog
+import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.ZrpComposerField
 import one.zrp.social.mobile.ui.home.PostCard
 import one.zrp.social.mobile.ui.theme.IconSize
@@ -101,6 +102,9 @@ fun PostDetailScreen(
     var editError by remember { mutableStateOf<String?>(null) }
     var deletingCommentId by remember { mutableStateOf<String?>(null) }
     var isDeletingComment by remember { mutableStateOf(false) }
+    var reportingCommentId by remember { mutableStateOf<String?>(null) }
+    var isSubmittingReport by remember { mutableStateOf(false) }
+    var reportError by remember { mutableStateOf<String?>(null) }
 
     fun shareComment(comment: Comment) {
         // Matches the "post/{postId}?commentId={commentId}" deep link
@@ -211,6 +215,10 @@ fun PostDetailScreen(
                                     editError = null
                                 },
                                 onDeleteClick = { id -> deletingCommentId = id },
+                                onReportClick = { id ->
+                                    reportingCommentId = id
+                                    reportError = null
+                                },
                                 onAuthorClick = onAuthorClick,
                                 onHashtagClick = onOpenHashtag,
                                 targetCommentId = targetCommentId,
@@ -308,6 +316,24 @@ fun PostDetailScreen(
                     result
                         .onSuccess { editingCommentId = null }
                         .onFailure { editError = it.message }
+                }
+            },
+        )
+    }
+
+    val reportCommentId = reportingCommentId
+    if (reportCommentId != null) {
+        ReportDialog(
+            isSubmitting = isSubmittingReport,
+            error = reportError,
+            onDismiss = { reportingCommentId = null },
+            onSubmit = { reason, details ->
+                isSubmittingReport = true
+                commentsViewModel.reportComment(reportCommentId, reason, details) { result ->
+                    isSubmittingReport = false
+                    result
+                        .onSuccess { reportingCommentId = null }
+                        .onFailure { reportError = it.message }
                 }
             },
         )

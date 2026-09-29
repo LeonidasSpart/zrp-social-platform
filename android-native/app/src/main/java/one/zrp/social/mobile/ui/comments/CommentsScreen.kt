@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
@@ -71,6 +72,7 @@ import one.zrp.social.mobile.ui.components.Avatar
 import one.zrp.social.mobile.ui.components.ComposerSendButton
 import one.zrp.social.mobile.ui.components.EditPostDialog
 import one.zrp.social.mobile.ui.components.LinkifiedText
+import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.components.ZrpComposerField
 import one.zrp.social.mobile.ui.components.copyTextWithFeedback
@@ -107,6 +109,9 @@ fun CommentsScreen(
     var editError by remember { mutableStateOf<String?>(null) }
     var deletingCommentId by remember { mutableStateOf<String?>(null) }
     var isDeletingComment by remember { mutableStateOf(false) }
+    var reportingCommentId by remember { mutableStateOf<String?>(null) }
+    var isSubmittingReport by remember { mutableStateOf(false) }
+    var reportError by remember { mutableStateOf<String?>(null) }
 
     fun shareComment(comment: Comment) {
         // Matches the "post/{postId}?commentId={commentId}" deep link
@@ -202,6 +207,10 @@ fun CommentsScreen(
                                     editError = null
                                 },
                                 onDeleteClick = { id -> deletingCommentId = id },
+                                onReportClick = { id ->
+                                    reportingCommentId = id
+                                    reportError = null
+                                },
                                 onAuthorClick = onAuthorClick,
                                 onHashtagClick = onOpenHashtag,
                             )
@@ -314,6 +323,24 @@ fun CommentsScreen(
         )
     }
 
+    val reportCommentId = reportingCommentId
+    if (reportCommentId != null) {
+        ReportDialog(
+            isSubmitting = isSubmittingReport,
+            error = reportError,
+            onDismiss = { reportingCommentId = null },
+            onSubmit = { reason, details ->
+                isSubmittingReport = true
+                viewModel.reportComment(reportCommentId, reason, details) { result ->
+                    isSubmittingReport = false
+                    result
+                        .onSuccess { reportingCommentId = null }
+                        .onFailure { reportError = it.message }
+                }
+            },
+        )
+    }
+
     val deleteCommentId = deletingCommentId
     if (deleteCommentId != null) {
         // Native uses a proper dialog here rather than a browser
@@ -386,6 +413,7 @@ internal fun CommentThread(
     onShareClick: (Comment) -> Unit,
     onEditClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
+    onReportClick: (String) -> Unit,
     onAuthorClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
     targetCommentId: String? = null,
@@ -419,6 +447,7 @@ internal fun CommentThread(
                     onShareClick = { onShareClick(comment) },
                     onEditClick = { onEditClick(comment.id) },
                     onDeleteClick = { onDeleteClick(comment.id) },
+                    onReportClick = { onReportClick(comment.id) },
                     onAuthorClick = { onAuthorClick(comment.author.username) },
                     onMentionClick = onAuthorClick,
                     onHashtagClick = onHashtagClick,
@@ -435,6 +464,7 @@ internal fun CommentThread(
                 onShareClick = { onShareClick(comment) },
                 onEditClick = { onEditClick(comment.id) },
                 onDeleteClick = { onDeleteClick(comment.id) },
+                onReportClick = { onReportClick(comment.id) },
                 onAuthorClick = { onAuthorClick(comment.author.username) },
                 onMentionClick = onAuthorClick,
                 onHashtagClick = onHashtagClick,
@@ -452,6 +482,7 @@ internal fun CommentThread(
                 onShareClick = onShareClick,
                 onEditClick = onEditClick,
                 onDeleteClick = onDeleteClick,
+                onReportClick = onReportClick,
                 onAuthorClick = onAuthorClick,
                 onHashtagClick = onHashtagClick,
                 targetCommentId = targetCommentId,
@@ -471,6 +502,7 @@ private fun CommentRow(
     onShareClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    onReportClick: () -> Unit,
     onAuthorClick: () -> Unit,
     onMentionClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
@@ -589,6 +621,18 @@ private fun CommentRow(
                         Icon(
                             imageVector = Icons.Filled.DeleteOutline,
                             contentDescription = stringResource(R.string.comment_delete_cd),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(IconSize.sm),
+                        )
+                    }
+                } else {
+                    // Mirrors Comments.tsx's own !isAuthor && session guard -
+                    // report is only ever offered on someone else's comment,
+                    // the same symmetry Edit/Delete already have for one's own.
+                    IconButton(onClick = onReportClick, modifier = Modifier.size(TouchTarget.min)) {
+                        Icon(
+                            imageVector = Icons.Filled.Flag,
+                            contentDescription = stringResource(R.string.comment_report_cd),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(IconSize.sm),
                         )
