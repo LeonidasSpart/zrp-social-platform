@@ -119,6 +119,7 @@ import one.zrp.social.mobile.ui.components.ZrpComposerField
 import one.zrp.social.mobile.ui.components.copyTextWithFeedback
 import one.zrp.social.mobile.ui.components.extractFirstUrl
 import one.zrp.social.mobile.ui.components.openLink
+import one.zrp.social.mobile.ui.theme.IconSize
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.formatRelativeTime
