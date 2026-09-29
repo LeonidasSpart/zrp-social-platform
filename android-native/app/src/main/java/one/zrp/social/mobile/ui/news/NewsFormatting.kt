@@ -21,6 +21,7 @@ fun newsCategoryLabel(category: String): String = when (category) {
     "SPORTS" -> stringResource(R.string.news_category_sports)
     "CULTURE" -> stringResource(R.string.news_category_culture)
     "COMMUNITY" -> stringResource(R.string.news_category_community)
+    "GAMING" -> stringResource(R.string.news_category_gaming)
     else -> category
 }
 
