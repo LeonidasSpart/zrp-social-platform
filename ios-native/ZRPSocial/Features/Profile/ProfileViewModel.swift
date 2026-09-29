@@ -425,7 +425,10 @@ final class ProfileViewModel: ObservableObject {
 
         do {
             let response = try await repository.toggleFollow(username: username)
-            phase = .loaded(profile.applyingFollowState(response.following))
+            phase = .loaded(profile.applyingFollowState(
+                following: response.following,
+                requested: response.requested
+            ))
             followNotice = response.requested ? response.message : nil
         } catch let error as ApiError {
             followNotice = error.userFacingMessage
@@ -443,9 +446,15 @@ private extension UserProfile {
     /// profile, so the count is adjusted locally rather than left stale
     /// or re-fetched with a second round trip the website does not make
     /// either.
-    func applyingFollowState(_ nowFollowing: Bool) -> UserProfile {
-        guard nowFollowing != isFollowing else { return self }
+    func applyingFollowState(following nowFollowing: Bool, requested: Bool) -> UserProfile {
         var updated = self
+        // A tap against a private account the viewer has already
+        // requested to follow re-sends the same request (the route
+        // answers "already sent" rather than toggling anything) - the
+        // pending state carries over unchanged rather than being read as
+        // a fresh request.
+        updated.followRequestStatus = requested ? "pending" : nil
+        guard nowFollowing != isFollowing else { return updated }
         updated.isFollowing = nowFollowing
         updated.counts = ProfileCounts(
             posts: counts.posts,

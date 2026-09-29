@@ -176,32 +176,51 @@ struct ProfileHeaderView: View {
                     .overlay(Capsule().strokeBorder(ZrpColor.outline, lineWidth: 1))
             }
         } else {
+            // A private account the viewer has already sent a request to
+            // shows "Requested" rather than a plain "Follow" that looks
+            // like nothing was ever sent - `followRequestStatus` is what
+            // makes that state survive a reload, matching web's own
+            // `isFollowRequested` (`app/profile/[username]/page.tsx`).
+            // Tapping it again re-sends to the same route rather than
+            // being disabled outright: there is no cancel endpoint (the
+            // request is otherwise permanent), so this stays a live
+            // button rather than a dead end.
             Button(action: onToggleFollow) {
                 Group {
                     if isTogglingFollow {
                         ProgressView()
-                            .tint(profile.isFollowing ? ZrpColor.onSurface : .white)
+                            .tint(profile.isFollowing || profile.isRequested ? ZrpColor.onSurface : .white)
                     } else {
-                        Text(profile.isFollowing ? L10nKey.actionFollowing : L10nKey.actionFollow)
-                            .font(.subheadline.weight(.semibold))
+                        Text(
+                            profile.isFollowing ? L10nKey.actionFollowing
+                                : profile.isRequested ? L10nKey.actionRequested
+                                : L10nKey.actionFollow
+                        )
+                        .font(.subheadline.weight(.semibold))
                     }
                 }
                 .frame(minWidth: 100)
                 .frame(minHeight: ZrpMetrics.minTouchTarget)
                 .padding(.horizontal, ZrpSpacing.lg)
-                .background(profile.isFollowing ? ZrpColor.surfaceHighest : ZrpColor.red)
-                .foregroundStyle(profile.isFollowing ? ZrpColor.onSurface : .white)
+                .background(
+                    profile.isFollowing || profile.isRequested ? ZrpColor.surfaceHighest : ZrpColor.red
+                )
+                .foregroundStyle(profile.isFollowing || profile.isRequested ? ZrpColor.onSurface : .white)
                 .clipShape(Capsule())
                 .overlay(
                     Capsule().strokeBorder(
-                        profile.isFollowing ? ZrpColor.outline : .clear,
+                        profile.isFollowing || profile.isRequested ? ZrpColor.outline : .clear,
                         lineWidth: 1
                     )
                 )
             }
             .disabled(isTogglingFollow)
             .accessibilityLabel(
-                Text(profile.isFollowing ? L10nKey.actionUnfollow : L10nKey.actionFollow)
+                Text(
+                    profile.isFollowing ? L10nKey.actionUnfollow
+                        : profile.isRequested ? L10nKey.actionRequested
+                        : L10nKey.actionFollow
+                )
             )
         }
     }

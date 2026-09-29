@@ -48,6 +48,15 @@ struct UserProfile: Decodable, Identifiable, Equatable {
     var isFollowing: Bool
     let isBlocked: Bool
 
+    /// `"pending"` once a follow request to a private account has been
+    /// sent, `"none"`/absent otherwise. Only meaningful when `isPrivate`
+    /// and `!isFollowing` - the route sets it so a reload (or a fresh
+    /// launch) can still show "Requested" instead of a plain "Follow"
+    /// that looks like nothing was ever sent.
+    var followRequestStatus: String? = nil
+
+    var isRequested: Bool { followRequestStatus == "pending" }
+
     /// What this profile's own completed tips and purchases have sent to
     /// charity, in USDC, summed server-side by `src/lib/charity.ts`.
     ///
@@ -80,7 +89,7 @@ struct UserProfile: Decodable, Identifiable, Equatable {
         case location, country, website, createdAt, isPrivate, badgeType
         case pinnedPostId, banned, publicLikes, publicFollowing
         case category, showCategory, headline, company, position, skills
-        case isFollowing, isBlocked
+        case isFollowing, isBlocked, followRequestStatus
         case charityContributionUsdc, milestones
         case counts = "_count"
     }

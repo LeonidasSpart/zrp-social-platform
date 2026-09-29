@@ -24,6 +24,9 @@ struct LoginView: View {
                 if let error = viewModel.errorMessage {
                     banner(error, isError: true)
                 }
+                if viewModel.isVerificationError {
+                    resendVerification
+                }
                 form
                 footer
             }
@@ -216,6 +219,32 @@ struct LoginView: View {
                 .buttonStyle(.plain)
             }
         }
+    }
+
+    /// Shown only when the server's own rejection said this account's
+    /// email is unverified - the same recovery path `app/login/page.tsx`
+    /// offers on web, previously built only into `RegisterView` here.
+    private var resendVerification: some View {
+        VStack(spacing: ZrpSpacing.sm) {
+            if let resendMessage = viewModel.resendMessage {
+                Text(verbatim: resendMessage)
+                    .font(.footnote)
+                    .foregroundStyle(ZrpColor.onSurfaceMuted)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            Button {
+                Task { await viewModel.resendVerification() }
+            } label: {
+                Text(viewModel.isResendingVerification
+                    ? L10nKey.authResendVerificationSending
+                    : L10nKey.authResendVerification)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(ZrpColor.red)
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.isResendingVerification)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func banner(_ message: String, isError: Bool) -> some View {
