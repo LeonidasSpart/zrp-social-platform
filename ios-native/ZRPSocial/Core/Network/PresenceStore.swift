@@ -23,6 +23,7 @@ final class PresenceStore: ObservableObject {
 
     private let socket: ZrpSocket
     private var token: UUID?
+    private var connectToken: UUID?
 
     /// Ids this store has asked about, so a reconnect can re-ask for all
     /// of them. Presence is per-connection server-side; after a drop,
@@ -49,11 +50,20 @@ final class PresenceStore: ObservableObject {
             else { return }
             self.online[status.userId] = status.status == "online"
         }
+        // `resync()` existed but nothing ever called it: a reconnect left
+        // every previously-known dot stale until that person happened to
+        // transition again. This is the fix - the same "re-ask on
+        // reconnect" behavior `PresenceContext.tsx` implements on web.
+        connectToken = socket.subscribeToConnect { [weak self] in
+            self?.resync()
+        }
     }
 
     func stop() {
         if let token { socket.unsubscribe(token) }
+        if let connectToken { socket.unsubscribeFromConnect(connectToken) }
         token = nil
+        connectToken = nil
         watched.removeAll()
         online.removeAll()
     }

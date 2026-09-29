@@ -35,6 +35,7 @@ final class GroupConversationViewModel: ObservableObject {
     private let uploads: UploadThingClient
     private let socket: ZrpSocket
     private var socketToken: UUID?
+    private var connectToken: UUID?
     private var pollTask: Task<Void, Never>?
 
     private let pageSize = 50
@@ -89,7 +90,18 @@ final class GroupConversationViewModel: ObservableObject {
         // Asking is not the same as being let in: the server re-checks
         // membership against the database before joining, and ignores
         // the request otherwise.
+        //
+        // Room membership is tied to one physical connection - it is not
+        // restored automatically, so a reconnect (background/foreground,
+        // a network handoff, a server restart) drops this socket out of
+        // the room until it asks again. `startPolling()`'s fallback
+        // interval assumes a connected socket means live delivery is
+        // working, which would be silently false without this.
         socket.emit("join-conversation", conversationId)
+        connectToken = socket.subscribeToConnect { [weak self] in
+            guard let self else { return }
+            self.socket.emit("join-conversation", self.conversationId)
+        }
         await load(showLoading: messages.isEmpty)
         await loadDetail()
         startPolling()
@@ -100,6 +112,8 @@ final class GroupConversationViewModel: ObservableObject {
         pollTask = nil
         if let socketToken { socket.unsubscribe(socketToken) }
         socketToken = nil
+        if let connectToken { socket.unsubscribeFromConnect(connectToken) }
+        connectToken = nil
         // Leaving the room stops this device being woken for a thread
         // nobody is reading. Membership is unchanged - this is a socket
         // subscription, not leaving the group.

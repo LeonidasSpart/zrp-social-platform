@@ -156,8 +156,18 @@ final class ConversationViewModel: ObservableObject {
         socketToken = socket.subscribe { [weak self] event in
             guard let self else { return }
             switch event.name {
-            case "receive-message", "message-deleted", "message-edited",
-                 "reaction-updated", "message-read":
+            case "receive-message":
+                // A live message from the OTHER party, arriving while
+                // this thread is open, is read the instant it is seen -
+                // the same `mark-read` emit `ChatInterface.tsx` sends on
+                // web. Without this the sender's read-receipt checkmark
+                // never flips live; it only catches up on their next
+                // poll (up to 30s), since the REST route's own read-flip
+                // is a silent DB write with no relay of its own.
+                self.markReadIfFromPartner(event.data)
+                Task { await self.load(showLoading: false) }
+
+            case "message-deleted", "message-edited", "reaction-updated", "message-read":
                 Task { await self.load(showLoading: false) }
 
             case "user-typing":
@@ -167,6 +177,19 @@ final class ConversationViewModel: ObservableObject {
                 break
             }
         }
+    }
+
+    private struct IncomingMessageRelay: Decodable {
+        let id: String
+        let senderId: String
+    }
+
+    private func markReadIfFromPartner(_ data: Data) {
+        guard
+            let relay = try? JSONDecoder().decode(IncomingMessageRelay.self, from: data),
+            relay.senderId == partner.id
+        else { return }
+        socket.emit("mark-read", ["messageId": relay.id])
     }
 
     private struct TypingEvent: Decodable {

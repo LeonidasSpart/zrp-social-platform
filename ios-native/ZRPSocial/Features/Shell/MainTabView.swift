@@ -89,6 +89,7 @@ struct MainTabView: View {
         .task {
             calls.connectSignaling()
             presence.start()
+            unread.startListening()
             await unread.refresh()
             // A link that arrived before anyone was signed in has been
             // waiting; this is the first moment it has somewhere to go.
@@ -108,6 +109,7 @@ struct MainTabView: View {
         .onDisappear {
             calls.disconnectSignaling()
             presence.stop()
+            unread.stopListening()
         }
     }
 
