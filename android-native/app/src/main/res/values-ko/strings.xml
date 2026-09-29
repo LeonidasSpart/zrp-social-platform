@@ -501,6 +501,9 @@
     <string name="search_no_marketplace">등록된 상품이 없습니다.</string>
     <string name="search_language">언어</string>
     <string name="search_country">국가</string>
+    <string name="search_date_from">시작일</string>
+    <string name="search_date_to">종료일</string>
+    <string name="search_no_results">결과를 찾을 수 없습니다.</string>
     <string name="home_trending_on_zrp">ZRP 인기 트렌드</string>
     <string name="home_see_all">모두 보기</string>
     <string name="right_panel_who_to_follow">팔로우 추천</string>

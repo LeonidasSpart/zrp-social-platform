@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Nebyly nalezeny žádné nabídky.</string>
     <string name="search_language">Jazyk</string>
     <string name="search_country">Země</string>
+    <string name="search_date_from">Od</string>
+    <string name="search_date_to">Do</string>
+    <string name="search_no_results">Nebyly nalezeny žádné výsledky.</string>
     <string name="home_trending_on_zrp">Populární na ZRP</string>
     <string name="home_see_all">Zobrazit vše</string>
     <string name="right_panel_who_to_follow">Koho sledovat</string>

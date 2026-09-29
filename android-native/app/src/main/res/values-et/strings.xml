@@ -425,6 +425,9 @@
     <string name="search_no_marketplace">Kuulutusi ei leitud.</string>
     <string name="search_language">Keel</string>
     <string name="search_country">Riik</string>
+    <string name="search_date_from">Alates</string>
+    <string name="search_date_to">Kuni</string>
+    <string name="search_no_results">Tulemusi ei leitud.</string>
     <string name="home_trending_on_zrp">Trendib ZRP-s</string>
     <string name="home_see_all">Vaata kõiki</string>
     <string name="right_panel_who_to_follow">Keda jälgida</string>

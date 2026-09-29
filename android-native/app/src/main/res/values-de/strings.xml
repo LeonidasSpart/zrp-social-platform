@@ -504,6 +504,9 @@
     <string name="search_no_marketplace">Keine Anzeigen gefunden.</string>
     <string name="search_language">Sprache</string>
     <string name="search_country">Land</string>
+    <string name="search_date_from">Von</string>
+    <string name="search_date_to">Bis</string>
+    <string name="search_no_results">Keine Ergebnisse gefunden.</string>
     <string name="home_trending_on_zrp">Trends auf ZRP</string>
     <string name="home_see_all">Alle anzeigen</string>
     <string name="right_panel_who_to_follow">Wem du folgen könntest</string>

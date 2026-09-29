@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Ilmoituksia ei löytynyt.</string>
     <string name="search_language">Kieli</string>
     <string name="search_country">Maa</string>
+    <string name="search_date_from">Alkaen</string>
+    <string name="search_date_to">Asti</string>
+    <string name="search_no_results">Tuloksia ei löytynyt.</string>
     <string name="home_trending_on_zrp">Nousussa ZRP:ssä</string>
     <string name="home_see_all">Näytä kaikki</string>
     <string name="right_panel_who_to_follow">Ketä seurata</string>

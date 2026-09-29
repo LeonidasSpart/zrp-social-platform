@@ -501,6 +501,9 @@
     <string name="search_no_marketplace">कोई लिस्टिंग नहीं मिली।</string>
     <string name="search_language">भाषा</string>
     <string name="search_country">देश</string>
+    <string name="search_date_from">से</string>
+    <string name="search_date_to">तक</string>
+    <string name="search_no_results">कोई परिणाम नहीं मिला।</string>
     <string name="home_trending_on_zrp">ZRP पर ट्रेंडिंग</string>
     <string name="home_see_all">सभी देखें</string>
     <string name="right_panel_who_to_follow">किसे फ़ॉलो करें</string>

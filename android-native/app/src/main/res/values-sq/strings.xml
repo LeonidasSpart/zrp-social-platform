@@ -504,6 +504,9 @@
     <string name="search_no_marketplace">Nuk u gjet asnjë njoftim.</string>
     <string name="search_language">Gjuha</string>
     <string name="search_country">Shteti</string>
+    <string name="search_date_from">Nga</string>
+    <string name="search_date_to">Deri</string>
+    <string name="search_no_results">Nuk u gjet asnjë rezultat.</string>
     <string name="home_trending_on_zrp">Në trend në ZRP</string>
     <string name="home_see_all">Shiko të gjitha</string>
     <string name="right_panel_who_to_follow">Kë të ndiqni</string>

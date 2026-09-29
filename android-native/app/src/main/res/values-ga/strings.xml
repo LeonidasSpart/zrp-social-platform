@@ -425,6 +425,9 @@
     <string name="search_no_marketplace">Níor aimsíodh aon liostú.</string>
     <string name="search_language">Teanga</string>
     <string name="search_country">Tír</string>
+    <string name="search_date_from">Ó</string>
+    <string name="search_date_to">Go dtí</string>
+    <string name="search_no_results">Níor aimsíodh aon toradh.</string>
     <string name="home_trending_on_zrp">Ag treochtáil ar ZRP</string>
     <string name="home_see_all">Féach orthu go léir</string>
     <string name="right_panel_who_to_follow">Cé atá le leanúint</string>

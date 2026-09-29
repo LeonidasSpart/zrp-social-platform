@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Не са намерени обяви.</string>
     <string name="search_language">Език</string>
     <string name="search_country">Държава</string>
+    <string name="search_date_from">От</string>
+    <string name="search_date_to">До</string>
+    <string name="search_no_results">Няма намерени резултати.</string>
     <string name="home_trending_on_zrp">Актуално в ZRP</string>
     <string name="home_see_all">Виж всички</string>
     <string name="right_panel_who_to_follow">Кого да последваш</string>

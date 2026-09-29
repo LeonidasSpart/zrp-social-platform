@@ -501,6 +501,9 @@
     <string name="search_no_marketplace">出品が見つかりませんでした。</string>
     <string name="search_language">言語</string>
     <string name="search_country">国</string>
+    <string name="search_date_from">開始日</string>
+    <string name="search_date_to">終了日</string>
+    <string name="search_no_results">結果が見つかりませんでした。</string>
     <string name="home_trending_on_zrp">ZRPのトレンド</string>
     <string name="home_see_all">すべて見る</string>
     <string name="right_panel_who_to_follow">おすすめユーザー</string>

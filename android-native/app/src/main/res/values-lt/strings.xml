@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Skelbimų nerasta.</string>
     <string name="search_language">Kalba</string>
     <string name="search_country">Šalis</string>
+    <string name="search_date_from">Nuo</string>
+    <string name="search_date_to">Iki</string>
+    <string name="search_no_results">Rezultatų nerasta.</string>
     <string name="home_trending_on_zrp">Populiaru ZRP platformoje</string>
     <string name="home_see_all">Žiūrėti viską</string>
     <string name="right_panel_who_to_follow">Ką sekti</string>

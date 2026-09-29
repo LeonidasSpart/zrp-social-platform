@@ -504,6 +504,9 @@
     <string name="search_no_marketplace">İlan bulunamadı.</string>
     <string name="search_language">Dil</string>
     <string name="search_country">Ülke</string>
+    <string name="search_date_from">Başlangıç</string>
+    <string name="search_date_to">Bitiş</string>
+    <string name="search_no_results">Sonuç bulunamadı.</string>
     <string name="home_trending_on_zrp">ZRP\'de gündemde</string>
     <string name="home_see_all">Tümünü gör</string>
     <string name="right_panel_who_to_follow">Takip edilecekler</string>

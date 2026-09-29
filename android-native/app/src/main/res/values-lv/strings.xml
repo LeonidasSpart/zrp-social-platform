@@ -425,6 +425,9 @@
     <string name="search_no_marketplace">Sludinājumi nav atrasti.</string>
     <string name="search_language">Valoda</string>
     <string name="search_country">Valsts</string>
+    <string name="search_date_from">No</string>
+    <string name="search_date_to">Līdz</string>
+    <string name="search_no_results">Rezultāti nav atrasti.</string>
     <string name="home_trending_on_zrp">Populārais ZRP</string>
     <string name="home_see_all">Skatīt visu</string>
     <string name="right_panel_who_to_follow">Kam sekot</string>

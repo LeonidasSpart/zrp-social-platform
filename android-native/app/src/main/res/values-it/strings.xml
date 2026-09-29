@@ -504,6 +504,9 @@
     <string name="search_no_marketplace">Nessun annuncio trovato.</string>
     <string name="search_language">Lingua</string>
     <string name="search_country">Paese</string>
+    <string name="search_date_from">Da</string>
+    <string name="search_date_to">A</string>
+    <string name="search_no_results">Nessun risultato trovato.</string>
     <string name="home_trending_on_zrp">Di tendenza su ZRP</string>
     <string name="home_see_all">Vedi tutto</string>
     <string name="right_panel_who_to_follow">Chi seguire</string>

@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Ni najdenih oglasov.</string>
     <string name="search_language">Jezik</string>
     <string name="search_country">Država</string>
+    <string name="search_date_from">Od</string>
+    <string name="search_date_to">Do</string>
+    <string name="search_no_results">Ni najdenih rezultatov.</string>
     <string name="home_trending_on_zrp">V trendu na ZRP</string>
     <string name="home_see_all">Prikaži vse</string>
     <string name="right_panel_who_to_follow">Komu naj sledite</string>

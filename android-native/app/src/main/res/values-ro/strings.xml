@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Niciun anunț găsit.</string>
     <string name="search_language">Limbă</string>
     <string name="search_country">Țară</string>
+    <string name="search_date_from">De la</string>
+    <string name="search_date_to">Până la</string>
+    <string name="search_no_results">Niciun rezultat găsit.</string>
     <string name="home_trending_on_zrp">În tendințe pe ZRP</string>
     <string name="home_see_all">Vezi tot</string>
     <string name="right_panel_who_to_follow">Pe cine să urmărești</string>

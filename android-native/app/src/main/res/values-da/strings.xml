@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Ingen annoncer fundet.</string>
     <string name="search_language">Sprog</string>
     <string name="search_country">Land</string>
+    <string name="search_date_from">Fra</string>
+    <string name="search_date_to">Til</string>
+    <string name="search_no_results">Ingen resultater fundet.</string>
     <string name="home_trending_on_zrp">Populært på ZRP</string>
     <string name="home_see_all">Se alle</string>
     <string name="right_panel_who_to_follow">Hvem skal du følge</string>

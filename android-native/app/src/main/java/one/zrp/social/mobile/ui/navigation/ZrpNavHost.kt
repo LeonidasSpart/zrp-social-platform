@@ -649,6 +649,13 @@ fun ZrpNavHost(
                     onOpenVideoViewer = goToVideoViewer,
                     onOpenTrending = goToTrending,
                     onOpenExplorePeople = goToExplorePeople,
+                    onOpenCommunity = goToCommunityDetail,
+                    onOpenNewsArticle = goToNewsArticle,
+                    onOpenListing = goToListing,
+                    onOpenOpportunityListing = goToOpportunityListing,
+                    onOpenMusicArtist = goToMusicArtist,
+                    onOpenMusicAlbum = goToMusicAlbum,
+                    onOpenMusicPlaylist = goToMusicPlaylist,
                 )
             }
             composable("explore/trending") {

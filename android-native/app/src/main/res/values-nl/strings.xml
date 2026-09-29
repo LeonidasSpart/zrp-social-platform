@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Geen advertenties gevonden.</string>
     <string name="search_language">Taal</string>
     <string name="search_country">Land</string>
+    <string name="search_date_from">Van</string>
+    <string name="search_date_to">Tot</string>
+    <string name="search_no_results">Geen resultaten gevonden.</string>
     <string name="home_trending_on_zrp">Trending op ZRP</string>
     <string name="home_see_all">Alles bekijken</string>
     <string name="right_panel_who_to_follow">Wie te volgen</string>

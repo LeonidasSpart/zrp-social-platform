@@ -504,6 +504,9 @@
     <string name="search_no_marketplace">Объявления не найдены.</string>
     <string name="search_language">Язык</string>
     <string name="search_country">Страна</string>
+    <string name="search_date_from">С</string>
+    <string name="search_date_to">По</string>
+    <string name="search_no_results">Результаты не найдены.</string>
     <string name="home_trending_on_zrp">В тренде на ZRP</string>
     <string name="home_see_all">Смотреть все</string>
     <string name="right_panel_who_to_follow">На кого подписаться</string>

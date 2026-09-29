@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Огласи нису пронађени.</string>
     <string name="search_language">Језик</string>
     <string name="search_country">Држава</string>
+    <string name="search_date_from">Од</string>
+    <string name="search_date_to">До</string>
+    <string name="search_no_results">Нема пронађених резултата.</string>
     <string name="home_trending_on_zrp">Popularno na ZRP-u</string>
     <string name="home_see_all">Prikaži sve</string>
     <string name="right_panel_who_to_follow">Koga pratiti</string>

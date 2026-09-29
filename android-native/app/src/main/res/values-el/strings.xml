@@ -502,6 +502,9 @@
     <string name="search_no_marketplace">Δεν βρέθηκαν αγγελίες.</string>
     <string name="search_language">Γλώσσα</string>
     <string name="search_country">Χώρα</string>
+    <string name="search_date_from">Από</string>
+    <string name="search_date_to">Έως</string>
+    <string name="search_no_results">Δεν βρέθηκαν αποτελέσματα.</string>
     <string name="home_trending_on_zrp">Δημοφιλή στο ZRP</string>
     <string name="home_see_all">Δες τα όλα</string>
     <string name="right_panel_who_to_follow">Ποιους να ακολουθήσεις</string>

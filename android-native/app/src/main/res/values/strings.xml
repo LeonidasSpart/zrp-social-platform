@@ -514,6 +514,9 @@
     <string name="search_no_marketplace">No listings found.</string>
     <string name="search_language">Language</string>
     <string name="search_country">Country</string>
+    <string name="search_date_from">From</string>
+    <string name="search_date_to">To</string>
+    <string name="search_no_results">No results found.</string>
     <string name="home_trending_on_zrp">Trending on ZRP</string>
     <string name="home_see_all">See all</string>
     <string name="right_panel_who_to_follow">Who to follow</string>
