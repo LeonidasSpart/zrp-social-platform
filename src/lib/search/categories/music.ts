@@ -46,8 +46,10 @@ export type MusicSearchResult =
       kind: "track";
       id: string;
       title: string;
+      audioUrl: string;
       coverUrl: string | null;
-      artist: { id: string; displayName: string };
+      durationSec: number | null;
+      artist: { id: string; displayName: string; avatarUrl: string | null };
       playCount: number;
       createdAt: Date;
       counter: number;
@@ -94,10 +96,12 @@ async function fetchCandidates(params: SearchQueryParams): Promise<MusicSearchRe
       select: {
         id: true,
         title: true,
+        audioUrl: true,
         coverUrl: true,
+        durationSec: true,
         playCount: true,
         createdAt: true,
-        artist: { select: { id: true, displayName: true } },
+        artist: { select: { id: true, displayName: true, avatarUrl: true } },
       },
       orderBy: { createdAt: "desc" },
       take: perKindTake,
@@ -137,7 +141,9 @@ async function fetchCandidates(params: SearchQueryParams): Promise<MusicSearchRe
       kind: "track" as const,
       id: t.id,
       title: t.title,
+      audioUrl: t.audioUrl,
       coverUrl: t.coverUrl,
+      durationSec: t.durationSec,
       artist: t.artist,
       playCount: t.playCount,
       createdAt: t.createdAt,
