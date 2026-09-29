@@ -513,6 +513,9 @@
     <string name="right_panel_trending">Tendencias</string>
     <string name="right_panel_posts_count">%1$d publicaciones</string>
     <string name="right_panel_no_trending">Aún no hay hashtags en tendencia.</string>
+    <string name="explore_people_near_you_title">Personas cerca de ti</string>
+    <string name="explore_people_near_you_subtitle">Mismo país que tú</string>
+    <string name="explore_people_near_you_empty">Todavía no hay nadie cerca.</string>
     <string name="home_discover_music">Descubrir nueva música</string>
     <string name="action_follow">Seguir</string>
     <string name="action_following">Siguiendo</string>

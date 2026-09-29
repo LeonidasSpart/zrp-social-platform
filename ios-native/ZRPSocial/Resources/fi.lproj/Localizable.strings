@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Videopuhelu";
 "ios.search.noHashtags" = "Hashtageja ei löytynyt.";
 "ios.search.noResults" = "Tuloksia ei löytynyt.";
+"ios.explore.peopleNearYouTitle" = "Ihmisiä lähelläsi";
+"ios.explore.peopleNearYouSubtitle" = "Sama maa kuin sinulla";
+"ios.explore.peopleNearYouEmpty" = "Ei vielä ketään lähellä.";

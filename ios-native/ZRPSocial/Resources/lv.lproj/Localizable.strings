@@ -1571,3 +1571,6 @@
 "ios.post.repostBlocked" = "Šo ierakstu nevar repostot, jo konts ir privāts.";
 "ios.media.loadFailed" = "Neizdevās ielādēt šo attēlu.";
 "ios.search.noResults" = "Rezultāti nav atrasti.";
+"ios.explore.peopleNearYouTitle" = "Cilvēki tuvumā";
+"ios.explore.peopleNearYouSubtitle" = "Tā pati valsts, kas jums";
+"ios.explore.peopleNearYouEmpty" = "Pagaidām neviena tuvumā nav.";

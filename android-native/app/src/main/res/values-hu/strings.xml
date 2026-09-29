@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Felkapott</string>
     <string name="right_panel_posts_count">%1$d bejegyzés</string>
     <string name="right_panel_no_trending">Még nincsenek felkapott hashtagek.</string>
+    <string name="explore_people_near_you_title">Emberek a közeledben</string>
+    <string name="explore_people_near_you_subtitle">Ugyanaz az ország, mint te</string>
+    <string name="explore_people_near_you_empty">Még senki sincs a közelben.</string>
     <string name="home_discover_music">Fedezz fel új zenéket</string>
     <string name="action_follow">Követés</string>
     <string name="action_following">Követve</string>

@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Apel video";
 "ios.search.noHashtags" = "Niciun hashtag găsit.";
 "ios.search.noResults" = "Niciun rezultat găsit.";
+"ios.explore.peopleNearYouTitle" = "Persoane din apropiere";
+"ios.explore.peopleNearYouSubtitle" = "Aceeași țară ca tine";
+"ios.explore.peopleNearYouEmpty" = "Încă nu este nimeni în apropiere.";

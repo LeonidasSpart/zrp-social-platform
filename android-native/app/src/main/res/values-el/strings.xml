@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Δημοφιλή</string>
     <string name="right_panel_posts_count">%1$d αναρτήσεις</string>
     <string name="right_panel_no_trending">Δεν υπάρχουν δημοφιλή hashtags ακόμα.</string>
+    <string name="explore_people_near_you_title">Άτομα κοντά σου</string>
+    <string name="explore_people_near_you_subtitle">Ίδια χώρα με εσένα</string>
+    <string name="explore_people_near_you_empty">Δεν υπάρχει ακόμη κανείς κοντά.</string>
     <string name="home_discover_music">Ανακάλυψε νέα μουσική</string>
     <string name="action_follow">Ακολούθησε</string>
     <string name="action_following">Ακολουθείτε</string>

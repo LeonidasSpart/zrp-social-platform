@@ -510,6 +510,9 @@
     <string name="right_panel_trending">トレンド</string>
     <string name="right_panel_posts_count">%1$d件の投稿</string>
     <string name="right_panel_no_trending">トレンドのハッシュタグはまだありません。</string>
+    <string name="explore_people_near_you_title">近くの人</string>
+    <string name="explore_people_near_you_subtitle">あなたと同じ国</string>
+    <string name="explore_people_near_you_empty">まだ近くに誰もいません。</string>
     <string name="home_discover_music">新しい音楽を発見</string>
     <string name="action_follow">フォロー</string>
     <string name="action_following">フォロー中</string>

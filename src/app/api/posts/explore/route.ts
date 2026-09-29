@@ -100,7 +100,11 @@ export async function GET(req: NextRequest) {
     // boost (author.countryCode), so a v7 entry cached before this
     // change would keep serving a ranking computed without it for up to
     // 5 minutes - treated as a distinct cache generation instead.
-    const cacheKey = `explore:${userId || 'anon'}:${sort}:${scope}:v8`;
+    // Bumped v8 -> v9: the candidate query now excludes banned authors
+    // (see the `banned: false` clause above) - a v8 entry cached before
+    // this fix could still serve a banned author's posts for up to 5
+    // more minutes otherwise.
+    const cacheKey = `explore:${userId || 'anon'}:${sort}:${scope}:v9`;
     // Cached as {ranked, scopeFallback} rather than a bare array so a
     // national-scope fallback decision (see below) survives a cache
     // hit too, not just the request that first computed it.
@@ -145,6 +149,15 @@ export async function GET(req: NextRequest) {
             status: "published",
             scheduledAt: null,
             author: {
+              // ⚠️ MODERATION: viewablePostAuthorFilter alone does not
+              // exclude a banned author's content (it only governs
+              // private-account visibility) - this route previously had
+              // no banned-author exclusion at all, a documented gap
+              // (docs/discover-backend.md) that let a banned account's
+              // posts keep surfacing in For You/Trending. Matches the
+              // same `banned: false` clause /api/discover already uses
+              // (src/lib/discover/candidates.ts).
+              banned: false,
               ...viewablePostAuthorFilter(userId),
               ...(countryFiltered ? nationalFilter.author : {}),
             },

@@ -510,6 +510,9 @@
     <string name="right_panel_trending">Em alta</string>
     <string name="right_panel_posts_count">%1$d publicações</string>
     <string name="right_panel_no_trending">Ainda não há hashtags em alta.</string>
+    <string name="explore_people_near_you_title">Pessoas perto de si</string>
+    <string name="explore_people_near_you_subtitle">O mesmo país que o seu</string>
+    <string name="explore_people_near_you_empty">Ainda não há ninguém por perto.</string>
     <string name="home_discover_music">Descobre nova música</string>
     <string name="action_follow">Seguir</string>
     <string name="action_following">A seguir</string>

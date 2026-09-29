@@ -99,6 +99,41 @@ data class DiscoverNotInterestedRequest(val postId: String)
 data class DiscoverNotInterestedResponse(val dismissed: Boolean)
 
 /**
+ * One row from GET /api/discover/people ("people near you") -
+ * src/app/api/discover/people/route.ts's own select. Deliberately a
+ * distinct model from [one.zrp.social.mobile.network.SearchUser]: this
+ * endpoint's `where` clause matches on the viewer's own `countryCode`
+ * field only (never GPS/device location - no such capability exists
+ * anywhere in this codebase, see docs/user-geography-and-acquisition.md's
+ * own "Known limitations"), so the UI must never call this "nearby" in a
+ * way that implies proximity - "people near you" here means "same
+ * country," and the extra profile fields (bio/category/headline/company)
+ * exist so that distinction reads clearly on the row.
+ */
+data class NearbyUser(
+    val id: String,
+    val username: String,
+    val name: String?,
+    val avatarUrl: String?,
+    val badgeType: String?,
+    val bio: String?,
+    val category: String?,
+    val headline: String?,
+    val company: String?,
+)
+
+/**
+ * `reason` is only ever "unknown_viewer_country" (the viewer has no
+ * countryCode on file, so the server honestly returns an empty result
+ * rather than guessing) - absent on an ordinary page.
+ */
+data class NearbyPeoplePage(
+    val users: List<NearbyUser> = emptyList(),
+    val nextCursor: String? = null,
+    val reason: String? = null,
+)
+
+/**
  * ZRP Discover - a server-ranked, TikTok-style vertical video feed
  * (src/app/discover/page.tsx), distinct from the Search screen's own
  * "Discover" pre-search state (suggested users/trending hashtags via
@@ -115,4 +150,11 @@ interface DiscoverApi {
 
     @POST("discover/not-interested")
     suspend fun markNotInterested(@Body request: DiscoverNotInterestedRequest): DiscoverNotInterestedResponse
+
+    @GET("discover/people")
+    suspend fun getNearbyPeople(
+        @Query("cursor") cursor: String? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("badgeType") badgeType: String? = null,
+    ): NearbyPeoplePage
 }

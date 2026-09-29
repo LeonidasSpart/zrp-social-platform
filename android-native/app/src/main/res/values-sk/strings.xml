@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Trendy</string>
     <string name="right_panel_posts_count">%1$d príspevkov</string>
     <string name="right_panel_no_trending">Zatiaľ žiadne trendujúce hashtagy.</string>
+    <string name="explore_people_near_you_title">Ľudia v okolí</string>
+    <string name="explore_people_near_you_subtitle">Rovnaká krajina ako vy</string>
+    <string name="explore_people_near_you_empty">Zatiaľ nikto v okolí.</string>
     <string name="home_discover_music">Objavte novú hudbu</string>
     <string name="action_follow">Sledovať</string>
     <string name="action_following">Sledovaní</string>

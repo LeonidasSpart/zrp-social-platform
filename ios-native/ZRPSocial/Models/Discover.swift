@@ -118,3 +118,36 @@ struct DiscoverNotInterestedRequest: Encodable {
 struct DiscoverNotInterestedResponse: Decodable {
     let dismissed: Bool
 }
+
+/// One row from `GET /api/discover/people` ("people near you") -
+/// `src/app/api/discover/people/route.ts`'s own select. Deliberately its
+/// own type rather than `PostAuthor`: this route's `where` clause
+/// matches only on the viewer's own `countryCode` field - there is no
+/// GPS/device-location capability anywhere in this codebase (see
+/// `docs/user-geography-and-acquisition.md`'s own "Known limitations") -
+/// so the extra profile fields (bio/category/headline/company) exist so
+/// the UI can caption a row with something more specific than "nearby",
+/// which would otherwise misleadingly imply real proximity.
+struct NearbyUser: Decodable, Identifiable, Equatable {
+    let id: String
+    let username: String
+    let name: String?
+    let avatarUrl: String?
+    let badgeType: String?
+    let bio: String?
+    let category: String?
+    let headline: String?
+    let company: String?
+
+    var displayName: String { name?.isEmpty == false ? name! : username }
+    var handle: String { "@\(username)" }
+}
+
+/// `reason` is only ever `"unknown_viewer_country"` - the viewer has no
+/// `countryCode` on file, so the server honestly returns an empty result
+/// rather than guessing. Absent on an ordinary page.
+struct NearbyPeoplePage: Decodable {
+    let users: [NearbyUser]
+    let nextCursor: String?
+    let reason: String?
+}

@@ -513,6 +513,9 @@
     <string name="right_panel_trending">热门</string>
     <string name="right_panel_posts_count">%1$d 帖子</string>
     <string name="right_panel_no_trending">无热门话题标签。</string>
+    <string name="explore_people_near_you_title">附近的人</string>
+    <string name="explore_people_near_you_subtitle">与你同国家</string>
+    <string name="explore_people_near_you_empty">附近暂无用户。</string>
     <string name="home_discover_music">发现新音乐</string>
     <string name="action_follow">关注</string>
     <string name="action_following">已关注</string>

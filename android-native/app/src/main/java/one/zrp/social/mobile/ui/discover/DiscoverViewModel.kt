@@ -38,6 +38,42 @@ data class DiscoverUiState(
 )
 
 /**
+ * Pure pagination guard, extracted from [DiscoverViewModel.loadMore] for
+ * the same testability reason as Home's own `canLoadMoreHome()` - a
+ * plain JUnit test can call this directly without touching
+ * `viewModelScope` (no Robolectric/coroutines-test dependency exists in
+ * this project's test setup).
+ */
+internal fun canLoadMoreDiscover(state: DiscoverUiState): Boolean =
+    state.nextCursor != null && !state.isLoadingMore && !state.endReached
+
+/**
+ * Whether the active pager page (`index`, 0-based) is close enough to
+ * the end of `itemCount` items to prefetch the next page - extracted
+ * from [DiscoverViewModel.setCurrentIndex]'s own `index >= items.size -
+ * 2` check, same testability reason as [canLoadMoreDiscover].
+ */
+internal fun shouldPrefetchDiscoverAt(index: Int, itemCount: Int): Boolean = index >= itemCount - 2
+
+/** Pure like toggle - extracted for the same testability reason as [canLoadMoreDiscover]. */
+internal fun applyOptimisticLike(item: DiscoverItem): DiscoverItem {
+    val wasLiked = item.viewerState.liked
+    return item.copy(
+        viewerState = item.viewerState.copy(liked = !wasLiked),
+        stats = item.stats.copy(likes = (item.stats.likes + if (wasLiked) -1 else 1).coerceAtLeast(0)),
+    )
+}
+
+/** Pure repost toggle - extracted for the same testability reason as [canLoadMoreDiscover]. */
+internal fun applyOptimisticRepost(item: DiscoverItem): DiscoverItem {
+    val wasReposted = item.viewerState.reposted
+    return item.copy(
+        viewerState = item.viewerState.copy(reposted = !wasReposted),
+        stats = item.stats.copy(reposts = (item.stats.reposts + if (wasReposted) -1 else 1).coerceAtLeast(0)),
+    )
+}
+
+/**
  * ZRP Discover - ported from src/app/discover/page.tsx: the real
  * server-ranked vertical video feed against GET /api/discover, plus its
  * own watch-event reporting (IMPRESSION/START/PROGRESS_25/50/75/
@@ -82,8 +118,8 @@ class DiscoverViewModel(private val repository: DiscoverRepository) : ViewModel(
 
     fun loadMore() {
         val s = _state.value
+        if (!canLoadMoreDiscover(s)) return
         val cursor = s.nextCursor ?: return
-        if (s.isLoadingMore || s.endReached) return
         _state.update { it.copy(isLoadingMore = true) }
         viewModelScope.launch {
             repository.getFeed(cursor)
@@ -135,7 +171,7 @@ class DiscoverViewModel(private val repository: DiscoverRepository) : ViewModel(
         }
         items.getOrNull(index)?.let { fireImpressionIfNeeded(it.id) }
 
-        if (index >= items.size - 2) loadMore()
+        if (shouldPrefetchDiscoverAt(index, items.size)) loadMore()
     }
 
     private fun fireImpressionIfNeeded(postId: String) {
@@ -267,22 +303,6 @@ class DiscoverViewModel(private val repository: DiscoverRepository) : ViewModel(
                 .onSuccess { _state.update { it.copy(toast = DiscoverToast.REPORT_SUBMITTED) } }
                 .onFailure { _state.update { it.copy(toast = DiscoverToast.REPORT_FAILED) } }
         }
-    }
-
-    private fun applyOptimisticLike(item: DiscoverItem): DiscoverItem {
-        val wasLiked = item.viewerState.liked
-        return item.copy(
-            viewerState = item.viewerState.copy(liked = !wasLiked),
-            stats = item.stats.copy(likes = (item.stats.likes + if (wasLiked) -1 else 1).coerceAtLeast(0)),
-        )
-    }
-
-    private fun applyOptimisticRepost(item: DiscoverItem): DiscoverItem {
-        val wasReposted = item.viewerState.reposted
-        return item.copy(
-            viewerState = item.viewerState.copy(reposted = !wasReposted),
-            stats = item.stats.copy(reposts = (item.stats.reposts + if (wasReposted) -1 else 1).coerceAtLeast(0)),
-        )
     }
 }
 

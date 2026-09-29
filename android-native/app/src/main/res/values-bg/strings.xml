@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Актуално</string>
     <string name="right_panel_posts_count">%1$d публикации</string>
     <string name="right_panel_no_trending">Все още няма актуални хаштагове.</string>
+    <string name="explore_people_near_you_title">Хора близо до теб</string>
+    <string name="explore_people_near_you_subtitle">Същата държава като теб</string>
+    <string name="explore_people_near_you_empty">Все още няма никого наблизо.</string>
     <string name="home_discover_music">Открий нова музика</string>
     <string name="action_follow">Последвай</string>
     <string name="action_following">Следваш</string>

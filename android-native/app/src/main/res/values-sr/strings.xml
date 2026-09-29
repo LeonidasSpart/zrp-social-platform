@@ -511,6 +511,9 @@
     <string name="right_panel_trending">U trendu</string>
     <string name="right_panel_posts_count">Objava: %1$d</string>
     <string name="right_panel_no_trending">Još nema popularnih heštegova.</string>
+    <string name="explore_people_near_you_title">Ljudi u blizini</string>
+    <string name="explore_people_near_you_subtitle">Ista država kao vi</string>
+    <string name="explore_people_near_you_empty">Još uvek nema nikoga u blizini.</string>
     <string name="home_discover_music">Otkrijte novu muziku</string>
     <string name="action_follow">Prati</string>
     <string name="action_following">Pratite</string>

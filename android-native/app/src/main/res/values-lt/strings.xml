@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Populiaru</string>
     <string name="right_panel_posts_count">%1$d įrašų</string>
     <string name="right_panel_no_trending">Populiarių saitažodžių dar nėra.</string>
+    <string name="explore_people_near_you_title">Žmonės netoliese</string>
+    <string name="explore_people_near_you_subtitle">Ta pati šalis kaip jūsų</string>
+    <string name="explore_people_near_you_empty">Kol kas niekas netoliese.</string>
     <string name="home_discover_music">Atraskite naują muziką</string>
     <string name="action_follow">Sekti</string>
     <string name="action_following">Sekama</string>

@@ -513,6 +513,9 @@
     <string name="right_panel_trending">В тренде</string>
     <string name="right_panel_posts_count">%1$d публикаций</string>
     <string name="right_panel_no_trending">Нет в тренде хэштегов пока.</string>
+    <string name="explore_people_near_you_title">Люди рядом с вами</string>
+    <string name="explore_people_near_you_subtitle">Та же страна, что и у вас</string>
+    <string name="explore_people_near_you_empty">Пока рядом никого нет.</string>
     <string name="home_discover_music">Открыть новую музыку</string>
     <string name="action_follow">Подписаться</string>
     <string name="action_following">Подписан</string>

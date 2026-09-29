@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Videóhívás";
 "ios.search.noHashtags" = "Nem található hashtag.";
 "ios.search.noResults" = "Nincs találat.";
+"ios.explore.peopleNearYouTitle" = "Emberek a közeledben";
+"ios.explore.peopleNearYouSubtitle" = "Ugyanaz az ország, mint te";
+"ios.explore.peopleNearYouEmpty" = "Még senki sincs a közelben.";

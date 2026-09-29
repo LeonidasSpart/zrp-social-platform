@@ -298,5 +298,29 @@ describe.skipIf(!hasRealDatabaseUrl)(
       const found2 = body2.posts.find((p: { poll?: { id: string } }) => p.poll?.id === poll.id);
       expect(found2.poll.votes_user).toEqual([{ optionIndex: 1 }]);
     });
+
+    // Regression coverage: this route previously had no banned-author
+    // exclusion at all (a documented gap in docs/discover-backend.md) -
+    // a banned account's posts kept surfacing in For You/Trending
+    // indefinitely, unlike GET /api/discover which already excludes
+    // them via the same `banned: false` clause.
+    it("excludes a banned author's posts from both For You and Trending", async () => {
+      const bannedAuthor = await createUser("bannedauth");
+      const bannedPost = await prisma.post.create({
+        data: { id: randomUUID(), content: `banned post ${runId}`, authorId: bannedAuthor.id, status: "published" },
+      });
+      postIds.push(bannedPost.id);
+      await prisma.user.update({ where: { id: bannedAuthor.id }, data: { banned: true } });
+
+      getServerSession.mockResolvedValueOnce(null);
+      const forYouRes = await GET(req());
+      const forYouBody = await forYouRes.json();
+      expect(forYouBody.posts.some((p: { id: string }) => p.id === bannedPost.id)).toBe(false);
+
+      getServerSession.mockResolvedValueOnce(null);
+      const trendingRes = await GET(req({ sort: "trending" }));
+      const trendingBody = await trendingRes.json();
+      expect(trendingBody.posts.some((p: { id: string }) => p.id === bannedPost.id)).toBe(false);
+    });
   }
 );

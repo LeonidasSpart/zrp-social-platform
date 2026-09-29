@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Vaizdo skambutis";
 "ios.search.noHashtags" = "Saitažodžių nerasta.";
 "ios.search.noResults" = "Rezultatų nerasta.";
+"ios.explore.peopleNearYouTitle" = "Žmonės netoliese";
+"ios.explore.peopleNearYouSubtitle" = "Ta pati šalis kaip jūsų";
+"ios.explore.peopleNearYouEmpty" = "Kol kas niekas netoliese.";

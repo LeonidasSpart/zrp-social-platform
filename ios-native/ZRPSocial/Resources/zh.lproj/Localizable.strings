@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "视频通话";
 "ios.search.noHashtags" = "未找到话题标签。";
 "ios.search.noResults" = "未找到结果。";
+"ios.explore.peopleNearYouTitle" = "附近的人";
+"ios.explore.peopleNearYouSubtitle" = "与你同国家";
+"ios.explore.peopleNearYouEmpty" = "附近暂无用户。";

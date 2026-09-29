@@ -29,6 +29,41 @@ data class HomeUiState(
 )
 
 /**
+ * Pure pagination guard for a single tab's [HomeUiState] - extracted
+ * (rather than left inline in [HomeViewModel.loadMore]) the same way
+ * `canLoadMoreSearch()` was pulled out of `SearchViewModel`: a plain
+ * JUnit test can call this directly without touching `viewModelScope`
+ * (which needs `Dispatchers.Main`, unavailable in this project's plain-
+ * JUnit test setup - no Robolectric/coroutines-test dependency exists
+ * here), while `loadMore()` itself stays exactly as simple as before.
+ */
+internal fun canLoadMoreHome(state: HomeUiState): Boolean =
+    !state.isLoadingMore && !state.endReached && state.nextCursor != null
+
+/** Pure like toggle - extracted for the same testability reason as [canLoadMoreHome]. */
+internal fun applyOptimisticLike(post: Post): Post {
+    val wasLiked = post.liked == true
+    return post.copy(
+        liked = !wasLiked,
+        _count = post._count.copy(likes = post._count.likes + if (wasLiked) -1 else 1),
+    )
+}
+
+/** Pure repost toggle - extracted for the same testability reason as [canLoadMoreHome]. */
+internal fun applyOptimisticRepost(post: Post): Post {
+    val wasReposted = post.reposted == true
+    return post.copy(
+        reposted = !wasReposted,
+        _count = post._count.copy(reposts = post._count.reposts + if (wasReposted) -1 else 1),
+    )
+}
+
+/** Pure bookmark toggle - extracted for the same testability reason as [canLoadMoreHome]. */
+internal fun applyOptimisticBookmark(post: Post): Post {
+    return post.copy(bookmarked = post.bookmarked != true)
+}
+
+/**
  * Drives the Home screen's two real feed tabs (For You / Following).
  * Each tab keeps its own posts/cursor in its own StateFlow so
  * switching tabs and back doesn't re-fetch from scratch, matching how
@@ -136,12 +171,12 @@ class HomeViewModel(
 
     fun loadMore(tab: FeedTab = _activeTab.value) {
         val stateFlow = stateFlowFor(tab)
-        val current = stateFlow.value
-        if (current.isLoadingMore || current.endReached || current.nextCursor == null) return
+        val cursor = stateFlow.value.nextCursor
+        if (!canLoadMoreHome(stateFlow.value)) return
 
         stateFlow.update { it.copy(isLoadingMore = true) }
         viewModelScope.launch {
-            fetch(tab, cursor = current.nextCursor)
+            fetch(tab, cursor = cursor)
                 .onSuccess { page -> applyAppendedPage(stateFlow, page) }
                 .onFailure { error ->
                     stateFlow.update {
@@ -294,10 +329,6 @@ class HomeViewModel(
         }
     }
 
-    private fun applyOptimisticBookmark(post: Post): Post {
-        return post.copy(bookmarked = post.bookmarked != true)
-    }
-
     private fun applyFreshPage(stateFlow: MutableStateFlow<HomeUiState>, page: PostsPage) {
         stateFlow.update {
             it.copy(
@@ -318,22 +349,6 @@ class HomeViewModel(
                 endReached = page.nextCursor == null,
             )
         }
-    }
-
-    private fun applyOptimisticLike(post: Post): Post {
-        val wasLiked = post.liked == true
-        return post.copy(
-            liked = !wasLiked,
-            _count = post._count.copy(likes = post._count.likes + if (wasLiked) -1 else 1),
-        )
-    }
-
-    private fun applyOptimisticRepost(post: Post): Post {
-        val wasReposted = post.reposted == true
-        return post.copy(
-            reposted = !wasReposted,
-            _count = post._count.copy(reposts = post._count.reposts + if (wasReposted) -1 else 1),
-        )
     }
 
     private suspend fun fetch(tab: FeedTab, cursor: String?, forceRefresh: Boolean = false) = when (tab) {

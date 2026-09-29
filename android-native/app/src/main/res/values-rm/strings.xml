@@ -434,6 +434,9 @@
     <string name="right_panel_trending">En tendenza</string>
     <string name="right_panel_posts_count">%1$d contribuziuns</string>
     <string name="right_panel_no_trending">Anc nagins hashtags en tendenza.</string>
+    <string name="explore_people_near_you_title">Persunas datiers da Vus</string>
+    <string name="explore_people_near_you_subtitle">Medem pajais sco Vus</string>
+    <string name="explore_people_near_you_empty">Anc nagin datiers.</string>
     <string name="home_discover_music">Scuvrir nova musica</string>
     <string name="action_follow">Suandar</string>
     <string name="action_following">Suandà</string>

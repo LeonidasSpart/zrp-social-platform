@@ -434,6 +434,9 @@
     <string name="right_panel_trending">Trendib</string>
     <string name="right_panel_posts_count">%1$d postitust</string>
     <string name="right_panel_no_trending">Trendikaid teemaviiteid pole veel.</string>
+    <string name="explore_people_near_you_title">Inimesed sinu lähedal</string>
+    <string name="explore_people_near_you_subtitle">Sinuga samast riigist</string>
+    <string name="explore_people_near_you_empty">Kedagi pole veel lähedal.</string>
     <string name="home_discover_music">Avasta uut muusikat</string>
     <string name="action_follow">Jälgi</string>
     <string name="action_following">Jälgid</string>

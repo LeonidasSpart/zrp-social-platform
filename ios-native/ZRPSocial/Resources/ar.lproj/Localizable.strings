@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "مكالمة فيديو";
 "ios.search.noHashtags" = "لم يتم العثور على وسوم.";
 "ios.search.noResults" = "لم يتم العثور على نتائج.";
+"ios.explore.peopleNearYouTitle" = "أشخاص بالقرب منك";
+"ios.explore.peopleNearYouSubtitle" = "من نفس بلدك";
+"ios.explore.peopleNearYouEmpty" = "لا يوجد أحد قريب بعد.";

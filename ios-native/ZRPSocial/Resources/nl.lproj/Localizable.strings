@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Video-oproep";
 "ios.search.noHashtags" = "Geen hashtags gevonden.";
 "ios.search.noResults" = "Geen resultaten gevonden.";
+"ios.explore.peopleNearYouTitle" = "Mensen in jouw buurt";
+"ios.explore.peopleNearYouSubtitle" = "Zelfde land als jij";
+"ios.explore.peopleNearYouEmpty" = "Nog niemand in de buurt.";

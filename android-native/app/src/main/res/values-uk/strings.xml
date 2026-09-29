@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Популярне</string>
     <string name="right_panel_posts_count">Дописів: %1$d</string>
     <string name="right_panel_no_trending">Популярних хештегів поки немає.</string>
+    <string name="explore_people_near_you_title">Люди поруч з вами</string>
+    <string name="explore_people_near_you_subtitle">Та сама країна, що й у вас</string>
+    <string name="explore_people_near_you_empty">Поки що нікого поруч немає.</string>
     <string name="home_discover_music">Відкрийте нову музику</string>
     <string name="action_follow">Підписатися</string>
     <string name="action_following">Ви підписані</string>

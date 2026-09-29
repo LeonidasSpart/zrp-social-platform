@@ -513,6 +513,9 @@
     <string name="right_panel_trending">الرائج</string>
     <string name="right_panel_posts_count">%1$d منشورات</string>
     <string name="right_panel_no_trending">لا رائج وسوم بعد.</string>
+    <string name="explore_people_near_you_title">أشخاص بالقرب منك</string>
+    <string name="explore_people_near_you_subtitle">من نفس بلدك</string>
+    <string name="explore_people_near_you_empty">لا يوجد أحد قريب بعد.</string>
     <string name="home_discover_music">اكتشف موسيقى جديدة</string>
     <string name="action_follow">متابعة</string>
     <string name="action_following">متابَع</string>

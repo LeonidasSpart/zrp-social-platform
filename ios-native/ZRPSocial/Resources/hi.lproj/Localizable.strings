@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "वीडियो कॉल";
 "ios.search.noHashtags" = "कोई हैशटैग नहीं मिला।";
 "ios.search.noResults" = "कोई परिणाम नहीं मिला।";
+"ios.explore.peopleNearYouTitle" = "आपके आस-पास के लोग";
+"ios.explore.peopleNearYouSubtitle" = "आपके जैसा ही देश";
+"ios.explore.peopleNearYouEmpty" = "अभी तक आस-पास कोई नहीं है।";

@@ -511,6 +511,9 @@
     <string name="right_panel_trending">Trendar</string>
     <string name="right_panel_posts_count">%1$d inlägg</string>
     <string name="right_panel_no_trending">Inga trendande hashtaggar än.</string>
+    <string name="explore_people_near_you_title">Personer i närheten</string>
+    <string name="explore_people_near_you_subtitle">Samma land som du</string>
+    <string name="explore_people_near_you_empty">Ingen i närheten ännu.</string>
     <string name="home_discover_music">Upptäck ny musik</string>
     <string name="action_follow">Följ</string>
     <string name="action_following">Följer</string>

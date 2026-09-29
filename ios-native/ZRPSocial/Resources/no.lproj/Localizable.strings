@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Videoanrop";
 "ios.search.noHashtags" = "Fant ingen emneknagger.";
 "ios.search.noResults" = "Fant ingen resultater.";
+"ios.explore.peopleNearYouTitle" = "Personer i nærheten";
+"ios.explore.peopleNearYouSubtitle" = "Samme land som deg";
+"ios.explore.peopleNearYouEmpty" = "Ingen i nærheten ennå.";

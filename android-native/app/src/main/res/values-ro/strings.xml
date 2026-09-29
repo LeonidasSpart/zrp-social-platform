@@ -511,6 +511,9 @@
     <string name="right_panel_trending">În tendințe</string>
     <string name="right_panel_posts_count">%1$d postări</string>
     <string name="right_panel_no_trending">Niciun hashtag în tendințe încă.</string>
+    <string name="explore_people_near_you_title">Persoane din apropiere</string>
+    <string name="explore_people_near_you_subtitle">Aceeași țară ca tine</string>
+    <string name="explore_people_near_you_empty">Încă nu este nimeni în apropiere.</string>
     <string name="home_discover_music">Descoperă muzică nouă</string>
     <string name="action_follow">Urmărește</string>
     <string name="action_following">Urmărești</string>

@@ -1571,3 +1571,6 @@
 "ios.post.repostBlocked" = "Ní féidir an phostáil seo a athphostáil toisc go bhfuil an cuntas príobháideach.";
 "ios.media.loadFailed" = "Níorbh fhéidir an íomhá seo a lódáil.";
 "ios.search.noResults" = "Níor aimsíodh aon toradh.";
+"ios.explore.peopleNearYouTitle" = "Daoine in aice leat";
+"ios.explore.peopleNearYouSubtitle" = "An tír chéanna leat";
+"ios.explore.peopleNearYouEmpty" = "Níl aon duine in aice leat go fóill.";

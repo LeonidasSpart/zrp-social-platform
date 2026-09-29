@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "ビデオ通話";
 "ios.search.noHashtags" = "ハッシュタグが見つかりませんでした。";
 "ios.search.noResults" = "結果が見つかりませんでした。";
+"ios.explore.peopleNearYouTitle" = "近くの人";
+"ios.explore.peopleNearYouSubtitle" = "あなたと同じ国";
+"ios.explore.peopleNearYouEmpty" = "まだ近くに誰もいません。";

@@ -351,7 +351,7 @@ to the candidate query and/or ranking score, without a contract change.
 
 ## Database
 
-One new table, one new enum, additive only, no changes to any
+Two new tables plus one new enum, additive only, no changes to any
 existing model or column:
 
 - `DiscoverEventType` enum
@@ -362,6 +362,17 @@ existing model or column:
   anonymous-dedup gap described in "Watch events / analytics" above;
   since this migration had not shipped to any deployed environment yet,
   it was amended in place rather than stacked as a second migration.
+- `DiscoverDismissal` model (`id`, `userId`, `postId`, `createdAt`,
+  `@@unique([userId, postId])`) - added after this doc's first pass to
+  back "Not interested" (`POST /api/discover/not-interested`, see
+  `src/lib/discover/dismissals.ts`), which this doc previously omitted
+  entirely (a real staleness gap fixed during Task #3's Discover/Explore
+  parity audit). Unlike `DiscoverEvent`, it requires a signed-in viewer
+  (there is no honest anonymous "not interested"), is upserted
+  idempotently, and **is** read back by ranking: `fetchCandidatePool()`
+  (`src/lib/discover/candidates.ts`) excludes a viewer's own dismissed
+  post ids from their future candidate pool - a real, working feedback
+  loop, distinct from `DiscoverEvent`'s write-only status noted above.
 
 Indexes (`src/lib/discover/candidates.ts` / `events.ts` describe the
 queries these support):
@@ -532,15 +543,34 @@ tests passed against a real, freshly-provisioned Postgres, 0 skipped).
 
 ## Known limitations / audit findings
 
-- **`GET /api/posts/explore` (the existing "For You" feed) does not
-  exclude banned authors**: `viewablePostAuthorFilter` alone only
-  governs private-account visibility, not the ban flag, and explore's
-  own `where` clause never adds `banned: false` the way
-  `GET /api/hashtags/search` already learned to. Discover adds
-  `banned: false` explicitly for itself (see `candidates.ts`); the
-  same fix for `/api/posts/explore` is a good, narrowly-scoped follow-
-  up but is out of scope for this backend-only Discover PR per the
-  directive's "do not redesign unrelated parts of the application."
+- ~~**`GET /api/posts/explore` does not exclude banned authors**~~ -
+  **fixed in Task #3** (Discover/Explore parity audit): `explore/
+  route.ts`'s candidate query now adds `banned: false` inside the
+  `author` filter, matching Discover's own `candidates.ts`, plus a
+  regression test (`__tests__/route.test.ts`) covering both `sort=
+  forYou` and `sort=trending`. The cache key was bumped (`v8` -> `v9`)
+  so no pre-fix cached ranking could keep serving a banned author's
+  posts for up to 5 more minutes after the fix shipped.
+- ~~**`GET /api/hashtags/trending` has no block/mute/banned
+  filtering**~~ - **fixed in Task #3**: this route ran its own inline,
+  unfiltered "scan 1000 posts, tally tags" query, duplicating (and
+  under-filtering relative to) the shared, already-filtered
+  `getAllHashtagCounts()` (`src/lib/hashtags/counts.ts`) that `GET
+  /api/hashtags/search` and Advanced Search's hashtags category already
+  used. It now calls that same shared module instead, removing both the
+  duplicate query and the filtering gap in one change.
+- **No CreatorProfile-based discovery signal anywhere**: `/api/users/
+  suggested` (the only "who to follow"/people-discovery endpoint with a
+  ranking signal) orders purely by follower count and never joins
+  `CreatorProfile` or reads verification/professional status; `/api/
+  discover/people` ("people near you," wired to Android/iOS UI in Task
+  #3) filters on `badgeType=organization` only. `CreatorProfile` itself
+  has no discovery-facing fields today (it is a monetization record:
+  tips/premium-post settings and balances). A "creator discovery"
+  surface driven by real creator-quality signals would need new
+  `CreatorProfile` fields and ranking logic that do not exist yet - not
+  invented here, per the standing rule against fabricating ranking
+  signals that aren't real.
 - **No NSFW/sensitive-content flag exists anywhere in the `Post`
   model**: Discover has nothing to gate on for this today; adding one
   would be a schema change affecting the whole posting/moderation

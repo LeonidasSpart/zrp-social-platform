@@ -434,6 +434,9 @@
     <string name="right_panel_trending">Ag Treochtáil</string>
     <string name="right_panel_posts_count">%1$d phostáil</string>
     <string name="right_panel_no_trending">Níl aon haischlib ag treochtáil fós.</string>
+    <string name="explore_people_near_you_title">Daoine in aice leat</string>
+    <string name="explore_people_near_you_subtitle">An tír chéanna leat</string>
+    <string name="explore_people_near_you_empty">Níl aon duine in aice leat go fóill.</string>
     <string name="home_discover_music">Fionnaigh ceol nua</string>
     <string name="action_follow">Lean</string>
     <string name="action_following">Á Leanúint</string>
