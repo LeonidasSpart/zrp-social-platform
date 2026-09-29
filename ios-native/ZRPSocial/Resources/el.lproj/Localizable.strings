@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Βιντεοκλήση";
 "ios.search.noHashtags" = "Δεν βρέθηκαν hashtags.";
 "ios.search.noResults" = "Δεν βρέθηκαν αποτελέσματα.";
+"ios.explore.peopleNearYouTitle" = "Άτομα κοντά σου";
+"ios.explore.peopleNearYouSubtitle" = "Ίδια χώρα με εσένα";
+"ios.explore.peopleNearYouEmpty" = "Δεν υπάρχει ακόμη κανείς κοντά.";

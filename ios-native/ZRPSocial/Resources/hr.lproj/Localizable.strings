@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Videopoziv";
 "ios.search.noHashtags" = "Hashtagovi nisu pronađeni.";
 "ios.search.noResults" = "Nema pronađenih rezultata.";
+"ios.explore.peopleNearYouTitle" = "Ljudi u blizini";
+"ios.explore.peopleNearYouSubtitle" = "Ista država kao vi";
+"ios.explore.peopleNearYouEmpty" = "Još nema nikoga u blizini.";

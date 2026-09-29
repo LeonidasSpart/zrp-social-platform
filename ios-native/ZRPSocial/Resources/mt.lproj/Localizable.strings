@@ -1571,3 +1571,6 @@
 "ios.post.repostBlocked" = "Dan il-post ma jistax jiġi ripostjat għax il-kont huwa privat.";
 "ios.media.loadFailed" = "Ma stajniex intellgħu dan ir-ritratt.";
 "ios.search.noResults" = "L-ebda riżultat ma nstab.";
+"ios.explore.peopleNearYouTitle" = "Nies fil-viċinanza tiegħek";
+"ios.explore.peopleNearYouSubtitle" = "L-istess pajjiż bħalek";
+"ios.explore.peopleNearYouEmpty" = "Għadu m'hemm ħadd fil-viċinanza.";

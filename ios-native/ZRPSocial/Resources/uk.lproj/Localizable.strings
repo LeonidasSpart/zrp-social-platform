@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Відеодзвінок";
 "ios.search.noHashtags" = "Хештегів не знайдено.";
 "ios.search.noResults" = "Результатів не знайдено.";
+"ios.explore.peopleNearYouTitle" = "Люди поруч з вами";
+"ios.explore.peopleNearYouSubtitle" = "Та сама країна, що й у вас";
+"ios.explore.peopleNearYouEmpty" = "Поки що нікого поруч немає.";

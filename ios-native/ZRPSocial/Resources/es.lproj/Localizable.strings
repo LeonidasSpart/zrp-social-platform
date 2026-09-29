@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Videollamada";
 "ios.search.noHashtags" = "No se encontraron hashtags.";
 "ios.search.noResults" = "No se encontraron resultados.";
+"ios.explore.peopleNearYouTitle" = "Personas cerca de ti";
+"ios.explore.peopleNearYouSubtitle" = "Mismo país que tú";
+"ios.explore.peopleNearYouEmpty" = "Todavía no hay nadie cerca.";

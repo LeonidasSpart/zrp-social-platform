@@ -13,7 +13,7 @@
     "other missing key does (see L10n.swift), never a raw key.",
     "",
     "Completeness is enforced by generate-localizations.py --check,",
-    "which fails if any of these 170 keys is missing a translation for",
+    "which fails if any of these 174 keys is missing a translation for",
     "any of the 33 non-English languages, or if a translation carries",
     "placeholders that don't match the English source exactly."
   ],
@@ -188,7 +188,10 @@
     "ios.call.voiceCallCd": "Voice call",
     "ios.call.videoCallCd": "Video call",
     "ios.search.noHashtags": "No hashtags found.",
-    "ios.search.noResults": "No results found."
+    "ios.search.noResults": "No results found.",
+    "ios.explore.peopleNearYouTitle": "People near you",
+    "ios.explore.peopleNearYouSubtitle": "Same country as you",
+    "ios.explore.peopleNearYouEmpty": "No one else nearby yet."
   },
   "translations": {
     "fr": {
@@ -362,7 +365,10 @@
       "ios.call.voiceCallCd": "Appel vocal",
       "ios.call.videoCallCd": "Appel vidéo",
       "ios.search.noHashtags": "Aucun hashtag trouvé.",
-      "ios.search.noResults": "Aucun résultat trouvé."
+      "ios.search.noResults": "Aucun résultat trouvé.",
+      "ios.explore.peopleNearYouTitle": "Personnes près de vous",
+      "ios.explore.peopleNearYouSubtitle": "Même pays que vous",
+      "ios.explore.peopleNearYouEmpty": "Personne à proximité pour l'instant."
     },
     "de": {
       "ios.a11y.bookmark": "Merken",
@@ -535,7 +541,10 @@
       "ios.call.voiceCallCd": "Sprachanruf",
       "ios.call.videoCallCd": "Videoanruf",
       "ios.search.noHashtags": "Keine Hashtags gefunden.",
-      "ios.search.noResults": "Keine Ergebnisse gefunden."
+      "ios.search.noResults": "Keine Ergebnisse gefunden.",
+      "ios.explore.peopleNearYouTitle": "Personen in deiner Nähe",
+      "ios.explore.peopleNearYouSubtitle": "Gleiches Land wie du",
+      "ios.explore.peopleNearYouEmpty": "Noch niemand in der Nähe."
     },
     "it": {
       "ios.a11y.bookmark": "Salva",
@@ -708,7 +717,10 @@
       "ios.call.voiceCallCd": "Chiamata vocale",
       "ios.call.videoCallCd": "Videochiamata",
       "ios.search.noHashtags": "Nessun hashtag trovato.",
-      "ios.search.noResults": "Nessun risultato trovato."
+      "ios.search.noResults": "Nessun risultato trovato.",
+      "ios.explore.peopleNearYouTitle": "Persone vicino a te",
+      "ios.explore.peopleNearYouSubtitle": "Stesso paese tuo",
+      "ios.explore.peopleNearYouEmpty": "Ancora nessuno nelle vicinanze."
     },
     "sq": {
       "ios.a11y.bookmark": "Ruaje",
@@ -881,7 +893,10 @@
       "ios.call.voiceCallCd": "Telefonatë zanore",
       "ios.call.videoCallCd": "Telefonatë video",
       "ios.search.noHashtags": "Nuk u gjet asnjë hashtag.",
-      "ios.search.noResults": "Nuk u gjet asnjë rezultat."
+      "ios.search.noResults": "Nuk u gjet asnjë rezultat.",
+      "ios.explore.peopleNearYouTitle": "Njerëz pranë jush",
+      "ios.explore.peopleNearYouSubtitle": "I njëjti vend si ju",
+      "ios.explore.peopleNearYouEmpty": "Ende nuk ka njeri pranë."
     },
     "es": {
       "ios.a11y.bookmark": "Guardar",
@@ -1054,7 +1069,10 @@
       "ios.call.voiceCallCd": "Llamada de voz",
       "ios.call.videoCallCd": "Videollamada",
       "ios.search.noHashtags": "No se encontraron hashtags.",
-      "ios.search.noResults": "No se encontraron resultados."
+      "ios.search.noResults": "No se encontraron resultados.",
+      "ios.explore.peopleNearYouTitle": "Personas cerca de ti",
+      "ios.explore.peopleNearYouSubtitle": "Mismo país que tú",
+      "ios.explore.peopleNearYouEmpty": "Todavía no hay nadie cerca."
     },
     "ru": {
       "ios.a11y.bookmark": "Добавить в закладки",
@@ -1227,7 +1245,10 @@
       "ios.call.voiceCallCd": "Голосовой звонок",
       "ios.call.videoCallCd": "Видеозвонок",
       "ios.search.noHashtags": "Хэштеги не найдены.",
-      "ios.search.noResults": "Результаты не найдены."
+      "ios.search.noResults": "Результаты не найдены.",
+      "ios.explore.peopleNearYouTitle": "Люди рядом с вами",
+      "ios.explore.peopleNearYouSubtitle": "Та же страна, что и у вас",
+      "ios.explore.peopleNearYouEmpty": "Пока рядом никого нет."
     },
     "ar": {
       "ios.a11y.bookmark": "حفظ",
@@ -1400,7 +1421,10 @@
       "ios.call.voiceCallCd": "مكالمة صوتية",
       "ios.call.videoCallCd": "مكالمة فيديو",
       "ios.search.noHashtags": "لم يتم العثور على وسوم.",
-      "ios.search.noResults": "لم يتم العثور على نتائج."
+      "ios.search.noResults": "لم يتم العثور على نتائج.",
+      "ios.explore.peopleNearYouTitle": "أشخاص بالقرب منك",
+      "ios.explore.peopleNearYouSubtitle": "من نفس بلدك",
+      "ios.explore.peopleNearYouEmpty": "لا يوجد أحد قريب بعد."
     },
     "zh": {
       "ios.a11y.bookmark": "收藏",
@@ -1573,7 +1597,10 @@
       "ios.call.voiceCallCd": "语音通话",
       "ios.call.videoCallCd": "视频通话",
       "ios.search.noHashtags": "未找到话题标签。",
-      "ios.search.noResults": "未找到结果。"
+      "ios.search.noResults": "未找到结果。",
+      "ios.explore.peopleNearYouTitle": "附近的人",
+      "ios.explore.peopleNearYouSubtitle": "与你同国家",
+      "ios.explore.peopleNearYouEmpty": "附近暂无用户。"
     },
     "tr": {
       "ios.a11y.bookmark": "Kaydet",
@@ -1746,7 +1773,10 @@
       "ios.call.voiceCallCd": "Sesli arama",
       "ios.call.videoCallCd": "Görüntülü arama",
       "ios.search.noHashtags": "Hashtag bulunamadı.",
-      "ios.search.noResults": "Sonuç bulunamadı."
+      "ios.search.noResults": "Sonuç bulunamadı.",
+      "ios.explore.peopleNearYouTitle": "Yakınındaki kişiler",
+      "ios.explore.peopleNearYouSubtitle": "Seninle aynı ülke",
+      "ios.explore.peopleNearYouEmpty": "Henüz yakınında kimse yok."
     },
     "id": {
       "ios.a11y.bookmark": "Simpan",
@@ -1919,7 +1949,10 @@
       "ios.call.voiceCallCd": "Panggilan suara",
       "ios.call.videoCallCd": "Panggilan video",
       "ios.search.noHashtags": "Tagar tidak ditemukan.",
-      "ios.search.noResults": "Tidak ada hasil ditemukan."
+      "ios.search.noResults": "Tidak ada hasil ditemukan.",
+      "ios.explore.peopleNearYouTitle": "Orang di dekat Anda",
+      "ios.explore.peopleNearYouSubtitle": "Negara yang sama dengan Anda",
+      "ios.explore.peopleNearYouEmpty": "Belum ada orang di dekat Anda."
     },
     "pt": {
       "ios.a11y.bookmark": "Guardar",
@@ -2092,7 +2125,10 @@
       "ios.call.voiceCallCd": "Chamada de voz",
       "ios.call.videoCallCd": "Chamada de vídeo",
       "ios.search.noHashtags": "Nenhuma hashtag encontrada.",
-      "ios.search.noResults": "Nenhum resultado encontrado."
+      "ios.search.noResults": "Nenhum resultado encontrado.",
+      "ios.explore.peopleNearYouTitle": "Pessoas perto de si",
+      "ios.explore.peopleNearYouSubtitle": "O mesmo país que o seu",
+      "ios.explore.peopleNearYouEmpty": "Ainda não há ninguém por perto."
     },
     "ja": {
       "ios.a11y.bookmark": "ブックマーク",
@@ -2265,7 +2301,10 @@
       "ios.call.voiceCallCd": "音声通話",
       "ios.call.videoCallCd": "ビデオ通話",
       "ios.search.noHashtags": "ハッシュタグが見つかりませんでした。",
-      "ios.search.noResults": "結果が見つかりませんでした。"
+      "ios.search.noResults": "結果が見つかりませんでした。",
+      "ios.explore.peopleNearYouTitle": "近くの人",
+      "ios.explore.peopleNearYouSubtitle": "あなたと同じ国",
+      "ios.explore.peopleNearYouEmpty": "まだ近くに誰もいません。"
     },
     "ko": {
       "ios.a11y.bookmark": "북마크",
@@ -2438,7 +2477,10 @@
       "ios.call.voiceCallCd": "음성통화",
       "ios.call.videoCallCd": "영상통화",
       "ios.search.noHashtags": "해시태그를 찾을 수 없습니다.",
-      "ios.search.noResults": "결과를 찾을 수 없습니다."
+      "ios.search.noResults": "결과를 찾을 수 없습니다.",
+      "ios.explore.peopleNearYouTitle": "내 주변 사람들",
+      "ios.explore.peopleNearYouSubtitle": "당신과 같은 국가",
+      "ios.explore.peopleNearYouEmpty": "아직 주변에 아무도 없습니다."
     },
     "hi": {
       "ios.a11y.bookmark": "बुकमार्क करें",
@@ -2611,7 +2653,10 @@
       "ios.call.voiceCallCd": "वॉइस कॉल",
       "ios.call.videoCallCd": "वीडियो कॉल",
       "ios.search.noHashtags": "कोई हैशटैग नहीं मिला।",
-      "ios.search.noResults": "कोई परिणाम नहीं मिला।"
+      "ios.search.noResults": "कोई परिणाम नहीं मिला।",
+      "ios.explore.peopleNearYouTitle": "आपके आस-पास के लोग",
+      "ios.explore.peopleNearYouSubtitle": "आपके जैसा ही देश",
+      "ios.explore.peopleNearYouEmpty": "अभी तक आस-पास कोई नहीं है।"
     },
     "nl": {
       "ios.a11y.bookmark": "Bewaren",
@@ -2784,7 +2829,10 @@
       "ios.call.voiceCallCd": "Spraakoproep",
       "ios.call.videoCallCd": "Video-oproep",
       "ios.search.noHashtags": "Geen hashtags gevonden.",
-      "ios.search.noResults": "Geen resultaten gevonden."
+      "ios.search.noResults": "Geen resultaten gevonden.",
+      "ios.explore.peopleNearYouTitle": "Mensen in jouw buurt",
+      "ios.explore.peopleNearYouSubtitle": "Zelfde land als jij",
+      "ios.explore.peopleNearYouEmpty": "Nog niemand in de buurt."
     },
     "pl": {
       "ios.a11y.bookmark": "Zapisz",
@@ -2957,7 +3005,10 @@
       "ios.call.voiceCallCd": "Połączenie głosowe",
       "ios.call.videoCallCd": "Połączenie wideo",
       "ios.search.noHashtags": "Nie znaleziono hashtagów.",
-      "ios.search.noResults": "Nie znaleziono wyników."
+      "ios.search.noResults": "Nie znaleziono wyników.",
+      "ios.explore.peopleNearYouTitle": "Osoby w pobliżu",
+      "ios.explore.peopleNearYouSubtitle": "Ten sam kraj co Ty",
+      "ios.explore.peopleNearYouEmpty": "Nikogo w pobliżu jeszcze nie ma."
     },
     "ro": {
       "ios.a11y.bookmark": "Salvează",
@@ -3130,7 +3181,10 @@
       "ios.call.voiceCallCd": "Apel vocal",
       "ios.call.videoCallCd": "Apel video",
       "ios.search.noHashtags": "Niciun hashtag găsit.",
-      "ios.search.noResults": "Niciun rezultat găsit."
+      "ios.search.noResults": "Niciun rezultat găsit.",
+      "ios.explore.peopleNearYouTitle": "Persoane din apropiere",
+      "ios.explore.peopleNearYouSubtitle": "Aceeași țară ca tine",
+      "ios.explore.peopleNearYouEmpty": "Încă nu este nimeni în apropiere."
     },
     "cs": {
       "ios.a11y.bookmark": "Uložit",
@@ -3303,7 +3357,10 @@
       "ios.call.voiceCallCd": "Hlasový hovor",
       "ios.call.videoCallCd": "Videohovor",
       "ios.search.noHashtags": "Nebyly nalezeny žádné hashtagy.",
-      "ios.search.noResults": "Nebyly nalezeny žádné výsledky."
+      "ios.search.noResults": "Nebyly nalezeny žádné výsledky.",
+      "ios.explore.peopleNearYouTitle": "Lidé poblíž",
+      "ios.explore.peopleNearYouSubtitle": "Stejná země jako vy",
+      "ios.explore.peopleNearYouEmpty": "Zatím nikdo poblíž."
     },
     "hu": {
       "ios.a11y.bookmark": "Mentés",
@@ -3476,7 +3533,10 @@
       "ios.call.voiceCallCd": "Hanghívás",
       "ios.call.videoCallCd": "Videóhívás",
       "ios.search.noHashtags": "Nem található hashtag.",
-      "ios.search.noResults": "Nincs találat."
+      "ios.search.noResults": "Nincs találat.",
+      "ios.explore.peopleNearYouTitle": "Emberek a közeledben",
+      "ios.explore.peopleNearYouSubtitle": "Ugyanaz az ország, mint te",
+      "ios.explore.peopleNearYouEmpty": "Még senki sincs a közelben."
     },
     "sv": {
       "ios.a11y.bookmark": "Spara",
@@ -3649,7 +3709,10 @@
       "ios.call.voiceCallCd": "Röstsamtal",
       "ios.call.videoCallCd": "Videosamtal",
       "ios.search.noHashtags": "Inga hashtaggar hittades.",
-      "ios.search.noResults": "Inga resultat hittades."
+      "ios.search.noResults": "Inga resultat hittades.",
+      "ios.explore.peopleNearYouTitle": "Personer i närheten",
+      "ios.explore.peopleNearYouSubtitle": "Samma land som du",
+      "ios.explore.peopleNearYouEmpty": "Ingen i närheten ännu."
     },
     "da": {
       "ios.a11y.bookmark": "Gem",
@@ -3822,7 +3885,10 @@
       "ios.call.voiceCallCd": "Taleopkald",
       "ios.call.videoCallCd": "Videoopkald",
       "ios.search.noHashtags": "Ingen hashtags fundet.",
-      "ios.search.noResults": "Ingen resultater fundet."
+      "ios.search.noResults": "Ingen resultater fundet.",
+      "ios.explore.peopleNearYouTitle": "Personer i nærheden",
+      "ios.explore.peopleNearYouSubtitle": "Samme land som dig",
+      "ios.explore.peopleNearYouEmpty": "Ingen i nærheden endnu."
     },
     "hr": {
       "ios.a11y.bookmark": "Spremi",
@@ -3995,7 +4061,10 @@
       "ios.call.voiceCallCd": "Glasovni poziv",
       "ios.call.videoCallCd": "Videopoziv",
       "ios.search.noHashtags": "Hashtagovi nisu pronađeni.",
-      "ios.search.noResults": "Nema pronađenih rezultata."
+      "ios.search.noResults": "Nema pronađenih rezultata.",
+      "ios.explore.peopleNearYouTitle": "Ljudi u blizini",
+      "ios.explore.peopleNearYouSubtitle": "Ista država kao vi",
+      "ios.explore.peopleNearYouEmpty": "Još nema nikoga u blizini."
     },
     "sr": {
       "ios.a11y.bookmark": "Obeleži",
@@ -4168,7 +4237,10 @@
       "ios.call.voiceCallCd": "Glasovni poziv",
       "ios.call.videoCallCd": "Video poziv",
       "ios.search.noHashtags": "Nema pronađenih heštegova.",
-      "ios.search.noResults": "Нема пронађених резултата."
+      "ios.search.noResults": "Нема пронађених резултата.",
+      "ios.explore.peopleNearYouTitle": "Ljudi u blizini",
+      "ios.explore.peopleNearYouSubtitle": "Ista država kao vi",
+      "ios.explore.peopleNearYouEmpty": "Još uvek nema nikoga u blizini."
     },
     "bg": {
       "ios.a11y.bookmark": "Запази",
@@ -4341,7 +4413,10 @@
       "ios.call.voiceCallCd": "Гласово обаждане",
       "ios.call.videoCallCd": "Видео обаждане",
       "ios.search.noHashtags": "Не са намерени хаштагове.",
-      "ios.search.noResults": "Няма намерени резултати."
+      "ios.search.noResults": "Няма намерени резултати.",
+      "ios.explore.peopleNearYouTitle": "Хора близо до теб",
+      "ios.explore.peopleNearYouSubtitle": "Същата държава като теб",
+      "ios.explore.peopleNearYouEmpty": "Все още няма никого наблизо."
     },
     "el": {
       "ios.a11y.bookmark": "Αποθήκευση",
@@ -4514,7 +4589,10 @@
       "ios.call.voiceCallCd": "Φωνητική κλήση",
       "ios.call.videoCallCd": "Βιντεοκλήση",
       "ios.search.noHashtags": "Δεν βρέθηκαν hashtags.",
-      "ios.search.noResults": "Δεν βρέθηκαν αποτελέσματα."
+      "ios.search.noResults": "Δεν βρέθηκαν αποτελέσματα.",
+      "ios.explore.peopleNearYouTitle": "Άτομα κοντά σου",
+      "ios.explore.peopleNearYouSubtitle": "Ίδια χώρα με εσένα",
+      "ios.explore.peopleNearYouEmpty": "Δεν υπάρχει ακόμη κανείς κοντά."
     },
     "bs": {
       "ios.a11y.bookmark": "Zabilježi",
@@ -4687,7 +4765,10 @@
       "ios.call.voiceCallCd": "Glasovni poziv",
       "ios.call.videoCallCd": "Video poziv",
       "ios.search.noHashtags": "Nije pronađen nijedan hashtag.",
-      "ios.search.noResults": "Nema pronađenih rezultata."
+      "ios.search.noResults": "Nema pronađenih rezultata.",
+      "ios.explore.peopleNearYouTitle": "Ljudi u blizini",
+      "ios.explore.peopleNearYouSubtitle": "Ista država kao vi",
+      "ios.explore.peopleNearYouEmpty": "Još uvijek nema nikoga u blizini."
     },
     "mk": {
       "ios.a11y.bookmark": "Обележи",
@@ -4860,7 +4941,10 @@
       "ios.call.voiceCallCd": "Гласовен повик",
       "ios.call.videoCallCd": "Видео повик",
       "ios.search.noHashtags": "Нема пронајдени хаштагови.",
-      "ios.search.noResults": "Нема пронајдени резултати."
+      "ios.search.noResults": "Нема пронајдени резултати.",
+      "ios.explore.peopleNearYouTitle": "Луѓе блиску до тебе",
+      "ios.explore.peopleNearYouSubtitle": "Иста држава како тебе",
+      "ios.explore.peopleNearYouEmpty": "Сè уште нема никого блиску."
     },
     "no": {
       "ios.a11y.bookmark": "Bokmerk",
@@ -5033,7 +5117,10 @@
       "ios.call.voiceCallCd": "Taleanrop",
       "ios.call.videoCallCd": "Videoanrop",
       "ios.search.noHashtags": "Fant ingen emneknagger.",
-      "ios.search.noResults": "Fant ingen resultater."
+      "ios.search.noResults": "Fant ingen resultater.",
+      "ios.explore.peopleNearYouTitle": "Personer i nærheten",
+      "ios.explore.peopleNearYouSubtitle": "Samme land som deg",
+      "ios.explore.peopleNearYouEmpty": "Ingen i nærheten ennå."
     },
     "uk": {
       "ios.a11y.bookmark": "Закладка",
@@ -5206,7 +5293,10 @@
       "ios.call.voiceCallCd": "Голосовий дзвінок",
       "ios.call.videoCallCd": "Відеодзвінок",
       "ios.search.noHashtags": "Хештегів не знайдено.",
-      "ios.search.noResults": "Результатів не знайдено."
+      "ios.search.noResults": "Результатів не знайдено.",
+      "ios.explore.peopleNearYouTitle": "Люди поруч з вами",
+      "ios.explore.peopleNearYouSubtitle": "Та сама країна, що й у вас",
+      "ios.explore.peopleNearYouEmpty": "Поки що нікого поруч немає."
     },
     "fi": {
       "ios.a11y.bookmark": "Kirjanmerkki",
@@ -5379,7 +5469,10 @@
       "ios.call.voiceCallCd": "Äänipuhelu",
       "ios.call.videoCallCd": "Videopuhelu",
       "ios.search.noHashtags": "Hashtageja ei löytynyt.",
-      "ios.search.noResults": "Tuloksia ei löytynyt."
+      "ios.search.noResults": "Tuloksia ei löytynyt.",
+      "ios.explore.peopleNearYouTitle": "Ihmisiä lähelläsi",
+      "ios.explore.peopleNearYouSubtitle": "Sama maa kuin sinulla",
+      "ios.explore.peopleNearYouEmpty": "Ei vielä ketään lähellä."
     },
     "sk": {
       "ios.a11y.bookmark": "Záložka",
@@ -5552,7 +5645,10 @@
       "ios.call.voiceCallCd": "Hlasový hovor",
       "ios.call.videoCallCd": "Video hovor",
       "ios.search.noHashtags": "Nenašli sa žiadne hashtagy.",
-      "ios.search.noResults": "Neboli nájdené žiadne výsledky."
+      "ios.search.noResults": "Neboli nájdené žiadne výsledky.",
+      "ios.explore.peopleNearYouTitle": "Ľudia v okolí",
+      "ios.explore.peopleNearYouSubtitle": "Rovnaká krajina ako vy",
+      "ios.explore.peopleNearYouEmpty": "Zatiaľ nikto v okolí."
     },
     "sl": {
       "ios.a11y.bookmark": "Zaznamek",
@@ -5725,7 +5821,10 @@
       "ios.call.voiceCallCd": "Glasovni klic",
       "ios.call.videoCallCd": "Video klic",
       "ios.search.noHashtags": "Ni najdenih ključnikov.",
-      "ios.search.noResults": "Ni najdenih rezultatov."
+      "ios.search.noResults": "Ni najdenih rezultatov.",
+      "ios.explore.peopleNearYouTitle": "Ljudje v bližini",
+      "ios.explore.peopleNearYouSubtitle": "Ista država kot vi",
+      "ios.explore.peopleNearYouEmpty": "Trenutno ni nikogar v bližini."
     },
     "lt": {
       "ios.a11y.addPhoto": "Pridėti nuotrauką",
@@ -5898,7 +5997,10 @@
       "ios.call.voiceCallCd": "Balso skambutis",
       "ios.call.videoCallCd": "Vaizdo skambutis",
       "ios.search.noHashtags": "Saitažodžių nerasta.",
-      "ios.search.noResults": "Rezultatų nerasta."
+      "ios.search.noResults": "Rezultatų nerasta.",
+      "ios.explore.peopleNearYouTitle": "Žmonės netoliese",
+      "ios.explore.peopleNearYouSubtitle": "Ta pati šalis kaip jūsų",
+      "ios.explore.peopleNearYouEmpty": "Kol kas niekas netoliese."
     },
     "et": {
       "ios.a11y.bookmark": "Salvesta",
@@ -6071,7 +6173,10 @@
       "ios.chat.sharedPostUnavailable": "See postitus ei ole enam saadaval.",
       "ios.post.repostBlocked": "Seda postitust ei saa uuesti postitada, kuna konto on privaatne.",
       "ios.media.loadFailed": "Seda pilti ei õnnestunud laadida.",
-      "ios.search.noResults": "Tulemusi ei leitud."
+      "ios.search.noResults": "Tulemusi ei leitud.",
+      "ios.explore.peopleNearYouTitle": "Inimesed sinu lähedal",
+      "ios.explore.peopleNearYouSubtitle": "Sinuga samast riigist",
+      "ios.explore.peopleNearYouEmpty": "Kedagi pole veel lähedal."
     },
     "ga": {
       "ios.a11y.bookmark": "Leabharmharc",
@@ -6244,7 +6349,10 @@
       "ios.chat.sharedPostUnavailable": "Níl an phostáil seo ar fáil a thuilleadh.",
       "ios.post.repostBlocked": "Ní féidir an phostáil seo a athphostáil toisc go bhfuil an cuntas príobháideach.",
       "ios.media.loadFailed": "Níorbh fhéidir an íomhá seo a lódáil.",
-      "ios.search.noResults": "Níor aimsíodh aon toradh."
+      "ios.search.noResults": "Níor aimsíodh aon toradh.",
+      "ios.explore.peopleNearYouTitle": "Daoine in aice leat",
+      "ios.explore.peopleNearYouSubtitle": "An tír chéanna leat",
+      "ios.explore.peopleNearYouEmpty": "Níl aon duine in aice leat go fóill."
     },
     "lv": {
       "ios.a11y.bookmark": "Grāmatzīme",
@@ -6417,7 +6525,10 @@
       "ios.chat.sharedPostUnavailable": "Šis ieraksts vairs nav pieejams.",
       "ios.post.repostBlocked": "Šo ierakstu nevar repostot, jo konts ir privāts.",
       "ios.media.loadFailed": "Neizdevās ielādēt šo attēlu.",
-      "ios.search.noResults": "Rezultāti nav atrasti."
+      "ios.search.noResults": "Rezultāti nav atrasti.",
+      "ios.explore.peopleNearYouTitle": "Cilvēki tuvumā",
+      "ios.explore.peopleNearYouSubtitle": "Tā pati valsts, kas jums",
+      "ios.explore.peopleNearYouEmpty": "Pagaidām neviena tuvumā nav."
     },
     "mt": {
       "ios.a11y.bookmark": "Immarka",
@@ -6590,7 +6701,10 @@
       "ios.chat.sharedPostUnavailable": "Dan il-post m'għadux disponibbli.",
       "ios.post.repostBlocked": "Dan il-post ma jistax jiġi ripostjat għax il-kont huwa privat.",
       "ios.media.loadFailed": "Ma stajniex intellgħu dan ir-ritratt.",
-      "ios.search.noResults": "L-ebda riżultat ma nstab."
+      "ios.search.noResults": "L-ebda riżultat ma nstab.",
+      "ios.explore.peopleNearYouTitle": "Nies fil-viċinanza tiegħek",
+      "ios.explore.peopleNearYouSubtitle": "L-istess pajjiż bħalek",
+      "ios.explore.peopleNearYouEmpty": "Għadu m'hemm ħadd fil-viċinanza."
     },
     "rm": {
       "ios.a11y.bookmark": "Favurit",
@@ -6763,7 +6877,10 @@
       "ios.chat.sharedPostUnavailable": "Questa contribuziun n'è betg pli disponibla.",
       "ios.post.repostBlocked": "Questa contribuziun na po betg vegnir republitgada perquai ch'il conto è privat.",
       "ios.media.loadFailed": "Impussibel da chargiar quest maletg.",
-      "ios.search.noResults": "Nagins resultats chattads."
+      "ios.search.noResults": "Nagins resultats chattads.",
+      "ios.explore.peopleNearYouTitle": "Persunas datiers da Vus",
+      "ios.explore.peopleNearYouSubtitle": "Medem pajais sco Vus",
+      "ios.explore.peopleNearYouEmpty": "Anc nagin datiers."
     }
   }
 }

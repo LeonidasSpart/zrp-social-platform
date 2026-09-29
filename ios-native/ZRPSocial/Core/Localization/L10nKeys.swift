@@ -3142,6 +3142,12 @@ enum L10nKey: String, CaseIterable {
     case iosSearchNoHashtags = "ios.search.noHashtags"
     /// en: "No results found."
     case iosSearchNoResults = "ios.search.noResults"
+    /// en: "People near you"
+    case iosExplorePeopleNearYouTitle = "ios.explore.peopleNearYouTitle"
+    /// en: "Same country as you"
+    case iosExplorePeopleNearYouSubtitle = "ios.explore.peopleNearYouSubtitle"
+    /// en: "No one else nearby yet."
+    case iosExplorePeopleNearYouEmpty = "ios.explore.peopleNearYouEmpty"
 }
 
 extension L10nKey {

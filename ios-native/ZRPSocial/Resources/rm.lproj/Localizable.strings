@@ -1571,3 +1571,6 @@
 "ios.post.repostBlocked" = "Questa contribuziun na po betg vegnir republitgada perquai ch'il conto è privat.";
 "ios.media.loadFailed" = "Impussibel da chargiar quest maletg.";
 "ios.search.noResults" = "Nagins resultats chattads.";
+"ios.explore.peopleNearYouTitle" = "Persunas datiers da Vus";
+"ios.explore.peopleNearYouSubtitle" = "Medem pajais sco Vus";
+"ios.explore.peopleNearYouEmpty" = "Anc nagin datiers.";

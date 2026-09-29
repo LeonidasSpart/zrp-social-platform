@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Video hovor";
 "ios.search.noHashtags" = "Nenašli sa žiadne hashtagy.";
 "ios.search.noResults" = "Neboli nájdené žiadne výsledky.";
+"ios.explore.peopleNearYouTitle" = "Ľudia v okolí";
+"ios.explore.peopleNearYouSubtitle" = "Rovnaká krajina ako vy";
+"ios.explore.peopleNearYouEmpty" = "Zatiaľ nikto v okolí.";

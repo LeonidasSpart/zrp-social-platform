@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Panggilan video";
 "ios.search.noHashtags" = "Tagar tidak ditemukan.";
 "ios.search.noResults" = "Tidak ada hasil ditemukan.";
+"ios.explore.peopleNearYouTitle" = "Orang di dekat Anda";
+"ios.explore.peopleNearYouSubtitle" = "Negara yang sama dengan Anda";
+"ios.explore.peopleNearYouEmpty" = "Belum ada orang di dekat Anda.";

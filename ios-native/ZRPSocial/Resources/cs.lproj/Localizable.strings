@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Videohovor";
 "ios.search.noHashtags" = "Nebyly nalezeny žádné hashtagy.";
 "ios.search.noResults" = "Nebyly nalezeny žádné výsledky.";
+"ios.explore.peopleNearYouTitle" = "Lidé poblíž";
+"ios.explore.peopleNearYouSubtitle" = "Stejná země jako vy";
+"ios.explore.peopleNearYouEmpty" = "Zatím nikdo poblíž.";

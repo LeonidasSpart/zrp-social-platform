@@ -1571,3 +1571,6 @@
 "ios.post.repostBlocked" = "Seda postitust ei saa uuesti postitada, kuna konto on privaatne.";
 "ios.media.loadFailed" = "Seda pilti ei õnnestunud laadida.";
 "ios.search.noResults" = "Tulemusi ei leitud.";
+"ios.explore.peopleNearYouTitle" = "Inimesed sinu lähedal";
+"ios.explore.peopleNearYouSubtitle" = "Sinuga samast riigist";
+"ios.explore.peopleNearYouEmpty" = "Kedagi pole veel lähedal.";

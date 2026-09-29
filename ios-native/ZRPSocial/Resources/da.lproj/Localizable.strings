@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Videoopkald";
 "ios.search.noHashtags" = "Ingen hashtags fundet.";
 "ios.search.noResults" = "Ingen resultater fundet.";
+"ios.explore.peopleNearYouTitle" = "Personer i nærheden";
+"ios.explore.peopleNearYouSubtitle" = "Samme land som dig";
+"ios.explore.peopleNearYouEmpty" = "Ingen i nærheden endnu.";

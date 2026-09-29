@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Videosamtal";
 "ios.search.noHashtags" = "Inga hashtaggar hittades.";
 "ios.search.noResults" = "Inga resultat hittades.";
+"ios.explore.peopleNearYouTitle" = "Personer i närheten";
+"ios.explore.peopleNearYouSubtitle" = "Samma land som du";
+"ios.explore.peopleNearYouEmpty" = "Ingen i närheten ännu.";

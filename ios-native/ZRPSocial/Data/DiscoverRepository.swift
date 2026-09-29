@@ -22,6 +22,7 @@ protocol DiscoverRepositoryProtocol: Sendable {
     func feed(cursor: String?) async throws -> DiscoverPage
     func recordEvent(postId: String, eventType: DiscoverEventType, watchedMs: Int?) async
     func markNotInterested(postId: String) async throws -> Bool
+    func nearbyPeople(limit: Int) async throws -> NearbyPeoplePage
     func toggleLike(postId: String) async throws -> Bool
     func toggleRepost(postId: String) async throws -> Bool
     func toggleSave(postId: String) async throws -> Bool
@@ -63,6 +64,15 @@ struct DiscoverRepository: DiscoverRepositoryProtocol {
             try Endpoint.post("discover/not-interested", body: DiscoverNotInterestedRequest(postId: postId))
         )
         return response.dismissed
+    }
+
+    /// "People near you" (country-based, never GPS - see `NearbyUser`'s
+    /// own doc comment). Requires a session; the server itself returns
+    /// an honest empty result rather than a 401 for a signed-in viewer
+    /// with no known country, so this only throws on a real network/auth
+    /// error.
+    func nearbyPeople(limit: Int = 20) async throws -> NearbyPeoplePage {
+        try await client.send(Endpoint.get("discover/people", query: [("limit", "\(limit)")]))
     }
 
     func toggleLike(postId: String) async throws -> Bool {

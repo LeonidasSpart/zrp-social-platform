@@ -1571,3 +1571,6 @@
 "ios.call.videoCallCd" = "Görüntülü arama";
 "ios.search.noHashtags" = "Hashtag bulunamadı.";
 "ios.search.noResults" = "Sonuç bulunamadı.";
+"ios.explore.peopleNearYouTitle" = "Yakınındaki kişiler";
+"ios.explore.peopleNearYouSubtitle" = "Seninle aynı ülke";
+"ios.explore.peopleNearYouEmpty" = "Henüz yakınında kimse yok.";
