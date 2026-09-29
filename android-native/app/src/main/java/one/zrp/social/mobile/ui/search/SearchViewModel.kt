@@ -48,9 +48,6 @@ data class SearchUiState(
     val music: List<SearchMusicResult> = emptyList(),
     val opportunities: List<OpportunitySummary> = emptyList(),
     val marketplace: List<ListingSummary> = emptyList(),
-    // type=all's per-category nextCursor - what a "See all" tap needs to
-    // know there's more before switching into single-category mode.
-    val allModeNextCursors: Map<String, String?> = emptyMap(),
     val suggestedUsers: List<SearchUser> = emptyList(),
     val trendingHashtags: List<TrendingHashtag> = emptyList(),
     val isLoadingDiscover: Boolean = true,
@@ -156,7 +153,6 @@ class SearchViewModel(private val repository: SearchRepository) : ViewModel() {
                     music = emptyList(),
                     opportunities = emptyList(),
                     marketplace = emptyList(),
-                    allModeNextCursors = emptyMap(),
                     nextCursor = null,
                     endReached = false,
                 )
@@ -188,7 +184,6 @@ class SearchViewModel(private val repository: SearchRepository) : ViewModel() {
                             music = r.music,
                             opportunities = r.opportunities,
                             marketplace = r.marketplace,
-                            allModeNextCursors = r.nextCursors ?: emptyMap(),
                             nextCursor = null,
                             endReached = true,
                         )

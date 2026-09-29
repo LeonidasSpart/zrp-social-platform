@@ -12,11 +12,16 @@ data class SearchUser(
 )
 
 // Advanced Search's type=all mode - the pre-existing {users, posts}
-// shape UNCHANGED, plus one additive list per new category and the
-// per-category nextCursor a "See all" tap needs to switch into paginated
-// single-category mode (see the searchXxxPage() methods below). Every
-// pre-existing caller that only reads .users/.posts keeps working
-// unchanged since Gson defaults the new fields when absent.
+// shape UNCHANGED, plus one additive list per new category (see the
+// searchXxxPage() methods below for real pagination once a "See all"
+// switches into a single category). Every pre-existing caller that only
+// reads .users/.posts keeps working unchanged since Gson defaults the
+// new fields when absent. `nextCursors` is intentionally not modelled
+// here: the UI always offers "See all" whenever a section has any
+// results at all (see AllModeSections in SearchScreen.kt), never
+// conditioned on whether more exist beyond the teaser - tapping through
+// to an already-exhausted category is harmless, so there is no need to
+// know that in advance.
 data class SearchResults(
     val users: List<SearchUser> = emptyList(),
     val posts: List<Post> = emptyList(),
@@ -26,7 +31,6 @@ data class SearchResults(
     val music: List<SearchMusicResult> = emptyList(),
     val opportunities: List<OpportunitySummary> = emptyList(),
     val marketplace: List<ListingSummary> = emptyList(),
-    val nextCursors: Map<String, String?>? = null,
     val sort: String? = null,
 )
 
