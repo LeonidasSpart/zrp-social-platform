@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Это действие нельзя отменить.</string>
     <string name="comment_edit_cd">Редактировать комментарий</string>
     <string name="comment_delete_cd">Удалить комментарий</string>
+    <string name="comment_report_cd">Пожаловаться на комментарий</string>
     <string name="comment_delete_confirm_title">Удалить комментарий?</string>
     <string name="comment_delete_confirm_body">Это действие нельзя отменить. Ответы на этот комментарий также будут удалены.</string>
     <string name="comment_write_placeholder">Напишите комментарий...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Воспроизвести</string>
     <string name="chat_voice_pause_cd">Пауза</string>
     <string name="chat_err_mic_access">Не удалось получить доступ к микрофону. Проверьте разрешения.</string>
+    <string name="chat_err_camera_access">Не удалось получить доступ к камере. Проверьте разрешения.</string>
     <string name="chat_attachment_fallback">Документ</string>
     <string name="comment_post_cd">Опубликовать комментарий</string>
     <string name="action_show_password">Показать пароль</string>
@@ -1315,6 +1317,7 @@
     <string name="news_category_sports">Спорт</string>
     <string name="news_category_culture">Культура</string>
     <string name="news_category_community">Сообщество</string>
+    <string name="news_category_gaming">Игры</string>
     <string name="news_title">Новости ZRP</string>
     <string name="news_discover_entry">Открыть ZRP News</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1354,6 +1357,9 @@
     <string name="shorts_upload_err_too_large_plan">Это видео слишком большое для вашего тарифа. Попробуйте файл меньшего размера или улучшите тариф.</string>
     <string name="shorts_upload_err_url_gen_failed">Не удалось начать загрузку: обычно это временная проблема с подключением. Пожалуйста, попробуйте снова.</string>
     <string name="shorts_upload_err_internal_server">Что-то пошло не так на нашей стороне во время загрузки. Пожалуйста, попробуйте снова через некоторое время.</string>
+    <string name="shorts_premium_locked_title">Премиум-видео</string>
+    <string name="shorts_premium_locked_body">Разблокируйте это видео за %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Открыть публикацию</string>
     <string name="caption_view_more">Показать больше</string>
     <string name="caption_view_less">Показать меньше</string>
     <!-- ZRP Creator Studio (native parity) -->

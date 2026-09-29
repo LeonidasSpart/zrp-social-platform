@@ -306,6 +306,7 @@
     <string name="post_delete_confirm_body">Seda ei saa tagasi võtta.</string>
     <string name="comment_edit_cd">Muuda kommentaari</string>
     <string name="comment_delete_cd">Kustuta kommentaar</string>
+    <string name="comment_report_cd">Teata kommentaarist</string>
     <string name="comment_delete_confirm_title">Kustutada kommentaar?</string>
     <string name="comment_delete_confirm_body">Seda ei saa tagasi võtta. Ka kõik selle vastused kustutatakse.</string>
     <string name="comment_write_placeholder">Kirjuta kommentaar...</string>
@@ -332,6 +333,7 @@
     <string name="chat_voice_play_cd">Mängi</string>
     <string name="chat_voice_pause_cd">Peata</string>
     <string name="chat_err_mic_access">Mikrofonile ei pääsenud ligi. Palun kontrolli oma õigusi.</string>
+    <string name="chat_err_camera_access">Kaamerale ei pääsenud ligi. Palun kontrolli oma õigusi.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Postita kommentaar</string>
     <string name="action_show_password">Näita parooli</string>
@@ -1208,6 +1210,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultuur</string>
     <string name="news_category_community">Kogukond</string>
+    <string name="news_category_gaming">Mängud</string>
     <string name="news_title">ZRP uudised</string>
     <string name="news_discover_entry">Avasta ZRP uudiseid</string>
     <string name="shorts_back">Tagasi</string>
@@ -1245,6 +1248,9 @@
     <string name="shorts_upload_err_too_large_plan">See video on sinu plaani jaoks liiga suur. Proovi väiksemat faili või uuenda oma plaani.</string>
     <string name="shorts_upload_err_url_gen_failed">Üleslaadimist ei õnnestunud alustada – tavaliselt on see ajutine ühendusprobleem. Palun proovi uuesti.</string>
     <string name="shorts_upload_err_internal_server">Üleslaadimisel läks midagi valesti meie poolel. Palun proovi hetke pärast uuesti.</string>
+    <string name="shorts_premium_locked_title">Premium-video</string>
+    <string name="shorts_premium_locked_body">Ava see video %1$s %2$s eest</string>
+    <string name="shorts_premium_locked_cta">Vaata postitust</string>
     <string name="caption_view_more">Näita rohkem</string>
     <string name="caption_view_less">Näita vähem</string>
     <string name="shorts_title">Lühivideod</string>

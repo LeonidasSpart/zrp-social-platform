@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Це неможливо скасувати.</string>
     <string name="comment_edit_cd">Редагувати коментар</string>
     <string name="comment_delete_cd">Видалити коментар</string>
+    <string name="comment_report_cd">Поскаржитися на коментар</string>
     <string name="comment_delete_confirm_title">Видалити коментар?</string>
     <string name="comment_delete_confirm_body">Це неможливо скасувати. Усі відповіді на нього також будуть видалені.</string>
     <string name="comment_write_placeholder">Напишіть коментар...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Відтворити</string>
     <string name="chat_voice_pause_cd">Пауза</string>
     <string name="chat_err_mic_access">Не вдалося отримати доступ до мікрофона. Перевірте свої дозволи.</string>
+    <string name="chat_err_camera_access">Не вдалося отримати доступ до камери. Перевірте свої дозволи.</string>
     <string name="chat_attachment_fallback">Документ</string>
     <string name="comment_post_cd">Опублікувати коментар</string>
     <string name="action_show_password">Показати пароль</string>
@@ -1306,6 +1308,7 @@
     <string name="news_category_sports">Спорт</string>
     <string name="news_category_culture">Культура</string>
     <string name="news_category_community">Спільнота</string>
+    <string name="news_category_gaming">Ігри</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Відкрийте ZRP News</string>
     <string name="shorts_back">Назад</string>
@@ -1343,6 +1346,9 @@
     <string name="shorts_upload_err_too_large_plan">Це відео завелике для вашого тарифу. Спробуйте менший файл або оновіть тариф.</string>
     <string name="shorts_upload_err_url_gen_failed">Не вдалося почати завантаження — зазвичай це тимчасова проблема зі з\'єднанням. Спробуйте ще раз.</string>
     <string name="shorts_upload_err_internal_server">Під час завантаження щось пішло не так на нашому боці. Спробуйте ще раз за мить.</string>
+    <string name="shorts_premium_locked_title">Преміум-відео</string>
+    <string name="shorts_premium_locked_body">Розблокуйте це відео за %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Переглянути допис</string>
     <string name="caption_view_more">Показати більше</string>
     <string name="caption_view_less">Показати менше</string>
     <string name="shorts_title">Короткі відео</string>

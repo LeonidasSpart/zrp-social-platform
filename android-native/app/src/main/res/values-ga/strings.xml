@@ -306,6 +306,7 @@
     <string name="post_delete_confirm_body">Ní féidir é seo a chur ar ceal.</string>
     <string name="comment_edit_cd">Cuir tuairim in eagar</string>
     <string name="comment_delete_cd">Scrios tuairim</string>
+    <string name="comment_report_cd">Tuairiscigh tuairim</string>
     <string name="comment_delete_confirm_title">Scrios an tuairim?</string>
     <string name="comment_delete_confirm_body">Ní féidir é seo a chur ar ceal. Scriosfar aon fhreagra uirthi freisin.</string>
     <string name="comment_write_placeholder">Scríobh tuairim...</string>
@@ -332,6 +333,7 @@
     <string name="chat_voice_play_cd">Seinn</string>
     <string name="chat_voice_pause_cd">Cuir ar Sos</string>
     <string name="chat_err_mic_access">Níorbh fhéidir do mhicreafón a rochtain. Seiceáil do chuid ceadanna le do thoil.</string>
+    <string name="chat_err_camera_access">Níorbh fhéidir do cheamara a rochtain. Seiceáil do chuid ceadanna le do thoil.</string>
     <string name="chat_attachment_fallback">Doiciméad</string>
     <string name="comment_post_cd">Postáil tuairim</string>
     <string name="action_show_password">Taispeáin an focal faire</string>
@@ -1220,6 +1222,7 @@
     <string name="news_category_sports">Spórt</string>
     <string name="news_category_culture">Cultúr</string>
     <string name="news_category_community">Pobal</string>
+    <string name="news_category_gaming">Cluichíocht</string>
     <string name="news_title">ZRP Nuacht</string>
     <string name="news_discover_entry">Fionnaigh ZRP Nuacht</string>
     <string name="shorts_back">Siar</string>
@@ -1257,6 +1260,9 @@
     <string name="shorts_upload_err_too_large_plan">Tá an físeán seo ró-mhór do do phlean. Bain triail as comhad níos lú nó uasghrádaigh do phlean.</string>
     <string name="shorts_upload_err_url_gen_failed">Níorbh fhéidir an uaslódáil a thosú - is gnách gur fadhb cheangail shealadach é seo. Bain triail eile as le do thoil.</string>
     <string name="shorts_upload_err_internal_server">Chuaigh rud éigin ó mhaith ar ár dtaobh le linn na huaslódála. Bain triail eile as i gceann nóiméid.</string>
+    <string name="shorts_premium_locked_title">Físeán préimhe</string>
+    <string name="shorts_premium_locked_body">Díghlasáil an físeán seo ar %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Féach ar an bpostáil</string>
     <string name="caption_view_more">Féach ar Thuilleadh</string>
     <string name="caption_view_less">Féach ar Níos Lú</string>
     <string name="shorts_title">Gearrscannáin</string>

@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Această acțiune nu poate fi anulată.</string>
     <string name="comment_edit_cd">Editează comentariul</string>
     <string name="comment_delete_cd">Șterge comentariul</string>
+    <string name="comment_report_cd">Raportează comentariul</string>
     <string name="comment_delete_confirm_title">Ștergi comentariul?</string>
     <string name="comment_delete_confirm_body">Această acțiune nu poate fi anulată. Orice răspuns la el va fi șters, de asemenea.</string>
     <string name="comment_write_placeholder">Scrie un comentariu...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Redă</string>
     <string name="chat_voice_pause_cd">Pauză</string>
     <string name="chat_err_mic_access">Nu am putut accesa microfonul tău. Te rugăm să-ți verifici permisiunile.</string>
+    <string name="chat_err_camera_access">Nu am putut accesa camera ta. Te rugăm să-ți verifici permisiunile.</string>
     <string name="chat_attachment_fallback">Document</string>
     <string name="comment_post_cd">Postează comentariul</string>
     <string name="action_show_password">Afișează parola</string>
@@ -1302,6 +1304,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Cultură</string>
     <string name="news_category_community">Comunitate</string>
+    <string name="news_category_gaming">Gaming</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Descoperă ZRP News</string>
     <string name="shorts_back">Înapoi</string>
@@ -1339,6 +1342,9 @@
     <string name="shorts_upload_err_too_large_plan">Acest videoclip este prea mare pentru planul tău. Încearcă un fișier mai mic sau fă upgrade la plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Nu am putut începe încărcarea - de obicei este o problemă temporară de conexiune. Te rugăm să încerci din nou.</string>
     <string name="shorts_upload_err_internal_server">Ceva nu a funcționat corect din partea noastră în timpul încărcării. Te rugăm să încerci din nou peste puțin timp.</string>
+    <string name="shorts_premium_locked_title">Videoclip premium</string>
+    <string name="shorts_premium_locked_body">Deblochează acest videoclip pentru %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Vezi postarea</string>
     <string name="caption_view_more">Vezi mai mult</string>
     <string name="caption_view_less">Vezi mai puțin</string>
     <string name="shorts_title">Shorts</string>

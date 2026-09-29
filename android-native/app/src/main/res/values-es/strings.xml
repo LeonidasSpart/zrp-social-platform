@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Esta acción no se puede deshacer.</string>
     <string name="comment_edit_cd">Editar comentario</string>
     <string name="comment_delete_cd">Eliminar comentario</string>
+    <string name="comment_report_cd">Reportar comentario</string>
     <string name="comment_delete_confirm_title">¿Eliminar comentario?</string>
     <string name="comment_delete_confirm_body">Esta acción no se puede deshacer. Las respuestas a este comentario también se eliminarán.</string>
     <string name="comment_write_placeholder">Escribe un comentario...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Reproducir</string>
     <string name="chat_voice_pause_cd">Pausa</string>
     <string name="chat_err_mic_access">No se pudo acceder a tu micrófono. Comprueba tus permisos.</string>
+    <string name="chat_err_camera_access">No se pudo acceder a tu cámara. Comprueba tus permisos.</string>
     <string name="chat_attachment_fallback">Documento</string>
     <string name="comment_post_cd">Publicar comentario</string>
     <string name="action_show_password">Mostrar contraseña</string>
@@ -1315,6 +1317,7 @@
     <string name="news_category_sports">Deportes</string>
     <string name="news_category_culture">Cultura</string>
     <string name="news_category_community">Comunidad</string>
+    <string name="news_category_gaming">Videojuegos</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Descubrir ZRP News</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1354,6 +1357,9 @@
     <string name="shorts_upload_err_too_large_plan">Este vídeo es demasiado grande para tu plan. Prueba con un archivo más pequeño o mejora tu plan.</string>
     <string name="shorts_upload_err_url_gen_failed">No se pudo iniciar la subida; esto suele deberse a un problema de conexión temporal. Inténtalo de nuevo.</string>
     <string name="shorts_upload_err_internal_server">Algo salió mal de nuestra parte durante la subida. Inténtalo de nuevo en un momento.</string>
+    <string name="shorts_premium_locked_title">Vídeo premium</string>
+    <string name="shorts_premium_locked_body">Desbloquea este vídeo por %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Ver publicación</string>
     <string name="caption_view_more">Ver más</string>
     <string name="caption_view_less">Ver menos</string>
     <!-- ZRP Creator Studio (native parity) -->

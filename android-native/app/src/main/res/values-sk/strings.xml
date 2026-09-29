@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Túto akciu nemožno vrátiť späť.</string>
     <string name="comment_edit_cd">Upraviť komentár</string>
     <string name="comment_delete_cd">Vymazať komentár</string>
+    <string name="comment_report_cd">Nahlásiť komentár</string>
     <string name="comment_delete_confirm_title">Vymazať komentár?</string>
     <string name="comment_delete_confirm_body">Túto akciu nemožno vrátiť späť. Vymazané budú aj všetky odpovede naň.</string>
     <string name="comment_write_placeholder">Napíšte komentár...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Prehrať</string>
     <string name="chat_voice_pause_cd">Pozastaviť</string>
     <string name="chat_err_mic_access">Nepodarilo sa získať prístup k mikrofónu. Skontrolujte svoje povolenia.</string>
+    <string name="chat_err_camera_access">Nepodarilo sa získať prístup k fotoaparátu. Skontrolujte svoje povolenia.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Odoslať komentár</string>
     <string name="action_show_password">Zobraziť heslo</string>
@@ -1306,6 +1308,7 @@
     <string name="news_category_sports">Šport</string>
     <string name="news_category_culture">Kultúra</string>
     <string name="news_category_community">Komunita</string>
+    <string name="news_category_gaming">Hry</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Objaviť ZRP News</string>
     <string name="shorts_back">Späť</string>
@@ -1343,6 +1346,9 @@
     <string name="shorts_upload_err_too_large_plan">Toto video je príliš veľké pre váš plán. Skúste menší súbor alebo povýšte svoj plán.</string>
     <string name="shorts_upload_err_url_gen_failed">Nepodarilo sa spustiť nahrávanie – zvyčajne ide o dočasný problém s pripojením. Skúste to znova.</string>
     <string name="shorts_upload_err_internal_server">Na našej strane sa počas nahrávania niečo pokazilo. Skúste to, prosím, o chvíľu znova.</string>
+    <string name="shorts_premium_locked_title">Prémiové video</string>
+    <string name="shorts_premium_locked_body">Odomknúť toto video za %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Zobraziť príspevok</string>
     <string name="caption_view_more">Zobraziť viac</string>
     <string name="caption_view_less">Zobraziť menej</string>
     <string name="shorts_title">Krátke videá</string>

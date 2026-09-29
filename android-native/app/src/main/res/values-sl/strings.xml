@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Tega ni mogoče razveljaviti.</string>
     <string name="comment_edit_cd">Uredi komentar</string>
     <string name="comment_delete_cd">Izbriši komentar</string>
+    <string name="comment_report_cd">Prijavi komentar</string>
     <string name="comment_delete_confirm_title">Izbrišete komentar?</string>
     <string name="comment_delete_confirm_body">Tega ni mogoče razveljaviti. Izbrisani bodo tudi vsi odgovori nanj.</string>
     <string name="comment_write_placeholder">Napišite komentar ...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Predvajaj</string>
     <string name="chat_voice_pause_cd">Premor</string>
     <string name="chat_err_mic_access">Dostop do mikrofona ni bil mogoč. Preverite svoja dovoljenja.</string>
+    <string name="chat_err_camera_access">Dostop do kamere ni bil mogoč. Preverite svoja dovoljenja.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Objavi komentar</string>
     <string name="action_show_password">Pokaži geslo</string>
@@ -1306,6 +1308,7 @@
     <string name="news_category_sports">Šport</string>
     <string name="news_category_culture">Kultura</string>
     <string name="news_category_community">Skupnost</string>
+    <string name="news_category_gaming">Igre</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Odkrij ZRP News</string>
     <string name="shorts_back">Nazaj</string>
@@ -1343,6 +1346,9 @@
     <string name="shorts_upload_err_too_large_plan">Ta video je prevelik za vaš paket. Poskusite z manjšo datoteko ali nadgradite paket.</string>
     <string name="shorts_upload_err_url_gen_failed">Nalaganja ni bilo mogoče začeti – navadno gre za začasno težavo s povezavo. Poskusite znova.</string>
     <string name="shorts_upload_err_internal_server">Med nalaganjem je na naši strani prišlo do napake. Poskusite znova čez trenutek.</string>
+    <string name="shorts_premium_locked_title">Premium video</string>
+    <string name="shorts_premium_locked_body">Odkleni ta video za %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Ogled objave</string>
     <string name="caption_view_more">Prikaži več</string>
     <string name="caption_view_less">Prikaži manj</string>
     <string name="shorts_title">Kratki videoposnetki</string>

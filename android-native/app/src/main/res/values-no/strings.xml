@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Dette kan ikke angres.</string>
     <string name="comment_edit_cd">Rediger kommentar</string>
     <string name="comment_delete_cd">Slett kommentar</string>
+    <string name="comment_report_cd">Rapporter kommentar</string>
     <string name="comment_delete_confirm_title">Slette kommentaren?</string>
     <string name="comment_delete_confirm_body">Dette kan ikke angres. Eventuelle svar på den blir også slettet.</string>
     <string name="comment_write_placeholder">Skriv en kommentar ...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Spill av</string>
     <string name="chat_voice_pause_cd">Pause</string>
     <string name="chat_err_mic_access">Fikk ikke tilgang til mikrofonen din. Sjekk tillatelsene dine.</string>
+    <string name="chat_err_camera_access">Fikk ikke tilgang til kameraet ditt. Sjekk tillatelsene dine.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Publiser kommentar</string>
     <string name="action_show_password">Vis passord</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultur</string>
     <string name="news_category_community">Fellesskap</string>
+    <string name="news_category_gaming">Gaming</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Oppdag ZRP News</string>
     <string name="shorts_back">Tilbake</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Denne videoen er for stor for abonnementet ditt. Prøv en mindre fil, eller oppgrader abonnementet.</string>
     <string name="shorts_upload_err_url_gen_failed">Kunne ikke starte opplastingen – dette er som regel et midlertidig tilkoblingsproblem. Prøv igjen.</string>
     <string name="shorts_upload_err_internal_server">Noe gikk galt hos oss under opplastingen. Prøv igjen om et øyeblikk.</string>
+    <string name="shorts_premium_locked_title">Premiumvideo</string>
+    <string name="shorts_premium_locked_body">Lås opp denne videoen for %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Se innlegg</string>
     <string name="caption_view_more">Vis mer</string>
     <string name="caption_view_less">Vis mindre</string>
     <string name="shorts_title">Shorts</string>

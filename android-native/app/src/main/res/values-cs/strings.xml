@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Tuto akci nelze vrátit zpět.</string>
     <string name="comment_edit_cd">Upravit komentář</string>
     <string name="comment_delete_cd">Smazat komentář</string>
+    <string name="comment_report_cd">Nahlásit komentář</string>
     <string name="comment_delete_confirm_title">Smazat komentář?</string>
     <string name="comment_delete_confirm_body">Tuto akci nelze vrátit zpět. Smažou se i všechny odpovědi na něj.</string>
     <string name="comment_write_placeholder">Napiš komentář...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Přehrát</string>
     <string name="chat_voice_pause_cd">Pozastavit</string>
     <string name="chat_err_mic_access">Nepodařilo se získat přístup k mikrofonu. Zkontroluj prosím oprávnění.</string>
+    <string name="chat_err_camera_access">Nepodařilo se získat přístup k fotoaparátu. Zkontroluj prosím oprávnění.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Přidat komentář</string>
     <string name="action_show_password">Zobrazit heslo</string>
@@ -1306,6 +1308,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultura</string>
     <string name="news_category_community">Komunita</string>
+    <string name="news_category_gaming">Hry</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Objevit ZRP News</string>
     <string name="shorts_back">Zpět</string>
@@ -1343,6 +1346,9 @@
     <string name="shorts_upload_err_too_large_plan">Toto video je pro tvůj tarif příliš velké. Zkus menší soubor nebo upgraduj tarif.</string>
     <string name="shorts_upload_err_url_gen_failed">Nahrávání se nepodařilo spustit - obvykle jde o dočasný problém s připojením. Zkus to prosím znovu.</string>
     <string name="shorts_upload_err_internal_server">Při nahrávání se na naší straně něco pokazilo. Zkus to prosím za chvíli znovu.</string>
+    <string name="shorts_premium_locked_title">Prémiové video</string>
+    <string name="shorts_premium_locked_body">Odemkni toto video za %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Zobrazit příspěvek</string>
     <string name="caption_view_more">Zobrazit více</string>
     <string name="caption_view_less">Zobrazit méně</string>
     <string name="shorts_title">Krátká videa</string>

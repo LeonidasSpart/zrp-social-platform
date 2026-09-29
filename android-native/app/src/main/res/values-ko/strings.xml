@@ -382,6 +382,7 @@
     <string name="post_delete_confirm_body">이 작업은 되돌릴 수 없어요.</string>
     <string name="comment_edit_cd">댓글 수정</string>
     <string name="comment_delete_cd">댓글 삭제</string>
+    <string name="comment_report_cd">댓글 신고</string>
     <string name="comment_delete_confirm_title">댓글을 삭제하시겠어요?</string>
     <string name="comment_delete_confirm_body">이 작업은 되돌릴 수 없어요. 이 댓글에 달린 답글도 함께 삭제돼요.</string>
     <string name="comment_write_placeholder">댓글을 입력하세요...</string>
@@ -408,6 +409,7 @@
     <string name="chat_voice_play_cd">재생</string>
     <string name="chat_voice_pause_cd">일시정지</string>
     <string name="chat_err_mic_access">마이크에 접근할 수 없어요. 권한을 확인해 주세요.</string>
+    <string name="chat_err_camera_access">카메라에 접근할 수 없어요. 권한을 확인해 주세요.</string>
     <string name="chat_attachment_fallback">문서</string>
     <string name="comment_post_cd">댓글 게시</string>
     <string name="action_show_password">비밀번호 표시</string>
@@ -1297,6 +1299,7 @@
     <string name="news_category_sports">스포츠</string>
     <string name="news_category_culture">문화</string>
     <string name="news_category_community">커뮤니티</string>
+    <string name="news_category_gaming">게임</string>
     <string name="news_title">ZRP 뉴스</string>
     <string name="news_discover_entry">ZRP 뉴스 살펴보기</string>
     <string name="shorts_back">뒤로</string>
@@ -1334,6 +1337,9 @@
     <string name="shorts_upload_err_too_large_plan">이 동영상은 이용 중인 요금제에 비해 용량이 너무 큽니다. 더 작은 파일을 사용하거나 요금제를 업그레이드해 보세요.</string>
     <string name="shorts_upload_err_url_gen_failed">업로드를 시작할 수 없습니다. 대부분 일시적인 연결 문제입니다. 다시 시도해 주세요.</string>
     <string name="shorts_upload_err_internal_server">업로드 중 저희 쪽에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.</string>
+    <string name="shorts_premium_locked_title">프리미엄 동영상</string>
+    <string name="shorts_premium_locked_body">%1$s %2$s에 이 동영상 잠금 해제</string>
+    <string name="shorts_premium_locked_cta">게시물 보기</string>
     <string name="caption_view_more">더 보기</string>
     <string name="caption_view_less">간략히 보기</string>
     <string name="shorts_title">숏츠</string>

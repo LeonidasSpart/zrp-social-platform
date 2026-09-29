@@ -382,6 +382,7 @@
     <string name="post_delete_confirm_body">इसे पूर्ववत नहीं किया जा सकता।</string>
     <string name="comment_edit_cd">टिप्पणी संपादित करें</string>
     <string name="comment_delete_cd">टिप्पणी हटाएं</string>
+    <string name="comment_report_cd">टिप्पणी रिपोर्ट करें</string>
     <string name="comment_delete_confirm_title">टिप्पणी हटाएं?</string>
     <string name="comment_delete_confirm_body">इसे पूर्ववत नहीं किया जा सकता। इसके सभी जवाब भी हटा दिए जाएंगे।</string>
     <string name="comment_write_placeholder">टिप्पणी लिखें...</string>
@@ -408,6 +409,7 @@
     <string name="chat_voice_play_cd">प्ले करें</string>
     <string name="chat_voice_pause_cd">रोकें</string>
     <string name="chat_err_mic_access">आपके माइक्रोफ़ोन का एक्सेस नहीं मिल सका। कृपया अपनी अनुमतियां जांचें।</string>
+    <string name="chat_err_camera_access">आपके कैमरे का एक्सेस नहीं मिल सका। कृपया अपनी अनुमतियां जांचें।</string>
     <string name="chat_attachment_fallback">दस्तावेज़</string>
     <string name="comment_post_cd">टिप्पणी पोस्ट करें</string>
     <string name="action_show_password">पासवर्ड दिखाएं</string>
@@ -1297,6 +1299,7 @@
     <string name="news_category_sports">खेल</string>
     <string name="news_category_culture">संस्कृति</string>
     <string name="news_category_community">समुदाय</string>
+    <string name="news_category_gaming">गेमिंग</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">ZRP News खोजें</string>
     <string name="shorts_back">वापस</string>
@@ -1334,6 +1337,9 @@
     <string name="shorts_upload_err_too_large_plan">यह वीडियो आपकी योजना के लिए बहुत बड़ा है। कोई छोटी फ़ाइल आज़माएँ या अपनी योजना अपग्रेड करें।</string>
     <string name="shorts_upload_err_url_gen_failed">अपलोड शुरू नहीं हो सका - यह आमतौर पर एक अस्थायी कनेक्शन समस्या होती है। कृपया फिर से कोशिश करें।</string>
     <string name="shorts_upload_err_internal_server">अपलोड करते समय हमारी ओर से कुछ गड़बड़ हो गई। कृपया थोड़ी देर में फिर से कोशिश करें।</string>
+    <string name="shorts_premium_locked_title">प्रीमियम वीडियो</string>
+    <string name="shorts_premium_locked_body">%1$s %2$s में इस वीडियो को अनलॉक करें</string>
+    <string name="shorts_premium_locked_cta">पोस्ट देखें</string>
     <string name="caption_view_more">और देखें</string>
     <string name="caption_view_less">कम देखें</string>
     <string name="shorts_title">शॉर्ट्स</string>

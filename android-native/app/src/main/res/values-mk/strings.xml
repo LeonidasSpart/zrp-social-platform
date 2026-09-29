@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Ова не може да се врати.</string>
     <string name="comment_edit_cd">Уреди коментар</string>
     <string name="comment_delete_cd">Избриши коментар</string>
+    <string name="comment_report_cd">Пријави коментар</string>
     <string name="comment_delete_confirm_title">Да го избришеме коментарот?</string>
     <string name="comment_delete_confirm_body">Ова не може да се врати. Сите одговори на него исто така ќе бидат избришани.</string>
     <string name="comment_write_placeholder">Напиши коментар...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Пушти</string>
     <string name="chat_voice_pause_cd">Паузирај</string>
     <string name="chat_err_mic_access">Не можевме да пристапиме до твојот микрофон. Провери ги дозволите.</string>
+    <string name="chat_err_camera_access">Не можевме да пристапиме до твојата камера. Провери ги дозволите.</string>
     <string name="chat_attachment_fallback">Документ</string>
     <string name="comment_post_cd">Објави коментар</string>
     <string name="action_show_password">Прикажи лозинка</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Спорт</string>
     <string name="news_category_culture">Култура</string>
     <string name="news_category_community">Заедница</string>
+    <string name="news_category_gaming">Гејминг</string>
     <string name="news_title">ZRP Вести</string>
     <string name="news_discover_entry">Откриј го ZRP News</string>
     <string name="shorts_back">Назад</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Ова видео е преголемо за твојот план. Пробај помала датотека или надгради го планот.</string>
     <string name="shorts_upload_err_url_gen_failed">Не можевме да го започнеме поставувањето - ова обично е привремен проблем со врската. Обиди се повторно.</string>
     <string name="shorts_upload_err_internal_server">Нешто тргна наопаку кај нас при поставувањето. Обиди се повторно за момент.</string>
+    <string name="shorts_premium_locked_title">Премиум видео</string>
+    <string name="shorts_premium_locked_body">Отклучи го ова видео за %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Види ја објавата</string>
     <string name="caption_view_more">Прикажи повеќе</string>
     <string name="caption_view_less">Прикажи помалку</string>
     <string name="shorts_title">Кратки видеа</string>

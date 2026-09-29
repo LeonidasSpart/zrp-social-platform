@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Bu işlem geri alınamaz.</string>
     <string name="comment_edit_cd">Yorumu düzenle</string>
     <string name="comment_delete_cd">Yorumu sil</string>
+    <string name="comment_report_cd">Yorumu bildir</string>
     <string name="comment_delete_confirm_title">Yorum silinsin mi?</string>
     <string name="comment_delete_confirm_body">Bu işlem geri alınamaz. Bu yoruma verilen yanıtlar da silinecektir.</string>
     <string name="comment_write_placeholder">Bir yorum yazın...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Oynat</string>
     <string name="chat_voice_pause_cd">Duraklat</string>
     <string name="chat_err_mic_access">Mikrofonunuza erişilemedi. Lütfen izinlerinizi kontrol edin.</string>
+    <string name="chat_err_camera_access">Kameranıza erişilemedi. Lütfen izinlerinizi kontrol edin.</string>
     <string name="chat_attachment_fallback">Belge</string>
     <string name="comment_post_cd">Yorumu gönder</string>
     <string name="action_show_password">Şifreyi göster</string>
@@ -1315,6 +1317,7 @@
     <string name="news_category_sports">Spor</string>
     <string name="news_category_culture">Kültür</string>
     <string name="news_category_community">Topluluk</string>
+    <string name="news_category_gaming">Oyun</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">ZRP News\'i Keşfet</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1354,6 +1357,9 @@
     <string name="shorts_upload_err_too_large_plan">Bu video, planınız için çok büyük. Daha küçük bir dosya deneyin veya planınızı yükseltin.</string>
     <string name="shorts_upload_err_url_gen_failed">Yükleme başlatılamadı - bu genellikle geçici bir bağlantı sorunudur. Lütfen tekrar deneyin.</string>
     <string name="shorts_upload_err_internal_server">Yükleme sırasında bizim tarafımızda bir sorun oluştu. Lütfen birazdan tekrar deneyin.</string>
+    <string name="shorts_premium_locked_title">Ücretli video</string>
+    <string name="shorts_premium_locked_body">Bu videonun kilidini %1$s %2$s karşılığında açın</string>
+    <string name="shorts_premium_locked_cta">Gönderiyi görüntüle</string>
     <string name="caption_view_more">Daha fazla göster</string>
     <string name="caption_view_less">Daha az göster</string>
     <!-- ZRP Creator Studio (native parity) -->

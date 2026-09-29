@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">لا يمكن التراجع عن هذا الإجراء.</string>
     <string name="comment_edit_cd">تعديل التعليق</string>
     <string name="comment_delete_cd">حذف التعليق</string>
+    <string name="comment_report_cd">الإبلاغ عن التعليق</string>
     <string name="comment_delete_confirm_title">هل تريد حذف التعليق؟</string>
     <string name="comment_delete_confirm_body">لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع الردود عليه أيضًا.</string>
     <string name="comment_write_placeholder">اكتب تعليقًا...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">تشغيل</string>
     <string name="chat_voice_pause_cd">إيقاف مؤقت</string>
     <string name="chat_err_mic_access">تعذر الوصول إلى الميكروفون. يرجى التحقق من الأذونات.</string>
+    <string name="chat_err_camera_access">تعذر الوصول إلى الكاميرا. يرجى التحقق من الأذونات.</string>
     <string name="chat_attachment_fallback">مستند</string>
     <string name="comment_post_cd">نشر التعليق</string>
     <string name="action_show_password">إظهار كلمة المرور</string>
@@ -1315,6 +1317,7 @@
     <string name="news_category_sports">الرياضة</string>
     <string name="news_category_culture">الثقافة</string>
     <string name="news_category_community">المجتمع</string>
+    <string name="news_category_gaming">الألعاب</string>
     <string name="news_title">أخبار ZRP</string>
     <string name="news_discover_entry">اكتشف ZRP News</string>
     <!-- ZRP Shorts (native parity) -->
@@ -1354,6 +1357,9 @@
     <string name="shorts_upload_err_too_large_plan">هذا الفيديو كبير جدًا بالنسبة لخطتك. جرّب ملفًا أصغر أو قم بترقية خطتك.</string>
     <string name="shorts_upload_err_url_gen_failed">تعذّر بدء الرفع - عادةً ما تكون هذه مشكلة اتصال مؤقتة. يرجى المحاولة مرة أخرى.</string>
     <string name="shorts_upload_err_internal_server">حدث خطأ ما من جانبنا أثناء الرفع. يرجى المحاولة مرة أخرى بعد قليل.</string>
+    <string name="shorts_premium_locked_title">فيديو مميز</string>
+    <string name="shorts_premium_locked_body">افتح هذا الفيديو مقابل %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">عرض المنشور</string>
     <string name="caption_view_more">عرض المزيد</string>
     <string name="caption_view_less">عرض أقل</string>
     <!-- ZRP Creator Studio (native parity) -->

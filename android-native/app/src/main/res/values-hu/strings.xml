@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Ez nem vonható vissza.</string>
     <string name="comment_edit_cd">Megjegyzés szerkesztése</string>
     <string name="comment_delete_cd">Megjegyzés törlése</string>
+    <string name="comment_report_cd">Megjegyzés jelentése</string>
     <string name="comment_delete_confirm_title">Törlöd a megjegyzést?</string>
     <string name="comment_delete_confirm_body">Ez nem vonható vissza. A rá érkezett válaszok is törlődnek.</string>
     <string name="comment_write_placeholder">Írj egy megjegyzést...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Lejátszás</string>
     <string name="chat_voice_pause_cd">Szünet</string>
     <string name="chat_err_mic_access">Nem sikerült hozzáférni a mikrofonodhoz. Ellenőrizd az engedélyeket.</string>
+    <string name="chat_err_camera_access">Nem sikerült hozzáférni a kamerádhoz. Ellenőrizd az engedélyeket.</string>
     <string name="chat_attachment_fallback">Dokumentum</string>
     <string name="comment_post_cd">Megjegyzés közzététele</string>
     <string name="action_show_password">Jelszó megjelenítése</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultúra</string>
     <string name="news_category_community">Közösség</string>
+    <string name="news_category_gaming">Játékok</string>
     <string name="news_title">ZRP News</string>
     <string name="news_discover_entry">Fedezd fel a ZRP News-t</string>
     <string name="shorts_back">Vissza</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Ez a videó túl nagy a csomagodhoz. Próbálj egy kisebb fájlt, vagy válts magasabb csomagra.</string>
     <string name="shorts_upload_err_url_gen_failed">Nem sikerült elindítani a feltöltést - ez általában átmeneti kapcsolati probléma. Próbáld újra.</string>
     <string name="shorts_upload_err_internal_server">Hiba történt nálunk feltöltés közben. Próbáld újra egy kicsit később.</string>
+    <string name="shorts_premium_locked_title">Prémium videó</string>
+    <string name="shorts_premium_locked_body">Oldd fel ezt a videót %1$s %2$s-ért</string>
+    <string name="shorts_premium_locked_cta">Bejegyzés megtekintése</string>
     <string name="caption_view_more">Több megjelenítése</string>
     <string name="caption_view_less">Kevesebb megjelenítése</string>
     <string name="shorts_title">Shorts</string>

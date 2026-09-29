@@ -383,6 +383,7 @@
     <string name="post_delete_confirm_body">Ovo se ne može poništiti.</string>
     <string name="comment_edit_cd">Uredi komentar</string>
     <string name="comment_delete_cd">Izbriši komentar</string>
+    <string name="comment_report_cd">Prijavi komentar</string>
     <string name="comment_delete_confirm_title">Izbrisati komentar?</string>
     <string name="comment_delete_confirm_body">Ovo se ne može poništiti. Svi odgovori na njega također će biti izbrisani.</string>
     <string name="comment_write_placeholder">Napišite komentar...</string>
@@ -409,6 +410,7 @@
     <string name="chat_voice_play_cd">Pusti</string>
     <string name="chat_voice_pause_cd">Pauziraj</string>
     <string name="chat_err_mic_access">Pristup mikrofonu nije uspio. Provjerite svoje dozvole.</string>
+    <string name="chat_err_camera_access">Pristup kameri nije uspio. Provjerite svoje dozvole.</string>
     <string name="chat_attachment_fallback">Dokument</string>
     <string name="comment_post_cd">Objavi komentar</string>
     <string name="action_show_password">Prikaži lozinku</string>
@@ -1298,6 +1300,7 @@
     <string name="news_category_sports">Sport</string>
     <string name="news_category_culture">Kultura</string>
     <string name="news_category_community">Zajednica</string>
+    <string name="news_category_gaming">Gejming</string>
     <string name="news_title">ZRP vijesti</string>
     <string name="news_discover_entry">Otkrijte ZRP vijesti</string>
     <string name="shorts_back">Nazad</string>
@@ -1335,6 +1338,9 @@
     <string name="shorts_upload_err_too_large_plan">Ovaj video je prevelik za vaš plan. Pokušajte s manjom datotekom ili nadogradite plan.</string>
     <string name="shorts_upload_err_url_gen_failed">Otpremanje nije moglo započeti - to je obično privremen problem s vezom. Pokušajte ponovo.</string>
     <string name="shorts_upload_err_internal_server">Nešto je pošlo po zlu na našoj strani tokom otpremanja. Pokušajte ponovo za trenutak.</string>
+    <string name="shorts_premium_locked_title">Premium video</string>
+    <string name="shorts_premium_locked_body">Otključajte ovaj video za %1$s %2$s</string>
+    <string name="shorts_premium_locked_cta">Pogledaj objavu</string>
     <string name="caption_view_more">Prikaži više</string>
     <string name="caption_view_less">Prikaži manje</string>
     <string name="shorts_title">Shorts</string>
