@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Persoane din apropiere";
 "ios.explore.peopleNearYouSubtitle" = "Aceeași țară ca tine";
 "ios.explore.peopleNearYouEmpty" = "Încă nu este nimeni în apropiere.";
+"ios.play.challengeUnsupported" = "Acest tip de joc nu este încă acceptat în această versiune a aplicației.";

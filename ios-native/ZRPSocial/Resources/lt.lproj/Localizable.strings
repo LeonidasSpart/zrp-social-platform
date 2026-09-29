@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Žmonės netoliese";
 "ios.explore.peopleNearYouSubtitle" = "Ta pati šalis kaip jūsų";
 "ios.explore.peopleNearYouEmpty" = "Kol kas niekas netoliese.";
+"ios.play.challengeUnsupported" = "Šis žaidimo tipas šioje programėlės versijoje dar nepalaikomas.";

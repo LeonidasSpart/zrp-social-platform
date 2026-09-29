@@ -175,17 +175,24 @@ struct PlayHomeView: View {
 
     @ViewBuilder
     private func trending(_ challenges: [PlayChallenge]) -> some View {
+        // This build has a player for TRIVIA/MEMORY/LOGIC only - a
+        // REACTION or SEQUENCE challenge decodes as `.unknown` and would
+        // otherwise show here looking like any other card, only to land
+        // on the honest "not supported yet" message the moment it's
+        // tapped. Filtered out of browsing instead, matching the Android
+        // sibling's `filterPlayableChallenges`.
+        let playable = challenges.filter { $0.type != .unknown }
         VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
             Text(.playTrending)
                 .font(.headline)
                 .foregroundStyle(ZrpColor.onSurface)
 
-            if challenges.isEmpty {
+            if playable.isEmpty {
                 Text(.playNoTrendingYet)
                     .font(.subheadline)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
             } else {
-                ForEach(challenges) { challenge in
+                ForEach(playable) { challenge in
                     Button {
                         navigator.push(.playChallenge(id: challenge.id, duelId: nil))
                     } label: {

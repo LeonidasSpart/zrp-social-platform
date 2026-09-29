@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Cilvēki tuvumā";
 "ios.explore.peopleNearYouSubtitle" = "Tā pati valsts, kas jums";
 "ios.explore.peopleNearYouEmpty" = "Pagaidām neviena tuvumā nav.";
+"ios.play.challengeUnsupported" = "Šis spēles veids šajā lietotnes versijā vēl netiek atbalstīts.";

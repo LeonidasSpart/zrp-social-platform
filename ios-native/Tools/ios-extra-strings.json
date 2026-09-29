@@ -191,7 +191,8 @@
     "ios.search.noResults": "No results found.",
     "ios.explore.peopleNearYouTitle": "People near you",
     "ios.explore.peopleNearYouSubtitle": "Same country as you",
-    "ios.explore.peopleNearYouEmpty": "No one else nearby yet."
+    "ios.explore.peopleNearYouEmpty": "No one else nearby yet.",
+    "ios.play.challengeUnsupported": "This game type isn't supported in this app version yet."
   },
   "translations": {
     "fr": {
@@ -368,7 +369,8 @@
       "ios.search.noResults": "Aucun résultat trouvé.",
       "ios.explore.peopleNearYouTitle": "Personnes près de vous",
       "ios.explore.peopleNearYouSubtitle": "Même pays que vous",
-      "ios.explore.peopleNearYouEmpty": "Personne à proximité pour l'instant."
+      "ios.explore.peopleNearYouEmpty": "Personne à proximité pour l'instant.",
+      "ios.play.challengeUnsupported": "Ce type de jeu n'est pas encore pris en charge dans cette version de l'application."
     },
     "de": {
       "ios.a11y.bookmark": "Merken",
@@ -544,7 +546,8 @@
       "ios.search.noResults": "Keine Ergebnisse gefunden.",
       "ios.explore.peopleNearYouTitle": "Personen in deiner Nähe",
       "ios.explore.peopleNearYouSubtitle": "Gleiches Land wie du",
-      "ios.explore.peopleNearYouEmpty": "Noch niemand in der Nähe."
+      "ios.explore.peopleNearYouEmpty": "Noch niemand in der Nähe.",
+      "ios.play.challengeUnsupported": "Dieser Spieltyp wird in dieser App-Version noch nicht unterstützt."
     },
     "it": {
       "ios.a11y.bookmark": "Salva",
@@ -720,7 +723,8 @@
       "ios.search.noResults": "Nessun risultato trovato.",
       "ios.explore.peopleNearYouTitle": "Persone vicino a te",
       "ios.explore.peopleNearYouSubtitle": "Stesso paese tuo",
-      "ios.explore.peopleNearYouEmpty": "Ancora nessuno nelle vicinanze."
+      "ios.explore.peopleNearYouEmpty": "Ancora nessuno nelle vicinanze.",
+      "ios.play.challengeUnsupported": "Questo tipo di gioco non è ancora supportato in questa versione dell'app."
     },
     "sq": {
       "ios.a11y.bookmark": "Ruaje",
@@ -896,7 +900,8 @@
       "ios.search.noResults": "Nuk u gjet asnjë rezultat.",
       "ios.explore.peopleNearYouTitle": "Njerëz pranë jush",
       "ios.explore.peopleNearYouSubtitle": "I njëjti vend si ju",
-      "ios.explore.peopleNearYouEmpty": "Ende nuk ka njeri pranë."
+      "ios.explore.peopleNearYouEmpty": "Ende nuk ka njeri pranë.",
+      "ios.play.challengeUnsupported": "Ky lloj loje nuk mbështetet ende në këtë version të aplikacionit."
     },
     "es": {
       "ios.a11y.bookmark": "Guardar",
@@ -1072,7 +1077,8 @@
       "ios.search.noResults": "No se encontraron resultados.",
       "ios.explore.peopleNearYouTitle": "Personas cerca de ti",
       "ios.explore.peopleNearYouSubtitle": "Mismo país que tú",
-      "ios.explore.peopleNearYouEmpty": "Todavía no hay nadie cerca."
+      "ios.explore.peopleNearYouEmpty": "Todavía no hay nadie cerca.",
+      "ios.play.challengeUnsupported": "Este tipo de juego aún no es compatible con esta versión de la aplicación."
     },
     "ru": {
       "ios.a11y.bookmark": "Добавить в закладки",
@@ -1248,7 +1254,8 @@
       "ios.search.noResults": "Результаты не найдены.",
       "ios.explore.peopleNearYouTitle": "Люди рядом с вами",
       "ios.explore.peopleNearYouSubtitle": "Та же страна, что и у вас",
-      "ios.explore.peopleNearYouEmpty": "Пока рядом никого нет."
+      "ios.explore.peopleNearYouEmpty": "Пока рядом никого нет.",
+      "ios.play.challengeUnsupported": "Этот тип игры пока не поддерживается в этой версии приложения."
     },
     "ar": {
       "ios.a11y.bookmark": "حفظ",
@@ -1424,7 +1431,8 @@
       "ios.search.noResults": "لم يتم العثور على نتائج.",
       "ios.explore.peopleNearYouTitle": "أشخاص بالقرب منك",
       "ios.explore.peopleNearYouSubtitle": "من نفس بلدك",
-      "ios.explore.peopleNearYouEmpty": "لا يوجد أحد قريب بعد."
+      "ios.explore.peopleNearYouEmpty": "لا يوجد أحد قريب بعد.",
+      "ios.play.challengeUnsupported": "هذا النوع من الألعاب غير مدعوم بعد في هذا الإصدار من التطبيق."
     },
     "zh": {
       "ios.a11y.bookmark": "收藏",
@@ -1600,7 +1608,8 @@
       "ios.search.noResults": "未找到结果。",
       "ios.explore.peopleNearYouTitle": "附近的人",
       "ios.explore.peopleNearYouSubtitle": "与你同国家",
-      "ios.explore.peopleNearYouEmpty": "附近暂无用户。"
+      "ios.explore.peopleNearYouEmpty": "附近暂无用户。",
+      "ios.play.challengeUnsupported": "此应用版本尚不支持此游戏类型。"
     },
     "tr": {
       "ios.a11y.bookmark": "Kaydet",
@@ -1776,7 +1785,8 @@
       "ios.search.noResults": "Sonuç bulunamadı.",
       "ios.explore.peopleNearYouTitle": "Yakınındaki kişiler",
       "ios.explore.peopleNearYouSubtitle": "Seninle aynı ülke",
-      "ios.explore.peopleNearYouEmpty": "Henüz yakınında kimse yok."
+      "ios.explore.peopleNearYouEmpty": "Henüz yakınında kimse yok.",
+      "ios.play.challengeUnsupported": "Bu oyun türü bu uygulama sürümünde henüz desteklenmiyor."
     },
     "id": {
       "ios.a11y.bookmark": "Simpan",
@@ -1952,7 +1962,8 @@
       "ios.search.noResults": "Tidak ada hasil ditemukan.",
       "ios.explore.peopleNearYouTitle": "Orang di dekat Anda",
       "ios.explore.peopleNearYouSubtitle": "Negara yang sama dengan Anda",
-      "ios.explore.peopleNearYouEmpty": "Belum ada orang di dekat Anda."
+      "ios.explore.peopleNearYouEmpty": "Belum ada orang di dekat Anda.",
+      "ios.play.challengeUnsupported": "Jenis permainan ini belum didukung di versi aplikasi ini."
     },
     "pt": {
       "ios.a11y.bookmark": "Guardar",
@@ -2128,7 +2139,8 @@
       "ios.search.noResults": "Nenhum resultado encontrado.",
       "ios.explore.peopleNearYouTitle": "Pessoas perto de si",
       "ios.explore.peopleNearYouSubtitle": "O mesmo país que o seu",
-      "ios.explore.peopleNearYouEmpty": "Ainda não há ninguém por perto."
+      "ios.explore.peopleNearYouEmpty": "Ainda não há ninguém por perto.",
+      "ios.play.challengeUnsupported": "Este tipo de jogo ainda não é suportado nesta versão da aplicação."
     },
     "ja": {
       "ios.a11y.bookmark": "ブックマーク",
@@ -2304,7 +2316,8 @@
       "ios.search.noResults": "結果が見つかりませんでした。",
       "ios.explore.peopleNearYouTitle": "近くの人",
       "ios.explore.peopleNearYouSubtitle": "あなたと同じ国",
-      "ios.explore.peopleNearYouEmpty": "まだ近くに誰もいません。"
+      "ios.explore.peopleNearYouEmpty": "まだ近くに誰もいません。",
+      "ios.play.challengeUnsupported": "このゲームタイプはこのアプリのバージョンではまだサポートされていません。"
     },
     "ko": {
       "ios.a11y.bookmark": "북마크",
@@ -2480,7 +2493,8 @@
       "ios.search.noResults": "결과를 찾을 수 없습니다.",
       "ios.explore.peopleNearYouTitle": "내 주변 사람들",
       "ios.explore.peopleNearYouSubtitle": "당신과 같은 국가",
-      "ios.explore.peopleNearYouEmpty": "아직 주변에 아무도 없습니다."
+      "ios.explore.peopleNearYouEmpty": "아직 주변에 아무도 없습니다.",
+      "ios.play.challengeUnsupported": "이 게임 유형은 이 앱 버전에서 아직 지원되지 않습니다."
     },
     "hi": {
       "ios.a11y.bookmark": "बुकमार्क करें",
@@ -2656,7 +2670,8 @@
       "ios.search.noResults": "कोई परिणाम नहीं मिला।",
       "ios.explore.peopleNearYouTitle": "आपके आस-पास के लोग",
       "ios.explore.peopleNearYouSubtitle": "आपके जैसा ही देश",
-      "ios.explore.peopleNearYouEmpty": "अभी तक आस-पास कोई नहीं है।"
+      "ios.explore.peopleNearYouEmpty": "अभी तक आस-पास कोई नहीं है।",
+      "ios.play.challengeUnsupported": "इस प्रकार का गेम अभी इस ऐप संस्करण में समर्थित नहीं है।"
     },
     "nl": {
       "ios.a11y.bookmark": "Bewaren",
@@ -2832,7 +2847,8 @@
       "ios.search.noResults": "Geen resultaten gevonden.",
       "ios.explore.peopleNearYouTitle": "Mensen in jouw buurt",
       "ios.explore.peopleNearYouSubtitle": "Zelfde land als jij",
-      "ios.explore.peopleNearYouEmpty": "Nog niemand in de buurt."
+      "ios.explore.peopleNearYouEmpty": "Nog niemand in de buurt.",
+      "ios.play.challengeUnsupported": "Dit speltype wordt in deze app-versie nog niet ondersteund."
     },
     "pl": {
       "ios.a11y.bookmark": "Zapisz",
@@ -3008,7 +3024,8 @@
       "ios.search.noResults": "Nie znaleziono wyników.",
       "ios.explore.peopleNearYouTitle": "Osoby w pobliżu",
       "ios.explore.peopleNearYouSubtitle": "Ten sam kraj co Ty",
-      "ios.explore.peopleNearYouEmpty": "Nikogo w pobliżu jeszcze nie ma."
+      "ios.explore.peopleNearYouEmpty": "Nikogo w pobliżu jeszcze nie ma.",
+      "ios.play.challengeUnsupported": "Ten typ gry nie jest jeszcze obsługiwany w tej wersji aplikacji."
     },
     "ro": {
       "ios.a11y.bookmark": "Salvează",
@@ -3184,7 +3201,8 @@
       "ios.search.noResults": "Niciun rezultat găsit.",
       "ios.explore.peopleNearYouTitle": "Persoane din apropiere",
       "ios.explore.peopleNearYouSubtitle": "Aceeași țară ca tine",
-      "ios.explore.peopleNearYouEmpty": "Încă nu este nimeni în apropiere."
+      "ios.explore.peopleNearYouEmpty": "Încă nu este nimeni în apropiere.",
+      "ios.play.challengeUnsupported": "Acest tip de joc nu este încă acceptat în această versiune a aplicației."
     },
     "cs": {
       "ios.a11y.bookmark": "Uložit",
@@ -3360,7 +3378,8 @@
       "ios.search.noResults": "Nebyly nalezeny žádné výsledky.",
       "ios.explore.peopleNearYouTitle": "Lidé poblíž",
       "ios.explore.peopleNearYouSubtitle": "Stejná země jako vy",
-      "ios.explore.peopleNearYouEmpty": "Zatím nikdo poblíž."
+      "ios.explore.peopleNearYouEmpty": "Zatím nikdo poblíž.",
+      "ios.play.challengeUnsupported": "Tento typ hry zatím není v této verzi aplikace podporován."
     },
     "hu": {
       "ios.a11y.bookmark": "Mentés",
@@ -3536,7 +3555,8 @@
       "ios.search.noResults": "Nincs találat.",
       "ios.explore.peopleNearYouTitle": "Emberek a közeledben",
       "ios.explore.peopleNearYouSubtitle": "Ugyanaz az ország, mint te",
-      "ios.explore.peopleNearYouEmpty": "Még senki sincs a közelben."
+      "ios.explore.peopleNearYouEmpty": "Még senki sincs a közelben.",
+      "ios.play.challengeUnsupported": "Ezt a játéktípust ez az alkalmazásverzió még nem támogatja."
     },
     "sv": {
       "ios.a11y.bookmark": "Spara",
@@ -3712,7 +3732,8 @@
       "ios.search.noResults": "Inga resultat hittades.",
       "ios.explore.peopleNearYouTitle": "Personer i närheten",
       "ios.explore.peopleNearYouSubtitle": "Samma land som du",
-      "ios.explore.peopleNearYouEmpty": "Ingen i närheten ännu."
+      "ios.explore.peopleNearYouEmpty": "Ingen i närheten ännu.",
+      "ios.play.challengeUnsupported": "Den här speltypen stöds inte än i den här appversionen."
     },
     "da": {
       "ios.a11y.bookmark": "Gem",
@@ -3888,7 +3909,8 @@
       "ios.search.noResults": "Ingen resultater fundet.",
       "ios.explore.peopleNearYouTitle": "Personer i nærheden",
       "ios.explore.peopleNearYouSubtitle": "Samme land som dig",
-      "ios.explore.peopleNearYouEmpty": "Ingen i nærheden endnu."
+      "ios.explore.peopleNearYouEmpty": "Ingen i nærheden endnu.",
+      "ios.play.challengeUnsupported": "Denne spiltype understøttes endnu ikke i denne appversion."
     },
     "hr": {
       "ios.a11y.bookmark": "Spremi",
@@ -4064,7 +4086,8 @@
       "ios.search.noResults": "Nema pronađenih rezultata.",
       "ios.explore.peopleNearYouTitle": "Ljudi u blizini",
       "ios.explore.peopleNearYouSubtitle": "Ista država kao vi",
-      "ios.explore.peopleNearYouEmpty": "Još nema nikoga u blizini."
+      "ios.explore.peopleNearYouEmpty": "Još nema nikoga u blizini.",
+      "ios.play.challengeUnsupported": "Ova vrsta igre još nije podržana u ovoj verziji aplikacije."
     },
     "sr": {
       "ios.a11y.bookmark": "Obeleži",
@@ -4240,7 +4263,8 @@
       "ios.search.noResults": "Нема пронађених резултата.",
       "ios.explore.peopleNearYouTitle": "Ljudi u blizini",
       "ios.explore.peopleNearYouSubtitle": "Ista država kao vi",
-      "ios.explore.peopleNearYouEmpty": "Još uvek nema nikoga u blizini."
+      "ios.explore.peopleNearYouEmpty": "Još uvek nema nikoga u blizini.",
+      "ios.play.challengeUnsupported": "Ova vrsta igre još nije podržana u ovoj verziji aplikacije."
     },
     "bg": {
       "ios.a11y.bookmark": "Запази",
@@ -4416,7 +4440,8 @@
       "ios.search.noResults": "Няма намерени резултати.",
       "ios.explore.peopleNearYouTitle": "Хора близо до теб",
       "ios.explore.peopleNearYouSubtitle": "Същата държава като теб",
-      "ios.explore.peopleNearYouEmpty": "Все още няма никого наблизо."
+      "ios.explore.peopleNearYouEmpty": "Все още няма никого наблизо.",
+      "ios.play.challengeUnsupported": "Този тип игра все още не се поддържа в тази версия на приложението."
     },
     "el": {
       "ios.a11y.bookmark": "Αποθήκευση",
@@ -4592,7 +4617,8 @@
       "ios.search.noResults": "Δεν βρέθηκαν αποτελέσματα.",
       "ios.explore.peopleNearYouTitle": "Άτομα κοντά σου",
       "ios.explore.peopleNearYouSubtitle": "Ίδια χώρα με εσένα",
-      "ios.explore.peopleNearYouEmpty": "Δεν υπάρχει ακόμη κανείς κοντά."
+      "ios.explore.peopleNearYouEmpty": "Δεν υπάρχει ακόμη κανείς κοντά.",
+      "ios.play.challengeUnsupported": "Αυτός ο τύπος παιχνιδιού δεν υποστηρίζεται ακόμη σε αυτήν την έκδοση της εφαρμογής."
     },
     "bs": {
       "ios.a11y.bookmark": "Zabilježi",
@@ -4768,7 +4794,8 @@
       "ios.search.noResults": "Nema pronađenih rezultata.",
       "ios.explore.peopleNearYouTitle": "Ljudi u blizini",
       "ios.explore.peopleNearYouSubtitle": "Ista država kao vi",
-      "ios.explore.peopleNearYouEmpty": "Još uvijek nema nikoga u blizini."
+      "ios.explore.peopleNearYouEmpty": "Još uvijek nema nikoga u blizini.",
+      "ios.play.challengeUnsupported": "Ova vrsta igre još nije podržana u ovoj verziji aplikacije."
     },
     "mk": {
       "ios.a11y.bookmark": "Обележи",
@@ -4944,7 +4971,8 @@
       "ios.search.noResults": "Нема пронајдени резултати.",
       "ios.explore.peopleNearYouTitle": "Луѓе блиску до тебе",
       "ios.explore.peopleNearYouSubtitle": "Иста држава како тебе",
-      "ios.explore.peopleNearYouEmpty": "Сè уште нема никого блиску."
+      "ios.explore.peopleNearYouEmpty": "Сè уште нема никого блиску.",
+      "ios.play.challengeUnsupported": "Овој тип на игра сè уште не е поддржан во оваа верзија на апликацијата."
     },
     "no": {
       "ios.a11y.bookmark": "Bokmerk",
@@ -5120,7 +5148,8 @@
       "ios.search.noResults": "Fant ingen resultater.",
       "ios.explore.peopleNearYouTitle": "Personer i nærheten",
       "ios.explore.peopleNearYouSubtitle": "Samme land som deg",
-      "ios.explore.peopleNearYouEmpty": "Ingen i nærheten ennå."
+      "ios.explore.peopleNearYouEmpty": "Ingen i nærheten ennå.",
+      "ios.play.challengeUnsupported": "Denne speltypen støttes ikke ennå i denne appversjonen."
     },
     "uk": {
       "ios.a11y.bookmark": "Закладка",
@@ -5296,7 +5325,8 @@
       "ios.search.noResults": "Результатів не знайдено.",
       "ios.explore.peopleNearYouTitle": "Люди поруч з вами",
       "ios.explore.peopleNearYouSubtitle": "Та сама країна, що й у вас",
-      "ios.explore.peopleNearYouEmpty": "Поки що нікого поруч немає."
+      "ios.explore.peopleNearYouEmpty": "Поки що нікого поруч немає.",
+      "ios.play.challengeUnsupported": "Цей тип гри поки не підтримується в цій версії застосунку."
     },
     "fi": {
       "ios.a11y.bookmark": "Kirjanmerkki",
@@ -5472,7 +5502,8 @@
       "ios.search.noResults": "Tuloksia ei löytynyt.",
       "ios.explore.peopleNearYouTitle": "Ihmisiä lähelläsi",
       "ios.explore.peopleNearYouSubtitle": "Sama maa kuin sinulla",
-      "ios.explore.peopleNearYouEmpty": "Ei vielä ketään lähellä."
+      "ios.explore.peopleNearYouEmpty": "Ei vielä ketään lähellä.",
+      "ios.play.challengeUnsupported": "Tätä pelityyppiä ei vielä tueta tässä sovellusversiossa."
     },
     "sk": {
       "ios.a11y.bookmark": "Záložka",
@@ -5648,7 +5679,8 @@
       "ios.search.noResults": "Neboli nájdené žiadne výsledky.",
       "ios.explore.peopleNearYouTitle": "Ľudia v okolí",
       "ios.explore.peopleNearYouSubtitle": "Rovnaká krajina ako vy",
-      "ios.explore.peopleNearYouEmpty": "Zatiaľ nikto v okolí."
+      "ios.explore.peopleNearYouEmpty": "Zatiaľ nikto v okolí.",
+      "ios.play.challengeUnsupported": "Tento typ hry zatiaľ nie je v tejto verzii aplikácie podporovaný."
     },
     "sl": {
       "ios.a11y.bookmark": "Zaznamek",
@@ -5824,7 +5856,8 @@
       "ios.search.noResults": "Ni najdenih rezultatov.",
       "ios.explore.peopleNearYouTitle": "Ljudje v bližini",
       "ios.explore.peopleNearYouSubtitle": "Ista država kot vi",
-      "ios.explore.peopleNearYouEmpty": "Trenutno ni nikogar v bližini."
+      "ios.explore.peopleNearYouEmpty": "Trenutno ni nikogar v bližini.",
+      "ios.play.challengeUnsupported": "Ta vrsta igre v tej različici aplikacije še ni podprta."
     },
     "lt": {
       "ios.a11y.addPhoto": "Pridėti nuotrauką",
@@ -6000,7 +6033,8 @@
       "ios.search.noResults": "Rezultatų nerasta.",
       "ios.explore.peopleNearYouTitle": "Žmonės netoliese",
       "ios.explore.peopleNearYouSubtitle": "Ta pati šalis kaip jūsų",
-      "ios.explore.peopleNearYouEmpty": "Kol kas niekas netoliese."
+      "ios.explore.peopleNearYouEmpty": "Kol kas niekas netoliese.",
+      "ios.play.challengeUnsupported": "Šis žaidimo tipas šioje programėlės versijoje dar nepalaikomas."
     },
     "et": {
       "ios.a11y.bookmark": "Salvesta",
@@ -6176,7 +6210,8 @@
       "ios.search.noResults": "Tulemusi ei leitud.",
       "ios.explore.peopleNearYouTitle": "Inimesed sinu lähedal",
       "ios.explore.peopleNearYouSubtitle": "Sinuga samast riigist",
-      "ios.explore.peopleNearYouEmpty": "Kedagi pole veel lähedal."
+      "ios.explore.peopleNearYouEmpty": "Kedagi pole veel lähedal.",
+      "ios.play.challengeUnsupported": "Seda mängutüüpi ei toetata veel selles rakenduse versioonis."
     },
     "ga": {
       "ios.a11y.bookmark": "Leabharmharc",
@@ -6352,7 +6387,8 @@
       "ios.search.noResults": "Níor aimsíodh aon toradh.",
       "ios.explore.peopleNearYouTitle": "Daoine in aice leat",
       "ios.explore.peopleNearYouSubtitle": "An tír chéanna leat",
-      "ios.explore.peopleNearYouEmpty": "Níl aon duine in aice leat go fóill."
+      "ios.explore.peopleNearYouEmpty": "Níl aon duine in aice leat go fóill.",
+      "ios.play.challengeUnsupported": "Níl an cineál cluiche seo tacaithe fós sa leagan seo den aip."
     },
     "lv": {
       "ios.a11y.bookmark": "Grāmatzīme",
@@ -6528,7 +6564,8 @@
       "ios.search.noResults": "Rezultāti nav atrasti.",
       "ios.explore.peopleNearYouTitle": "Cilvēki tuvumā",
       "ios.explore.peopleNearYouSubtitle": "Tā pati valsts, kas jums",
-      "ios.explore.peopleNearYouEmpty": "Pagaidām neviena tuvumā nav."
+      "ios.explore.peopleNearYouEmpty": "Pagaidām neviena tuvumā nav.",
+      "ios.play.challengeUnsupported": "Šis spēles veids šajā lietotnes versijā vēl netiek atbalstīts."
     },
     "mt": {
       "ios.a11y.bookmark": "Immarka",
@@ -6704,7 +6741,8 @@
       "ios.search.noResults": "L-ebda riżultat ma nstab.",
       "ios.explore.peopleNearYouTitle": "Nies fil-viċinanza tiegħek",
       "ios.explore.peopleNearYouSubtitle": "L-istess pajjiż bħalek",
-      "ios.explore.peopleNearYouEmpty": "Għadu m'hemm ħadd fil-viċinanza."
+      "ios.explore.peopleNearYouEmpty": "Għadu m'hemm ħadd fil-viċinanza.",
+      "ios.play.challengeUnsupported": "Dan it-tip ta' logħba għadu mhux appoġġjat f'din il-verżjoni tal-app."
     },
     "rm": {
       "ios.a11y.bookmark": "Favurit",
@@ -6880,7 +6918,8 @@
       "ios.search.noResults": "Nagins resultats chattads.",
       "ios.explore.peopleNearYouTitle": "Persunas datiers da Vus",
       "ios.explore.peopleNearYouSubtitle": "Medem pajais sco Vus",
-      "ios.explore.peopleNearYouEmpty": "Anc nagin datiers."
+      "ios.explore.peopleNearYouEmpty": "Anc nagin datiers.",
+      "ios.play.challengeUnsupported": "Quest tip da gieu n'è anc betg sustegnì en questa versiun da l'app."
     }
   }
 }

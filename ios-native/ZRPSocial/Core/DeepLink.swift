@@ -105,9 +105,17 @@ enum DeepLink {
             return DeepLinkTarget(.home, .shorts(startId: second))
 
         case "play":
-            // /play, and /play/challenge/{id} for one challenge.
+            // /play, /play/challenge/{id} for one challenge, and
+            // /play/duel/{id} for a specific duel - previously
+            // unrecognized here despite `Route.playDuelDetail(id:)`
+            // already existing and being pushed from `PlayDuelsView`,
+            // so a shared duel link silently landed on the Play home
+            // tab instead of the duel it named.
             if second == "challenge", let id = third {
                 return DeepLinkTarget(.home, .playChallenge(id: id, duelId: nil))
+            }
+            if second == "duel", let id = third {
+                return DeepLinkTarget(.home, .playDuelDetail(id: id))
             }
             return DeepLinkTarget(.home, .play)
 

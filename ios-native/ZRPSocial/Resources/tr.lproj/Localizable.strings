@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Yakınındaki kişiler";
 "ios.explore.peopleNearYouSubtitle" = "Seninle aynı ülke";
 "ios.explore.peopleNearYouEmpty" = "Henüz yakınında kimse yok.";
+"ios.play.challengeUnsupported" = "Bu oyun türü bu uygulama sürümünde henüz desteklenmiyor.";

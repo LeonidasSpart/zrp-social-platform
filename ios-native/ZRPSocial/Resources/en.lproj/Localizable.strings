@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "People near you";
 "ios.explore.peopleNearYouSubtitle" = "Same country as you";
 "ios.explore.peopleNearYouEmpty" = "No one else nearby yet.";
+"ios.play.challengeUnsupported" = "This game type isn't supported in this app version yet.";

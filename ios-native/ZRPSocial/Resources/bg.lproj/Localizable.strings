@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Хора близо до теб";
 "ios.explore.peopleNearYouSubtitle" = "Същата държава като теб";
 "ios.explore.peopleNearYouEmpty" = "Все още няма никого наблизо.";
+"ios.play.challengeUnsupported" = "Този тип игра все още не се поддържа в тази версия на приложението.";

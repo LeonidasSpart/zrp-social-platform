@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Personen in deiner Nähe";
 "ios.explore.peopleNearYouSubtitle" = "Gleiches Land wie du";
 "ios.explore.peopleNearYouEmpty" = "Noch niemand in der Nähe.";
+"ios.play.challengeUnsupported" = "Dieser Spieltyp wird in dieser App-Version noch nicht unterstützt.";

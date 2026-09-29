@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Inimesed sinu lähedal";
 "ios.explore.peopleNearYouSubtitle" = "Sinuga samast riigist";
 "ios.explore.peopleNearYouEmpty" = "Kedagi pole veel lähedal.";
+"ios.play.challengeUnsupported" = "Seda mängutüüpi ei toetata veel selles rakenduse versioonis.";

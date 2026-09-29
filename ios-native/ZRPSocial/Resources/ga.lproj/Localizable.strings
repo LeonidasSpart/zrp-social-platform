@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Daoine in aice leat";
 "ios.explore.peopleNearYouSubtitle" = "An tír chéanna leat";
 "ios.explore.peopleNearYouEmpty" = "Níl aon duine in aice leat go fóill.";
+"ios.play.challengeUnsupported" = "Níl an cineál cluiche seo tacaithe fós sa leagan seo den aip.";
