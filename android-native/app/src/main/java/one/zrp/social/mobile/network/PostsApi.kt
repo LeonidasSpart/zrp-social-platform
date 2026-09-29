@@ -117,6 +117,17 @@ data class Post(
     val location: String? = null,
     val applyUrl: String? = null,
     val body: String? = null,
+    // Present only on a gated pay-per-view post this viewer hasn't
+    // purchased (see applyPremiumGating in src/lib/premium-content.ts,
+    // applied uniformly to every post-returning endpoint including
+    // GET /api/videos - the feed this app's Shorts screen reads from).
+    // Reuses DiscoverPremiumPost's identical {id, price, currency,
+    // previewContent, locked} shape rather than a second, duplicate
+    // type for the same server-side contract. Was previously missing
+    // here entirely, so a locked Short (imageUrl redacted to null by
+    // the same gating) rendered as a blank playback surface with no
+    // lock icon, no preview text, and no way to tell what happened.
+    val premiumPost: DiscoverPremiumPost? = null,
 )
 
 data class PostViewResponse(val views: Int?)

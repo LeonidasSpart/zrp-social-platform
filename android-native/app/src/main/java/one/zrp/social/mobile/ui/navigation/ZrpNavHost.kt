@@ -1313,6 +1313,7 @@ fun ZrpNavHost(
                     onBack = { navController.popBackStack() },
                     onOpenComments = goToComments,
                     onAuthorClick = goToProfile,
+                    onViewPost = { postId -> goToPost(postId, null) },
                 )
             }
             composable("discover") {
@@ -1349,6 +1350,7 @@ fun ZrpNavHost(
                     onBack = { navController.popBackStack() },
                     onOpenComments = goToComments,
                     onAuthorClick = goToProfile,
+                    onViewPost = { id -> goToPost(id, null) },
                     startPostId = postId,
                 )
             }
