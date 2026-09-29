@@ -27,18 +27,25 @@ import { searchMarketplace } from "@/lib/search/categories/marketplace";
 // &community=<slug>                   (scopes Posts/Hashtags to one Community)
 // &cursor=<opaque>  &limit=<n>
 //
-// type=all (the default, and the ONLY mode the pre-existing callers
-// below ever use) returns the pre-existing {users, posts} shape
+// type=all (the default) returns the pre-existing {users, posts} shape
 // UNCHANGED, plus the same shape for every other category - additive,
 // not a breaking change. It is a fixed-size teaser per category
 // (`cursor` is ignored in this mode); a client asking for "more" of one
 // category switches to type=<category>, which honors `cursor`/`limit`
 // for genuine pagination and returns {results, nextCursor, category,
-// sort}. Existing callers that only read `.users`/`.posts` - the Web
-// mention-autocomplete's own call, Android's SearchViewModel/
-// OpponentSearchView/UserMultiSelectField/CreatePostViewModel and iOS's
-// SearchViewModel/PlayChallengeView/PeoplePickerView - keep working
-// unchanged, since they never read the new keys.
+// sort}. type=users/type=posts predate this rewrite and are the one
+// other mode pre-existing callers actually use directly (not just
+// type=all) - Web's SharePostModal/OpponentSearch/UserMultiSelect/
+// MentionAutocomplete/explore page, Android's SearchRepository.
+// searchUsers/PlayRepository.searchOpponents/the group-chat picker's
+// MentionAutocomplete, all sending `type=users` and reading a bare
+// `.users` array with no `results`/`nextCursor` wrapper. Those two
+// category responses additively carry the legacy `users`/`posts` key
+// alongside the new `results`/`nextCursor` shape for exactly that
+// reason (see the `legacyShape` below) - every other category is new
+// API surface with no such constraint. iOS's SearchViewModel/
+// PlayChallengeView/PeoplePickerView all call `type=all` and never hit
+// this branch at all.
 const ALL_MODE_LIMITS: Partial<Record<SearchCategory, number>> = {
   // Preserves the exact pre-existing counts those callers already
   // depend on (10 users for mention-autocomplete-style pickers, 20
@@ -90,15 +97,35 @@ export async function GET(req: NextRequest) {
 
     if (category !== "all") {
       const cursor = req.nextUrl.searchParams.get("cursor");
-      const limit = parseLimit(req, SINGLE_CATEGORY_DEFAULT_LIMIT);
+      // type=users/type=posts predate this file's rewrite (git blame:
+      // the original route only ever accepted type=all|users|posts) and
+      // several real, unrelated callers - Web's SharePostModal,
+      // OpponentSearch, UserMultiSelect, MentionAutocomplete,
+      // explore/page.tsx; Android's SearchRepository.searchUsers,
+      // PlayRepository.searchOpponents, the group-chat picker and its
+      // own MentionAutocomplete - still call exactly `type=users` (never
+      // `type=posts` in practice, but both are part of the same old
+      // contract) and read a bare `.users`/`.posts` array off the
+      // response with no `results`/`nextCursor` wrapper, expecting the
+      // original 10-user/20-post cap. Defaulting `limit` from the same
+      // ALL_MODE_LIMITS map those callers already depend on, and
+      // additively including the legacy `users`/`posts` key alongside
+      // the new `results`/`nextCursor` shape, keeps both the old
+      // contract and the new paginated one honestly true at once rather
+      // than silently breaking every one of those call sites (they would
+      // otherwise decode `results`, not `users`/`posts`, and see empty
+      // lists).
+      const limit = parseLimit(req, ALL_MODE_LIMITS[category] ?? SINGLE_CATEGORY_DEFAULT_LIMIT);
       const params: SearchQueryParams = { query, sort, filters, viewerId, excludedAuthorIds, cursor, limit };
       const { items, nextCursor } = await CATEGORY_SEARCHERS[category](params);
+      const legacyShape =
+        category === "users" ? { users: items } : category === "posts" ? { posts: items } : {};
       // ⚠️ Listing.price (marketplace) is a Prisma Decimal, which
       // JSON.stringify serializes as a decimal.js internal object, not
       // a plain number - jsonWithDecimals walks the payload and
       // converts every Decimal to a number first (src/lib/serialize-
       // decimal.ts, the same helper GET /api/listings already uses).
-      return jsonWithDecimals({ results: items, nextCursor, category, sort });
+      return jsonWithDecimals({ results: items, nextCursor, category, sort, ...legacyShape });
     }
 
     const categories = Object.keys(CATEGORY_SEARCHERS) as SearchCategory[];

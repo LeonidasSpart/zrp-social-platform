@@ -112,6 +112,33 @@ describe.skipIf(!hasRealDatabaseUrl)("GET /api/search (integration, real Postgre
       expect(ids).toContain(byName.id);
     });
 
+    // Regression: type=users predates this rewrite and several real,
+    // unrelated callers (Web's SharePostModal/OpponentSearch/
+    // UserMultiSelect/MentionAutocomplete/explore page; Android's
+    // SearchRepository.searchUsers/PlayRepository.searchOpponents/the
+    // group-chat picker's MentionAutocomplete) still send exactly this
+    // request and decode a bare `.users` array with no `results`/
+    // `nextCursor` wrapper - a regression this test would have caught
+    // during this feature's own development, since `.results` alone
+    // silently looks correct in isolation.
+    it("also carries the legacy {users} shape for type=users, matching results, capped at 10 by default", async () => {
+      // `tag` is a prefix of every seeded username below (createUser
+      // appends its own runId suffix, so building the query as a prefix
+      // - rather than trying to reproduce the exact truncated username -
+      // guarantees a substring match regardless of `.slice(0, 20)`
+      // truncation or the numeric suffix in between).
+      const tag = `legacyusr${runId}`;
+      const matches = await Promise.all(Array.from({ length: 12 }, (_, i) => createUser(`${tag}${i}`)));
+      getServerSession.mockResolvedValueOnce(null);
+
+      const res = await GET(req({ q: tag, type: "users" }));
+      const body = await res.json();
+      expect(Array.isArray(body.users)).toBe(true);
+      expect(body.users).toEqual(body.results);
+      expect(body.users.length).toBe(10);
+      expect(matches.length).toBe(12);
+    });
+
     it("never returns a banned account", async () => {
       const banned = await createUser(`bannedsearch${runId}`, { banned: true });
       getServerSession.mockResolvedValueOnce(null);
