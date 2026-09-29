@@ -400,7 +400,7 @@
     <string name="search_sort_recent">L-aktar reċenti</string>
     <string name="search_sort_engagement">L-aktar involviment</string>
     <string name="search_sort_trending">Popolari</string>
-    <string name="search_date_range">Firxa ta' dati</string>
+    <string name="search_date_range">Firxa ta\' dati</string>
     <string name="search_date_any">Fi kwalunkwe ħin</string>
     <string name="search_date_24h">L-aħħar 24 siegħa</string>
     <string name="search_date_7d">L-aħħar 7 ijiem</string>
