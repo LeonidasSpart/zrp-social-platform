@@ -73,6 +73,7 @@ import one.zrp.social.mobile.ui.components.ReportDialog
 import one.zrp.social.mobile.ui.components.VerifiedBadge
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
+import one.zrp.social.mobile.util.localizedError
 
 /**
  * A single listing - the same real image carousel, description, seller
@@ -111,6 +112,30 @@ fun ListingDetailScreen(
             state.isLoading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            }
+            // A genuine load failure (offline, timeout, server error) used
+            // to render as "listing not found" with only a back button -
+            // the exact same dead end a real 404 shows, with no way to
+            // retry a transient failure. See ListingDetailViewModel's own
+            // notFound-vs-error split for how these are now told apart.
+            state.error != null && state.listing == null -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(Spacing.xl),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = localizedError(state.error) ?: stringResource(R.string.marketplace_listing_not_found),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Button(onClick = { viewModel.refresh() }, modifier = Modifier.padding(top = Spacing.md)) {
+                        Text(stringResource(R.string.action_retry))
+                    }
+                    OutlinedButton(onClick = onBack, modifier = Modifier.padding(top = Spacing.sm)) {
+                        Text(stringResource(R.string.marketplace_back_to_marketplace))
+                    }
                 }
             }
             state.notFound || state.listing == null -> {
