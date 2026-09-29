@@ -116,7 +116,10 @@ class GroupConversationViewModel(
         val liveSocket = ZrpSocket.connect(tokenStore)
         socket = liveSocket
 
-        liveSocket.on(Socket.EVENT_CONNECT, Emitter.Listener { liveSocket.emit("join-conversation", conversationId) })
+        liveSocket.on(Socket.EVENT_CONNECT, Emitter.Listener {
+            liveSocket.emit("join-conversation", conversationId)
+            reRequestAllParticipantStatus()
+        })
 
         liveSocket.on("receive-group-message", Emitter.Listener { args ->
             val preview = parsePayload(args, SocketGroupMessagePreview::class.java) ?: return@Listener
@@ -254,6 +257,26 @@ class GroupConversationViewModel(
         val liveSocket = socket ?: return
         detail.participants.forEach { participant ->
             if (participant.userId != currentUserId && requestedStatusFor.add(participant.userId)) {
+                liveSocket.emit("get-status", participant.userId)
+            }
+        }
+    }
+
+    // Re-requests presence for every currently-known participant,
+    // unconditionally (bypassing requestParticipantStatus's own
+    // requestedStatusFor dedup gate) - called on every socket reconnect,
+    // not just the first connect, since Socket.IO's client fires
+    // EVENT_CONNECT again after any automatic reconnect, not only on the
+    // very first one. Without this, every group member's presence dot
+    // froze at its pre-drop value for the rest of this screen's
+    // lifetime after any network blip - the same staleness bug
+    // ConversationViewModel's own EVENT_CONNECT handler already fixes
+    // for the 1:1 case (see its KDoc). A no-op until the conversation's
+    // participant list has actually loaded once.
+    private fun reRequestAllParticipantStatus() {
+        val liveSocket = socket ?: return
+        _state.value.conversation?.participants?.forEach { participant ->
+            if (participant.userId != currentUserId) {
                 liveSocket.emit("get-status", participant.userId)
             }
         }
