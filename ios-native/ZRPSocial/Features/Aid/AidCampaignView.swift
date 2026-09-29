@@ -67,13 +67,24 @@ final class AidCampaignViewModel: ObservableObject {
 struct AidCampaignView: View {
 
     @EnvironmentObject private var navigator: Navigator
+    @EnvironmentObject private var session: SessionController
+    let campaignId: String
     @StateObject private var viewModel: AidCampaignViewModel
     @State private var offering: HelpNeedType?
+    @State private var isReporting = false
 
     init(campaignId: String) {
+        self.campaignId = campaignId
         _viewModel = StateObject(
             wrappedValue: AidCampaignViewModel(campaignId: campaignId)
         )
+    }
+
+    /// Reporting your own campaign is meaningless when you organized it.
+    private func isOwner(_ campaign: HelpCampaign) -> Bool {
+        guard let organizerId = campaign.organizer?.id, let viewerId = session.currentUser?.id
+        else { return false }
+        return organizerId == viewerId
     }
 
     var body: some View {
@@ -93,10 +104,26 @@ struct AidCampaignView: View {
         .navigationTitle(Text(.navHelp))
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
+        .toolbar {
+            // `POST /api/reports` has accepted `campaignId` since HELP
+            // campaigns shipped, and web already has a working Report
+            // button here - this app never built one.
+            if case .loaded(let campaign) = viewModel.phase, !isOwner(campaign) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { isReporting = true } label: {
+                        Image(systemName: "flag")
+                    }
+                    .accessibilityLabel(Text(.reportModalTitle))
+                }
+            }
+        }
         .sheet(item: $offering) { need in
             OfferHelpSheet(needType: need) { message in
                 await viewModel.offer(needType: need, message: message)
             }
+        }
+        .sheet(isPresented: $isReporting) {
+            ReportSheet(target: .campaign(campaignId))
         }
         .alert(
             Text(.iosErrorGenericTitle),

@@ -91,13 +91,25 @@ struct OpportunityDetailView: View {
     @EnvironmentObject private var navigator: Navigator
     @Environment(\.openURL) private var openURL
 
+    let listingId: String
     @StateObject private var viewModel: OpportunityDetailViewModel
     @State private var isApplying = false
+    @State private var isReporting = false
 
     init(listingId: String) {
+        self.listingId = listingId
         _viewModel = StateObject(
             wrappedValue: OpportunityDetailViewModel(listingId: listingId)
         )
+    }
+
+    /// Reporting your own listing is meaningless when you posted it -
+    /// same rule the Marketplace equivalent uses.
+    private func isOwner(_ listing: Opportunity) -> Bool {
+        guard let posterId = listing.poster?.id, let viewerId = session.currentUser?.id else {
+            return false
+        }
+        return posterId == viewerId
     }
 
     var body: some View {
@@ -117,8 +129,24 @@ struct OpportunityDetailView: View {
         .navigationTitle(Text(.navOpportunity))
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
+        .toolbar {
+            // `POST /api/reports` has accepted `opportunityId` since this
+            // listing type shipped, and web already has a working Report
+            // button here - this app never built one.
+            if case .loaded(let listing) = viewModel.phase, !isOwner(listing) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { isReporting = true } label: {
+                        Image(systemName: "flag")
+                    }
+                    .accessibilityLabel(Text(.reportModalTitle))
+                }
+            }
+        }
         .sheet(isPresented: $isApplying) {
             ApplySheet { note, resumeUrl in await viewModel.apply(coverNote: note, resumeUrl: resumeUrl) }
+        }
+        .sheet(isPresented: $isReporting) {
+            ReportSheet(target: .opportunity(listingId))
         }
         .alert(
             Text(.iosErrorGenericTitle),
