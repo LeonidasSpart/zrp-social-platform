@@ -387,6 +387,29 @@ describe.skipIf(!hasRealDatabaseUrl)("GET /api/search (integration, real Postgre
       expect(ids).not.toContain(pending.id);
     });
 
+    it("serializes price as a plain number, not a Decimal object", async () => {
+      const seller = await createUser(`pricedseller${runId}`);
+      const priced = await prisma.listing.create({
+        data: {
+          sellerId: seller.id,
+          category: "OTHER_LUXURY",
+          title: `Priced Item ${runId}`,
+          description: "desc",
+          status: "ACTIVE",
+          price: 4999.5,
+        },
+      });
+      listingIds.push(priced.id);
+      getServerSession.mockResolvedValueOnce(null);
+
+      const res = await GET(req({ q: `Priced Item ${runId}`, type: "marketplace" }));
+      const body = await res.json();
+      const found = body.results.find((l: { id: string }) => l.id === priced.id);
+      expect(found).toBeDefined();
+      expect(typeof found.price).toBe("number");
+      expect(found.price).toBe(4999.5);
+    });
+
     it("⚠️ SECURITY: never returns an expired listing", async () => {
       const seller = await createUser(`expiredseller${runId}`);
       const expired = await prisma.listing.create({

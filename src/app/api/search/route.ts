@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getExcludedAuthorIds } from "@/lib/permissions";
+import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { parseSearchCategory, parseSearchFilters, parseSearchSort } from "@/lib/search/params";
 import type { SearchCategory, SearchQueryParams } from "@/lib/search/types";
 import { searchUsers } from "@/lib/search/categories/users";
@@ -92,7 +93,12 @@ export async function GET(req: NextRequest) {
       const limit = parseLimit(req, SINGLE_CATEGORY_DEFAULT_LIMIT);
       const params: SearchQueryParams = { query, sort, filters, viewerId, excludedAuthorIds, cursor, limit };
       const { items, nextCursor } = await CATEGORY_SEARCHERS[category](params);
-      return NextResponse.json({ results: items, nextCursor, category, sort });
+      // ⚠️ Listing.price (marketplace) is a Prisma Decimal, which
+      // JSON.stringify serializes as a decimal.js internal object, not
+      // a plain number - jsonWithDecimals walks the payload and
+      // converts every Decimal to a number first (src/lib/serialize-
+      // decimal.ts, the same helper GET /api/listings already uses).
+      return jsonWithDecimals({ results: items, nextCursor, category, sort });
     }
 
     const categories = Object.keys(CATEGORY_SEARCHERS) as SearchCategory[];
@@ -112,7 +118,7 @@ export async function GET(req: NextRequest) {
       nextCursors[cat] = page.nextCursor;
     }
 
-    return NextResponse.json({ ...results, nextCursors, sort });
+    return jsonWithDecimals({ ...results, nextCursors, sort });
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json({ error: "Search failed" }, { status: 500 });
