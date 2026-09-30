@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "من نفس بلدك";
 "ios.explore.peopleNearYouEmpty" = "لا يوجد أحد قريب بعد.";
 "ios.play.challengeUnsupported" = "هذا النوع من الألعاب غير مدعوم بعد في هذا الإصدار من التطبيق.";
+"ios.notifications.pushSettingsTitle" = "الإشعارات الفورية";
+"ios.notifications.statusEnabledTitle" = "الإشعارات مفعّلة";
+"ios.notifications.statusEnabledDesc" = "سيتم إشعارك بالرسائل والإعجابات والتعليقات والمتابعين والمكالمات الواردة، حتى عندما يكون ZRP مغلقًا.";
+"ios.notifications.statusNotDeterminedTitle" = "تفعيل الإشعارات";
+"ios.notifications.statusNotDeterminedDesc" = "احصل على إشعارات بالرسائل والإعجابات والتعليقات والمتابعين والمكالمات الواردة، حتى عندما يكون ZRP مغلقًا.";
+"ios.notifications.enableButton" = "تفعيل الإشعارات";
+"ios.notifications.statusDeniedTitle" = "الإشعارات معطّلة";
+"ios.notifications.statusDeniedDesc" = "فعّل الإشعارات في إعدادات iOS لتلقّي الرسائل والإعجابات والتعليقات والمتابعين والمكالمات الواردة عندما يكون ZRP مغلقًا.";
+"ios.notifications.openSettingsButton" = "فتح الإعدادات";

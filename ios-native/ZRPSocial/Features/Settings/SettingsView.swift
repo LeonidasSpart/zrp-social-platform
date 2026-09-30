@@ -38,6 +38,9 @@ struct SettingsView: View {
                 NavigationLink(value: Route.emailPreferences) {
                     Label { Text(.iosEmailPrefsTitle) } icon: { Image(systemName: "envelope") }
                 }
+                NavigationLink(value: Route.notificationSettings) {
+                    Label { Text(.iosNotificationsPushSettingsTitle) } icon: { Image(systemName: "bell.badge") }
+                }
                 NavigationLink(value: Route.changePassword) {
                     Label { Text(.settingsChangePassword) } icon: { Image(systemName: "key") }
                 }

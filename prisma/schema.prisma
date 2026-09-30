@@ -542,7 +542,8 @@ model User {
   notifications     Notification[] @relation("Notification_user")
   sentNotifications Notification[] @relation("Notification_fromUser")
 
-  fcmTokens FcmToken[]
+  fcmTokens  FcmToken[]
+  voipTokens VoipToken[]
 
   sentMessages     Message[] @relation("Message_sender")
   receivedMessages Message[] @relation("Message_receiver")
@@ -1033,6 +1034,29 @@ model FcmToken {
   // doesn't send one, since that was the only platform this ever
   // supported until the iOS app existed.
   platform String @default("android")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// A PushKit VoIP token, distinct from FcmToken: it comes from
+// PKPushRegistry (not UNUserNotificationCenter/FCM), is delivered over
+// the APNs "voip" topic instead of the ordinary alert topic, and a
+// device that has one still separately registers an FcmToken for
+// ordinary pushes - the two are independent subscriptions on iOS.
+// "ios" is the only platform today (Android/Web have no VoIP-push
+// equivalent - see ios-native/PARITY.md), but the column exists for
+// the same reason FcmToken.platform does.
+model VoipToken {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token    String @unique
+  platform String @default("ios")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

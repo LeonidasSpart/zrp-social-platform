@@ -123,4 +123,21 @@ struct Endpoint {
     static func delete(_ path: String, requiresAuth: Bool = true) -> Endpoint {
         Endpoint(method: .delete, path: path, requiresAuth: requiresAuth)
     }
+
+    /// A DELETE that scopes what it deletes with a JSON body rather than
+    /// a path segment - `DELETE /api/push/fcm` and `/api/push/voip` take
+    /// `{token}` this way rather than `/api/push/fcm/{token}`, since a
+    /// device token is not a path-safe identifier by construction.
+    static func delete<Body: Encodable>(
+        _ path: String,
+        body: Body,
+        requiresAuth: Bool = true
+    ) throws -> Endpoint {
+        Endpoint(
+            method: .delete,
+            path: path,
+            body: try JSONEncoder().encode(body),
+            requiresAuth: requiresAuth
+        )
+    }
 }

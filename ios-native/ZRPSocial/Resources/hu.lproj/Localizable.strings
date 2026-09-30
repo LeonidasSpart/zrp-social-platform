@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Ugyanaz az ország, mint te";
 "ios.explore.peopleNearYouEmpty" = "Még senki sincs a közelben.";
 "ios.play.challengeUnsupported" = "Ezt a játéktípust ez az alkalmazásverzió még nem támogatja.";
+"ios.notifications.pushSettingsTitle" = "Push-értesítések";
+"ios.notifications.statusEnabledTitle" = "Az értesítések be vannak kapcsolva";
+"ios.notifications.statusEnabledDesc" = "Értesítést kapsz üzenetekről, kedvelésekről, hozzászólásokról, követőkről és bejövő hívásokról, még akkor is, ha a ZRP nincs megnyitva.";
+"ios.notifications.statusNotDeterminedTitle" = "Értesítések bekapcsolása";
+"ios.notifications.statusNotDeterminedDesc" = "Kapj értesítést üzenetekről, kedvelésekről, hozzászólásokról, követőkről és bejövő hívásokról, még akkor is, ha a ZRP nincs megnyitva.";
+"ios.notifications.enableButton" = "Értesítések bekapcsolása";
+"ios.notifications.statusDeniedTitle" = "Az értesítések ki vannak kapcsolva";
+"ios.notifications.statusDeniedDesc" = "Kapcsold be az értesítéseket az iOS beállításaiban, hogy üzeneteket, kedveléseket, hozzászólásokat, követőket és hívásokat kapj, amikor a ZRP nincs megnyitva.";
+"ios.notifications.openSettingsButton" = "Beállítások megnyitása";

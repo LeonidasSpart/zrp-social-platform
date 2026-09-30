@@ -2,6 +2,7 @@ import webpush from "web-push";
 import crypto from "crypto";
 import { prisma } from "./db";
 import { sendFcmPush } from "./fcm";
+import { sendApnsAlert } from "./apns";
 // Initialize Web Push lazily.
 // Do not initialize VAPID at module/build time.
 function getWebPush() {
@@ -115,13 +116,25 @@ export async function sendPushNotification(
   body: string,
   url: string = "/"
 ) {
-  // Native Android (FCM) and browser (Web Push) are independent
-  // delivery paths with their own subscriber lists - one having no
-  // registered devices, or erroring, must never stop the other.
+  // Android (FCM), iOS (direct APNs), and browser (Web Push) are
+  // independent delivery paths with their own subscriber lists - one
+  // having no registered devices, or erroring, must never stop another.
+  // sendFcmPush only ever reaches FcmToken rows FCM can actually
+  // deliver to; sendApnsAlert separately reaches the ones sendFcmPush
+  // cannot (platform "ios" - see apns.ts's own doc comment for why FCM
+  // can't bridge to APNs for this app today). Both read the same
+  // FcmToken table, filtered by platform, so a token is never sent to
+  // twice.
   try {
     await sendFcmPush(userId, title, body, url);
   } catch (err) {
     console.error("FCM push notification error:", err);
+  }
+
+  try {
+    await sendApnsAlert(userId, title, body, url);
+  } catch (err) {
+    console.error("APNs push notification error:", err);
   }
 
   try {

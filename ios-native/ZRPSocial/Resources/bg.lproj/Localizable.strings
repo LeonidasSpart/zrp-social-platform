@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Същата държава като теб";
 "ios.explore.peopleNearYouEmpty" = "Все още няма никого наблизо.";
 "ios.play.challengeUnsupported" = "Този тип игра все още не се поддържа в тази версия на приложението.";
+"ios.notifications.pushSettingsTitle" = "Push известия";
+"ios.notifications.statusEnabledTitle" = "Известията са включени";
+"ios.notifications.statusEnabledDesc" = "Ще бъдете уведомявани за съобщения, харесвания, коментари, последователи и входящи обаждания, дори когато ZRP не е отворено.";
+"ios.notifications.statusNotDeterminedTitle" = "Включете известията";
+"ios.notifications.statusNotDeterminedDesc" = "Получавайте известия за съобщения, харесвания, коментари, последователи и входящи обаждания, дори когато ZRP не е отворено.";
+"ios.notifications.enableButton" = "Включи известията";
+"ios.notifications.statusDeniedTitle" = "Известията са изключени";
+"ios.notifications.statusDeniedDesc" = "Включете известията в настройките на iOS, за да получавате съобщения, харесвания, коментари, последователи и обаждания, когато ZRP не е отворено.";
+"ios.notifications.openSettingsButton" = "Отвори настройките";

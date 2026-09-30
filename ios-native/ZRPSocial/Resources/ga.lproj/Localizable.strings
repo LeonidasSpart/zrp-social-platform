@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "An tír chéanna leat";
 "ios.explore.peopleNearYouEmpty" = "Níl aon duine in aice leat go fóill.";
 "ios.play.challengeUnsupported" = "Níl an cineál cluiche seo tacaithe fós sa leagan seo den aip.";
+"ios.notifications.pushSettingsTitle" = "Fógraí Sá";
+"ios.notifications.statusEnabledTitle" = "Tá na fógraí ann";
+"ios.notifications.statusEnabledDesc" = "Cuirfear in iúl duit faoi theachtaireachtaí, taitneamh, tuairimí, leantóirí, agus glaonna isteach, fiú nuair nach bhfuil ZRP oscailte.";
+"ios.notifications.statusNotDeterminedTitle" = "Cuir na fógraí ar siúl";
+"ios.notifications.statusNotDeterminedDesc" = "Faigh fógraí faoi theachtaireachtaí, taitneamh, tuairimí, leantóirí, agus glaonna isteach, fiú nuair nach bhfuil ZRP oscailte.";
+"ios.notifications.enableButton" = "Cumasaigh Fógraí";
+"ios.notifications.statusDeniedTitle" = "Tá na fógraí múchta";
+"ios.notifications.statusDeniedDesc" = "Cuir na fógraí ar siúl i Socruithe iOS chun teachtaireachtaí, taitneamh, tuairimí, leantóirí, agus glaonna a fháil nuair nach bhfuil ZRP oscailte.";
+"ios.notifications.openSettingsButton" = "Oscail Socruithe";

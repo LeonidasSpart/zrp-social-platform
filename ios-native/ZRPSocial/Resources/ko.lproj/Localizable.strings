@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "당신과 같은 국가";
 "ios.explore.peopleNearYouEmpty" = "아직 주변에 아무도 없습니다.";
 "ios.play.challengeUnsupported" = "이 게임 유형은 이 앱 버전에서 아직 지원되지 않습니다.";
+"ios.notifications.pushSettingsTitle" = "푸시 알림";
+"ios.notifications.statusEnabledTitle" = "알림이 켜져 있습니다";
+"ios.notifications.statusEnabledDesc" = "ZRP가 열려 있지 않아도 메시지, 좋아요, 댓글, 팔로우, 수신 전화에 대한 알림을 받게 됩니다.";
+"ios.notifications.statusNotDeterminedTitle" = "알림 켜기";
+"ios.notifications.statusNotDeterminedDesc" = "ZRP가 열려 있지 않아도 메시지, 좋아요, 댓글, 팔로우, 수신 전화에 대한 알림을 받으세요.";
+"ios.notifications.enableButton" = "알림 켜기";
+"ios.notifications.statusDeniedTitle" = "알림이 꺼져 있습니다";
+"ios.notifications.statusDeniedDesc" = "ZRP가 열려 있지 않을 때 메시지, 좋아요, 댓글, 팔로우, 전화를 받으려면 iOS 설정에서 알림을 켜세요.";
+"ios.notifications.openSettingsButton" = "설정 열기";

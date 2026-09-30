@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Seninle aynı ülke";
 "ios.explore.peopleNearYouEmpty" = "Henüz yakınında kimse yok.";
 "ios.play.challengeUnsupported" = "Bu oyun türü bu uygulama sürümünde henüz desteklenmiyor.";
+"ios.notifications.pushSettingsTitle" = "Anlık Bildirimler";
+"ios.notifications.statusEnabledTitle" = "Bildirimler açık";
+"ios.notifications.statusEnabledDesc" = "ZRP açık olmasa bile mesajlar, beğeniler, yorumlar, takipçiler ve gelen aramalar hakkında bildirim alacaksınız.";
+"ios.notifications.statusNotDeterminedTitle" = "Bildirimleri aç";
+"ios.notifications.statusNotDeterminedDesc" = "ZRP açık olmasa bile mesajlar, beğeniler, yorumlar, takipçiler ve gelen aramalar hakkında bildirim alın.";
+"ios.notifications.enableButton" = "Bildirimleri Aç";
+"ios.notifications.statusDeniedTitle" = "Bildirimler kapalı";
+"ios.notifications.statusDeniedDesc" = "ZRP açık olmadığında mesaj, beğeni, yorum, takipçi ve arama almak için iOS Ayarları'ndan bildirimleri açın.";
+"ios.notifications.openSettingsButton" = "Ayarları Aç";

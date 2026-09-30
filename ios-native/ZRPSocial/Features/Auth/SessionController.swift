@@ -30,6 +30,15 @@ final class SessionController: ObservableObject {
     private let repository: AuthRepositoryProtocol
     private var expiryObserver: NSObjectProtocol?
 
+    /// Set from `ZRPSocialApp`'s launch-time `.task`, once the push
+    /// coordinators exist (the same two-phase-init pattern
+    /// `PushCoordinator.attach`/`VoipPushCoordinator.attach` use) -
+    /// unregisters this device's APNs alert and VoIP tokens. `nil` (the
+    /// default, and what every existing/future unit test that
+    /// constructs a bare `SessionController` gets) just means "nothing
+    /// to unregister," never a crash.
+    var unregisterPushTokens: (() async -> Void)?
+
     init(repository: AuthRepositoryProtocol = AuthRepository()) {
         self.repository = repository
 
@@ -107,6 +116,12 @@ final class SessionController: ObservableObject {
         // Before the token goes: a socket authenticated as this viewer
         // must not outlive them on a shared device.
         ZrpSocket.shared.disconnect()
+        // Before repository.logout() clears the session - the
+        // authenticated DELETE /api/push/fcm and /api/push/voip calls
+        // this makes would themselves 401 afterward. Matches Android's
+        // own unregister-before-clear ordering (PushRepository.kt's
+        // logout()).
+        await unregisterPushTokens?()
         await repository.logout()
         expiryNotice = nil
         state = .signedOut
@@ -115,6 +130,11 @@ final class SessionController: ObservableObject {
     private func handleSessionExpired() {
         guard state != .signedOut else { return }
         ZrpSocket.shared.disconnect()
+        // Best-effort only here: the session is already invalid by the
+        // time this fires (comment above), so the unregister calls will
+        // likely 401 themselves - each one fails soft and is logged,
+        // never thrown, so this is harmless either way.
+        Task { await unregisterPushTokens?() }
         state = .signedOut
         expiryNotice = L10n.string(.authErrSessionExpired)
     }

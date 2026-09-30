@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "I njëjti vend si ju";
 "ios.explore.peopleNearYouEmpty" = "Ende nuk ka njeri pranë.";
 "ios.play.challengeUnsupported" = "Ky lloj loje nuk mbështetet ende në këtë version të aplikacionit.";
+"ios.notifications.pushSettingsTitle" = "Njoftimet push";
+"ios.notifications.statusEnabledTitle" = "Njoftimet janë aktive";
+"ios.notifications.statusEnabledDesc" = "Do të njoftoheni për mesazhe, pëlqime, komente, ndjekës dhe telefonata hyrëse, edhe kur ZRP nuk është i hapur.";
+"ios.notifications.statusNotDeterminedTitle" = "Aktivizo njoftimet";
+"ios.notifications.statusNotDeterminedDesc" = "Merrni njoftime për mesazhe, pëlqime, komente, ndjekës dhe telefonata hyrëse, edhe kur ZRP nuk është i hapur.";
+"ios.notifications.enableButton" = "Aktivizo njoftimet";
+"ios.notifications.statusDeniedTitle" = "Njoftimet janë joaktive";
+"ios.notifications.statusDeniedDesc" = "Aktivizo njoftimet te Cilësimet e iOS për të marrë mesazhe, pëlqime, komente, ndjekës dhe telefonata kur ZRP nuk është i hapur.";
+"ios.notifications.openSettingsButton" = "Hap Cilësimet";

@@ -66,6 +66,11 @@ enum Route: Hashable {
     case editProfile
     case accountSettings
     case emailPreferences
+    /// Device push notification permission status - separate from
+    /// `emailPreferences` (a server-side setting) since this is a raw
+    /// iOS permission with its own state machine; see
+    /// `NotificationSettingsView`/`PushCoordinator`.
+    case notificationSettings
     case appeals
     case trustPassport(username: String)
     case bookmarks

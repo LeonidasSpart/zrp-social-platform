@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash, timingSafeEqual } from "crypto";
 import { sendPushNotification } from "@/lib/push-notifications";
+import { sendApnsVoip } from "@/lib/apns";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { receiverId, callerName, callerUsername, isVideo } = await req.json();
+    const { receiverId, callerId, callId, callerName, callerUsername, isVideo } = await req.json();
     if (
       typeof receiverId !== "string" ||
       !receiverId ||
@@ -60,6 +61,23 @@ export async function POST(req: NextRequest) {
       `${callerName} is calling you`,
       `/messages/${callerUsername}`
     );
+
+    // A structured PushKit VoIP push, separate from the alert push
+    // above: CallKit needs callerId/callId to report the call via
+    // CXProvider without first parsing title text or making a network
+    // round-trip (a hard PushKit requirement). Only sent when the
+    // caller (server.js) actually supplied both - older/other call
+    // paths that don't have a callId yet simply don't get a VoIP push,
+    // same fail-soft posture as every other optional field here.
+    if (typeof callerId === "string" && callerId && typeof callId === "string" && callId) {
+      await sendApnsVoip(receiverId, {
+        callerId,
+        callId,
+        callerName,
+        callerUsername,
+        isVideo: isVideo === true,
+      });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

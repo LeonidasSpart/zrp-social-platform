@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Medem pajais sco Vus";
 "ios.explore.peopleNearYouEmpty" = "Anc nagin datiers.";
 "ios.play.challengeUnsupported" = "Quest tip da gieu n'è anc betg sustegnì en questa versiun da l'app.";
+"ios.notifications.pushSettingsTitle" = "Communicaziuns push";
+"ios.notifications.statusEnabledTitle" = "Las communicaziuns èn activadas";
+"ios.notifications.statusEnabledDesc" = "Ti vegns infurmà davart messadis, la plaschair, commentaris, sequitaders e clamadas entrantas, era cur che ZRP n'è betg avert.";
+"ios.notifications.statusNotDeterminedTitle" = "Activar communicaziuns";
+"ios.notifications.statusNotDeterminedDesc" = "Retscha communicaziuns davart messadis, la plaschair, commentaris, sequitaders e clamadas entrantas, era cur che ZRP n'è betg avert.";
+"ios.notifications.enableButton" = "Activar communicaziuns";
+"ios.notifications.statusDeniedTitle" = "Las communicaziuns èn deactivadas";
+"ios.notifications.statusDeniedDesc" = "Activescha las communicaziuns en las Preferenzas iOS per retschaiver messadis, la plaschair, commentaris, sequitaders e clamadas cur che ZRP n'è betg avert.";
+"ios.notifications.openSettingsButton" = "Avrir preferenzas";

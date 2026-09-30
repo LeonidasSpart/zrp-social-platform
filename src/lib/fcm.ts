@@ -2,12 +2,14 @@ import { initializeApp, getApps, cert, type App } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
 import { prisma } from "./db";
 
-// Firebase Cloud Messaging for the native Android and iOS apps (FCM
-// fans a message out to APNs itself for a token registered by an iOS
-// client - see prisma/schema.prisma's FcmToken.platform and
-// api/push/fcm's route) - separate from src/lib/push-notifications.ts's
-// Web Push (VAPID) path, which only reaches browser tabs. Lazily
-// initialized exactly like getWebPush()
+// Firebase Cloud Messaging for the native Android app. FCM can only
+// deliver to a device holding an *FCM* registration token, which on iOS
+// only the Firebase iOS SDK can mint - this app has no such SDK (see
+// ios-native/PARITY.md's B3), so this file is scoped to platform
+// "android" only; see src/lib/apns.ts for the direct-APNs path that
+// actually reaches iOS devices. Separate from
+// src/lib/push-notifications.ts's Web Push (VAPID) path, which only
+// reaches browser tabs. Lazily initialized exactly like getWebPush()
 // there, from the FIREBASE_SERVICE_ACCOUNT_JSON server secret
 // (distinct from the client-side google-services.json the Android app
 // ships with). Every call here is a safe no-op if that env var is ever
@@ -55,8 +57,13 @@ export async function sendFcmPush(userId: string, title: string, body: string, u
   const app = getFcmApp();
   if (!app) return;
 
+  // "android" only: platform "ios" is now handled by src/lib/apns.ts's
+  // sendApnsAlert, sent directly to Apple rather than through FCM (see
+  // that file's doc comment for why FCM can't actually reach an iOS
+  // device today). Filtering here prevents ever double-sending to the
+  // same device if a Firebase iOS SDK is added later.
   const tokens = await prisma.fcmToken.findMany({
-    where: { userId },
+    where: { userId, platform: "android" },
     select: { token: true },
   });
   if (tokens.length === 0) return;

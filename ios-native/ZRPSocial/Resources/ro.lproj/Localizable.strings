@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Aceeași țară ca tine";
 "ios.explore.peopleNearYouEmpty" = "Încă nu este nimeni în apropiere.";
 "ios.play.challengeUnsupported" = "Acest tip de joc nu este încă acceptat în această versiune a aplicației.";
+"ios.notifications.pushSettingsTitle" = "Notificări push";
+"ios.notifications.statusEnabledTitle" = "Notificările sunt activate";
+"ios.notifications.statusEnabledDesc" = "Vei fi notificat despre mesaje, aprecieri, comentarii, urmăritori și apeluri primite, chiar și atunci când ZRP nu este deschis.";
+"ios.notifications.statusNotDeterminedTitle" = "Activează notificările";
+"ios.notifications.statusNotDeterminedDesc" = "Primește notificări despre mesaje, aprecieri, comentarii, urmăritori și apeluri primite, chiar și atunci când ZRP nu este deschis.";
+"ios.notifications.enableButton" = "Activează notificările";
+"ios.notifications.statusDeniedTitle" = "Notificările sunt dezactivate";
+"ios.notifications.statusDeniedDesc" = "Activează notificările în Setările iOS pentru a primi mesaje, aprecieri, comentarii, urmăritori și apeluri când ZRP nu este deschis.";
+"ios.notifications.openSettingsButton" = "Deschide Setările";

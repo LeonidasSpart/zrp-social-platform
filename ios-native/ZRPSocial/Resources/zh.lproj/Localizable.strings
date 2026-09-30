@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "与你同国家";
 "ios.explore.peopleNearYouEmpty" = "附近暂无用户。";
 "ios.play.challengeUnsupported" = "此应用版本尚不支持此游戏类型。";
+"ios.notifications.pushSettingsTitle" = "推送通知";
+"ios.notifications.statusEnabledTitle" = "通知已开启";
+"ios.notifications.statusEnabledDesc" = "即使 ZRP 未打开，您也会收到有关消息、点赞、评论、关注者和来电的通知。";
+"ios.notifications.statusNotDeterminedTitle" = "开启通知";
+"ios.notifications.statusNotDeterminedDesc" = "即使 ZRP 未打开，也能收到有关消息、点赞、评论、关注者和来电的通知。";
+"ios.notifications.enableButton" = "开启通知";
+"ios.notifications.statusDeniedTitle" = "通知已关闭";
+"ios.notifications.statusDeniedDesc" = "在 iOS 设置中开启通知，以便在 ZRP 未打开时接收消息、点赞、评论、关注者和来电。";
+"ios.notifications.openSettingsButton" = "打开设置";

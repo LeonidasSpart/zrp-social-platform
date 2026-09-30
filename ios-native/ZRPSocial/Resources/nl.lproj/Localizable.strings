@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Zelfde land als jij";
 "ios.explore.peopleNearYouEmpty" = "Nog niemand in de buurt.";
 "ios.play.challengeUnsupported" = "Dit speltype wordt in deze app-versie nog niet ondersteund.";
+"ios.notifications.pushSettingsTitle" = "Pushmeldingen";
+"ios.notifications.statusEnabledTitle" = "Meldingen staan aan";
+"ios.notifications.statusEnabledDesc" = "Je krijgt meldingen over berichten, likes, reacties, volgers en inkomende oproepen, zelfs als ZRP niet open is.";
+"ios.notifications.statusNotDeterminedTitle" = "Meldingen inschakelen";
+"ios.notifications.statusNotDeterminedDesc" = "Ontvang meldingen over berichten, likes, reacties, volgers en inkomende oproepen, zelfs als ZRP niet open is.";
+"ios.notifications.enableButton" = "Meldingen inschakelen";
+"ios.notifications.statusDeniedTitle" = "Meldingen staan uit";
+"ios.notifications.statusDeniedDesc" = "Schakel meldingen in via iOS-instellingen om berichten, likes, reacties, volgers en oproepen te ontvangen als ZRP niet open is.";
+"ios.notifications.openSettingsButton" = "Instellingen openen";

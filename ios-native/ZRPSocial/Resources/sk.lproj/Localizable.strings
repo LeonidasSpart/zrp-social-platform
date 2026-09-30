@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Rovnaká krajina ako vy";
 "ios.explore.peopleNearYouEmpty" = "Zatiaľ nikto v okolí.";
 "ios.play.challengeUnsupported" = "Tento typ hry zatiaľ nie je v tejto verzii aplikácie podporovaný.";
+"ios.notifications.pushSettingsTitle" = "Push notifikácie";
+"ios.notifications.statusEnabledTitle" = "Notifikácie sú zapnuté";
+"ios.notifications.statusEnabledDesc" = "Budete upozornení na správy, páči sa mi, komentáre, sledovateľov a prichádzajúce hovory, aj keď ZRP nie je otvorený.";
+"ios.notifications.statusNotDeterminedTitle" = "Zapnúť notifikácie";
+"ios.notifications.statusNotDeterminedDesc" = "Dostávajte upozornenia na správy, páči sa mi, komentáre, sledovateľov a prichádzajúce hovory, aj keď ZRP nie je otvorený.";
+"ios.notifications.enableButton" = "Zapnúť notifikácie";
+"ios.notifications.statusDeniedTitle" = "Notifikácie sú vypnuté";
+"ios.notifications.statusDeniedDesc" = "Zapnite notifikácie v nastaveniach iOS, aby ste dostávali správy, páči sa mi, komentáre, sledovateľov a hovory, keď ZRP nie je otvorený.";
+"ios.notifications.openSettingsButton" = "Otvoriť nastavenia";

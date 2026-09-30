@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Ίδια χώρα με εσένα";
 "ios.explore.peopleNearYouEmpty" = "Δεν υπάρχει ακόμη κανείς κοντά.";
 "ios.play.challengeUnsupported" = "Αυτός ο τύπος παιχνιδιού δεν υποστηρίζεται ακόμη σε αυτήν την έκδοση της εφαρμογής.";
+"ios.notifications.pushSettingsTitle" = "Ειδοποιήσεις Push";
+"ios.notifications.statusEnabledTitle" = "Οι ειδοποιήσεις είναι ενεργές";
+"ios.notifications.statusEnabledDesc" = "Θα ειδοποιείστε για μηνύματα, likes, σχόλια, ακόλουθους και εισερχόμενες κλήσεις, ακόμα κι όταν το ZRP δεν είναι ανοιχτό.";
+"ios.notifications.statusNotDeterminedTitle" = "Ενεργοποίηση ειδοποιήσεων";
+"ios.notifications.statusNotDeterminedDesc" = "Λάβετε ειδοποιήσεις για μηνύματα, likes, σχόλια, ακόλουθους και εισερχόμενες κλήσεις, ακόμα κι όταν το ZRP δεν είναι ανοιχτό.";
+"ios.notifications.enableButton" = "Ενεργοποίηση ειδοποιήσεων";
+"ios.notifications.statusDeniedTitle" = "Οι ειδοποιήσεις είναι απενεργοποιημένες";
+"ios.notifications.statusDeniedDesc" = "Ενεργοποιήστε τις ειδοποιήσεις στις ρυθμίσεις iOS για να λαμβάνετε μηνύματα, likes, σχόλια, ακόλουθους και κλήσεις όταν το ZRP δεν είναι ανοιχτό.";
+"ios.notifications.openSettingsButton" = "Άνοιγμα ρυθμίσεων";

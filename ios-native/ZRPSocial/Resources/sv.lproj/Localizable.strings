@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Samma land som du";
 "ios.explore.peopleNearYouEmpty" = "Ingen i närheten ännu.";
 "ios.play.challengeUnsupported" = "Den här speltypen stöds inte än i den här appversionen.";
+"ios.notifications.pushSettingsTitle" = "Push-aviseringar";
+"ios.notifications.statusEnabledTitle" = "Aviseringar är på";
+"ios.notifications.statusEnabledDesc" = "Du blir aviserad om meddelanden, gilla-markeringar, kommentarer, följare och inkommande samtal, även när ZRP inte är öppet.";
+"ios.notifications.statusNotDeterminedTitle" = "Slå på aviseringar";
+"ios.notifications.statusNotDeterminedDesc" = "Få aviseringar om meddelanden, gilla-markeringar, kommentarer, följare och inkommande samtal, även när ZRP inte är öppet.";
+"ios.notifications.enableButton" = "Slå på aviseringar";
+"ios.notifications.statusDeniedTitle" = "Aviseringar är av";
+"ios.notifications.statusDeniedDesc" = "Slå på aviseringar i iOS-inställningar för att få meddelanden, gilla-markeringar, kommentarer, följare och samtal när ZRP inte är öppet.";
+"ios.notifications.openSettingsButton" = "Öppna inställningar";

@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Ista država kao vi";
 "ios.explore.peopleNearYouEmpty" = "Još uvek nema nikoga u blizini.";
 "ios.play.challengeUnsupported" = "Ova vrsta igre još nije podržana u ovoj verziji aplikacije.";
+"ios.notifications.pushSettingsTitle" = "Push обавештења";
+"ios.notifications.statusEnabledTitle" = "Обавештења су укључена";
+"ios.notifications.statusEnabledDesc" = "Бићете обавештени о порукама, лајковима, коментарима, пратиоцима и долазним позивима, чак и када ZRP није отворен.";
+"ios.notifications.statusNotDeterminedTitle" = "Укључи обавештења";
+"ios.notifications.statusNotDeterminedDesc" = "Примајте обавештења о порукама, лајковима, коментарима, пратиоцима и долазним позивима, чак и када ZRP није отворен.";
+"ios.notifications.enableButton" = "Укључи обавештења";
+"ios.notifications.statusDeniedTitle" = "Обавештења су искључена";
+"ios.notifications.statusDeniedDesc" = "Укључите обавештења у подешавањима iOS-а да бисте примали поруке, лајкове, коментаре, пратиоце и позиве када ZRP није отворен.";
+"ios.notifications.openSettingsButton" = "Отвори подешавања";

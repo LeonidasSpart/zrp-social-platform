@@ -1575,3 +1575,12 @@
 "ios.explore.peopleNearYouSubtitle" = "Tā pati valsts, kas jums";
 "ios.explore.peopleNearYouEmpty" = "Pagaidām neviena tuvumā nav.";
 "ios.play.challengeUnsupported" = "Šis spēles veids šajā lietotnes versijā vēl netiek atbalstīts.";
+"ios.notifications.pushSettingsTitle" = "Push paziņojumi";
+"ios.notifications.statusEnabledTitle" = "Paziņojumi ir ieslēgti";
+"ios.notifications.statusEnabledDesc" = "Jūs saņemsiet paziņojumus par ziņām, patīk atzīmēm, komentāriem, sekotājiem un ienākošiem zvaniem, pat ja ZRP nav atvērts.";
+"ios.notifications.statusNotDeterminedTitle" = "Ieslēgt paziņojumus";
+"ios.notifications.statusNotDeterminedDesc" = "Saņemiet paziņojumus par ziņām, patīk atzīmēm, komentāriem, sekotājiem un ienākošiem zvaniem, pat ja ZRP nav atvērts.";
+"ios.notifications.enableButton" = "Ieslēgt paziņojumus";
+"ios.notifications.statusDeniedTitle" = "Paziņojumi ir izslēgti";
+"ios.notifications.statusDeniedDesc" = "Ieslēdziet paziņojumus iOS iestatījumos, lai saņemtu ziņas, patīk atzīmes, komentārus, sekotājus un zvanus, kad ZRP nav atvērts.";
+"ios.notifications.openSettingsButton" = "Atvērt iestatījumus";
