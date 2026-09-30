@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { jsonWithDecimals } from "@/lib/serialize-decimal";
+import { jsonWithDecimalStrings as jsonWithDecimals } from "@/lib/launchpad/json";
 
 const CREATOR_SELECT = {
   id: true,
