@@ -46,17 +46,31 @@ export default function LaunchpadHomePage() {
         </div>
         <p className="mt-3 text-white/80 max-w-xl mx-auto">Create your own Solana SPL token in minutes - no code required.</p>
 
-        {session?.user && (
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/launchpad/create"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-zrp-darkRed rounded-full font-semibold hover:bg-gray-100 transition text-sm"
-            >
-              <Plus className="w-4 h-4" />
-              Create a token
-            </Link>
-          </div>
-        )}
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {session?.user && (
+            <>
+              <Link
+                href="/launchpad/create"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-zrp-darkRed rounded-full font-semibold hover:bg-gray-100 transition text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Create a token
+              </Link>
+              <Link
+                href="/launchpad/vesting"
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
+              >
+                My vesting contracts
+              </Link>
+            </>
+          )}
+          <Link
+            href="/launchpad/vesting/claim"
+            className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
+          >
+            Claim vested tokens
+          </Link>
+        </div>
       </section>
 
       {error && <p className="text-center py-4 text-red-500">{error}</p>}

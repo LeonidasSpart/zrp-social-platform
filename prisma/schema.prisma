@@ -619,6 +619,7 @@ model User {
   withdrawalRequests WithdrawalRequest[]
 
   launchedTokens LaunchedToken[]
+  vestingContracts VestingContract[]
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -2067,6 +2068,87 @@ model LaunchedToken {
 
   @@index([creatorId])
   @@index([status])
+
+  vestingContracts VestingContract[]
+}
+
+enum VestingContractStatus {
+  ACTIVE
+  COMPLETED
+}
+
+// ZRP Launchpad, phase 2: linear (+ optional cliff) vesting against an
+// already-launched token. Deliberately NOT tied to a ZRP account on the
+// beneficiary side - vesting recipients (team, advisors, investors) are
+// routinely people who never sign up for the platform at all, only a
+// wallet address. Two independent, already-proven-safe patterns cover
+// both directions of money movement, so nothing new had to be invented:
+//   - deposit (creator -> platform escrow): "pay externally, paste the
+//     tx signature" - identical in shape to every other payment-in flow
+//     in this codebase (tip, premium purchase, launchpad creation fee),
+//     verified by src/lib/launchpad/spl-transfer-verify.ts (the
+//     LaunchedToken-mint-aware generalization of verifyUsdcTransaction).
+//   - claim (platform -> beneficiary, server-signed): authorized by an
+//     ed25519 signature over a single-use, server-issued challenge
+//     proving ownership of beneficiaryWalletAddress - the exact same
+//     primitive src/lib/wallet-link.ts already uses for linking a
+//     wallet to an account (buildWalletLinkMessage/verifyWalletSignature
+//     are reused as-is; they were never account-specific internally).
+//     No ZRP session is required to claim.
+// All amounts are raw base units (matching LaunchedToken.supply), never
+// floating point, so vesting math can never lose precision the way
+// zrppad's own float-based getClaimableAmount() did.
+model VestingContract {
+  id String @id @default(cuid())
+
+  launchedTokenId String
+  launchedToken   LaunchedToken @relation(fields: [launchedTokenId], references: [id], onDelete: Cascade)
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  beneficiaryWalletAddress String
+
+  totalAmount   Decimal @db.Decimal(38, 0)
+  totalReleased Decimal @db.Decimal(38, 0) @default(0)
+
+  cliffSeconds   Int
+  vestingSeconds Int
+  startAt        DateTime
+
+  depositTransactionId String @unique
+
+  status VestingContractStatus @default(ACTIVE)
+
+  // Single-use claim challenge (see the model comment above). Cleared
+  // (set back to null) the instant it's consumed by a claim, whether
+  // that claim succeeds or finds nothing claimable - a stale nonce is
+  // never left around to be reused.
+  claimNonce          String?
+  claimNonceExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  releases VestingRelease[]
+
+  @@index([launchedTokenId])
+  @@index([beneficiaryWalletAddress])
+  @@index([status])
+}
+
+model VestingRelease {
+  id String @id @default(cuid())
+
+  vestingContractId String
+  vestingContract   VestingContract @relation(fields: [vestingContractId], references: [id], onDelete: Cascade)
+
+  amount        Decimal @db.Decimal(38, 0)
+  transactionId String  @unique
+
+  createdAt DateTime @default(now())
+
+  @@index([vestingContractId])
 }
 
 // ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT
