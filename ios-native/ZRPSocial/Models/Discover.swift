@@ -72,7 +72,7 @@ struct DiscoverViewerState: Decodable, Equatable {
 /// a real, honest preview (`previewContent`, `price`, `currency`) with
 /// a plain link to the post's own detail screen - not a purchase
 /// button, and not a dead-end "Unlock" CTA either.
-struct DiscoverPremiumPost: Decodable, Equatable {
+struct DiscoverPremiumPost: Decodable, Equatable, Hashable {
     let id: String
     let price: Double
     let currency: String

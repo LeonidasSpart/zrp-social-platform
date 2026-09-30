@@ -172,7 +172,13 @@ struct Post: Decodable, Identifiable, Equatable, Hashable {
     // init every test fixture in this app constructs a `Post` through
     // (JSON decoding is unaffected either way), and none of them knew
     // this field existed a moment ago.
-    let premiumPost: DiscoverPremiumPost? = nil
+    // `var`, not `let`: a `let` with a default value is never actually
+    // decoded by Swift's synthesized Decodable (it silently keeps the
+    // default forever, defeating this field's whole purpose) - the
+    // compiler warns about exactly this. `var` decodes normally via
+    // decodeIfPresent while still giving every existing memberwise-init
+    // test fixture a default of `nil`.
+    var premiumPost: DiscoverPremiumPost? = nil
 
     private enum CodingKeys: String, CodingKey {
         case id, content, createdAt, author, imageUrl, imageUrls, mediaType
