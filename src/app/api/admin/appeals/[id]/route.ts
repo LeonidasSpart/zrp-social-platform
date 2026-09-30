@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireStaff } from "@/lib/admin";
+import { requireStaff, requireAdminToModifyStaffBan } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
 import { logAdminAction } from "@/lib/audit-log";
@@ -32,6 +32,20 @@ export async function PUT(
     }
     if (appeal.status !== "pending") {
       return NextResponse.json({ error: "This appeal was already resolved." }, { status: 409 });
+    }
+
+    // ⚠️ SECURITY: this route is staff-level (moderators included), but
+    // overturning a BAN_USER appeal flips User.banned=false below - the
+    // exact same privileged mutation admin/users/[id]/ban/route.ts
+    // already restricts to a real admin when the target is staff.
+    // Without this check, a moderator could restore a banned admin or
+    // fellow moderator's access through this second code path instead,
+    // bypassing that control entirely. Checked before anything is
+    // mutated, so a rejected request never leaves the appeal marked
+    // "overturned" with the ban left in place.
+    if (status === "overturned" && appeal.report.actionType === "BAN_USER") {
+      const staffBanError = await requireAdminToModifyStaffBan(appeal.userId, adminCheck.session);
+      if (staffBanError) return staffBanError;
     }
 
     const actorUsername =

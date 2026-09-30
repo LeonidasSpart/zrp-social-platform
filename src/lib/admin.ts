@@ -2,6 +2,7 @@ import { getServerSession, type Session } from "next-auth";
 import { authOptions } from "./auth";
 import { NextResponse } from "next/server";
 import { getUserAuthState, isAdminState, isModeratorState } from "./auth-state";
+import { prisma } from "./db";
 
 // Explicit discriminated union return type. Without this, TypeScript
 // widens the `authorized: true/false` literals to plain `boolean` on
@@ -60,4 +61,40 @@ export async function isSessionAdmin(session: Session | null | undefined): Promi
 
 export async function requireStaff(): Promise<AdminCheckResult> {
   return checkRole(isModeratorState);
+}
+
+/**
+ * ⚠️ SECURITY: a route that is staff-level (moderators included) but
+ * that can flip User.banned must not let a moderator ban/unban a
+ * fellow staff account - otherwise any moderator could lock out every
+ * admin (or, symmetrically, restore a legitimately banned staff
+ * account). admin/users/[id]/ban/route.ts already enforced this; the
+ * appeal-resolution route (admin/appeals/[id]/route.ts) performs the
+ * exact same banned:false mutation when a BAN_USER appeal is
+ * overturned but had no equivalent check, letting a moderator unban a
+ * staff account through that second path instead. Both routes now
+ * call this one helper rather than each re-implementing the rule.
+ *
+ * Returns null when the mutation is allowed to proceed, or a 403
+ * response when a non-admin staff member is targeting a staff
+ * account.
+ */
+export async function requireAdminToModifyStaffBan(
+  targetUserId: string,
+  actorSession: Session
+): Promise<NextResponse | null> {
+  const target = await prisma.user.findUnique({
+    where: { id: targetUserId },
+    select: { role: true, isAdmin: true },
+  });
+  const targetIsStaff = !!target && (target.isAdmin || target.role === "ADMIN" || target.role === "MODERATOR");
+  if (!targetIsStaff) return null;
+
+  const actorIsAdmin = await isSessionAdmin(actorSession);
+  if (actorIsAdmin) return null;
+
+  return NextResponse.json(
+    { error: "Only an admin can change a staff account's ban state." },
+    { status: 403 }
+  );
 }

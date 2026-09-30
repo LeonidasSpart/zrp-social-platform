@@ -7,7 +7,13 @@ const { requireStaff, logAdminAction, createNotification } = vi.hoisted(() => ({
   logAdminAction: vi.fn(),
   createNotification: vi.fn(),
 }));
-vi.mock("@/lib/admin", () => ({ requireStaff }));
+// Only requireStaff is faked - requireAdminToModifyStaffBan (the same
+// moderator-can't-touch-staff guard also used by admin/users/[id]/ban)
+// must run for real against real DB rows in this real-Postgres test.
+vi.mock("@/lib/admin", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/admin")>();
+  return { ...actual, requireStaff };
+});
 vi.mock("@/lib/audit-log", () => ({ logAdminAction }));
 vi.mock("@/lib/notifications", () => ({ createNotification }));
 
@@ -81,3 +87,66 @@ describe.skipIf(!hasRealDatabaseUrl)("PUT /api/admin/appeals/[id] (integration, 
     expect(createNotification).toHaveBeenCalledTimes(1);
   });
 });
+
+/*
+ * ⚠️ REGRESSION (master audit): overturning a BAN_USER appeal unbans the
+ * target the same way POST /api/admin/users/[id]/ban does - without the
+ * same staff-role guard, a moderator could unban another moderator or an
+ * admin by appeal instead of by the ban route directly.
+ */
+describe.skipIf(!hasRealDatabaseUrl)(
+  "PUT /api/admin/appeals/[id] moderator-cannot-touch-staff guard",
+  () => {
+    const suffix = randomUUID().slice(0, 8);
+    const userIds: string[] = [];
+    let appealId = "";
+    let reportId = "";
+
+    beforeAll(async () => {
+      requireStaff.mockResolvedValue({ authorized: true, session: { user: { id: "mod-1", username: "mod" } } });
+      const reporter = await prisma.user.create({
+        data: { email: `r2-${suffix}@appealstaff.example`, username: `asr${suffix}`, password: "x" },
+      });
+      // The appealing target is a moderator - banned by an earlier admin action.
+      const target = await prisma.user.create({
+        data: { email: `t2-${suffix}@appealstaff.example`, username: `ast${suffix}`, password: "x", role: "MODERATOR", banned: true },
+      });
+      userIds.push(reporter.id, target.id);
+      const report = await prisma.report.create({
+        data: {
+          reporterId: reporter.id,
+          reportedUserId: target.id,
+          targetUserId: target.id,
+          reason: "Spam",
+          status: "actioned",
+          actionType: "BAN_USER",
+          actionedAt: new Date(),
+        },
+      });
+      reportId = report.id;
+      const appeal = await prisma.appeal.create({ data: { reportId, userId: target.id, message: "Please" } });
+      appealId = appeal.id;
+    });
+
+    afterAll(async () => {
+      await prisma.report.deleteMany({ where: { id: reportId } });
+      await prisma.user.deleteMany({ where: { id: { in: userIds } } });
+    });
+
+    it("a moderator cannot overturn a BAN_USER appeal against another staff account", async () => {
+      const res = await PUT(
+        new NextRequest(`https://zrp.one/api/admin/appeals/${appealId}`, {
+          method: "PUT",
+          body: JSON.stringify({ status: "overturned" }),
+        }),
+        { params: Promise.resolve({ id: appealId }) }
+      );
+      expect(res.status).toBe(403);
+
+      const stored = await prisma.appeal.findUniqueOrThrow({ where: { id: appealId } });
+      expect(stored.status).toBe("pending");
+      const target = await prisma.user.findUniqueOrThrow({ where: { id: userIds[1] } });
+      expect(target.banned).toBe(true);
+    });
+  }
+);

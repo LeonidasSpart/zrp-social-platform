@@ -55,6 +55,7 @@ export async function PUT(
           challenge: { select: { creatorId: true } },
           opportunity: { select: { posterId: true } },
           campaign: { select: { organizerId: true } },
+          liveAudioRoom: { select: { hostId: true } },
           reportedUserId: true,
         },
       });
@@ -65,6 +66,7 @@ export async function PUT(
         current?.challenge?.creatorId ??
         current?.opportunity?.posterId ??
         current?.campaign?.organizerId ??
+        current?.liveAudioRoom?.hostId ??
         current?.reportedUserId ??
         null;
     } else {

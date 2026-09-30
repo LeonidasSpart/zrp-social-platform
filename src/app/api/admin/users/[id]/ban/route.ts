@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 // requireStaff (ADMIN or MODERATOR) - this is core content-moderation work.
 // Sensitive/financial admin routes (roles, plan changes, payments, analytics)
 // stay on requireAdmin.
-import { requireStaff } from "@/lib/admin";
+import { requireStaff, requireAdminToModifyStaffBan } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
 import { logAdminAction } from "@/lib/audit-log";
 import { forceLeaveAllLiveAudioRooms } from "@/lib/live-audio/room-service";
+import { disconnectAllSocketsForUser } from "@/lib/socket-emit";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -39,19 +40,11 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     // banned account fails every admin/staff check. Without this, any
     // moderator could lock every admin (and every other moderator) out
     // of the platform. Only a full admin may ban/unban a staff account.
-    const targetIsStaff = user.isAdmin || user.role === "ADMIN" || user.role === "MODERATOR";
-    if (targetIsStaff) {
-      const actor = await prisma.user.findUnique({
-        where: { id: adminCheck.session.user.id },
-        select: { role: true, isAdmin: true },
-      });
-      if (!actor || !(actor.isAdmin || actor.role === "ADMIN")) {
-        return NextResponse.json(
-          { error: "Only an admin can ban or unban a staff account." },
-          { status: 403 }
-        );
-      }
-    }
+    // Shared with admin/appeals/[id]/route.ts, which performs the same
+    // banned:false mutation through a second path (overturning a
+    // BAN_USER appeal) and needs the identical rule.
+    const staffBanError = await requireAdminToModifyStaffBan(userId, adminCheck.session);
+    if (staffBanError) return staffBanError;
 
     const nextBanned = requested ?? !user.banned;
     const updated = await prisma.user.update({
@@ -74,6 +67,14 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       void forceLeaveAllLiveAudioRooms(userId).catch((err) =>
         console.error(`Failed to sweep Live Audio rooms for banned user ${userId}:`, err)
       );
+
+      // ⚠️ SECURITY: the same "already-open connection outlives the
+      // ban" gap Live Audio had, but for DMs and calls - an already-
+      // connected socket has no periodic re-check and no backing REST
+      // call-signaling write to gate it. Force-close every socket this
+      // user currently has open so a ban actually bites in realtime,
+      // not just on their next HTTP request.
+      disconnectAllSocketsForUser(userId);
     }
 
     await logAdminAction({

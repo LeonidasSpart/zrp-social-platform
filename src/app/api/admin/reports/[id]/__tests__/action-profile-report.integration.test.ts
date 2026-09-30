@@ -81,4 +81,32 @@ describe.skipIf(!hasRealDatabaseUrl)("PUT /api/admin/reports/[id] - profile repo
     expect(updated?.status).toBe("actioned");
     expect(updated?.actionedAt).not.toBeNull();
   });
+
+  // ⚠️ REGRESSION (master audit): liveAudioRoomId was the 8th
+  // polymorphic report target added (alongside storyId), but the
+  // targetUserId denormalization fallback chain was never extended to
+  // cover it - a Live Audio room report actioned here left targetUserId
+  // null, same untraceable/unappealable gap the profile-report fix
+  // above closed for reportedUserId.
+  it("denormalizes targetUserId from the room's hostId when a Live Audio room report is actioned", async () => {
+    const reporter = await createUser("liveaudioreporter");
+    const host = await createUser("liveaudiohost");
+
+    const room = await prisma.liveAudioRoom.create({
+      data: { hostId: host.id, title: "Test Room" },
+    });
+    const report = await prisma.report.create({
+      data: { reporterId: reporter.id, liveAudioRoomId: room.id, reason: "Hate speech", status: "pending" },
+    });
+    reportIds.push(report.id);
+
+    const res = await put(report.id, { status: "actioned", actionType: "WARN_USER", actionNote: "Warned host." });
+    expect(res.status).toBe(200);
+
+    const updated = await prisma.report.findUnique({ where: { id: report.id } });
+    expect(updated?.targetUserId).toBe(host.id);
+    expect(updated?.status).toBe("actioned");
+
+    await prisma.liveAudioRoom.delete({ where: { id: room.id } });
+  });
 });
