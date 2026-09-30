@@ -648,6 +648,14 @@ include:
 - **Email**: `RESEND_API_KEY`, `EMAIL_FROM`
 - **Push**: `FIREBASE_SERVICE_ACCOUNT_JSON`, `VAPID_PUBLIC_KEY`,
   `VAPID_PRIVATE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+- **iOS push (APNs)**: `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_BUNDLE_ID`,
+  `APNS_PRIVATE_KEY` (a `.p8` provider auth key's contents; `\n` in the
+  env var is unescaped to real newlines), `APNS_ENVIRONMENT` (`development`
+  or `production`, defaults to `development`) - all optional and used
+  together by `src/lib/apns.ts` to deliver both ordinary alert pushes and
+  PushKit VoIP pushes directly to Apple, bypassing Firebase entirely (see
+  that file's doc comment for why). Unset means iOS push is skipped;
+  Android (FCM) and Web Push are unaffected either way.
 - **AI**: `DEEPSEEK_API_KEY`
 - **Realtime and calling**: `SOCKET_ALLOWED_ORIGINS`, `METERED_API_KEY`,
   `METERED_APP_NAME`, `INTERNAL_PUSH_SECRET` (optional; a shared secret

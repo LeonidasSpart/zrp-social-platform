@@ -105,8 +105,11 @@ describe.skipIf(!hasRealDatabaseUrl)("sendFcmPush (deep-link data payload, real 
       },
     });
     userIds.push(user.id);
+    // "android": sendFcmPush is now scoped to platform "android" only
+    // (see fcm.ts's doc comment) - platform "ios" is sent via
+    // src/lib/apns.ts's sendApnsAlert instead, covered by apns.test.ts.
     await prisma.fcmToken.create({
-      data: { userId: user.id, token: `token-${randomUUID()}`, platform: "ios" },
+      data: { userId: user.id, token: `token-${randomUUID()}`, platform: "android" },
     });
     return user;
   }
@@ -129,7 +132,7 @@ describe.skipIf(!hasRealDatabaseUrl)("sendFcmPush (deep-link data payload, real 
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   });
 
-  it("includes the caller's url as data.url alongside the notification, for any registered platform", async () => {
+  it("includes the caller's url as data.url alongside the notification", async () => {
     const user = await createUserWithToken();
     const { sendFcmPush } = await import("../fcm");
     await sendFcmPush(user.id, "New Message", "Ada sent you a message.", "/messages/ada");
@@ -150,5 +153,20 @@ describe.skipIf(!hasRealDatabaseUrl)("sendFcmPush (deep-link data payload, real 
     expect(sendEachForMulticast).toHaveBeenCalledWith(
       expect.objectContaining({ data: { url: "/" } })
     );
+  });
+
+  it("never sends to a platform=ios token - that's src/lib/apns.ts's job now", async () => {
+    const user = await createUserWithToken();
+    await prisma.fcmToken.create({
+      data: { userId: user.id, token: `token-${randomUUID()}`, platform: "ios" },
+    });
+
+    const { sendFcmPush } = await import("../fcm");
+    await sendFcmPush(user.id, "Title", "Body");
+
+    // Only the one "android" token from createUserWithToken() should be
+    // in the multicast call, never the "ios" one just added.
+    const [call] = sendEachForMulticast.mock.calls.at(-1) as unknown as [{ tokens: string[] }];
+    expect(call.tokens).toHaveLength(1);
   });
 });

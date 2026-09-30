@@ -290,4 +290,54 @@ describe("call registry (call signaling spoofing)", () => {
       expect(calls.end("alice", "bob")).toBe(true);
     });
   });
+
+  describe("pendingFor: redelivering a missed incoming-call on reconnect (PushKit/CallKit wake-up)", () => {
+    it("returns the stored meta for a still-pending call to that receiver", () => {
+      const calls = authz.createCallRegistry();
+      const callId = calls.start("alice", "bob", {
+        signal: { type: "offer", sdp: "v=0..." },
+        isVideo: true,
+        callerName: "Alice A.",
+        callerUsername: "alice",
+      });
+      expect(calls.pendingFor("bob")).toEqual({
+        callerId: "alice",
+        callId,
+        signal: { type: "offer", sdp: "v=0..." },
+        isVideo: true,
+        callerName: "Alice A.",
+        callerUsername: "alice",
+      });
+    });
+
+    it("returns null for the caller (only the receiver gets redelivery)", () => {
+      const calls = authz.createCallRegistry();
+      calls.start("alice", "bob", { signal: {}, isVideo: false, callerName: "Alice", callerUsername: "alice" });
+      expect(calls.pendingFor("alice")).toBeNull();
+    });
+
+    it("returns null once the call is no longer pending (accepted, rejected, or ended)", () => {
+      const calls = authz.createCallRegistry();
+      calls.start("alice", "bob", { signal: {}, isVideo: false, callerName: "Alice", callerUsername: "alice" });
+      calls.accept("bob", "alice");
+      expect(calls.pendingFor("bob")).toBeNull();
+    });
+
+    it("returns null for a call placed with no meta (defensive - nothing to redeliver)", () => {
+      const calls = authz.createCallRegistry();
+      calls.start("alice", "bob"); // no third argument, exactly like an old caller
+      expect(calls.pendingFor("bob")).toBeNull();
+    });
+
+    it("returns null once the pending call has expired", () => {
+      const calls = authz.createCallRegistry({ pendingTtlMs: -1 });
+      calls.start("alice", "bob", { signal: {}, isVideo: false, callerName: "Alice", callerUsername: "alice" });
+      expect(calls.pendingFor("bob")).toBeNull();
+    });
+
+    it("returns null when there is no call at all", () => {
+      const calls = authz.createCallRegistry();
+      expect(calls.pendingFor("nobody")).toBeNull();
+    });
+  });
 });

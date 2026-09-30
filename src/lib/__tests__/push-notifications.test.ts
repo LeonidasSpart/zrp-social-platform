@@ -19,6 +19,9 @@ vi.mock("web-push", () => ({
 const { sendFcmPush } = vi.hoisted(() => ({ sendFcmPush: vi.fn().mockResolvedValue(undefined) }));
 vi.mock("../fcm", () => ({ sendFcmPush }));
 
+const { sendApnsAlert } = vi.hoisted(() => ({ sendApnsAlert: vi.fn().mockResolvedValue(undefined) }));
+vi.mock("../apns", () => ({ sendApnsAlert }));
+
 const { findMany, deletePushSubscription } = vi.hoisted(() => ({
   findMany: vi.fn(),
   deletePushSubscription: vi.fn(),
@@ -54,6 +57,21 @@ describe("sendPushNotification - dead subscription pruning", () => {
     setVapidDetails.mockReset();
     findMany.mockReset();
     deletePushSubscription.mockReset();
+    sendFcmPush.mockClear().mockResolvedValue(undefined);
+    sendApnsAlert.mockClear().mockResolvedValue(undefined);
+  });
+
+  it("calls Android (FCM), iOS (APNs), and Web Push independently - one throwing never stops the others", async () => {
+    findMany.mockResolvedValue([sub("https://fcm.example/webpush")]);
+    sendFcmPush.mockRejectedValueOnce(new Error("fcm down"));
+    sendApnsAlert.mockRejectedValueOnce(new Error("apns down"));
+    sendNotification.mockResolvedValueOnce({ statusCode: 201 });
+
+    await sendPushNotification("user1", "title", "body", "/somewhere");
+
+    expect(sendFcmPush).toHaveBeenCalledWith("user1", "title", "body", "/somewhere");
+    expect(sendApnsAlert).toHaveBeenCalledWith("user1", "title", "body", "/somewhere");
+    expect(sendNotification).toHaveBeenCalledTimes(1);
   });
 
   it("prunes a subscription on the FCM VAPID-key-mismatch 403", async () => {

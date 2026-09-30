@@ -453,7 +453,13 @@ app.prepare().then(async () => {
   // deployment that never configured INTERNAL_PUSH_SECRET must never
   // delay or break the call itself, which is already ringing via the
   // socket relay above regardless of this outcome.
-  function notifyIncomingCallPush({ receiverId, callerName, callerUsername, isVideo }) {
+  // callerId/callId are optional: every current call-site now has both
+  // (they're minted before "incoming-call" is even emitted, see below),
+  // but the route itself only requires the other fields - a future
+  // call-site that genuinely can't supply them yet still gets the
+  // ordinary alert push, just no PushKit VoIP push (see that route's
+  // own comment on this).
+  function notifyIncomingCallPush({ receiverId, callerId, callId, callerName, callerUsername, isVideo }) {
     const secret = process.env.INTERNAL_PUSH_SECRET;
     if (!secret) return;
     const port = process.env.PORT || 8080;
@@ -465,7 +471,7 @@ app.prepare().then(async () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${secret}`,
       },
-      body: JSON.stringify({ receiverId, callerName, callerUsername, isVideo }),
+      body: JSON.stringify({ receiverId, callerId, callId, callerName, callerUsername, isVideo }),
       signal: controller.signal,
     })
       .then((res) => {
@@ -591,6 +597,34 @@ app.prepare().then(async () => {
     // Registers this socket; emits "user-status: online" (locally and to
     // other instances) only if the user was not already online anywhere.
     presence.connect(userId).catch((err) => console.error("presence connect error:", err));
+
+    // ─── Redeliver a still-ringing call this socket just missed ────
+    // A call placed via "call-user" while this user had no live socket
+    // (backgrounded/terminated app) still emits "incoming-call" once,
+    // to an empty room - Socket.IO does not buffer that for a socket
+    // that joins later. A PushKit VoIP push (ios-native) wakes the app
+    // and reports the call to CallKit from the push payload alone, but
+    // actually connecting still needs this same event (the payload
+    // deliberately does not carry the WebRTC signal - see this task's
+    // security requirements). This is that redelivery: if the call
+    // this socket's owner is being rung for is still pending (within
+    // calls' own TTL) by the time they reconnect, send it again - to
+    // this socket only, not the whole room, so an already-connected
+    // second device of theirs isn't re-shown a call it already handled.
+    // Not a second signaling protocol: same registry, same event, same
+    // authorization this file already performs for the first emit.
+    Promise.resolve(calls.pendingFor(userId))
+      .then((pending) => {
+        if (!pending) return;
+        socket.emit("incoming-call", {
+          callerId: pending.callerId,
+          callerName: pending.callerName,
+          signal: pending.signal,
+          isVideo: pending.isVideo === true,
+          callId: pending.callId,
+        });
+      })
+      .catch((err) => console.error("pendingFor redelivery error:", err));
 
     // Kept as a no-op-compatible listener so existing clients that
     // still emit "join-room" on connect (see socket-client.ts) don't
@@ -905,7 +939,12 @@ app.prepare().then(async () => {
         // of this contract, which is additive: a client that never learns
         // about callId keeps working exactly as before (calls.* treat a
         // missing callId as "no check", their pre-fix behavior).
-        const callId = await calls.start(userId, receiverId);
+        const callId = await calls.start(userId, receiverId, {
+          signal,
+          isVideo: isVideo === true,
+          callerName: caller.name || caller.username,
+          callerUsername: caller.username,
+        });
         if (typeof ack === "function") ack({ callId });
         console.log(`📞 call-user from ${userId} to ${receiverId}`);
         io.to(receiverId).emit("incoming-call", {
@@ -926,6 +965,8 @@ app.prepare().then(async () => {
         // route's own fail-closed check).
         notifyIncomingCallPush({
           receiverId,
+          callerId: userId,
+          callId,
           callerName: caller.name || caller.username,
           callerUsername: caller.username,
           isVideo: isVideo === true,

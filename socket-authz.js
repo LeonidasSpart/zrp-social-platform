@@ -395,8 +395,23 @@ function createCallRegistry(options) {
     }
 
     return {
-      /** call-user: record that callerId is ringing receiverId. Returns the new call's generation id. */
-      start(callerId, receiverId) {
+      /**
+       * call-user: record that callerId is ringing receiverId. Returns
+       * the new call's generation id.
+       *
+       * `meta` ({signal, isVideo, callerName, callerUsername}, all
+       * optional) is stored alongside the call state so `pendingFor()`
+       * below can hand a reconnecting receiver the SAME "incoming-call"
+       * payload server.js already emitted once via Socket.IO - needed
+       * because a PushKit VoIP push (see ios-native's PushKit/CallKit
+       * work) can wake this app well after that original emit was lost
+       * (nothing listened for it - Socket.IO does not buffer a
+       * room-scoped emit for a socket that joins the room later). This
+       * is not a second signaling protocol: it is redelivery, through
+       * this exact same registry, of the one event this registry
+       * already exists to authorize.
+       */
+      start(callerId, receiverId, meta) {
         const callId = randomUUID();
         calls.set(key(callerId, receiverId), {
           callerId,
@@ -404,8 +419,26 @@ function createCallRegistry(options) {
           callId,
           state: "pending",
           updatedAt: Date.now(),
+          meta: meta || null,
         });
         return callId;
+      },
+      /**
+       * The still-pending call (if any) where `receiverId` is the
+       * callee - used to re-emit "incoming-call" when they (re)join
+       * their room, e.g. woken from Terminated by a VoIP push. Returns
+       * `null` if there is none, or if the pending entry predates this
+       * change and carries no `meta` (an unpatched/older call - nothing
+       * to redeliver).
+       */
+      pendingFor(receiverId) {
+        for (const entry of calls.values()) {
+          if (entry.receiverId !== receiverId || entry.state !== "pending") continue;
+          if (Date.now() - entry.updatedAt > pendingTtlMs) continue;
+          if (!entry.meta) return null;
+          return { callerId: entry.callerId, callId: entry.callId, ...entry.meta };
+        }
+        return null;
       },
       /** accept-call by `userId` of a call from `callerId`. `callId`, if supplied, must match the call being accepted. */
       accept(userId, callerId, callId) {
@@ -518,8 +551,8 @@ return 1
   }
 
   return {
-    /** call-user: record that callerId is ringing receiverId. Returns the new call's generation id. */
-    async start(callerId, receiverId) {
+    /** call-user: record that callerId is ringing receiverId. Returns the new call's generation id. See the in-memory start()'s doc comment for what `meta` is and why. */
+    async start(callerId, receiverId, meta) {
       const callId = randomUUID();
       const entry = JSON.stringify({
         callerId,
@@ -527,9 +560,27 @@ return 1
         callId,
         state: "pending",
         updatedAt: Date.now(),
+        meta: meta || null,
       });
       await redis.set(redisKey(callerId, receiverId), entry, { PX: pendingTtlMs });
       return callId;
+    },
+    /** See the in-memory pendingFor()'s doc comment. SCANs the same small `call:*` keyspace `dropUser` already does. */
+    async pendingFor(receiverId) {
+      const keys = await scanCallKeys();
+      for (const k of keys) {
+        const raw = await redis.get(k);
+        if (!raw) continue;
+        try {
+          const entry = JSON.parse(raw);
+          if (entry.receiverId === receiverId && entry.state === "pending" && entry.meta) {
+            return { callerId: entry.callerId, callId: entry.callId, ...entry.meta };
+          }
+        } catch {
+          // Malformed entry - not this registry's own data; skip it.
+        }
+      }
+      return null;
     },
     async accept(userId, callerId, callId) {
       const result = await redis.eval(ACCEPT_SCRIPT, {

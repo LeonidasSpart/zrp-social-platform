@@ -6,6 +6,11 @@ const { sendPushNotification } = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/push-notifications", () => ({ sendPushNotification }));
 
+const { sendApnsVoip } = vi.hoisted(() => ({
+  sendApnsVoip: vi.fn(async () => {}),
+}));
+vi.mock("@/lib/apns", () => ({ sendApnsVoip }));
+
 import { POST } from "../route";
 
 // This route is server.js's only way to trigger a real push notification
@@ -35,6 +40,7 @@ describe("POST /api/internal/call-push", () => {
     originalSecret = process.env.INTERNAL_PUSH_SECRET;
     process.env.INTERNAL_PUSH_SECRET = "test-secret";
     sendPushNotification.mockClear();
+    sendApnsVoip.mockClear();
   });
 
   afterEach(() => {
@@ -116,6 +122,41 @@ describe("POST /api/internal/call-push", () => {
       "Ada Lovelace is calling you",
       "/messages/ada"
     );
+  });
+
+  it("sends a structured VoIP push with callerId/callId when both are supplied", async () => {
+    const res = await call(
+      {
+        receiverId: "u1",
+        callerId: "caller-1",
+        callId: "call-abc",
+        callerName: "Ada Lovelace",
+        callerUsername: "ada",
+        isVideo: true,
+      },
+      "test-secret"
+    );
+    expect(res.status).toBe(200);
+    expect(sendApnsVoip).toHaveBeenCalledWith("u1", {
+      callerId: "caller-1",
+      callId: "call-abc",
+      callerName: "Ada Lovelace",
+      callerUsername: "ada",
+      isVideo: true,
+    });
+    // The ordinary alert push must still go out too - VoIP is additive,
+    // not a replacement for it (other platforms/devices still need it).
+    expect(sendPushNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it("skips the VoIP push (but still sends the alert push) when callerId/callId are absent", async () => {
+    const res = await call(
+      { receiverId: "u1", callerName: "Ada", callerUsername: "ada", isVideo: false },
+      "test-secret"
+    );
+    expect(res.status).toBe(200);
+    expect(sendApnsVoip).not.toHaveBeenCalled();
+    expect(sendPushNotification).toHaveBeenCalledTimes(1);
   });
 
   it("never surfaces a push failure as an error response", async () => {
