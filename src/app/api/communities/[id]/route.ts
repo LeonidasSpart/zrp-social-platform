@@ -45,7 +45,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
     // DELETE handler below enforces (OWNER role, creator, or site
     // admin), so clients show the Delete control off a real server
     // answer instead of guessing from createdBy alone.
-    const isOwner = membership?.role === "OWNER" || (!!userId && community.createdBy.id === userId);
+    const isOwner = membership?.role === "OWNER" || (!!userId && community.createdBy?.id === userId);
     const canDelete = isOwner || (!!session && (await isSessionAdmin(session)));
 
     return NextResponse.json({

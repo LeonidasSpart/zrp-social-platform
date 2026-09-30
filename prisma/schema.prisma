@@ -382,6 +382,18 @@ model User {
   username String  @unique
   password String?
 
+  // ⚠️ SECURITY: bumped on every password change (see PUT
+  // /api/user/password) and baked into every JWT/session token at
+  // mint/refresh time (src/lib/auth.ts, src/app/api/mobile/auth/*) -
+  // applyAuthStateToToken() (src/lib/auth-state.ts) treats a token
+  // whose version no longer matches the database's current value
+  // exactly like a banned session, forcing an immediate sign-out.
+  // Without this, changing a password never invalidated any other
+  // already-issued session/token - a stolen cookie or leaked native
+  // sessionToken stayed valid for up to 30 days even after the
+  // legitimate user "secured" the account.
+  credentialsVersion Int @default(0)
+
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
 
@@ -3337,8 +3349,8 @@ model Community {
   iconUrl     String?
   memberCount Int               @default(0)
 
-  createdById String
-  createdBy   User   @relation("CommunityCreator", fields: [createdById], references: [id])
+  createdById String?
+  createdBy   User?   @relation("CommunityCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   members        CommunityMember[]
   liveAudioRooms LiveAudioRoom[]

@@ -40,6 +40,7 @@ export interface UserAuthState {
   role: AuthRole;
   plan: string;
   username: string;
+  credentialsVersion: number;
 }
 
 // Short per-instance cache. 30s bounds how long a stale claim can
@@ -73,6 +74,7 @@ function missingState(userId: string): UserAuthState {
     role: "USER",
     plan: "free",
     username: "",
+    credentialsVersion: 0,
   };
 }
 
@@ -114,6 +116,7 @@ export async function getUserAuthState(
       role: true,
       plan: true,
       username: true,
+      credentialsVersion: true,
     },
   });
 
@@ -126,6 +129,7 @@ export async function getUserAuthState(
         role: user.role as AuthRole,
         plan: user.plan || "free",
         username: user.username,
+        credentialsVersion: user.credentialsVersion,
       }
     : missingState(userId);
 
@@ -144,7 +148,19 @@ export function applyAuthStateToToken<T extends Record<string, unknown>>(
   token: T,
   state: UserAuthState
 ): T {
-  if (!state.exists || state.banned) {
+  // ⚠️ SECURITY: a token minted (or last refreshed) under an older
+  // credentialsVersion predates the user's most recent password
+  // change - treat it exactly like a banned session (forces sign-out
+  // on the next read) rather than letting a stolen cookie/leaked
+  // native sessionToken keep working until it naturally expires. A
+  // token with no credentialsVersion claim at all (minted before this
+  // field existed) is treated as version 0, matching every existing
+  // row's backfilled default, so no pre-existing session is force-
+  // signed-out by this check alone.
+  const tokenCredentialsVersion =
+    typeof token.credentialsVersion === "number" ? token.credentialsVersion : 0;
+
+  if (!state.exists || state.banned || tokenCredentialsVersion !== state.credentialsVersion) {
     return { ...token, banned: true };
   }
   return {
@@ -154,6 +170,7 @@ export function applyAuthStateToToken<T extends Record<string, unknown>>(
     role: state.role,
     plan: state.plan,
     username: state.username,
+    credentialsVersion: state.credentialsVersion,
     features: getFeatureStatus({ plan: state.plan }),
   };
 }
