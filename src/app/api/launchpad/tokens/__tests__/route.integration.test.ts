@@ -183,7 +183,7 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
     expect(mintLaunchedToken).toHaveBeenCalledTimes(1);
     const mintCall = mintLaunchedToken.mock.calls[0][0];
     expect(mintCall.ownerWalletAddress).toBe("WalletPlaceholder4444444444444444444");
-    expect(mintCall.supply).toBe(1000000000000000n);
+    expect(mintCall.supply).toBe(BigInt(1000000000000000));
   });
 
   it("a mint that fails on-chain is reported as success:false, not silently as a created token", async () => {
