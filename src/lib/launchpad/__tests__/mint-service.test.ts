@@ -36,7 +36,7 @@ function build(overrides: Partial<{ revokeMint: boolean; revokeFreeze: boolean; 
     ownerPubkey: owner.publicKey,
     mintRent: 1_461_600,
     decimals: 9,
-    supply: BigInt("1000000000000000"),
+    supply: BigInt(1_000_000_000_000_000),
     name: "Test Token",
     symbol: "TEST",
     metadataUri: "https://example.com/metadata.json",
