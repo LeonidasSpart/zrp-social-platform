@@ -160,9 +160,10 @@ gap).
 
 **Genuine remaining gaps, scoped out of this pass deliberately** (real
 "build a subsystem" work, not "fix a bug" work - documented honestly
-rather than attempted piecemeal): iOS device push remains entirely
-unbuilt (pre-existing, [B3](#b3-ios-device-push), unblocks CallKit and
-backgrounded/terminated incoming-call delivery too); no Achievements
+rather than attempted piecemeal): iOS device push and PushKit/CallKit were
+entirely unbuilt as of this pass - since built in Task #6, see
+[B3](#b3-ios-device-push--pushkitcallkit) (unverified against real APNs
+credentials, which this project still does not have); no Achievements
 gallery / other-player PLAY-profile screen; PLAY leaderboard has no
 country/friends scope (global only); no group message reactions/delete
 despite full backend support (`socket-authz.js` explicitly handles a
@@ -417,7 +418,7 @@ own view of "who is in this room").
 | Realtime | Socket.IO (`server.js`, path `/api/socket.io`, websocket transport, session-cookie handshake) | ✅ | ✅ (Socket.IO Java client) | ✅ Engine.IO v4 + Socket.IO framing written directly on `URLSessionWebSocketTask` (no dependency added). Live `receive-message`, `message-edited`, `message-deleted`, `reaction-updated`, `message-read`; polling stays as the fallback while the socket is down (30 s connected, 6 s not) | IMPLEMENTED |
 | Typing indicator | `typing` → `user-typing` relay | ✅ | ✅ | ✅ throttled to one event every 2 s; the indicator clears itself after 5 s in case the "stopped" event is lost with the connection | IMPLEMENTED |
 | Contact drawer (avatar, name, badge, handle, profile, block/mute, shared media) | `POST /api/users/{username}/block`, `POST /api/users/mute` | ✅ `ChatContactDrawer` | 🔶 | ✅ (**without Call and Video**) | PARTIAL |
-| Voice / video calling: placing/answering/being called | WebRTC signalling over the same socket (`call-user`/`incoming-call`/`accept-call`/`call-accepted`/`reject-call`/`call-rejected`/`end-call`/`call-ended`, non-trickle - one full SDP per side) | ✅ simple-peer | ✅ (`org.webrtc.*`) | ✅ `CallViewModel`/`CallView`, `stasel/WebRTC` (a SwiftPM distribution of Google's own prebuilt libwebrtc binaries - this app's *second* third-party dependency, after LiveKit for Live Audio); mic/camera, mute, speaker toggle, front/back camera switch, the same non-trickle-ICE signal/answer timeouts as the Android sibling. Placed from `ConversationView`'s toolbar (matching where the Android sibling puts the buttons); the incoming-call overlay is shown app-wide (`MainTabView`), superseding the earlier decline-only `IncomingCallResponder`. Hardening pass: the overlay used to unmount (and take its own error text with it) in the same render pass a failure set `phase = .idle` - a person could never actually read why a call ended; it now stays up for that case until `dismissError()` is tapped. An ICE `.failed` state used to only set an error flag while leaving the "connected" UI running over a peer connection that could no longer carry media (the Android sibling still does); it now calls `endCall()`, matching the website. `accept-call`/`reject-call`/`end-call` now carry the `callId` `incoming-call` supplied (`socket-authz.js`'s own GENERATION RACE protection) when this side is the callee; the caller side still cannot learn its own outgoing call's id, since that requires a socket.io ACK `ZrpSocket` does not implement. Audio session interruptions (Siri, another app) and route changes (AirPods connecting/disconnecting) are now handled, mirroring `MusicPlayer`'s own observers. CallKit/VoIP push was evaluated and deliberately not added: it would require a working iOS push-delivery path, which does not exist yet for any feature (see [B3](#b3-ios-device-push)) - a CallKit UI with no way to be triggered while backgrounded would be exactly the "capability added blindly" this file warns against elsewhere. `ZRPSocialTests/CallViewModelTests.swift` covers the pure logic (error classification, duration formatting); no CI job runs `xcodebuild test` for this or any other iOS test target today - `ios-native-build.yml` only builds and archives, so this suite is automated but not CI-verified, a pre-existing gap wider than calling | IMPLEMENTED |
+| Voice / video calling: placing/answering/being called | WebRTC signalling over the same socket (`call-user`/`incoming-call`/`accept-call`/`call-accepted`/`reject-call`/`call-rejected`/`end-call`/`call-ended`, non-trickle - one full SDP per side) | ✅ simple-peer | ✅ (`org.webrtc.*`) | ✅ `CallViewModel`/`CallView`, `stasel/WebRTC` (a SwiftPM distribution of Google's own prebuilt libwebrtc binaries - this app's *second* third-party dependency, after LiveKit for Live Audio); mic/camera, mute, speaker toggle, front/back camera switch, the same non-trickle-ICE signal/answer timeouts as the Android sibling. Placed from `ConversationView`'s toolbar (matching where the Android sibling puts the buttons); the incoming-call overlay is shown app-wide (`MainTabView`), superseding the earlier decline-only `IncomingCallResponder`. Hardening pass: the overlay used to unmount (and take its own error text with it) in the same render pass a failure set `phase = .idle` - a person could never actually read why a call ended; it now stays up for that case until `dismissError()` is tapped. An ICE `.failed` state used to only set an error flag while leaving the "connected" UI running over a peer connection that could no longer carry media (the Android sibling still does); it now calls `endCall()`, matching the website. `accept-call`/`reject-call`/`end-call` now carry the `callId` `incoming-call` supplied (`socket-authz.js`'s own GENERATION RACE protection) when this side is the callee; the caller side still cannot learn its own outgoing call's id, since that requires a socket.io ACK `ZrpSocket` does not implement. Audio session interruptions (Siri, another app) and route changes (AirPods connecting/disconnecting) are now handled, mirroring `MusicPlayer`'s own observers. **Task #6**: PushKit VoIP push + CallKit are now wired - see [B3](#b3-ios-device-push--pushkitcallkit) for the full architecture, security model, and what remains unverified (no real APNs credentials exist in this environment). `CallViewModel` itself is unchanged by this - `VoipPushCoordinator` calls its existing `acceptCall()`/`rejectCall()`/`endCall()` exactly as the in-app UI does, never a second call-handling path. `ZRPSocialTests/CallViewModelTests.swift`, `VoipPushPayloadParserTests.swift`, `VoipPushCoordinatorTests.swift` cover the pure logic; no CI job runs `xcodebuild test` for this or any other iOS test target today - `ios-native-build.yml` only builds and archives, so these suites are automated but not CI-verified, a pre-existing gap wider than calling | IMPLEMENTED (client + server wiring); PushKit/CallKit unverified on a real device (no Apple Developer account/APNs credentials exist for this project) |
 | Read receipts | side effect of `GET /api/messages/{userId}`, live push via socket `mark-read` → `message-read` | ✅ | ✅ | ✅ display was always correct; the live `mark-read` emit on receiving a message while the thread is open was missing (Task #5 fix) - the sender's checkmark previously only caught up on their next ≤30s poll instead of flipping instantly | IMPLEMENTED |
 | Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
@@ -520,7 +521,7 @@ own view of "who is in this room").
 | Notification tap-through | N/A | ✅ | ✅ | ✅ like/comment/repost → post, follow → profile, message → thread, appeal outcome → Appeals, listing decision → My listings (the payload carries no listing id, so it leads to where the outcome is visible rather than guessing at one) | IMPLEMENTED |
 | Unrecognised notification types | N/A | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
-| **Device push** | `POST/DELETE /api/push/fcm` accepts `platform: "ios"` and includes a deep-link `data.url`; delivery goes through `firebase-admin/messaging` | n/a | ✅ FCM | ❌ blocked on an APNs key, a `GoogleService-Info.plist`, **and an unresolved dependency decision**: an FCM token on iOS can only come from the Firebase iOS SDK, a third-party dependency this app has not added (see [B3](#b3-ios-device-push) for why the bar for adding it is higher than LiveKit's or WebRTC's). The alternative is a direct APNs sender server-side, which does not exist | **BLOCKED: [B3](#b3-ios-device-push)** |
+| **Device push** | `POST/DELETE /api/push/fcm` (alert token) + `POST/DELETE /api/push/voip` (PushKit token); delivery via FCM for `"android"`, direct APNs (`src/lib/apns.ts`, no Firebase/GoogleService-Info.plist dependency) for `"ios"`, both fed by the same `data.url`/`{title,body,url}` contract | n/a | ✅ FCM | ✅ `AppDelegate`/`PushCoordinator`/`VoipPushCoordinator` - real APNs registration, token lifecycle, foreground/background/terminated routing, PushKit VoIP → CallKit for incoming calls (Task #6); unverified against a real device/real APNs credentials, see [B3](#b3-ios-device-push--pushkitcallkit) | IMPLEMENTED (client+server); UNVERIFIED ON DEVICE: [B3](#b3-ios-device-push--pushkitcallkit) |
 
 ### Music
 
@@ -1559,52 +1560,292 @@ complete a sign-in is a dead button. The entitlement and capability are
 prepared in `Supporting/ZRPSocial.entitlements` so the flow is one route
 away, and the audit above is the specification for it.
 
-### B3. iOS device push
+### B3. iOS device push + PushKit/CallKit
 
-**Item 3 below (the backend change) is done.** `POST /api/push/fcm` now
-accepts an optional `platform` (`"android"` or `"ios"`, case-insensitive)
-in the request body, stored on both token creation and re-registration;
-any request that omits it - which today means every existing Android
-client, since this field didn't exist before - still defaults to
-`"android"`, so no existing row or caller is relabeled or broken.
-`sendFcmPush()` now also puts the same relative in-app path
-`sendPushNotification` already sends to Web Push subscribers (e.g.
-`/post/{id}`, `/messages/{username}`) into the FCM message's `data.url`,
-alongside the existing `notification` block, so a tap can navigate to the
-right screen instead of just opening the app - this reaches Android today
-too, not only a future iOS client, since Android's `notification`-only
-payload never carried a destination either.
+**Status: client and server wiring complete and internally consistent;
+unverified end to end.** This project has no real Apple Developer
+account (see the entitlements file's own note on Sign in with Apple) and
+therefore no real APNs key/certificate - every line below was written,
+cross-checked against the exact existing backend contract, and reasoned
+through for correctness, but has never been exercised against Apple's
+real push servers or a physical device. Do not read "IMPLEMENTED"
+anywhere in this section as "verified on a device" - see **Remaining
+limitations** at the end.
 
-Three things are still needed, and the third is a DECISION, not a
-credential. An earlier version of this note listed only the first two and
-said "an iOS client can register a token… with no further backend
-change". That was true about the backend and quietly skipped the hard
-part: **how an iOS client would obtain an FCM token at all.**
+The dependency-conflict item 3 the previous version of this note left
+open (FCM requires an FCM registration token; iOS has no way to produce
+one without the Firebase iOS SDK) is now moot: this app does not use
+Firebase for iOS push at all. `src/lib/apns.ts` is a real, direct APNs
+provider - HTTP/2, JWT (ES256) authenticated with a `.p8` key, talking to
+`api.push.apple.com`/`api.sandbox.push.apple.com` directly from the raw
+device token `UNUserNotificationCenter` and `PKPushRegistry` hand this
+app. No `GoogleService-Info.plist`, no Firebase iOS SDK, no dependency
+conflict.
 
-1. An **APNs key uploaded to the Firebase project**: a console action, not
-   a code change.
-2. A **`GoogleService-Info.plist`** for the iOS app. Only
-   `android-native/app/google-services.json` exists in this repo; the iOS
-   counterpart has never been generated.
-3. **A resolution to the dependency conflict.** `src/lib/fcm.ts` sends
-   through `firebase-admin/messaging`, so delivery to a device requires an
-   **FCM registration token**. On iOS that token is produced by the
-   Firebase iOS SDK; there is no way to obtain one from a raw APNs
-   device token on the client. So iOS push needs either:
-   - the **Firebase iOS SDK**, which would be a third sizeable
-     third-party dependency - this app is no longer dependency-free
-     (LiveKit for Live Audio, `stasel/WebRTC` for calling; see the
-     calling row), but each addition so far has mapped to a real,
-     working feature with no other path, and the same bar applies here; or
-   - a **direct APNs sender added server-side**, letting iOS register its
-     raw APNs device token instead. `grep -rl "apns" src/lib src/app/api`
-     returns nothing today, so this path does not exist yet; it is real
-     backend work, not configuration.
+#### Architecture
 
-Until item 3 is decided, items 1 and 2 are not sufficient on their own.
-**No fake local notifications will stand in for this**, and no
-"registration" that cannot produce a deliverable token will be added to
-make the screen look finished.
+- **Server: `src/lib/apns.ts`.** `sendApnsAlert(userId, title, body, url)`
+  and `sendApnsVoip(userId, call)` - independent of `src/lib/fcm.ts`
+  (now explicitly scoped to `platform: "android"` only) and of Web Push.
+  Configured from `APNS_KEY_ID` / `APNS_TEAM_ID` / `APNS_BUNDLE_ID` /
+  `APNS_PRIVATE_KEY` / `APNS_ENVIRONMENT` (all optional; every function
+  is a safe no-op - matching `FIREBASE_SERVICE_ACCOUNT_JSON`'s and
+  `VAPID_PRIVATE_KEY`'s own fail-soft convention - when unset, which is
+  every environment today). `sendPushNotification()`
+  (`src/lib/push-notifications.ts`) now calls Android (FCM), iOS
+  (direct APNs), and Web Push independently - the exact same `{title,
+  body, url}` contract every existing caller already sends, so no
+  call-site changed.
+- **Tokens.** Two independent Prisma models: `FcmToken` (`platform:
+  "ios"` now genuinely deliverable, not just stored) for ordinary alert
+  push, and a new `VoipToken` model for PushKit's separate VoIP
+  subscription (`POST`/`DELETE /api/push/voip`, mirroring
+  `/api/push/fcm`'s own upsert-on-token pattern - a new route because
+  there is no existing VoIP-push endpoint to reuse, not a duplicate of
+  one).
+- **iOS client**: `AppDelegate.swift` (the one non-SwiftUI entry point
+  this app needed - `@UIApplicationDelegateAdaptor` in
+  `ZRPSocialApp.swift`), `PushCoordinator.swift` (ordinary push:
+  permission state, device-token lifecycle, foreground presentation,
+  notification-tap routing), `VoipPushCoordinator.swift` (PushKit
+  registration, incoming-VoIP-push → CXProvider reporting, CallKit
+  action → `CallViewModel` call), `PushTokenRepository.swift` (both
+  registration endpoints). `NotificationSettingsView.swift`
+  (`Settings → Push Notifications`) shows the real
+  `UNAuthorizationStatus` and the one correct action for each of the
+  five states - never a second, app-invented "on/off" model.
+
+#### Token lifecycle
+
+Install → `UIApplication.shared.registerForRemoteNotifications()` (called
+from `PushCoordinator.attach`/`requestAuthorization` once permission is
+granted, and again on every launch when already authorized - registering
+again is a cheap refresh, not a re-prompt) → `AppDelegate.
+didRegisterForRemoteNotificationsWithDeviceToken` → hex-encoded and sent
+to `/api/push/fcm` (upsert keyed on the token itself, exactly like
+Android). Refresh: iOS calls the same delegate method again; handled
+identically. Login: `ZRPSocialApp`'s `.onChange(of: session.currentUser?.id)`
+calls `registerPendingTokenIfNeeded()` on both coordinators, covering a
+token that arrived before sign-in. Logout:
+`SessionController.signOut()`/`handleSessionExpired()` call
+`unregisterPushTokens` (wired from `ZRPSocialApp`) **before**
+`repository.logout()` clears the session - the authenticated `DELETE`
+calls would themselves 401 afterward, matching Android's own
+unregister-before-clear ordering in `PushRepository.kt`. Account switch:
+the same upsert-by-token semantics `/api/push/fcm` already had move a
+re-registered token to the new owner. Reinstall: a fresh token,
+registered the same way. Multiple devices: naturally supported - each
+device's token is its own row. Registration failures are never silently
+swallowed: `PushCoordinator.didFailToRegister`/each repository call logs
+via `ZrpLog.error` and surfaces on `@Published lastRegistrationError`.
+
+#### Notification permissions
+
+All five `UNAuthorizationStatus` values are handled distinctly
+(`PushCoordinator.PermissionState`). `.notDetermined` is the only state
+that ever calls `requestAuthorization()` (the real system prompt);
+every other state is never re-prompted (iOS itself would silently no-op
+a repeat request, so offering the button again would look broken).
+`.denied`/`.restricted` explain clearly and route to
+`UIApplication.openSettingsURLString` - this app never claims it can
+flip the permission itself. All strings route through the existing
+39-language `L10n`/`ios-extra-strings.json` system (10 new
+`ios.notifications.*` keys, `generate-localizations.py --check` passes).
+
+#### Foreground / background / terminated
+
+**Foreground**: `willPresent` fires; the banner is deliberately
+suppressed (`[.badge, .sound]` only) since Socket.IO's realtime handlers
+already update the visible screen live - a banner on top of that would
+be the exact duplicate-notification anti-pattern CLAUDE.md's own
+"Socket.IO and APNs must complement each other" line warns against.
+Badge and sound still fire since neither is otherwise reflected by a
+foregrounded screen. **Background**: iOS shows the system banner itself;
+a tap calls `didReceive response`. **Terminated**: `UNUserNotification
+Center.current().delegate = self` is set synchronously inside
+`application(_:didFinishLaunchingWithOptions:)`, before that method
+returns - the one hard requirement for a terminated-launch tap to reach
+`didReceive response` at all rather than falling back to a blind Home
+open (this task's own explicit prohibition). All three states funnel
+through the same `PushCoordinator.route(userInfo:)`: `userInfo["url"]`
+(the same relative path every push already carries -
+`sendPushNotification`'s `url` parameter, identical contract across
+Android/Web/iOS) is turned into a `https://zrp.one`-prefixed `URL` and
+handed to the **existing** `DeepLinkInbox`/`DeepLink.target(for:)`
+universal-link queue - not a second router. A payload arriving before
+`DeepLinkInbox` exists yet (a terminated-launch race) is buffered and
+flushed on `attach()`. A missing/malformed `url`, or one not starting
+with `/` (rejecting an attacker-supplied absolute URL), safely does
+nothing rather than crashing or forcing Home.
+
+#### Notification types
+
+The backend has never sent a `type` field in a push payload at all -
+Android's own `ZrpFirebaseMessagingService.onMessageReceived` reads only
+`title`/`body`/`url`, confirmed by this task's own audit of both the
+Android app and `src/lib/fcm.ts`/`push-notifications.ts`. iOS follows the
+exact same contract; no notification-type taxonomy is invented here that
+the backend does not actually produce. The in-app `NotificationsView`'s
+own `NotificationKind` (12 cases) is a separate, pre-existing concept for
+the in-app notification list, unrelated to and unchanged by this task.
+
+#### Security
+
+Every push payload is `{title, body}` (an APNs `aps.alert`) plus a bare
+relative `url` path - never a full message body, never a token, never
+private account data. `notifyIncomingCallPush`'s VoIP payload is more
+structured (`callerId`, `callId`, `callerName`, `callerUsername`,
+`isVideo`) but still carries no WebRTC signal/SDP and no session
+credential - see **PushKit/CallKit** below for exactly why. Server-side
+authorization is unchanged and remains the only authority: a push is
+never trusted as an authorization mechanism, `sendApnsAlert`/
+`sendApnsVoip` only ever read from `FcmToken`/`VoipToken` rows already
+scoped to `userId`, and the underlying `createNotification`/`call-user`
+paths still perform every existing block/mute/ban/membership check
+exactly as before this task. Tokens are never included in server logs
+(`apns.ts` only ever logs `{environment}` on successful configuration -
+see `console.log`'s own call site - never a device token or the `.p8`
+key material).
+
+#### PushKit / CallKit — the critical piece
+
+Today, `CallViewModel`'s WebRTC calling only rings while `MainTabView` is
+alive in the foreground (`connectSignaling()`/the socket subscription is
+tied to the signed-in tab shell's own `.task`/`.onDisappear`). This task
+adds a legitimate, Apple-supported path for the same call to ring while
+backgrounded, suspended, or terminated - **without a second signaling
+protocol**:
+
+1. `notifyIncomingCallPush` (`server.js`, on every `call-user`) now also
+   carries `callerId`/`callId` and calls `sendApnsVoip` when a
+   `VoipToken` exists for the receiver, on the `.voip` APNs topic
+   (`apns-priority: 10`, `apns-expiration: 0` - immediate, never queued;
+   PushKit VoIP pushes are APNs-only and cannot go through FCM at all,
+   under any configuration).
+2. `VoipPushCoordinator.pushRegistry(_:didReceiveIncomingPushWith:for:
+   completion:)` decodes the payload (`VoipPushPayloadParser`, pure and
+   unit-tested), and - the one hard real-time requirement in this whole
+   task, an Apple contract, not a ZRP design choice - reports the call to
+   `CXProvider` before/very close to when it returns, using **only**
+   data already in the push payload. A malformed/unusable payload still
+   gets a call reported and immediately ended (`reportCall(...,
+   reason: .failed)`) rather than silently dropped, since an app that
+   receives a VoIP push and reports nothing can have its VoIP
+   entitlement revoked.
+3. **Only after** reporting to CXProvider, the coordinator calls
+   `CallViewModel.connectSignaling()` (idempotent - a no-op if the
+   socket is already up), using the background execution time the VoIP
+   push itself grants.
+4. **The real gap this closes**: the original `"incoming-call"`
+   Socket.IO emit already happened once, to a room nobody was listening
+   to (Socket.IO does not buffer a room-scoped emit for a socket that
+   joins later) - so a plain reconnect would never see the actual WebRTC
+   `signal` (SDP) again, and CallKit would have a ringing call with no
+   way to ever connect it. Fixed server-side, not by inventing a new
+   protocol: `calls.start()` (`socket-authz.js`'s call registry) now
+   also stores `{signal, isVideo, callerName, callerUsername}` alongside
+   the existing pending-call state, and a new `calls.pendingFor
+   (receiverId)` is checked every time a socket joins its own room
+   (`server.js`, right after `socket.join(userId)`) - if a still-pending
+   call names this user as receiver, `"incoming-call"` is **redelivered**,
+   to that one socket only, with the real signal. This is genuinely a
+   redelivery of the exact same authorized event through the exact same
+   registry, not a second channel: `CallViewModel.handleIncomingCall`
+   picks it up completely unmodified.
+5. `CXAnswerCallAction` waits (bounded, 10s, 200ms poll - `Call
+   ViewModel` has no existing reactive-binding surface this coordinator
+   already depends on, so a short poll was simpler than adding one) for
+   `CallViewModel.phase == .incoming` (i.e. for step 4's redelivery to
+   land) before calling the **existing**
+   `CallViewModel.acceptCall()` - never a parallel accept path. Timeout
+   or a phase mismatch fails the action, which tells CallKit to clean up
+   its own UI (no phantom call left in the system).
+   `CXEndCallAction` calls the existing `rejectCall()`/`endCall()`
+   depending on `phase`. `providerDidReset` and every action handler
+   clear `activeCallUUID`, so CallKit state cannot outlive the call it
+   named.
+6. Call security is unchanged: the receiver's server-side authorization
+   (blocks, presence, ban status) already happened in `call-user`'s
+   existing checks before `notifyIncomingCallPush`/`sendApnsVoip` is ever
+   reached - the VoIP push is purely a delivery mechanism for a call the
+   server already authorized, never a second authorization surface, and
+   the iOS client never trusts a caller identity supplied only by the
+   push payload for anything beyond building the CXProvider UI (the
+   actual call proceeds only once the real, server-authorized `signal`
+   arrives).
+7. WebRTC/signaling compatibility is untouched: iOS↔Android, iOS↔Web,
+   and iOS↔iOS all still speak the identical non-trickle-ICE
+   `call-user`/`incoming-call`/`accept-call`/`call-accepted`/
+   `reject-call`/`call-rejected`/`end-call`/`call-ended` contract this
+   task's own audit re-confirmed byte-for-byte against `server.js`.
+8. AVAudioSession: deliberately **not** changed to defer activation to
+   `CXProviderDelegate.didActivate` - `CallViewModel`'s existing
+   `configureCallAudioSession()`/`teardownCallAudioSession()` still run
+   exactly as before, for both CallKit-driven and in-app-UI-driven calls
+   alike. Apple's documented best practice for a CallKit app is to let
+   CallKit own session activation timing; not doing so is a known,
+   deliberate scope cut for this pass (the two most likely real-world
+   symptoms are a brief audio glitch at call start, not silent failure
+   or crash) - recorded here rather than silently left unmentioned.
+
+#### Entitlements / background modes
+
+`Supporting/ZRPSocial.entitlements`: `aps-environment` (`development` -
+Xcode substitutes `production` automatically when archiving for
+distribution; the file's own value is never what ships). `Supporting/
+Info.plist`'s `UIBackgroundModes` gained `remote-notification` and
+`voip` (alongside the pre-existing `audio` for Music) - `voip` in
+particular is not optional paperwork: `PKPushRegistry` cannot receive
+VoIP pushes without it. Neither capability is yet enabled for the
+`one.zrp.social` App ID in the Apple Developer portal (there is no
+Apple Developer account for this app at all - the same real-world gap
+Sign In with Apple's own entitlement note already documents), so a
+*signed* build will fail to provision until then; the unsigned CI build
+this repo runs today is unaffected either way.
+
+#### Tests
+
+`ZRPSocialTests/VoipPushPayloadParserTests.swift` (pure payload decoding:
+valid, missing/empty `callerId`/`callId`, wrong-type fields, missing
+`callerName`/`isVideo` defaults), `PushCoordinatorTests.swift` (device
+token hex-encoding, register/unregister via a fake
+`PushTokenRepositoryProtocol`, notification-tap routing including
+malformed/absolute-URL/pre-attach-buffered payloads),
+`VoipPushCoordinatorTests.swift` (the same token-lifecycle coverage for
+the separate VoIP subscription), `SessionControllerPushTokenTests.swift`
+(sign-out unregisters before `repository.logout()`, a missing hook never
+crashes sign-out), plus the extended `socket-authz.test.ts` coverage for
+`pendingFor()` (still-pending vs already-resolved vs expired vs
+no-meta-stored calls). `PKPushRegistry`/`CXProvider` themselves are not
+constructible from XCTest without a running app, so the CallKit action
+handlers (`CXAnswerCallAction`/`CXEndCallAction`) are not exercised by
+this suite - only the pure payload-parsing step feeding them is. As
+before, no CI job runs `xcodebuild test`, so none of this - old or new -
+is CI-verified today.
+
+#### Remaining limitations
+
+- **No real Apple Developer account, APNs key, or VoIP push
+  entitlement exists for this project.** Every claim above is
+  architecturally correct and internally consistent against the real
+  existing backend contract, but has not been exercised against Apple's
+  real push servers or a physical device - this is real, evidence-traced
+  engineering work, not a verified-working feature. Do not report this
+  as "done" without that distinction.
+- The Redis-backed (multi-instance) branch of `calls.pendingFor()` is
+  implemented for symmetry with the in-memory branch but has no test
+  coverage of its own (mirroring the pre-existing gap: no test in this
+  repo exercises the Redis branch of `createCallRegistry` at all - this
+  is a pre-existing limitation this task did not introduce, and today's
+  actual deployment is single-replica, where the in-memory branch is
+  what runs).
+- CallKit's audio-session activation is not deferred to
+  `CXProviderDelegate.didActivate` - see point 8 above.
+- No `xcodebuild test` CI job exists for any iOS test target, old or
+  new.
+- Silent/data-only push (a payload with no `alert`, used to wake the app
+  without showing a banner) is not implemented - nothing in this
+  backend produces one today, so there was nothing to build against.
 
 ---
 
@@ -1622,7 +1863,7 @@ make the screen look finished.
 | 8 | Comments, replies, quotes, edit | ✅ done: 8b complete (reactions, comment repost/bookmark, reposts & quotes lists, inline translation) |
 | 9 | Stories | ✅ done |
 | 10 | Messages | ✅ done: 10b image attachments done. Conversation search was listed here in error: the website has none either (no search box on `/messages`, and no route behind one), so there is nothing to reach parity with. 10c: a distinct Camera button (`CameraCapture.swift`, `UIImagePickerController(sourceType: .camera)`) and a GIF button (reusing `GifPickerView`) were added to both the 1-1 and group composers, matching the same fix made to ChatInterface.tsx/GroupChatInterface.tsx and Android's ConversationScreen.kt/GroupConversationScreen.kt in the same pass - `NSCameraUsageDescription` is now declared for exactly this reason. The group composer previously had no photo affordance at all (only the video/document menu and voice notes); it now matches the 1-1 thread's Camera/Gallery/GIF trio |
-| 11 | Notifications | ✅ in-app list done: device push remains BLOCKED (B3) |
+| 11 | Notifications | ✅ in-app list done; device push + PushKit/CallKit done (Task #6), unverified on a real device (B3) |
 | 12 | Search + hashtags | ✅ done |
 | 13 | Music + background player | ✅ 13a (engine, background audio, lock screen, home) and 13b (discover, artists, albums, playlists, liked, history, queue) done |
 | 14 | Music Studio | ✅ gate, apply, artist profile, upload/publish, track + album management, reorder |

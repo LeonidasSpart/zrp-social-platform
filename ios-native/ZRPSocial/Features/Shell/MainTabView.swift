@@ -26,15 +26,14 @@ struct MainTabView: View {
     /// bell, the menu, the bar - refreshed once for the whole shell.
     @StateObject private var unread = UnreadBadgeViewModel()
 
-    /// Also at shell level, and for the same reason: a call arrives
-    /// while you are anywhere in the app, so a view model owned by the
-    /// conversation view would only ever ring while you happened to be
-    /// reading that one thread. One `CallViewModel` for the whole
-    /// signed-in session, matching the Android sibling's own
-    /// Activity-scoped instance and the website's own `CallContext`
-    /// provider at the app root - a screen that wants to place a call
-    /// reaches this one via `@EnvironmentObject`, never creates its own.
-    @StateObject private var calls = CallViewModel()
+    /// Owned at the app root now, not here - see `ZRPSocialApp.swift`'s
+    /// own comment on `calls`. `connectSignaling()`/`disconnectSignaling()`
+    /// still track this shell's own lifetime below (`.task`/`.onDisappear`),
+    /// matching `presence`'s identical pattern just below: the object
+    /// exists for the whole app so a PushKit-woken `VoipPushCoordinator`
+    /// can always reach it, but its socket subscription only runs while
+    /// someone is actually signed in.
+    @EnvironmentObject private var calls: CallViewModel
 
     @StateObject private var drawer = DrawerState()
 
@@ -61,7 +60,6 @@ struct MainTabView: View {
         .environmentObject(router)
         .environmentObject(unread)
         .environmentObject(drawer)
-        .environmentObject(calls)
         .fullScreenCover(isPresented: $player.isExpanded) {
             NowPlayingView()
         }

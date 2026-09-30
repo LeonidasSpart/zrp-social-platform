@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Gleiches Land wie du";
 "ios.explore.peopleNearYouEmpty" = "Noch niemand in der Nähe.";
 "ios.play.challengeUnsupported" = "Dieser Spieltyp wird in dieser App-Version noch nicht unterstützt.";
+"ios.notifications.pushSettingsTitle" = "Push-Mitteilungen";
+"ios.notifications.statusEnabledTitle" = "Mitteilungen sind aktiviert";
+"ios.notifications.statusEnabledDesc" = "Du wirst über Nachrichten, Likes, Kommentare, Follower und eingehende Anrufe benachrichtigt, auch wenn ZRP nicht geöffnet ist.";
+"ios.notifications.statusNotDeterminedTitle" = "Mitteilungen aktivieren";
+"ios.notifications.statusNotDeterminedDesc" = "Erhalte Benachrichtigungen über Nachrichten, Likes, Kommentare, Follower und eingehende Anrufe, auch wenn ZRP nicht geöffnet ist.";
+"ios.notifications.enableButton" = "Mitteilungen aktivieren";
+"ios.notifications.statusDeniedTitle" = "Mitteilungen sind deaktiviert";
+"ios.notifications.statusDeniedDesc" = "Aktiviere Mitteilungen in den iOS-Einstellungen, um Nachrichten, Likes, Kommentare, Follower und Anrufe zu erhalten, wenn ZRP nicht geöffnet ist.";
+"ios.notifications.openSettingsButton" = "Einstellungen öffnen";
+"ios.notifications.statusRestrictedDesc" = "Mitteilungen sind auf diesem Gerät durch eine Kindersicherung oder ein Verwaltungsprofil eingeschränkt.";

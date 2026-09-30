@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Negara yang sama dengan Anda";
 "ios.explore.peopleNearYouEmpty" = "Belum ada orang di dekat Anda.";
 "ios.play.challengeUnsupported" = "Jenis permainan ini belum didukung di versi aplikasi ini.";
+"ios.notifications.pushSettingsTitle" = "Notifikasi Push";
+"ios.notifications.statusEnabledTitle" = "Notifikasi aktif";
+"ios.notifications.statusEnabledDesc" = "Anda akan diberi tahu tentang pesan, suka, komentar, pengikut, dan panggilan masuk, bahkan saat ZRP tidak terbuka.";
+"ios.notifications.statusNotDeterminedTitle" = "Aktifkan notifikasi";
+"ios.notifications.statusNotDeterminedDesc" = "Dapatkan notifikasi tentang pesan, suka, komentar, pengikut, dan panggilan masuk, bahkan saat ZRP tidak terbuka.";
+"ios.notifications.enableButton" = "Aktifkan Notifikasi";
+"ios.notifications.statusDeniedTitle" = "Notifikasi nonaktif";
+"ios.notifications.statusDeniedDesc" = "Aktifkan notifikasi di Pengaturan iOS untuk mendapatkan pesan, suka, komentar, pengikut, dan panggilan saat ZRP tidak terbuka.";
+"ios.notifications.openSettingsButton" = "Buka Pengaturan";
+"ios.notifications.statusRestrictedDesc" = "Notifikasi dibatasi di perangkat ini oleh kontrol orang tua atau profil manajemen.";

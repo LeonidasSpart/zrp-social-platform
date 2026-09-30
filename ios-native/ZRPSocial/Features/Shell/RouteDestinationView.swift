@@ -89,6 +89,8 @@ struct RouteDestinationView: View {
             AccountSettingsView()
         case .emailPreferences:
             EmailPreferencesView()
+        case .notificationSettings:
+            NotificationSettingsView()
         case .appeals:
             AppealsView()
         case .trustPassport(let username):

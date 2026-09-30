@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "L-istess pajjiż bħalek";
 "ios.explore.peopleNearYouEmpty" = "Għadu m'hemm ħadd fil-viċinanza.";
 "ios.play.challengeUnsupported" = "Dan it-tip ta' logħba għadu mhux appoġġjat f'din il-verżjoni tal-app.";
+"ios.notifications.pushSettingsTitle" = "Notifiki Push";
+"ios.notifications.statusEnabledTitle" = "In-notifiki huma mixgħula";
+"ios.notifications.statusEnabledDesc" = "Tiġi nnotifikat dwar messaġġi, likes, kummenti, segwaċi, u sejħiet dieħla, anke meta ZRP mhux miftuħ.";
+"ios.notifications.statusNotDeterminedTitle" = "Ixgħel in-notifiki";
+"ios.notifications.statusNotDeterminedDesc" = "Ikseb notifiki dwar messaġġi, likes, kummenti, segwaċi, u sejħiet dieħla, anke meta ZRP mhux miftuħ.";
+"ios.notifications.enableButton" = "Ixgħel in-Notifiki";
+"ios.notifications.statusDeniedTitle" = "In-notifiki huma mitfija";
+"ios.notifications.statusDeniedDesc" = "Ixgħel in-notifiki fis-Settings tal-iOS biex tirċievi messaġġi, likes, kummenti, segwaċi, u sejħiet meta ZRP mhux miftuħ.";
+"ios.notifications.openSettingsButton" = "Iftaħ is-Settings";
+"ios.notifications.statusRestrictedDesc" = "In-notifiki huma ristretti fuq dan l-apparat minn kontroll tal-ġenituri jew profil ta' ġestjoni.";

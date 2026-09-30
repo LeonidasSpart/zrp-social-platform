@@ -29,11 +29,36 @@
 	</array>
 
 	<!--
-	  NOT declared yet, deliberately:
+	  Push notifications + PushKit VoIP (Task #6).
 
-	  aps-environment (push notifications) is blocked on B3 - there is no
-	  APNs key, no GoogleService-Info.plist for iOS, and /api/push/fcm
-	  hardcodes platform: "android". See ios-native/PARITY.md.
+	  The client-side wiring is real and complete: AppDelegate registers
+	  for remote notifications, PushCoordinator/VoipPushCoordinator
+	  handle the device token and VoIP token lifecycles, and
+	  src/lib/apns.ts is a real, direct HTTP/2 APNs sender (not FCM - see
+	  that file's own doc comment for why this app never needed the
+	  Firebase iOS SDK or a GoogleService-Info.plist at all).
+
+	  "development" here, matching how Xcode's own template generates
+	  this key: a signed Debug/TestFlight build talks to APNs' sandbox
+	  environment, and archiving for App Store distribution has Xcode
+	  substitute "production" automatically from the distribution
+	  provisioning profile - this file's own value is never what ships.
+
+	  Same real-world gap as Sign In with Apple above: "aps-environment"
+	  and the "Push Notifications"/"Background Modes: Voice over IP"
+	  capabilities must be enabled for the one.zrp.social App ID in the
+	  Apple Developer portal, and real APNS_KEY_ID/APNS_TEAM_ID/
+	  APNS_BUNDLE_ID/APNS_PRIVATE_KEY values (a real .p8 key) configured
+	  server-side, before this is live end to end - neither exists yet
+	  (no Apple Developer account for this app at all - see above). A
+	  *signed* build will fail to provision until then; the unsigned CI
+	  build this repo runs today is unaffected. See ios-native/PARITY.md.
+	-->
+	<key>aps-environment</key>
+	<string>development</string>
+
+	<!--
+	  NOT declared yet, deliberately:
 
 	  com.apple.developer.associated-domains (universal links) needs
 	  public/.well-known/apple-app-site-association to name

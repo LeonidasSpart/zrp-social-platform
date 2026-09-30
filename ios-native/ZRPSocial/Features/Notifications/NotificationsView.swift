@@ -91,12 +91,12 @@ final class NotificationsViewModel: ObservableObject {
 
 /// The in-app notification list.
 ///
-/// **Device push is a separate, blocked concern** - see PARITY.md B3.
-/// `/api/push/fcm` hardcodes `platform: "android"`, the Firebase project
-/// has no APNs key, and no `GoogleService-Info.plist` exists for iOS.
-/// Nothing here simulates a push with a local notification: that would
-/// look like the feature working while delivering nothing when the app is
-/// closed.
+/// Device push is real now (Task #6) - see `AppDelegate`/
+/// `PushCoordinator`/`ios-native/PARITY.md`'s B3 section for the actual
+/// APNs architecture. This screen itself is unchanged by that: it still
+/// reads the same `GET /api/notifications`, and a tapped push routes
+/// through `DeepLink`/`DeepLinkInbox` rather than through this view at
+/// all - nothing here simulates a push with a local notification.
 struct NotificationsView: View {
 
     @EnvironmentObject private var navigator: Navigator

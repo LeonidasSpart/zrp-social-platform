@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "आपके जैसा ही देश";
 "ios.explore.peopleNearYouEmpty" = "अभी तक आस-पास कोई नहीं है।";
 "ios.play.challengeUnsupported" = "इस प्रकार का गेम अभी इस ऐप संस्करण में समर्थित नहीं है।";
+"ios.notifications.pushSettingsTitle" = "पुश सूचनाएं";
+"ios.notifications.statusEnabledTitle" = "सूचनाएं चालू हैं";
+"ios.notifications.statusEnabledDesc" = "ZRP बंद होने पर भी आपको संदेशों, लाइक, टिप्पणियों, फ़ॉलोअर्स और आने वाली कॉल की सूचना मिलेगी।";
+"ios.notifications.statusNotDeterminedTitle" = "सूचनाएं चालू करें";
+"ios.notifications.statusNotDeterminedDesc" = "ZRP बंद होने पर भी संदेशों, लाइक, टिप्पणियों, फ़ॉलोअर्स और आने वाली कॉल की सूचनाएं पाएं।";
+"ios.notifications.enableButton" = "सूचनाएं चालू करें";
+"ios.notifications.statusDeniedTitle" = "सूचनाएं बंद हैं";
+"ios.notifications.statusDeniedDesc" = "ZRP बंद होने पर संदेश, लाइक, टिप्पणियां, फ़ॉलोअर्स और कॉल पाने के लिए iOS सेटिंग्स में सूचनाएं चालू करें।";
+"ios.notifications.openSettingsButton" = "सेटिंग्स खोलें";
+"ios.notifications.statusRestrictedDesc" = "इस डिवाइस पर पैरेंटल कंट्रोल या प्रबंधन प्रोफ़ाइल द्वारा सूचनाएं प्रतिबंधित हैं।";

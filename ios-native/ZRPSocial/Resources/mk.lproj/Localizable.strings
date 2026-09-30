@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Иста држава како тебе";
 "ios.explore.peopleNearYouEmpty" = "Сè уште нема никого блиску.";
 "ios.play.challengeUnsupported" = "Овој тип на игра сè уште не е поддржан во оваа верзија на апликацијата.";
+"ios.notifications.pushSettingsTitle" = "Пуш известувања";
+"ios.notifications.statusEnabledTitle" = "Известувањата се вклучени";
+"ios.notifications.statusEnabledDesc" = "Ќе бидете известени за пораки, лајкови, коментари, следбеници и дојдовни повици, дури и кога ZRP не е отворен.";
+"ios.notifications.statusNotDeterminedTitle" = "Вклучи известувања";
+"ios.notifications.statusNotDeterminedDesc" = "Добивајте известувања за пораки, лајкови, коментари, следбеници и дојдовни повици, дури и кога ZRP не е отворен.";
+"ios.notifications.enableButton" = "Вклучи известувања";
+"ios.notifications.statusDeniedTitle" = "Известувањата се исклучени";
+"ios.notifications.statusDeniedDesc" = "Вклучете известувања во поставките на iOS за да добивате пораки, лајкови, коментари, следбеници и повици кога ZRP не е отворен.";
+"ios.notifications.openSettingsButton" = "Отвори поставки";
+"ios.notifications.statusRestrictedDesc" = "Известувањата на овој уред се ограничени со родителска контрола или профил за управување.";

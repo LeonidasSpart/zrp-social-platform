@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Ta pati šalis kaip jūsų";
 "ios.explore.peopleNearYouEmpty" = "Kol kas niekas netoliese.";
 "ios.play.challengeUnsupported" = "Šis žaidimo tipas šioje programėlės versijoje dar nepalaikomas.";
+"ios.notifications.pushSettingsTitle" = "„Push“ pranešimai";
+"ios.notifications.statusEnabledTitle" = "Pranešimai įjungti";
+"ios.notifications.statusEnabledDesc" = "Būsite informuoti apie žinutes, patinka žymas, komentarus, sekėjus ir įeinančius skambučius, net kai ZRP neatidarytas.";
+"ios.notifications.statusNotDeterminedTitle" = "Įjungti pranešimus";
+"ios.notifications.statusNotDeterminedDesc" = "Gaukite pranešimus apie žinutes, patinka žymas, komentarus, sekėjus ir įeinančius skambučius, net kai ZRP neatidarytas.";
+"ios.notifications.enableButton" = "Įjungti pranešimus";
+"ios.notifications.statusDeniedTitle" = "Pranešimai išjungti";
+"ios.notifications.statusDeniedDesc" = "Įjunkite pranešimus iOS nustatymuose, kad gautumėte žinutes, patinka žymas, komentarus, sekėjus ir skambučius, kai ZRP neatidarytas.";
+"ios.notifications.openSettingsButton" = "Atidaryti nustatymus";
+"ios.notifications.statusRestrictedDesc" = "Pranešimai šiame įrenginyje apriboti dėl tėvų kontrolės ar valdymo profilio.";

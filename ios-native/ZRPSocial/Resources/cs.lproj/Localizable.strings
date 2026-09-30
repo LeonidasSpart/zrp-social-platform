@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Stejná země jako vy";
 "ios.explore.peopleNearYouEmpty" = "Zatím nikdo poblíž.";
 "ios.play.challengeUnsupported" = "Tento typ hry zatím není v této verzi aplikace podporován.";
+"ios.notifications.pushSettingsTitle" = "Push oznámení";
+"ios.notifications.statusEnabledTitle" = "Oznámení jsou zapnutá";
+"ios.notifications.statusEnabledDesc" = "Budete upozorněni na zprávy, lajky, komentáře, sledující a příchozí hovory, i když ZRP není otevřený.";
+"ios.notifications.statusNotDeterminedTitle" = "Zapnout oznámení";
+"ios.notifications.statusNotDeterminedDesc" = "Dostávejte upozornění na zprávy, lajky, komentáře, sledující a příchozí hovory, i když ZRP není otevřený.";
+"ios.notifications.enableButton" = "Zapnout oznámení";
+"ios.notifications.statusDeniedTitle" = "Oznámení jsou vypnutá";
+"ios.notifications.statusDeniedDesc" = "Zapněte oznámení v nastavení iOS, abyste dostávali zprávy, lajky, komentáře, sledující a hovory, když ZRP není otevřený.";
+"ios.notifications.openSettingsButton" = "Otevřít nastavení";
+"ios.notifications.statusRestrictedDesc" = "Oznámení jsou na tomto zařízení omezena rodičovskou kontrolou nebo profilem správy.";

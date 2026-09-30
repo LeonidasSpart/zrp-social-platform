@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Samme land som deg";
 "ios.explore.peopleNearYouEmpty" = "Ingen i nærheten ennå.";
 "ios.play.challengeUnsupported" = "Denne speltypen støttes ikke ennå i denne appversjonen.";
+"ios.notifications.pushSettingsTitle" = "Push-varsler";
+"ios.notifications.statusEnabledTitle" = "Varsler er på";
+"ios.notifications.statusEnabledDesc" = "Du blir varslet om meldinger, likerklikk, kommentarer, følgere og innkommende anrop, selv når ZRP ikke er åpen.";
+"ios.notifications.statusNotDeterminedTitle" = "Slå på varsler";
+"ios.notifications.statusNotDeterminedDesc" = "Få varsler om meldinger, likerklikk, kommentarer, følgere og innkommende anrop, selv når ZRP ikke er åpen.";
+"ios.notifications.enableButton" = "Slå på varsler";
+"ios.notifications.statusDeniedTitle" = "Varsler er av";
+"ios.notifications.statusDeniedDesc" = "Slå på varsler i iOS-innstillinger for å få meldinger, likerklikk, kommentarer, følgere og anrop når ZRP ikke er åpen.";
+"ios.notifications.openSettingsButton" = "Åpne innstillinger";
+"ios.notifications.statusRestrictedDesc" = "Varsler er begrenset på denne enheten av foreldrekontroll eller en administrasjonsprofil.";

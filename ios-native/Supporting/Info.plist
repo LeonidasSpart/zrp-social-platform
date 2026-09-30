@@ -72,13 +72,26 @@
 	  ZRP Music plays audio that must continue when the app is
 	  backgrounded or the screen locks - that is the whole point of a
 	  music player, and it is what MPNowPlayingInfoCenter and the lock
-	  screen transport controls attach to. This is the first phase that
-	  genuinely exercises a background mode, so it is the first phase
-	  that declares one.
+	  screen transport controls attach to.
+
+	  "remote-notification": background push delivery, driven by
+	  AppDelegate/PushCoordinator (Task #6). Genuinely needed - without
+	  it, a background push can still show a system banner, but this
+	  app's own didReceive(response:) tap-routing has no code path to
+	  run in until the user taps it and the app itself launches anyway,
+	  so silent/data-only pushes (used nowhere today, but the capability
+	  a correct implementation declares) would otherwise never reach it.
+
+	  "voip": REQUIRED, not optional, for PKPushRegistry to be entitled
+	  to receive VoIP pushes at all - see VoipPushCoordinator.swift. This
+	  is what actually lets an incoming call ring while the app is
+	  backgrounded, suspended, or terminated.
 	-->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>remote-notification</string>
+		<string>voip</string>
 	</array>
 
 	<!--
@@ -108,11 +121,9 @@
 
 	<!--
 	  Still deliberately absent. Apple rejects permissions an app does
-	  not actually use, and each of these would be exactly that:
+	  not actually use, and this would be exactly that:
 	    NSPhotoLibraryUsageDescription  PhotosPicker is out-of-process
 	                                    and needs no permission at all
-	    UIBackgroundModes remote-notification
-	                                    push, BLOCKED on B3
 	  See ios-native/PARITY.md.
 	-->
 </dict>

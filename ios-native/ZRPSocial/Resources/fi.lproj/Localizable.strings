@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Sama maa kuin sinulla";
 "ios.explore.peopleNearYouEmpty" = "Ei vielä ketään lähellä.";
 "ios.play.challengeUnsupported" = "Tätä pelityyppiä ei vielä tueta tässä sovellusversiossa.";
+"ios.notifications.pushSettingsTitle" = "Push-ilmoitukset";
+"ios.notifications.statusEnabledTitle" = "Ilmoitukset ovat päällä";
+"ios.notifications.statusEnabledDesc" = "Saat ilmoituksia viesteistä, tykkäyksistä, kommenteista, seuraajista ja saapuvista puheluista, vaikka ZRP ei olisi auki.";
+"ios.notifications.statusNotDeterminedTitle" = "Ota ilmoitukset käyttöön";
+"ios.notifications.statusNotDeterminedDesc" = "Saa ilmoituksia viesteistä, tykkäyksistä, kommenteista, seuraajista ja saapuvista puheluista, vaikka ZRP ei olisi auki.";
+"ios.notifications.enableButton" = "Ota ilmoitukset käyttöön";
+"ios.notifications.statusDeniedTitle" = "Ilmoitukset ovat pois päältä";
+"ios.notifications.statusDeniedDesc" = "Ota ilmoitukset käyttöön iOS-asetuksissa saadaksesi viestejä, tykkäyksiä, kommentteja, seuraajia ja puheluita, kun ZRP ei ole auki.";
+"ios.notifications.openSettingsButton" = "Avaa asetukset";
+"ios.notifications.statusRestrictedDesc" = "Ilmoitukset on rajoitettu tällä laitteella lapsilukon tai hallintaprofiilin vuoksi.";

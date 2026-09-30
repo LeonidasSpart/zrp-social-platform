@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Stesso paese tuo";
 "ios.explore.peopleNearYouEmpty" = "Ancora nessuno nelle vicinanze.";
 "ios.play.challengeUnsupported" = "Questo tipo di gioco non è ancora supportato in questa versione dell'app.";
+"ios.notifications.pushSettingsTitle" = "Notifiche push";
+"ios.notifications.statusEnabledTitle" = "Le notifiche sono attive";
+"ios.notifications.statusEnabledDesc" = "Riceverai notifiche su messaggi, mi piace, commenti, follower e chiamate in arrivo, anche quando ZRP non è aperto.";
+"ios.notifications.statusNotDeterminedTitle" = "Attiva le notifiche";
+"ios.notifications.statusNotDeterminedDesc" = "Ricevi notifiche su messaggi, mi piace, commenti, follower e chiamate in arrivo, anche quando ZRP non è aperto.";
+"ios.notifications.enableButton" = "Attiva notifiche";
+"ios.notifications.statusDeniedTitle" = "Le notifiche sono disattivate";
+"ios.notifications.statusDeniedDesc" = "Attiva le notifiche nelle Impostazioni di iOS per ricevere messaggi, mi piace, commenti, follower e chiamate quando ZRP non è aperto.";
+"ios.notifications.openSettingsButton" = "Apri Impostazioni";
+"ios.notifications.statusRestrictedDesc" = "Le notifiche sono limitate su questo dispositivo da un controllo genitori o da un profilo di gestione.";

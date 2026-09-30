@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "あなたと同じ国";
 "ios.explore.peopleNearYouEmpty" = "まだ近くに誰もいません。";
 "ios.play.challengeUnsupported" = "このゲームタイプはこのアプリのバージョンではまだサポートされていません。";
+"ios.notifications.pushSettingsTitle" = "プッシュ通知";
+"ios.notifications.statusEnabledTitle" = "通知はオンです";
+"ios.notifications.statusEnabledDesc" = "ZRPを開いていないときでも、メッセージ、いいね、コメント、フォロー、着信について通知を受け取れます。";
+"ios.notifications.statusNotDeterminedTitle" = "通知をオンにする";
+"ios.notifications.statusNotDeterminedDesc" = "ZRPを開いていないときでも、メッセージ、いいね、コメント、フォロー、着信について通知を受け取りましょう。";
+"ios.notifications.enableButton" = "通知をオンにする";
+"ios.notifications.statusDeniedTitle" = "通知はオフです";
+"ios.notifications.statusDeniedDesc" = "ZRPを開いていないときにメッセージ、いいね、コメント、フォロー、着信を受け取るには、iOSの設定で通知をオンにしてください。";
+"ios.notifications.openSettingsButton" = "設定を開く";
+"ios.notifications.statusRestrictedDesc" = "このデバイスではペアレンタルコントロールまたは管理プロファイルにより通知が制限されています。";

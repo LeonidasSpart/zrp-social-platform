@@ -1575,3 +1575,13 @@
 "ios.explore.peopleNearYouSubtitle" = "Sinuga samast riigist";
 "ios.explore.peopleNearYouEmpty" = "Kedagi pole veel lähedal.";
 "ios.play.challengeUnsupported" = "Seda mängutüüpi ei toetata veel selles rakenduse versioonis.";
+"ios.notifications.pushSettingsTitle" = "Push-teavitused";
+"ios.notifications.statusEnabledTitle" = "Teavitused on sees";
+"ios.notifications.statusEnabledDesc" = "Sind teavitatakse sõnumitest, meeldimistest, kommentaaridest, jälgijatest ja sissetulevatest kõnedest ka siis, kui ZRP pole avatud.";
+"ios.notifications.statusNotDeterminedTitle" = "Lülita teavitused sisse";
+"ios.notifications.statusNotDeterminedDesc" = "Saa teavitusi sõnumitest, meeldimistest, kommentaaridest, jälgijatest ja sissetulevatest kõnedest ka siis, kui ZRP pole avatud.";
+"ios.notifications.enableButton" = "Lülita teavitused sisse";
+"ios.notifications.statusDeniedTitle" = "Teavitused on väljas";
+"ios.notifications.statusDeniedDesc" = "Lülita teavitused sisse iOS-i seadetes, et saada sõnumeid, meeldimisi, kommentaare, jälgijaid ja kõnesid, kui ZRP pole avatud.";
+"ios.notifications.openSettingsButton" = "Ava seaded";
+"ios.notifications.statusRestrictedDesc" = "Teavitused on selles seadmes piiratud vanemliku kontrolli või haldusprofiili tõttu.";
