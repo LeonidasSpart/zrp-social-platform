@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Meldingen staan uit";
 "ios.notifications.statusDeniedDesc" = "Schakel meldingen in via iOS-instellingen om berichten, likes, reacties, volgers en oproepen te ontvangen als ZRP niet open is.";
 "ios.notifications.openSettingsButton" = "Instellingen openen";
-"ios.notifications.statusRestrictedDesc" = "Meldingen zijn op dit apparaat beperkt door ouderlijk toezicht of een beheerprofiel.";

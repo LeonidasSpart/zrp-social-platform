@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Сповіщення вимкнено";
 "ios.notifications.statusDeniedDesc" = "Увімкніть сповіщення в налаштуваннях iOS, щоб отримувати повідомлення, лайки, коментарі, підписників і дзвінки, коли ZRP не відкрито.";
 "ios.notifications.openSettingsButton" = "Відкрити налаштування";
-"ios.notifications.statusRestrictedDesc" = "Сповіщення на цьому пристрої обмежено батьківським контролем або профілем керування.";

@@ -201,8 +201,7 @@
     "ios.notifications.enableButton": "Enable Notifications",
     "ios.notifications.statusDeniedTitle": "Notifications are off",
     "ios.notifications.statusDeniedDesc": "Turn on notifications in iOS Settings to get messages, likes, comments, follows, and incoming calls when ZRP isn't open.",
-    "ios.notifications.openSettingsButton": "Open Settings",
-    "ios.notifications.statusRestrictedDesc": "Notifications are restricted on this device by a parental control or management profile."
+    "ios.notifications.openSettingsButton": "Open Settings"
   },
   "translations": {
     "fr": {
@@ -389,8 +388,7 @@
       "ios.notifications.enableButton": "Activer les notifications",
       "ios.notifications.statusDeniedTitle": "Les notifications sont désactivées",
       "ios.notifications.statusDeniedDesc": "Activez les notifications dans les réglages iOS pour recevoir messages, likes, commentaires, abonnés et appels lorsque ZRP n'est pas ouvert.",
-      "ios.notifications.openSettingsButton": "Ouvrir les réglages",
-      "ios.notifications.statusRestrictedDesc": "Les notifications sont restreintes sur cet appareil par un contrôle parental ou un profil de gestion."
+      "ios.notifications.openSettingsButton": "Ouvrir les réglages"
     },
     "de": {
       "ios.a11y.bookmark": "Merken",
@@ -576,8 +574,7 @@
       "ios.notifications.enableButton": "Mitteilungen aktivieren",
       "ios.notifications.statusDeniedTitle": "Mitteilungen sind deaktiviert",
       "ios.notifications.statusDeniedDesc": "Aktiviere Mitteilungen in den iOS-Einstellungen, um Nachrichten, Likes, Kommentare, Follower und Anrufe zu erhalten, wenn ZRP nicht geöffnet ist.",
-      "ios.notifications.openSettingsButton": "Einstellungen öffnen",
-      "ios.notifications.statusRestrictedDesc": "Mitteilungen sind auf diesem Gerät durch eine Kindersicherung oder ein Verwaltungsprofil eingeschränkt."
+      "ios.notifications.openSettingsButton": "Einstellungen öffnen"
     },
     "it": {
       "ios.a11y.bookmark": "Salva",
@@ -763,8 +760,7 @@
       "ios.notifications.enableButton": "Attiva notifiche",
       "ios.notifications.statusDeniedTitle": "Le notifiche sono disattivate",
       "ios.notifications.statusDeniedDesc": "Attiva le notifiche nelle Impostazioni di iOS per ricevere messaggi, mi piace, commenti, follower e chiamate quando ZRP non è aperto.",
-      "ios.notifications.openSettingsButton": "Apri Impostazioni",
-      "ios.notifications.statusRestrictedDesc": "Le notifiche sono limitate su questo dispositivo da un controllo genitori o da un profilo di gestione."
+      "ios.notifications.openSettingsButton": "Apri Impostazioni"
     },
     "sq": {
       "ios.a11y.bookmark": "Ruaje",
@@ -950,8 +946,7 @@
       "ios.notifications.enableButton": "Aktivizo njoftimet",
       "ios.notifications.statusDeniedTitle": "Njoftimet janë joaktive",
       "ios.notifications.statusDeniedDesc": "Aktivizo njoftimet te Cilësimet e iOS për të marrë mesazhe, pëlqime, komente, ndjekës dhe telefonata kur ZRP nuk është i hapur.",
-      "ios.notifications.openSettingsButton": "Hap Cilësimet",
-      "ios.notifications.statusRestrictedDesc": "Njoftimet janë të kufizuara në këtë pajisje nga kontrolli prindëror ose një profil menaxhimi."
+      "ios.notifications.openSettingsButton": "Hap Cilësimet"
     },
     "es": {
       "ios.a11y.bookmark": "Guardar",
@@ -1137,8 +1132,7 @@
       "ios.notifications.enableButton": "Activar notificaciones",
       "ios.notifications.statusDeniedTitle": "Las notificaciones están desactivadas",
       "ios.notifications.statusDeniedDesc": "Activa las notificaciones en Ajustes de iOS para recibir mensajes, me gusta, comentarios, seguidores y llamadas cuando ZRP no esté abierto.",
-      "ios.notifications.openSettingsButton": "Abrir ajustes",
-      "ios.notifications.statusRestrictedDesc": "Las notificaciones están restringidas en este dispositivo por un control parental o un perfil de gestión."
+      "ios.notifications.openSettingsButton": "Abrir ajustes"
     },
     "ru": {
       "ios.a11y.bookmark": "Добавить в закладки",
@@ -1324,8 +1318,7 @@
       "ios.notifications.enableButton": "Включить уведомления",
       "ios.notifications.statusDeniedTitle": "Уведомления выключены",
       "ios.notifications.statusDeniedDesc": "Включите уведомления в настройках iOS, чтобы получать сообщения, лайки, комментарии, подписчиков и звонки, когда ZRP закрыт.",
-      "ios.notifications.openSettingsButton": "Открыть настройки",
-      "ios.notifications.statusRestrictedDesc": "Уведомления ограничены на этом устройстве родительским контролем или профилем управления."
+      "ios.notifications.openSettingsButton": "Открыть настройки"
     },
     "ar": {
       "ios.a11y.bookmark": "حفظ",
@@ -1511,8 +1504,7 @@
       "ios.notifications.enableButton": "تفعيل الإشعارات",
       "ios.notifications.statusDeniedTitle": "الإشعارات معطّلة",
       "ios.notifications.statusDeniedDesc": "فعّل الإشعارات في إعدادات iOS لتلقّي الرسائل والإعجابات والتعليقات والمتابعين والمكالمات الواردة عندما يكون ZRP مغلقًا.",
-      "ios.notifications.openSettingsButton": "فتح الإعدادات",
-      "ios.notifications.statusRestrictedDesc": "الإشعارات مقيّدة على هذا الجهاز بواسطة الرقابة الأبوية أو ملف تعريف الإدارة."
+      "ios.notifications.openSettingsButton": "فتح الإعدادات"
     },
     "zh": {
       "ios.a11y.bookmark": "收藏",
@@ -1698,8 +1690,7 @@
       "ios.notifications.enableButton": "开启通知",
       "ios.notifications.statusDeniedTitle": "通知已关闭",
       "ios.notifications.statusDeniedDesc": "在 iOS 设置中开启通知，以便在 ZRP 未打开时接收消息、点赞、评论、关注者和来电。",
-      "ios.notifications.openSettingsButton": "打开设置",
-      "ios.notifications.statusRestrictedDesc": "此设备上的通知已被家长控制或管理配置文件限制。"
+      "ios.notifications.openSettingsButton": "打开设置"
     },
     "tr": {
       "ios.a11y.bookmark": "Kaydet",
@@ -1885,8 +1876,7 @@
       "ios.notifications.enableButton": "Bildirimleri Aç",
       "ios.notifications.statusDeniedTitle": "Bildirimler kapalı",
       "ios.notifications.statusDeniedDesc": "ZRP açık olmadığında mesaj, beğeni, yorum, takipçi ve arama almak için iOS Ayarları'ndan bildirimleri açın.",
-      "ios.notifications.openSettingsButton": "Ayarları Aç",
-      "ios.notifications.statusRestrictedDesc": "Bu cihazda bildirimler ebeveyn denetimi veya bir yönetim profili tarafından kısıtlanmış."
+      "ios.notifications.openSettingsButton": "Ayarları Aç"
     },
     "id": {
       "ios.a11y.bookmark": "Simpan",
@@ -2072,8 +2062,7 @@
       "ios.notifications.enableButton": "Aktifkan Notifikasi",
       "ios.notifications.statusDeniedTitle": "Notifikasi nonaktif",
       "ios.notifications.statusDeniedDesc": "Aktifkan notifikasi di Pengaturan iOS untuk mendapatkan pesan, suka, komentar, pengikut, dan panggilan saat ZRP tidak terbuka.",
-      "ios.notifications.openSettingsButton": "Buka Pengaturan",
-      "ios.notifications.statusRestrictedDesc": "Notifikasi dibatasi di perangkat ini oleh kontrol orang tua atau profil manajemen."
+      "ios.notifications.openSettingsButton": "Buka Pengaturan"
     },
     "pt": {
       "ios.a11y.bookmark": "Guardar",
@@ -2259,8 +2248,7 @@
       "ios.notifications.enableButton": "Ativar notificações",
       "ios.notifications.statusDeniedTitle": "As notificações estão desativadas",
       "ios.notifications.statusDeniedDesc": "Ative as notificações nos Ajustes do iOS para receber mensagens, curtidas, comentários, seguidores e chamadas quando o ZRP não estiver aberto.",
-      "ios.notifications.openSettingsButton": "Abrir Ajustes",
-      "ios.notifications.statusRestrictedDesc": "As notificações estão restritas neste dispositivo por um controlo parental ou perfil de gestão."
+      "ios.notifications.openSettingsButton": "Abrir Ajustes"
     },
     "ja": {
       "ios.a11y.bookmark": "ブックマーク",
@@ -2446,8 +2434,7 @@
       "ios.notifications.enableButton": "通知をオンにする",
       "ios.notifications.statusDeniedTitle": "通知はオフです",
       "ios.notifications.statusDeniedDesc": "ZRPを開いていないときにメッセージ、いいね、コメント、フォロー、着信を受け取るには、iOSの設定で通知をオンにしてください。",
-      "ios.notifications.openSettingsButton": "設定を開く",
-      "ios.notifications.statusRestrictedDesc": "このデバイスではペアレンタルコントロールまたは管理プロファイルにより通知が制限されています。"
+      "ios.notifications.openSettingsButton": "設定を開く"
     },
     "ko": {
       "ios.a11y.bookmark": "북마크",
@@ -2633,8 +2620,7 @@
       "ios.notifications.enableButton": "알림 켜기",
       "ios.notifications.statusDeniedTitle": "알림이 꺼져 있습니다",
       "ios.notifications.statusDeniedDesc": "ZRP가 열려 있지 않을 때 메시지, 좋아요, 댓글, 팔로우, 전화를 받으려면 iOS 설정에서 알림을 켜세요.",
-      "ios.notifications.openSettingsButton": "설정 열기",
-      "ios.notifications.statusRestrictedDesc": "이 기기에서는 자녀 보호 기능 또는 관리 프로필에 의해 알림이 제한되어 있습니다."
+      "ios.notifications.openSettingsButton": "설정 열기"
     },
     "hi": {
       "ios.a11y.bookmark": "बुकमार्क करें",
@@ -2820,8 +2806,7 @@
       "ios.notifications.enableButton": "सूचनाएं चालू करें",
       "ios.notifications.statusDeniedTitle": "सूचनाएं बंद हैं",
       "ios.notifications.statusDeniedDesc": "ZRP बंद होने पर संदेश, लाइक, टिप्पणियां, फ़ॉलोअर्स और कॉल पाने के लिए iOS सेटिंग्स में सूचनाएं चालू करें।",
-      "ios.notifications.openSettingsButton": "सेटिंग्स खोलें",
-      "ios.notifications.statusRestrictedDesc": "इस डिवाइस पर पैरेंटल कंट्रोल या प्रबंधन प्रोफ़ाइल द्वारा सूचनाएं प्रतिबंधित हैं।"
+      "ios.notifications.openSettingsButton": "सेटिंग्स खोलें"
     },
     "nl": {
       "ios.a11y.bookmark": "Bewaren",
@@ -3007,8 +2992,7 @@
       "ios.notifications.enableButton": "Meldingen inschakelen",
       "ios.notifications.statusDeniedTitle": "Meldingen staan uit",
       "ios.notifications.statusDeniedDesc": "Schakel meldingen in via iOS-instellingen om berichten, likes, reacties, volgers en oproepen te ontvangen als ZRP niet open is.",
-      "ios.notifications.openSettingsButton": "Instellingen openen",
-      "ios.notifications.statusRestrictedDesc": "Meldingen zijn op dit apparaat beperkt door ouderlijk toezicht of een beheerprofiel."
+      "ios.notifications.openSettingsButton": "Instellingen openen"
     },
     "pl": {
       "ios.a11y.bookmark": "Zapisz",
@@ -3194,8 +3178,7 @@
       "ios.notifications.enableButton": "Włącz powiadomienia",
       "ios.notifications.statusDeniedTitle": "Powiadomienia są wyłączone",
       "ios.notifications.statusDeniedDesc": "Włącz powiadomienia w ustawieniach iOS, aby otrzymywać wiadomości, polubienia, komentarze, obserwujących i połączenia, gdy ZRP nie jest otwarty.",
-      "ios.notifications.openSettingsButton": "Otwórz ustawienia",
-      "ios.notifications.statusRestrictedDesc": "Powiadomienia są ograniczone na tym urządzeniu przez kontrolę rodzicielską lub profil zarządzania."
+      "ios.notifications.openSettingsButton": "Otwórz ustawienia"
     },
     "ro": {
       "ios.a11y.bookmark": "Salvează",
@@ -3381,8 +3364,7 @@
       "ios.notifications.enableButton": "Activează notificările",
       "ios.notifications.statusDeniedTitle": "Notificările sunt dezactivate",
       "ios.notifications.statusDeniedDesc": "Activează notificările în Setările iOS pentru a primi mesaje, aprecieri, comentarii, urmăritori și apeluri când ZRP nu este deschis.",
-      "ios.notifications.openSettingsButton": "Deschide Setările",
-      "ios.notifications.statusRestrictedDesc": "Notificările sunt restricționate pe acest dispozitiv de un control parental sau un profil de gestionare."
+      "ios.notifications.openSettingsButton": "Deschide Setările"
     },
     "cs": {
       "ios.a11y.bookmark": "Uložit",
@@ -3568,8 +3550,7 @@
       "ios.notifications.enableButton": "Zapnout oznámení",
       "ios.notifications.statusDeniedTitle": "Oznámení jsou vypnutá",
       "ios.notifications.statusDeniedDesc": "Zapněte oznámení v nastavení iOS, abyste dostávali zprávy, lajky, komentáře, sledující a hovory, když ZRP není otevřený.",
-      "ios.notifications.openSettingsButton": "Otevřít nastavení",
-      "ios.notifications.statusRestrictedDesc": "Oznámení jsou na tomto zařízení omezena rodičovskou kontrolou nebo profilem správy."
+      "ios.notifications.openSettingsButton": "Otevřít nastavení"
     },
     "hu": {
       "ios.a11y.bookmark": "Mentés",
@@ -3755,8 +3736,7 @@
       "ios.notifications.enableButton": "Értesítések bekapcsolása",
       "ios.notifications.statusDeniedTitle": "Az értesítések ki vannak kapcsolva",
       "ios.notifications.statusDeniedDesc": "Kapcsold be az értesítéseket az iOS beállításaiban, hogy üzeneteket, kedveléseket, hozzászólásokat, követőket és hívásokat kapj, amikor a ZRP nincs megnyitva.",
-      "ios.notifications.openSettingsButton": "Beállítások megnyitása",
-      "ios.notifications.statusRestrictedDesc": "Az értesítések korlátozva vannak ezen az eszközön szülői felügyelet vagy kezelési profil miatt."
+      "ios.notifications.openSettingsButton": "Beállítások megnyitása"
     },
     "sv": {
       "ios.a11y.bookmark": "Spara",
@@ -3942,8 +3922,7 @@
       "ios.notifications.enableButton": "Slå på aviseringar",
       "ios.notifications.statusDeniedTitle": "Aviseringar är av",
       "ios.notifications.statusDeniedDesc": "Slå på aviseringar i iOS-inställningar för att få meddelanden, gilla-markeringar, kommentarer, följare och samtal när ZRP inte är öppet.",
-      "ios.notifications.openSettingsButton": "Öppna inställningar",
-      "ios.notifications.statusRestrictedDesc": "Aviseringar är begränsade på den här enheten av föräldrakontroll eller en hanteringsprofil."
+      "ios.notifications.openSettingsButton": "Öppna inställningar"
     },
     "da": {
       "ios.a11y.bookmark": "Gem",
@@ -4129,8 +4108,7 @@
       "ios.notifications.enableButton": "Slå notifikationer til",
       "ios.notifications.statusDeniedTitle": "Notifikationer er slået fra",
       "ios.notifications.statusDeniedDesc": "Slå notifikationer til i iOS-indstillinger for at få beskeder, likes, kommentarer, følgere og opkald, når ZRP ikke er åbent.",
-      "ios.notifications.openSettingsButton": "Åbn indstillinger",
-      "ios.notifications.statusRestrictedDesc": "Notifikationer er begrænset på denne enhed af forældrekontrol eller en administrationsprofil."
+      "ios.notifications.openSettingsButton": "Åbn indstillinger"
     },
     "hr": {
       "ios.a11y.bookmark": "Spremi",
@@ -4316,8 +4294,7 @@
       "ios.notifications.enableButton": "Uključi obavijesti",
       "ios.notifications.statusDeniedTitle": "Obavijesti su isključene",
       "ios.notifications.statusDeniedDesc": "Uključite obavijesti u postavkama iOS-a kako biste primali poruke, lajkove, komentare, pratitelje i pozive kad ZRP nije otvoren.",
-      "ios.notifications.openSettingsButton": "Otvori postavke",
-      "ios.notifications.statusRestrictedDesc": "Obavijesti su na ovom uređaju ograničene roditeljskim nadzorom ili profilom za upravljanje."
+      "ios.notifications.openSettingsButton": "Otvori postavke"
     },
     "sr": {
       "ios.a11y.bookmark": "Obeleži",
@@ -4503,8 +4480,7 @@
       "ios.notifications.enableButton": "Укључи обавештења",
       "ios.notifications.statusDeniedTitle": "Обавештења су искључена",
       "ios.notifications.statusDeniedDesc": "Укључите обавештења у подешавањима iOS-а да бисте примали поруке, лајкове, коментаре, пратиоце и позиве када ZRP није отворен.",
-      "ios.notifications.openSettingsButton": "Отвори подешавања",
-      "ios.notifications.statusRestrictedDesc": "Обавештења су на овом уређају ограничена родитељском контролом или профилом управљања."
+      "ios.notifications.openSettingsButton": "Отвори подешавања"
     },
     "bg": {
       "ios.a11y.bookmark": "Запази",
@@ -4690,8 +4666,7 @@
       "ios.notifications.enableButton": "Включи известията",
       "ios.notifications.statusDeniedTitle": "Известията са изключени",
       "ios.notifications.statusDeniedDesc": "Включете известията в настройките на iOS, за да получавате съобщения, харесвания, коментари, последователи и обаждания, когато ZRP не е отворено.",
-      "ios.notifications.openSettingsButton": "Отвори настройките",
-      "ios.notifications.statusRestrictedDesc": "Известията са ограничени на това устройство от родителски контрол или профил за управление."
+      "ios.notifications.openSettingsButton": "Отвори настройките"
     },
     "el": {
       "ios.a11y.bookmark": "Αποθήκευση",
@@ -4877,8 +4852,7 @@
       "ios.notifications.enableButton": "Ενεργοποίηση ειδοποιήσεων",
       "ios.notifications.statusDeniedTitle": "Οι ειδοποιήσεις είναι απενεργοποιημένες",
       "ios.notifications.statusDeniedDesc": "Ενεργοποιήστε τις ειδοποιήσεις στις ρυθμίσεις iOS για να λαμβάνετε μηνύματα, likes, σχόλια, ακόλουθους και κλήσεις όταν το ZRP δεν είναι ανοιχτό.",
-      "ios.notifications.openSettingsButton": "Άνοιγμα ρυθμίσεων",
-      "ios.notifications.statusRestrictedDesc": "Οι ειδοποιήσεις περιορίζονται σε αυτή τη συσκευή από γονικό έλεγχο ή προφίλ διαχείρισης."
+      "ios.notifications.openSettingsButton": "Άνοιγμα ρυθμίσεων"
     },
     "bs": {
       "ios.a11y.bookmark": "Zabilježi",
@@ -5064,8 +5038,7 @@
       "ios.notifications.enableButton": "Uključi obavještenja",
       "ios.notifications.statusDeniedTitle": "Obavještenja su isključena",
       "ios.notifications.statusDeniedDesc": "Uključite obavještenja u postavkama iOS-a da biste primali poruke, lajkove, komentare, pratioce i pozive kada ZRP nije otvoren.",
-      "ios.notifications.openSettingsButton": "Otvori postavke",
-      "ios.notifications.statusRestrictedDesc": "Obavještenja su ograničena na ovom uređaju putem roditeljske kontrole ili profila upravljanja."
+      "ios.notifications.openSettingsButton": "Otvori postavke"
     },
     "mk": {
       "ios.a11y.bookmark": "Обележи",
@@ -5251,8 +5224,7 @@
       "ios.notifications.enableButton": "Вклучи известувања",
       "ios.notifications.statusDeniedTitle": "Известувањата се исклучени",
       "ios.notifications.statusDeniedDesc": "Вклучете известувања во поставките на iOS за да добивате пораки, лајкови, коментари, следбеници и повици кога ZRP не е отворен.",
-      "ios.notifications.openSettingsButton": "Отвори поставки",
-      "ios.notifications.statusRestrictedDesc": "Известувањата на овој уред се ограничени со родителска контрола или профил за управување."
+      "ios.notifications.openSettingsButton": "Отвори поставки"
     },
     "no": {
       "ios.a11y.bookmark": "Bokmerk",
@@ -5438,8 +5410,7 @@
       "ios.notifications.enableButton": "Slå på varsler",
       "ios.notifications.statusDeniedTitle": "Varsler er av",
       "ios.notifications.statusDeniedDesc": "Slå på varsler i iOS-innstillinger for å få meldinger, likerklikk, kommentarer, følgere og anrop når ZRP ikke er åpen.",
-      "ios.notifications.openSettingsButton": "Åpne innstillinger",
-      "ios.notifications.statusRestrictedDesc": "Varsler er begrenset på denne enheten av foreldrekontroll eller en administrasjonsprofil."
+      "ios.notifications.openSettingsButton": "Åpne innstillinger"
     },
     "uk": {
       "ios.a11y.bookmark": "Закладка",
@@ -5625,8 +5596,7 @@
       "ios.notifications.enableButton": "Увімкнути сповіщення",
       "ios.notifications.statusDeniedTitle": "Сповіщення вимкнено",
       "ios.notifications.statusDeniedDesc": "Увімкніть сповіщення в налаштуваннях iOS, щоб отримувати повідомлення, лайки, коментарі, підписників і дзвінки, коли ZRP не відкрито.",
-      "ios.notifications.openSettingsButton": "Відкрити налаштування",
-      "ios.notifications.statusRestrictedDesc": "Сповіщення на цьому пристрої обмежено батьківським контролем або профілем керування."
+      "ios.notifications.openSettingsButton": "Відкрити налаштування"
     },
     "fi": {
       "ios.a11y.bookmark": "Kirjanmerkki",
@@ -5812,8 +5782,7 @@
       "ios.notifications.enableButton": "Ota ilmoitukset käyttöön",
       "ios.notifications.statusDeniedTitle": "Ilmoitukset ovat pois päältä",
       "ios.notifications.statusDeniedDesc": "Ota ilmoitukset käyttöön iOS-asetuksissa saadaksesi viestejä, tykkäyksiä, kommentteja, seuraajia ja puheluita, kun ZRP ei ole auki.",
-      "ios.notifications.openSettingsButton": "Avaa asetukset",
-      "ios.notifications.statusRestrictedDesc": "Ilmoitukset on rajoitettu tällä laitteella lapsilukon tai hallintaprofiilin vuoksi."
+      "ios.notifications.openSettingsButton": "Avaa asetukset"
     },
     "sk": {
       "ios.a11y.bookmark": "Záložka",
@@ -5999,8 +5968,7 @@
       "ios.notifications.enableButton": "Zapnúť notifikácie",
       "ios.notifications.statusDeniedTitle": "Notifikácie sú vypnuté",
       "ios.notifications.statusDeniedDesc": "Zapnite notifikácie v nastaveniach iOS, aby ste dostávali správy, páči sa mi, komentáre, sledovateľov a hovory, keď ZRP nie je otvorený.",
-      "ios.notifications.openSettingsButton": "Otvoriť nastavenia",
-      "ios.notifications.statusRestrictedDesc": "Notifikácie sú na tomto zariadení obmedzené rodičovskou kontrolou alebo profilom správy."
+      "ios.notifications.openSettingsButton": "Otvoriť nastavenia"
     },
     "sl": {
       "ios.a11y.bookmark": "Zaznamek",
@@ -6186,8 +6154,7 @@
       "ios.notifications.enableButton": "Vklopi obvestila",
       "ios.notifications.statusDeniedTitle": "Obvestila so izklopljena",
       "ios.notifications.statusDeniedDesc": "Vklopite obvestila v nastavitvah iOS, da prejemate sporočila, všečke, komentarje, sledilce in klice, ko ZRP ni odprt.",
-      "ios.notifications.openSettingsButton": "Odpri nastavitve",
-      "ios.notifications.statusRestrictedDesc": "Obvestila so na tej napravi omejena s starševskim nadzorom ali profilom za upravljanje."
+      "ios.notifications.openSettingsButton": "Odpri nastavitve"
     },
     "lt": {
       "ios.a11y.addPhoto": "Pridėti nuotrauką",
@@ -6373,8 +6340,7 @@
       "ios.notifications.enableButton": "Įjungti pranešimus",
       "ios.notifications.statusDeniedTitle": "Pranešimai išjungti",
       "ios.notifications.statusDeniedDesc": "Įjunkite pranešimus iOS nustatymuose, kad gautumėte žinutes, patinka žymas, komentarus, sekėjus ir skambučius, kai ZRP neatidarytas.",
-      "ios.notifications.openSettingsButton": "Atidaryti nustatymus",
-      "ios.notifications.statusRestrictedDesc": "Pranešimai šiame įrenginyje apriboti dėl tėvų kontrolės ar valdymo profilio."
+      "ios.notifications.openSettingsButton": "Atidaryti nustatymus"
     },
     "et": {
       "ios.a11y.bookmark": "Salvesta",
@@ -6560,8 +6526,7 @@
       "ios.notifications.enableButton": "Lülita teavitused sisse",
       "ios.notifications.statusDeniedTitle": "Teavitused on väljas",
       "ios.notifications.statusDeniedDesc": "Lülita teavitused sisse iOS-i seadetes, et saada sõnumeid, meeldimisi, kommentaare, jälgijaid ja kõnesid, kui ZRP pole avatud.",
-      "ios.notifications.openSettingsButton": "Ava seaded",
-      "ios.notifications.statusRestrictedDesc": "Teavitused on selles seadmes piiratud vanemliku kontrolli või haldusprofiili tõttu."
+      "ios.notifications.openSettingsButton": "Ava seaded"
     },
     "ga": {
       "ios.a11y.bookmark": "Leabharmharc",
@@ -6747,8 +6712,7 @@
       "ios.notifications.enableButton": "Cumasaigh Fógraí",
       "ios.notifications.statusDeniedTitle": "Tá na fógraí múchta",
       "ios.notifications.statusDeniedDesc": "Cuir na fógraí ar siúl i Socruithe iOS chun teachtaireachtaí, taitneamh, tuairimí, leantóirí, agus glaonna a fháil nuair nach bhfuil ZRP oscailte.",
-      "ios.notifications.openSettingsButton": "Oscail Socruithe",
-      "ios.notifications.statusRestrictedDesc": "Tá fógraí teoranta ar an ngléas seo ag rialú tuismitheoirí nó próifíl bhainistíochta."
+      "ios.notifications.openSettingsButton": "Oscail Socruithe"
     },
     "lv": {
       "ios.a11y.bookmark": "Grāmatzīme",
@@ -6934,8 +6898,7 @@
       "ios.notifications.enableButton": "Ieslēgt paziņojumus",
       "ios.notifications.statusDeniedTitle": "Paziņojumi ir izslēgti",
       "ios.notifications.statusDeniedDesc": "Ieslēdziet paziņojumus iOS iestatījumos, lai saņemtu ziņas, patīk atzīmes, komentārus, sekotājus un zvanus, kad ZRP nav atvērts.",
-      "ios.notifications.openSettingsButton": "Atvērt iestatījumus",
-      "ios.notifications.statusRestrictedDesc": "Paziņojumi šajā ierīcē ir ierobežoti ar vecāku kontroli vai pārvaldības profilu."
+      "ios.notifications.openSettingsButton": "Atvērt iestatījumus"
     },
     "mt": {
       "ios.a11y.bookmark": "Immarka",
@@ -7121,8 +7084,7 @@
       "ios.notifications.enableButton": "Ixgħel in-Notifiki",
       "ios.notifications.statusDeniedTitle": "In-notifiki huma mitfija",
       "ios.notifications.statusDeniedDesc": "Ixgħel in-notifiki fis-Settings tal-iOS biex tirċievi messaġġi, likes, kummenti, segwaċi, u sejħiet meta ZRP mhux miftuħ.",
-      "ios.notifications.openSettingsButton": "Iftaħ is-Settings",
-      "ios.notifications.statusRestrictedDesc": "In-notifiki huma ristretti fuq dan l-apparat minn kontroll tal-ġenituri jew profil ta' ġestjoni."
+      "ios.notifications.openSettingsButton": "Iftaħ is-Settings"
     },
     "rm": {
       "ios.a11y.bookmark": "Favurit",
@@ -7308,8 +7270,7 @@
       "ios.notifications.enableButton": "Activar communicaziuns",
       "ios.notifications.statusDeniedTitle": "Las communicaziuns èn deactivadas",
       "ios.notifications.statusDeniedDesc": "Activescha las communicaziuns en las Preferenzas iOS per retschaiver messadis, la plaschair, commentaris, sequitaders e clamadas cur che ZRP n'è betg avert.",
-      "ios.notifications.openSettingsButton": "Avrir preferenzas",
-      "ios.notifications.statusRestrictedDesc": "Las communicaziuns èn limitadas sin quest apparat tras in control da geniturs u in profil da gestiun."
+      "ios.notifications.openSettingsButton": "Avrir preferenzas"
     }
   }
 }

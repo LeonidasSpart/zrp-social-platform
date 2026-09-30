@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "通知はオフです";
 "ios.notifications.statusDeniedDesc" = "ZRPを開いていないときにメッセージ、いいね、コメント、フォロー、着信を受け取るには、iOSの設定で通知をオンにしてください。";
 "ios.notifications.openSettingsButton" = "設定を開く";
-"ios.notifications.statusRestrictedDesc" = "このデバイスではペアレンタルコントロールまたは管理プロファイルにより通知が制限されています。";

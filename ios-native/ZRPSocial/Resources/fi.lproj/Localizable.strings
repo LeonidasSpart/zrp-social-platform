@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Ilmoitukset ovat pois päältä";
 "ios.notifications.statusDeniedDesc" = "Ota ilmoitukset käyttöön iOS-asetuksissa saadaksesi viestejä, tykkäyksiä, kommentteja, seuraajia ja puheluita, kun ZRP ei ole auki.";
 "ios.notifications.openSettingsButton" = "Avaa asetukset";
-"ios.notifications.statusRestrictedDesc" = "Ilmoitukset on rajoitettu tällä laitteella lapsilukon tai hallintaprofiilin vuoksi.";

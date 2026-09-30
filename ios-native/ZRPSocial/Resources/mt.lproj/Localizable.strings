@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "In-notifiki huma mitfija";
 "ios.notifications.statusDeniedDesc" = "Ixgħel in-notifiki fis-Settings tal-iOS biex tirċievi messaġġi, likes, kummenti, segwaċi, u sejħiet meta ZRP mhux miftuħ.";
 "ios.notifications.openSettingsButton" = "Iftaħ is-Settings";
-"ios.notifications.statusRestrictedDesc" = "In-notifiki huma ristretti fuq dan l-apparat minn kontroll tal-ġenituri jew profil ta' ġestjoni.";

@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Notifikasi nonaktif";
 "ios.notifications.statusDeniedDesc" = "Aktifkan notifikasi di Pengaturan iOS untuk mendapatkan pesan, suka, komentar, pengikut, dan panggilan saat ZRP tidak terbuka.";
 "ios.notifications.openSettingsButton" = "Buka Pengaturan";
-"ios.notifications.statusRestrictedDesc" = "Notifikasi dibatasi di perangkat ini oleh kontrol orang tua atau profil manajemen.";

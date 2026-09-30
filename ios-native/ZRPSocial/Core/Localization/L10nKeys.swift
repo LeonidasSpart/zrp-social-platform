@@ -3168,8 +3168,6 @@ enum L10nKey: String, CaseIterable {
     case iosNotificationsStatusDeniedDesc = "ios.notifications.statusDeniedDesc"
     /// en: "Open Settings"
     case iosNotificationsOpenSettingsButton = "ios.notifications.openSettingsButton"
-    /// en: "Notifications are restricted on this device by a parental control or management profile."
-    case iosNotificationsStatusRestrictedDesc = "ios.notifications.statusRestrictedDesc"
 }
 
 extension L10nKey {

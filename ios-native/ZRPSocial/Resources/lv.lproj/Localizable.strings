@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Paziņojumi ir izslēgti";
 "ios.notifications.statusDeniedDesc" = "Ieslēdziet paziņojumus iOS iestatījumos, lai saņemtu ziņas, patīk atzīmes, komentārus, sekotājus un zvanus, kad ZRP nav atvērts.";
 "ios.notifications.openSettingsButton" = "Atvērt iestatījumus";
-"ios.notifications.statusRestrictedDesc" = "Paziņojumi šajā ierīcē ir ierobežoti ar vecāku kontroli vai pārvaldības profilu.";

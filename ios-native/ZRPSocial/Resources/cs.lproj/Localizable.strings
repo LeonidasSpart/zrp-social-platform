@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Oznámení jsou vypnutá";
 "ios.notifications.statusDeniedDesc" = "Zapněte oznámení v nastavení iOS, abyste dostávali zprávy, lajky, komentáře, sledující a hovory, když ZRP není otevřený.";
 "ios.notifications.openSettingsButton" = "Otevřít nastavení";
-"ios.notifications.statusRestrictedDesc" = "Oznámení jsou na tomto zařízení omezena rodičovskou kontrolou nebo profilem správy.";

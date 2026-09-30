@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Pranešimai išjungti";
 "ios.notifications.statusDeniedDesc" = "Įjunkite pranešimus iOS nustatymuose, kad gautumėte žinutes, patinka žymas, komentarus, sekėjus ir skambučius, kai ZRP neatidarytas.";
 "ios.notifications.openSettingsButton" = "Atidaryti nustatymus";
-"ios.notifications.statusRestrictedDesc" = "Pranešimai šiame įrenginyje apriboti dėl tėvų kontrolės ar valdymo profilio.";

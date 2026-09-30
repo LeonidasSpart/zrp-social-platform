@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Οι ειδοποιήσεις είναι απενεργοποιημένες";
 "ios.notifications.statusDeniedDesc" = "Ενεργοποιήστε τις ειδοποιήσεις στις ρυθμίσεις iOS για να λαμβάνετε μηνύματα, likes, σχόλια, ακόλουθους και κλήσεις όταν το ZRP δεν είναι ανοιχτό.";
 "ios.notifications.openSettingsButton" = "Άνοιγμα ρυθμίσεων";
-"ios.notifications.statusRestrictedDesc" = "Οι ειδοποιήσεις περιορίζονται σε αυτή τη συσκευή από γονικό έλεγχο ή προφίλ διαχείρισης.";

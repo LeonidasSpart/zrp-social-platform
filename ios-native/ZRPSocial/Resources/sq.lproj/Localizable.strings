@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Njoftimet janë joaktive";
 "ios.notifications.statusDeniedDesc" = "Aktivizo njoftimet te Cilësimet e iOS për të marrë mesazhe, pëlqime, komente, ndjekës dhe telefonata kur ZRP nuk është i hapur.";
 "ios.notifications.openSettingsButton" = "Hap Cilësimet";
-"ios.notifications.statusRestrictedDesc" = "Njoftimet janë të kufizuara në këtë pajisje nga kontrolli prindëror ose një profil menaxhimi.";

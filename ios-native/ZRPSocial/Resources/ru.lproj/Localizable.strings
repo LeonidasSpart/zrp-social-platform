@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Уведомления выключены";
 "ios.notifications.statusDeniedDesc" = "Включите уведомления в настройках iOS, чтобы получать сообщения, лайки, комментарии, подписчиков и звонки, когда ZRP закрыт.";
 "ios.notifications.openSettingsButton" = "Открыть настройки";
-"ios.notifications.statusRestrictedDesc" = "Уведомления ограничены на этом устройстве родительским контролем или профилем управления.";

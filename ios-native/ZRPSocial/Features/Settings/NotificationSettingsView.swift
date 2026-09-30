@@ -2,8 +2,11 @@ import SwiftUI
 import UIKit
 
 /// Shows this device's real push-notification permission state and the
-/// one action available for each of the five states iOS can report
-/// (`PushCoordinator.PermissionState`) - never a second, app-invented
+/// one action available for each of the four states `UNAuthorizationStatus`
+/// can actually report (`PushCoordinator.PermissionState` - it has no
+/// `.restricted` case, unlike `CNAuthorizationStatus`/`CLAuthorizationStatus`;
+/// a device-management restriction on notifications surfaces as `.denied`)
+/// - never a second, app-invented
 /// notion of "notifications on/off" that could drift from what iOS
 /// actually allows.
 ///
@@ -71,14 +74,6 @@ struct NotificationSettingsView: View {
                 description: .iosNotificationsStatusDeniedDesc
             )
             openSettingsButton
-
-        case .restricted:
-            statusRow(
-                systemImage: "bell.slash",
-                tint: ZrpColor.onSurfaceMuted,
-                title: .iosNotificationsStatusDeniedTitle,
-                description: .iosNotificationsStatusRestrictedDesc
-            )
         }
     }
 

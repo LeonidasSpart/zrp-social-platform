@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Mitteilungen sind deaktiviert";
 "ios.notifications.statusDeniedDesc" = "Aktiviere Mitteilungen in den iOS-Einstellungen, um Nachrichten, Likes, Kommentare, Follower und Anrufe zu erhalten, wenn ZRP nicht geöffnet ist.";
 "ios.notifications.openSettingsButton" = "Einstellungen öffnen";
-"ios.notifications.statusRestrictedDesc" = "Mitteilungen sind auf diesem Gerät durch eine Kindersicherung oder ein Verwaltungsprofil eingeschränkt.";

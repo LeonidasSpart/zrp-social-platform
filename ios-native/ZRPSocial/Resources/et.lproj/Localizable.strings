@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Teavitused on väljas";
 "ios.notifications.statusDeniedDesc" = "Lülita teavitused sisse iOS-i seadetes, et saada sõnumeid, meeldimisi, kommentaare, jälgijaid ja kõnesid, kui ZRP pole avatud.";
 "ios.notifications.openSettingsButton" = "Ava seaded";
-"ios.notifications.statusRestrictedDesc" = "Teavitused on selles seadmes piiratud vanemliku kontrolli või haldusprofiili tõttu.";

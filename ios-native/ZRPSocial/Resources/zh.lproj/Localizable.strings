@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "通知已关闭";
 "ios.notifications.statusDeniedDesc" = "在 iOS 设置中开启通知，以便在 ZRP 未打开时接收消息、点赞、评论、关注者和来电。";
 "ios.notifications.openSettingsButton" = "打开设置";
-"ios.notifications.statusRestrictedDesc" = "此设备上的通知已被家长控制或管理配置文件限制。";

@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Notificările sunt dezactivate";
 "ios.notifications.statusDeniedDesc" = "Activează notificările în Setările iOS pentru a primi mesaje, aprecieri, comentarii, urmăritori și apeluri când ZRP nu este deschis.";
 "ios.notifications.openSettingsButton" = "Deschide Setările";
-"ios.notifications.statusRestrictedDesc" = "Notificările sunt restricționate pe acest dispozitiv de un control parental sau un profil de gestionare.";

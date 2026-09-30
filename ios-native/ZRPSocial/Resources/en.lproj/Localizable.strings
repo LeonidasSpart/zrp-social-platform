@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Notifications are off";
 "ios.notifications.statusDeniedDesc" = "Turn on notifications in iOS Settings to get messages, likes, comments, follows, and incoming calls when ZRP isn't open.";
 "ios.notifications.openSettingsButton" = "Open Settings";
-"ios.notifications.statusRestrictedDesc" = "Notifications are restricted on this device by a parental control or management profile.";

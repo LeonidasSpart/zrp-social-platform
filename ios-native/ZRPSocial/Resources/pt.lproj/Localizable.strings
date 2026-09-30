@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "As notificações estão desativadas";
 "ios.notifications.statusDeniedDesc" = "Ative as notificações nos Ajustes do iOS para receber mensagens, curtidas, comentários, seguidores e chamadas quando o ZRP não estiver aberto.";
 "ios.notifications.openSettingsButton" = "Abrir Ajustes";
-"ios.notifications.statusRestrictedDesc" = "As notificações estão restritas neste dispositivo por um controlo parental ou perfil de gestão.";

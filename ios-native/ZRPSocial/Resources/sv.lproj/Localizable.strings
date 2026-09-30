@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Aviseringar är av";
 "ios.notifications.statusDeniedDesc" = "Slå på aviseringar i iOS-inställningar för att få meddelanden, gilla-markeringar, kommentarer, följare och samtal när ZRP inte är öppet.";
 "ios.notifications.openSettingsButton" = "Öppna inställningar";
-"ios.notifications.statusRestrictedDesc" = "Aviseringar är begränsade på den här enheten av föräldrakontroll eller en hanteringsprofil.";

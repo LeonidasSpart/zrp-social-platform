@@ -1641,15 +1641,20 @@ via `ZrpLog.error` and surfaces on `@Published lastRegistrationError`.
 
 #### Notification permissions
 
-All five `UNAuthorizationStatus` values are handled distinctly
-(`PushCoordinator.PermissionState`). `.notDetermined` is the only state
-that ever calls `requestAuthorization()` (the real system prompt);
-every other state is never re-prompted (iOS itself would silently no-op
-a repeat request, so offering the button again would look broken).
-`.denied`/`.restricted` explain clearly and route to
-`UIApplication.openSettingsURLString` - this app never claims it can
-flip the permission itself. All strings route through the existing
-39-language `L10n`/`ios-extra-strings.json` system (10 new
+All four `UNAuthorizationStatus` values are handled distinctly
+(`PushCoordinator.PermissionState` - `UNAuthorizationStatus` has no
+`.restricted` case, unlike `CNAuthorizationStatus`/`CLAuthorizationStatus`;
+a device-management/parental-control restriction on notifications
+surfaces as plain `.denied`, exactly as iOS itself reports it - an
+earlier draft of this coordinator modeled a fifth `.restricted` state
+that could never actually occur and CI's real Xcode build correctly
+rejected it). `.notDetermined` is the only state that ever calls
+`requestAuthorization()` (the real system prompt); every other state is
+never re-prompted (iOS itself would silently no-op a repeat request, so
+offering the button again would look broken). `.denied` explains clearly
+and routes to `UIApplication.openSettingsURLString` - this app never
+claims it can flip the permission itself. All strings route through the
+existing 39-language `L10n`/`ios-extra-strings.json` system (9 new
 `ios.notifications.*` keys, `generate-localizations.py --check` passes).
 
 #### Foreground / background / terminated

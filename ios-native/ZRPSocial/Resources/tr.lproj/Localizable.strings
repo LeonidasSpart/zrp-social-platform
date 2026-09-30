@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Bildirimler kapalı";
 "ios.notifications.statusDeniedDesc" = "ZRP açık olmadığında mesaj, beğeni, yorum, takipçi ve arama almak için iOS Ayarları'ndan bildirimleri açın.";
 "ios.notifications.openSettingsButton" = "Ayarları Aç";
-"ios.notifications.statusRestrictedDesc" = "Bu cihazda bildirimler ebeveyn denetimi veya bir yönetim profili tarafından kısıtlanmış.";

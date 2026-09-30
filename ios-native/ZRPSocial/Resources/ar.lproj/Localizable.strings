@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "الإشعارات معطّلة";
 "ios.notifications.statusDeniedDesc" = "فعّل الإشعارات في إعدادات iOS لتلقّي الرسائل والإعجابات والتعليقات والمتابعين والمكالمات الواردة عندما يكون ZRP مغلقًا.";
 "ios.notifications.openSettingsButton" = "فتح الإعدادات";
-"ios.notifications.statusRestrictedDesc" = "الإشعارات مقيّدة على هذا الجهاز بواسطة الرقابة الأبوية أو ملف تعريف الإدارة.";

@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Az értesítések ki vannak kapcsolva";
 "ios.notifications.statusDeniedDesc" = "Kapcsold be az értesítéseket az iOS beállításaiban, hogy üzeneteket, kedveléseket, hozzászólásokat, követőket és hívásokat kapj, amikor a ZRP nincs megnyitva.";
 "ios.notifications.openSettingsButton" = "Beállítások megnyitása";
-"ios.notifications.statusRestrictedDesc" = "Az értesítések korlátozva vannak ezen az eszközön szülői felügyelet vagy kezelési profil miatt.";

@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Varsler er av";
 "ios.notifications.statusDeniedDesc" = "Slå på varsler i iOS-innstillinger for å få meldinger, likerklikk, kommentarer, følgere og anrop når ZRP ikke er åpen.";
 "ios.notifications.openSettingsButton" = "Åpne innstillinger";
-"ios.notifications.statusRestrictedDesc" = "Varsler er begrenset på denne enheten av foreldrekontroll eller en administrasjonsprofil.";

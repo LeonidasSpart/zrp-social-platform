@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Powiadomienia są wyłączone";
 "ios.notifications.statusDeniedDesc" = "Włącz powiadomienia w ustawieniach iOS, aby otrzymywać wiadomości, polubienia, komentarze, obserwujących i połączenia, gdy ZRP nie jest otwarty.";
 "ios.notifications.openSettingsButton" = "Otwórz ustawienia";
-"ios.notifications.statusRestrictedDesc" = "Powiadomienia są ograniczone na tym urządzeniu przez kontrolę rodzicielską lub profil zarządzania.";

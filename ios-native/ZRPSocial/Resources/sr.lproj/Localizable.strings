@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Обавештења су искључена";
 "ios.notifications.statusDeniedDesc" = "Укључите обавештења у подешавањима iOS-а да бисте примали поруке, лајкове, коментаре, пратиоце и позиве када ZRP није отворен.";
 "ios.notifications.openSettingsButton" = "Отвори подешавања";
-"ios.notifications.statusRestrictedDesc" = "Обавештења су на овом уређају ограничена родитељском контролом или профилом управљања.";

@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "알림이 꺼져 있습니다";
 "ios.notifications.statusDeniedDesc" = "ZRP가 열려 있지 않을 때 메시지, 좋아요, 댓글, 팔로우, 전화를 받으려면 iOS 설정에서 알림을 켜세요.";
 "ios.notifications.openSettingsButton" = "설정 열기";
-"ios.notifications.statusRestrictedDesc" = "이 기기에서는 자녀 보호 기능 또는 관리 프로필에 의해 알림이 제한되어 있습니다.";

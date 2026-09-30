@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "सूचनाएं बंद हैं";
 "ios.notifications.statusDeniedDesc" = "ZRP बंद होने पर संदेश, लाइक, टिप्पणियां, फ़ॉलोअर्स और कॉल पाने के लिए iOS सेटिंग्स में सूचनाएं चालू करें।";
 "ios.notifications.openSettingsButton" = "सेटिंग्स खोलें";
-"ios.notifications.statusRestrictedDesc" = "इस डिवाइस पर पैरेंटल कंट्रोल या प्रबंधन प्रोफ़ाइल द्वारा सूचनाएं प्रतिबंधित हैं।";

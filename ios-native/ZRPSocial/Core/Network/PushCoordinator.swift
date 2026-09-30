@@ -22,14 +22,17 @@ import UserNotifications
 @MainActor
 final class PushCoordinator: NSObject, ObservableObject {
 
-    /// Mirrors `UNAuthorizationStatus` 1:1 so the permission UI can
-    /// switch over it without importing UserNotifications itself.
+    /// Mirrors `UNAuthorizationStatus`'s real cases 1:1 so the permission
+    /// UI can switch over it without importing UserNotifications itself.
+    /// `UNAuthorizationStatus` has no `.restricted` case (unlike
+    /// `CNAuthorizationStatus`/`CLAuthorizationStatus`, which do) - a
+    /// device-management/parental-control restriction on notifications
+    /// surfaces as `.denied` here, which is what iOS itself reports.
     enum PermissionState: Equatable {
         case notDetermined
         case authorized
         case provisional
         case denied
-        case restricted
     }
 
     @Published private(set) var permissionState: PermissionState = .notDetermined
@@ -114,7 +117,6 @@ final class PushCoordinator: NSObject, ObservableObject {
         case .provisional: return .provisional
         case .denied: return .denied
         case .ephemeral: return .authorized // App Clips only.
-        case .restricted: return .restricted
         @unknown default: return .denied
         }
     }

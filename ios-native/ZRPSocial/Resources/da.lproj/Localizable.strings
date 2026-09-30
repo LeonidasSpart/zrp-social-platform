@@ -1584,4 +1584,3 @@
 "ios.notifications.statusDeniedTitle" = "Notifikationer er slået fra";
 "ios.notifications.statusDeniedDesc" = "Slå notifikationer til i iOS-indstillinger for at få beskeder, likes, kommentarer, følgere og opkald, når ZRP ikke er åbent.";
 "ios.notifications.openSettingsButton" = "Åbn indstillinger";
-"ios.notifications.statusRestrictedDesc" = "Notifikationer er begrænset på denne enhed af forældrekontrol eller en administrationsprofil.";
