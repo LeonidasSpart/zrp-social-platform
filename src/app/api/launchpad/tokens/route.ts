@@ -10,7 +10,7 @@ import { Keypair } from "@solana/web3.js";
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { rateLimitByIpAndUser } from "@/lib/rate-limit";
-import { jsonWithDecimals } from "@/lib/serialize-decimal";
+import { jsonWithDecimalStrings as jsonWithDecimals } from "@/lib/launchpad/json";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
 import { validateTrustedUploadUrls } from "@/lib/media-url";
 import { normalizeProfileWebsite } from "@/lib/profile-website";
