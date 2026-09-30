@@ -161,6 +161,39 @@ describe.skipIf(!hasRealDatabaseUrl)("PUT/DELETE /api/stories/[id] (integration,
     });
   });
 
+  describe("POST /api/stories/[id]/view", () => {
+    // ⚠️ REGRESSION (master audit): a blocked-either-way viewer could
+    // still record a StoryView (and appear in the owner's viewer list)
+    // by hitting this route directly, even though every other surface
+    // (feed, GET /api/stories) already hides the story from them.
+    it("404s a view attempt from a blocked-either-way relationship", async () => {
+      const owner = await createUser();
+      const blockedViewer = await createUser();
+      await prisma.blocked.create({ data: { blockerId: owner.id, blockedId: blockedViewer.id } });
+      const story = await createStory(owner.id);
+
+      getServerSession.mockResolvedValueOnce({ user: { id: blockedViewer.id } });
+      const res = await viewStory(viewReq(story.id), { params: Promise.resolve({ id: story.id }) });
+      expect(res.status).toBe(404);
+
+      const view = await prisma.storyView.findFirst({ where: { storyId: story.id, viewerId: blockedViewer.id } });
+      expect(view).toBeNull();
+    });
+
+    it("still records a normal (non-blocked) view", async () => {
+      const owner = await createUser();
+      const viewer = await createUser();
+      const story = await createStory(owner.id);
+
+      getServerSession.mockResolvedValueOnce({ user: { id: viewer.id } });
+      const res = await viewStory(viewReq(story.id), { params: Promise.resolve({ id: story.id }) });
+      expect(res.status).toBe(200);
+
+      const view = await prisma.storyView.findFirst({ where: { storyId: story.id, viewerId: viewer.id } });
+      expect(view).not.toBeNull();
+    });
+  });
+
   describe("PUT (edit)", () => {
     it("rejects an unauthenticated request", async () => {
       getServerSession.mockResolvedValueOnce(null);

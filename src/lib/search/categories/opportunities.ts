@@ -59,6 +59,9 @@ function buildWhere(params: SearchQueryParams): Prisma.OpportunityListingWhereIn
           { skills: { has: query.toLowerCase() } },
         ],
       },
+      // Same banned-poster gap already fixed for the Posts category
+      // (src/lib/search/categories/posts.ts).
+      { poster: { banned: false } },
       ...(dateFilter ? [{ createdAt: dateFilter }] : []),
       ...(filters.verified ? [{ poster: { badgeType: { not: null } } }] : []),
       ...(filters.professional

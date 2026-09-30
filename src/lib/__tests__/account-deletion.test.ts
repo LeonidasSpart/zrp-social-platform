@@ -91,5 +91,46 @@ describe.skipIf(!hasRealDatabaseUrl)(
       await expect(deleteUserAccountAndFiles(randomUUID())).resolves.toBeUndefined();
       expect(deleteUploadThingKeys).not.toHaveBeenCalled();
     });
+
+    // ⚠️ REGRESSION (master audit P0): Community.createdBy was the only
+    // required FK-to-User relation in the whole schema left at the
+    // implicit ON DELETE RESTRICT default - deleting a user who had
+    // ever created a community threw a raw Postgres FK violation here,
+    // which the cron sweep and the self-service confirm route both
+    // surfaced as a generic 500/log line forever, never actually
+    // completing the deletion. Community.createdById is now nullable
+    // with ON DELETE SET NULL, matching every other ownership relation.
+    it("deletes a user who created a community, orphaning the community rather than blocking the delete", async () => {
+      const user = await prisma.user.create({
+        data: {
+          email: `del3-${randomUUID().slice(0, 8)}@deltest.example`,
+          username: `del3${randomUUID().slice(0, 8)}`,
+          password: "x",
+          role: "USER",
+        },
+      });
+      userIds.push(user.id);
+
+      const community = await prisma.community.create({
+        data: {
+          slug: `del-test-${randomUUID().slice(0, 8)}`,
+          name: "Deletion Test Community",
+          description: "x",
+          hashtag: `deltest${randomUUID().slice(0, 6)}`,
+          createdById: user.id,
+        },
+      });
+
+      await expect(deleteUserAccountAndFiles(user.id)).resolves.toBeUndefined();
+
+      const found = await prisma.user.findUnique({ where: { id: user.id } });
+      expect(found).toBeNull();
+
+      const survivingCommunity = await prisma.community.findUnique({ where: { id: community.id } });
+      expect(survivingCommunity).not.toBeNull();
+      expect(survivingCommunity!.createdById).toBeNull();
+
+      await prisma.community.delete({ where: { id: community.id } });
+    });
   }
 );

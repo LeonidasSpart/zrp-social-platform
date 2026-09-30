@@ -2,21 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { Prisma } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
-  // Rate limit: 10 reports per 10 minutes - reports are meant to be rare
-  // and deliberate, and this route previously had no protection at all,
-  // meaning the same person could spam-report a single post or comment
-  // an unlimited number of times.
-  const limit = await rateLimit(req, { limit: 10, window: 600, type: "report-create" });
-  if (!limit.success) return limit.response;
-
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Rate limit: 10 reports per 10 minutes - reports are meant to be rare
+  // and deliberate, and this route previously had no protection at all,
+  // meaning the same person could spam-report a single post or comment
+  // an unlimited number of times. ⚠️ SECURITY: also keyed on the
+  // session id, not just IP - IP-only would let one account flood the
+  // moderation queue via IP rotation.
+  const limit = await rateLimitByIpAndUser(req, session.user.id, { limit: 10, window: 600, type: "report-create" });
+  if (!limit.success) return limit.response;
 
   try {
     const {
@@ -55,21 +57,36 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (
-      !postId &&
-      !commentId &&
-      !listingId &&
-      !challengeId &&
-      !opportunityId &&
-      !campaignId &&
-      !liveAudioRoomId &&
-      !userId
-    ) {
+    const targetCount = [
+      postId,
+      commentId,
+      listingId,
+      challengeId,
+      opportunityId,
+      campaignId,
+      liveAudioRoomId,
+      userId,
+    ].filter(Boolean).length;
+
+    if (targetCount === 0) {
       return NextResponse.json(
         {
           error:
             "One of postId, commentId, listingId, challengeId, opportunityId, campaignId, liveAudioRoomId, or userId is required",
         },
+        { status: 400 }
+      );
+    }
+
+    // ⚠️ Exactly one target, never more: nothing downstream (the target
+    // resolution below, or admin/reports/[id]'s own denormalized
+    // targetUserId) can express "this report is about two things at
+    // once" - a multi-target request would silently have all but the
+    // first-checked target ignored, with no error surfaced to the
+    // reporter or to staff reviewing an ambiguous report.
+    if (targetCount > 1) {
+      return NextResponse.json(
+        { error: "A report may target only one item at a time." },
         { status: 400 }
       );
     }

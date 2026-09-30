@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
       banned: user.banned,
       emailVerified: user.emailVerified,
       plan: user.plan,
+      credentialsVersion: user.credentialsVersion,
       features,
     },
     secret,

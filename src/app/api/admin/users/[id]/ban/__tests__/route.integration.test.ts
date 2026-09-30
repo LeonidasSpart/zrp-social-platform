@@ -6,7 +6,14 @@ const { requireStaff, logAdminAction } = vi.hoisted(() => ({
   requireStaff: vi.fn(),
   logAdminAction: vi.fn(),
 }));
-vi.mock("@/lib/admin", () => ({ requireStaff }));
+// Only requireStaff (the actor's own session) is faked - this is a
+// real-Postgres integration test, and requireAdminToModifyStaffBan
+// (the moderator-can't-touch-staff guard under test here) must run for
+// real against the real DB rows this file creates, not a stub.
+vi.mock("@/lib/admin", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/admin")>();
+  return { ...actual, requireStaff };
+});
 vi.mock("@/lib/audit-log", () => ({ logAdminAction }));
 
 import { prisma } from "@/lib/db";

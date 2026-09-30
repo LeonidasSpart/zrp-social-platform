@@ -435,7 +435,12 @@ function createCallRegistry(options) {
         for (const entry of calls.values()) {
           if (entry.receiverId !== receiverId || entry.state !== "pending") continue;
           if (Date.now() - entry.updatedAt > pendingTtlMs) continue;
-          if (!entry.meta) return null;
+          // Meta-less entries are skipped, not treated as "nothing to
+          // redeliver" - matches the Redis branch below. A receiver can
+          // have more than one simultaneous pending call; giving up on
+          // the whole scan at the first meta-less entry could miss a
+          // later, valid one.
+          if (!entry.meta) continue;
           return { callerId: entry.callerId, callId: entry.callId, ...entry.meta };
         }
         return null;

@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { checkPostLength } from "@/lib/limits";
 import { canViewPrivateContent } from "@/lib/permissions";
 import { notifyMentionedUsers } from "@/lib/mentions";
@@ -146,15 +146,17 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
 // ─── POST: Create a comment (or reply) ──────────────────────────────
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  // Rate limit: 30 comments per 5 minutes - generous for active
-  // conversations, blocks comment-flooding/spam scripts.
-  const limit = await rateLimit(req, { limit: 30, window: 300, type: "comment-create" });
-  if (!limit.success) return limit.response;
-
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Rate limit: 30 comments per 5 minutes - generous for active
+  // conversations, blocks comment-flooding/spam scripts.
+  // ⚠️ SECURITY: also keyed on the session id (not just IP), so an
+  // account can't reset its bucket by rotating IP.
+  const limit = await rateLimitByIpAndUser(req, session.user.id, { limit: 30, window: 300, type: "comment-create" });
+  if (!limit.success) return limit.response;
 
   try {
     const { content, parentId, imageUrl } = await req.json();

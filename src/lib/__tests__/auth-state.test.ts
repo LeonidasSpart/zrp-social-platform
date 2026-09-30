@@ -31,6 +31,10 @@ function dbUser(overrides: Partial<Record<string, unknown>> = {}) {
     role: "USER",
     plan: "free",
     username: "alice",
+    // Matches every real row's migration-backfilled default - a token
+    // with no credentialsVersion claim (also defaults to 0) should
+    // compare equal, not be treated as predating a password change.
+    credentialsVersion: 0,
     ...overrides,
   };
 }
@@ -65,6 +69,26 @@ describe("getUserAuthState / applyAuthStateToToken", () => {
     const staleToken: Record<string, unknown> = { id: "u1", banned: false, role: "USER" };
     const refreshed = applyAuthStateToToken(staleToken, await getUserAuthState("u1"));
     expect(refreshed.banned).toBe(true);
+  });
+
+  it("a token minted before a password change is forced to sign out (credentialsVersion mismatch)", async () => {
+    const { getUserAuthState, applyAuthStateToToken } = await import("../auth-state");
+    findUnique.mockResolvedValue(dbUser({ credentialsVersion: 1 }));
+
+    // Token was minted while credentialsVersion was still 0 (its default).
+    const staleToken: Record<string, unknown> = { id: "u1", banned: false, role: "USER", isAdmin: true };
+    const refreshed = applyAuthStateToToken(staleToken, await getUserAuthState("u1"));
+    expect(refreshed.banned).toBe(true);
+  });
+
+  it("a token whose credentialsVersion matches the DB is left alone", async () => {
+    const { getUserAuthState, applyAuthStateToToken } = await import("../auth-state");
+    findUnique.mockResolvedValue(dbUser({ credentialsVersion: 2 }));
+
+    const currentToken: Record<string, unknown> = { id: "u1", banned: false, role: "USER", credentialsVersion: 2 };
+    const refreshed = applyAuthStateToToken(currentToken, await getUserAuthState("u1"));
+    expect(refreshed.banned).toBe(false);
+    expect(refreshed.credentialsVersion).toBe(2);
   });
 
   it("a deleted account is treated exactly like a banned one", async () => {

@@ -27,7 +27,10 @@
 interface ZrpGlobal {
   __zrpIO?: {
     to(room: string): { emit(event: string, payload?: unknown): void };
-    in(room: string): { socketsLeave(room: string | string[]): void };
+    in(room: string): {
+      socketsLeave(room: string | string[]): void;
+      disconnectSockets(close?: boolean): void;
+    };
   };
 }
 
@@ -83,5 +86,28 @@ export function evictUserFromLiveAudioRoom(userId: string, roomId: string): void
     io.in(userId).socketsLeave(`live-audio:${roomId}`);
   } catch (err) {
     console.error("socket eviction from live-audio room failed:", err);
+  }
+}
+
+/**
+ * ⚠️ SECURITY: the Socket.IO handshake re-checks `banned` against the
+ * database (server.js), but that only runs at CONNECT time - a socket
+ * already open when a ban lands keeps relaying DMs and placing/
+ * accepting calls indefinitely (call-user/accept-call/reject-call have
+ * no backing REST/DB write of their own to gate). Every socket a user
+ * has open already sits in a room named by their own userId (the same
+ * room emitToUser() targets), so force-disconnecting that room closes
+ * every one of their open connections at once - the client's own
+ * reconnect logic then re-runs the handshake and is correctly refused.
+ * Mirrors the existing evictUserFromLiveAudioRoom pattern, generalized
+ * to "end this user's realtime session entirely" rather than one room.
+ */
+export function disconnectAllSocketsForUser(userId: string): void {
+  const io = (globalThis as ZrpGlobal).__zrpIO;
+  if (!io) return;
+  try {
+    io.in(userId).disconnectSockets(true);
+  } catch (err) {
+    console.error("socket disconnect for banned user failed:", err);
   }
 }

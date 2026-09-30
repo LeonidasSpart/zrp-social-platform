@@ -3,6 +3,7 @@ import { NewsArticleCategory } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireJournalistRole } from "@/lib/journalist";
 import { normalizeProfileWebsite } from "@/lib/profile-website";
+import { validateMediaUrls } from "@/lib/media-url";
 
 const AUTHOR_SELECT = {
   id: true,
@@ -112,6 +113,17 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: "Invalid news category" }, { status: 400 });
     }
 
+    // ⚠️ SECURITY: same media-url.ts validation as article creation -
+    // see the create route's comment for why an unvalidated coverImage
+    // matters (raw <img src>, OG/JSON-LD meta scraped by bots).
+    const trimmedCoverImage = typeof coverImage === "string" ? coverImage.trim() : "";
+    if (coverImage !== undefined && trimmedCoverImage) {
+      const coverImageCheck = validateMediaUrls([trimmedCoverImage]);
+      if (!coverImageCheck.ok) {
+        return NextResponse.json({ success: false, error: coverImageCheck.error }, { status: 400 });
+      }
+    }
+
     let cleanSlug = existing.slug;
     if (slug !== undefined) {
       if (typeof slug !== "string" || !slug.trim()) {
@@ -142,9 +154,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
           ? { excerpt: typeof excerpt === "string" && excerpt.trim() ? excerpt.trim() : null }
           : {}),
         ...(content !== undefined ? { content: content.trim() } : {}),
-        ...(coverImage !== undefined
-          ? { coverImage: typeof coverImage === "string" && coverImage.trim() ? coverImage.trim() : null }
-          : {}),
+        ...(coverImage !== undefined ? { coverImage: trimmedCoverImage || null } : {}),
         ...(sourceName !== undefined
           ? { sourceName: typeof sourceName === "string" && sourceName.trim() ? sourceName.trim() : null }
           : {}),

@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { canAccessApi } from "@/lib/permissions";
 import { apiKeyExpiryFor } from "@/lib/api-auth";
+import { isSerializationConflict } from "@/lib/serialization-conflict";
 import crypto from "crypto";
 
 // ─── Helper: Generate a secure API key ─────────────────────────────
@@ -23,35 +24,6 @@ const MAX_ACTIVE_KEYS_PER_USER = 10;
 const MAX_KEYS_MESSAGE = `You can have at most ${MAX_ACTIVE_KEYS_PER_USER} active API keys. Revoke one before creating another.`;
 
 class MaxActiveKeysError extends Error {}
-
-// ⚠️ Prisma 7+ driver-adapter architecture: a Postgres serialization
-// failure (SQLSTATE 40001) detected DURING a query inside the
-// transaction still surfaces the same way as before - a
-// PrismaClientKnownRequestError with code P2034. But this route's own
-// conflict is a write-skew between a SELECT count() and a concurrent
-// INSERT, which Postgres's serializable snapshot isolation frequently
-// only detects at COMMIT time - and a commit-time conflict surfaces
-// instead as a raw, unwrapped DriverAdapterError (kind
-// "TransactionWriteConflict") from @prisma/adapter-pg, never reaching
-// the P2034 wrapping at all. Reproduced directly: identical concurrent
-// load that reliably retried-then-succeeded under Prisma 6 instead hit
-// unhandled 500s under Prisma 7 until this second check was added.
-// Checked structurally (not `instanceof` against
-// @prisma/driver-adapter-utils, a transitive dependency this app
-// doesn't declare directly) and against the raw Postgres SQLSTATE
-// rather than a Prisma-internal shape, so this keeps working even if
-// Prisma's own wrapping changes again.
-function isSerializationConflict(err: unknown): boolean {
-  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2034") {
-    return true;
-  }
-  const cause = (err as { name?: string; cause?: { originalCode?: string } } | null)?.cause;
-  return (
-    err instanceof Error &&
-    err.name === "DriverAdapterError" &&
-    cause?.originalCode === "40001"
-  );
-}
 
 // ⚠️ SECURITY: count-then-create was a check-then-act race - two
 // concurrent POSTs could both read a count under the limit and both

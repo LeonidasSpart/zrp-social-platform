@@ -4,16 +4,19 @@ import { NextRequest, NextResponse } from "next/server";
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import {
   getPlanLimits,
   checkPostLength,
   checkImagesPerPost,
+  checkScheduledPostsCount,
 } from "@/lib/limits";
+import { isSerializationConflict } from "@/lib/serialization-conflict";
 import {
   canPostRecruitment,
   canPublishArticle,
 } from "@/lib/permissions";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { renderArticleBody } from "@/lib/sanitize";
 import { resolveScheduledAt } from "@/lib/scheduled-time";
 import { isTrustedUploadUrl, validateMediaUrls } from "@/lib/media-url";
@@ -22,6 +25,12 @@ import { notifySubscribersOfNewPost } from "@/lib/post-subscriptions";
 import { isBlockedEitherWay } from "@/lib/auth-guards";
 import { viewablePostAuthorFilter } from "@/lib/permissions";
 import { applyPremiumGating } from "@/lib/premium-content";
+
+// Thrown inside the scheduled-post Serializable transaction to
+// distinguish "limit genuinely exceeded" (return 400, don't retry)
+// from a Postgres serialization conflict (retry) - see the
+// scheduled-posts create path below.
+class ScheduledPostLimitError extends Error {}
 
 // ─────────────────────────────────────────────────────────────
 // MEDIA HELPERS
@@ -482,17 +491,6 @@ export async function GET(req: NextRequest) {
 export async function POST(
   req: NextRequest
 ) {
-  const limit =
-    await rateLimit(req, {
-      limit: 20,
-      window: 600,
-      type: "posts-create",
-    });
-
-  if (!limit.success) {
-    return limit.response!;
-  }
-
   try {
     const token =
       await getToken({
@@ -511,6 +509,22 @@ export async function POST(
           status: 401,
         }
       );
+    }
+
+    // ⚠️ SECURITY: IP-only keying let one account reset its bucket by
+    // rotating IP while continuing to post from the same account -
+    // rateLimitByIpAndUser also keys on the verified token id, matching
+    // the dual login-ip/login-acct pattern already used for login
+    // brute-force protection.
+    const limit =
+      await rateLimitByIpAndUser(req, token.id as string, {
+        limit: 20,
+        window: 600,
+        type: "posts-create",
+      });
+
+    if (!limit.success) {
+      return limit.response!;
     }
 
     const user =
@@ -775,38 +789,35 @@ export async function POST(
     // SCHEDULED POSTS
     // ─────────────────────────────────────────────────────────
 
+    // Fast-path rejection only - this count is re-checked atomically
+    // (see scheduledPostsMonthStart/createScheduledPostAtomic below)
+    // immediately before the row is actually inserted, so a burst of
+    // concurrent requests can't all read the same pre-increment count
+    // and all pass. Doing the cheap check here first still avoids the
+    // poll-creation/media-validation work below for the common,
+    // non-racing case of an already-over-limit request.
+    const scheduledPostsMonthStart = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      1
+    );
+
     if (scheduledAt) {
       const scheduledCount =
         await prisma.post.count({
           where: {
-            authorId:
-              user.id,
-            scheduledAt: {
-              not: null,
-            },
-            status:
-              "scheduled",
-            createdAt: {
-              gte: new Date(
-                new Date().getFullYear(),
-                new Date().getMonth(),
-                1
-              ),
-            },
+            authorId: user.id,
+            scheduledAt: { not: null },
+            status: "scheduled",
+            createdAt: { gte: scheduledPostsMonthStart },
           },
         });
 
-      if (
-        scheduledCount >=
-        limits.scheduledPostsPerMonth
-      ) {
+      const scheduledCheck = checkScheduledPostsCount(scheduledCount, plan);
+      if (!scheduledCheck.allowed) {
         return NextResponse.json(
-          {
-            error: `You've reached your monthly limit of ${limits.scheduledPostsPerMonth} scheduled posts.`,
-          },
-          {
-            status: 400,
-          }
+          { error: scheduledCheck.message },
+          { status: 400 }
         );
       }
     }
@@ -992,10 +1003,60 @@ export async function POST(
           : null,
     };
 
-    const post =
-      await prisma.post.create({
-        data: postData,
-      });
+    // ⚠️ The fast-path count() above is a check-then-act race: two
+    // concurrent scheduled-post requests near the limit can both read
+    // the same pre-increment count and both pass. For a scheduled
+    // post, re-check the count and insert the row inside one
+    // Serializable transaction, mirroring the api-keys active-key-cap
+    // fix (src/app/api/api-keys/route.ts) - Postgres detects the write
+    // skew and aborts one of the two transactions instead of letting
+    // both commit, and the caller retries a few times so a burst of
+    // concurrent requests converges on the correct outcome.
+    let post;
+    if (scheduledAt) {
+      const MAX_SCHEDULE_SERIALIZATION_RETRIES = 5;
+      let created: Awaited<ReturnType<typeof prisma.post.create>> | undefined;
+      for (let attempt = 0; attempt <= MAX_SCHEDULE_SERIALIZATION_RETRIES; attempt++) {
+        try {
+          created = await prisma.$transaction(
+            async (tx) => {
+              const currentCount = await tx.post.count({
+                where: {
+                  authorId: user.id,
+                  scheduledAt: { not: null },
+                  status: "scheduled",
+                  createdAt: { gte: scheduledPostsMonthStart },
+                },
+              });
+              const recheck = checkScheduledPostsCount(currentCount, plan);
+              if (!recheck.allowed) {
+                throw new ScheduledPostLimitError(recheck.message);
+              }
+              return tx.post.create({ data: postData });
+            },
+            { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+          );
+          break;
+        } catch (err) {
+          if (err instanceof ScheduledPostLimitError) {
+            return NextResponse.json({ error: err.message }, { status: 400 });
+          }
+          const conflict = isSerializationConflict(err);
+          if (!conflict || attempt === MAX_SCHEDULE_SERIALIZATION_RETRIES) {
+            if (conflict) {
+              return NextResponse.json(
+                { error: "Too many concurrent requests. Please try again." },
+                { status: 409 }
+              );
+            }
+            throw err;
+          }
+        }
+      }
+      post = created!;
+    } else {
+      post = await prisma.post.create({ data: postData });
+    }
 
     // ─────────────────────────────────────────────────────────
     // HASHTAGS + MENTIONS

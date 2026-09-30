@@ -45,6 +45,10 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     features?: FeatureStatus;
+    // Baked in at sign-in/refresh, compared against the database's
+    // current value in applyAuthStateToToken() (auth-state.ts) - see
+    // User.credentialsVersion's schema comment.
+    credentialsVersion?: number;
   }
 }
 
@@ -76,6 +80,7 @@ export interface VerifiedCredentialsUser {
   banned: boolean;
   emailVerified: boolean;
   plan: string;
+  credentialsVersion: number;
 }
 
 // The single source of truth for verifying an email/username + password
@@ -127,6 +132,7 @@ export async function verifyCredentials({
       banned: true,
       emailVerified: true,
       plan: true,
+      credentialsVersion: true,
     },
   });
 
@@ -182,6 +188,7 @@ export async function verifyCredentials({
     banned: user.banned || false,
     emailVerified: !!user.emailVerified,
     plan: user.plan || "free",
+    credentialsVersion: user.credentialsVersion,
   };
 }
 
@@ -244,6 +251,7 @@ export async function findOrCreateOAuthUser(
     banned: true,
     emailVerified: true,
     plan: true,
+    credentialsVersion: true,
   } as const;
 
   const existing = await prisma.user.findUnique({
@@ -295,6 +303,7 @@ export async function findOrCreateOAuthUser(
       banned: existing.banned || false,
       emailVerified: !!existing.emailVerified,
       plan: existing.plan || "free",
+      credentialsVersion: existing.credentialsVersion,
     };
   }
 
@@ -329,6 +338,7 @@ export async function findOrCreateOAuthUser(
     banned: created.banned || false,
     emailVerified: !!created.emailVerified,
     plan: created.plan || "free",
+    credentialsVersion: created.credentialsVersion,
   };
 }
 
@@ -438,6 +448,7 @@ export const authOptions: NextAuthOptions = {
           token.banned = dbUser.banned || false;
           token.emailVerified = !!dbUser.emailVerified;
           token.plan = dbUser.plan || "free";
+          token.credentialsVersion = dbUser.credentialsVersion;
           token.features = getFeatureStatus({ plan: token.plan });
         }
         return token;
@@ -455,6 +466,7 @@ export const authOptions: NextAuthOptions = {
         token.banned = user.banned || false;
         token.emailVerified = !!user.emailVerified;
         token.plan = (user as any).plan || "free";
+        token.credentialsVersion = (user as any).credentialsVersion ?? 0;
         token.features = getFeatureStatus({ plan: token.plan });
       }
 
@@ -480,6 +492,7 @@ export const authOptions: NextAuthOptions = {
             banned: true,
             emailVerified: true,
             plan: true,
+            credentialsVersion: true,
           },
         });
         if (freshUser) {
@@ -493,6 +506,10 @@ export const authOptions: NextAuthOptions = {
           token.banned = freshUser.banned || false;
           token.emailVerified = !!freshUser.emailVerified;
           token.plan = freshUser.plan || "free";
+          // Keeps this branch consistent with the periodic recheck
+          // below rather than being a second path that never learns a
+          // password changed - see auth-state.ts's applyAuthStateToToken.
+          token.credentialsVersion = freshUser.credentialsVersion;
           token.features = getFeatureStatus({ plan: token.plan });
         }
       }

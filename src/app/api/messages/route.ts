@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendPushNotification } from "@/lib/push-notifications";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { getUserConversations } from "@/lib/conversations";
 import { isAllowedMediaUrl } from "@/lib/media-url";
 
@@ -38,14 +38,15 @@ export async function GET(req: NextRequest) {
 
 // ─── POST send message ──────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  // Rate limit: 60 messages per hour
-  const limit = await rateLimit(req, { limit: 60, window: 3600, type: "messages-send" });
-  if (!limit.success) return limit.response;
-
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Rate limit: 60 messages per hour. ⚠️ SECURITY: also keyed on the
+  // session id (DM-spam via IP rotation was otherwise unthrottled).
+  const limit = await rateLimitByIpAndUser(req, session.user.id, { limit: 60, window: 3600, type: "messages-send" });
+  if (!limit.success) return limit.response;
 
   try {
     const { content, receiverId, imageUrl, replyToId, storyId } = await req.json();

@@ -179,9 +179,13 @@ Single Postgres schema via Prisma. Broad shape:
   `CommunityCategory` and OWNER/ADMIN/MEMBER roles) and `List`/`ListMember` (X-style curated
   lists of users, public or private); a list's "feed" is the existing post feed filtered to
   member `authorId`s, not a parallel content system.
-- **Moderation**: `Report`, seven polymorphic targets (`postId`, `commentId`, `listingId`,
-  `challengeId`, `opportunityId`, `campaignId`, `reportedUserId` for a bare-profile report),
-  `Appeal` (one per actioned report), admin ban/plan endpoints under `src/app/api/admin/*`.
+- **Moderation**: `Report`, eight polymorphic targets (`postId`, `commentId`, `listingId`,
+  `challengeId`, `opportunityId`, `campaignId`, `liveAudioRoomId`, `reportedUserId` for a
+  bare-profile report; exactly one must be set per report), `Appeal` (one per actioned
+  report), admin ban/plan endpoints under `src/app/api/admin/*`. Any code that resolves a
+  report's target user (denormalizing `Report.targetUserId`, cross-platform target-type
+  switches, etc.) must handle all eight - a prior miss on `liveAudioRoomId` alone silently
+  broke appeals for actioned Live Audio room reports.
 - **Monetisation**: `CreatorProfile` (per-user monetisation settings + running balance
   totals), `Tip`, `PremiumPost`/`PremiumPurchase` (pay-to-view posts), `WithdrawalRequest`
   (payout to a Solana wallet address). All of these carry a `platformFee`/`charityAmount`/

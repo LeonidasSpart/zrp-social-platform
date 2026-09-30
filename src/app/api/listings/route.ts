@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { checkImagesPerListing, checkActiveListingsCount, getUserPlan } from "@/lib/limits";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
@@ -114,17 +114,18 @@ export async function GET(req: NextRequest) {
 
 // ─── POST: create a new listing - always starts PENDING_REVIEW ──────
 export async function POST(req: NextRequest) {
-  // Listing creation is low-frequency, deliberate activity (unlike
-  // likes/comments) but not free of abuse risk (spam/scam listing
-  // farms) - generous enough for a real seller managing several
-  // listings, tight enough to block automated flooding.
-  const limit = await rateLimit(req, { limit: 10, window: 3600, type: "listing-create" });
-  if (!limit.success) return limit.response;
-
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Listing creation is low-frequency, deliberate activity (unlike
+  // likes/comments) but not free of abuse risk (spam/scam listing
+  // farms) - generous enough for a real seller managing several
+  // listings, tight enough to block automated flooding. ⚠️ SECURITY:
+  // also keyed on the token id, not just IP.
+  const limit = await rateLimitByIpAndUser(req, token.id as string, { limit: 10, window: 3600, type: "listing-create" });
+  if (!limit.success) return limit.response;
 
   try {
     const body = await req.json();

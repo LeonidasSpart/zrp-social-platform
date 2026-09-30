@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { hashToken } from "@/lib/tokens";
 import { rateLimit } from "@/lib/rate-limit";
+import { invalidateUserAuthState } from "@/lib/auth-state";
 
 export async function POST(req: NextRequest) {
   // Prevent brute-forcing the reset token by request volume.
@@ -41,8 +42,15 @@ export async function POST(req: NextRequest) {
         password: hashedPassword,
         resetToken: null,
         resetTokenExpiry: null,
+        // ⚠️ SECURITY: forces every other already-issued session/token
+        // to sign out - see PUT /api/user/password's identical comment.
+        // A reset is often used precisely because the account may be
+        // compromised, so invalidating old sessions matters at least as
+        // much here as for an ordinary in-settings password change.
+        credentialsVersion: { increment: 1 },
       },
     });
+    invalidateUserAuthState(user.id);
 
     return NextResponse.json({ message: "Password reset successfully" });
   } catch (error) {

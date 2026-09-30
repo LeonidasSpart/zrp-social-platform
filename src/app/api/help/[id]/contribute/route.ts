@@ -171,8 +171,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       message: "Thank you for your contribution!",
     });
   } catch (error) {
+    // ⚠️ SECURITY: same fix as creator/tip/route.ts - the raw error
+    // (Prisma constraint text, Solana RPC details) used to be sent
+    // verbatim to the client. Log server-side only, return a fixed
+    // generic message.
     console.error("HELP contribution error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to process contribution. Please try again." },
+      { status: 500 }
+    );
   }
 }

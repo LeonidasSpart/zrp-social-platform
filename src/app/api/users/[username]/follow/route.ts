@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { isBlockedEitherWay } from "@/lib/auth-guards";
+import { rateLimit } from "@/lib/rate-limit";
 
 function isUniqueViolation(err: unknown): boolean {
   return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
@@ -13,6 +14,13 @@ function isUniqueViolation(err: unknown): boolean {
 
 export async function POST(req: NextRequest, props: { params: Promise<{ username: string }> }) {
   const params = await props.params;
+  // Unlike every other reaction endpoint (like/repost/reaction/comment),
+  // follow had no rate limit at all despite fanning out into a
+  // notification + push send - unbounded follow-spam/harassment and a
+  // free amplifier for the notification pipeline.
+  const limit = await rateLimit(req, { limit: 60, window: 60, type: "follow-toggle" });
+  if (!limit.success) return limit.response;
+
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

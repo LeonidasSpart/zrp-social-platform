@@ -3,6 +3,7 @@ import { NewsArticleCategory, NewsArticleStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireJournalistRole } from "@/lib/journalist";
 import { normalizeProfileWebsite } from "@/lib/profile-website";
+import { validateMediaUrls } from "@/lib/media-url";
 
 const AUTHOR_SELECT = {
   id: true,
@@ -131,6 +132,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: normalizedSourceUrl.error }, { status: 400 });
     }
 
+    // ⚠️ SECURITY: coverImage is rendered as a raw <img src> on the
+    // public article page and fed into OG/JSON-LD meta tags, scraped by
+    // every reader's browser and by social-unfurl bots on share -
+    // unlike every other content-writing route in the codebase, this
+    // one never validated it through media-url.ts, letting any
+    // journalist point it at an attacker-controlled tracking/arbitrary
+    // image URL.
+    const trimmedCoverImage = typeof coverImage === "string" ? coverImage.trim() : "";
+    if (trimmedCoverImage) {
+      const coverImageCheck = validateMediaUrls([trimmedCoverImage]);
+      if (!coverImageCheck.ok) {
+        return NextResponse.json({ success: false, error: coverImageCheck.error }, { status: 400 });
+      }
+    }
+
     const articleCategory =
       category && Object.values(NewsArticleCategory).includes(category)
         ? (category as NewsArticleCategory)
@@ -166,7 +182,7 @@ export async function POST(request: NextRequest) {
         slug: cleanSlug,
         excerpt: typeof excerpt === "string" && excerpt.trim() ? excerpt.trim() : null,
         content: content.trim(),
-        coverImage: typeof coverImage === "string" && coverImage.trim() ? coverImage.trim() : null,
+        coverImage: trimmedCoverImage || null,
         sourceName: typeof sourceName === "string" && sourceName.trim() ? sourceName.trim() : null,
         sourceUrl: normalizedSourceUrl.value,
         category: articleCategory,
