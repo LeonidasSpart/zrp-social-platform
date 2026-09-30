@@ -2511,7 +2511,7 @@
     <string name="admin_subscription_detail_not_yet">Ещё нет</string>
     <string name="admin_subscription_detail_yes">Да</string>
     <string name="admin_subscription_detail_no">Нет</string>
-    <string name="admin_subscription_detail_no_subscription_record">Записи о подписке нет — у этого пользователя никогда не было платных прав, отслеживаемых этой системой.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Записи о подписке нет: у этого пользователя никогда не было платных прав, отслеживаемых этой системой.</string>
     <string name="admin_subscription_detail_admin_controls">Управление администратора</string>
     <string name="admin_subscription_detail_plan_label">Тариф</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2521,7 +2521,7 @@
     <string name="admin_subscription_detail_interval_monthly">Ежемесячно</string>
     <string name="admin_subscription_detail_interval_yearly">Ежегодно</string>
     <string name="admin_subscription_detail_grant_extend">Выдать / продлить</string>
-    <string name="admin_subscription_detail_grant_extend_note">«Выдать / продлить» повторяет реальный платёж: если по тому же тарифу ещё действует период, он продлевается, иначе начинается новый период с сегодняшнего дня. Деньги не переводятся — операция записывается как admin_grant в историю платежей ниже.</string>
+    <string name="admin_subscription_detail_grant_extend_note">«Выдать / продлить» повторяет реальный платёж: если по тому же тарифу ещё действует период, он продлевается, иначе начинается новый период с сегодняшнего дня. Деньги не переводятся: операция записывается как admin_grant в историю платежей ниже.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Причина отмены (необязательно):</string>
     <string name="admin_subscription_detail_cancel_remaining">Отменить оставшееся время</string>
     <string name="admin_subscription_detail_restore">Восстановить</string>
@@ -2558,7 +2558,7 @@
     <string name="post_show_original">Показать оригинал</string>
     <string name="post_translation_unavailable">Перевод сейчас недоступен.</string>
     <string name="auth_username_taken">Это имя пользователя уже занято.</string>
-    <string name="auth_username_format_hint">3–20 символов, только буквы/цифры/подчёркивания</string>
+    <string name="auth_username_format_hint">3-20 символов, только буквы/цифры/подчёркивания</string>
     <string name="quote_post_title">Процитировать пост</string>
 
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->

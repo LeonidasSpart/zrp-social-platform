@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Play, Shuffle, Disc3 } from "lucide-react";
 import TrackList from "@/components/music/TrackList";
 import { useMusicPlayer, type MusicTrack } from "@/components/music/MusicPlayerProvider";
@@ -88,9 +89,9 @@ export default function MusicAlbumPage() {
 
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         <section className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
-          <div className="w-40 h-40 sm:w-56 sm:h-56 rounded-2xl overflow-hidden bg-gray-200 dark:bg-white/5 shrink-0 shadow-xl">
+          <div className="relative w-40 h-40 sm:w-56 sm:h-56 rounded-2xl overflow-hidden bg-gray-200 dark:bg-white/5 shrink-0 shadow-xl">
             {album.coverUrl ? (
-              <img src={album.coverUrl} alt="" className="w-full h-full object-cover" />
+              <Image src={album.coverUrl} alt="" fill sizes="(min-width: 640px) 224px, 160px" className="object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Disc3 className="w-14 h-14 text-gray-300 dark:text-white/20" />

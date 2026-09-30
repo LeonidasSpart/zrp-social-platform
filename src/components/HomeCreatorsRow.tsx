@@ -117,12 +117,12 @@ export default function HomeCreatorsRow() {
 
               <Link
                 href={`/profile/${user.username}`}
-                className="mt-2 flex items-center gap-0.5 max-w-full"
+                className="mt-2 flex min-w-0 items-center gap-0.5 max-w-full"
               >
                 <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                   {user.name || user.username}
                 </span>
-                {user.badgeType && <VerifiedBadge badgeType={user.badgeType} />}
+                {user.badgeType && <VerifiedBadge badgeType={user.badgeType} className="flex-shrink-0" />}
               </Link>
 
               <Link

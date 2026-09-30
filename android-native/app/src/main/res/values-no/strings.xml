@@ -837,7 +837,7 @@
     <string name="music_shell_studio_label">Music Studio</string>
     <string name="music_shell_studio_eyebrow">Verktøy for skapere</string>
     <string name="music_shell_studio_description">Publiser musikken din direkte på ZRP.</string>
-    <string name="music_shell_gate_title">Music Studio – krever artist- eller skaperstatus</string>
+    <string name="music_shell_gate_title">Music Studio: krever artist- eller skaperstatus</string>
     <string name="music_shell_gate_body">Alle kan lytte til ZRP Music. Å publisere musikk krever godkjent skaperstatus eller en verifisert musikkartistprofil.</string>
     <string name="music_shell_pending_verification">Artistprofilen din er sendt inn og venter på verifisering fra ZRP-ansatte.</string>
     <string name="music_shell_apply_intro_prefix">Opprett en artistprofil for å søke om verifisering som musikkartist, eller</string>
@@ -864,9 +864,9 @@
     <string name="music_shell_publishing">Publiserer ...</string>
     <string name="music_shell_upload_hint">Lyd og omslag lastes opp direkte til din eksisterende ZRP-lagring.</string>
     <string name="music_shell_publish_failed_default">Publiseringen mislyktes. Prøv igjen.</string>
-    <string name="music_shell_empty_file_error">«%1$s» kunne ikke leses – den laster kanskje fortsatt ned fra iCloud eller skylagringsleverandøren din. Vent til nedlastingen er ferdig, og prøv igjen.</string>
+    <string name="music_shell_empty_file_error">«%1$s» kunne ikke leses: den laster kanskje fortsatt ned fra iCloud eller skylagringsleverandøren din. Vent til nedlastingen er ferdig, og prøv igjen.</string>
     <string name="music_studio_delete_track_title">Slett spor</string>
-    <string name="music_studio_delete_track_body">Vil du slette «%1$s»? Dette kan ikke angres – sporet, avspillingene og likerklikkene blir permanent fjernet.</string>
+    <string name="music_studio_delete_track_body">Vil du slette «%1$s»? Dette kan ikke angres: sporet, avspillingene og likerklikkene blir permanent fjernet.</string>
     <string name="music_studio_cancel">Avbryt</string>
     <string name="music_studio_deleting">Sletter ...</string>
     <string name="music_studio_delete_confirm">Slett</string>
@@ -899,7 +899,7 @@
     <string name="music_studio_remove_from_album">Fjern fra albumet</string>
     <string name="music_studio_add_existing_tracks">Legg til eksisterende spor</string>
     <string name="music_studio_delete_album_title">Slett album</string>
-    <string name="music_studio_delete_album_body">Vil du slette «%1$s»? Sporene blir IKKE slettet – de forblir publisert og løsrives bare fra dette albumet.</string>
+    <string name="music_studio_delete_album_body">Vil du slette «%1$s»? Sporene blir IKKE slettet: de forblir publisert og løsrives bare fra dette albumet.</string>
     <string name="music_studio_album_created_msg">Albumet er opprettet.</string>
     <string name="music_studio_album_updated_msg">Albumet er oppdatert.</string>
     <string name="music_studio_album_deleted_msg">Albumet er slettet. Sporene dine ble beholdt og er fortsatt tilgjengelige.</string>
@@ -915,7 +915,7 @@
     <string name="marketplace_category_watches_jewelry">Klokker og smykker</string>
     <string name="marketplace_category_other_luxury">Andre luksusobjekter</string>
     <string name="marketplace_hero_title">ZRP Market Plus</string>
-    <string name="marketplace_hero_subtitle">Luksusmarkedsplassen for verifiserte ZRP-medlemmer – eksotiske biler, yachter, privatfly, eiendom og mer.</string>
+    <string name="marketplace_hero_subtitle">Luksusmarkedsplassen for verifiserte ZRP-medlemmer: eksotiske biler, yachter, privatfly, eiendom og mer.</string>
     <string name="marketplace_search_placeholder">Søk i annonser ...</string>
     <string name="marketplace_search">Søk</string>
     <string name="marketplace_browse_categories">Utforsk kategorier</string>
@@ -1003,7 +1003,7 @@
     <string name="opportunity_back_to_opportunity">Tilbake til OPPORTUNITY</string>
     <string name="opportunity_close">Lukk</string>
     <string name="opportunity_compensation_label">Godtgjørelse</string>
-    <string name="opportunity_compensation_placeholder">f.eks. 500 000–700 000 kr/år, ulønnet – studiepoeng</string>
+    <string name="opportunity_compensation_placeholder">f.eks. 500 000-700 000 kr/år, ulønnet: studiepoeng</string>
     <string name="opportunity_cover_note_label">Følgebrev (valgfritt)</string>
     <string name="opportunity_cover_note_placeholder">Fortell dem hvorfor du passer godt ...</string>
     <string name="opportunity_create_subtitle">Legg ut en jobb, praksisplass, et stipend, en mentorordning eller et samarbeid for ZRP-fellesskapet.</string>
@@ -1019,7 +1019,7 @@
     <string name="opportunity_external_url_hint">Hvis dette er satt, sendes søkere til denne lenken i stedet for å søke på ZRP.</string>
     <string name="opportunity_external_url_label">Ekstern søknadslenke (valgfritt)</string>
     <string name="opportunity_external_url_placeholder">https:// ...</string>
-    <string name="opportunity_hero_subtitle">Jobber, fjernarbeid, praksisplasser, stipender, mentorordninger, frilansprosjekter og samarbeid – drevet av ZRP-fellesskapet.</string>
+    <string name="opportunity_hero_subtitle">Jobber, fjernarbeid, praksisplasser, stipender, mentorordninger, frilansprosjekter og samarbeid: drevet av ZRP-fellesskapet.</string>
     <string name="opportunity_hero_title">ZRP OPPORTUNITY</string>
     <string name="opportunity_is_paid">Dette er lønnet</string>
     <string name="opportunity_location_label">Sted (valgfritt)</string>
@@ -1149,7 +1149,7 @@
     <string name="aid_status_rejected">Avslått</string>
     <string name="aid_status_removed">Fjernet</string>
     <string name="aid_title_label">Tittel</string>
-    <string name="aid_withdrawal_requested">Uttaket er bestilt. Det behandles innen 24–48 timer.</string>
+    <string name="aid_withdrawal_requested">Uttaket er bestilt. Det behandles innen 24-48 timer.</string>
     <string name="play_discover_entry">Utforsk ZRP PLAY</string>
     <string name="play_accept">Godta</string>
     <string name="play_accepted">Godtatt</string>
@@ -1160,7 +1160,7 @@
     <string name="play_add_option">Legg til alternativ</string>
     <string name="play_add_pair">Legg til par</string>
     <string name="play_add_question">Legg til spørsmål</string>
-    <string name="play_ai_generated_note">AI-generert – se gjennom før du publiserer.</string>
+    <string name="play_ai_generated_note">AI-generert: se gjennom før du publiserer.</string>
     <string name="play_ai_tab">Generer med AI</string>
     <string name="play_ai_topic_label">Tema</string>
     <string name="play_ai_topic_placeholder">f.eks. 80-tallsfilmer, verdens hovedsteder, fakta om verdensrommet</string>
@@ -1200,7 +1200,7 @@
     <string name="play_finish">Fullfør</string>
     <string name="play_generate">Generer</string>
     <string name="play_generating">Genererer ...</string>
-    <string name="play_hero_subtitle">Raske spill, dueller og daglige utfordringer – drevet av ZRP-fellesskapet.</string>
+    <string name="play_hero_subtitle">Raske spill, dueller og daglige utfordringer: drevet av ZRP-fellesskapet.</string>
     <string name="play_hero_title">ZRP PLAY</string>
     <string name="play_incoming_duels">Innkommende utfordringer</string>
     <string name="play_leaderboard">Ledertavle</string>
@@ -1336,7 +1336,7 @@
     <string name="shorts_upload_err_generic">Noe gikk galt under opplastingen. Sjekk tilkoblingen din og prøv igjen.</string>
     <string name="shorts_upload_err_upload_failed_detailed">Opplastingen ble ikke fullført, sannsynligvis på grunn av et tilkoblingsproblem eller at filen er for stor for abonnementet ditt. Sjekk tilkoblingen din og prøv igjen.</string>
     <string name="shorts_upload_err_too_large_plan">Denne videoen er for stor for abonnementet ditt. Prøv en mindre fil, eller oppgrader abonnementet.</string>
-    <string name="shorts_upload_err_url_gen_failed">Kunne ikke starte opplastingen – dette er som regel et midlertidig tilkoblingsproblem. Prøv igjen.</string>
+    <string name="shorts_upload_err_url_gen_failed">Kunne ikke starte opplastingen: dette er som regel et midlertidig tilkoblingsproblem. Prøv igjen.</string>
     <string name="shorts_upload_err_internal_server">Noe gikk galt hos oss under opplastingen. Prøv igjen om et øyeblikk.</string>
     <string name="shorts_premium_locked_title">Premiumvideo</string>
     <string name="shorts_premium_locked_body">Lås opp denne videoen for %1$s %2$s</string>
@@ -1381,7 +1381,7 @@
     <string name="creator_tips_label">Tips</string>
     <string name="creator_withdraw_button">Ta ut</string>
     <string name="creator_withdraw_funds_title">Ta ut penger</string>
-    <string name="creator_withdrawals_processed_hint">Uttak behandles innen 24–48 timer.</string>
+    <string name="creator_withdrawals_processed_hint">Uttak behandles innen 24-48 timer.</string>
     <string name="creator_content_comments">Kommentarer</string>
     <string name="creator_content_engagement_subtitle">Likerklikk, kommentarer og reposter på tvers av alle innleggene dine.</string>
     <string name="creator_content_engagement_title">Engasjement, siste 30 dager</string>
@@ -1402,7 +1402,7 @@
     <string name="trust_account_age_label">Kontoens alder:</string>
     <string name="trust_account_history_title">Kontohistorikk</string>
     <string name="trust_additional_signals_heading">Flere signaler</string>
-    <string name="trust_additional_signals_note">Disse påvirker ikke scoren over – de vises separat som ekstra kontekst.</string>
+    <string name="trust_additional_signals_note">Disse påvirker ikke scoren over: de vises separat som ekstra kontekst.</string>
     <string name="trust_back_to_profile">Tilbake til profilen</string>
     <string name="trust_back_to_username">Tilbake til @%1$s</string>
     <string name="trust_category_community">Fellesskap</string>
@@ -1556,7 +1556,7 @@
     <string name="ai_chat_new_chat">Ny chat</string>
     <string name="ai_chat_powered_by_deepseek">Drevet av DeepSeek</string>
     <string name="ai_chat_remaining_today">%1$d igjen i dag</string>
-    <string name="ai_chat_suggestion_35_charity">35 % til veldedighet – forklart</string>
+    <string name="ai_chat_suggestion_35_charity">35 % til veldedighet: forklart</string>
     <string name="ai_chat_suggestion_what_is_zrp">Hva er ZRP?</string>
     <string name="ai_chat_suggestion_write_charity">Skriv om veldedighet</string>
     <string name="ai_page_powered_by">Drevet av DeepSeek · Åpen kildekode · Åpenhet</string>
@@ -1584,7 +1584,7 @@
     <string name="support_category_security">Sikkerhet</string>
     <string name="support_err_create_failed">Kunne ikke opprette saken</string>
     <string name="support_footer_note_link">Mine saker</string>
-    <string name="support_footer_note_p1">Saken din blir gjennomgått innen 24–48 timer. Du kan følge statusen på siden</string>
+    <string name="support_footer_note_p1">Saken din blir gjennomgått innen 24-48 timer. Du kan følge statusen på siden</string>
     <string name="support_footer_note_p2">.</string>
     <string name="support_loading">Laster ...</string>
     <string name="support_message_label">Melding</string>
@@ -1901,7 +1901,7 @@
     <string name="transparency_status_heading">Rapportstatus</string>
     <string name="transparency_action_heading">Tiltak iverksatt</string>
     <string name="transparency_appeals_heading">Klager på moderering</string>
-    <string name="transparency_appeals_note">Når en bruker er uenig i en modereringsavgjørelse, kan vedkommende klage på den. Dette er de samlede utfallene – aldri hvem som klaget eller hva som ble sagt.</string>
+    <string name="transparency_appeals_note">Når en bruker er uenig i en modereringsavgjørelse, kan vedkommende klage på den. Dette er de samlede utfallene: aldri hvem som klaget eller hva som ble sagt.</string>
     <string name="transparency_generated_note">Data generert %1$s. Oppdateres hver time.</string>
     <string name="charity_committed_label">Forpliktet til veldedighet</string>
     <string name="charity_committed_note">Beregnes automatisk fra fullførte tips og kjøp av premiuminnhold: 35 % av ZRPs plattformgebyr på hvert av dem.</string>
@@ -1960,7 +1960,7 @@
     <string name="admin_analytics_total_comments">Kommentarer totalt</string>
     <string name="admin_analytics_daily_activity">Daglig aktivitet</string>
     <string name="admin_analytics_no_daily">Ingen aktivitet registrert de siste 30 dagene.</string>
-    <string name="admin_analytics_daily_range">%1$s – %2$s</string>
+    <string name="admin_analytics_daily_range">%1$s: %2$s</string>
     <string name="admin_analytics_daily_peak">Topp: %1$s den %2$s</string>
     <string name="admin_analytics_top_posts">Toppinnlegg</string>
     <string name="admin_analytics_no_top_posts">Ingen innlegg ennå.</string>
@@ -1982,7 +1982,7 @@
     <string name="admin_audit_target">Mål: %1$s %2$s</string>
     <string name="admin_audit_metadata">Detaljer: %1$s</string>
     <string name="admin_storage_title">Opprydding i lagring</string>
-    <string name="admin_storage_subtitle">Finner filer som fortsatt ligger i UploadThing, men som ingenting i databasen peker til lenger, og lar deg slette dem. Skanning endrer aldri noe – den bare rapporterer.</string>
+    <string name="admin_storage_subtitle">Finner filer som fortsatt ligger i UploadThing, men som ingenting i databasen peker til lenger, og lar deg slette dem. Skanning endrer aldri noe: den bare rapporterer.</string>
     <string name="admin_storage_scan_button">Skann etter foreldreløse filer</string>
     <string name="admin_storage_scanning">Skanner …</string>
     <string name="admin_storage_delete_button">Slett %1$s foreldreløs(e) fil(er)</string>
@@ -1995,8 +1995,8 @@
     <string name="admin_storage_stat_orphaned_size">Størrelse på foreldreløse</string>
     <string name="admin_storage_stat_held_for_review_summary">Holdt tilbake for gjennomgang: %1$s (%2$s MB)</string>
     <string name="admin_storage_held_for_review_hint">%1$s nylig opplastede fil(er) er uten referanser, men holdes tilbake fra sletting i 24 timer i tilfelle de fortsatt er i ferd med å knyttes til en ny oppføring.</string>
-    <string name="admin_storage_nothing_orphaned">Ingen foreldreløse filer – lagringen i UploadThing samsvarer med databasen.</string>
-    <string name="admin_storage_showing_sample">Viser %1$s av %2$s – sletting fjerner alle sammen, ikke bare det som er listet opp her.</string>
+    <string name="admin_storage_nothing_orphaned">Ingen foreldreløse filer: lagringen i UploadThing samsvarer med databasen.</string>
+    <string name="admin_storage_showing_sample">Viser %1$s av %2$s: sletting fjerner alle sammen, ikke bare det som er listet opp her.</string>
     <string name="admin_charity_title">Veldedighetsutbetalinger</string>
     <string name="admin_charity_subtitle">Faktiske veldedighetsutbetalinger ZRP har gjort. Hver oppføring her vises også i den offentlige veldedighetsoversikten.</string>
     <string name="admin_charity_saved">Utbetalingen er registrert.</string>
@@ -2104,7 +2104,7 @@
     <string name="admin_news_network_no_stories">Ingen saker i denne køen.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · poengsum %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d kilder</string>
-    <string name="admin_news_network_flag_sensitive">Sensitiv – krever menneskelig gjennomgang</string>
+    <string name="admin_news_network_flag_sensitive">Sensitiv: krever menneskelig gjennomgang</string>
     <string name="admin_news_network_flag_breaking">Siste nytt</string>
     <string name="admin_news_network_flag_travel">Reise</string>
     <string name="admin_news_network_reject">Avslå</string>
@@ -2180,7 +2180,7 @@
     <string name="ambassadors_hero_title1">BYGG FELLESSKAPET DITT.</string>
     <string name="ambassadors_hero_title2">REPRESENTER LANDET DITT.</string>
     <string name="ambassadors_hero_title3">KOBLE SAMMEN VERDEN.</string>
-    <string name="ambassadors_hero_subtitle">ZRPs globale ambassadører leder fellesskapet i sitt eget land – ekte mennesker, ekte fellesskap, én voksende bevegelse.</string>
+    <string name="ambassadors_hero_subtitle">ZRPs globale ambassadører leder fellesskapet i sitt eget land: ekte mennesker, ekte fellesskap, én voksende bevegelse.</string>
     <string name="ambassadors_hero_cta_primary">Bli ZRP-ambassadør</string>
     <string name="ambassadors_hero_cta_secondary">Utforsk verden</string>
     <string name="ambassadors_hero_stat_ambassadors">Ambassadører</string>
@@ -2207,7 +2207,7 @@
     <string name="ambassadors_levels_title">Din vei til global innflytelse</string>
     <string name="ambassadors_levels_subtitle">Du rykker opp gjennom reell aktivitet i fellesskapet, ikke bare ved å melde deg på.</string>
     <string name="ambassadors_level_explorer">Utforsker</string>
-    <string name="ambassadors_level_explorer_desc">Alle ambassadører starter her – med å oppdage ZRP og fellesskapet rundt.</string>
+    <string name="ambassadors_level_explorer_desc">Alle ambassadører starter her: med å oppdage ZRP og fellesskapet rundt.</string>
     <string name="ambassadors_level_ambassador">Ambassadør</string>
     <string name="ambassadors_level_ambassador_desc">Godkjent til å representere landet ditt og bygge ZRPs tilstedeværelse der.</string>
     <string name="ambassadors_level_community_leader">Fellesskapsleder</string>
@@ -2238,7 +2238,7 @@
     <string name="ambassadors_apply_err_motivation_required">Fortell oss hvorfor du vil bli ZRP-ambassadør.</string>
     <string name="ambassadors_apply_err_generic">Noe gikk galt. Prøv igjen.</string>
     <string name="ambassadors_apply_success_title">Søknaden er sendt inn</string>
-    <string name="ambassadors_apply_success_body">Takk! Søknaden din venter på behandling. Vi gir deg beskjed så snart teamet vårt har tatt en avgjørelse – du er ennå ikke offisiell ambassadør.</string>
+    <string name="ambassadors_apply_success_body">Takk! Søknaden din venter på behandling. Vi gir deg beskjed så snart teamet vårt har tatt en avgjørelse: du er ennå ikke offisiell ambassadør.</string>
     <string name="ambassadors_dashboard_title">Ambassadøroversikt</string>
     <string name="ambassadors_dashboard_not_applied_title">Du er ikke ZRP-ambassadør ennå</string>
     <string name="ambassadors_dashboard_err_load">Kunne ikke laste ambassadørstatusen din</string>
@@ -2456,7 +2456,7 @@
     <string name="admin_subscription_detail_not_yet">Ikke ennå</string>
     <string name="admin_subscription_detail_yes">Ja</string>
     <string name="admin_subscription_detail_no">Nei</string>
-    <string name="admin_subscription_detail_no_subscription_record">Ingen abonnementsoppføring – denne brukeren har aldri hatt en betalt rettighet registrert i dette systemet.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Ingen abonnementsoppføring: denne brukeren har aldri hatt en betalt rettighet registrert i dette systemet.</string>
     <string name="admin_subscription_detail_admin_controls">Administratorkontroller</string>
     <string name="admin_subscription_detail_plan_label">Abonnement</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2466,7 +2466,7 @@
     <string name="admin_subscription_detail_interval_monthly">Månedlig</string>
     <string name="admin_subscription_detail_interval_yearly">Årlig</string>
     <string name="admin_subscription_detail_grant_extend">Gi / forleng</string>
-    <string name="admin_subscription_detail_grant_extend_note">«Gi / forleng» speiler en reell betaling: den forlenger brukerens eksisterende periode hvis en fortsatt er aktiv for det samme abonnementet, ellers starter den en ny periode fra i dag. Ingen penger flyttes – det registreres som admin_grant i betalingshistorikken nedenfor.</string>
+    <string name="admin_subscription_detail_grant_extend_note">«Gi / forleng» speiler en reell betaling: den forlenger brukerens eksisterende periode hvis en fortsatt er aktiv for det samme abonnementet, ellers starter den en ny periode fra i dag. Ingen penger flyttes: det registreres som admin_grant i betalingshistorikken nedenfor.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Årsak til kansellering (valgfritt):</string>
     <string name="admin_subscription_detail_cancel_remaining">Kanseller gjenværende tid</string>
     <string name="admin_subscription_detail_restore">Gjenopprett</string>
@@ -2503,7 +2503,7 @@
     <string name="post_show_original">Vis original</string>
     <string name="post_translation_unavailable">Oversettelse er ikke tilgjengelig akkurat nå.</string>
     <string name="auth_username_taken">Det brukernavnet er opptatt.</string>
-    <string name="auth_username_format_hint">3–20 tegn, kun bokstaver, tall og understreker</string>
+    <string name="auth_username_format_hint">3-20 tegn, kun bokstaver, tall og understreker</string>
     <string name="quote_post_title">Siter innlegg</string>
 
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->

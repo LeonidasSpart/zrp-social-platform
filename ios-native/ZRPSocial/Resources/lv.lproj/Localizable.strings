@@ -1056,7 +1056,7 @@
 "ambassadors.apply.submit" = "Iesniegt pieteikumu";
 "ambassadors.apply.submitting" = "Iesniedz...";
 "ambassadors.apply.subtitle" = "Pastāsti mums par savu valsti un kopienu. Katru pieteikumu izskata mūsu komanda.";
-"ambassadors.apply.successBody" = "Paldies! Tavs pieteikums gaida izskatīšanu. Mēs tevi informēsim, tiklīdz mūsu komanda pieņems lēmumu – pagaidām tu vēl neesi oficiāls vēstnieks.";
+"ambassadors.apply.successBody" = "Paldies! Tavs pieteikums gaida izskatīšanu. Mēs tevi informēsim, tiklīdz mūsu komanda pieņems lēmumu: pagaidām tu vēl neesi oficiāls vēstnieks.";
 "ambassadors.apply.successTitle" = "Pieteikums iesniegts";
 "ambassadors.apply.title" = "Kļūsti par ZRP vēstnieku";
 "ambassadors.dashboard.codeAcceptedOn" = "Rīcības kodekss apstiprināts";
@@ -1083,7 +1083,7 @@
 "ambassadors.hero.ctaPrimary" = "Kļūsti par ZRP vēstnieku";
 "ambassadors.hero.statAmbassadors" = "Vēstnieki";
 "ambassadors.hero.statCountries" = "Pārstāvētās valstis";
-"ambassadors.hero.subtitle" = "ZRP globālie vēstnieki vada kopienu savā valstī – reāli cilvēki, reālas kopienas, viena augoša kustība.";
+"ambassadors.hero.subtitle" = "ZRP globālie vēstnieki vada kopienu savā valstī: reāli cilvēki, reālas kopienas, viena augoša kustība.";
 "ambassadors.hero.title1" = "VEIDO SAVU KOPIENU.";
 "ambassadors.hero.title2" = "PĀRSTĀVI SAVU VALSTI.";
 "ambassadors.hero.title3" = "SAVIENO PASAULI.";
@@ -1092,7 +1092,7 @@
 "ambassadors.levels.communityLeader" = "Kopienas līderis";
 "ambassadors.levels.communityLeaderDesc" = "Izveidoja un uztur reālu, aktīvu kopienu ap ZRP.";
 "ambassadors.levels.explorer" = "Pētnieks";
-"ambassadors.levels.explorerDesc" = "Katrs vēstnieks sāk šeit – atklājot ZRP un tā apkārtējo kopienu.";
+"ambassadors.levels.explorerDesc" = "Katrs vēstnieks sāk šeit: atklājot ZRP un tā apkārtējo kopienu.";
 "ambassadors.levels.globalAmbassador" = "Globālais vēstnieks";
 "ambassadors.levels.globalAmbassadorDesc" = "Atzīts par noturīgu ietekmi visā ZRP globālajā kopienā.";
 "ambassadors.levels.sectionSubtitle" = "Izaugsme tiek nopelnīta ar reālu kopienas aktivitāti, nevis vienkārši reģistrējoties.";

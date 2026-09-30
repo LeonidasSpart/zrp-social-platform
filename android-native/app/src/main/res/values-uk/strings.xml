@@ -845,7 +845,7 @@
     <string name="music_shell_studio_label">Music Studio</string>
     <string name="music_shell_studio_eyebrow">Інструменти творця</string>
     <string name="music_shell_studio_description">Публікуйте свою музику прямо на ZRP.</string>
-    <string name="music_shell_gate_title">Music Studio — потрібен статус виконавця чи творця</string>
+    <string name="music_shell_gate_title">Music Studio: потрібен статус виконавця чи творця</string>
     <string name="music_shell_gate_body">Прослуховування ZRP Music доступне для всіх. Публікація музики вимагає схваленого статусу творця чи верифікованого профілю музичного виконавця.</string>
     <string name="music_shell_pending_verification">Ваш профіль виконавця надіслано, і він очікує на верифікацію персоналом ZRP.</string>
     <string name="music_shell_apply_intro_prefix">Створіть профіль виконавця, щоб подати заявку на верифікацію музичного виконавця, або</string>
@@ -872,9 +872,9 @@
     <string name="music_shell_publishing">Публікація...</string>
     <string name="music_shell_upload_hint">Аудіо та обкладинка завантажуються прямо у ваше наявне сховище ZRP.</string>
     <string name="music_shell_publish_failed_default">Публікація не вдалася. Спробуйте ще раз.</string>
-    <string name="music_shell_empty_file_error">Не вдалося прочитати «%1$s» — можливо, файл ще завантажується з iCloud чи іншого хмарного сховища. Зачекайте, поки завантаження завершиться, і спробуйте ще раз.</string>
+    <string name="music_shell_empty_file_error">Не вдалося прочитати «%1$s»: можливо, файл ще завантажується з iCloud чи іншого хмарного сховища. Зачекайте, поки завантаження завершиться, і спробуйте ще раз.</string>
     <string name="music_studio_delete_track_title">Видалити трек</string>
-    <string name="music_studio_delete_track_body">Видалити «%1$s»? Це неможливо скасувати — трек, його прослуховування й вподобання буде остаточно видалено.</string>
+    <string name="music_studio_delete_track_body">Видалити «%1$s»? Це неможливо скасувати: трек, його прослуховування й вподобання буде остаточно видалено.</string>
     <string name="music_studio_cancel">Скасувати</string>
     <string name="music_studio_deleting">Видалення...</string>
     <string name="music_studio_delete_confirm">Видалити</string>
@@ -907,7 +907,7 @@
     <string name="music_studio_remove_from_album">Видалити з альбому</string>
     <string name="music_studio_add_existing_tracks">Додати наявні треки</string>
     <string name="music_studio_delete_album_title">Видалити альбом</string>
-    <string name="music_studio_delete_album_body">Видалити «%1$s»? Його треки НЕ буде видалено — вони залишаться опублікованими й просто втратять зв\'язок із цим альбомом.</string>
+    <string name="music_studio_delete_album_body">Видалити «%1$s»? Його треки НЕ буде видалено: вони залишаться опублікованими й просто втратять зв\'язок із цим альбомом.</string>
     <string name="music_studio_album_created_msg">Альбом створено.</string>
     <string name="music_studio_album_updated_msg">Альбом оновлено.</string>
     <string name="music_studio_album_deleted_msg">Альбом видалено. Ваші треки збережено, вони залишаються доступними.</string>
@@ -923,7 +923,7 @@
     <string name="marketplace_category_watches_jewelry">Годинники та ювелірні вироби</string>
     <string name="marketplace_category_other_luxury">Інші розкішні активи</string>
     <string name="marketplace_hero_title">ZRP Market Plus</string>
-    <string name="marketplace_hero_subtitle">Розкішний маркетплейс для верифікованих учасників ZRP — екзотичні автомобілі, яхти, приватні літаки, нерухомість та інше.</string>
+    <string name="marketplace_hero_subtitle">Розкішний маркетплейс для верифікованих учасників ZRP: екзотичні автомобілі, яхти, приватні літаки, нерухомість та інше.</string>
     <string name="marketplace_search_placeholder">Пошук оголошень...</string>
     <string name="marketplace_search">Пошук</string>
     <string name="marketplace_browse_categories">Переглянути категорії</string>
@@ -1011,7 +1011,7 @@
     <string name="opportunity_back_to_opportunity">Назад до OPPORTUNITY</string>
     <string name="opportunity_close">Закрити</string>
     <string name="opportunity_compensation_label">Винагорода</string>
-    <string name="opportunity_compensation_placeholder">напр., $50–70 тис/рік, без оплати — академічні кредити</string>
+    <string name="opportunity_compensation_placeholder">напр., $50-70 тис/рік, без оплати: академічні кредити</string>
     <string name="opportunity_cover_note_label">Супровідний лист (необов\'язково)</string>
     <string name="opportunity_cover_note_placeholder">Розкажіть, чому ви ідеально підходите...</string>
     <string name="opportunity_create_subtitle">Розмістіть вакансію, стажування, стипендію, менторство чи пропозицію співпраці для спільноти ZRP.</string>
@@ -1027,7 +1027,7 @@
     <string name="opportunity_external_url_hint">Якщо вказано, кандидатів буде спрямовано на це посилання замість подання заявки на ZRP.</string>
     <string name="opportunity_external_url_label">Посилання на зовнішню заявку (необов\'язково)</string>
     <string name="opportunity_external_url_placeholder">https://...</string>
-    <string name="opportunity_hero_subtitle">Робота, віддалена робота, стажування, стипендії, менторство, фриланс-проєкти та співпраця — на основі спільноти ZRP.</string>
+    <string name="opportunity_hero_subtitle">Робота, віддалена робота, стажування, стипендії, менторство, фриланс-проєкти та співпраця: на основі спільноти ZRP.</string>
     <string name="opportunity_hero_title">ZRP OPPORTUNITY</string>
     <string name="opportunity_is_paid">Це оплачувано</string>
     <string name="opportunity_location_label">Місцезнаходження (необов\'язково)</string>
@@ -1157,7 +1157,7 @@
     <string name="aid_status_rejected">Відхилено</string>
     <string name="aid_status_removed">Видалено</string>
     <string name="aid_title_label">Заголовок</string>
-    <string name="aid_withdrawal_requested">Запит на виведення коштів подано. Він буде оброблений протягом 24–48 годин.</string>
+    <string name="aid_withdrawal_requested">Запит на виведення коштів подано. Він буде оброблений протягом 24-48 годин.</string>
     <string name="play_discover_entry">Дослідити ZRP PLAY</string>
     <string name="play_accept">Прийняти</string>
     <string name="play_accepted">Прийнято</string>
@@ -1168,7 +1168,7 @@
     <string name="play_add_option">Додати варіант</string>
     <string name="play_add_pair">Додати пару</string>
     <string name="play_add_question">Додати питання</string>
-    <string name="play_ai_generated_note">Згенеровано ШІ — перегляньте перед публікацією.</string>
+    <string name="play_ai_generated_note">Згенеровано ШІ: перегляньте перед публікацією.</string>
     <string name="play_ai_tab">Згенерувати за допомогою ШІ</string>
     <string name="play_ai_topic_label">Тема</string>
     <string name="play_ai_topic_placeholder">напр., фільми 80-х, столиці світу, факти про космос</string>
@@ -1208,7 +1208,7 @@
     <string name="play_finish">Завершити</string>
     <string name="play_generate">Згенерувати</string>
     <string name="play_generating">Генерація...</string>
-    <string name="play_hero_subtitle">Швидкі ігри, дуелі та щоденні завдання — на основі спільноти ZRP.</string>
+    <string name="play_hero_subtitle">Швидкі ігри, дуелі та щоденні завдання: на основі спільноти ZRP.</string>
     <string name="play_hero_title">ZRP PLAY</string>
     <string name="play_incoming_duels">Вхідні виклики</string>
     <string name="play_leaderboard">Таблиця лідерів</string>
@@ -1344,7 +1344,7 @@
     <string name="shorts_upload_err_generic">Під час завантаження щось пішло не так. Перевірте з\'єднання й спробуйте ще раз.</string>
     <string name="shorts_upload_err_upload_failed_detailed">Завантаження не завершилося, ймовірно через проблему зі з\'єднанням або через те, що файл завеликий для вашого тарифу. Перевірте з\'єднання й спробуйте ще раз.</string>
     <string name="shorts_upload_err_too_large_plan">Це відео завелике для вашого тарифу. Спробуйте менший файл або оновіть тариф.</string>
-    <string name="shorts_upload_err_url_gen_failed">Не вдалося почати завантаження — зазвичай це тимчасова проблема зі з\'єднанням. Спробуйте ще раз.</string>
+    <string name="shorts_upload_err_url_gen_failed">Не вдалося почати завантаження: зазвичай це тимчасова проблема зі з\'єднанням. Спробуйте ще раз.</string>
     <string name="shorts_upload_err_internal_server">Під час завантаження щось пішло не так на нашому боці. Спробуйте ще раз за мить.</string>
     <string name="shorts_premium_locked_title">Преміум-відео</string>
     <string name="shorts_premium_locked_body">Розблокуйте це відео за %1$s %2$s</string>
@@ -1389,12 +1389,12 @@
     <string name="creator_tips_label">Чайові</string>
     <string name="creator_withdraw_button">Вивести</string>
     <string name="creator_withdraw_funds_title">Вивести кошти</string>
-    <string name="creator_withdrawals_processed_hint">Виведення коштів обробляється протягом 24–48 годин.</string>
+    <string name="creator_withdrawals_processed_hint">Виведення коштів обробляється протягом 24-48 годин.</string>
     <string name="creator_content_comments">Коментарі</string>
     <string name="creator_content_engagement_subtitle">Вподобання, коментарі та репости за всіма вашими дописами.</string>
     <string name="creator_content_engagement_title">Залученість за останні 30 днів</string>
-    <string name="creator_content_engagement_tooltip_plural">%1$s: залучень — %2$d</string>
-    <string name="creator_content_engagement_tooltip_singular">%1$s: залучення — %2$d</string>
+    <string name="creator_content_engagement_tooltip_plural">%1$s: залучень: %2$d</string>
+    <string name="creator_content_engagement_tooltip_singular">%1$s: залучення: %2$d</string>
     <string name="creator_content_likes">Вподобання</string>
     <string name="creator_content_media_post_fallback">(медіа-допис)</string>
     <string name="creator_content_no_posts_yet">Дописів поки немає.</string>
@@ -1410,7 +1410,7 @@
     <string name="trust_account_age_label">Вік акаунта:</string>
     <string name="trust_account_history_title">Історія акаунта</string>
     <string name="trust_additional_signals_heading">Додаткові сигнали</string>
-    <string name="trust_additional_signals_note">Вони не впливають на показник вище — вони показані окремо як додатковий контекст.</string>
+    <string name="trust_additional_signals_note">Вони не впливають на показник вище: вони показані окремо як додатковий контекст.</string>
     <string name="trust_back_to_profile">Назад до профілю</string>
     <string name="trust_back_to_username">Назад до @%1$s</string>
     <string name="trust_category_community">Спільнота</string>
@@ -1592,7 +1592,7 @@
     <string name="support_category_security">Безпека</string>
     <string name="support_err_create_failed">Не вдалося створити звернення</string>
     <string name="support_footer_note_link">Мої звернення</string>
-    <string name="support_footer_note_p1">Ваше звернення буде розглянуто протягом 24–48 годин. Ви можете відстежувати його статус на сторінці</string>
+    <string name="support_footer_note_p1">Ваше звернення буде розглянуто протягом 24-48 годин. Ви можете відстежувати його статус на сторінці</string>
     <string name="support_footer_note_p2">.</string>
     <string name="support_loading">Завантаження...</string>
     <string name="support_message_label">Повідомлення</string>
@@ -1909,7 +1909,7 @@
     <string name="transparency_status_heading">Статус скарг</string>
     <string name="transparency_action_heading">Вжиті дії</string>
     <string name="transparency_appeals_heading">Апеляції на модерацію</string>
-    <string name="transparency_appeals_note">Коли користувач не погоджується з рішенням модерації, він може його оскаржити. Це сукупні результати — ніколи не хто оскаржив чи що було сказано.</string>
+    <string name="transparency_appeals_note">Коли користувач не погоджується з рішенням модерації, він може його оскаржити. Це сукупні результати: ніколи не хто оскаржив чи що було сказано.</string>
     <string name="transparency_generated_note">Дані згенеровано %1$s. Оновлюються щогодини.</string>
     <string name="charity_committed_label">Спрямовано на благодійність</string>
     <string name="charity_committed_note">Розраховується автоматично на основі завершених чайових і покупок преміум-контенту: 35% від комісії платформи ZRP з кожної.</string>
@@ -1968,13 +1968,13 @@
     <string name="admin_analytics_total_comments">Усього коментарів</string>
     <string name="admin_analytics_daily_activity">Щоденна активність</string>
     <string name="admin_analytics_no_daily">За останні 30 днів активності не зафіксовано.</string>
-    <string name="admin_analytics_daily_range">%1$s – %2$s</string>
+    <string name="admin_analytics_daily_range">%1$s: %2$s</string>
     <string name="admin_analytics_daily_peak">Пік: %1$s %2$s</string>
     <string name="admin_analytics_top_posts">Найкращі дописи</string>
     <string name="admin_analytics_no_top_posts">Дописів поки немає.</string>
     <string name="admin_analytics_post_counts">%1$s   ❤ %2$s   💬 %3$s   🔁 %4$s</string>
     <string name="admin_audit_title">Журнал аудиту</string>
-    <string name="admin_audit_subtitle">Кожна зафіксована дія адміністратора, найновіші — першими.</string>
+    <string name="admin_audit_subtitle">Кожна зафіксована дія адміністратора, найновіші: першими.</string>
     <string name="admin_audit_filters">Фільтри</string>
     <string name="admin_audit_no_entries">Записів аудиту поки не зафіксовано.</string>
     <string name="admin_audit_load_more">Завантажити більше</string>
@@ -1990,7 +1990,7 @@
     <string name="admin_audit_target">Ціль: %1$s %2$s</string>
     <string name="admin_audit_metadata">Деталі: %1$s</string>
     <string name="admin_storage_title">Очищення сховища</string>
-    <string name="admin_storage_subtitle">Знаходить файли, що досі зберігаються в UploadThing, але на які вже ніщо в базі даних не посилається, і дозволяє їх видалити. Сканування нічого не змінює — лише формує звіт.</string>
+    <string name="admin_storage_subtitle">Знаходить файли, що досі зберігаються в UploadThing, але на які вже ніщо в базі даних не посилається, і дозволяє їх видалити. Сканування нічого не змінює: лише формує звіт.</string>
     <string name="admin_storage_scan_button">Сканувати файли-сироти</string>
     <string name="admin_storage_scanning">Сканування…</string>
     <string name="admin_storage_delete_button">Видалити %1$s файл(ів)-сиріт</string>
@@ -2002,9 +2002,9 @@
     <string name="admin_storage_stat_orphaned">Сиріт</string>
     <string name="admin_storage_stat_orphaned_size">Розмір файлів-сиріт</string>
     <string name="admin_storage_stat_held_for_review_summary">Утримано для перевірки: %1$s (%2$s МБ)</string>
-    <string name="admin_storage_held_for_review_hint">%1$s нещодавно завантажених файл(ів) не мають посилань, але 24 години не видаляються — на випадок, якщо вони все ще прив\'язуються до нового запису.</string>
-    <string name="admin_storage_nothing_orphaned">Файлів-сиріт немає — сховище UploadThing відповідає базі даних.</string>
-    <string name="admin_storage_showing_sample">Показано %1$s з %2$s — видалення прибирає всі, а не лише перелічені тут.</string>
+    <string name="admin_storage_held_for_review_hint">%1$s нещодавно завантажених файл(ів) не мають посилань, але 24 години не видаляються: на випадок, якщо вони все ще прив\'язуються до нового запису.</string>
+    <string name="admin_storage_nothing_orphaned">Файлів-сиріт немає: сховище UploadThing відповідає базі даних.</string>
+    <string name="admin_storage_showing_sample">Показано %1$s з %2$s: видалення прибирає всі, а не лише перелічені тут.</string>
     <string name="admin_charity_title">Благодійні виплати</string>
     <string name="admin_charity_subtitle">Реальні благодійні виплати, здійснені ZRP. Кожен запис тут також з\'являється в публічному реєстрі благодійності.</string>
     <string name="admin_charity_saved">Виплату записано.</string>
@@ -2098,8 +2098,8 @@
     <string name="admin_news_network_backoff_until">Призупинено до %1$s</string>
     <string name="admin_news_network_verify">Перевірити</string>
     <string name="admin_news_network_verify_title">Верифікація</string>
-    <string name="admin_news_network_verify_ok">%1$s: оброблено елементів — %2$d. robots.txt дозволяє цей канал.</string>
-    <string name="admin_news_network_verify_ok_robots_blocked">%1$s: оброблено елементів — %2$d, але robots.txt забороняє цей канал.</string>
+    <string name="admin_news_network_verify_ok">%1$s: оброблено елементів: %2$d. robots.txt дозволяє цей канал.</string>
+    <string name="admin_news_network_verify_ok_robots_blocked">%1$s: оброблено елементів: %2$d, але robots.txt забороняє цей канал.</string>
     <string name="admin_news_network_verify_failed">%1$s: %2$s</string>
     <string name="admin_news_network_verify_failed_generic">%1$s: перевірку не пройдено.</string>
     <string name="admin_news_network_clear_backoff">Скинути затримку</string>
@@ -2112,7 +2112,7 @@
     <string name="admin_news_network_no_stories">У цій черзі немає новин.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · оцінка %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · джерел: %3$d</string>
-    <string name="admin_news_network_flag_sensitive">Чутливе — потрібна перевірка людиною</string>
+    <string name="admin_news_network_flag_sensitive">Чутливе: потрібна перевірка людиною</string>
     <string name="admin_news_network_flag_breaking">Термінові новини</string>
     <string name="admin_news_network_flag_travel">Подорожі</string>
     <string name="admin_news_network_reject">Відхилити</string>
@@ -2190,7 +2190,7 @@
     <string name="ambassadors_hero_title1">СТВОРЮЙТЕ СВОЮ СПІЛЬНОТУ.</string>
     <string name="ambassadors_hero_title2">ПРЕДСТАВЛЯЙТЕ СВОЮ КРАЇНУ.</string>
     <string name="ambassadors_hero_title3">З\'ЄДНУЙТЕ СВІТ.</string>
-    <string name="ambassadors_hero_subtitle">Глобальні амбасадори ZRP очолюють спільноту у своїй країні — справжні люди, справжні спільноти, один рух, що зростає.</string>
+    <string name="ambassadors_hero_subtitle">Глобальні амбасадори ZRP очолюють спільноту у своїй країні: справжні люди, справжні спільноти, один рух, що зростає.</string>
     <string name="ambassadors_hero_cta_primary">Стати амбасадором ZRP</string>
     <string name="ambassadors_hero_cta_secondary">Дослідити світ</string>
     <string name="ambassadors_hero_stat_ambassadors">Амбасадорів</string>
@@ -2217,7 +2217,7 @@
     <string name="ambassadors_levels_title">Ваш шлях до глобального впливу</string>
     <string name="ambassadors_levels_subtitle">Просування здобувається реальною активністю в спільноті, а не простою реєстрацією.</string>
     <string name="ambassadors_level_explorer">Дослідник</string>
-    <string name="ambassadors_level_explorer_desc">Кожен амбасадор починає звідси — з відкриття ZRP і спільноти навколо неї.</string>
+    <string name="ambassadors_level_explorer_desc">Кожен амбасадор починає звідси: з відкриття ZRP і спільноти навколо неї.</string>
     <string name="ambassadors_level_ambassador">Амбасадор</string>
     <string name="ambassadors_level_ambassador_desc">Затверджений представляти свою країну й розвивати присутність ZRP у ній.</string>
     <string name="ambassadors_level_community_leader">Лідер спільноти</string>
@@ -2248,7 +2248,7 @@
     <string name="ambassadors_apply_err_motivation_required">Розкажіть, чому ви хочете стати амбасадором ZRP.</string>
     <string name="ambassadors_apply_err_generic">Щось пішло не так. Спробуйте ще раз.</string>
     <string name="ambassadors_apply_success_title">Заявку надіслано</string>
-    <string name="ambassadors_apply_success_body">Дякуємо! Вашу заявку прийнято на розгляд. Ми повідомимо вас, щойно наша команда ухвалить рішення — офіційним амбасадором ви поки що не є.</string>
+    <string name="ambassadors_apply_success_body">Дякуємо! Вашу заявку прийнято на розгляд. Ми повідомимо вас, щойно наша команда ухвалить рішення: офіційним амбасадором ви поки що не є.</string>
     <string name="ambassadors_dashboard_title">Панель амбасадора</string>
     <string name="ambassadors_dashboard_not_applied_title">Ви ще не амбасадор ZRP</string>
     <string name="ambassadors_dashboard_err_load">Не вдалося завантажити ваш статус амбасадора</string>
@@ -2261,7 +2261,7 @@
     <string name="ambassadors_dashboard_reapply_cta">Подати заявку знову</string>
     <string name="ambassadors_dashboard_suspended_title">Статус амбасадора призупинено</string>
     <string name="ambassadors_dashboard_suspended_body">Ваш статус амбасадора наразі призупинено. Зверніться до підтримки ZRP для отримання додаткової інформації.</string>
-    <string name="ambassadors_apply_already_ambassador">Ви вже є амбасадором ZRP. Ваш статус, рівень і посилання-запрошення — на вашій панелі.</string>
+    <string name="ambassadors_apply_already_ambassador">Ви вже є амбасадором ZRP. Ваш статус, рівень і посилання-запрошення: на вашій панелі.</string>
     <string name="ambassadors_dashboard_my_country">Моя країна</string>
     <string name="ambassadors_dashboard_my_level">Мій рівень</string>
     <string name="ambassadors_dashboard_my_invitation_link">Моє посилання-запрошення</string>
@@ -2467,7 +2467,7 @@
     <string name="admin_subscription_detail_not_yet">Ще ні</string>
     <string name="admin_subscription_detail_yes">Так</string>
     <string name="admin_subscription_detail_no">Ні</string>
-    <string name="admin_subscription_detail_no_subscription_record">Немає запису підписки — ця система ще жодного разу не відстежувала платних прав цього користувача.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Немає запису підписки: ця система ще жодного разу не відстежувала платних прав цього користувача.</string>
     <string name="admin_subscription_detail_admin_controls">Керування адміністратора</string>
     <string name="admin_subscription_detail_plan_label">Тариф</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2477,7 +2477,7 @@
     <string name="admin_subscription_detail_interval_monthly">Щомісячно</string>
     <string name="admin_subscription_detail_interval_yearly">Щорічно</string>
     <string name="admin_subscription_detail_grant_extend">Надати / продовжити</string>
-    <string name="admin_subscription_detail_grant_extend_note">«Надати / продовжити» імітує реальний платіж: продовжує наявний період користувача, якщо для цього ж тарифу він ще активний, або починає новий період із сьогоднішнього дня. Гроші не переказуються — дія фіксується як admin_grant в історії платежів нижче.</string>
+    <string name="admin_subscription_detail_grant_extend_note">«Надати / продовжити» імітує реальний платіж: продовжує наявний період користувача, якщо для цього ж тарифу він ще активний, або починає новий період із сьогоднішнього дня. Гроші не переказуються: дія фіксується як admin_grant в історії платежів нижче.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Причина скасування (необов\'язково):</string>
     <string name="admin_subscription_detail_cancel_remaining">Скасувати залишок терміну</string>
     <string name="admin_subscription_detail_restore">Відновити</string>
@@ -2514,7 +2514,7 @@
     <string name="post_show_original">Показати оригінал</string>
     <string name="post_translation_unavailable">Переклад наразі недоступний.</string>
     <string name="auth_username_taken">Це ім\'я користувача вже зайняте.</string>
-    <string name="auth_username_format_hint">3–20 символів, лише літери/цифри/підкреслення</string>
+    <string name="auth_username_format_hint">3-20 символів, лише літери/цифри/підкреслення</string>
     <string name="quote_post_title">Процитувати допис</string>
     <string name="post_repost_private_error">Дописи з приватних акаунтів не можна репостити.</string>
     <string name="post_repost_forbidden_error">Цей допис не можна репостити.</string>

@@ -2511,7 +2511,7 @@
     <string name="admin_subscription_detail_not_yet">Noch nicht</string>
     <string name="admin_subscription_detail_yes">Ja</string>
     <string name="admin_subscription_detail_no">Nein</string>
-    <string name="admin_subscription_detail_no_subscription_record">Kein Abonnement-Eintrag – für diesen Nutzer wurde nie eine bezahlte Berechtigung in diesem System erfasst.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Kein Abonnement-Eintrag: für diesen Nutzer wurde nie eine bezahlte Berechtigung in diesem System erfasst.</string>
     <string name="admin_subscription_detail_admin_controls">Admin-Steuerung</string>
     <string name="admin_subscription_detail_plan_label">Plan</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2521,7 +2521,7 @@
     <string name="admin_subscription_detail_interval_monthly">Monatlich</string>
     <string name="admin_subscription_detail_interval_yearly">Jährlich</string>
     <string name="admin_subscription_detail_grant_extend">Gewähren / verlängern</string>
-    <string name="admin_subscription_detail_grant_extend_note">„Gewähren / verlängern“ bildet eine echte Zahlung nach: Ist für denselben Plan noch ein Zeitraum aktiv, wird dieser verlängert, andernfalls beginnt ab heute ein neuer Zeitraum. Es fließt kein Geld – der Vorgang wird unten im Zahlungsverlauf als admin_grant erfasst.</string>
+    <string name="admin_subscription_detail_grant_extend_note">„Gewähren / verlängern“ bildet eine echte Zahlung nach: Ist für denselben Plan noch ein Zeitraum aktiv, wird dieser verlängert, andernfalls beginnt ab heute ein neuer Zeitraum. Es fließt kein Geld: der Vorgang wird unten im Zahlungsverlauf als admin_grant erfasst.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Grund für die Kündigung (optional):</string>
     <string name="admin_subscription_detail_cancel_remaining">Restlaufzeit kündigen</string>
     <string name="admin_subscription_detail_restore">Wiederherstellen</string>
@@ -2558,7 +2558,7 @@
     <string name="post_show_original">Original anzeigen</string>
     <string name="post_translation_unavailable">Übersetzung derzeit nicht verfügbar.</string>
     <string name="auth_username_taken">Dieser Benutzername ist bereits vergeben.</string>
-    <string name="auth_username_format_hint">3–20 Zeichen, nur Buchstaben/Zahlen/Unterstriche</string>
+    <string name="auth_username_format_hint">3-20 Zeichen, nur Buchstaben/Zahlen/Unterstriche</string>
     <string name="quote_post_title">Beitrag zitieren</string>
 
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->

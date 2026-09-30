@@ -1488,7 +1488,7 @@
 "ios.language.systemDefaultNote" = "Folgt der in den iOS-Einstellungen festgelegten Sprache. Wähle unten eine Sprache aus, um sie nur in ZRP zu verwenden.";
 "ios.auth.usernameAvailable" = "Benutzername ist verfügbar";
 "ios.auth.usernameTaken" = "Dieser Benutzername ist bereits vergeben";
-"ios.auth.usernameInvalid" = "3–20 Zeichen, nur Buchstaben, Zahlen und Unterstriche";
+"ios.auth.usernameInvalid" = "3-20 Zeichen, nur Buchstaben, Zahlen und Unterstriche";
 "ios.auth.usernameSuggestions" = "Probiere einen dieser Vorschläge";
 "ios.auth.forgotTitle" = "Passwort zurücksetzen";
 "ios.auth.forgotBody" = "Gib die E-Mail-Adresse deines Kontos ein. Falls sie existiert, senden wir dir einen Link zum Zurücksetzen deines Passworts.";

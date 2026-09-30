@@ -2511,7 +2511,7 @@
     <string name="admin_subscription_detail_not_yet">ليس بعد</string>
     <string name="admin_subscription_detail_yes">نعم</string>
     <string name="admin_subscription_detail_no">لا</string>
-    <string name="admin_subscription_detail_no_subscription_record">لا يوجد سجل اشتراك — لم يسبق أن تتبّع هذا النظام أي استحقاق مدفوع لهذا المستخدم.</string>
+    <string name="admin_subscription_detail_no_subscription_record">لا يوجد سجل اشتراك: لم يسبق أن تتبّع هذا النظام أي استحقاق مدفوع لهذا المستخدم.</string>
     <string name="admin_subscription_detail_admin_controls">أدوات التحكم الإدارية</string>
     <string name="admin_subscription_detail_plan_label">الخطة</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2521,7 +2521,7 @@
     <string name="admin_subscription_detail_interval_monthly">شهري</string>
     <string name="admin_subscription_detail_interval_yearly">سنوي</string>
     <string name="admin_subscription_detail_grant_extend">منح / تمديد</string>
-    <string name="admin_subscription_detail_grant_extend_note">«منح / تمديد» يحاكي دفعة حقيقية: فهو يمدّد فترة المستخدم الحالية إن كانت لا تزال سارية للخطة نفسها، وإلا فيبدأ فترة جديدة اعتبارًا من اليوم. ولا تُحوَّل أي أموال — إذ يُسجَّل الإجراء باسم admin_grant في سجل المدفوعات أدناه.</string>
+    <string name="admin_subscription_detail_grant_extend_note">«منح / تمديد» يحاكي دفعة حقيقية: فهو يمدّد فترة المستخدم الحالية إن كانت لا تزال سارية للخطة نفسها، وإلا فيبدأ فترة جديدة اعتبارًا من اليوم. ولا تُحوَّل أي أموال: إذ يُسجَّل الإجراء باسم admin_grant في سجل المدفوعات أدناه.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">سبب الإلغاء (اختياري):</string>
     <string name="admin_subscription_detail_cancel_remaining">إلغاء المدة المتبقية</string>
     <string name="admin_subscription_detail_restore">استعادة</string>

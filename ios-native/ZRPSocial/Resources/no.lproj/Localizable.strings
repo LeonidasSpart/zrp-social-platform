@@ -61,7 +61,7 @@
 "play.aiTopicPlaceholder" = "f.eks. 80-tallsfilmer, verdens hovedsteder, fakta om verdensrommet";
 "play.generate" = "Generer";
 "play.generating" = "Genererer ...";
-"play.aiGeneratedNote" = "AI-generert – se gjennom før du publiserer.";
+"play.aiGeneratedNote" = "AI-generert: se gjennom før du publiserer.";
 "play.titleLabel" = "Tittel";
 "play.titlePlaceholder" = "Gi utfordringen din en fengende tittel";
 "play.descriptionLabel" = "Beskrivelse (valgfritt)";
@@ -513,7 +513,7 @@
 "music.shell.uploadMusic" = "Last opp musikk";
 "music.shell.signInTitle" = "Logg inn for å publisere musikk";
 "music.shell.signInBody" = "Alle kan lytte til ZRP Music. Du må logge inn for å søke om publiseringstilgang.";
-"music.shell.gateTitle" = "Music Studio – krever artist- eller skaperstatus";
+"music.shell.gateTitle" = "Music Studio: krever artist- eller skaperstatus";
 "music.shell.gateBody" = "Alle kan lytte til ZRP Music. Å publisere musikk krever godkjent skaperstatus eller en verifisert musikkartistprofil.";
 "music.shell.pendingVerification" = "Artistprofilen din er sendt inn og venter på verifisering fra ZRP-ansatte.";
 "music.shell.applyIntroPrefix" = "Opprett en artistprofil for å søke om verifisering som musikkartist, eller";
@@ -529,22 +529,22 @@
 "music.shell.uploadHint" = "Lyd og omslag lastes opp direkte til din eksisterende ZRP-lagring.";
 "music.shell.publishFailedDefault" = "Publiseringen mislyktes. Prøv igjen.";
 "music.shell.uploadFailedDefault" = "Opplastingen mislyktes. Prøv igjen.";
-"music.shell.emptyFileError" = "«{name}» kunne ikke leses – den laster kanskje fortsatt ned fra iCloud eller skylagringsleverandøren din. Vent til nedlastingen er ferdig, og prøv igjen.";
+"music.shell.emptyFileError" = "«{name}» kunne ikke leses: den laster kanskje fortsatt ned fra iCloud eller skylagringsleverandøren din. Vent til nedlastingen er ferdig, og prøv igjen.";
 "music.shell.unreadableFileError" = "«{name}» kunne ikke leses. Den laster kanskje fortsatt ned eller dekrypteres i skylagrings-appen din (Google Drive, MEGA, Dropbox, iCloud osv.). Åpne filen der først, slik at den er fullt tilgjengelig offline, og prøv igjen.";
 "music.studio.tabTracks" = "Spor";
 "music.studio.tabAlbums" = "Album";
 "music.studio.tabArtist" = "Artistprofil";
 "music.studio.deleteTrackTitle" = "Slett spor";
-"music.studio.deleteTrackBody" = "Vil du slette «{title}»? Dette kan ikke angres – sporet, avspillingene og likerklikkene blir permanent fjernet.";
+"music.studio.deleteTrackBody" = "Vil du slette «{title}»? Dette kan ikke angres: sporet, avspillingene og likerklikkene blir permanent fjernet.";
 "music.studio.cancel" = "Avbryt";
 "music.studio.deleting" = "Sletter ...";
 "music.studio.deleteConfirm" = "Slett";
 "music.studio.deleteAlbumTitle" = "Slett album";
-"music.studio.deleteAlbumBody" = "Vil du slette «{title}»? Sporene blir IKKE slettet – de forblir publisert og løsrives bare fra dette albumet.";
-"music.studio.uploadDoneRetryPublish" = "Opplastingen ble fullført, men publiseringen av sporet mislyktes. Filen din er trygg – trykk på Prøv igjen for å fullføre publiseringen uten å laste opp på nytt.";
+"music.studio.deleteAlbumBody" = "Vil du slette «{title}»? Sporene blir IKKE slettet: de forblir publisert og løsrives bare fra dette albumet.";
+"music.studio.uploadDoneRetryPublish" = "Opplastingen ble fullført, men publiseringen av sporet mislyktes. Filen din er trygg: trykk på Prøv igjen for å fullføre publiseringen uten å laste opp på nytt.";
 "music.studio.explicitLabel" = "Eksplisitt innhold";
 "music.studio.retryPublish" = "Prøv å publisere igjen";
-"music.studio.checkingFileHint" = "Filer fra skylagrings-apper som MEGA kan bruke litt lengre tid på å bli klargjort – det er helt normalt.";
+"music.studio.checkingFileHint" = "Filer fra skylagrings-apper som MEGA kan bruke litt lengre tid på å bli klargjort: det er helt normalt.";
 "music.studio.checkingFile" = "Sjekker filen ...";
 "music.studio.discardUpload" = "Forkast og start på nytt";
 "music.studio.myTracks" = "Mine spor";
@@ -599,7 +599,7 @@
 "marketplace.statusExpired" = "Utløpt";
 "marketplace.statusRemoved" = "Fjernet";
 "marketplace.heroTitle" = "ZRP Market Plus";
-"marketplace.heroSubtitle" = "Luksusmarkedsplassen for verifiserte ZRP-medlemmer – eksotiske biler, yachter, privatfly, eiendom og mer.";
+"marketplace.heroSubtitle" = "Luksusmarkedsplassen for verifiserte ZRP-medlemmer: eksotiske biler, yachter, privatfly, eiendom og mer.";
 "marketplace.searchPlaceholder" = "Søk i annonser ...";
 "marketplace.createListing" = "Opprett annonse";
 "marketplace.myListings" = "Mine annonser";
@@ -825,7 +825,7 @@
 "settings.currentUsername" = "Nåværende brukernavn";
 "settings.newUsername" = "Nytt brukernavn";
 "settings.newUsernamePlaceholder" = "Nytt brukernavn";
-"settings.usernameHint" = "Brukernavnet må være 3–20 tegn. Kan kun endres én gang hver 30. dag.";
+"settings.usernameHint" = "Brukernavnet må være 3-20 tegn. Kan kun endres én gang hver 30. dag.";
 "settings.cooldownNote" = "⏳ Du kan endre brukernavnet ditt igjen om {n} dager";
 "settings.changeUsername" = "Endre brukernavn";
 "settings.successUsernameUpdated" = "Brukernavnet er oppdatert! Du kan endre det igjen om 30 dager.";
@@ -886,7 +886,7 @@
 "trust.trustSignalsTitle" = "Tillitssignaler";
 "trust.trustSignalsSubtitle" = "Offentlige signaler som brukes til å beregne dette passet.";
 "trust.additionalSignalsHeading" = "Flere signaler";
-"trust.additionalSignalsNote" = "Disse påvirker ikke scoren over – de vises separat som ekstra kontekst.";
+"trust.additionalSignalsNote" = "Disse påvirker ikke scoren over: de vises separat som ekstra kontekst.";
 "trust.whatItMeansTitle" = "Hva Trust Passport betyr";
 "trust.whatItMeansDesc" = "Trust Passport gir et åpent innblikk i positive kontosignaler som er tilgjengelige på ZRP. Det er ikke et system for identitetsverifisering og garanterer ikke en persons identitet, hensikter eller fremtidige atferd.";
 "trust.transparencyNotice" = "ZRP Trust Passport bygger på konto- og fellesskapssignaler som er tilgjengelige på ZRP. Scorene beregnes automatisk på nytt når den underliggende kontoinformasjonen eller aktiviteten endrer seg. Passet viser ikke e-postadresser, IP-adresser, private meldinger, modereringsrapporter eller annen privat kontoinformasjon.";
@@ -926,7 +926,7 @@
 "opportunity.organizationLabel" = "Organisasjon (valgfritt)";
 "opportunity.skillsPlaceholder" = "f.eks. python, design, markedsføring";
 "opportunity.addSkill" = "Legg til";
-"opportunity.compensationPlaceholder" = "f.eks. 500 000–700 000 kr/år, ulønnet – studiepoeng";
+"opportunity.compensationPlaceholder" = "f.eks. 500 000-700 000 kr/år, ulønnet: studiepoeng";
 "opportunity.externalUrlLabel" = "Ekstern søknadslenke (valgfritt)";
 "opportunity.externalUrlPlaceholder" = "https:// ...";
 "opportunity.externalUrlHint" = "Hvis dette er satt, sendes søkere til denne lenken i stedet for å søke på ZRP.";
@@ -1026,7 +1026,7 @@
 "transparency.actionHeading" = "Tiltak iverksatt";
 "transparency.generatedNote" = "Data generert {date}. Oppdateres hver time.";
 "transparency.appealsHeading" = "Klager på moderering";
-"transparency.appealsNote" = "Når en bruker er uenig i en modereringsavgjørelse, kan vedkommende klage på den. Dette er de samlede utfallene – aldri hvem som klaget eller hva som ble sagt.";
+"transparency.appealsNote" = "Når en bruker er uenig i en modereringsavgjørelse, kan vedkommende klage på den. Dette er de samlede utfallene: aldri hvem som klaget eller hva som ble sagt.";
 "adminReports.statusPending" = "Venter";
 "adminReports.statusReviewed" = "Gjennomgått";
 "adminReports.statusDismissed" = "Avvist";
@@ -1056,7 +1056,7 @@
 "ambassadors.apply.submit" = "Send inn søknad";
 "ambassadors.apply.submitting" = "Sender inn ...";
 "ambassadors.apply.subtitle" = "Fortell oss om landet ditt og fellesskapet ditt. Alle søknader vurderes av teamet vårt.";
-"ambassadors.apply.successBody" = "Takk! Søknaden din venter på behandling. Vi gir deg beskjed så snart teamet vårt har tatt en avgjørelse – du er ennå ikke offisiell ambassadør.";
+"ambassadors.apply.successBody" = "Takk! Søknaden din venter på behandling. Vi gir deg beskjed så snart teamet vårt har tatt en avgjørelse: du er ennå ikke offisiell ambassadør.";
 "ambassadors.apply.successTitle" = "Søknaden er sendt inn";
 "ambassadors.apply.title" = "Bli ZRP-ambassadør";
 "ambassadors.dashboard.codeAcceptedOn" = "Etiske retningslinjer godtatt";
@@ -1083,7 +1083,7 @@
 "ambassadors.hero.ctaPrimary" = "Bli ZRP-ambassadør";
 "ambassadors.hero.statAmbassadors" = "Ambassadører";
 "ambassadors.hero.statCountries" = "Land representert";
-"ambassadors.hero.subtitle" = "ZRPs globale ambassadører leder fellesskapet i sitt eget land – ekte mennesker, ekte fellesskap, én voksende bevegelse.";
+"ambassadors.hero.subtitle" = "ZRPs globale ambassadører leder fellesskapet i sitt eget land: ekte mennesker, ekte fellesskap, én voksende bevegelse.";
 "ambassadors.hero.title1" = "BYGG FELLESSKAPET DITT.";
 "ambassadors.hero.title2" = "REPRESENTER LANDET DITT.";
 "ambassadors.hero.title3" = "KOBLE SAMMEN VERDEN.";
@@ -1092,7 +1092,7 @@
 "ambassadors.levels.communityLeader" = "Fellesskapsleder";
 "ambassadors.levels.communityLeaderDesc" = "Har bygget og opprettholdt et ekte, aktivt fellesskap rundt ZRP.";
 "ambassadors.levels.explorer" = "Utforsker";
-"ambassadors.levels.explorerDesc" = "Alle ambassadører starter her – med å oppdage ZRP og fellesskapet rundt.";
+"ambassadors.levels.explorerDesc" = "Alle ambassadører starter her: med å oppdage ZRP og fellesskapet rundt.";
 "ambassadors.levels.globalAmbassador" = "Global ambassadør";
 "ambassadors.levels.globalAmbassadorDesc" = "Anerkjent for varig innflytelse på tvers av ZRPs globale fellesskap.";
 "ambassadors.levels.sectionSubtitle" = "Du rykker opp gjennom reell aktivitet i fellesskapet, ikke bare ved å melde deg på.";
@@ -1488,7 +1488,7 @@
 "ios.language.systemDefaultNote" = "Følger språket som er valgt i iOS-innstillingene. Velg et språk nedenfor for å bruke det kun i ZRP.";
 "ios.auth.usernameAvailable" = "Brukernavnet er ledig";
 "ios.auth.usernameTaken" = "Det brukernavnet er opptatt";
-"ios.auth.usernameInvalid" = "3–20 tegn, kun bokstaver, tall og understreker";
+"ios.auth.usernameInvalid" = "3-20 tegn, kun bokstaver, tall og understreker";
 "ios.auth.usernameSuggestions" = "Prøv et av disse";
 "ios.auth.forgotTitle" = "Tilbakestill passordet ditt";
 "ios.auth.forgotBody" = "Skriv inn e-postadressen til kontoen din. Hvis den finnes, sender vi en lenke for å tilbakestille passordet.";

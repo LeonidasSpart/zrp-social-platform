@@ -2461,7 +2461,7 @@
     <string name="admin_subscription_detail_not_yet">Još ne</string>
     <string name="admin_subscription_detail_yes">Da</string>
     <string name="admin_subscription_detail_no">Ne</string>
-    <string name="admin_subscription_detail_no_subscription_record">Nema zapisa o pretplati – ovaj korisnik nikada nije imao plaćeno pravo praćeno u ovom sustavu.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Nema zapisa o pretplati: ovaj korisnik nikada nije imao plaćeno pravo praćeno u ovom sustavu.</string>
     <string name="admin_subscription_detail_admin_controls">Administratorske kontrole</string>
     <string name="admin_subscription_detail_plan_label">Plan</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2471,7 +2471,7 @@
     <string name="admin_subscription_detail_interval_monthly">Mjesečno</string>
     <string name="admin_subscription_detail_interval_yearly">Godišnje</string>
     <string name="admin_subscription_detail_grant_extend">Dodijeli / produlji</string>
-    <string name="admin_subscription_detail_grant_extend_note">„Dodijeli / produlji” oponaša stvarno plaćanje: produljuje korisnikovo postojeće razdoblje ako je za isti plan još aktivno, a inače započinje novo razdoblje od danas. Novac se ne prenosi – bilježi se kao admin_grant u povijesti plaćanja u nastavku.</string>
+    <string name="admin_subscription_detail_grant_extend_note">„Dodijeli / produlji” oponaša stvarno plaćanje: produljuje korisnikovo postojeće razdoblje ako je za isti plan još aktivno, a inače započinje novo razdoblje od danas. Novac se ne prenosi: bilježi se kao admin_grant u povijesti plaćanja u nastavku.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Razlog otkazivanja (nije obavezno):</string>
     <string name="admin_subscription_detail_cancel_remaining">Otkaži preostalo vrijeme</string>
     <string name="admin_subscription_detail_restore">Vrati</string>

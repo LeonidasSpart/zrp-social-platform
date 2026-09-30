@@ -1498,7 +1498,7 @@
     <string name="support_category_security">Drošība</string>
     <string name="support_err_create_failed">Neizdevās izveidot pieprasījumu</string>
     <string name="support_footer_note_link">Mani pieprasījumi</string>
-    <string name="support_footer_note_p1">Tavs pieprasījums tiks izskatīts 24–48 stundu laikā. Tā statusu vari izsekot</string>
+    <string name="support_footer_note_p1">Tavs pieprasījums tiks izskatīts 24-48 stundu laikā. Tā statusu vari izsekot</string>
     <string name="support_footer_note_p2">lapā.</string>
     <string name="support_loading">Ielādē...</string>
     <string name="support_message_label">Ziņa</string>
@@ -2094,7 +2094,7 @@
     <string name="ambassadors_hero_title1">VEIDO SAVU KOPIENU.</string>
     <string name="ambassadors_hero_title2">PĀRSTĀVI SAVU VALSTI.</string>
     <string name="ambassadors_hero_title3">SAVIENO PASAULI.</string>
-    <string name="ambassadors_hero_subtitle">ZRP globālie vēstnieki vada kopienu savā valstī – reāli cilvēki, reālas kopienas, viena augoša kustība.</string>
+    <string name="ambassadors_hero_subtitle">ZRP globālie vēstnieki vada kopienu savā valstī: reāli cilvēki, reālas kopienas, viena augoša kustība.</string>
     <string name="ambassadors_hero_cta_primary">Kļūsti par ZRP vēstnieku</string>
     <string name="ambassadors_hero_cta_secondary">Izpēti pasauli</string>
     <string name="ambassadors_hero_stat_ambassadors">Vēstnieki</string>
@@ -2121,7 +2121,7 @@
     <string name="ambassadors_levels_title">Tavs ceļš uz globālu ietekmi</string>
     <string name="ambassadors_levels_subtitle">Izaugsme tiek nopelnīta ar reālu kopienas aktivitāti, nevis vienkārši reģistrējoties.</string>
     <string name="ambassadors_level_explorer">Pētnieks</string>
-    <string name="ambassadors_level_explorer_desc">Katrs vēstnieks sāk šeit – atklājot ZRP un tā apkārtējo kopienu.</string>
+    <string name="ambassadors_level_explorer_desc">Katrs vēstnieks sāk šeit: atklājot ZRP un tā apkārtējo kopienu.</string>
     <string name="ambassadors_level_ambassador">Vēstnieks</string>
     <string name="ambassadors_level_ambassador_desc">Apstiprināts, lai pārstāvētu savu valsti un vairotu ZRP klātbūtni tajā.</string>
     <string name="ambassadors_level_community_leader">Kopienas līderis</string>
@@ -2152,7 +2152,7 @@
     <string name="ambassadors_apply_err_motivation_required">Pastāsti mums, kāpēc vēlies kļūt par ZRP vēstnieku.</string>
     <string name="ambassadors_apply_err_generic">Kaut kas nogāja greizi. Lūdzu, mēģini vēlreiz.</string>
     <string name="ambassadors_apply_success_title">Pieteikums iesniegts</string>
-    <string name="ambassadors_apply_success_body">Paldies! Tavs pieteikums gaida izskatīšanu. Mēs tevi informēsim, tiklīdz mūsu komanda pieņems lēmumu – pagaidām tu vēl neesi oficiāls vēstnieks.</string>
+    <string name="ambassadors_apply_success_body">Paldies! Tavs pieteikums gaida izskatīšanu. Mēs tevi informēsim, tiklīdz mūsu komanda pieņems lēmumu: pagaidām tu vēl neesi oficiāls vēstnieks.</string>
     <string name="ambassadors_dashboard_title">Vēstnieka panelis</string>
     <string name="ambassadors_dashboard_not_applied_title">Tu vēl neesi ZRP vēstnieks</string>
     <string name="ambassadors_dashboard_err_load">Neizdevās ielādēt tavu vēstnieka statusu</string>

@@ -143,7 +143,7 @@ export default function CallComponent({
           )}
 
           {showLocalVideo && (
-            <div className="absolute bottom-4 right-4 w-32 h-24 bg-black rounded-xl overflow-hidden border-2 border-white/30 shadow-lg">
+            <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 w-32 h-24 bg-black rounded-xl overflow-hidden border-2 border-white/30 shadow-lg">
               <video
                 ref={localVideoRef}
                 autoPlay
@@ -170,7 +170,7 @@ export default function CallComponent({
           )}
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4">
+        <div className="absolute bottom-[calc(2rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 flex items-center gap-4">
           {!isIncoming && remoteStream && (
             <>
               <button
@@ -229,7 +229,7 @@ export default function CallComponent({
         {!isIncoming && remoteStream && (
           <button
             onClick={onEnd}
-            className="absolute bottom-24 left-1/2 -translate-x-1/2 text-red-400 text-sm hover:text-red-300 transition bg-red-500/10 px-4 py-1.5 rounded-full"
+            className="absolute bottom-[calc(6rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 text-red-400 text-sm hover:text-red-300 transition bg-red-500/10 px-4 py-1.5 rounded-full"
           >
             End Call
           </button>

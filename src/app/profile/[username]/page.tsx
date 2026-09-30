@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef, useCallback, use } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   MapPin,
   Link as LinkIcon,
@@ -1272,10 +1273,10 @@ export default function ProfilePage(
               e.stopPropagation()
             }
           >
-            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+            <div className="relative w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
               {reply.author
                 .avatarUrl ? (
-                <img
+                <Image
                   src={
                     reply.author
                       .avatarUrl
@@ -1286,7 +1287,9 @@ export default function ProfilePage(
                     reply.author
                       .username
                   }
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="40px"
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold">

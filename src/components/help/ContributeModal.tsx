@@ -101,7 +101,7 @@ export default function ContributeModal({ campaignId, campaignTitle, onClose, on
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-zrp-deepBlack">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t("help.contributeTitle", { title: campaignTitle })}</h2>
-          <button type="button" onClick={onClose} disabled={loading} className="rounded p-1 hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-800" aria-label={t("help.close")}>
+          <button type="button" onClick={onClose} disabled={loading} className="rounded p-3 hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-800" aria-label={t("help.close")}>
             <X className="h-5 w-5" />
           </button>
         </div>

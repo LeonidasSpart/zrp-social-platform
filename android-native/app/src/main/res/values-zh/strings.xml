@@ -2511,7 +2511,7 @@
     <string name="admin_subscription_detail_not_yet">尚未</string>
     <string name="admin_subscription_detail_yes">是</string>
     <string name="admin_subscription_detail_no">否</string>
-    <string name="admin_subscription_detail_no_subscription_record">没有订阅记录——本系统从未追踪过该用户的付费权益。</string>
+    <string name="admin_subscription_detail_no_subscription_record">没有订阅记录：：本系统从未追踪过该用户的付费权益。</string>
     <string name="admin_subscription_detail_admin_controls">管理员操作</string>
     <string name="admin_subscription_detail_plan_label">套餐</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2521,7 +2521,7 @@
     <string name="admin_subscription_detail_interval_monthly">按月</string>
     <string name="admin_subscription_detail_interval_yearly">按年</string>
     <string name="admin_subscription_detail_grant_extend">授予 / 延长</string>
-    <string name="admin_subscription_detail_grant_extend_note">“授予 / 延长”会模拟一次真实付款：如果同一套餐的现有周期仍然有效，则在其基础上延长；否则从今天起开启一个新周期。不涉及任何资金流动——该操作会以 admin_grant 记录在下方的付款历史中。</string>
+    <string name="admin_subscription_detail_grant_extend_note">“授予 / 延长”会模拟一次真实付款：如果同一套餐的现有周期仍然有效，则在其基础上延长；否则从今天起开启一个新周期。不涉及任何资金流动：：该操作会以 admin_grant 记录在下方的付款历史中。</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">取消原因（可选）：</string>
     <string name="admin_subscription_detail_cancel_remaining">取消剩余时长</string>
     <string name="admin_subscription_detail_restore">恢复</string>

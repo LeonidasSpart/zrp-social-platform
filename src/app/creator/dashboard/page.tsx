@@ -506,11 +506,19 @@ export default function CreatorDashboard() {
       {/* ─── Withdrawal Modal ────────────────────────────────────────── */}
       {showWithdrawModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-md w-full p-6 shadow-xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="withdraw-modal-title"
+            className="bg-white dark:bg-gray-900 rounded-lg max-w-md w-full p-6 shadow-xl"
+          >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("creatorDash.withdrawFundsTitle")}</h2>
+              <h2 id="withdraw-modal-title" className="text-xl font-bold text-gray-900 dark:text-white">
+                {t("creatorDash.withdrawFundsTitle")}
+              </h2>
               <button
                 onClick={() => setShowWithdrawModal(false)}
+                aria-label={t("action.cancel")}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
               >
                 <XCircle className="w-5 h-5" />
@@ -518,10 +526,11 @@ export default function CreatorDashboard() {
             </div>
             <form onSubmit={handleWithdraw} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="withdraw-amount-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {t("creatorDash.amountUsdcLabel")}
                 </label>
                 <Input
+                  id="withdraw-amount-input"
                   type="number"
                   step="0.01"
                   min="1"
@@ -541,7 +550,11 @@ export default function CreatorDashboard() {
                 <WalletVerifyPanel compact onVerifiedChange={setVerifiedWallet} />
               </div>
               {withdrawMessage && (
-                <div className={`text-sm ${withdrawMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className={`text-sm ${withdrawMessage.type === "success" ? "text-green-600" : "text-red-600"}`}
+                >
                   {withdrawMessage.text}
                 </div>
               )}

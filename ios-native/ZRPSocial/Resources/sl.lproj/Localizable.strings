@@ -61,7 +61,7 @@
 "play.aiTopicPlaceholder" = "npr. filmi 80. let, svetovne prestolnice, dejstva o vesolju";
 "play.generate" = "Ustvari";
 "play.generating" = "Ustvarjanje ...";
-"play.aiGeneratedNote" = "Ustvarjeno z UI – pred objavo preglejte.";
+"play.aiGeneratedNote" = "Ustvarjeno z UI: pred objavo preglejte.";
 "play.titleLabel" = "Naslov";
 "play.titlePlaceholder" = "Dajte svojemu izzivu privlačen naslov";
 "play.descriptionLabel" = "Opis (neobvezno)";
@@ -513,7 +513,7 @@
 "music.shell.uploadMusic" = "Naloži glasbo";
 "music.shell.signInTitle" = "Prijavite se za objavljanje glasbe";
 "music.shell.signInBody" = "Poslušanje ZRP Music je odprto za vse. Za prijavo za dostop do objavljanja se morate prijaviti.";
-"music.shell.gateTitle" = "Music Studio – potreben status izvajalca ali ustvarjalca";
+"music.shell.gateTitle" = "Music Studio: potreben status izvajalca ali ustvarjalca";
 "music.shell.gateBody" = "Poslušanje ZRP Music je odprto za vse. Za objavljanje glasbe je potreben odobren status ustvarjalca ali preverjen profil glasbenega izvajalca.";
 "music.shell.pendingVerification" = "Vaš profil izvajalca je bil oddan in čaka na preverbo s strani osebja ZRP.";
 "music.shell.applyIntroPrefix" = "Ustvarite profil izvajalca, da zaprosite za preverbo glasbenega izvajalca, ali pa";
@@ -529,22 +529,22 @@
 "music.shell.uploadHint" = "Zvok in naslovnica se naložita neposredno v vaš obstoječi prostor za shranjevanje ZRP.";
 "music.shell.publishFailedDefault" = "Objava ni uspela. Poskusite znova.";
 "music.shell.uploadFailedDefault" = "Nalaganje ni uspelo. Poskusite znova.";
-"music.shell.emptyFileError" = "\"{name}\" ni bilo mogoče prebrati – morda se še prenaša iz iClouda ali vašega ponudnika oblačnega shranjevanja. Počakajte, da se prenos konča, nato poskusite znova.";
+"music.shell.emptyFileError" = "\"{name}\" ni bilo mogoče prebrati: morda se še prenaša iz iClouda ali vašega ponudnika oblačnega shranjevanja. Počakajte, da se prenos konča, nato poskusite znova.";
 "music.shell.unreadableFileError" = "\"{name}\" ni bilo mogoče prebrati. Morda se še prenaša ali dešifrira v vaši aplikaciji za oblačno shranjevanje (Google Drive, MEGA, Dropbox, iCloud itd.). Datoteko najprej odprite tam, da bo popolnoma na voljo brez povezave, nato poskusite znova.";
 "music.studio.tabTracks" = "Skladbe";
 "music.studio.tabAlbums" = "Albumi";
 "music.studio.tabArtist" = "Profil izvajalca";
 "music.studio.deleteTrackTitle" = "Izbriši skladbo";
-"music.studio.deleteTrackBody" = "Izbrišete \"{title}\"? Tega ni mogoče razveljaviti – skladba, njena predvajanja in všečki bodo trajno odstranjeni.";
+"music.studio.deleteTrackBody" = "Izbrišete \"{title}\"? Tega ni mogoče razveljaviti: skladba, njena predvajanja in všečki bodo trajno odstranjeni.";
 "music.studio.cancel" = "Prekliči";
 "music.studio.deleting" = "Brisanje ...";
 "music.studio.deleteConfirm" = "Izbriši";
 "music.studio.deleteAlbumTitle" = "Izbriši album";
-"music.studio.deleteAlbumBody" = "Izbrišete \"{title}\"? Njegove skladbe NE bodo izbrisane – ostale bodo objavljene in bodo preprosto izgubile povezavo s tem albumom.";
-"music.studio.uploadDoneRetryPublish" = "Vaše nalaganje je končano, vendar objava skladbe ni uspela. Vaša datoteka je varna – pritisnite Poskusi znova, da dokončate objavo brez ponovnega nalaganja.";
+"music.studio.deleteAlbumBody" = "Izbrišete \"{title}\"? Njegove skladbe NE bodo izbrisane: ostale bodo objavljene in bodo preprosto izgubile povezavo s tem albumom.";
+"music.studio.uploadDoneRetryPublish" = "Vaše nalaganje je končano, vendar objava skladbe ni uspela. Vaša datoteka je varna: pritisnite Poskusi znova, da dokončate objavo brez ponovnega nalaganja.";
 "music.studio.explicitLabel" = "Eksplicitna vsebina";
 "music.studio.retryPublish" = "Poskusi objavo znova";
-"music.studio.checkingFileHint" = "Datoteke iz aplikacij za oblačno shranjevanje, kot je MEGA, lahko za pripravo potrebujejo malo več časa – to je normalno.";
+"music.studio.checkingFileHint" = "Datoteke iz aplikacij za oblačno shranjevanje, kot je MEGA, lahko za pripravo potrebujejo malo več časa: to je normalno.";
 "music.studio.checkingFile" = "Preverjanje datoteke ...";
 "music.studio.discardUpload" = "Zavrzi in začni znova";
 "music.studio.myTracks" = "Moje skladbe";
@@ -599,7 +599,7 @@
 "marketplace.statusExpired" = "Poteklo";
 "marketplace.statusRemoved" = "Odstranjeno";
 "marketplace.heroTitle" = "ZRP Market Plus";
-"marketplace.heroSubtitle" = "Luksuzna tržnica za preverjene člane ZRP – ekskluzivni avtomobili, jahte, zasebna letala, nepremičnine in več.";
+"marketplace.heroSubtitle" = "Luksuzna tržnica za preverjene člane ZRP: ekskluzivni avtomobili, jahte, zasebna letala, nepremičnine in več.";
 "marketplace.searchPlaceholder" = "Iskanje oglasov ...";
 "marketplace.createListing" = "Ustvari oglas";
 "marketplace.myListings" = "Moji oglasi";
@@ -825,7 +825,7 @@
 "settings.currentUsername" = "Trenutno uporabniško ime";
 "settings.newUsername" = "Novo uporabniško ime";
 "settings.newUsernamePlaceholder" = "Novo uporabniško ime";
-"settings.usernameHint" = "Uporabniško ime mora imeti 3–20 znakov. Spremenite ga lahko le enkrat na 30 dni.";
+"settings.usernameHint" = "Uporabniško ime mora imeti 3-20 znakov. Spremenite ga lahko le enkrat na 30 dni.";
 "settings.cooldownNote" = "⏳ Uporabniško ime lahko znova spremenite čez {n} dni";
 "settings.changeUsername" = "Spremeni uporabniško ime";
 "settings.successUsernameUpdated" = "Uporabniško ime uspešno posodobljeno! Znova ga lahko spremenite čez 30 dni.";
@@ -886,7 +886,7 @@
 "trust.trustSignalsTitle" = "Signali zaupanja";
 "trust.trustSignalsSubtitle" = "Javni signali, uporabljeni za izračun tega potnega lista.";
 "trust.additionalSignalsHeading" = "Dodatni signali";
-"trust.additionalSignalsNote" = "Ti ne vplivajo na zgornjo oceno – prikazani so ločeno kot dodaten kontekst.";
+"trust.additionalSignalsNote" = "Ti ne vplivajo na zgornjo oceno: prikazani so ločeno kot dodaten kontekst.";
 "trust.whatItMeansTitle" = "Kaj pomeni Trust Passport";
 "trust.whatItMeansDesc" = "Trust Passport zagotavlja pregleden vpogled v pozitivne signale računa, razpoložljive na ZRP. Ni sistem za preverjanje identitete in ne jamči za identiteto, namere ali prihodnje ravnanje osebe.";
 "trust.transparencyNotice" = "ZRP Trust Passport temelji na signalih računa in skupnosti, razpoložljivih na ZRP. Ocene se samodejno ponovno izračunajo, ko se spremenijo osnovni podatki ali dejavnost računa. Potni list ne razkriva e-poštnih naslovov, IP-naslovov, zasebnih sporočil, prijav za moderiranje ali drugih zasebnih informacij o računu.";
@@ -926,7 +926,7 @@
 "opportunity.organizationLabel" = "Organizacija (neobvezno)";
 "opportunity.skillsPlaceholder" = "npr. python, oblikovanje, trženje";
 "opportunity.addSkill" = "Dodaj";
-"opportunity.compensationPlaceholder" = "npr. 50.000–70.000 USD/leto, neplačano – akademski kredit";
+"opportunity.compensationPlaceholder" = "npr. 50.000-70.000 USD/leto, neplačano: akademski kredit";
 "opportunity.externalUrlLabel" = "Zunanja povezava za prijavo (neobvezno)";
 "opportunity.externalUrlPlaceholder" = "https://...";
 "opportunity.externalUrlHint" = "Če je nastavljeno, so prijavljeni kandidati poslani na to povezavo namesto prijave na ZRP.";
@@ -1026,7 +1026,7 @@
 "transparency.actionHeading" = "Sprejeti ukrepi";
 "transparency.generatedNote" = "Podatki ustvarjeni {date}. Posodobljeno vsako uro.";
 "transparency.appealsHeading" = "Pritožbe na moderiranje";
-"transparency.appealsNote" = "Ko se uporabnik ne strinja z odločitvijo o moderiranju, se lahko pritoži. To so skupni izidi – nikoli ne razkrivamo, kdo se je pritožil ali kaj je bilo rečeno.";
+"transparency.appealsNote" = "Ko se uporabnik ne strinja z odločitvijo o moderiranju, se lahko pritoži. To so skupni izidi: nikoli ne razkrivamo, kdo se je pritožil ali kaj je bilo rečeno.";
 "adminReports.statusPending" = "V obravnavi";
 "adminReports.statusReviewed" = "Pregledano";
 "adminReports.statusDismissed" = "Zavrnjeno";
@@ -1056,7 +1056,7 @@
 "ambassadors.apply.submit" = "Oddaj prijavo";
 "ambassadors.apply.submitting" = "Oddajanje ...";
 "ambassadors.apply.subtitle" = "Povejte nam o svoji državi in skupnosti. Vsako prijavo pregleda naša ekipa.";
-"ambassadors.apply.successBody" = "Hvala! Vaša prijava čaka na pregled. Obvestili vas bomo takoj, ko naša ekipa sprejme odločitev – še niste uradni ambasador.";
+"ambassadors.apply.successBody" = "Hvala! Vaša prijava čaka na pregled. Obvestili vas bomo takoj, ko naša ekipa sprejme odločitev: še niste uradni ambasador.";
 "ambassadors.apply.successTitle" = "Prijava oddana";
 "ambassadors.apply.title" = "Postanite ambasador ZRP";
 "ambassadors.dashboard.codeAcceptedOn" = "Kodeks ravnanja sprejet";
@@ -1083,7 +1083,7 @@
 "ambassadors.hero.ctaPrimary" = "Postanite ambasador ZRP";
 "ambassadors.hero.statAmbassadors" = "Ambasadorjev";
 "ambassadors.hero.statCountries" = "Zastopanih držav";
-"ambassadors.hero.subtitle" = "Globalni ambasadorji ZRP vodijo skupnost v svoji državi – pravi ljudje, prave skupnosti, eno rastoče gibanje.";
+"ambassadors.hero.subtitle" = "Globalni ambasadorji ZRP vodijo skupnost v svoji državi: pravi ljudje, prave skupnosti, eno rastoče gibanje.";
 "ambassadors.hero.title1" = "ZGRADITE SVOJO SKUPNOST.";
 "ambassadors.hero.title2" = "ZASTOPAJTE SVOJO DRŽAVO.";
 "ambassadors.hero.title3" = "POVEŽITE SVET.";
@@ -1092,7 +1092,7 @@
 "ambassadors.levels.communityLeader" = "Vodja skupnosti";
 "ambassadors.levels.communityLeaderDesc" = "Zgradil/-a in vzdržuje pravo, aktivno skupnost okoli ZRP.";
 "ambassadors.levels.explorer" = "Raziskovalec";
-"ambassadors.levels.explorerDesc" = "Vsak ambasador začne tukaj – z odkrivanjem ZRP in skupnosti okoli njega.";
+"ambassadors.levels.explorerDesc" = "Vsak ambasador začne tukaj: z odkrivanjem ZRP in skupnosti okoli njega.";
 "ambassadors.levels.globalAmbassador" = "Globalni ambasador";
 "ambassadors.levels.globalAmbassadorDesc" = "Priznan za trajen vpliv v globalni skupnosti ZRP.";
 "ambassadors.levels.sectionSubtitle" = "Napredovanje se pridobi z resnično dejavnostjo v skupnosti, ne le s prijavo.";
@@ -1488,7 +1488,7 @@
 "ios.language.systemDefaultNote" = "Sledi jeziku, nastavljenem v Nastavitvah iOS. Za uporabo samo v ZRP spodaj izberite jezik.";
 "ios.auth.usernameAvailable" = "Uporabniško ime je na voljo";
 "ios.auth.usernameTaken" = "To uporabniško ime je zasedeno";
-"ios.auth.usernameInvalid" = "3–20 znakov, samo črke, številke in podčrtaji";
+"ios.auth.usernameInvalid" = "3-20 znakov, samo črke, številke in podčrtaji";
 "ios.auth.usernameSuggestions" = "Poskusite z enim od teh";
 "ios.auth.forgotTitle" = "Ponastavite svoje geslo";
 "ios.auth.forgotBody" = "Vnesite e-poštni naslov svojega računa. Če obstaja, vam bomo poslali povezavo za ponastavitev gesla.";

@@ -845,7 +845,7 @@
     <string name="music_shell_studio_label">Music Studio</string>
     <string name="music_shell_studio_eyebrow">Orodja za ustvarjalce</string>
     <string name="music_shell_studio_description">Objavite svojo glasbo neposredno na ZRP.</string>
-    <string name="music_shell_gate_title">Music Studio – potreben status izvajalca ali ustvarjalca</string>
+    <string name="music_shell_gate_title">Music Studio: potreben status izvajalca ali ustvarjalca</string>
     <string name="music_shell_gate_body">Poslušanje ZRP Music je odprto za vse. Za objavljanje glasbe je potreben odobren status ustvarjalca ali preverjen profil glasbenega izvajalca.</string>
     <string name="music_shell_pending_verification">Vaš profil izvajalca je bil oddan in čaka na preverbo s strani osebja ZRP.</string>
     <string name="music_shell_apply_intro_prefix">Ustvarite profil izvajalca, da zaprosite za preverbo glasbenega izvajalca, ali pa</string>
@@ -872,9 +872,9 @@
     <string name="music_shell_publishing">Objavljanje ...</string>
     <string name="music_shell_upload_hint">Zvok in naslovnica se naložita neposredno v vaš obstoječi prostor za shranjevanje ZRP.</string>
     <string name="music_shell_publish_failed_default">Objava ni uspela. Poskusite znova.</string>
-    <string name="music_shell_empty_file_error">&quot;%1$s&quot; ni bilo mogoče prebrati – morda se še prenaša iz iClouda ali vašega ponudnika oblačnega shranjevanja. Počakajte, da se prenos konča, nato poskusite znova.</string>
+    <string name="music_shell_empty_file_error">&quot;%1$s&quot; ni bilo mogoče prebrati: morda se še prenaša iz iClouda ali vašega ponudnika oblačnega shranjevanja. Počakajte, da se prenos konča, nato poskusite znova.</string>
     <string name="music_studio_delete_track_title">Izbriši skladbo</string>
-    <string name="music_studio_delete_track_body">Izbrišete &quot;%1$s&quot;? Tega ni mogoče razveljaviti – skladba, njena predvajanja in všečki bodo trajno odstranjeni.</string>
+    <string name="music_studio_delete_track_body">Izbrišete &quot;%1$s&quot;? Tega ni mogoče razveljaviti: skladba, njena predvajanja in všečki bodo trajno odstranjeni.</string>
     <string name="music_studio_cancel">Prekliči</string>
     <string name="music_studio_deleting">Brisanje ...</string>
     <string name="music_studio_delete_confirm">Izbriši</string>
@@ -907,7 +907,7 @@
     <string name="music_studio_remove_from_album">Odstrani iz albuma</string>
     <string name="music_studio_add_existing_tracks">Dodaj obstoječe skladbe</string>
     <string name="music_studio_delete_album_title">Izbriši album</string>
-    <string name="music_studio_delete_album_body">Izbrišete &quot;%1$s&quot;? Njegove skladbe NE bodo izbrisane – ostale bodo objavljene in bodo preprosto izgubile povezavo s tem albumom.</string>
+    <string name="music_studio_delete_album_body">Izbrišete &quot;%1$s&quot;? Njegove skladbe NE bodo izbrisane: ostale bodo objavljene in bodo preprosto izgubile povezavo s tem albumom.</string>
     <string name="music_studio_album_created_msg">Album ustvarjen.</string>
     <string name="music_studio_album_updated_msg">Album posodobljen.</string>
     <string name="music_studio_album_deleted_msg">Album izbrisan. Vaše skladbe so bile ohranjene in so še vedno na voljo.</string>
@@ -923,7 +923,7 @@
     <string name="marketplace_category_watches_jewelry">Ure in nakit</string>
     <string name="marketplace_category_other_luxury">Druga luksuzna sredstva</string>
     <string name="marketplace_hero_title">ZRP Market Plus</string>
-    <string name="marketplace_hero_subtitle">Luksuzna tržnica za preverjene člane ZRP – ekskluzivni avtomobili, jahte, zasebna letala, nepremičnine in več.</string>
+    <string name="marketplace_hero_subtitle">Luksuzna tržnica za preverjene člane ZRP: ekskluzivni avtomobili, jahte, zasebna letala, nepremičnine in več.</string>
     <string name="marketplace_search_placeholder">Iskanje oglasov ...</string>
     <string name="marketplace_search">Iskanje</string>
     <string name="marketplace_browse_categories">Brskaj po kategorijah</string>
@@ -1011,7 +1011,7 @@
     <string name="opportunity_back_to_opportunity">Nazaj na OPPORTUNITY</string>
     <string name="opportunity_close">Zapri</string>
     <string name="opportunity_compensation_label">Plačilo</string>
-    <string name="opportunity_compensation_placeholder">npr. 50.000–70.000 USD/leto, neplačano – akademski kredit</string>
+    <string name="opportunity_compensation_placeholder">npr. 50.000-70.000 USD/leto, neplačano: akademski kredit</string>
     <string name="opportunity_cover_note_label">Spremno pismo (neobvezno)</string>
     <string name="opportunity_cover_note_placeholder">Povejte jim, zakaj ste odlična izbira ...</string>
     <string name="opportunity_create_subtitle">Objavite zaposlitev, pripravništvo, štipendijo, mentorstvo ali sodelovanje za skupnost ZRP.</string>
@@ -1027,7 +1027,7 @@
     <string name="opportunity_external_url_hint">Če je nastavljeno, so prijavljeni kandidati poslani na to povezavo namesto prijave na ZRP.</string>
     <string name="opportunity_external_url_label">Zunanja povezava za prijavo (neobvezno)</string>
     <string name="opportunity_external_url_placeholder">https://...</string>
-    <string name="opportunity_hero_subtitle">Zaposlitve, delo na daljavo, pripravništva, štipendije, mentorstvo, honorarni projekti in sodelovanje – poganja jih skupnost ZRP.</string>
+    <string name="opportunity_hero_subtitle">Zaposlitve, delo na daljavo, pripravništva, štipendije, mentorstvo, honorarni projekti in sodelovanje: poganja jih skupnost ZRP.</string>
     <string name="opportunity_hero_title">ZRP OPPORTUNITY</string>
     <string name="opportunity_is_paid">To je plačano</string>
     <string name="opportunity_location_label">Lokacija (neobvezno)</string>
@@ -1157,7 +1157,7 @@
     <string name="aid_status_rejected">Zavrnjeno</string>
     <string name="aid_status_removed">Odstranjeno</string>
     <string name="aid_title_label">Naslov</string>
-    <string name="aid_withdrawal_requested">Dvig sredstev zahtevan. Obdelan bo v 24–48 urah.</string>
+    <string name="aid_withdrawal_requested">Dvig sredstev zahtevan. Obdelan bo v 24-48 urah.</string>
     <string name="play_discover_entry">Razišči ZRP PLAY</string>
     <string name="play_accept">Sprejmi</string>
     <string name="play_accepted">Sprejeto</string>
@@ -1168,7 +1168,7 @@
     <string name="play_add_option">Dodaj možnost</string>
     <string name="play_add_pair">Dodaj par</string>
     <string name="play_add_question">Dodaj vprašanje</string>
-    <string name="play_ai_generated_note">Ustvarjeno z UI – pred objavo preglejte.</string>
+    <string name="play_ai_generated_note">Ustvarjeno z UI: pred objavo preglejte.</string>
     <string name="play_ai_tab">Ustvari z UI</string>
     <string name="play_ai_topic_label">Tema</string>
     <string name="play_ai_topic_placeholder">npr. filmi 80. let, svetovne prestolnice, dejstva o vesolju</string>
@@ -1208,7 +1208,7 @@
     <string name="play_finish">Zaključi</string>
     <string name="play_generate">Ustvari</string>
     <string name="play_generating">Ustvarjanje ...</string>
-    <string name="play_hero_subtitle">Hitre igre, dvoboji in dnevni izzivi – poganja jih skupnost ZRP.</string>
+    <string name="play_hero_subtitle">Hitre igre, dvoboji in dnevni izzivi: poganja jih skupnost ZRP.</string>
     <string name="play_hero_title">ZRP PLAY</string>
     <string name="play_incoming_duels">Prejeti izzivi</string>
     <string name="play_leaderboard">Lestvica</string>
@@ -1344,7 +1344,7 @@
     <string name="shorts_upload_err_generic">Med nalaganjem je prišlo do napake. Preverite svojo povezavo in poskusite znova.</string>
     <string name="shorts_upload_err_upload_failed_detailed">Nalaganje ni bilo dokončano, verjetno zaradi težave s povezavo ali datoteke, ki je prevelika za vaš paket. Preverite povezavo in poskusite znova.</string>
     <string name="shorts_upload_err_too_large_plan">Ta video je prevelik za vaš paket. Poskusite z manjšo datoteko ali nadgradite paket.</string>
-    <string name="shorts_upload_err_url_gen_failed">Nalaganja ni bilo mogoče začeti – navadno gre za začasno težavo s povezavo. Poskusite znova.</string>
+    <string name="shorts_upload_err_url_gen_failed">Nalaganja ni bilo mogoče začeti: navadno gre za začasno težavo s povezavo. Poskusite znova.</string>
     <string name="shorts_upload_err_internal_server">Med nalaganjem je na naši strani prišlo do napake. Poskusite znova čez trenutek.</string>
     <string name="shorts_premium_locked_title">Premium video</string>
     <string name="shorts_premium_locked_body">Odkleni ta video za %1$s %2$s</string>
@@ -1389,7 +1389,7 @@
     <string name="creator_tips_label">Napitnine</string>
     <string name="creator_withdraw_button">Dvigni</string>
     <string name="creator_withdraw_funds_title">Dvigni sredstva</string>
-    <string name="creator_withdrawals_processed_hint">Dvigi se obdelajo v 24–48 urah.</string>
+    <string name="creator_withdrawals_processed_hint">Dvigi se obdelajo v 24-48 urah.</string>
     <string name="creator_content_comments">Komentarji</string>
     <string name="creator_content_engagement_subtitle">Všečki, komentarji in deljenja pri vseh vaših objavah.</string>
     <string name="creator_content_engagement_title">Vključenost, zadnjih 30 dni</string>
@@ -1410,7 +1410,7 @@
     <string name="trust_account_age_label">Starost računa:</string>
     <string name="trust_account_history_title">Zgodovina računa</string>
     <string name="trust_additional_signals_heading">Dodatni signali</string>
-    <string name="trust_additional_signals_note">Ti ne vplivajo na zgornjo oceno – prikazani so ločeno kot dodaten kontekst.</string>
+    <string name="trust_additional_signals_note">Ti ne vplivajo na zgornjo oceno: prikazani so ločeno kot dodaten kontekst.</string>
     <string name="trust_back_to_profile">Nazaj na profil</string>
     <string name="trust_back_to_username">Nazaj na @%1$s</string>
     <string name="trust_category_community">Skupnost</string>
@@ -1592,7 +1592,7 @@
     <string name="support_category_security">Varnost</string>
     <string name="support_err_create_failed">Ustvarjanje zahtevka ni uspelo</string>
     <string name="support_footer_note_link">Moji zahtevki</string>
-    <string name="support_footer_note_p1">Vaš zahtevek bo pregledan v 24–48 urah. Njegov status lahko spremljate na strani</string>
+    <string name="support_footer_note_p1">Vaš zahtevek bo pregledan v 24-48 urah. Njegov status lahko spremljate na strani</string>
     <string name="support_footer_note_p2">.</string>
     <string name="support_loading">Nalaganje ...</string>
     <string name="support_message_label">Sporočilo</string>
@@ -1909,7 +1909,7 @@
     <string name="transparency_status_heading">Status prijave</string>
     <string name="transparency_action_heading">Sprejeti ukrepi</string>
     <string name="transparency_appeals_heading">Pritožbe na moderiranje</string>
-    <string name="transparency_appeals_note">Ko se uporabnik ne strinja z odločitvijo o moderiranju, se lahko pritoži. To so skupni izidi – nikoli ne razkrivamo, kdo se je pritožil ali kaj je bilo rečeno.</string>
+    <string name="transparency_appeals_note">Ko se uporabnik ne strinja z odločitvijo o moderiranju, se lahko pritoži. To so skupni izidi: nikoli ne razkrivamo, kdo se je pritožil ali kaj je bilo rečeno.</string>
     <string name="transparency_generated_note">Podatki ustvarjeni %1$s. Posodobljeno vsako uro.</string>
     <string name="charity_committed_label">Zavezano dobrodelnim namenom</string>
     <string name="charity_committed_note">Samodejno izračunano iz zaključenih napitnin in nakupov premium vsebine: 35 % provizije platforme na vsakega.</string>
@@ -1968,7 +1968,7 @@
     <string name="admin_analytics_total_comments">Skupaj komentarjev</string>
     <string name="admin_analytics_daily_activity">Dnevna dejavnost</string>
     <string name="admin_analytics_no_daily">V zadnjih 30 dneh ni zabeležene dejavnosti.</string>
-    <string name="admin_analytics_daily_range">%1$s – %2$s</string>
+    <string name="admin_analytics_daily_range">%1$s: %2$s</string>
     <string name="admin_analytics_daily_peak">Vrh: %1$s dne %2$s</string>
     <string name="admin_analytics_top_posts">Najboljše objave</string>
     <string name="admin_analytics_no_top_posts">Še ni objav.</string>
@@ -1990,7 +1990,7 @@
     <string name="admin_audit_target">Cilj: %1$s %2$s</string>
     <string name="admin_audit_metadata">Podrobnosti: %1$s</string>
     <string name="admin_storage_title">Čiščenje shrambe</string>
-    <string name="admin_storage_subtitle">Poišče datoteke, ki še vedno ležijo v UploadThing, na katere pa v podatkovni bazi nič več ne kaže, in vam omogoči, da jih izbrišete. Preverjanje nikoli ničesar ne spremeni – samo poroča.</string>
+    <string name="admin_storage_subtitle">Poišče datoteke, ki še vedno ležijo v UploadThing, na katere pa v podatkovni bazi nič več ne kaže, in vam omogoči, da jih izbrišete. Preverjanje nikoli ničesar ne spremeni: samo poroča.</string>
     <string name="admin_storage_scan_button">Preveri osirotele datoteke</string>
     <string name="admin_storage_scanning">Preverjanje …</string>
     <string name="admin_storage_delete_button">Izbriši %1$s osirotelih datotek</string>
@@ -2003,8 +2003,8 @@
     <string name="admin_storage_stat_orphaned_size">Velikost osirotelih</string>
     <string name="admin_storage_stat_held_for_review_summary">Zadržano za pregled: %1$s (%2$s MB)</string>
     <string name="admin_storage_held_for_review_hint">%1$s nedavno naloženih datotek je nereferenciranih, vendar so 24 ur zadržane pred izbrisom, za primer, da bi bile še vedno priložene novemu zapisu.</string>
-    <string name="admin_storage_nothing_orphaned">Ni osirotelih datotek – shramba UploadThing se ujema s podatkovno bazo.</string>
-    <string name="admin_storage_showing_sample">Prikazanih %1$s od %2$s – izbris odstrani vse, ne le naštete tukaj.</string>
+    <string name="admin_storage_nothing_orphaned">Ni osirotelih datotek: shramba UploadThing se ujema s podatkovno bazo.</string>
+    <string name="admin_storage_showing_sample">Prikazanih %1$s od %2$s: izbris odstrani vse, ne le naštete tukaj.</string>
     <string name="admin_charity_title">Dobrodelna izplačila</string>
     <string name="admin_charity_subtitle">Prava dobrodelna izplačila, ki jih je izvedel ZRP. Vsak zapis tukaj se prikaže tudi na javnem dobrodelnem dnevniku.</string>
     <string name="admin_charity_saved">Izplačilo zabeleženo.</string>
@@ -2112,7 +2112,7 @@
     <string name="admin_news_network_no_stories">V tej vrsti ni zgodb.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · ocena %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d virov</string>
-    <string name="admin_news_network_flag_sensitive">Občutljivo – zahteva pregled osebja</string>
+    <string name="admin_news_network_flag_sensitive">Občutljivo: zahteva pregled osebja</string>
     <string name="admin_news_network_flag_breaking">Nujno</string>
     <string name="admin_news_network_flag_travel">Potovanja</string>
     <string name="admin_news_network_reject">Zavrni</string>
@@ -2190,7 +2190,7 @@ Tega dejanja ni mogoče razveljaviti.</string>
     <string name="ambassadors_hero_title1">ZGRADITE SVOJO SKUPNOST.</string>
     <string name="ambassadors_hero_title2">ZASTOPAJTE SVOJO DRŽAVO.</string>
     <string name="ambassadors_hero_title3">POVEŽITE SVET.</string>
-    <string name="ambassadors_hero_subtitle">Globalni ambasadorji ZRP vodijo skupnost v svoji državi – pravi ljudje, prave skupnosti, eno rastoče gibanje.</string>
+    <string name="ambassadors_hero_subtitle">Globalni ambasadorji ZRP vodijo skupnost v svoji državi: pravi ljudje, prave skupnosti, eno rastoče gibanje.</string>
     <string name="ambassadors_hero_cta_primary">Postanite ambasador ZRP</string>
     <string name="ambassadors_hero_cta_secondary">Raziščite svet</string>
     <string name="ambassadors_hero_stat_ambassadors">Ambasadorjev</string>
@@ -2217,7 +2217,7 @@ Tega dejanja ni mogoče razveljaviti.</string>
     <string name="ambassadors_levels_title">Vaša pot do globalnega vpliva</string>
     <string name="ambassadors_levels_subtitle">Napredovanje se pridobi z resnično dejavnostjo v skupnosti, ne le s prijavo.</string>
     <string name="ambassadors_level_explorer">Raziskovalec</string>
-    <string name="ambassadors_level_explorer_desc">Vsak ambasador začne tukaj – z odkrivanjem ZRP in skupnosti okoli njega.</string>
+    <string name="ambassadors_level_explorer_desc">Vsak ambasador začne tukaj: z odkrivanjem ZRP in skupnosti okoli njega.</string>
     <string name="ambassadors_level_ambassador">Ambasador</string>
     <string name="ambassadors_level_ambassador_desc">Odobren za zastopanje vaše države in rast prisotnosti ZRP tam.</string>
     <string name="ambassadors_level_community_leader">Vodja skupnosti</string>
@@ -2248,7 +2248,7 @@ Tega dejanja ni mogoče razveljaviti.</string>
     <string name="ambassadors_apply_err_motivation_required">Povejte nam, zakaj želite postati ambasador ZRP.</string>
     <string name="ambassadors_apply_err_generic">Prišlo je do napake. Poskusite znova.</string>
     <string name="ambassadors_apply_success_title">Prijava oddana</string>
-    <string name="ambassadors_apply_success_body">Hvala! Vaša prijava čaka na pregled. Obvestili vas bomo takoj, ko naša ekipa sprejme odločitev – še niste uradni ambasador.</string>
+    <string name="ambassadors_apply_success_body">Hvala! Vaša prijava čaka na pregled. Obvestili vas bomo takoj, ko naša ekipa sprejme odločitev: še niste uradni ambasador.</string>
     <string name="ambassadors_dashboard_title">Nadzorna plošča ambasadorja</string>
     <string name="ambassadors_dashboard_not_applied_title">Še niste ambasador ZRP</string>
     <string name="ambassadors_dashboard_err_load">Vašega statusa ambasadorja ni bilo mogoče naložiti</string>
@@ -2467,7 +2467,7 @@ Tega dejanja ni mogoče razveljaviti.</string>
     <string name="admin_subscription_detail_not_yet">Še ne</string>
     <string name="admin_subscription_detail_yes">Da</string>
     <string name="admin_subscription_detail_no">Ne</string>
-    <string name="admin_subscription_detail_no_subscription_record">Ni zapisa naročnine – ta uporabnik nikoli ni imel plačljive upravičenosti, ki bi jo sledil ta sistem.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Ni zapisa naročnine: ta uporabnik nikoli ni imel plačljive upravičenosti, ki bi jo sledil ta sistem.</string>
     <string name="admin_subscription_detail_admin_controls">Skrbniške kontrole</string>
     <string name="admin_subscription_detail_plan_label">Paket</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2477,7 +2477,7 @@ Tega dejanja ni mogoče razveljaviti.</string>
     <string name="admin_subscription_detail_interval_monthly">Mesečno</string>
     <string name="admin_subscription_detail_interval_yearly">Letno</string>
     <string name="admin_subscription_detail_grant_extend">Podeli / podaljšaj</string>
-    <string name="admin_subscription_detail_grant_extend_note">&quot;Podeli / podaljšaj&quot; posnema pravo plačilo: podaljša obstoječe obdobje uporabnika, če je za isti paket še aktivno, sicer začne novo obdobje od danes. Denar se ne premakne – zabeleži se kot admin_grant v spodnji zgodovini plačil.</string>
+    <string name="admin_subscription_detail_grant_extend_note">&quot;Podeli / podaljšaj&quot; posnema pravo plačilo: podaljša obstoječe obdobje uporabnika, če je za isti paket še aktivno, sicer začne novo obdobje od danes. Denar se ne premakne: zabeleži se kot admin_grant v spodnji zgodovini plačil.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Razlog za preklic (neobvezno):</string>
     <string name="admin_subscription_detail_cancel_remaining">Prekliči preostali čas</string>
     <string name="admin_subscription_detail_restore">Obnovi</string>
@@ -2514,7 +2514,7 @@ Tega dejanja ni mogoče razveljaviti.</string>
     <string name="post_show_original">Prikaži izvirnik</string>
     <string name="post_translation_unavailable">Prevod trenutno ni na voljo.</string>
     <string name="auth_username_taken">To uporabniško ime je zasedeno.</string>
-    <string name="auth_username_format_hint">3–20 znakov, samo črke/številke/podčrtaji</string>
+    <string name="auth_username_format_hint">3-20 znakov, samo črke/številke/podčrtaji</string>
     <string name="quote_post_title">Citiraj objavo</string>
     <string name="post_repost_private_error">Objav zasebnih računov ni mogoče deliti.</string>
     <string name="post_repost_forbidden_error">Te objave ni mogoče deliti.</string>

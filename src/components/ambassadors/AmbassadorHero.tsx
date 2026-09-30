@@ -117,7 +117,7 @@ export default function AmbassadorHero({ myStatus }: { myStatus?: MyAmbassadorSt
         >
           <div>
             <p className="font-orbitron text-2xl font-bold tabular-nums text-white">
-              {stats ? stats.totalAmbassadors.toLocaleString() : "–"}
+              {stats ? stats.totalAmbassadors.toLocaleString() : "-"}
             </p>
             <p className="mt-1 text-xs uppercase tracking-wide text-white/50">
               {t("ambassadors.hero.statAmbassadors")}
@@ -126,7 +126,7 @@ export default function AmbassadorHero({ myStatus }: { myStatus?: MyAmbassadorSt
           <div className="h-8 w-px bg-white/10" aria-hidden="true" />
           <div>
             <p className="font-orbitron text-2xl font-bold tabular-nums text-white">
-              {stats ? stats.countriesRepresented.toLocaleString() : "–"}
+              {stats ? stats.countriesRepresented.toLocaleString() : "-"}
             </p>
             <p className="mt-1 text-xs uppercase tracking-wide text-white/50">
               {t("ambassadors.hero.statCountries")}

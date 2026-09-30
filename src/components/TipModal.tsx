@@ -164,7 +164,7 @@ export default function TipModal({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="rounded p-1 hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-700"
+            className="rounded p-3 hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-gray-700"
             aria-label={t("tipModal.close")}
           >
             <X className="h-5 w-5" />

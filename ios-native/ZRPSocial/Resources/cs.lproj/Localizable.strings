@@ -825,7 +825,7 @@
 "settings.currentUsername" = "Současné uživatelské jméno";
 "settings.newUsername" = "Nové uživatelské jméno";
 "settings.newUsernamePlaceholder" = "Nové uživatelské jméno";
-"settings.usernameHint" = "Uživatelské jméno musí mít 3–20 znaků. Lze jej změnit jen jednou za 30 dní.";
+"settings.usernameHint" = "Uživatelské jméno musí mít 3-20 znaků. Lze jej změnit jen jednou za 30 dní.";
 "settings.cooldownNote" = "⏳ Uživatelské jméno budeš moci znovu změnit za {n} dní";
 "settings.changeUsername" = "Změnit uživatelské jméno";
 "settings.successUsernameUpdated" = "Uživatelské jméno bylo úspěšně změněno! Znovu ho můžeš změnit za 30 dní.";
@@ -1488,7 +1488,7 @@
 "ios.language.systemDefaultNote" = "Řídí se jazykem nastaveným v nastavení iOS. Vyberte jazyk níže, který se použije pouze v ZRP.";
 "ios.auth.usernameAvailable" = "Uživatelské jméno je k dispozici";
 "ios.auth.usernameTaken" = "Toto uživatelské jméno je již obsazeno";
-"ios.auth.usernameInvalid" = "3–20 znaků, pouze písmena, čísla a podtržítka";
+"ios.auth.usernameInvalid" = "3-20 znaků, pouze písmena, čísla a podtržítka";
 "ios.auth.usernameSuggestions" = "Zkuste jednu z těchto možností";
 "ios.auth.forgotTitle" = "Obnovte heslo";
 "ios.auth.forgotBody" = "Zadejte e-mailovou adresu svého účtu. Pokud existuje, zašleme vám odkaz pro obnovení hesla.";

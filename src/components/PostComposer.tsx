@@ -2467,6 +2467,8 @@ export default function PostComposer({
 
               {error && (
                 <div
+                  role="alert"
+                  aria-live="polite"
                   className="
                     mt-3
                     rounded-xl

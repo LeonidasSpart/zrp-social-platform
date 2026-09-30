@@ -286,7 +286,7 @@ merged GitHub history at the time of this release.
   rail from `md` (768px), full labeled rail from `lg` (1024px), closing
   a gap where every viewport between phone and 1024px fell back to full
   phone UI. `RightPanel` now renders from `lg` (narrower) instead of only
-  from `xl`, closing a second gap where the 1024–1280px range had a
+  from `xl`, closing a second gap where the 1024-1280px range had a
   right-hand column of dead whitespace next to the feed (#315, #318).
 - Native Android and iOS shell redesigns: a 5-item bottom nav + left
   drawer on Android matching the ZRP reference design (#283), and an iOS
@@ -341,7 +341,7 @@ merged GitHub history at the time of this release.
   `DATABASE_URL` was unset (#295).
 - Poll rendering on the web client and a native composer keyboard block
   were both fixed in the same publish-flow pass (#228).
-- A forensic re-audit of PRs #302–#309 found and fixed three further real
+- A forensic re-audit of PRs #302-#309 found and fixed three further real
   defects surfaced by that work (#312).
 - Hardcoded English strings in `PostCard`, and Team Management/API Keys
   being unreachable from the Settings page's own index, were fixed

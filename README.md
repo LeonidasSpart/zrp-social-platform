@@ -127,7 +127,7 @@ watching video content.
 Dedicated discovery surfaces for trending hashtags, suggested people,
 trending content, search, explore feeds and hashtag feeds. Discovery reads
 real platform data; there is no seeded or placeholder catalogue. The "For
-You" feed and Trending also carry an opt-in country signal — see
+You" feed and Trending also carry an opt-in country signal: see
 [Geography, discovery and analytics](#geography-discovery-and-analytics).
 
 **ZRP Discover** (`/discover`, Web) is a separate, vertical swipeable
@@ -185,8 +185,8 @@ actions, and room discovery filtered to public rooms plus the caller's
 own community-visibility rooms. Audio transport runs over
 [LiveKit](https://livekit.io) (a self-hostable SFU): access tokens are
 minted server-side with role-scoped grants (a listener's token never
-carries publish rights), and every state transition — join, leave,
-promotion, moderation, room end — is authorized and re-derived from
+carries publish rights), and every state transition: join, leave,
+promotion, moderation, room end: is authorized and re-derived from
 Postgres on every request, never trusted from the client. A room ends
 through an explicit host/moderator action, a LiveKit webhook reporting
 the room emptied, or a cron sweep that reclaims an abandoned room after
@@ -199,7 +199,7 @@ credentials are not configured, rather than issuing a fake token.
 
 **Platform status**: implemented and reachable from the main navigation
 on **Web and PWA** (`/live-audio`, `/live-audio/[id]`). **Android and iOS
-currently expose no Live Audio client screens** — the backend/API
+currently expose no Live Audio client screens**: the backend/API
 contract exists and is what a native client would build against, but no
 native UI has shipped yet. See
 [`docs/live-audio-architecture.md`](docs/live-audio-architecture.md) for
@@ -325,10 +325,10 @@ off-platform.
 
 - **Country normalization.** A user's free-text country is normalized to
   a canonical ISO 3166-1 alpha-2 `countryCode` (exact, case/diacritic-
-  insensitive matching only — never a fuzzy guess), used consistently for
+  insensitive matching only: never a fuzzy guess), used consistently for
   ad targeting, feed ranking and "people near you".
 - **Signup geography and acquisition, tracked immutably.** At
-  registration, `signupCountryCode` (from a local, in-process IP lookup —
+  registration, `signupCountryCode` (from a local, in-process IP lookup:
   no raw IP is ever stored) and `signupSource` (`DIRECT` / `REFERRAL` /
   `CAMPAIGN`, computed from `ref`/`utm_*` parameters, never guessed as
   "organic") are set once and never rewritten by a later profile edit, so
@@ -336,18 +336,18 @@ off-platform.
   declared country.
 - **Feed geo-boost.** `GET /api/posts/explore` ("For You") applies a
   small multiplicative boost when the viewer and a post's author share a
-  known country — additive only, never a filter, and never applied to
+  known country: additive only, never a filter, and never applied to
   global Trending.
 - **Opt-in national trending.** `GET /api/posts/explore?scope=national`
   filters Trending to the viewer's own country, falling back to the
   global pool (with an honest `scopeFallback` flag) when too few national
   candidates exist, rather than presenting a thin result as complete.
   This is a real, tested API parameter with **no UI switch on any
-  platform yet** — the same honest scope boundary as the people/business
+  platform yet**: the same honest scope boundary as the people/business
   discovery endpoint below.
 - **People and businesses near you** (`GET /api/discover/people`,
   authenticated only): a working, tested backend endpoint filtered to the
-  viewer's own country. **It has no frontend UI yet on any platform** —
+  viewer's own country. **It has no frontend UI yet on any platform**:
   a deliberate scope boundary, not an oversight.
 - **Professional profile fields**: `headline`, `company`, `position` and
   `skills`, editable from Settings on Web, Android and iOS, alongside the
@@ -492,7 +492,7 @@ Redis-backed rate limiting · SSRF guard · Sentry
 
 ### Realtime audio
 
-LiveKit (`livekit-server-sdk`, `livekit-client`) — the SFU media transport
+LiveKit (`livekit-server-sdk`, `livekit-client`): the SFU media transport
 behind ZRP Live Audio (see [ZRP Live Audio](#zrp-live-audio)).
 
 ### Media
@@ -568,8 +568,8 @@ symptom (intermittent "timeout" errors when navigating between pages):
 - **Node HTTP keep-alive tuning.** `server.js` raises the raw HTTP
   server's `keepAliveTimeout`/`headersTimeout` (65s/66s) above Node's
   5-second default. Behind a reverse proxy whose own idle timeout is
-  longer than that — Railway's edge included, and a well-documented
-  failure class for Node behind any proxy — the origin could otherwise
+  longer than that: Railway's edge included, and a well-documented
+  failure class for Node behind any proxy: the origin could otherwise
   silently close a connection the proxy still considers reusable, and
   the next request sent down that stale socket would hang.
 - **Bounded PostgreSQL operations.** The Prisma `pg` driver adapter sets
@@ -587,7 +587,7 @@ symptom (intermittent "timeout" errors when navigating between pages):
   from boot cannot hang every caller application-wide.
 - **Explore request-path optimization.** `GET /api/posts/explore` now
   only performs its (real) country lookup when the request actually needs
-  it — national-scope Trending — skipping it entirely on a cache hit or
+  it: national-scope Trending: skipping it entirely on a cache hit or
   on global Trending, and runs the independent like/poll-vote lookups
   concurrently instead of sequentially.
 
@@ -664,7 +664,7 @@ include:
   client), `LIVEKIT_URL` (the LiveKit server's WebSocket URL, given to
   clients so they know where to connect; not secret), `LIVEKIT_WEBHOOK_API_KEY`
   / `LIVEKIT_WEBHOOK_API_SECRET` (optional; only needed if the LiveKit
-  webhook is signed with a different key/secret pair than the main one —
+  webhook is signed with a different key/secret pair than the main one:
   defaults to `LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET` when unset). Every
   Live Audio route fails closed with a `503` when these are unset rather
   than faking a token; see `docs/live-audio-architecture.md`.

@@ -436,8 +436,8 @@ export default function DiscoverSlide({
       {isActive && !locked && !playbackError && (
         <div className="absolute top-0 inset-x-0 h-0.5 bg-white/20" aria-hidden="true">
           <div
-            className="h-full bg-white transition-[width] duration-150 ease-linear"
-            style={{ width: `${Math.min(100, item.progressPct ?? 0)}%` }}
+            className="h-full w-full origin-left bg-white transition-transform duration-150 ease-linear"
+            style={{ transform: `scaleX(${Math.min(100, item.progressPct ?? 0) / 100})` }}
           />
         </div>
       )}

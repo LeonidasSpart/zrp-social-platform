@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   ShieldCheck,
   Clock,
@@ -11,21 +12,18 @@ import {
   Info,
   Scale,
 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from "recharts";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
 import { getDateLocale } from "@/lib/dateLocale";
+
+const TransparencyTrendChart = dynamic(
+  () => import("@/components/transparency/TransparencyCharts").then((m) => m.TransparencyTrendChart),
+  { ssr: false, loading: () => <div className="h-[280px]" aria-hidden="true" /> }
+);
+const TransparencyActionChart = dynamic(
+  () => import("@/components/transparency/TransparencyCharts").then((m) => m.TransparencyActionChart),
+  { ssr: false, loading: () => <div className="h-[220px]" aria-hidden="true" /> }
+);
 
 interface ModerationData {
   generatedAt: string;
@@ -187,17 +185,7 @@ export default function TransparencyPage() {
                 {t("transparency.trendHeading")}
               </h2>
               <div className="bg-white dark:bg-zrp-charcoal/50 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal p-4">
-                <ResponsiveContainer width="100%" height={280}>
-                  <LineChart data={seriesData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="received" stroke="#9CA3AF" name={t("transparency.reportsReceivedLegend")} />
-                    <Line type="monotone" dataKey="actioned" stroke="#FF2D2D" name={t("transparency.reportsActionedLegend")} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <TransparencyTrendChart seriesData={seriesData} t={t} />
               </div>
             </section>
 
@@ -254,21 +242,12 @@ export default function TransparencyPage() {
                   {t("transparency.actionHeading")}
                 </h2>
                 <div className="bg-white dark:bg-zrp-charcoal/50 rounded-xl border border-zrp-silver/30 dark:border-zrp-charcoal p-4">
-                  <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={data.byActionType} layout="vertical" margin={{ left: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" allowDecimals={false} domain={[0, maxActionCount]} />
-                      <YAxis
-                        type="category"
-                        dataKey="actionType"
-                        tick={{ fontSize: 11 }}
-                        width={100}
-                        tickFormatter={(v: string) => t(ACTION_KEYS[v])}
-                      />
-                      <Tooltip formatter={(value) => [value, t("transparency.actionHeading")]} labelFormatter={(v) => t(ACTION_KEYS[v as string])} />
-                      <Bar dataKey="count" fill="#FF2D2D" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <TransparencyActionChart
+                    byActionType={data.byActionType}
+                    maxActionCount={maxActionCount}
+                    actionKeys={ACTION_KEYS}
+                    t={t}
+                  />
                 </div>
               </div>
             </section>

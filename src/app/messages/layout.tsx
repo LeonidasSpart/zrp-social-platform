@@ -45,7 +45,7 @@ export default function MessagesLayout({ children }: { children: React.ReactNode
   return (
     <div className="flex w-full">
       {/* ─── Persistent conversation list (desktop only) ──────────── */}
-      <aside className="hidden lg:flex flex-col w-80 flex-shrink-0 h-screen sticky top-0 border-r border-gray-200 dark:border-gray-800 overflow-y-auto">
+      <aside className="hidden lg:flex flex-col w-80 flex-shrink-0 h-[100dvh] sticky top-0 border-r border-gray-200 dark:border-gray-800 overflow-y-auto">
         {/* h2, not h1: this aside is the persistent conversation list
             beside the page, and messages/page.tsx already provides the
             document's h1. At lg and above both were rendered and both

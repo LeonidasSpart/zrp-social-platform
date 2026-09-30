@@ -19,8 +19,8 @@ assumed.
 | # | Item | Status | Platforms |
 |---|------|--------|-----------|
 | 1 | Report-on-profile (bare account report) | **DONE** | Web, Android, iOS |
-| 2 | RightPanel 1024–1280px gap | **DONE / VERIFIED** | Web |
-| 3 | Tablet-tier responsive nav (md–lg rail) | **DONE / VERIFIED** (prior PR #315) | Web |
+| 2 | RightPanel 1024-1280px gap | **DONE / VERIFIED** | Web |
+| 3 | Tablet-tier responsive nav (md-lg rail) | **DONE / VERIFIED** (prior PR #315) | Web |
 | 4 | Team Management / API Keys discoverability | **DONE** (prior PR #313) | Web |
 | 5 | Android release candidate (versionCode 22 / 4.0.16, signed) | **UNCHANGED, per explicit instruction** | Android |
 | 6 | This audit report | **DONE** | N/A |
@@ -96,7 +96,7 @@ reported. `Report` had no field for a bare-account target.
 reason list: the same fixed English `Report.reason` values the site
 already stores verbatim are reused everywhere (web/Android/iOS).
 
-## 2. RightPanel 1024–1280px gap
+## 2. RightPanel 1024-1280px gap
 
 **Finding (original audit):** `Sidebar` became a full `w-64` rail at
 `lg` (1024px), but `RightPanel` stayed hidden until `xl` (1280px). In
@@ -125,7 +125,7 @@ a guess) and checked with headless Chromium at 768, 1023, 1024, 1100,
   edge exactly meets RightPanel's left edge, at every width from 1024
   up: no gap, no overlap.
 - At 1024px (the narrowest three-column width), the feed column gets
-  roughly 448–464px of usable width after padding, more generous than
+  roughly 448-464px of usable width after padding, more generous than
   the ~343px this same feed already has to support at a 375px phone
   width, so no clipping/squeezing risk.
 
@@ -139,7 +139,7 @@ utility classes compile to fixed CSS independent of the page's data,
 but this has not been checked in a real browser against a live login
 session or on a physical device.
 
-## 3–4. Prior work (already merged, unchanged by this pass)
+## 3-4. Prior work (already merged, unchanged by this pass)
 
 - **Tablet-tier responsive nav** (PR #315): `Sidebar` compact icon-only
   rail from `md` (768px), full labeled rail from `lg`; `BottomNav`/

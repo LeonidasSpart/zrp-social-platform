@@ -1571,7 +1571,7 @@
     <string name="ai_page_subtitle">Zeptej se na cokoli. Získej pomoc s příspěvky, zjisti víc o ZRP nebo si prostě popovídej.</string>
     <string name="ai_discover_entry">Objevit ZRP AI</string>
     <string name="settings_solana_wallet_title">Solana peněženka (pro přímé dary)</string>
-    <string name="settings_solana_wallet_desc">Přidej adresu své Solana peněženky a přijímej dary přímo od uživatelů. Uživatelé odešlou USDC přímo do této peněženky – neplatí se žádné poplatky platformě.</string>
+    <string name="settings_solana_wallet_desc">Přidej adresu své Solana peněženky a přijímej dary přímo od uživatelů. Uživatelé odešlou USDC přímo do této peněženky: neplatí se žádné poplatky platformě.</string>
     <string name="settings_wallet_address">Adresa peněženky</string>
     <string name="settings_wallet_address_placeholder">Adresa tvé Solana peněženky (např. 4zMMC...)</string>
     <string name="settings_wallet_address_note">Tato adresa bude zobrazena na tvém profilu pro přímé dary.</string>
@@ -1968,7 +1968,7 @@
     <string name="admin_analytics_total_comments">Celkem komentářů</string>
     <string name="admin_analytics_daily_activity">Denní aktivita</string>
     <string name="admin_analytics_no_daily">Za posledních 30 dní nebyla zaznamenána žádná aktivita.</string>
-    <string name="admin_analytics_daily_range">%1$s – %2$s</string>
+    <string name="admin_analytics_daily_range">%1$s: %2$s</string>
     <string name="admin_analytics_daily_peak">Vrchol: %1$s dne %2$s</string>
     <string name="admin_analytics_top_posts">Nejlepší příspěvky</string>
     <string name="admin_analytics_no_top_posts">Zatím žádné příspěvky.</string>
@@ -2466,7 +2466,7 @@
     <string name="admin_subscription_detail_not_yet">Zatím ne</string>
     <string name="admin_subscription_detail_yes">Ano</string>
     <string name="admin_subscription_detail_no">Ne</string>
-    <string name="admin_subscription_detail_no_subscription_record">Žádný záznam o předplatném – tento uživatel nikdy neměl placené oprávnění sledované tímto systémem.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Žádný záznam o předplatném: tento uživatel nikdy neměl placené oprávnění sledované tímto systémem.</string>
     <string name="admin_subscription_detail_admin_controls">Nástroje správce</string>
     <string name="admin_subscription_detail_plan_label">Tarif</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2476,7 +2476,7 @@
     <string name="admin_subscription_detail_interval_monthly">Měsíčně</string>
     <string name="admin_subscription_detail_interval_yearly">Ročně</string>
     <string name="admin_subscription_detail_grant_extend">Přidělit / prodloužit</string>
-    <string name="admin_subscription_detail_grant_extend_note">„Přidělit / prodloužit“ napodobuje skutečnou platbu: prodlouží stávající období uživatele, pokud je pro stejný tarif ještě aktivní, jinak zahájí nové období ode dneška. Žádné peníze se nepřevádějí – zaznamená se to jako admin_grant v historii plateb níže.</string>
+    <string name="admin_subscription_detail_grant_extend_note">„Přidělit / prodloužit“ napodobuje skutečnou platbu: prodlouží stávající období uživatele, pokud je pro stejný tarif ještě aktivní, jinak zahájí nové období ode dneška. Žádné peníze se nepřevádějí: zaznamená se to jako admin_grant v historii plateb níže.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Důvod zrušení (nepovinné):</string>
     <string name="admin_subscription_detail_cancel_remaining">Zrušit zbývající čas</string>
     <string name="admin_subscription_detail_restore">Obnovit</string>
