@@ -613,7 +613,14 @@ export default function SettingsPage() {
       </div>
 
       {message && (
-        <div className={`p-3 rounded-lg mb-4 ${
+        // role="alert" + aria-live: this block is injected after an
+        // avatar/profile/privacy/wallet update, so without them a
+        // screen-reader user got no announcement at all - the page
+        // simply appeared to do nothing.
+        <div
+          role="alert"
+          aria-live="polite"
+          className={`p-3 rounded-lg mb-4 ${
           message.type === "success"
             ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
             : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
@@ -718,10 +725,11 @@ export default function SettingsPage() {
                     <p className="text-gray-600 dark:text-gray-400">{currentEmail}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="settings-new-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t("settings.newEmail")}
                     </label>
                     <input
+                      id="settings-new-email"
                       type="email"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
@@ -741,7 +749,15 @@ export default function SettingsPage() {
                     autoComplete="current-password"
                   />
                   {emailMessage && (
-                    <p className={`text-sm ${emailMessage.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    // role="alert" + aria-live: this block is injected after a
+                    // failed/succeeded email change, so without them a
+                    // screen-reader user got no announcement at all - the form
+                    // simply appeared to do nothing.
+                    <p
+                      role="alert"
+                      aria-live="polite"
+                      className={`text-sm ${emailMessage.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                    >
                       {emailMessage.text}
                     </p>
                   )}
@@ -779,12 +795,13 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="settings-new-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t("settings.newUsername")}
                     </label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input
+                        id="settings-new-username"
                         type="text"
                         value={newUsername}
                         onChange={(e) => setNewUsername(e.target.value.toLowerCase())}
@@ -796,7 +813,11 @@ export default function SettingsPage() {
                       />
                     </div>
                     {usernameError && (
-                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">{usernameError}</p>
+                      // role="alert" + aria-live: this block is injected after a
+                      // failed username change, so without them a
+                      // screen-reader user got no announcement at all - the form
+                      // simply appeared to do nothing.
+                      <p role="alert" aria-live="polite" className="text-red-500 dark:text-red-400 text-sm mt-1">{usernameError}</p>
                     )}
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                       {t("settings.usernameHint")}
@@ -982,10 +1003,11 @@ export default function SettingsPage() {
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.profile")}</h2>
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="settings-display-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t("settings.displayName")}
                     </label>
                     <input
+                      id="settings-display-name"
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -995,10 +1017,11 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="settings-bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t("settings.bio")}
                     </label>
                     <textarea
+                      id="settings-bio"
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       rows={3}
@@ -1020,10 +1043,11 @@ export default function SettingsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label htmlFor="settings-country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {t("settings.country")}
                       </label>
                       <input
+                        id="settings-country"
                         type="text"
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
@@ -1035,12 +1059,13 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="settings-website" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t("settings.website")}
                     </label>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input
+                        id="settings-website"
                         type="url"
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
@@ -1060,10 +1085,11 @@ export default function SettingsPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="settings-headline" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t("settings.headline")}
                         </label>
                         <input
+                          id="settings-headline"
                           type="text"
                           value={headline}
                           onChange={(e) => setHeadline(e.target.value)}
@@ -1074,10 +1100,11 @@ export default function SettingsPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="settings-company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t("settings.company")}
                         </label>
                         <input
+                          id="settings-company"
                           type="text"
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
@@ -1088,10 +1115,11 @@ export default function SettingsPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="settings-position" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t("settings.position")}
                         </label>
                         <input
+                          id="settings-position"
                           type="text"
                           value={position}
                           onChange={(e) => setPosition(e.target.value)}
@@ -1102,10 +1130,11 @@ export default function SettingsPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="settings-skills" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t("settings.skills")}
                         </label>
                         <input
+                          id="settings-skills"
                           type="text"
                           value={skillsInput}
                           onChange={(e) => setSkillsInput(e.target.value)}
@@ -1170,7 +1199,11 @@ export default function SettingsPage() {
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t("settings.changePasswordTitle")}</h2>
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                   {passwordError && (
-                    <p className="text-red-500 dark:text-red-400 text-sm">{passwordError}</p>
+                    // role="alert" + aria-live: this block is injected after a
+                    // failed password change, so without them a
+                    // screen-reader user got no announcement at all - the form
+                    // simply appeared to do nothing.
+                    <p role="alert" aria-live="polite" className="text-red-500 dark:text-red-400 text-sm">{passwordError}</p>
                   )}
 
                   <PasswordInput
@@ -1463,12 +1496,13 @@ export default function SettingsPage() {
                 </p>
                 <form onSubmit={handleUpdateSolanaWallet} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="settings-wallet-address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {t("settings.walletAddress")}
                     </label>
                     <div className="relative">
                       <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input
+                        id="settings-wallet-address"
                         type="text"
                         value={solanaWallet}
                         onChange={(e) => setSolanaWallet(e.target.value)}

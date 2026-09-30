@@ -1960,7 +1960,7 @@
     <string name="admin_analytics_total_comments">Общо коментари</string>
     <string name="admin_analytics_daily_activity">Дневна активност</string>
     <string name="admin_analytics_no_daily">Няма записана активност през последните 30 дни.</string>
-    <string name="admin_analytics_daily_range">%1$s – %2$s</string>
+    <string name="admin_analytics_daily_range">%1$s: %2$s</string>
     <string name="admin_analytics_daily_peak">Пик: %1$s на %2$s</string>
     <string name="admin_analytics_top_posts">Топ публикации</string>
     <string name="admin_analytics_no_top_posts">Все още няма публикации.</string>
@@ -2456,7 +2456,7 @@
     <string name="admin_subscription_detail_not_yet">Още не</string>
     <string name="admin_subscription_detail_yes">Да</string>
     <string name="admin_subscription_detail_no">Не</string>
-    <string name="admin_subscription_detail_no_subscription_record">Няма запис за абонамент – този потребител никога не е имал платено право, проследено от тази система.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Няма запис за абонамент: този потребител никога не е имал платено право, проследено от тази система.</string>
     <string name="admin_subscription_detail_admin_controls">Администраторски контроли</string>
     <string name="admin_subscription_detail_plan_label">План</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2466,7 +2466,7 @@
     <string name="admin_subscription_detail_interval_monthly">Месечно</string>
     <string name="admin_subscription_detail_interval_yearly">Годишно</string>
     <string name="admin_subscription_detail_grant_extend">Предостави / удължи</string>
-    <string name="admin_subscription_detail_grant_extend_note">„Предостави / удължи“ повтаря реално плащане: удължава текущия период на потребителя, ако той е още активен за същия план, а в противен случай започва нов период от днес. Не се прехвърлят пари – записва се като admin_grant в историята на плащанията по-долу.</string>
+    <string name="admin_subscription_detail_grant_extend_note">„Предостави / удължи“ повтаря реално плащане: удължава текущия период на потребителя, ако той е още активен за същия план, а в противен случай започва нов период от днес. Не се прехвърлят пари: записва се като admin_grant в историята на плащанията по-долу.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Причина за отмяната (по избор):</string>
     <string name="admin_subscription_detail_cancel_remaining">Отмени оставащото време</string>
     <string name="admin_subscription_detail_restore">Възстанови</string>

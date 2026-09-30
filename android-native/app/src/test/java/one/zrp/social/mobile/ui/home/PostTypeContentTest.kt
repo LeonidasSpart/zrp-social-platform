@@ -28,8 +28,8 @@ class PostTypeContentTest {
     @Test
     fun `un-escapes the common HTML entities the rich-text editor emits`() {
         assertEquals(
-            "Terms & Conditions: <this> is a \"test\" — it's fine",
-            stripHtmlTags("Terms &amp; Conditions: &lt;this&gt; is a &quot;test&quot; — it&#39;s fine"),
+            "Terms & Conditions: <this> is a \"test\", it's fine",
+            stripHtmlTags("Terms &amp; Conditions: &lt;this&gt; is a &quot;test&quot;, it&#39;s fine"),
         )
     }
 

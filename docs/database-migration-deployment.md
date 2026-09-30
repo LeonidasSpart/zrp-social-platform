@@ -276,13 +276,13 @@ $ npx prisma validate
 The schema at prisma/schema.prisma is valid 🚀
 
 $ npx prisma migrate deploy         # fresh database
-Error: P3018 — relation "User" does not exist   (Section 3)
+Error: P3018: relation "User" does not exist   (Section 3)
 
 $ npx prisma db push --skip-generate   # simulate db-push-managed prod
 🚀  Your database is now in sync with your Prisma schema.
 
 $ npx prisma migrate deploy         # against the db-push-synced database
-Error: P3005 — the database schema is not empty   (Section 3)
+Error: P3005: the database schema is not empty   (Section 3)
 
 $ npx prisma migrate resolve --applied <each migration>
 Migration <name> marked as applied.   (one per migration)

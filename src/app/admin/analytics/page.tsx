@@ -1,27 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { Users, FileText, MessageCircle, Heart, Repeat, TrendingUp, Award, Globe, Smartphone, Languages } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
 import { getCountryName, flagEmoji } from "@/lib/ambassadors/countries";
 import type { AnalyticsRange } from "@/lib/date-range";
 import type { TranslationKey } from "@/lib/translations";
+
+const chartLoading = <div className="h-[250px]" aria-hidden="true" />;
+const DailyActivityChart = dynamic(
+  () => import("@/components/admin/AdminAnalyticsCharts").then((m) => m.DailyActivityChart),
+  { ssr: false, loading: () => chartLoading }
+);
+const UserGrowthChart = dynamic(
+  () => import("@/components/admin/AdminAnalyticsCharts").then((m) => m.UserGrowthChart),
+  { ssr: false, loading: () => chartLoading }
+);
+const EngagementPieChart = dynamic(
+  () => import("@/components/admin/AdminAnalyticsCharts").then((m) => m.EngagementPieChart),
+  { ssr: false, loading: () => chartLoading }
+);
+const CountryBarChart = dynamic(
+  () => import("@/components/admin/AdminAnalyticsCharts").then((m) => m.CountryBarChart),
+  { ssr: false, loading: () => <div className="h-[280px]" aria-hidden="true" /> }
+);
 
 interface AnalyticsData {
   range: AnalyticsRange;
@@ -242,32 +246,15 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{t("analytics.dailyActivity")}</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="posts" stroke="#FF2D2D" name={t("analytics.posts")} />
-              <Line type="monotone" dataKey="comments" stroke="#8B5CF6" name={t("analytics.comments")} />
-              <Line type="monotone" dataKey="likes" stroke="#EC4899" name={t("analytics.likes")} />
-            </LineChart>
-          </ResponsiveContainer>
+          <DailyActivityChart
+            chartData={chartData}
+            labels={{ posts: t("analytics.posts"), comments: t("analytics.comments"), likes: t("analytics.likes") }}
+          />
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{t("analytics.userGrowth")}</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="signups" fill="#FF2D2D" name={t("analytics.newUsers")} />
-            </BarChart>
-          </ResponsiveContainer>
+          <UserGrowthChart chartData={chartData} newUsersLabel={t("analytics.newUsers")} />
         </div>
       </div>
 
@@ -275,26 +262,7 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{t("analytics.engagementBreakdown")}</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+          <EngagementPieChart pieData={pieData} colors={COLORS} />
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
@@ -332,22 +300,13 @@ export default function AnalyticsPage() {
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
                 {t("analytics.usersByCountry")}
               </h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart
-                  data={geo.geography.byCountry.slice(0, 10).map((b) => ({
-                    label: countryBucketLabel(b.key, language),
-                    count: b.count,
-                  }))}
-                  layout="vertical"
-                  margin={{ left: 8 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" allowDecimals={false} />
-                  <YAxis type="category" dataKey="label" width={110} tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#FF2D2D" name={t("analytics.users")} />
-                </BarChart>
-              </ResponsiveContainer>
+              <CountryBarChart
+                data={geo.geography.byCountry.slice(0, 10).map((b) => ({
+                  label: countryBucketLabel(b.key, language),
+                  count: b.count,
+                }))}
+                usersLabel={t("analytics.users")}
+              />
               {geo.geography.unknownCountryCount > 0 && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   {t("analytics.unknownGeographyCount", { count: geo.geography.unknownCountryCount })}

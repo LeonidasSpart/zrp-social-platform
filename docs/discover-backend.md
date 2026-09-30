@@ -296,7 +296,7 @@ endpoint (`AdImpression`/`AdClick`'s dedup in
     `ip` column above and the anonymous branch in
     `DiscoverEventService.recordDiscoverEvent`: see
     `src/app/api/discover/events/__tests__/route.integration.test.ts`
-    tests 19c–19f for the regression coverage (anonymous spam from one
+    tests 19c-19f for the regression coverage (anonymous spam from one
     IP is deduped; two different anonymous IPs are each still counted;
     an authenticated viewer's dedup is unaffected by IP changes; `ip`
     is never persisted on a row that already has a `userId`).

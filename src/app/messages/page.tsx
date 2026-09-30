@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Loader2, MessageCircle, Users, UserPlus } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -337,7 +338,7 @@ export default function MessagesIndexPage() {
                   >
                     <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-zrp-red/10 overflow-hidden flex-shrink-0 flex items-center justify-center">
                       {conv.avatarUrl ? (
-                        <img src={conv.avatarUrl} alt={conv.name || ""} className="w-full h-full object-cover" loading="lazy" />
+                        <Image src={conv.avatarUrl} alt={conv.name || ""} fill sizes="52px" className="object-cover" />
                       ) : (
                         <Users className="w-6 h-6 text-zrp-red" />
                       )}

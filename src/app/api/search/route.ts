@@ -14,7 +14,7 @@ import { searchMusic } from "@/lib/search/categories/music";
 import { searchOpportunities } from "@/lib/search/categories/opportunities";
 import { searchMarketplace } from "@/lib/search/categories/marketplace";
 
-// ─── GET /api/search — Advanced Search ────────────────────────────────
+// --- GET /api/search: Advanced Search -----------------------------------
 // See docs/advanced-search-architecture.md for the full contract.
 //
 // ?q=<query>                          required, min 2 chars

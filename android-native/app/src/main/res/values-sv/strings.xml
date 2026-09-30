@@ -837,7 +837,7 @@
     <string name="music_shell_studio_label">Musikstudio</string>
     <string name="music_shell_studio_eyebrow">Verktyg för skapare</string>
     <string name="music_shell_studio_description">Publicera din musik direkt på ZRP.</string>
-    <string name="music_shell_gate_title">Music Studio – artist- eller skaparstatus krävs</string>
+    <string name="music_shell_gate_title">Music Studio: artist- eller skaparstatus krävs</string>
     <string name="music_shell_gate_body">Att lyssna på ZRP Music är öppet för alla. Att publicera musik kräver en godkänd skaparstatus eller en verifierad musikartistprofil.</string>
     <string name="music_shell_pending_verification">Din artistprofil har skickats in och väntar på verifiering från ZRP:s personal.</string>
     <string name="music_shell_apply_intro_prefix">Skapa en artistprofil för att ansöka om verifiering som musikartist, eller</string>
@@ -864,9 +864,9 @@
     <string name="music_shell_publishing">Publicerar...</string>
     <string name="music_shell_upload_hint">Ljud och omslagsbild laddas upp direkt till din befintliga ZRP-lagring.</string>
     <string name="music_shell_publish_failed_default">Publiceringen misslyckades. Försök igen.</string>
-    <string name="music_shell_empty_file_error">"%1$s" kunde inte läsas – den kan fortfarande laddas ner från iCloud eller din molnlagringsleverantör. Vänta tills nedladdningen är klar och försök igen.</string>
+    <string name="music_shell_empty_file_error">"%1$s" kunde inte läsas: den kan fortfarande laddas ner från iCloud eller din molnlagringsleverantör. Vänta tills nedladdningen är klar och försök igen.</string>
     <string name="music_studio_delete_track_title">Ta bort låt</string>
-    <string name="music_studio_delete_track_body">Ta bort "%1$s"? Detta kan inte ångras – låten, dess spelningar och gillamarkeringar tas bort permanent.</string>
+    <string name="music_studio_delete_track_body">Ta bort "%1$s"? Detta kan inte ångras: låten, dess spelningar och gillamarkeringar tas bort permanent.</string>
     <string name="music_studio_cancel">Avbryt</string>
     <string name="music_studio_deleting">Tar bort...</string>
     <string name="music_studio_delete_confirm">Ta bort</string>
@@ -899,7 +899,7 @@
     <string name="music_studio_remove_from_album">Ta bort från album</string>
     <string name="music_studio_add_existing_tracks">Lägg till befintliga låtar</string>
     <string name="music_studio_delete_album_title">Ta bort album</string>
-    <string name="music_studio_delete_album_body">Ta bort "%1$s"? Dess låtar tas INTE bort – de förblir publicerade och blir bara ofördelade från det här albumet.</string>
+    <string name="music_studio_delete_album_body">Ta bort "%1$s"? Dess låtar tas INTE bort: de förblir publicerade och blir bara ofördelade från det här albumet.</string>
     <string name="music_studio_album_created_msg">Albumet har skapats.</string>
     <string name="music_studio_album_updated_msg">Albumet har uppdaterats.</string>
     <string name="music_studio_album_deleted_msg">Albumet har tagits bort. Dina låtar behölls och är fortfarande tillgängliga.</string>
@@ -915,7 +915,7 @@
     <string name="marketplace_category_watches_jewelry">Klockor och smycken</string>
     <string name="marketplace_category_other_luxury">Andra lyxtillgångar</string>
     <string name="marketplace_hero_title">ZRP Market Plus</string>
-    <string name="marketplace_hero_subtitle">Lyxmarknadsplatsen för verifierade ZRP-medlemmar – exklusiva bilar, yachter, privatjet, fastigheter med mera.</string>
+    <string name="marketplace_hero_subtitle">Lyxmarknadsplatsen för verifierade ZRP-medlemmar: exklusiva bilar, yachter, privatjet, fastigheter med mera.</string>
     <string name="marketplace_search_placeholder">Sök annonser...</string>
     <string name="marketplace_search">Sök</string>
     <string name="marketplace_browse_categories">Bläddra bland kategorier</string>
@@ -1003,7 +1003,7 @@
     <string name="opportunity_back_to_opportunity">Tillbaka till OPPORTUNITY</string>
     <string name="opportunity_close">Stäng</string>
     <string name="opportunity_compensation_label">Ersättning</string>
-    <string name="opportunity_compensation_placeholder">t.ex. 500–700 tkr/år, oavlönad – studiepoäng</string>
+    <string name="opportunity_compensation_placeholder">t.ex. 500-700 tkr/år, oavlönad: studiepoäng</string>
     <string name="opportunity_cover_note_label">Personligt brev (valfritt)</string>
     <string name="opportunity_cover_note_placeholder">Berätta varför du passar perfekt...</string>
     <string name="opportunity_create_subtitle">Publicera ett jobb, en praktikplats, ett stipendium, mentorskap eller samarbete för ZRP-communityn.</string>
@@ -1019,7 +1019,7 @@
     <string name="opportunity_external_url_hint">Om angiven skickas sökande till den här länken i stället för att ansöka på ZRP.</string>
     <string name="opportunity_external_url_label">Extern ansökningslänk (valfritt)</string>
     <string name="opportunity_external_url_placeholder">https://...</string>
-    <string name="opportunity_hero_subtitle">Jobb, distansarbete, praktikplatser, stipendier, mentorskap, frilansprojekt och samarbete – drivet av ZRP-communityn.</string>
+    <string name="opportunity_hero_subtitle">Jobb, distansarbete, praktikplatser, stipendier, mentorskap, frilansprojekt och samarbete: drivet av ZRP-communityn.</string>
     <string name="opportunity_hero_title">ZRP OPPORTUNITY</string>
     <string name="opportunity_is_paid">Det här är avlönat</string>
     <string name="opportunity_location_label">Plats (valfritt)</string>
@@ -1149,7 +1149,7 @@
     <string name="aid_status_rejected">Avvisad</string>
     <string name="aid_status_removed">Borttagen</string>
     <string name="aid_title_label">Titel</string>
-    <string name="aid_withdrawal_requested">Uttag begärt. Det behandlas inom 24–48 timmar.</string>
+    <string name="aid_withdrawal_requested">Uttag begärt. Det behandlas inom 24-48 timmar.</string>
     <string name="play_discover_entry">Utforska ZRP PLAY</string>
     <string name="play_accept">Acceptera</string>
     <string name="play_accepted">Accepterad</string>
@@ -1160,7 +1160,7 @@
     <string name="play_add_option">Lägg till alternativ</string>
     <string name="play_add_pair">Lägg till par</string>
     <string name="play_add_question">Lägg till fråga</string>
-    <string name="play_ai_generated_note">AI-genererat – granska innan publicering.</string>
+    <string name="play_ai_generated_note">AI-genererat: granska innan publicering.</string>
     <string name="play_ai_tab">Generera med AI</string>
     <string name="play_ai_topic_label">Ämne</string>
     <string name="play_ai_topic_placeholder">t.ex. 80-talsfilmer, huvudstäder, rymdfakta</string>
@@ -1200,7 +1200,7 @@
     <string name="play_finish">Avsluta</string>
     <string name="play_generate">Generera</string>
     <string name="play_generating">Genererar...</string>
-    <string name="play_hero_subtitle">Snabba spel, dueller och dagliga utmaningar – drivet av ZRP-communityn.</string>
+    <string name="play_hero_subtitle">Snabba spel, dueller och dagliga utmaningar: drivet av ZRP-communityn.</string>
     <string name="play_hero_title">ZRP PLAY</string>
     <string name="play_incoming_duels">Inkommande utmaningar</string>
     <string name="play_leaderboard">Topplista</string>
@@ -1336,7 +1336,7 @@
     <string name="shorts_upload_err_generic">Något gick fel vid uppladdningen. Kontrollera din anslutning och försök igen.</string>
     <string name="shorts_upload_err_upload_failed_detailed">Uppladdningen slutfördes inte, troligen på grund av ett anslutningsproblem eller att filen är för stor för din plan. Kontrollera din anslutning och försök igen.</string>
     <string name="shorts_upload_err_too_large_plan">Den här videon är för stor för din plan. Prova en mindre fil eller uppgradera din plan.</string>
-    <string name="shorts_upload_err_url_gen_failed">Det gick inte att starta uppladdningen – det här beror vanligtvis på ett tillfälligt anslutningsproblem. Försök igen.</string>
+    <string name="shorts_upload_err_url_gen_failed">Det gick inte att starta uppladdningen: det här beror vanligtvis på ett tillfälligt anslutningsproblem. Försök igen.</string>
     <string name="shorts_upload_err_internal_server">Något gick fel på vår sida under uppladdningen. Försök igen om en liten stund.</string>
     <string name="shorts_premium_locked_title">Premiumvideo</string>
     <string name="shorts_premium_locked_body">Lås upp den här videon för %1$s %2$s</string>
@@ -1381,7 +1381,7 @@
     <string name="creator_tips_label">Dricks</string>
     <string name="creator_withdraw_button">Ta ut</string>
     <string name="creator_withdraw_funds_title">Ta ut medel</string>
-    <string name="creator_withdrawals_processed_hint">Uttag behandlas inom 24–48 timmar.</string>
+    <string name="creator_withdrawals_processed_hint">Uttag behandlas inom 24-48 timmar.</string>
     <string name="creator_content_comments">Kommentarer</string>
     <string name="creator_content_engagement_subtitle">Gillamarkeringar, kommentarer och reposter för alla dina inlägg.</string>
     <string name="creator_content_engagement_title">Engagemang, senaste 30 dagarna</string>
@@ -1402,7 +1402,7 @@
     <string name="trust_account_age_label">Kontots ålder:</string>
     <string name="trust_account_history_title">Kontohistorik</string>
     <string name="trust_additional_signals_heading">Ytterligare signaler</string>
-    <string name="trust_additional_signals_note">De här påverkar inte poängen ovan – de visas separat som extra sammanhang.</string>
+    <string name="trust_additional_signals_note">De här påverkar inte poängen ovan: de visas separat som extra sammanhang.</string>
     <string name="trust_back_to_profile">Tillbaka till profilen</string>
     <string name="trust_back_to_username">Tillbaka till @%1$s</string>
     <string name="trust_category_community">Community</string>
@@ -1584,7 +1584,7 @@
     <string name="support_category_security">Säkerhet</string>
     <string name="support_err_create_failed">Det gick inte att skapa ärendet</string>
     <string name="support_footer_note_link">Mina ärenden</string>
-    <string name="support_footer_note_p1">Ditt ärende granskas inom 24–48 timmar. Du kan följa dess status på sidan</string>
+    <string name="support_footer_note_p1">Ditt ärende granskas inom 24-48 timmar. Du kan följa dess status på sidan</string>
     <string name="support_footer_note_p2">.</string>
     <string name="support_loading">Läser in...</string>
     <string name="support_message_label">Meddelande</string>
@@ -1901,7 +1901,7 @@
     <string name="transparency_status_heading">Anmälningsstatus</string>
     <string name="transparency_action_heading">Vidtagna åtgärder</string>
     <string name="transparency_appeals_heading">Modereringsöverklaganden</string>
-    <string name="transparency_appeals_note">När en användare inte håller med om ett modereringsbeslut kan de överklaga det. Detta är de aggregerade utfallen – aldrig vem som överklagade eller vad som sades.</string>
+    <string name="transparency_appeals_note">När en användare inte håller med om ett modereringsbeslut kan de överklaga det. Detta är de aggregerade utfallen: aldrig vem som överklagade eller vad som sades.</string>
     <string name="transparency_generated_note">Data genererad %1$s. Uppdateras varje timme.</string>
     <string name="charity_committed_label">Avsatt till välgörenhet</string>
     <string name="charity_committed_note">Beräknas automatiskt från slutförd dricks och köp av premiuminnehåll: 35 % av ZRP:s plattformsavgift på vardera.</string>
@@ -1960,7 +1960,7 @@
     <string name="admin_analytics_total_comments">Totalt antal kommentarer</string>
     <string name="admin_analytics_daily_activity">Daglig aktivitet</string>
     <string name="admin_analytics_no_daily">Ingen aktivitet registrerad de senaste 30 dagarna.</string>
-    <string name="admin_analytics_daily_range">%1$s – %2$s</string>
+    <string name="admin_analytics_daily_range">%1$s: %2$s</string>
     <string name="admin_analytics_daily_peak">Toppnivå: %1$s den %2$s</string>
     <string name="admin_analytics_top_posts">Populäraste inläggen</string>
     <string name="admin_analytics_no_top_posts">Inga inlägg än.</string>
@@ -1982,7 +1982,7 @@
     <string name="admin_audit_target">Mål: %1$s %2$s</string>
     <string name="admin_audit_metadata">Detaljer: %1$s</string>
     <string name="admin_storage_title">Lagringsrensning</string>
-    <string name="admin_storage_subtitle">Hittar filer som fortfarande ligger kvar i UploadThing som inget i databasen längre pekar på, och låter dig ta bort dem. Skanning ändrar aldrig något – den bara rapporterar.</string>
+    <string name="admin_storage_subtitle">Hittar filer som fortfarande ligger kvar i UploadThing som inget i databasen längre pekar på, och låter dig ta bort dem. Skanning ändrar aldrig något: den bara rapporterar.</string>
     <string name="admin_storage_scan_button">Skanna efter herrelösa filer</string>
     <string name="admin_storage_scanning">Skannar…</string>
     <string name="admin_storage_delete_button">Ta bort %1$s herrelösa fil(er)</string>
@@ -1995,8 +1995,8 @@
     <string name="admin_storage_stat_orphaned_size">Storlek herrelösa</string>
     <string name="admin_storage_stat_held_for_review_summary">Hålls kvar för granskning: %1$s (%2$s MB)</string>
     <string name="admin_storage_held_for_review_hint">%1$s nyligen uppladdad(e) fil(er) är orefererade men hålls kvar från borttagning i 24 timmar ifall de fortfarande håller på att kopplas till en ny post.</string>
-    <string name="admin_storage_nothing_orphaned">Inget herrelöst – UploadThing-lagringen matchar databasen.</string>
-    <string name="admin_storage_showing_sample">Visar %1$s av %2$s – borttagning tar bort alla, inte bara de som listas här.</string>
+    <string name="admin_storage_nothing_orphaned">Inget herrelöst: UploadThing-lagringen matchar databasen.</string>
+    <string name="admin_storage_showing_sample">Visar %1$s av %2$s: borttagning tar bort alla, inte bara de som listas här.</string>
     <string name="admin_charity_title">Välgörenhetsutbetalningar</string>
     <string name="admin_charity_subtitle">Verkliga välgörenhetsutbetalningar ZRP har gjort. Varje post här visas också i den offentliga välgörenhetsjournalen.</string>
     <string name="admin_charity_saved">Utbetalningen har registrerats.</string>
@@ -2104,7 +2104,7 @@
     <string name="admin_news_network_no_stories">Inga nyheter i den här kön.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · poäng %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d källor</string>
-    <string name="admin_news_network_flag_sensitive">Känsligt – mänsklig granskning krävs</string>
+    <string name="admin_news_network_flag_sensitive">Känsligt: mänsklig granskning krävs</string>
     <string name="admin_news_network_flag_breaking">Nyhetsflash</string>
     <string name="admin_news_network_flag_travel">Resor</string>
     <string name="admin_news_network_reject">Avvisa</string>
@@ -2180,7 +2180,7 @@
     <string name="ambassadors_hero_title1">BYGG DIN COMMUNITY.</string>
     <string name="ambassadors_hero_title2">REPRESENTERA DITT LAND.</string>
     <string name="ambassadors_hero_title3">KOPPLA IHOP VÄRLDEN.</string>
-    <string name="ambassadors_hero_subtitle">ZRP:s globala ambassadörer leder communityn i sina respektive länder – riktiga människor, riktiga communities, en växande rörelse.</string>
+    <string name="ambassadors_hero_subtitle">ZRP:s globala ambassadörer leder communityn i sina respektive länder: riktiga människor, riktiga communities, en växande rörelse.</string>
     <string name="ambassadors_hero_cta_primary">Bli en ZRP-ambassadör</string>
     <string name="ambassadors_hero_cta_secondary">Utforska världen</string>
     <string name="ambassadors_hero_stat_ambassadors">Ambassadörer</string>
@@ -2207,7 +2207,7 @@
     <string name="ambassadors_levels_title">Din väg till global påverkan</string>
     <string name="ambassadors_levels_subtitle">Progression sker genom verklig communityaktivitet, inte genom att bara registrera sig.</string>
     <string name="ambassadors_level_explorer">Utforskare</string>
-    <string name="ambassadors_level_explorer_desc">Varje ambassadör börjar här – genom att upptäcka ZRP och communityn kring det.</string>
+    <string name="ambassadors_level_explorer_desc">Varje ambassadör börjar här: genom att upptäcka ZRP och communityn kring det.</string>
     <string name="ambassadors_level_ambassador">Ambassadör</string>
     <string name="ambassadors_level_ambassador_desc">Godkänd att representera ditt land och öka ZRP:s närvaro där.</string>
     <string name="ambassadors_level_community_leader">Communityledare</string>
@@ -2238,7 +2238,7 @@
     <string name="ambassadors_apply_err_motivation_required">Berätta varför du vill bli en ZRP-ambassadör.</string>
     <string name="ambassadors_apply_err_generic">Något gick fel. Försök igen.</string>
     <string name="ambassadors_apply_success_title">Ansökan skickad</string>
-    <string name="ambassadors_apply_success_body">Tack! Din ansökan väntar på granskning. Vi hör av oss så snart vårt team har fattat ett beslut – du är ännu inte en officiell ambassadör.</string>
+    <string name="ambassadors_apply_success_body">Tack! Din ansökan väntar på granskning. Vi hör av oss så snart vårt team har fattat ett beslut: du är ännu inte en officiell ambassadör.</string>
     <string name="ambassadors_dashboard_title">Ambassadöröversikt</string>
     <string name="ambassadors_dashboard_not_applied_title">Du är inte ZRP-ambassadör ännu</string>
     <string name="ambassadors_dashboard_err_load">Det gick inte att läsa in din ambassadörsstatus</string>
@@ -2456,7 +2456,7 @@
     <string name="admin_subscription_detail_not_yet">Inte än</string>
     <string name="admin_subscription_detail_yes">Ja</string>
     <string name="admin_subscription_detail_no">Nej</string>
-    <string name="admin_subscription_detail_no_subscription_record">Ingen prenumerationspost – den här användaren har aldrig haft en betald behörighet som spårats av det här systemet.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Ingen prenumerationspost: den här användaren har aldrig haft en betald behörighet som spårats av det här systemet.</string>
     <string name="admin_subscription_detail_admin_controls">Adminkontroller</string>
     <string name="admin_subscription_detail_plan_label">Plan</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2466,7 +2466,7 @@
     <string name="admin_subscription_detail_interval_monthly">Månadsvis</string>
     <string name="admin_subscription_detail_interval_yearly">Årsvis</string>
     <string name="admin_subscription_detail_grant_extend">Tilldela / förläng</string>
-    <string name="admin_subscription_detail_grant_extend_note">”Tilldela / förläng” speglar en riktig betalning: den förlänger användarens befintliga period om en fortfarande är aktiv för samma plan, annars startar den en ny period från i dag. Inga pengar flyttas – det registreras som admin_grant i betalningshistoriken nedan.</string>
+    <string name="admin_subscription_detail_grant_extend_note">”Tilldela / förläng” speglar en riktig betalning: den förlänger användarens befintliga period om en fortfarande är aktiv för samma plan, annars startar den en ny period från i dag. Inga pengar flyttas: det registreras som admin_grant i betalningshistoriken nedan.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Orsak till uppsägning (valfritt):</string>
     <string name="admin_subscription_detail_cancel_remaining">Säg upp återstående tid</string>
     <string name="admin_subscription_detail_restore">Återställ</string>
@@ -2503,7 +2503,7 @@
     <string name="post_show_original">Visa original</string>
     <string name="post_translation_unavailable">Översättning inte tillgänglig just nu.</string>
     <string name="auth_username_taken">Det användarnamnet är upptaget.</string>
-    <string name="auth_username_format_hint">3–20 tecken, endast bokstäver/siffror/understreck</string>
+    <string name="auth_username_format_hint">3-20 tecken, endast bokstäver/siffror/understreck</string>
     <string name="quote_post_title">Citera inlägg</string>
 
     <!-- Repost feedback, image viewer, appearance, persistent music player (front-end fix mission) -->

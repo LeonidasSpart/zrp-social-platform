@@ -1,4 +1,4 @@
-# ZRP Live Audio — Architecture
+# ZRP Live Audio: Architecture
 
 Status: backend MVP implemented (domain model, authorization, realtime
 signaling, moderation, notifications, discovery, cleanup, LiveKit
@@ -26,8 +26,8 @@ Live Audio reuses from this:
   DB-backed authorization check before every relay/action, an ephemeral
   Redis-backed registry with TTL + generation tokens for race-safety
   (`createCallRegistry` is the direct template for the join/leave
-  bookkeeping shape, even though the actual mechanism differs — see §3).
-- `emitToUser()` (`src/lib/socket-emit.ts`) — the existing bridge that
+  bookkeeping shape, even though the actual mechanism differs: see §3).
+- `emitToUser()` (`src/lib/socket-emit.ts`): the existing bridge that
   lets a plain Next.js API route push a realtime event to a user's
   Socket.IO room via `globalThis.__zrpIO`. Live Audio's room-state pushes
   (someone joined, was promoted, was muted, room ended) go through this
@@ -35,22 +35,22 @@ Live Audio reuses from this:
   parallel signaling channel.
 - `/api/turn-credentials`'s pattern (session-gated, dual IP+user rate
   limit, provider credentials never reach the client bundle,
-  environment-variable-gated with a safe fallback) — mirrored by the new
+  environment-variable-gated with a safe fallback): mirrored by the new
   LiveKit token-minting route.
 - Auth: `requireActiveUser()`/`requireAdmin()`/`requireModerator()`
   (`src/lib/auth-guards.ts`), which always re-read role/ban state fresh
   from Postgres rather than trusting a JWT snapshot.
 - Rate limiting: `rateLimit()`/`checkRateLimitKey()`
-  (`src/lib/rate-limit.ts`) — no second rate-limit system.
+  (`src/lib/rate-limit.ts`): no second rate-limit system.
 - Moderation: `isBlockedEitherWay()`, the `Report`/`Appeal` polymorphic
   moderation system (Live Audio rooms become the Report model's 8th
   optional target, exactly like `listingId`/`challengeId`/etc. before
-  it — no parallel reporting system).
-- Notifications: `createNotification()` (`src/lib/notifications.ts`) —
+  it: no parallel reporting system).
+- Notifications: `createNotification()` (`src/lib/notifications.ts`):
   new `live_audio_*` type strings added to the existing union, same
   copy-table pattern every other vertical (`opportunity_*`,
   `help_campaign_*`) already follows.
-- Communities: `CommunityMember` — a room's optional `communityId` is
+- Communities: `CommunityMember`: a room's optional `communityId` is
   checked against this exact table (`communityId_userId` unique lookup),
   no second membership system.
 - Cron: the existing `/api/cron/*` + `isAuthorizedCronRequest()`
@@ -65,10 +65,10 @@ transport itself (§2) and the domain model it's built on (§4).
 ## 2. Media architecture: why an SFU, and why LiveKit
 
 **Mesh WebRTC (what calls use) does not fit Live Audio.** A mesh needs
-`n·(n-1)/2` peer connections for `n` participants — it stops being
+`n·(n-1)/2` peer connections for `n` participants: it stops being
 viable well before "dozens" of listeners, let alone the "hundreds/
 thousands" this feature must support. It also does nothing to solve the
-concrete problem that **iOS has zero WebRTC infrastructure today** — an
+concrete problem that **iOS has zero WebRTC infrastructure today**: an
 audio room built on raw mesh WebRTC would mean hand-rolling WebRTC on
 iOS from scratch, on top of also hand-rolling multi-party SFU-like
 fan-out logic that doesn't actually exist anywhere in this codebase.
@@ -83,7 +83,7 @@ handling is the SFU vendor's problem, not ours to re-invent per platform.
 **Choice: LiveKit**, specifically because:
 
 - **Self-hostable AND cloud-hosted from the same open-source server**
-  (Apache 2.0) — the app-facing contract (access tokens, room API,
+  (Apache 2.0): the app-facing contract (access tokens, room API,
   webhooks) is identical either way, so starting self-hosted and moving
   to LiveKit Cloud later (or vice versa) is a `LIVEKIT_URL` change, not a
   rewrite. This directly satisfies the mission's "document vendor
@@ -92,16 +92,16 @@ handling is the SFU vendor's problem, not ours to re-invent per platform.
 - **Ships real client SDKs for Web, Android (Kotlin), and iOS (Swift)**
   that wrap WebRTC internally. This is the concrete way iOS gains real
   audio capability for the first time, without ZRP hand-building a
-  WebRTC stack there — the SDK is the WebRTC stack.
+  WebRTC stack there: the SDK is the WebRTC stack.
 - **Server-side token minting is a pure local operation.** LiveKit access
   tokens are self-signed JWTs, generated with `livekit-server-sdk` from
-  `LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET` alone — no network call to
+  `LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET` alone: no network call to
   LiveKit is needed to mint one. That means the authorization-critical
   part ("is this user actually allowed to publish audio in this room, at
   this role") is real, fully testable, production code, independent of
   whether a LiveKit server is reachable. See `src/lib/live-audio/livekit.ts`.
   The token encodes the *grants* (`roomJoin`, `canPublish`,
-  `canSubscribe`, `canPublishData`) our backend decided — LiveKit's
+  `canSubscribe`, `canPublishData`) our backend decided: LiveKit's
   server enforces them; a listener's token simply never carries
   `canPublish: true`, so no amount of client tampering lets them publish
   (§7, §8).
@@ -111,7 +111,7 @@ handling is the SFU vendor's problem, not ours to re-invent per platform.
   disappeared) actually correct rather than a heuristic.
 
 **Cost/security implications, stated plainly:** running LiveKit (self-
-hosted or Cloud) is a real, metered dependency — it is not free compute,
+hosted or Cloud) is a real, metered dependency: it is not free compute,
 and Cloud LiveKit bills by connection-minutes. `LIVEKIT_API_SECRET` is a
 credential capable of minting a token for *any* room; it must never reach
 a client, exactly like `NEXTAUTH_SECRET`/`METERED_API_KEY` today. This is
@@ -126,23 +126,23 @@ INFRASTRUCTURE breakdown.
 
 ## 3. Redis vs. Postgres split
 
-Unlike a 1:1 call (which has no durable identity worth persisting —
+Unlike a 1:1 call (which has no durable identity worth persisting:
 `createCallRegistry` has no Postgres backing at all), a Live Audio room
 is a real, discoverable, reportable, statistics-bearing object. So the
 split here is different from the call registry's "Redis only":
 
 - **Postgres is authoritative** for room existence, membership, role,
-  moderation actions, and final statistics — anything that must survive
+  moderation actions, and final statistics: anything that must survive
   a restart, be queried/joined, support the Report/Appeal moderation
   flow, or be analyzed later. See §4.
 - **Redis is used for exactly one purpose**: rate limiting room
   creation / speaker requests / join attempts (existing `rateLimit()`/
-  `checkRateLimitKey()` — no new mechanism). There is deliberately no
+  `checkRateLimitKey()`: no new mechanism). There is deliberately no
   separate Redis "room is still alive" heartbeat key: because the host
   is always seeded as an active `LiveAudioParticipant` row in the same
   transaction that creates the room, "does this LIVE room have zero
   active (non-`leftAt`) participants" is a self-contained Postgres fact
-  that needs no additional ephemeral state to compute — see §5.
+  that needs no additional ephemeral state to compute: see §5.
 
 There is deliberately **no** Redis-based "current listener count" cache
 the way `/api/posts/explore` caches ranked feeds: room membership is
@@ -164,7 +164,7 @@ LiveAudioRoom
   visibility: PUBLIC | COMMUNITY | PRIVATE
   scheduledAt?, startedAt?, endedAt?
   peakListenerCount, peakSpeakerCount, totalUniqueParticipants (final stats,
-    finalized at ENDED — no separate 1:1 "statistics" table: a handful of
+    finalized at ENDED: no separate 1:1 "statistics" table: a handful of
     denormalized counters on the room row itself is simpler than a joined
     table for data this small, and it's exactly one row to write once at
     end-of-room, not a running aggregate write on every event)
@@ -191,7 +191,7 @@ LiveAudioModerationAction
 `@@unique`, and hand-editing a partial-unique index into the generated
 migration SQL would silently drift from `schema.prisma` on the next
 `migrate dev`. The simpler, drift-proof design used here: **one row per
-`(roomId, userId)` for the lifetime of the room**, mutated in place —
+`(roomId, userId)` for the lifetime of the room**, mutated in place:
 joining is an upsert (`leftAt: null`, fresh `joinedAt` if rejoining),
 leaving sets `leftAt`, removal sets `removedAt`. "Currently active" is
 just `leftAt IS NULL AND removedAt IS NULL`. This also directly satisfies
@@ -204,23 +204,23 @@ updates the existing row back to `PENDING` rather than accumulating
 request spam.
 
 **Indexes**, and why each one exists:
-- `LiveAudioRoom(status)` — the cleanup cron's exact query shape
+- `LiveAudioRoom(status)`: the cleanup cron's exact query shape
   (`WHERE status = 'LIVE'`).
-- `LiveAudioRoom(visibility, status)` — the discovery list's exact query
+- `LiveAudioRoom(visibility, status)`: the discovery list's exact query
   shape (`WHERE visibility = 'PUBLIC' AND status = 'LIVE'`).
-- `LiveAudioRoom(communityId)` — a community's "live now" surface.
-- `LiveAudioRoom(hostId)` — "my rooms" / abuse investigation.
-- `LiveAudioParticipant(roomId, role)` — "who are the current speakers/
+- `LiveAudioRoom(communityId)`: a community's "live now" surface.
+- `LiveAudioRoom(hostId)`: "my rooms" / abuse investigation.
+- `LiveAudioParticipant(roomId, role)`: "who are the current speakers/
   moderators in this room" (promote/demote/mute/remove all need this).
-- `LiveAudioParticipant(userId)` — "which rooms is this user in" (used
+- `LiveAudioParticipant(userId)`: "which rooms is this user in" (used
   by the banned-user-mid-session check, §7).
-- `LiveAudioSpeakerRequest(roomId, status)` — "pending requests for this
+- `LiveAudioSpeakerRequest(roomId, status)`: "pending requests for this
   room," the host/moderator queue view.
-- `LiveAudioModerationAction(roomId)`, `(targetUserId)` — room audit
+- `LiveAudioModerationAction(roomId)`, `(targetUserId)`: room audit
   trail, and "has this user been actioned before" lookups.
 
 **State transitions are validated exclusively server-side** in
-`src/lib/live-audio/room-service.ts` — every transition function takes
+`src/lib/live-audio/room-service.ts`: every transition function takes
 the *authenticated userId*, re-reads the room/participant rows fresh,
 and re-derives the caller's role from Postgres. No transition ever
 trusts a client-supplied role, roomId-implies-membership assumption, or
@@ -238,10 +238,10 @@ LIVE -> ENDED (cron: heartbeat TTL expired with no webhook ever arriving)
 
 Three independent mechanisms end a room, so no single point of failure
 leaves one stuck LIVE forever:
-1. **Explicit end** — `POST /rooms/[id]/end`, authorized to host/
+1. **Explicit end**: `POST /rooms/[id]/end`, authorized to host/
    moderator.
 2. **LiveKit webhook** (`POST /api/live-audio/webhooks/livekit`, signature-verified
-   via `livekit-server-sdk`'s `WebhookReceiver`) — `room_finished` (the
+   via `livekit-server-sdk`'s `WebhookReceiver`): `room_finished` (the
    SFU's own room emptied and closed) transitions our row to `ENDED`;
    `participant_left` marks the corresponding `LiveAudioParticipant.leftAt`
    so departures are reflected even if the client's own `POST /leave`
@@ -257,7 +257,7 @@ leaves one stuck LIVE forever:
      including the host, has actually left/been removed/disconnected
      (webhook-observed or explicit) - a genuine abandonment signal with
      no extra state to maintain.
-   - **Absolute max duration exceeded** (24h since `startedAt`) — the
+   - **Absolute max duration exceeded** (24h since `startedAt`): the
      backstop of last resort for the case LiveKit itself is unreachable/
      misconfigured and no webhook ever updates a participant's `leftAt`
      at all, so the first condition could never fire. Real products
@@ -268,7 +268,7 @@ leaves one stuck LIVE forever:
 
 | Action | HOST | MODERATOR | SPEAKER | LISTENER | Non-member |
 |---|---|---|---|---|---|
-| Create room | (any active user **with Live Audio entitlement** — see §13) | — | — | — | — |
+| Create room | (any active user **with Live Audio entitlement**: see §13) |: |: |: |: |
 | View public room | yes | yes | yes | yes | yes |
 | View community room | yes | yes | yes | yes | only if community member |
 | View private room | yes | yes | yes | yes | **no** |
@@ -286,26 +286,26 @@ leaves one stuck LIVE forever:
 
 `*` the host leaving does **not** transfer host role or end the room
 automatically (mirrors Communities: no owner-succession flow exists
-there either, and inventing one is out of scope for this MVP) — a
+there either, and inventing one is out of scope for this MVP): a
 moderator can still end the room; if none exists, the cleanup cron
 eventually reclaims it once the heartbeat lapses. This is a documented,
 intentional simplification, not an oversight.
 
 Every row of this table is enforced in `src/lib/live-audio/permissions.ts`,
-re-checked on every request — never cached, never inferred from a
+re-checked on every request: never cached, never inferred from a
 client-supplied role.
 
 ## 7. Security-relevant guarantees
 
 - **A listener cannot become a publisher by editing the client.** The
   LiveKit access token minted for a `LISTENER` never sets `canPublish:
-  true`. LiveKit's server — not our client, not our trust — enforces the
+  true`. LiveKit's server: not our client, not our trust: enforces the
   grant. Promotion to `SPEAKER` requires a fresh server-side
   authorization check and re-mints a new token with `canPublish: true`;
   the old listener-only token is not retroactively upgraded.
 - **A banned user cannot keep speaking because an old connection is
   open.** `requireActiveUser()` re-reads ban state fresh on every
-  mutating Live Audio request — no caching. On ban, `POST /admin/users/
+  mutating Live Audio request: no caching. On ban, `POST /admin/users/
   [id]/ban` (existing route) additionally calls a new
   `forceLeaveAllLiveAudioRooms(userId)` helper that ends the user's
   Postgres membership rows immediately AND revokes them at the media
@@ -320,7 +320,7 @@ client-supplied role.
 - **Two moderators promoting the same listener simultaneously** cannot
   both succeed: promotion is `prisma.$transaction` guarded by an
   `updateMany({ where: { roomId, userId, role: "LISTENER" }, data: {
-  role: "SPEAKER" } })` whose returned `count` must be exactly 1 — the
+  role: "SPEAKER" } })` whose returned `count` must be exactly 1: the
   same atomic conditional-update idiom this codebase already uses for
   AI-quota reservation (never check-then-write). The loser gets a 409.
 - **TURN/LiveKit credentials never appear in logs**; the webhook route
@@ -331,7 +331,7 @@ client-supplied role.
   sweep both force-drop the user's actual LiveKit audio connection
   (`forceDisconnectParticipant`) AND call `evictUserFromLiveAudioRoom()`
   to forcibly remove their socket(s) from the `live-audio:<roomId>`
-  Socket.IO broadcast room server-side — found and fixed during the
+  Socket.IO broadcast room server-side: found and fixed during the
   §36 adversarial pass: without it, a client that simply ignored the
   polite `you-were-removed` event (or never reconnected) would keep
   receiving that room's realtime metadata (speaker list, mute/role
@@ -342,7 +342,7 @@ client-supplied role.
 - **Recording.** Not built. The schema has no recording-related field;
   adding one later (LiveKit supports room composite recording via its
   own Egress API) would be a new, separate table (`LiveAudioRecording`)
-  and consent/retention flow — not a redesign of anything here.
+  and consent/retention flow: not a redesign of anything here.
 - **A numeric hard speaker-limit.** Not enforced. LiveKit imposes no
   inherent limit; nothing in the mission's product spec asked for a
   specific number, and inventing one (say, "8 speakers max") would be
@@ -354,35 +354,35 @@ client-supplied role.
   `permissions.ts` is the existing extension point if ZRP later wants
   e.g. "Business+ only" hosting; adding it is a `canHostLiveAudio(plan)`
   helper plus one check in the create-room route, not a new system.
-- **Android/iOS native UI.** Not built — see the final report.
+- **Android/iOS native UI.** Not built: see the final report.
 
 ## 9. Discovery
 
 `GET /api/live-audio/rooms` returns `PUBLIC` rooms with `status = LIVE`
 plus, for an authenticated caller, `COMMUNITY`-visibility rooms in
-communities they belong to — never `PRIVATE` rooms unless the caller is
+communities they belong to: never `PRIVATE` rooms unless the caller is
 already a participant. Cursor-paginated via the existing
 `parseCursorParams`/`buildPage` helpers, ordered by listener count
 descending then `startedAt` (busiest/newest first), matching Explore's
 own "don't just show chronological" instinct without introducing a
-second ranking/caching system — no Redis cache here (§3), since a live
+second ranking/caching system: no Redis cache here (§3), since a live
 room's listener count changing invalidates a cache immediately anyway,
 and query volume for a "who's live right now" list is low.
 
 ## 10. Notifications added
 
 New `CreateNotificationParams.type` members (all following the existing
-`opportunity_*`/`help_campaign_*` pattern — union entry, `NEVER_EMAIL_TYPES`
+`opportunity_*`/`help_campaign_*` pattern: union entry, `NEVER_EMAIL_TYPES`
 membership decision, `typeMap`, `actionMap`, `subjectMap` entries):
 
-- `live_audio_started` — sent to a community's members when a room goes
-  LIVE in that community (never for a public/non-community room — that
+- `live_audio_started`: sent to a community's members when a room goes
+  LIVE in that community (never for a public/non-community room: that
   would be feed-dominating spam, explicitly warned against in the
-  mission). Never emailed (`NEVER_EMAIL_TYPES`) — this is a "happening
+  mission). Never emailed (`NEVER_EMAIL_TYPES`): this is a "happening
   now" notification; an email arriving after the room ends is useless.
-- `live_audio_speaker_invited` — a moderator/host invited a listener to
+- `live_audio_speaker_invited`: a moderator/host invited a listener to
   speak directly (distinct from the listener requesting it themselves).
-- `live_audio_speaker_approved` / `live_audio_speaker_rejected` — the
+- `live_audio_speaker_approved` / `live_audio_speaker_rejected`: the
   outcome of the requester's own `speak/request`.
 
 ## 11. Environment variables
@@ -391,7 +391,7 @@ membership decision, `typeMap`, `actionMap`, `subjectMap` entries):
 |---|---|---|
 | `LIVEKIT_API_KEY` | LiveKit server SDK auth (token minting, webhook verification, RoomService calls) | Yes, to actually mint usable tokens |
 | `LIVEKIT_API_SECRET` | Paired secret for the above. **Never sent to any client.** | Yes |
-| `LIVEKIT_URL` | The LiveKit server's WebSocket URL, given to clients so they know where to connect (not secret — it's a hostname) | Yes |
+| `LIVEKIT_URL` | The LiveKit server's WebSocket URL, given to clients so they know where to connect (not secret: it's a hostname) | Yes |
 | `LIVEKIT_WEBHOOK_API_KEY` / `LIVEKIT_WEBHOOK_API_SECRET` | Only needed if the webhook is verified against a *different* key/secret pair than the main one (LiveKit supports per-endpoint keys); defaults to `LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET` if unset | No |
 
 None of these are set in this repository or in any committed file.
@@ -402,14 +402,14 @@ integration" requirement.
 
 ## 12. Cross-platform status
 
-- **Web/PWA**: **implemented and manually verified** — `src/app/live-audio/page.tsx`
+- **Web/PWA**: **implemented and manually verified**: `src/app/live-audio/page.tsx`
   (discovery + a "Go Live" create-room modal,
   `src/components/live-audio/CreateLiveAudioModal.tsx`) and
   `src/app/live-audio/[id]/page.tsx` (the room screen: joins via
   `POST /rooms/[id]/join`, connects with `livekit-client`'s
   `Room.connect(livekitUrl, token)`, publishes/subscribes audio per
   role, renders participants grouped by role, and exposes speak-request/
-  approve/reject, promote/demote/mute/remove, leave/end — all through
+  approve/reject, promote/demote/mute/remove, leave/end: all through
   the existing REST routes). Realtime updates come from this repo's
   Socket.IO `live-audio:*` broadcasts (`join-live-audio-room`), not
   polling. ZRP has one web codebase for web and PWA/mobile-browser (see
@@ -419,10 +419,10 @@ integration" requirement.
   languages, verified by the repo's own translation-completeness CI
   gate. **Manually exercised end-to-end** with Playwright against a real
   local dev server + Postgres + Redis: login, discovery empty/loaded
-  states, room creation, and the room screen's HOST view — this is how
+  states, room creation, and the room screen's HOST view: this is how
   a real, confirmed bug was caught and fixed (see below). **Not
   exercised**: an actual LiveKit media connection (no deployment exists
-  in this sandbox — the UI's own "Live Audio isn't set up yet" fallback
+  in this sandbox: the UI's own "Live Audio isn't set up yet" fallback
   state was what was verified instead, which is the correct, honest
   behavior for that case) or native mobile browsers specifically.
 - **Android**: backend contract only. `CallViewModel.kt`'s existing
@@ -437,8 +437,8 @@ integration" requirement.
 cleanup effect originally called `POST /leave` unconditionally on
 unmount, even when `POST /join` had never succeeded (LiveKit
 unconfigured, a failed request, or React Strict Mode's dev-only double-
-invoke of effects). For a room's own HOST — who never goes through the
-join upsert, since they're seeded directly at room creation — this
+invoke of effects). For a room's own HOST: who never goes through the
+join upsert, since they're seeded directly at room creation: this
 silently marked their already-existing participant row as departed,
 observed directly via the room detail API returning `myRole: null` and
 an empty participant list for the room's own creator. Fixed by only
@@ -453,11 +453,11 @@ contract exists.
 
 ## 13. Live Audio as a paid feature
 
-Live Audio is gated behind an active paid subscription — `pro`,
+Live Audio is gated behind an active paid subscription: `pro`,
 `business`, and `enterprise` (`liveAudio: true` in `PLANS`,
 `src/lib/limits.ts`); `free` never has it. This reuses ZRP's existing
-subscription/payment architecture end to end (see `docs/subscriptions.md`)
-— there is no second payment system, no second subscription table, and no
+subscription/payment architecture end to end (see `docs/subscriptions.md`):
+there is no second payment system, no second subscription table, and no
 Live-Audio-specific pricing.
 
 **Enforcement point**: `requireLiveAudioAccess(userId)` /
@@ -470,7 +470,7 @@ participation: `createRoom`, `startScheduledRoom`, `joinRoom`,
 route each under `src/app/api/live-audio/**`, so gating room-service.ts
 covers every entry point without duplicating the check per-route. It is
 **not** applied to `leaveRoom`, `endRoom`, `cancelScheduledRoom`, or the
-two read-only discovery endpoints (`GET /rooms`, `GET /rooms/[id]`) —
+two read-only discovery endpoints (`GET /rooms`, `GET /rooms/[id]`):
 a lapsed subscriber must still be able to see the upgrade CTA and get out
 of a room cleanly, and this can never be an enumeration oracle either way
 since `joinRoom`'s own gate runs before the room is even looked up.
@@ -480,14 +480,14 @@ case, per mission requirement):
 
 1. A `Subscription` row exists for the user: it alone decides. Must be
    `status: ACTIVE` **and** `currentPeriodEnd` still in the future,
-   re-checked against the clock on every call — not just the stored
-   `status` — so a period that lapsed minutes ago is denied even before
+   re-checked against the clock on every call: not just the stored
+   `status`: so a period that lapsed minutes ago is denied even before
    the hourly `expireDueSubscriptions` cron sweeps it to `EXPIRED`
    (see `docs/subscriptions.md`'s expiration engine section). `PENDING`
    and `CANCELED` rows, and already-swept `EXPIRED` rows, are all denied.
 2. No `Subscription` row exists at all: this is the documented
    `NO_SUBSCRIPTION` reconciliation bucket from `docs/subscriptions.md`
-   ("Admin Subscriptions & Billing") — a free user who never paid, or a
+   ("Admin Subscriptions & Billing"): a free user who never paid, or a
    legacy-paid user (`User.plan != "free"`) who predates the
    `Subscription` model and hasn't been run through
    `scripts/backfill-subscriptions.ts` yet. Falling back to `User.plan`
@@ -498,19 +498,19 @@ case, per mission requirement):
    user is already, legitimately, receiving everywhere else.
 
 **Never cached.** Both `User` and `Subscription` are read fresh from
-Postgres on every protected call — this deliberately bypasses the
+Postgres on every protected call: this deliberately bypasses the
 JWT/auth-state ~30s cache (`auth-state.ts`), because the actual
 requirement is "a lapsed subscription loses access immediately," not
 "within one cache window." No wiring into `invalidateUserAuthState()` was
 needed for this reason: there is nothing here to invalidate.
 
-**Response shape**: every denial — free, expired, canceled, pending, or
-an unrecognized plan — returns the exact same
+**Response shape**: every denial: free, expired, canceled, pending, or
+an unrecognized plan: returns the exact same
 `LiveAudioErrors.paidFeatureRequired()` (`code: "live_audio_paid_feature"`,
 403, `"Live Audio is available only to paid ZRP accounts. Upgrade your
 plan to access Live Audio."`). Deliberately not run through the app's
 `localizeApiMessage` curated-translation list, matching how every other
-`LiveAudioError` in this file already behaves — this file's existing
+`LiveAudioError` in this file already behaves: this file's existing
 convention (see `src/lib/api-error-i18n.ts`'s own doc comment) is raw,
 un-translated English passthrough for Live-Audio-specific messages, and
 the pricing page's own feature row (`pricing.featureLiveAudio` /
@@ -519,7 +519,7 @@ the pricing page's own feature row (`pricing.featureLiveAudio` /
 
 **Security properties**: `userId` is always the authenticated session's
 own id (`requireActiveUser()`, never a client-supplied `userId`/`plan`/
-`isPaid` field — no Live Audio route or room-service function accepts any
+`isPaid` field: no Live Audio route or room-service function accepts any
 of those as an acting-user identity), so there is no plan/identity value
 in a request body to spoof in the first place; the target of a moderation
 action (e.g. `mute`'s `body.userId`) is a *different* user, already
@@ -529,7 +529,7 @@ entitlement check itself.
 
 **Known, documented limitation**: an already-minted LiveKit token remains
 valid for its own TTL (`TOKEN_TTL = "6h"`, `livekit.ts`) even if the
-holder's subscription expires seconds after the token was issued — the
+holder's subscription expires seconds after the token was issued: the
 entitlement gate blocks every subsequent *server-side* action (a new
 join, a token refresh, any moderation call) but does not reach into
 LiveKit to revoke a token already in a client's hands. This mirrors the

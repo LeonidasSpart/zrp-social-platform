@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Play, Shuffle, ShieldCheck, UserPlus, UserCheck, Disc3, Pencil } from "lucide-react";
 import { useSession } from "next-auth/react";
 import TrackList from "@/components/music/TrackList";
@@ -142,11 +143,15 @@ export default function MusicArtistPage() {
 
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
         <section className="flex flex-col sm:flex-row items-center sm:items-end gap-6 rounded-[28px] overflow-hidden border border-gray-200 dark:border-white/10 p-6 sm:p-8 bg-gradient-to-br from-zrp-red/10 via-transparent to-transparent">
-          <img
-            src={artist.avatarUrl || "/logo.png"}
-            alt=""
-            className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white dark:border-black shadow-xl shrink-0"
-          />
+          <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white dark:border-black shadow-xl shrink-0">
+            <Image
+              src={artist.avatarUrl || "/logo.png"}
+              alt=""
+              fill
+              sizes="(min-width: 640px) 160px, 128px"
+              className="object-cover"
+            />
+          </div>
 
           <div className="min-w-0 text-center sm:text-left flex-1">
             <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
@@ -217,9 +222,15 @@ export default function MusicArtistPage() {
                   href={`/music/albums/${album.id}`}
                   className="group rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.035] overflow-hidden hover:border-zrp-red/30 transition"
                 >
-                  <div className="aspect-square bg-gray-200 dark:bg-white/5 overflow-hidden">
+                  <div className="relative aspect-square bg-gray-200 dark:bg-white/5 overflow-hidden">
                     {album.coverUrl ? (
-                      <img src={album.coverUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <Image
+                        src={album.coverUrl}
+                        alt=""
+                        fill
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Disc3 className="w-10 h-10 text-gray-300 dark:text-white/20" />

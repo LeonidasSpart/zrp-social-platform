@@ -5,11 +5,16 @@ const { withSentryConfig } = require('@sentry/nextjs');
 
 const nextConfig = {
   images: {
+    // Must mirror src/lib/media-url.ts's UPLOAD_HOST_RULES: UploadThing
+    // serves files from utfs.io (legacy) and <app>.ufs.sh (current), not
+    // just uploadthing.com - next/image throws at runtime for any host
+    // not listed here, so this was silently unusable for real upload URLs.
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "uploadthing.com",
-      },
+      { protocol: "https", hostname: "uploadthing.com" },
+      { protocol: "https", hostname: "*.uploadthing.com" },
+      { protocol: "https", hostname: "utfs.io" },
+      { protocol: "https", hostname: "*.utfs.io" },
+      { protocol: "https", hostname: "*.ufs.sh" },
     ],
   },
 

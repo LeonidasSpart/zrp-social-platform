@@ -1661,6 +1661,10 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
   ],
   sv: [
+    // "Version" is a legitimate Swedish cognate (identical spelling); this key only became a
+    // byte-for-byte English copy once the frontend dash audit normalized its original en-dash
+    // version range to a plain hyphen, matching English's own "1.0-8.8.2026" - not a translation gap.
+    "press.versionBadge",
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy

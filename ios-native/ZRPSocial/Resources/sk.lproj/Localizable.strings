@@ -61,7 +61,7 @@
 "play.aiTopicPlaceholder" = "napr. filmy z 80. rokov, hlavné mestá sveta, fakty o vesmíre";
 "play.generate" = "Vygenerovať";
 "play.generating" = "Generuje sa...";
-"play.aiGeneratedNote" = "Vygenerované pomocou AI – pred zverejnením skontrolujte.";
+"play.aiGeneratedNote" = "Vygenerované pomocou AI: pred zverejnením skontrolujte.";
 "play.titleLabel" = "Názov";
 "play.titlePlaceholder" = "Dajte svojej výzve chytľavý názov";
 "play.descriptionLabel" = "Popis (voliteľné)";
@@ -513,7 +513,7 @@
 "music.shell.uploadMusic" = "Nahrať hudbu";
 "music.shell.signInTitle" = "Ak chcete publikovať hudbu, prihláste sa";
 "music.shell.signInBody" = "Počúvanie ZRP Music je otvorené pre každého. Ak chcete požiadať o prístup na publikovanie, musíte sa prihlásiť.";
-"music.shell.gateTitle" = "Music Studio – vyžaduje sa status umelca alebo Tvorcu";
+"music.shell.gateTitle" = "Music Studio: vyžaduje sa status umelca alebo Tvorcu";
 "music.shell.gateBody" = "Počúvanie ZRP Music je otvorené pre každého. Publikovanie hudby vyžaduje schválený status Tvorcu alebo overený profil hudobného umelca.";
 "music.shell.pendingVerification" = "Váš profil umelca bol odoslaný a čaká na overenie tímom ZRP.";
 "music.shell.applyIntroPrefix" = "Vytvorte si profil umelca a požiadajte o overenie hudobného umelca, alebo";
@@ -529,22 +529,22 @@
 "music.shell.uploadHint" = "Zvuk aj obal sa nahrávajú priamo do vášho existujúceho úložiska ZRP.";
 "music.shell.publishFailedDefault" = "Publikovanie zlyhalo. Skúste to znova.";
 "music.shell.uploadFailedDefault" = "Nahrávanie zlyhalo. Skúste to znova.";
-"music.shell.emptyFileError" = "Súbor „{name}“ sa nedá načítať – možno sa ešte sťahuje z iCloudu alebo vášho cloudového úložiska. Počkajte, kým sa sťahovanie dokončí, a skúste to znova.";
+"music.shell.emptyFileError" = "Súbor „{name}“ sa nedá načítať: možno sa ešte sťahuje z iCloudu alebo vášho cloudového úložiska. Počkajte, kým sa sťahovanie dokončí, a skúste to znova.";
 "music.shell.unreadableFileError" = "Súbor „{name}“ sa nedá načítať. Možno sa ešte sťahuje alebo dešifruje vo vašej aplikácii cloudového úložiska (Google Drive, MEGA, Dropbox, iCloud atď.). Najprv ho tam otvorte, aby bol plne dostupný offline, a potom to skúste znova.";
 "music.studio.tabTracks" = "Skladby";
 "music.studio.tabAlbums" = "Albumy";
 "music.studio.tabArtist" = "Profil umelca";
 "music.studio.deleteTrackTitle" = "Vymazať skladbu";
-"music.studio.deleteTrackBody" = "Vymazať „{title}“? Túto akciu nemožno vrátiť späť – skladba, jej prehratia a lajky budú natrvalo odstránené.";
+"music.studio.deleteTrackBody" = "Vymazať „{title}“? Túto akciu nemožno vrátiť späť: skladba, jej prehratia a lajky budú natrvalo odstránené.";
 "music.studio.cancel" = "Zrušiť";
 "music.studio.deleting" = "Vymazáva sa...";
 "music.studio.deleteConfirm" = "Vymazať";
 "music.studio.deleteAlbumTitle" = "Vymazať album";
-"music.studio.deleteAlbumBody" = "Vymazať „{title}“? Jeho skladby NEBUDÚ vymazané – zostanú publikované a jednoducho sa odpoja od tohto albumu.";
-"music.studio.uploadDoneRetryPublish" = "Vaše nahrávanie sa dokončilo, ale publikovanie skladby zlyhalo. Váš súbor je v bezpečí – stlačením Skúsiť znova dokončite publikovanie bez opätovného nahrávania.";
+"music.studio.deleteAlbumBody" = "Vymazať „{title}“? Jeho skladby NEBUDÚ vymazané: zostanú publikované a jednoducho sa odpoja od tohto albumu.";
+"music.studio.uploadDoneRetryPublish" = "Vaše nahrávanie sa dokončilo, ale publikovanie skladby zlyhalo. Váš súbor je v bezpečí: stlačením Skúsiť znova dokončite publikovanie bez opätovného nahrávania.";
 "music.studio.explicitLabel" = "Explicitný obsah";
 "music.studio.retryPublish" = "Skúsiť publikovanie znova";
-"music.studio.checkingFileHint" = "Súbory z cloudových aplikácií ako MEGA môžu trvať o niečo dlhšie na prípravu – to je normálne.";
+"music.studio.checkingFileHint" = "Súbory z cloudových aplikácií ako MEGA môžu trvať o niečo dlhšie na prípravu: to je normálne.";
 "music.studio.checkingFile" = "Kontroluje sa súbor...";
 "music.studio.discardUpload" = "Zahodiť a začať znova";
 "music.studio.myTracks" = "Moje skladby";
@@ -599,7 +599,7 @@
 "marketplace.statusExpired" = "Vypršané";
 "marketplace.statusRemoved" = "Odstránené";
 "marketplace.heroTitle" = "ZRP Market Plus";
-"marketplace.heroSubtitle" = "Luxusné trhovisko pre overených členov ZRP – exotické autá, jachty, súkromné lietadlá, nehnuteľnosti a ďalšie.";
+"marketplace.heroSubtitle" = "Luxusné trhovisko pre overených členov ZRP: exotické autá, jachty, súkromné lietadlá, nehnuteľnosti a ďalšie.";
 "marketplace.searchPlaceholder" = "Hľadať inzeráty...";
 "marketplace.createListing" = "Vytvoriť inzerát";
 "marketplace.myListings" = "Moje inzeráty";
@@ -825,7 +825,7 @@
 "settings.currentUsername" = "Aktuálne používateľské meno";
 "settings.newUsername" = "Nové používateľské meno";
 "settings.newUsernamePlaceholder" = "Nové používateľské meno";
-"settings.usernameHint" = "Používateľské meno musí mať 3 – 20 znakov. Dá sa zmeniť iba raz za 30 dní.";
+"settings.usernameHint" = "Používateľské meno musí mať 3: 20 znakov. Dá sa zmeniť iba raz za 30 dní.";
 "settings.cooldownNote" = "⏳ Svoje používateľské meno môžete znova zmeniť o {n} dní";
 "settings.changeUsername" = "Zmeniť používateľské meno";
 "settings.successUsernameUpdated" = "Používateľské meno bolo úspešne aktualizované! Znova ho môžete zmeniť o 30 dní.";
@@ -886,7 +886,7 @@
 "trust.trustSignalsTitle" = "Signály dôvery";
 "trust.trustSignalsSubtitle" = "Verejné signály použité na výpočet tohto passportu.";
 "trust.additionalSignalsHeading" = "Ďalšie signály";
-"trust.additionalSignalsNote" = "Toto neovplyvňuje skóre vyššie – zobrazuje sa samostatne ako dodatočný kontext.";
+"trust.additionalSignalsNote" = "Toto neovplyvňuje skóre vyššie: zobrazuje sa samostatne ako dodatočný kontext.";
 "trust.whatItMeansTitle" = "Čo Trust Passport znamená";
 "trust.whatItMeansDesc" = "Trust Passport poskytuje transparentný pohľad na pozitívne signály účtu dostupné na ZRP. Nie je to systém overenia totožnosti a nezaručuje niečiu totožnosť, úmysly ani budúce správanie.";
 "trust.transparencyNotice" = "ZRP Trust Passport je založený na signáloch účtu a komunity dostupných na ZRP. Skóre sa automaticky prepočítava pri zmene informácií o účte alebo aktivity. Passport neodhaľuje e-mailové adresy, IP adresy, súkromné správy, moderačné nahlásenia ani iné súkromné informácie o účte.";
@@ -926,7 +926,7 @@
 "opportunity.organizationLabel" = "Organizácia (voliteľné)";
 "opportunity.skillsPlaceholder" = "napr. python, dizajn, marketing";
 "opportunity.addSkill" = "Pridať";
-"opportunity.compensationPlaceholder" = "napr. 50 000 – 70 000 $/rok, neplatené – kredit za štúdium";
+"opportunity.compensationPlaceholder" = "napr. 50 000: 70 000 $/rok, neplatené: kredit za štúdium";
 "opportunity.externalUrlLabel" = "Odkaz na externú prihlášku (voliteľné)";
 "opportunity.externalUrlPlaceholder" = "https://...";
 "opportunity.externalUrlHint" = "Ak je nastavený, uchádzači budú presmerovaní na tento odkaz namiesto prihlásenia sa na ZRP.";
@@ -1026,7 +1026,7 @@
 "transparency.actionHeading" = "Prijaté opatrenia";
 "transparency.generatedNote" = "Údaje vygenerované {date}. Aktualizované každú hodinu.";
 "transparency.appealsHeading" = "Odvolania proti moderácii";
-"transparency.appealsNote" = "Keď používateľ nesúhlasí s moderačným rozhodnutím, môže sa proti nemu odvolať. Toto sú súhrnné výsledky – nikdy nie kto sa odvolal alebo čo bolo povedané.";
+"transparency.appealsNote" = "Keď používateľ nesúhlasí s moderačným rozhodnutím, môže sa proti nemu odvolať. Toto sú súhrnné výsledky: nikdy nie kto sa odvolal alebo čo bolo povedané.";
 "adminReports.statusPending" = "Čaká na vybavenie";
 "adminReports.statusReviewed" = "Skontrolované";
 "adminReports.statusDismissed" = "Zamietnuté";
@@ -1056,7 +1056,7 @@
 "ambassadors.apply.submit" = "Odoslať prihlášku";
 "ambassadors.apply.submitting" = "Odosiela sa...";
 "ambassadors.apply.subtitle" = "Povedzte nám o svojej krajine a komunite. Každú prihlášku posudzuje náš tím.";
-"ambassadors.apply.successBody" = "Ďakujeme! Vaša prihláška čaká na posúdenie. Dáme vám vedieť, hneď ako náš tím rozhodne – zatiaľ ešte nie ste oficiálnym ambasádorom.";
+"ambassadors.apply.successBody" = "Ďakujeme! Vaša prihláška čaká na posúdenie. Dáme vám vedieť, hneď ako náš tím rozhodne: zatiaľ ešte nie ste oficiálnym ambasádorom.";
 "ambassadors.apply.successTitle" = "Prihláška bola odoslaná";
 "ambassadors.apply.title" = "Staňte sa Ambasádorom ZRP";
 "ambassadors.dashboard.codeAcceptedOn" = "Kódex správania bol prijatý";
@@ -1083,7 +1083,7 @@
 "ambassadors.hero.ctaPrimary" = "Staňte sa Ambasádorom ZRP";
 "ambassadors.hero.statAmbassadors" = "Ambasádori";
 "ambassadors.hero.statCountries" = "Zastúpené krajiny";
-"ambassadors.hero.subtitle" = "Globálni ambasádori ZRP vedú komunitu vo svojej krajine – skutoční ľudia, skutočné komunity, jedno rastúce hnutie.";
+"ambassadors.hero.subtitle" = "Globálni ambasádori ZRP vedú komunitu vo svojej krajine: skutoční ľudia, skutočné komunity, jedno rastúce hnutie.";
 "ambassadors.hero.title1" = "VYBUDUJTE SI SVOJU KOMUNITU.";
 "ambassadors.hero.title2" = "ZASTUPUJTE SVOJU KRAJINU.";
 "ambassadors.hero.title3" = "SPOJTE SVET.";
@@ -1092,7 +1092,7 @@
 "ambassadors.levels.communityLeader" = "Vedúci komunity";
 "ambassadors.levels.communityLeaderDesc" = "Vybudovali a udržali skutočnú, aktívnu komunitu okolo ZRP.";
 "ambassadors.levels.explorer" = "Prieskumník";
-"ambassadors.levels.explorerDesc" = "Každý ambasádor začína tu – objavovaním ZRP a komunity okolo neho.";
+"ambassadors.levels.explorerDesc" = "Každý ambasádor začína tu: objavovaním ZRP a komunity okolo neho.";
 "ambassadors.levels.globalAmbassador" = "Globálny ambasádor";
 "ambassadors.levels.globalAmbassadorDesc" = "Ocenené za trvalý dosah naprieč globálnou komunitou ZRP.";
 "ambassadors.levels.sectionSubtitle" = "Postup sa získava skutočnou aktivitou v komunite, nie len samotnou registráciou.";
@@ -1488,7 +1488,7 @@
 "ios.language.systemDefaultNote" = "Riadi sa jazykom nastaveným v Nastaveniach iOS. Ak chcete iný jazyk použiť iba v ZRP, vyberte ho nižšie.";
 "ios.auth.usernameAvailable" = "Používateľské meno je dostupné";
 "ios.auth.usernameTaken" = "Toto používateľské meno je už obsadené";
-"ios.auth.usernameInvalid" = "3 – 20 znakov, iba písmená, čísla a podčiarkovníky";
+"ios.auth.usernameInvalid" = "3: 20 znakov, iba písmená, čísla a podčiarkovníky";
 "ios.auth.usernameSuggestions" = "Skúste jedno z týchto";
 "ios.auth.forgotTitle" = "Obnovte si heslo";
 "ios.auth.forgotBody" = "Zadajte e-mailovú adresu svojho účtu. Ak existuje, pošleme na ňu odkaz na obnovenie hesla.";

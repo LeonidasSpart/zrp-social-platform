@@ -237,7 +237,7 @@ export default function ListingForm({
                 type="button"
                 onClick={() => setImageUrls((prev) => prev.filter((_, idx) => idx !== i))}
                 aria-label={t("comment.removeAttachment")}
-                className="absolute top-0.5 end-0.5 bg-black/60 text-white rounded-full p-0.5"
+                className="absolute top-0.5 end-0.5 bg-black/60 text-white rounded-full p-2"
               >
                 <X className="w-3 h-3" />
               </button>

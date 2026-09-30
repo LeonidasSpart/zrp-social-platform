@@ -845,7 +845,7 @@
     <string name="music_shell_studio_label">Hudobné štúdio</string>
     <string name="music_shell_studio_eyebrow">Nástroje pre tvorcov</string>
     <string name="music_shell_studio_description">Publikujte svoju hudbu priamo na ZRP.</string>
-    <string name="music_shell_gate_title">Music Studio – vyžaduje sa status umelca alebo Tvorcu</string>
+    <string name="music_shell_gate_title">Music Studio: vyžaduje sa status umelca alebo Tvorcu</string>
     <string name="music_shell_gate_body">Počúvanie ZRP Music je otvorené pre každého. Publikovanie hudby vyžaduje schválený status Tvorcu alebo overený profil hudobného umelca.</string>
     <string name="music_shell_pending_verification">Váš profil umelca bol odoslaný a čaká na overenie tímom ZRP.</string>
     <string name="music_shell_apply_intro_prefix">Vytvorte si profil umelca a požiadajte o overenie hudobného umelca, alebo</string>
@@ -872,9 +872,9 @@
     <string name="music_shell_publishing">Publikuje sa...</string>
     <string name="music_shell_upload_hint">Zvuk aj obal sa nahrávajú priamo do vášho existujúceho úložiska ZRP.</string>
     <string name="music_shell_publish_failed_default">Publikovanie zlyhalo. Skúste to znova.</string>
-    <string name="music_shell_empty_file_error">Súbor „%1$s“ sa nedá načítať – možno sa ešte sťahuje z iCloudu alebo vášho cloudového úložiska. Počkajte, kým sa sťahovanie dokončí, a skúste to znova.</string>
+    <string name="music_shell_empty_file_error">Súbor „%1$s“ sa nedá načítať: možno sa ešte sťahuje z iCloudu alebo vášho cloudového úložiska. Počkajte, kým sa sťahovanie dokončí, a skúste to znova.</string>
     <string name="music_studio_delete_track_title">Vymazať skladbu</string>
-    <string name="music_studio_delete_track_body">Vymazať „%1$s“? Túto akciu nemožno vrátiť späť – skladba, jej prehratia a lajky budú natrvalo odstránené.</string>
+    <string name="music_studio_delete_track_body">Vymazať „%1$s“? Túto akciu nemožno vrátiť späť: skladba, jej prehratia a lajky budú natrvalo odstránené.</string>
     <string name="music_studio_cancel">Zrušiť</string>
     <string name="music_studio_deleting">Vymazáva sa...</string>
     <string name="music_studio_delete_confirm">Vymazať</string>
@@ -907,7 +907,7 @@
     <string name="music_studio_remove_from_album">Odstrániť z albumu</string>
     <string name="music_studio_add_existing_tracks">Pridať existujúce skladby</string>
     <string name="music_studio_delete_album_title">Vymazať album</string>
-    <string name="music_studio_delete_album_body">Vymazať „%1$s“? Jeho skladby NEBUDÚ vymazané – zostanú publikované a jednoducho sa odpoja od tohto albumu.</string>
+    <string name="music_studio_delete_album_body">Vymazať „%1$s“? Jeho skladby NEBUDÚ vymazané: zostanú publikované a jednoducho sa odpoja od tohto albumu.</string>
     <string name="music_studio_album_created_msg">Album bol vytvorený.</string>
     <string name="music_studio_album_updated_msg">Album bol aktualizovaný.</string>
     <string name="music_studio_album_deleted_msg">Album bol vymazaný. Vaše skladby zostali zachované a sú naďalej dostupné.</string>
@@ -923,7 +923,7 @@
     <string name="marketplace_category_watches_jewelry">Hodinky a šperky</string>
     <string name="marketplace_category_other_luxury">Ostatné luxusné aktíva</string>
     <string name="marketplace_hero_title">ZRP Market Plus</string>
-    <string name="marketplace_hero_subtitle">Luxusné trhovisko pre overených členov ZRP – exotické autá, jachty, súkromné lietadlá, nehnuteľnosti a ďalšie.</string>
+    <string name="marketplace_hero_subtitle">Luxusné trhovisko pre overených členov ZRP: exotické autá, jachty, súkromné lietadlá, nehnuteľnosti a ďalšie.</string>
     <string name="marketplace_search_placeholder">Hľadať inzeráty...</string>
     <string name="marketplace_search">Hľadať</string>
     <string name="marketplace_browse_categories">Prehliadať kategórie</string>
@@ -1011,7 +1011,7 @@
     <string name="opportunity_back_to_opportunity">Späť na OPPORTUNITY</string>
     <string name="opportunity_close">Zavrieť</string>
     <string name="opportunity_compensation_label">Odmena</string>
-    <string name="opportunity_compensation_placeholder">napr. 50 000 – 70 000 $/rok, neplatené – kredit za štúdium</string>
+    <string name="opportunity_compensation_placeholder">napr. 50 000: 70 000 $/rok, neplatené: kredit za štúdium</string>
     <string name="opportunity_cover_note_label">Sprievodná poznámka (voliteľné)</string>
     <string name="opportunity_cover_note_placeholder">Napíšte im, prečo ste tá pravá voľba...</string>
     <string name="opportunity_create_subtitle">Zverejnite pracovnú ponuku, stáž, štipendium, mentoring alebo spoluprácu pre komunitu ZRP.</string>
@@ -1027,7 +1027,7 @@
     <string name="opportunity_external_url_hint">Ak je nastavený, uchádzači budú presmerovaní na tento odkaz namiesto prihlásenia sa na ZRP.</string>
     <string name="opportunity_external_url_label">Odkaz na externú prihlášku (voliteľné)</string>
     <string name="opportunity_external_url_placeholder">https://...</string>
-    <string name="opportunity_hero_subtitle">Práca, práca na diaľku, stáže, štipendiá, mentoring, freelance projekty a spolupráca – poháňané komunitou ZRP.</string>
+    <string name="opportunity_hero_subtitle">Práca, práca na diaľku, stáže, štipendiá, mentoring, freelance projekty a spolupráca: poháňané komunitou ZRP.</string>
     <string name="opportunity_hero_title">ZRP OPPORTUNITY</string>
     <string name="opportunity_is_paid">Toto je platené</string>
     <string name="opportunity_location_label">Lokalita (voliteľné)</string>
@@ -1157,7 +1157,7 @@
     <string name="aid_status_rejected">Zamietnuté</string>
     <string name="aid_status_removed">Odstránené</string>
     <string name="aid_title_label">Názov</string>
-    <string name="aid_withdrawal_requested">Výber bol požadovaný. Bude spracovaný do 24 – 48 hodín.</string>
+    <string name="aid_withdrawal_requested">Výber bol požadovaný. Bude spracovaný do 24: 48 hodín.</string>
     <string name="play_discover_entry">Objaviť ZRP PLAY</string>
     <string name="play_accept">Prijať</string>
     <string name="play_accepted">Prijaté</string>
@@ -1168,7 +1168,7 @@
     <string name="play_add_option">Pridať možnosť</string>
     <string name="play_add_pair">Pridať pár</string>
     <string name="play_add_question">Pridať otázku</string>
-    <string name="play_ai_generated_note">Vygenerované pomocou AI – pred zverejnením skontrolujte.</string>
+    <string name="play_ai_generated_note">Vygenerované pomocou AI: pred zverejnením skontrolujte.</string>
     <string name="play_ai_tab">Vygenerovať pomocou AI</string>
     <string name="play_ai_topic_label">Téma</string>
     <string name="play_ai_topic_placeholder">napr. filmy z 80. rokov, hlavné mestá sveta, fakty o vesmíre</string>
@@ -1208,7 +1208,7 @@
     <string name="play_finish">Dokončiť</string>
     <string name="play_generate">Vygenerovať</string>
     <string name="play_generating">Generuje sa...</string>
-    <string name="play_hero_subtitle">Rýchle hry, súboje a denné výzvy – poháňané komunitou ZRP.</string>
+    <string name="play_hero_subtitle">Rýchle hry, súboje a denné výzvy: poháňané komunitou ZRP.</string>
     <string name="play_hero_title">ZRP PLAY</string>
     <string name="play_incoming_duels">Prichádzajúce výzvy</string>
     <string name="play_leaderboard">Rebríček</string>
@@ -1344,7 +1344,7 @@
     <string name="shorts_upload_err_generic">Počas nahrávania sa niečo pokazilo. Skontrolujte, prosím, svoje pripojenie a skúste to znova.</string>
     <string name="shorts_upload_err_upload_failed_detailed">Nahrávanie sa nedokončilo, pravdepodobne kvôli problému s pripojením alebo príliš veľkému súboru pre váš plán. Skontrolujte pripojenie a skúste to znova.</string>
     <string name="shorts_upload_err_too_large_plan">Toto video je príliš veľké pre váš plán. Skúste menší súbor alebo povýšte svoj plán.</string>
-    <string name="shorts_upload_err_url_gen_failed">Nepodarilo sa spustiť nahrávanie – zvyčajne ide o dočasný problém s pripojením. Skúste to znova.</string>
+    <string name="shorts_upload_err_url_gen_failed">Nepodarilo sa spustiť nahrávanie: zvyčajne ide o dočasný problém s pripojením. Skúste to znova.</string>
     <string name="shorts_upload_err_internal_server">Na našej strane sa počas nahrávania niečo pokazilo. Skúste to, prosím, o chvíľu znova.</string>
     <string name="shorts_premium_locked_title">Prémiové video</string>
     <string name="shorts_premium_locked_body">Odomknúť toto video za %1$s %2$s</string>
@@ -1389,7 +1389,7 @@
     <string name="creator_tips_label">Tipy</string>
     <string name="creator_withdraw_button">Vybrať</string>
     <string name="creator_withdraw_funds_title">Vybrať prostriedky</string>
-    <string name="creator_withdrawals_processed_hint">Výbery sa spracúvajú do 24 – 48 hodín.</string>
+    <string name="creator_withdrawals_processed_hint">Výbery sa spracúvajú do 24: 48 hodín.</string>
     <string name="creator_content_comments">Komentáre</string>
     <string name="creator_content_engagement_subtitle">Lajky, komentáre a reposty naprieč všetkými vašimi príspevkami.</string>
     <string name="creator_content_engagement_title">Angažovanosť za posledných 30 dní</string>
@@ -1410,7 +1410,7 @@
     <string name="trust_account_age_label">Vek účtu:</string>
     <string name="trust_account_history_title">História účtu</string>
     <string name="trust_additional_signals_heading">Ďalšie signály</string>
-    <string name="trust_additional_signals_note">Toto neovplyvňuje skóre vyššie – zobrazuje sa samostatne ako dodatočný kontext.</string>
+    <string name="trust_additional_signals_note">Toto neovplyvňuje skóre vyššie: zobrazuje sa samostatne ako dodatočný kontext.</string>
     <string name="trust_back_to_profile">Späť na profil</string>
     <string name="trust_back_to_username">Späť na @%1$s</string>
     <string name="trust_category_community">Komunita</string>
@@ -1571,7 +1571,7 @@
     <string name="ai_page_subtitle">Spýtajte sa na čokoľvek. Získajte pomoc s príspevkami, dozveďte sa viac o ZRP, alebo si len tak pokecajte.</string>
     <string name="ai_discover_entry">Objaviť ZRP AI</string>
     <string name="settings_solana_wallet_title">Peňaženka Solana (na priame tipy)</string>
-    <string name="settings_solana_wallet_desc">Pridajte adresu svojej peňaženky Solana, aby ste mohli prijímať tipy priamo od používateľov. Používatelia posielajú USDC priamo do tejto peňaženky – platforma si neúčtuje žiadne poplatky.</string>
+    <string name="settings_solana_wallet_desc">Pridajte adresu svojej peňaženky Solana, aby ste mohli prijímať tipy priamo od používateľov. Používatelia posielajú USDC priamo do tejto peňaženky: platforma si neúčtuje žiadne poplatky.</string>
     <string name="settings_wallet_address">Adresa peňaženky</string>
     <string name="settings_wallet_address_placeholder">Adresa vašej peňaženky Solana (napr. 4zMMC...)</string>
     <string name="settings_wallet_address_note">Táto adresa sa zobrazí na vašom profile na priame tipy.</string>
@@ -1592,7 +1592,7 @@
     <string name="support_category_security">Bezpečnosť</string>
     <string name="support_err_create_failed">Nepodarilo sa vytvoriť tiket</string>
     <string name="support_footer_note_link">Moje tikety</string>
-    <string name="support_footer_note_p1">Váš tiket bude posúdený do 24 – 48 hodín. Jeho stav môžete sledovať v</string>
+    <string name="support_footer_note_p1">Váš tiket bude posúdený do 24: 48 hodín. Jeho stav môžete sledovať v</string>
     <string name="support_footer_note_p2">stránke.</string>
     <string name="support_loading">Načítava sa...</string>
     <string name="support_message_label">Správa</string>
@@ -1909,7 +1909,7 @@
     <string name="transparency_status_heading">Stav nahlásenia</string>
     <string name="transparency_action_heading">Prijaté opatrenia</string>
     <string name="transparency_appeals_heading">Odvolania proti moderácii</string>
-    <string name="transparency_appeals_note">Keď používateľ nesúhlasí s moderačným rozhodnutím, môže sa proti nemu odvolať. Toto sú súhrnné výsledky – nikdy nie kto sa odvolal alebo čo bolo povedané.</string>
+    <string name="transparency_appeals_note">Keď používateľ nesúhlasí s moderačným rozhodnutím, môže sa proti nemu odvolať. Toto sú súhrnné výsledky: nikdy nie kto sa odvolal alebo čo bolo povedané.</string>
     <string name="transparency_generated_note">Údaje vygenerované %1$s. Aktualizované každú hodinu.</string>
     <string name="charity_committed_label">Venované na charitu</string>
     <string name="charity_committed_note">Počíta sa automaticky z dokončených tipov a nákupov prémiového obsahu: 35 % z poplatku platformy ZRP z každého z nich.</string>
@@ -1990,7 +1990,7 @@
     <string name="admin_audit_target">Cieľ: %1$s %2$s</string>
     <string name="admin_audit_metadata">Podrobnosti: %1$s</string>
     <string name="admin_storage_title">Vyčistenie úložiska</string>
-    <string name="admin_storage_subtitle">Nájde súbory, ktoré stále zostávajú v UploadThing, no v databáze na ne už nič neodkazuje, a umožní vám ich vymazať. Skenovanie nič nemení – iba oznamuje.</string>
+    <string name="admin_storage_subtitle">Nájde súbory, ktoré stále zostávajú v UploadThing, no v databáze na ne už nič neodkazuje, a umožní vám ich vymazať. Skenovanie nič nemení: iba oznamuje.</string>
     <string name="admin_storage_scan_button">Vyhľadať osirotené súbory</string>
     <string name="admin_storage_scanning">Skenuje sa…</string>
     <string name="admin_storage_delete_button">Vymazať %1$s osirotených súborov</string>
@@ -2003,8 +2003,8 @@
     <string name="admin_storage_stat_orphaned_size">Veľkosť osirotených súborov</string>
     <string name="admin_storage_stat_held_for_review_summary">Zadržané na kontrolu: %1$s (%2$s MB)</string>
     <string name="admin_storage_held_for_review_hint">%1$s nedávno nahraných súborov nie je odkazovaných, no vymazanie je odložené na 24 hodín pre prípad, že sa ešte priraďujú k novému záznamu.</string>
-    <string name="admin_storage_nothing_orphaned">Nič nie je osirotené – úložisko UploadThing zodpovedá databáze.</string>
-    <string name="admin_storage_showing_sample">Zobrazených %1$s z %2$s – vymazaním sa odstránia všetky, nielen tie uvedené tu.</string>
+    <string name="admin_storage_nothing_orphaned">Nič nie je osirotené: úložisko UploadThing zodpovedá databáze.</string>
+    <string name="admin_storage_showing_sample">Zobrazených %1$s z %2$s: vymazaním sa odstránia všetky, nielen tie uvedené tu.</string>
     <string name="admin_charity_title">Výplaty na charitu</string>
     <string name="admin_charity_subtitle">Skutočné platby na charitu, ktoré ZRP vykonalo. Každý záznam tu sa zobrazuje aj vo verejnom registri charity.</string>
     <string name="admin_charity_saved">Výplata bola zaznamenaná.</string>
@@ -2112,7 +2112,7 @@
     <string name="admin_news_network_no_stories">V tejto fronte nie sú žiadne príbehy.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · skóre %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d zdrojov</string>
-    <string name="admin_news_network_flag_sensitive">Citlivé – vyžaduje sa ľudská kontrola</string>
+    <string name="admin_news_network_flag_sensitive">Citlivé: vyžaduje sa ľudská kontrola</string>
     <string name="admin_news_network_flag_breaking">Aktuálne</string>
     <string name="admin_news_network_flag_travel">Cestovanie</string>
     <string name="admin_news_network_reject">Zamietnuť</string>
@@ -2190,7 +2190,7 @@ Túto akciu nemožno vrátiť späť.</string>
     <string name="ambassadors_hero_title1">VYBUDUJTE SI SVOJU KOMUNITU.</string>
     <string name="ambassadors_hero_title2">ZASTUPUJTE SVOJU KRAJINU.</string>
     <string name="ambassadors_hero_title3">SPOJTE SVET.</string>
-    <string name="ambassadors_hero_subtitle">Globálni ambasádori ZRP vedú komunitu vo svojej krajine – skutoční ľudia, skutočné komunity, jedno rastúce hnutie.</string>
+    <string name="ambassadors_hero_subtitle">Globálni ambasádori ZRP vedú komunitu vo svojej krajine: skutoční ľudia, skutočné komunity, jedno rastúce hnutie.</string>
     <string name="ambassadors_hero_cta_primary">Staňte sa Ambasádorom ZRP</string>
     <string name="ambassadors_hero_cta_secondary">Objavte svet</string>
     <string name="ambassadors_hero_stat_ambassadors">Ambasádori</string>
@@ -2217,7 +2217,7 @@ Túto akciu nemožno vrátiť späť.</string>
     <string name="ambassadors_levels_title">Vaša cesta ku globálnemu dosahu</string>
     <string name="ambassadors_levels_subtitle">Postup sa získava skutočnou aktivitou v komunite, nie len samotnou registráciou.</string>
     <string name="ambassadors_level_explorer">Prieskumník</string>
-    <string name="ambassadors_level_explorer_desc">Každý ambasádor začína tu – objavovaním ZRP a komunity okolo neho.</string>
+    <string name="ambassadors_level_explorer_desc">Každý ambasádor začína tu: objavovaním ZRP a komunity okolo neho.</string>
     <string name="ambassadors_level_ambassador">Ambasádor</string>
     <string name="ambassadors_level_ambassador_desc">Schválené na zastupovanie vašej krajiny a rozširovanie prítomnosti ZRP v nej.</string>
     <string name="ambassadors_level_community_leader">Vedúci komunity</string>
@@ -2248,7 +2248,7 @@ Túto akciu nemožno vrátiť späť.</string>
     <string name="ambassadors_apply_err_motivation_required">Povedzte nám, prečo sa chcete stať Ambasádorom ZRP.</string>
     <string name="ambassadors_apply_err_generic">Niečo sa pokazilo. Skúste to znova.</string>
     <string name="ambassadors_apply_success_title">Prihláška bola odoslaná</string>
-    <string name="ambassadors_apply_success_body">Ďakujeme! Vaša prihláška čaká na posúdenie. Dáme vám vedieť, hneď ako náš tím rozhodne – zatiaľ ešte nie ste oficiálnym ambasádorom.</string>
+    <string name="ambassadors_apply_success_body">Ďakujeme! Vaša prihláška čaká na posúdenie. Dáme vám vedieť, hneď ako náš tím rozhodne: zatiaľ ešte nie ste oficiálnym ambasádorom.</string>
     <string name="ambassadors_dashboard_title">Nástenka Ambasádora</string>
     <string name="ambassadors_dashboard_not_applied_title">Zatiaľ nie ste Ambasádorom ZRP</string>
     <string name="ambassadors_dashboard_err_load">Nepodarilo sa načítať váš status ambasádora</string>
@@ -2467,7 +2467,7 @@ Túto akciu nemožno vrátiť späť.</string>
     <string name="admin_subscription_detail_not_yet">Ešte nie</string>
     <string name="admin_subscription_detail_yes">Áno</string>
     <string name="admin_subscription_detail_no">Nie</string>
-    <string name="admin_subscription_detail_no_subscription_record">Žiadny záznam o predplatnom – tento používateľ nikdy nemal platený nárok sledovaný týmto systémom.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Žiadny záznam o predplatnom: tento používateľ nikdy nemal platený nárok sledovaný týmto systémom.</string>
     <string name="admin_subscription_detail_admin_controls">Ovládacie prvky administrátora</string>
     <string name="admin_subscription_detail_plan_label">Plán</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2477,7 +2477,7 @@ Túto akciu nemožno vrátiť späť.</string>
     <string name="admin_subscription_detail_interval_monthly">Mesačne</string>
     <string name="admin_subscription_detail_interval_yearly">Ročne</string>
     <string name="admin_subscription_detail_grant_extend">Udeliť / predĺžiť</string>
-    <string name="admin_subscription_detail_grant_extend_note">„Udeliť / predĺžiť“ napodobňuje skutočnú platbu: ak má používateľ pre rovnaký plán ešte aktívne obdobie, predĺži ho, inak spustí nové obdobie od dnešného dňa. Nepohnú sa žiadne peniaze – v histórii platieb nižšie sa to zaznamená ako admin_grant.</string>
+    <string name="admin_subscription_detail_grant_extend_note">„Udeliť / predĺžiť“ napodobňuje skutočnú platbu: ak má používateľ pre rovnaký plán ešte aktívne obdobie, predĺži ho, inak spustí nové obdobie od dnešného dňa. Nepohnú sa žiadne peniaze: v histórii platieb nižšie sa to zaznamená ako admin_grant.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Dôvod zrušenia (voliteľné):</string>
     <string name="admin_subscription_detail_cancel_remaining">Zrušiť zostávajúci čas</string>
     <string name="admin_subscription_detail_restore">Obnoviť</string>
@@ -2514,7 +2514,7 @@ Túto akciu nemožno vrátiť späť.</string>
     <string name="post_show_original">Zobraziť originál</string>
     <string name="post_translation_unavailable">Preklad momentálne nie je dostupný.</string>
     <string name="auth_username_taken">Toto používateľské meno je už obsadené.</string>
-    <string name="auth_username_format_hint">3 – 20 znakov, iba písmená, čísla a podčiarkovníky</string>
+    <string name="auth_username_format_hint">3: 20 znakov, iba písmená, čísla a podčiarkovníky</string>
     <string name="quote_post_title">Citovaný príspevok</string>
     <string name="post_repost_private_error">Príspevky zo súkromných účtov nemožno repostovať.</string>
     <string name="post_repost_forbidden_error">Tento príspevok nemožno repostovať.</string>

@@ -750,7 +750,7 @@
     <string name="music_shell_studio_label">Music Studio</string>
     <string name="music_shell_studio_eyebrow">Sisulooja vahendid</string>
     <string name="music_shell_studio_description">Avalda oma muusika otse ZRP-s.</string>
-    <string name="music_shell_gate_title">Music Studio – vajalik on esineja või sisulooja staatus</string>
+    <string name="music_shell_gate_title">Music Studio: vajalik on esineja või sisulooja staatus</string>
     <string name="music_shell_gate_body">ZRP Music kuulamine on avatud kõigile. Muusika avaldamine eeldab kinnitatud sisulooja staatust või kinnitatud muusikaesineja profiili.</string>
     <string name="music_shell_pending_verification">Sinu esineja profiil on esitatud ja ootab ZRP töötajate kinnitust.</string>
     <string name="music_shell_apply_intro_prefix">Loo esineja profiil, et taotleda muusikaesineja kinnitust, või</string>
@@ -777,9 +777,9 @@
     <string name="music_shell_publishing">Avaldamine...</string>
     <string name="music_shell_upload_hint">Heli ja kujundus laaditakse otse sinu olemasolevasse ZRP salvestusruumi.</string>
     <string name="music_shell_publish_failed_default">Avaldamine ebaõnnestus. Palun proovi uuesti.</string>
-    <string name="music_shell_empty_file_error">Faili &quot;%1$s&quot; ei õnnestunud lugeda – see võib olla alles iCloudist või sinu pilvesalvestuse teenusest allalaadimisel. Oota, kuni allalaadimine lõppeb, ja proovi seejärel uuesti.</string>
+    <string name="music_shell_empty_file_error">Faili &quot;%1$s&quot; ei õnnestunud lugeda: see võib olla alles iCloudist või sinu pilvesalvestuse teenusest allalaadimisel. Oota, kuni allalaadimine lõppeb, ja proovi seejärel uuesti.</string>
     <string name="music_studio_delete_track_title">Kustuta lugu</string>
-    <string name="music_studio_delete_track_body">Kustutada &quot;%1$s&quot;? Seda ei saa tagasi võtta – lugu, selle esitamised ja meeldimised eemaldatakse jäädavalt.</string>
+    <string name="music_studio_delete_track_body">Kustutada &quot;%1$s&quot;? Seda ei saa tagasi võtta: lugu, selle esitamised ja meeldimised eemaldatakse jäädavalt.</string>
     <string name="music_studio_cancel">Tühista</string>
     <string name="music_studio_deleting">Kustutamine...</string>
     <string name="music_studio_delete_confirm">Kustuta</string>
@@ -812,7 +812,7 @@
     <string name="music_studio_remove_from_album">Eemalda albumist</string>
     <string name="music_studio_add_existing_tracks">Lisa olemasolevaid lugusid</string>
     <string name="music_studio_delete_album_title">Kustuta album</string>
-    <string name="music_studio_delete_album_body">Kustutada &quot;%1$s&quot;? Selle lood EI kustutata – need jäävad avaldatuks ja lihtsalt kaotavad seose selle albumiga.</string>
+    <string name="music_studio_delete_album_body">Kustutada &quot;%1$s&quot;? Selle lood EI kustutata: need jäävad avaldatuks ja lihtsalt kaotavad seose selle albumiga.</string>
     <string name="music_studio_album_created_msg">Album loodud.</string>
     <string name="music_studio_album_updated_msg">Album uuendatud.</string>
     <string name="music_studio_album_deleted_msg">Album kustutatud. Sinu lood säilisid ja on jätkuvalt saadaval.</string>
@@ -828,7 +828,7 @@
     <string name="marketplace_category_watches_jewelry">Kellad ja ehted</string>
     <string name="marketplace_category_other_luxury">Muu luksusvara</string>
     <string name="marketplace_hero_title">ZRP Market Plus</string>
-    <string name="marketplace_hero_subtitle">Luksuskaubaplats kinnitatud ZRP liikmetele – eksootilised autod, jahid, erilennukid, kinnisvara ja palju muud.</string>
+    <string name="marketplace_hero_subtitle">Luksuskaubaplats kinnitatud ZRP liikmetele: eksootilised autod, jahid, erilennukid, kinnisvara ja palju muud.</string>
     <string name="marketplace_search_placeholder">Otsi kuulutusi...</string>
     <string name="marketplace_search">Otsi</string>
     <string name="marketplace_browse_categories">Sirvi kategooriaid</string>
@@ -916,7 +916,7 @@
     <string name="opportunity_back_to_opportunity">Tagasi OPPORTUNITY juurde</string>
     <string name="opportunity_close">Sulge</string>
     <string name="opportunity_compensation_label">Tasu</string>
-    <string name="opportunity_compensation_placeholder">nt 50-70 tuh €/aasta, tasustamata – akadeemiline krediit</string>
+    <string name="opportunity_compensation_placeholder">nt 50-70 tuh €/aasta, tasustamata: akadeemiline krediit</string>
     <string name="opportunity_cover_note_label">Kaaskiri (valikuline)</string>
     <string name="opportunity_cover_note_placeholder">Räägi neile, miks sa oled suurepärane kandidaat...</string>
     <string name="opportunity_create_subtitle">Postita tööpakkumine, praktikakoht, stipendium, mentorlus või koostöövõimalus ZRP kogukonnale.</string>
@@ -932,7 +932,7 @@
     <string name="opportunity_external_url_hint">Kui seatud, suunatakse kandideerijad sellele lingile, mitte ei kandideeri ZRP-s.</string>
     <string name="opportunity_external_url_label">Väline kandideerimislink (valikuline)</string>
     <string name="opportunity_external_url_placeholder">https://...</string>
-    <string name="opportunity_hero_subtitle">Töökohad, kaugtöö, praktikakohad, stipendiumid, mentorlus, vabakutselised projektid ja koostöö – ZRP kogukonna toel.</string>
+    <string name="opportunity_hero_subtitle">Töökohad, kaugtöö, praktikakohad, stipendiumid, mentorlus, vabakutselised projektid ja koostöö: ZRP kogukonna toel.</string>
     <string name="opportunity_hero_title">ZRP OPPORTUNITY</string>
     <string name="opportunity_is_paid">See on tasustatud</string>
     <string name="opportunity_location_label">Asukoht (valikuline)</string>
@@ -1073,7 +1073,7 @@
     <string name="play_add_option">Lisa valik</string>
     <string name="play_add_pair">Lisa paar</string>
     <string name="play_add_question">Lisa küsimus</string>
-    <string name="play_ai_generated_note">AI genereeritud – vaata üle enne avaldamist.</string>
+    <string name="play_ai_generated_note">AI genereeritud: vaata üle enne avaldamist.</string>
     <string name="play_ai_tab">Genereeri AI-ga</string>
     <string name="play_ai_topic_label">Teema</string>
     <string name="play_ai_topic_placeholder">nt 80ndate filmid, maailma pealinnad, kosmosefaktid</string>
@@ -1113,7 +1113,7 @@
     <string name="play_finish">Lõpeta</string>
     <string name="play_generate">Genereeri</string>
     <string name="play_generating">Genereerimine...</string>
-    <string name="play_hero_subtitle">Kiired mängud, duellid ja päevased väljakutsed – ZRP kogukonna toel.</string>
+    <string name="play_hero_subtitle">Kiired mängud, duellid ja päevased väljakutsed: ZRP kogukonna toel.</string>
     <string name="play_hero_title">ZRP PLAY</string>
     <string name="play_incoming_duels">Saabunud väljakutsed</string>
     <string name="play_leaderboard">Edetabel</string>
@@ -1246,7 +1246,7 @@
     <string name="shorts_upload_err_generic">Üleslaadimisel läks midagi valesti. Palun kontrolli oma ühendust ja proovi uuesti.</string>
     <string name="shorts_upload_err_upload_failed_detailed">Üleslaadimine ei lõppenud, tõenäoliselt ühendusprobleemi või sinu plaani jaoks liiga suure faili tõttu. Kontrolli oma ühendust ja proovi uuesti.</string>
     <string name="shorts_upload_err_too_large_plan">See video on sinu plaani jaoks liiga suur. Proovi väiksemat faili või uuenda oma plaani.</string>
-    <string name="shorts_upload_err_url_gen_failed">Üleslaadimist ei õnnestunud alustada – tavaliselt on see ajutine ühendusprobleem. Palun proovi uuesti.</string>
+    <string name="shorts_upload_err_url_gen_failed">Üleslaadimist ei õnnestunud alustada: tavaliselt on see ajutine ühendusprobleem. Palun proovi uuesti.</string>
     <string name="shorts_upload_err_internal_server">Üleslaadimisel läks midagi valesti meie poolel. Palun proovi hetke pärast uuesti.</string>
     <string name="shorts_premium_locked_title">Premium-video</string>
     <string name="shorts_premium_locked_body">Ava see video %1$s %2$s eest</string>
@@ -1312,7 +1312,7 @@
     <string name="trust_account_age_label">Konto vanus:</string>
     <string name="trust_account_history_title">Konto ajalugu</string>
     <string name="trust_additional_signals_heading">Täiendavad signaalid</string>
-    <string name="trust_additional_signals_note">Need ei mõjuta ülaltoodud skoori – need on näidatud eraldi täiendava kontekstina.</string>
+    <string name="trust_additional_signals_note">Need ei mõjuta ülaltoodud skoori: need on näidatud eraldi täiendava kontekstina.</string>
     <string name="trust_back_to_profile">Tagasi profiili juurde</string>
     <string name="trust_back_to_username">Tagasi kasutaja @%1$s juurde</string>
     <string name="trust_category_community">Kogukond</string>
@@ -1811,7 +1811,7 @@
     <string name="transparency_status_heading">Teate staatus</string>
     <string name="transparency_action_heading">Tehtud toimingud</string>
     <string name="transparency_appeals_heading">Modereerimise vaidlustused</string>
-    <string name="transparency_appeals_note">Kui kasutaja ei nõustu modereerimisotsusega, saab ta selle vaidlustada. Need on koondtulemused – mitte kunagi see, kes vaidlustas või mida öeldi.</string>
+    <string name="transparency_appeals_note">Kui kasutaja ei nõustu modereerimisotsusega, saab ta selle vaidlustada. Need on koondtulemused: mitte kunagi see, kes vaidlustas või mida öeldi.</string>
     <string name="transparency_generated_note">Andmed loodud %1$s. Uuendatakse iga tund.</string>
     <string name="charity_committed_label">Heategevusse lubatud</string>
     <string name="charity_committed_note">Arvutatakse automaatselt tehtud jootrahadest ja premium-sisu ostudest: 35% ZRP platvormitasust igaühelt.</string>
@@ -1892,7 +1892,7 @@
     <string name="admin_audit_target">Sihtmärk: %1$s %2$s</string>
     <string name="admin_audit_metadata">Üksikasjad: %1$s</string>
     <string name="admin_storage_title">Salvestusruumi koristus</string>
-    <string name="admin_storage_subtitle">Leiab failid, mis on ikka veel UploadThingis, kuid millele miski andmebaasis enam ei viita, ja lubab need kustutada. Skannimine ei muuda kunagi midagi – see ainult raporteerib.</string>
+    <string name="admin_storage_subtitle">Leiab failid, mis on ikka veel UploadThingis, kuid millele miski andmebaasis enam ei viita, ja lubab need kustutada. Skannimine ei muuda kunagi midagi: see ainult raporteerib.</string>
     <string name="admin_storage_scan_button">Otsi orbfaile</string>
     <string name="admin_storage_scanning">Skannimine…</string>
     <string name="admin_storage_delete_button">Kustuta %1$s orbfaili</string>
@@ -2014,7 +2014,7 @@
     <string name="admin_news_network_no_stories">Selles järjekorras pole ühtegi lugu.</string>
     <string name="admin_news_network_story_meta">%1$s · %2$s · skoor %3$s</string>
     <string name="admin_news_network_story_context">%1$s · %2$s · %3$d allikat</string>
-    <string name="admin_news_network_flag_sensitive">Tundlik – vajab inimese ülevaatust</string>
+    <string name="admin_news_network_flag_sensitive">Tundlik: vajab inimese ülevaatust</string>
     <string name="admin_news_network_flag_breaking">Kiireloomuline</string>
     <string name="admin_news_network_flag_travel">Reisimine</string>
     <string name="admin_news_network_reject">Lükka tagasi</string>
@@ -2092,7 +2092,7 @@ Seda tegevust ei saa tagasi võtta.</string>
     <string name="ambassadors_hero_title1">LOO OMA KOGUKOND.</string>
     <string name="ambassadors_hero_title2">ESINDA OMA RIIKI.</string>
     <string name="ambassadors_hero_title3">ÜHENDA MAAILM.</string>
-    <string name="ambassadors_hero_subtitle">ZRP globaalsed suursaadikud juhivad kogukonda oma riigis – päris inimesed, päris kogukonnad, üks kasvav liikumine.</string>
+    <string name="ambassadors_hero_subtitle">ZRP globaalsed suursaadikud juhivad kogukonda oma riigis: päris inimesed, päris kogukonnad, üks kasvav liikumine.</string>
     <string name="ambassadors_hero_cta_primary">Hakka ZRP suursaadikuks</string>
     <string name="ambassadors_hero_cta_secondary">Avasta maailma</string>
     <string name="ambassadors_hero_stat_ambassadors">Suursaadikud</string>
@@ -2119,7 +2119,7 @@ Seda tegevust ei saa tagasi võtta.</string>
     <string name="ambassadors_levels_title">Sinu tee globaalse mõjuni</string>
     <string name="ambassadors_levels_subtitle">Edenemine teenitakse tegeliku kogukonnategevusega, mitte pelgalt registreerumisega.</string>
     <string name="ambassadors_level_explorer">Avastaja</string>
-    <string name="ambassadors_level_explorer_desc">Iga suursaadik alustab siit – avastades ZRP-d ja selle ümber olevat kogukonda.</string>
+    <string name="ambassadors_level_explorer_desc">Iga suursaadik alustab siit: avastades ZRP-d ja selle ümber olevat kogukonda.</string>
     <string name="ambassadors_level_ambassador">Suursaadik</string>
     <string name="ambassadors_level_ambassador_desc">Kinnitatud esindama oma riiki ja kasvatama ZRP kohalolu seal.</string>
     <string name="ambassadors_level_community_leader">Kogukonnajuht</string>
@@ -2150,7 +2150,7 @@ Seda tegevust ei saa tagasi võtta.</string>
     <string name="ambassadors_apply_err_motivation_required">Räägi meile, miks soovid saada ZRP suursaadikuks.</string>
     <string name="ambassadors_apply_err_generic">Midagi läks valesti. Palun proovi uuesti.</string>
     <string name="ambassadors_apply_success_title">Avaldus saadetud</string>
-    <string name="ambassadors_apply_success_body">Aitäh! Sinu avaldus ootab läbivaatamist. Anname teada niipea, kui meie meeskond otsuse teeb – sa ei ole veel ametlik suursaadik.</string>
+    <string name="ambassadors_apply_success_body">Aitäh! Sinu avaldus ootab läbivaatamist. Anname teada niipea, kui meie meeskond otsuse teeb: sa ei ole veel ametlik suursaadik.</string>
     <string name="ambassadors_dashboard_title">Suursaadiku töölaud</string>
     <string name="ambassadors_dashboard_not_applied_title">Sa ei ole veel ZRP suursaadik</string>
     <string name="ambassadors_dashboard_err_load">Sinu suursaadiku staatust ei õnnestunud laadida</string>
@@ -2367,7 +2367,7 @@ Seda tegevust ei saa tagasi võtta.</string>
     <string name="admin_subscription_detail_not_yet">Mitte veel</string>
     <string name="admin_subscription_detail_yes">Jah</string>
     <string name="admin_subscription_detail_no">Ei</string>
-    <string name="admin_subscription_detail_no_subscription_record">Tellimuse kirjet ei ole – sellel kasutajal ei ole kunagi olnud süsteemi poolt jälgitud tasulist õigust.</string>
+    <string name="admin_subscription_detail_no_subscription_record">Tellimuse kirjet ei ole: sellel kasutajal ei ole kunagi olnud süsteemi poolt jälgitud tasulist õigust.</string>
     <string name="admin_subscription_detail_admin_controls">Admini juhtnupud</string>
     <string name="admin_subscription_detail_plan_label">Plaan</string>
     <string name="admin_subscription_detail_plan_pro">Pro</string>
@@ -2377,7 +2377,7 @@ Seda tegevust ei saa tagasi võtta.</string>
     <string name="admin_subscription_detail_interval_monthly">Kuine</string>
     <string name="admin_subscription_detail_interval_yearly">Aastane</string>
     <string name="admin_subscription_detail_grant_extend">Anna / pikenda</string>
-    <string name="admin_subscription_detail_grant_extend_note">&quot;Anna / pikenda&quot; jäljendab päris makset: see pikendab kasutaja olemasolevat perioodi, kui üks on samale plaanile veel aktiivne, vastasel juhul alustab uut perioodi tänasest. Raha ei liigu – see registreeritakse allolevas maksete ajaloos kui admin_grant.</string>
+    <string name="admin_subscription_detail_grant_extend_note">&quot;Anna / pikenda&quot; jäljendab päris makset: see pikendab kasutaja olemasolevat perioodi, kui üks on samale plaanile veel aktiivne, vastasel juhul alustab uut perioodi tänasest. Raha ei liigu: see registreeritakse allolevas maksete ajaloos kui admin_grant.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Tühistamise põhjus (valikuline):</string>
     <string name="admin_subscription_detail_cancel_remaining">Tühista järelejäänud aeg</string>
     <string name="admin_subscription_detail_restore">Taasta</string>

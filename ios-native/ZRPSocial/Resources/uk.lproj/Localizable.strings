@@ -61,7 +61,7 @@
 "play.aiTopicPlaceholder" = "напр., фільми 80-х, столиці світу, факти про космос";
 "play.generate" = "Згенерувати";
 "play.generating" = "Генерація...";
-"play.aiGeneratedNote" = "Згенеровано ШІ — перегляньте перед публікацією.";
+"play.aiGeneratedNote" = "Згенеровано ШІ: перегляньте перед публікацією.";
 "play.titleLabel" = "Заголовок";
 "play.titlePlaceholder" = "Дайте своєму завданню цікаву назву";
 "play.descriptionLabel" = "Опис (необов'язково)";
@@ -513,7 +513,7 @@
 "music.shell.uploadMusic" = "Завантажити музику";
 "music.shell.signInTitle" = "Увійдіть, щоб публікувати музику";
 "music.shell.signInBody" = "Прослуховування ZRP Music доступне для всіх. Щоб подати заявку на доступ до публікації, вам потрібно увійти.";
-"music.shell.gateTitle" = "Music Studio — потрібен статус виконавця чи творця";
+"music.shell.gateTitle" = "Music Studio: потрібен статус виконавця чи творця";
 "music.shell.gateBody" = "Прослуховування ZRP Music доступне для всіх. Публікація музики вимагає схваленого статусу творця чи верифікованого профілю музичного виконавця.";
 "music.shell.pendingVerification" = "Ваш профіль виконавця надіслано, і він очікує на верифікацію персоналом ZRP.";
 "music.shell.applyIntroPrefix" = "Створіть профіль виконавця, щоб подати заявку на верифікацію музичного виконавця, або";
@@ -529,22 +529,22 @@
 "music.shell.uploadHint" = "Аудіо та обкладинка завантажуються прямо у ваше наявне сховище ZRP.";
 "music.shell.publishFailedDefault" = "Публікація не вдалася. Спробуйте ще раз.";
 "music.shell.uploadFailedDefault" = "Завантаження не вдалося. Спробуйте ще раз.";
-"music.shell.emptyFileError" = "Не вдалося прочитати «{name}» — можливо, файл ще завантажується з iCloud чи іншого хмарного сховища. Зачекайте, поки завантаження завершиться, і спробуйте ще раз.";
+"music.shell.emptyFileError" = "Не вдалося прочитати «{name}»: можливо, файл ще завантажується з iCloud чи іншого хмарного сховища. Зачекайте, поки завантаження завершиться, і спробуйте ще раз.";
 "music.shell.unreadableFileError" = "Не вдалося прочитати «{name}». Можливо, він ще завантажується чи розшифровується у вашому застосунку хмарного сховища (Google Drive, MEGA, Dropbox, iCloud тощо). Спершу відкрийте файл там, щоб він став повністю доступним офлайн, а потім спробуйте ще раз.";
 "music.studio.tabTracks" = "Треки";
 "music.studio.tabAlbums" = "Альбоми";
 "music.studio.tabArtist" = "Профіль виконавця";
 "music.studio.deleteTrackTitle" = "Видалити трек";
-"music.studio.deleteTrackBody" = "Видалити «{title}»? Це неможливо скасувати — трек, його прослуховування й вподобання буде остаточно видалено.";
+"music.studio.deleteTrackBody" = "Видалити «{title}»? Це неможливо скасувати: трек, його прослуховування й вподобання буде остаточно видалено.";
 "music.studio.cancel" = "Скасувати";
 "music.studio.deleting" = "Видалення...";
 "music.studio.deleteConfirm" = "Видалити";
 "music.studio.deleteAlbumTitle" = "Видалити альбом";
-"music.studio.deleteAlbumBody" = "Видалити «{title}»? Його треки НЕ буде видалено — вони залишаться опублікованими й просто втратять зв'язок із цим альбомом.";
-"music.studio.uploadDoneRetryPublish" = "Завантаження завершено, але публікація треку не вдалася. Ваш файл у безпеці — натисніть «Повторити», щоб завершити публікацію без повторного завантаження.";
+"music.studio.deleteAlbumBody" = "Видалити «{title}»? Його треки НЕ буде видалено: вони залишаться опублікованими й просто втратять зв'язок із цим альбомом.";
+"music.studio.uploadDoneRetryPublish" = "Завантаження завершено, але публікація треку не вдалася. Ваш файл у безпеці: натисніть «Повторити», щоб завершити публікацію без повторного завантаження.";
 "music.studio.explicitLabel" = "Відвертий контент";
 "music.studio.retryPublish" = "Повторити публікацію";
-"music.studio.checkingFileHint" = "Файли з хмарних сховищ на кшталт MEGA можуть готуватися трохи довше — це нормально.";
+"music.studio.checkingFileHint" = "Файли з хмарних сховищ на кшталт MEGA можуть готуватися трохи довше: це нормально.";
 "music.studio.checkingFile" = "Перевірка файлу...";
 "music.studio.discardUpload" = "Скасувати й почати заново";
 "music.studio.myTracks" = "Мої треки";
@@ -599,7 +599,7 @@
 "marketplace.statusExpired" = "Закінчилося";
 "marketplace.statusRemoved" = "Видалено";
 "marketplace.heroTitle" = "ZRP Market Plus";
-"marketplace.heroSubtitle" = "Розкішний маркетплейс для верифікованих учасників ZRP — екзотичні автомобілі, яхти, приватні літаки, нерухомість та інше.";
+"marketplace.heroSubtitle" = "Розкішний маркетплейс для верифікованих учасників ZRP: екзотичні автомобілі, яхти, приватні літаки, нерухомість та інше.";
 "marketplace.searchPlaceholder" = "Пошук оголошень...";
 "marketplace.createListing" = "Створити оголошення";
 "marketplace.myListings" = "Мої оголошення";
@@ -825,7 +825,7 @@
 "settings.currentUsername" = "Поточне ім'я користувача";
 "settings.newUsername" = "Нове ім'я користувача";
 "settings.newUsernamePlaceholder" = "Нове ім'я користувача";
-"settings.usernameHint" = "Ім'я користувача має містити 3–20 символів. Можна змінювати лише раз на 30 днів.";
+"settings.usernameHint" = "Ім'я користувача має містити 3-20 символів. Можна змінювати лише раз на 30 днів.";
 "settings.cooldownNote" = "⏳ Ви зможете знову змінити ім'я користувача через {n} дн.";
 "settings.changeUsername" = "Змінити ім'я користувача";
 "settings.successUsernameUpdated" = "Ім'я користувача успішно оновлено! Ви зможете змінити його знову через 30 днів.";
@@ -886,7 +886,7 @@
 "trust.trustSignalsTitle" = "Сигнали довіри";
 "trust.trustSignalsSubtitle" = "Публічні сигнали, що використовуються для розрахунку цього паспорта.";
 "trust.additionalSignalsHeading" = "Додаткові сигнали";
-"trust.additionalSignalsNote" = "Вони не впливають на показник вище — вони показані окремо як додатковий контекст.";
+"trust.additionalSignalsNote" = "Вони не впливають на показник вище: вони показані окремо як додатковий контекст.";
 "trust.whatItMeansTitle" = "Що означає Trust Passport";
 "trust.whatItMeansDesc" = "Trust Passport надає прозорий погляд на позитивні сигнали акаунта, доступні на ZRP. Це не система верифікації особи, і вона не гарантує особу, наміри чи майбутню поведінку людини.";
 "trust.transparencyNotice" = "ZRP Trust Passport базується на сигналах акаунта та спільноти, доступних на ZRP. Показники автоматично перераховуються, коли змінюється базова інформація акаунта чи активність. Паспорт не розкриває адреси електронної пошти, IP-адреси, приватні повідомлення, скарги на модерацію чи іншу приватну інформацію акаунта.";
@@ -926,7 +926,7 @@
 "opportunity.organizationLabel" = "Організація (необов'язково)";
 "opportunity.skillsPlaceholder" = "напр., python, дизайн, маркетинг";
 "opportunity.addSkill" = "Додати";
-"opportunity.compensationPlaceholder" = "напр., $50–70 тис/рік, без оплати — академічні кредити";
+"opportunity.compensationPlaceholder" = "напр., $50-70 тис/рік, без оплати: академічні кредити";
 "opportunity.externalUrlLabel" = "Посилання на зовнішню заявку (необов'язково)";
 "opportunity.externalUrlPlaceholder" = "https://...";
 "opportunity.externalUrlHint" = "Якщо вказано, кандидатів буде спрямовано на це посилання замість подання заявки на ZRP.";
@@ -1026,7 +1026,7 @@
 "transparency.actionHeading" = "Вжиті дії";
 "transparency.generatedNote" = "Дані згенеровано {date}. Оновлюються щогодини.";
 "transparency.appealsHeading" = "Апеляції на модерацію";
-"transparency.appealsNote" = "Коли користувач не погоджується з рішенням модерації, він може його оскаржити. Це сукупні результати — ніколи не хто оскаржив чи що було сказано.";
+"transparency.appealsNote" = "Коли користувач не погоджується з рішенням модерації, він може його оскаржити. Це сукупні результати: ніколи не хто оскаржив чи що було сказано.";
 "adminReports.statusPending" = "На розгляді";
 "adminReports.statusReviewed" = "Розглянуто";
 "adminReports.statusDismissed" = "Відхилено";
@@ -1056,7 +1056,7 @@
 "ambassadors.apply.submit" = "Надіслати заявку";
 "ambassadors.apply.submitting" = "Надсилання...";
 "ambassadors.apply.subtitle" = "Розкажіть про свою країну та свою спільноту. Кожну заявку розглядає наша команда.";
-"ambassadors.apply.successBody" = "Дякуємо! Вашу заявку прийнято на розгляд. Ми повідомимо вас, щойно наша команда ухвалить рішення — офіційним амбасадором ви поки що не є.";
+"ambassadors.apply.successBody" = "Дякуємо! Вашу заявку прийнято на розгляд. Ми повідомимо вас, щойно наша команда ухвалить рішення: офіційним амбасадором ви поки що не є.";
 "ambassadors.apply.successTitle" = "Заявку надіслано";
 "ambassadors.apply.title" = "Стати амбасадором ZRP";
 "ambassadors.dashboard.codeAcceptedOn" = "Кодекс поведінки прийнято";
@@ -1083,7 +1083,7 @@
 "ambassadors.hero.ctaPrimary" = "Стати амбасадором ZRP";
 "ambassadors.hero.statAmbassadors" = "Амбасадорів";
 "ambassadors.hero.statCountries" = "Представлених країн";
-"ambassadors.hero.subtitle" = "Глобальні амбасадори ZRP очолюють спільноту у своїй країні — справжні люди, справжні спільноти, один рух, що зростає.";
+"ambassadors.hero.subtitle" = "Глобальні амбасадори ZRP очолюють спільноту у своїй країні: справжні люди, справжні спільноти, один рух, що зростає.";
 "ambassadors.hero.title1" = "СТВОРЮЙТЕ СВОЮ СПІЛЬНОТУ.";
 "ambassadors.hero.title2" = "ПРЕДСТАВЛЯЙТЕ СВОЮ КРАЇНУ.";
 "ambassadors.hero.title3" = "З'ЄДНУЙТЕ СВІТ.";
@@ -1092,7 +1092,7 @@
 "ambassadors.levels.communityLeader" = "Лідер спільноти";
 "ambassadors.levels.communityLeaderDesc" = "Створив(ла) і підтримує справжню, активну спільноту навколо ZRP.";
 "ambassadors.levels.explorer" = "Дослідник";
-"ambassadors.levels.explorerDesc" = "Кожен амбасадор починає звідси — з відкриття ZRP і спільноти навколо неї.";
+"ambassadors.levels.explorerDesc" = "Кожен амбасадор починає звідси: з відкриття ZRP і спільноти навколо неї.";
 "ambassadors.levels.globalAmbassador" = "Глобальний амбасадор";
 "ambassadors.levels.globalAmbassadorDesc" = "Визнання за тривалий вплив на глобальну спільноту ZRP.";
 "ambassadors.levels.sectionSubtitle" = "Просування здобувається реальною активністю в спільноті, а не простою реєстрацією.";
@@ -1327,7 +1327,7 @@
 "auth.hidePassword" = "Приховати пароль";
 "verifiedBadge.newsAutomated" = "Офіційний редакційний канал ZRP (автоматизований)";
 "profile.errLoadPosts" = "Не вдалося це завантажити. Спробуйте ще раз.";
-"ambassadors.apply.alreadyAmbassador" = "Ви вже є амбасадором ZRP. Ваш статус, рівень і посилання-запрошення — на вашій панелі.";
+"ambassadors.apply.alreadyAmbassador" = "Ви вже є амбасадором ZRP. Ваш статус, рівень і посилання-запрошення: на вашій панелі.";
 "communities.detail.leaveConfirmTitle" = "Покинути цю спільноту?";
 "communities.detail.leaveConfirmBody" = "Ви покинете {name}. Ви можете приєднатися знову будь-коли.";
 "communities.detail.ownerCannotLeave" = "Ви є власником цієї спільноти, тож не можете її покинути. Видаліть її, щоб закрити для всіх.";
@@ -1488,7 +1488,7 @@
 "ios.language.systemDefaultNote" = "Відповідає мові, встановленій у Налаштуваннях iOS. Оберіть мову нижче, щоб використовувати її лише в ZRP.";
 "ios.auth.usernameAvailable" = "Ім'я користувача доступне";
 "ios.auth.usernameTaken" = "Це ім'я користувача вже зайняте";
-"ios.auth.usernameInvalid" = "3–20 символів, лише літери, цифри й підкреслення";
+"ios.auth.usernameInvalid" = "3-20 символів, лише літери, цифри й підкреслення";
 "ios.auth.usernameSuggestions" = "Спробуйте один із варіантів";
 "ios.auth.forgotTitle" = "Скиньте свій пароль";
 "ios.auth.forgotBody" = "Введіть електронну пошту свого акаунта. Якщо вона існує, ми надішлемо посилання для скидання пароля.";
