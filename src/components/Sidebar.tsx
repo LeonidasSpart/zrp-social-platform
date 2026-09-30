@@ -169,6 +169,7 @@ export default function Sidebar() {
     { href: "/live-audio", icon: Radio, label: t("nav.liveAudio") },
     { href: "/play", icon: Gamepad2, label: t("nav.play") },
     { href: "/opportunity", icon: Briefcase, label: t("nav.opportunity") },
+    { href: "/launchpad", icon: Rocket, label: "Launchpad" },
     { href: "/aid", icon: HeartHandshake, label: t("nav.help") },
     { href: "/search", icon: Search, label: t("nav.search") },
     {

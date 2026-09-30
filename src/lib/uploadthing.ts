@@ -729,6 +729,25 @@ export const ourFileRouter = {
       type: isAudioFile(file) ? "audio" : "image",
     })),
 
+  // ─── ZRP LAUNCHPAD ─────────────────────────────────────────
+  tokenImage: f({
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user) {
+        throw new UploadThingError("Unauthorized");
+      }
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ file }) => {
+      console.log("Launchpad token image uploaded:", file.ufsUrl);
+      return { url: file.ufsUrl };
+    }),
+
 } satisfies FileRouter;
 
 export type OurFileRouter =

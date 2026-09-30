@@ -618,6 +618,8 @@ model User {
 
   withdrawalRequests WithdrawalRequest[]
 
+  launchedTokens LaunchedToken[]
+
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
 
@@ -2012,6 +2014,59 @@ model WithdrawalRequest {
   @@index([userId])
   @@index([status])
   @@index([creatorProfileId])
+}
+
+// ZRP Launchpad, phase 1: SPL token creation. The on-chain mint
+// transaction is server-signed (platform Keypair, same one
+// sendUsdc()/withdrawals already use) rather than signed in-browser by
+// the creator's own wallet - mint/freeze/update authorities are
+// assigned directly to the creator's User.verifiedSolanaWallet at
+// creation time (or revoked outright), which needs no signature from
+// that wallet at all, so this never reintroduces the in-browser
+// wallet-connect/sign dependency tree this codebase deliberately
+// removed (see TipModal.tsx's own comment on that). mintAddress and
+// mintTransactionId both start null and are filled in exactly once,
+// as early as possible after each is known, matching
+// withdrawals.ts's crash-safety pattern (record the signature before
+// waiting on confirmation, not after).
+model LaunchedToken {
+  id String @id @default(cuid())
+
+  mintAddress String? @unique
+
+  name        String
+  symbol      String
+  description String? @db.Text
+  imageUrl    String
+
+  website  String?
+  twitter  String?
+  telegram String?
+  discord  String?
+
+  supply   Decimal @db.Decimal(38, 0)
+  decimals Int
+
+  revokeMint   Boolean @default(false)
+  revokeFreeze Boolean @default(false)
+  revokeUpdate Boolean @default(false)
+
+  feeAmount        Decimal @db.Decimal(18, 6)
+  feeTransactionId String  @unique
+
+  mintTransactionId String? @unique
+
+  status        TransactionStatus @default(PENDING)
+  failureReason String?
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([creatorId])
+  @@index([status])
 }
 
 // ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT
