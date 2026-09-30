@@ -23,6 +23,18 @@ vi.mock("@/lib/uploadthing", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/uploadthing")>();
   return { ...actual, deleteUploadThingKeys, deleteUploadThingFiles: vi.fn() };
 });
+// Rate limiting isn't what this file tests (media-URL trust/validation
+// is) - the "rejects any untrusted photo or video" case below
+// deliberately makes 28 create calls from one seller to exercise every
+// BAD_URLS entry, which now also trips the real per-user
+// rateLimitByIpAndUser bucket (10/hour) added alongside the per-IP one
+// this file already dodges via a fresh IP per request (see jsonReq).
+// Stubbed the same way auth/uploadthing already are here, rather than
+// working around it with an unrealistic per-request user churn.
+vi.mock("@/lib/rate-limit", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/rate-limit")>();
+  return { ...actual, rateLimitByIpAndUser: vi.fn(async () => ({ success: true as const })) };
+});
 
 import { POST as createListing } from "../route";
 import { PUT as updateListing, DELETE as deleteListing } from "../[id]/route";

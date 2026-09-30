@@ -9,7 +9,7 @@ import { randomUUID } from "crypto";
 import { getVerifiedToken as getToken, isBlockedEitherWay } from "@/lib/auth-guards";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 import { checkPaymentSender } from "@/lib/payment-sender";
@@ -18,10 +18,6 @@ const PLATFORM_FEE = 0.10; // 10% platform fee
 const CHARITY_PERCENTAGE = 0.35; // 35% of platform fee goes to charity
 
 export async function POST(req: NextRequest) {
-  // Tip verification does real RPC + DB work per call - cap abuse.
-  const limit = await rateLimit(req, { limit: 10, window: 60, type: "creator-tip" });
-  if (!limit.success) return limit.response;
-
   try {
     // ─────────────────────────────────────────────────────────────
     // Authentication
@@ -47,6 +43,11 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Tip verification does real RPC + DB work per call - cap abuse.
+    // ⚠️ SECURITY: also keyed on the token id, not just IP.
+    const limit = await rateLimitByIpAndUser(req, senderId, { limit: 10, window: 60, type: "creator-tip" });
+    if (!limit.success) return limit.response;
 
     // Tips take a platform cut and unlock nothing distinguishable from a
     // simple digital gratuity - a store-sensitive payment surface, blocked
@@ -398,17 +399,15 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: unknown) {
+    // ⚠️ SECURITY: the raw error (a Prisma constraint message, or a
+    // @solana/web3.js RPC error that can include account addresses) used
+    // to be sent verbatim to the client. Log it server-side only, same
+    // pattern the admin withdrawal-approval routes already use, and
+    // return a fixed, generic message to the caller.
     console.error("Tip error:", error);
 
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Internal server error";
-
     return NextResponse.json(
-      {
-        error: errorMessage,
-      },
+      { error: "Failed to process tip. Please try again." },
       { status: 500 }
     );
   }

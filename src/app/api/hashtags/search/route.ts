@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllHashtagCounts } from "@/lib/hashtags/counts";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,9 @@ const MAX_LIMIT = 50;
 // (in this case, non-relational-*for the same reason*: no single-table
 // row backs one "hashtag") result set.
 export async function GET(req: NextRequest) {
+  const rl = await rateLimit(req, { limit: 30, window: 60, type: "hashtags-search" });
+  if (!rl.success) return rl.response;
+
   try {
     const rawQuery = (req.nextUrl.searchParams.get("q") || "")
       .trim()

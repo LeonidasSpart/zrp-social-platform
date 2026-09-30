@@ -245,3 +245,37 @@ export async function rateLimit(
 
   return { success: true };
 }
+
+/*
+ * ⚠️ SECURITY: rateLimit() above keys only on IP. For an authenticated
+ * write, that lets one account reset its bucket just by rotating IP
+ * (residential proxies, mobile-carrier CGNAT churn, a VPN with many
+ * exit nodes) while continuing to hit the endpoint from the same
+ * account - exactly the report-flooding and DM-spam bypass this was
+ * built to close. Mirrors the dual login-ip/login-acct pattern
+ * verifyCredentials() already uses for brute-force protection
+ * (src/lib/auth.ts) and turn-credentials/route.ts already uses for
+ * TURN credential issuance: check BOTH an IP-keyed and a user-keyed
+ * bucket with the same limit/window, so an attacker has to evade both
+ * dimensions at once, not just one.
+ */
+export async function rateLimitByIpAndUser(
+  req: NextRequest,
+  userId: string,
+  config: RateLimitConfig
+): Promise<{ success: true; response?: undefined } | { success: false; response: NextResponse }> {
+  const { limit, window: windowSeconds, type } = config;
+  const ip = getClientIp(req);
+
+  const [ipResult, userResult] = await Promise.all([
+    checkRateLimitKey(`${type}-ip:${ip}`, limit, windowSeconds),
+    checkRateLimitKey(`${type}-user:${userId}`, limit, windowSeconds),
+  ]);
+
+  if (!ipResult.success || !userResult.success) {
+    const retryAfter = Math.max(ipResult.retryAfter, userResult.retryAfter);
+    return { success: false, response: tooManyRequestsResponse(limit, retryAfter) };
+  }
+
+  return { success: true };
+}

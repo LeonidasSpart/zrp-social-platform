@@ -245,6 +245,16 @@ describe.skipIf(!hasRealDatabaseUrl)("GET /api/search (integration, real Postgre
       expect(body.results.map((p: { id: string }) => p.id)).not.toContain(post.id);
     });
 
+    it("⚠️ SECURITY: never returns a banned author's post", async () => {
+      const bannedAuthor = await createUser(`bannedpostauthor${runId}`, { banned: true });
+      const post = await createPost(bannedAuthor.id, `banned content ${runId}unique2`);
+      getServerSession.mockResolvedValueOnce(null);
+
+      const res = await GET(req({ q: `${runId}unique2`, type: "posts" }));
+      const body = await res.json();
+      expect(body.results.map((p: { id: string }) => p.id)).not.toContain(post.id);
+    });
+
     it("⚠️ SECURITY: redacts a premium post's content for a viewer who hasn't purchased it", async () => {
       const creator = await createUser(`premiumcreator${runId}`);
       const post = await createPost(creator.id, `premium content ${runId}secret`);

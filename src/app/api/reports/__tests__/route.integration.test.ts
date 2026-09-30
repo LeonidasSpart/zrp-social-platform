@@ -100,6 +100,23 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/reports - report a bare profile 
     expect(stored?.status).toBe("pending");
   });
 
+  // ⚠️ REGRESSION (master audit): the route only ever stored the target
+  // fields it was given, so a request carrying more than one of
+  // postId/commentId/.../userId silently created a report with several
+  // polymorphic targets set at once - violating the "exactly one
+  // target" invariant every downstream admin/report-count query assumes.
+  it("400s a request carrying more than one target at once", async () => {
+    const reporter = await createUser("multiTarget");
+    const target = await createUser("multiTargetVictim");
+
+    getServerSession.mockResolvedValueOnce(sessionFor(reporter.id));
+    const res = await createReport(
+      jsonReq({ userId: target.id, postId: randomUUID(), reason: "Spam" })
+    );
+    expect(res.status).toBe(400);
+    expect(await prisma.report.count({ where: { reporterId: reporter.id } })).toBe(0);
+  });
+
   it("409s a second pending report on the same account from the same reporter", async () => {
     const reporter = await createUser("dupReporter");
     const target = await createUser("dupTarget");

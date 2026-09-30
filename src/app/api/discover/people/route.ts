@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuthenticatedUser } from "@/lib/auth-guards";
 import { parseCursorParams, buildPage } from "@/lib/pagination";
+import { rateLimit } from "@/lib/rate-limit";
 
 // ─── People near you / businesses near you (Phase 11/15) ───────────
 //
@@ -19,6 +20,12 @@ import { parseCursorParams, buildPage } from "@/lib/pagination";
 // logged-out visitor would mean guessing their country, which this
 // feature never does.
 export async function GET(req: NextRequest) {
+  // Sibling Discover routes (discover, discover/events, discover/not-interested)
+  // are all rate-limited - this one, despite requiring auth and running
+  // a country-scoped user-directory query, wasn't.
+  const rl = await rateLimit(req, { limit: 30, window: 60, type: "discover-people" });
+  if (!rl.success) return rl.response;
+
   const auth = await requireAuthenticatedUser();
   if (!auth.ok) return auth.response;
 

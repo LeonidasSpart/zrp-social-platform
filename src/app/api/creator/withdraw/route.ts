@@ -5,13 +5,10 @@ import { Prisma } from "@prisma/client";
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
 import { getVerifiedToken as getToken } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { jsonWithDecimals } from "@/lib/serialize-decimal";
 
 export async function POST(req: NextRequest) {
-  const limit = await rateLimit(req, { limit: 5, window: 300, type: "creator-withdraw" });
-  if (!limit.success) return limit.response;
-
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token) {
@@ -19,6 +16,10 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = token.id as string;
+
+    // ⚠️ SECURITY: also keyed on the token id, not just IP.
+    const limit = await rateLimitByIpAndUser(req, userId, { limit: 5, window: 300, type: "creator-withdraw" });
+    if (!limit.success) return limit.response;
     const body = await req.json();
     const { amount } = body;
 

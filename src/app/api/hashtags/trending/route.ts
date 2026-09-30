@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllHashtagCounts } from "@/lib/hashtags/counts";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,13 @@ export const dynamic = 'force-dynamic';
 // query and the filtering gap in one change, rather than maintaining two
 // slightly different hashtag tallies.
 export async function GET(req: NextRequest) {
+  // The 5-min cache absorbs most repeat traffic, but the first caller
+  // in each window still triggers a real take:1000 Postgres scan - a
+  // coordinated multi-IP burst right at cache expiry can force
+  // repeated concurrent scans with no throttle at all otherwise.
+  const rl = await rateLimit(req, { limit: 30, window: 60, type: "hashtags-trending" });
+  if (!rl.success) return rl.response;
+
   try {
     const requestedLimit = parseInt(req.nextUrl.searchParams.get("limit") || "10", 10);
     const limit = Math.min(Math.max(Number.isFinite(requestedLimit) ? requestedLimit : 10, 1), 50);

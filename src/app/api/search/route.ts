@@ -13,6 +13,7 @@ import { searchNews } from "@/lib/search/categories/news";
 import { searchMusic } from "@/lib/search/categories/music";
 import { searchOpportunities } from "@/lib/search/categories/opportunities";
 import { searchMarketplace } from "@/lib/search/categories/marketplace";
+import { rateLimit } from "@/lib/rate-limit";
 
 // --- GET /api/search: Advanced Search -----------------------------------
 // See docs/advanced-search-architecture.md for the full contract.
@@ -75,6 +76,13 @@ function parseLimit(req: NextRequest, fallback: number): number {
 }
 
 export async function GET(req: NextRequest) {
+  // type=all fans out into 8 parallel category queries, each capable of
+  // a real DB scan on a cache miss - unprotected, this is both a
+  // directory-scraping/enumeration surface and an 8x DB-load
+  // amplification vector for a single caller.
+  const rl = await rateLimit(req, { limit: 30, window: 60, type: "search" });
+  if (!rl.success) return rl.response;
+
   const query = req.nextUrl.searchParams.get("q") || "";
 
   const category = parseSearchCategory(req);
