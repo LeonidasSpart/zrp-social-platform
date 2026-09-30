@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { X, Eye, Heart, Send, MoreVertical, Pencil, Trash2 } from "lucide-react";
@@ -316,8 +317,19 @@ export default function StoryViewer({ group, onClose, onGroupComplete, onStoryVi
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+  // Rendered through a portal onto <body>, matching ImageLightbox.tsx and
+  // BottomNav.tsx: inline, this `fixed inset-0` overlay was a DOM
+  // descendant of PageTransition's <motion.div> (src/components/
+  // PageTransition.tsx), and framer-motion keeps a non-"none" inline
+  // `transform` on that element even at rest - which establishes a new
+  // stacking context per spec. That trapped this overlay's whole subtree
+  // below BottomNav/Header/CookieConsent, which all portal straight onto
+  // <body> at z-[9999], regardless of what z-index this div used: no
+  // z-index value fixes a stacking context the element is trapped inside.
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black bg-opacity-90 z-[10000] flex items-center justify-center">
       {/* This button is a direct child of the `fixed inset-0` backdrop,
           so its offset is measured from the true viewport edge, not from
           the centred story card below. layout.tsx sets viewportFit:
@@ -692,6 +704,7 @@ export default function StoryViewer({ group, onClose, onGroupComplete, onStoryVi
           }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
