@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useId } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -92,8 +93,19 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-0 sm:p-4">
+  // Rendered through a portal onto <body>, matching ImageLightbox.tsx and
+  // BottomNav.tsx: inline, this `fixed inset-0` backdrop was a DOM
+  // descendant of PageTransition's <motion.div> (src/components/
+  // PageTransition.tsx), which framer-motion keeps a non-"none" inline
+  // `transform` on even at rest - that establishes a new stacking context
+  // per spec, trapping this whole modal's subtree below BottomNav/Header/
+  // CookieConsent (portaled straight onto <body> at z-[9999]) no matter
+  // what z-index this div used, and letting feed/story content from
+  // elsewhere in that same trapped subtree paint through on top of it.
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000] p-0 sm:p-4">
       {/*
         Root cause of the original bug: this whole modal was one single
         `overflow-y-auto` block (preview + textarea + buttons together)
@@ -218,6 +230,7 @@ export default function QuotePostModal({ post, onClose, onQuotePosted }: Props) 
           )}
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
