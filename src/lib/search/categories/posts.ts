@@ -147,7 +147,15 @@ async function buildWhere(params: SearchQueryParams): Promise<Prisma.PostWhereIn
       { authorId: { notIn: excludedAuthorIds } },
       { status: "published" },
       { scheduledAt: null },
-      { author: viewablePostAuthorFilter(params.viewerId) },
+      {
+        // ⚠️ MODERATION: viewablePostAuthorFilter alone does not exclude
+        // a banned author's content (it only governs private-account
+        // visibility) - the same gap already fixed in
+        // src/lib/discover/candidates.ts (Task #3) and in
+        // GET /api/hashtags/search's own scan. Advanced Search's Posts
+        // category was the one consumer never patched to match.
+        author: { banned: false, ...viewablePostAuthorFilter(params.viewerId) },
+      },
       ...(media ? [media] : []),
       ...(dateFilter ? [{ createdAt: dateFilter }] : []),
       ...(communityHashtag ? [{ hashtags: { has: communityHashtag } }] : []),

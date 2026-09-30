@@ -55,6 +55,10 @@ function buildWhere(params: SearchQueryParams): Prisma.NewsArticleWhereInput {
           { sourceName: { contains: params.query, mode: "insensitive" } },
         ],
       },
+      // Same banned-author gap already fixed for the Posts category
+      // (src/lib/search/categories/posts.ts) - a journalist banned
+      // after publishing must not keep surfacing through search.
+      { author: { banned: false } },
       ...(dateFilter ? [{ publishedAt: dateFilter }] : []),
     ],
   };

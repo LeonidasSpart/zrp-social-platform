@@ -55,6 +55,10 @@ function buildWhere(params: SearchQueryParams): Prisma.ListingWhereInput {
           { location: { contains: query, mode: "insensitive" } },
         ],
       },
+      // Same banned-author gap already fixed for the Posts category
+      // (src/lib/search/categories/posts.ts) - a banned seller's still-
+      // ACTIVE listing must not be findable through search.
+      { seller: { banned: false } },
       ...(dateFilter ? [{ createdAt: dateFilter }] : []),
       ...(filters.verified ? [{ seller: { badgeType: { not: null } } }] : []),
       ...(filters.professional

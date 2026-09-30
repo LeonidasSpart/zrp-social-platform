@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { isBlockedEitherWay } from "@/lib/auth-guards";
 import { findVisiblePost } from "@/lib/post-visibility";
+import { canViewPrivateContent } from "@/lib/permissions";
 
 // An emoji - including ZWJ family/flag sequences - is a handful of
 // UTF-16 code units; anything longer is not an emoji.
@@ -92,6 +93,30 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 // ─── GET /api/posts/[id]/reaction: Get all reactions ──────────────
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
+
+  // ⚠️ SECURITY: unlike every sibling "who did X" listing in this
+  // directory (reposts, quotes), this had no auth/visibility/block
+  // check at all - anyone who knew or guessed a post id got the full
+  // list of reactors (id/username/name/avatar) on a private, blocked,
+  // or unpublished/scheduled post. Same visibility rule the reposts
+  // route already applies.
+  const session = await getServerSession(authOptions);
+  const viewerId = session?.user?.id;
+
+  const post = await prisma.post.findUnique({
+    where: { id: params.id },
+    select: { authorId: true, status: true, author: { select: { isPrivate: true } } },
+  });
+  if (!post || post.status !== "published") {
+    return NextResponse.json({ error: "Post not found" }, { status: 404 });
+  }
+  if (!(await canViewPrivateContent(viewerId, post.authorId, post.author.isPrivate))) {
+    return NextResponse.json({ error: "Post not found" }, { status: 404 });
+  }
+  if (viewerId && viewerId !== post.authorId && (await isBlockedEitherWay(viewerId, post.authorId))) {
+    return NextResponse.json({ error: "Post not found" }, { status: 404 });
+  }
+
   const reactions = await prisma.reaction.findMany({
     where: { postId: params.id },
     include: {
