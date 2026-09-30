@@ -620,6 +620,7 @@ model User {
 
   launchedTokens LaunchedToken[]
   vestingContracts VestingContract[]
+  stakingPools StakingPool[]
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -2070,6 +2071,7 @@ model LaunchedToken {
   @@index([status])
 
   vestingContracts VestingContract[]
+  stakingPools     StakingPool[]
 }
 
 enum VestingContractStatus {
@@ -2149,6 +2151,106 @@ model VestingRelease {
   createdAt DateTime @default(now())
 
   @@index([vestingContractId])
+}
+
+enum StakingPositionStatus {
+  ACTIVE
+  UNSTAKED
+}
+
+// ZRP Launchpad, phase 3: fixed-APY staking pools against an
+// already-launched token. Fully wallet-native like VestingContract's
+// beneficiary side - opening or closing a position needs no ZRP
+// account, only the wallet itself:
+//   - stake (user -> platform escrow): "pay externally, paste the tx
+//     signature" exactly like a vesting deposit. The verified on-chain
+//     sender IS the position's owner - result.from === the wallet
+//     address the caller claims to stake for is the only check needed,
+//     since nobody but the true key-holder could have produced that
+//     transfer.
+//   - claim rewards / unstake (platform -> user, server-signed):
+//     the SAME single-use ed25519 challenge pattern as a vesting claim
+//     (buildWalletLinkMessage/verifyWalletSignature, bound to the
+//     position id), via claimNonce/claimNonceExpiresAt below.
+// Rewards are backed by a real, explicitly funded reserve
+// (StakingRewardDeposit, same pay-externally pattern) rather than
+// zrppad's pools, which could promise an APY with nothing behind it -
+// rewardReserveRaw is decremented atomically on every payout (the same
+// "reserve atomically, never check-then-increment" rule
+// src/lib/ai-quota.ts established), so a claim can never pay out more
+// than the pool has actually been funded with.
+model StakingPool {
+  id String @id @default(cuid())
+
+  launchedTokenId String
+  launchedToken   LaunchedToken @relation(fields: [launchedTokenId], references: [id], onDelete: Cascade)
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  // Annual percentage yield in basis points (1000 = 10.00%) - never a
+  // float, so reward math can be done entirely in BigInt.
+  apyBasisPoints Int
+  lockSeconds    Int
+  minStakeRaw    Decimal  @db.Decimal(38, 0)
+  maxStakeRaw    Decimal? @db.Decimal(38, 0)
+
+  totalStakedRaw    Decimal @db.Decimal(38, 0) @default(0)
+  rewardReserveRaw  Decimal @db.Decimal(38, 0) @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  positions      StakingPosition[]
+  rewardDeposits StakingRewardDeposit[]
+
+  @@index([launchedTokenId])
+  @@index([creatorId])
+}
+
+model StakingPosition {
+  id String @id @default(cuid())
+
+  poolId String
+  pool   StakingPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  userWalletAddress String
+
+  amountRaw         Decimal @db.Decimal(38, 0)
+  rewardClaimedRaw  Decimal @db.Decimal(38, 0) @default(0)
+
+  depositTransactionId String @unique
+
+  stakedAt  DateTime @default(now())
+  unlocksAt DateTime
+
+  status StakingPositionStatus @default(ACTIVE)
+
+  claimNonce          String?
+  claimNonceExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([poolId])
+  @@index([userWalletAddress])
+  @@index([status])
+}
+
+model StakingRewardDeposit {
+  id String @id @default(cuid())
+
+  poolId String
+  pool   StakingPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  amountRaw     Decimal @db.Decimal(38, 0)
+  transactionId String  @unique
+
+  createdAt DateTime @default(now())
+
+  @@index([poolId])
 }
 
 // ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT
