@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "내 주변 사람들";
 "ios.explore.peopleNearYouSubtitle" = "당신과 같은 국가";
 "ios.explore.peopleNearYouEmpty" = "아직 주변에 아무도 없습니다.";
+"ios.play.challengeUnsupported" = "이 게임 유형은 이 앱 버전에서 아직 지원되지 않습니다.";

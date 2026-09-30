@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Ljudi u blizini";
 "ios.explore.peopleNearYouSubtitle" = "Ista država kao vi";
 "ios.explore.peopleNearYouEmpty" = "Još nema nikoga u blizini.";
+"ios.play.challengeUnsupported" = "Ova vrsta igre još nije podržana u ovoj verziji aplikacije.";

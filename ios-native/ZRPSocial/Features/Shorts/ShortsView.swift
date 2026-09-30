@@ -213,7 +213,9 @@ private struct ShortPageView: View {
         ZStack {
             Color.black
 
-            if isCurrent, videos.activeId == post.id {
+            if let premiumPost = post.premiumPost, premiumPost.locked {
+                lockedContent(premiumPost)
+            } else if isCurrent, videos.activeId == post.id {
                 // `resizeAspect` inside a black screen rather than a
                 // crop: a short can be filmed at any ratio, and filling
                 // the screen would cut the subject out of a wide one.
@@ -228,10 +230,51 @@ private struct ShortPageView: View {
         .overlay(alignment: .bottomTrailing) { actions }
         .clipped()
         .onAppear {
-            if let url = post.imageUrl { videos.register(id: post.id, url: url) }
+            // A locked premium short has its `imageUrl` redacted server-side
+            // (`applyPremiumGating`), so there is nothing to register - the
+            // lock screen above is the whole story for this item.
+            if post.premiumPost?.locked != true, let url = post.imageUrl {
+                videos.register(id: post.id, url: url)
+            }
             if isCurrent { videos.report(id: post.id, visibleFraction: 1) }
         }
         .onDisappear { videos.unregister(id: post.id) }
+    }
+
+    // Same real, honest lock+price+link treatment ZRP Discover already
+    // uses for a locked premium item (`DiscoverSlideView.lockedContent`) -
+    // never a purchase button, since this app has no purchase flow for
+    // anything (Apple 3.1.1; see this app's store-policy notes).
+    @ViewBuilder
+    private func lockedContent(_ premiumPost: DiscoverPremiumPost) -> some View {
+        VStack(spacing: ZrpSpacing.md) {
+            Image(systemName: "lock.fill")
+                .font(.largeTitle)
+                .padding(ZrpSpacing.lg)
+                .background(.white.opacity(0.1), in: Circle())
+            Text(.shortsPremiumLockedTitle)
+                .font(.headline)
+            Text(.shortsPremiumLockedBody, ["price": formattedPrice(premiumPost.price), "currency": premiumPost.currency])
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.7))
+            Button {
+                navigator.push(.postDetail(postId: post.id, preloaded: nil, targetCommentId: nil))
+            } label: {
+                Text(.shortsPremiumLockedCta)
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, ZrpSpacing.lg)
+                    .padding(.vertical, ZrpSpacing.sm)
+                    .background(.white.opacity(0.15), in: Capsule())
+            }
+            .padding(.top, ZrpSpacing.xs)
+        }
+        .foregroundStyle(.white)
+        .multilineTextAlignment(.center)
+        .padding(ZrpSpacing.xl)
+    }
+
+    private func formattedPrice(_ price: Double) -> String {
+        price == price.rounded() ? String(Int(price)) : String(format: "%.2f", price)
     }
 
     private var caption: some View {

@@ -233,6 +233,11 @@ struct ReportRequest: Encodable {
         // account) with no single post/comment/listing attached - see
         // the backend's reportedUserId field in prisma/schema.prisma.
         case user(String)
+        // Two more of the route's eight polymorphic targets that had a
+        // backend field and working web + Android UI but no case here at
+        // all - an Opportunity listing and a ZRP HELP campaign.
+        case opportunity(String)
+        case campaign(String)
     }
 
     let target: Target
@@ -246,13 +251,15 @@ struct ReportRequest: Encodable {
         case .comment(let id): try container.encode(id, forKey: .commentId)
         case .listing(let id): try container.encode(id, forKey: .listingId)
         case .user(let id): try container.encode(id, forKey: .userId)
+        case .opportunity(let id): try container.encode(id, forKey: .opportunityId)
+        case .campaign(let id): try container.encode(id, forKey: .campaignId)
         }
         try container.encode(reason.rawValue, forKey: .reason)
         try container.encodeIfPresent(details, forKey: .details)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case postId, commentId, listingId, userId, reason, details
+        case postId, commentId, listingId, userId, opportunityId, campaignId, reason, details
     }
 }
 

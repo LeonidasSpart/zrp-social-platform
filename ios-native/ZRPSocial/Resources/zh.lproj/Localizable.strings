@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "附近的人";
 "ios.explore.peopleNearYouSubtitle" = "与你同国家";
 "ios.explore.peopleNearYouEmpty" = "附近暂无用户。";
+"ios.play.challengeUnsupported" = "此应用版本尚不支持此游戏类型。";

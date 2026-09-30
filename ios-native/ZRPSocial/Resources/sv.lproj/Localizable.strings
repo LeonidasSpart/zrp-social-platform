@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Personer i närheten";
 "ios.explore.peopleNearYouSubtitle" = "Samma land som du";
 "ios.explore.peopleNearYouEmpty" = "Ingen i närheten ännu.";
+"ios.play.challengeUnsupported" = "Den här speltypen stöds inte än i den här appversionen.";

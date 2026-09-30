@@ -356,7 +356,11 @@ struct PlayChallengeView: View {
                     Text(.opportunityLoginToApply)
                         .font(.footnote)
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
-                } else if !viewModel.isDuelPlay {
+                } else if !viewModel.isDuelPlay && challenge.type != .unknown {
+                    // Sending a duel for a type this build cannot render
+                    // would put both sides on a challenge neither of them
+                    // can play - a dead end reachable via a shared link,
+                    // a search result, or (previously) the trending list.
                     duelPanel
                 }
 
@@ -369,8 +373,12 @@ struct PlayChallengeView: View {
                     memoryBoard(challenge)
                 case .unknown:
                     // A challenge type this build does not know how to
-                    // play. Saying so beats a blank screen.
-                    Text(.playErrLoadFailed)
+                    // play (REACTION/SEQUENCE) - reached only via a
+                    // direct/duel/daily link now that the trending list
+                    // filters these out. Says so plainly rather than
+                    // reusing the generic load-failure string, which
+                    // reads as a bug rather than "not built yet."
+                    Text(.iosPlayChallengeUnsupported)
                         .font(.subheadline)
                         .foregroundStyle(ZrpColor.onSurfaceMuted)
                 }

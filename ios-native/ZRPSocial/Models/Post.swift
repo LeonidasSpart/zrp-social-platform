@@ -159,10 +159,31 @@ struct Post: Decodable, Identifiable, Equatable, Hashable {
     /// go in the timeline; this holds the piece itself.
     let body: String?
 
+    /// Present when `applyPremiumGating` (`src/lib/premium-content.ts`)
+    /// redacted this post for the viewer - every post-reading route
+    /// attaches it (`/api/posts`, `/api/posts/explore`, `/api/posts/{id}`,
+    /// `/api/users/{username}/posts`, `/api/videos`), but this struct
+    /// never decoded it, so a locked post silently rendered its
+    /// `previewContent` as if it were the whole post: no lock icon, no
+    /// price, no explanation, indistinguishable from a real short post.
+    /// Same shape as `DiscoverPremiumPost`, which already renders this
+    /// correctly on the Discover feed.
+    // A default rather than a required argument: this is the memberwise
+    // init every test fixture in this app constructs a `Post` through
+    // (JSON decoding is unaffected either way), and none of them knew
+    // this field existed a moment ago.
+    // `var`, not `let`: a `let` with a default value is never actually
+    // decoded by Swift's synthesized Decodable (it silently keeps the
+    // default forever, defeating this field's whole purpose) - the
+    // compiler warns about exactly this. `var` decodes normally via
+    // decodeIfPresent while still giving every existing memberwise-init
+    // test fixture a default of `nil`.
+    var premiumPost: DiscoverPremiumPost? = nil
+
     private enum CodingKeys: String, CodingKey {
         case id, content, createdAt, author, imageUrl, imageUrls, mediaType
         case views, quotePost, liked, commentsEnabled, linkUrl, poll
-        case type, company, location, applyUrl, body
+        case type, company, location, applyUrl, body, premiumPost
         case counts = "_count"
     }
 

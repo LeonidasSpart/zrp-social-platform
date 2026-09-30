@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Emberek a közeledben";
 "ios.explore.peopleNearYouSubtitle" = "Ugyanaz az ország, mint te";
 "ios.explore.peopleNearYouEmpty" = "Még senki sincs a közelben.";
+"ios.play.challengeUnsupported" = "Ezt a játéktípust ez az alkalmazásverzió még nem támogatja.";

@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Njerëz pranë jush";
 "ios.explore.peopleNearYouSubtitle" = "I njëjti vend si ju";
 "ios.explore.peopleNearYouEmpty" = "Ende nuk ka njeri pranë.";
+"ios.play.challengeUnsupported" = "Ky lloj loje nuk mbështetet ende në këtë version të aplikacionit.";

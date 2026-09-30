@@ -53,10 +53,19 @@ struct CommentRowView: View {
 
             VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
                 header
-                Text(verbatim: comment.content)
-                    .font(.subheadline)
-                    .foregroundStyle(ZrpColor.onSurface)
-                    .fixedSize(horizontal: false, vertical: true)
+                // Post text has always gone through `LinkifiedText`; this
+                // row rendered its own text with a plain `Text(verbatim:)`
+                // instead, so a comment's #hashtags/@mentions/links were
+                // inert here while web's `ParsedContent` makes them
+                // tappable on comments too.
+                LinkifiedText(
+                    content: comment.content,
+                    onHashtag: { navigator.push(.hashtag(tag: $0)) },
+                    onMention: { navigator.push(.profile(username: $0)) },
+                    onZrpLink: { navigator.push($0) },
+                    font: .subheadline
+                )
+                .fixedSize(horizontal: false, vertical: true)
                 translation
                 actions
             }

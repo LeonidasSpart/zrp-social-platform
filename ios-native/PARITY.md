@@ -39,6 +39,156 @@ called and the real response being handled.
 
 ---
 
+## Task #5 — iOS Full Parity Audit (2026-09-29)
+
+A ten-cluster, read-only audit of the whole iOS app against web/Android/
+backend (mirroring Task #4's Android methodology), each cluster required
+to consult this file first rather than assume anything was missing. It
+found this file accurate on most of what it already documents, plus real,
+previously-undocumented gaps and a few outright stale/wrong claims
+(corrected in place below, not just here). Rows this pass touched are
+marked with a "(Task #5 fix)"/"(Task #5 audit finding)" note; this
+section is the single place to see the whole pass at a glance.
+
+**Real bugs fixed (behavior was wrong, not merely incomplete):**
+- `PresenceStore.resync()` existed but nothing ever called it - a socket
+  reconnect (background/foreground, a network drop, a server restart)
+  left every previously-known online/offline dot stale until that person
+  happened to transition again. Now wired via `ZrpSocket`'s new
+  `subscribeToConnect(_:)`, mirroring web's `PresenceContext.tsx` fix.
+- Group conversation rooms (`join-conversation`) were joined once at
+  screen-open and never re-joined after a reconnect, silently degrading
+  live group delivery to a ≤30s poll while `isConnected` still read
+  `true` - the polling fallback's own interval logic assumes a connected
+  socket means live delivery works. Now re-emitted on every reconnect,
+  using the same `subscribeToConnect(_:)` mechanism.
+- Nav badges (Messages/Notifications tab counts) never updated live -
+  no socket listener, no poll - so a message or notification arriving
+  while on another tab left the badge stale until the Messages tab was
+  manually opened. Now listens for `receive-message`/`receive-group-message`
+  (unlike Android's equivalent fix, which had to fall back to polling
+  since Android has no app-wide socket; iOS already holds one session-long)
+  and `notification:new` (the same event `UnreadCountContext.tsx` listens
+  for on web).
+- `ConversationViewModel` never emitted `mark-read` on receiving a live
+  message from the other party while the thread was open - the sender's
+  read-receipt checkmark only ever caught up on their next ≤30s poll,
+  never instantly, unlike web and Android.
+- `Post` never decoded `premiumPost`, so a locked premium item rendered
+  its server-truncated preview as if it were the whole post on the main
+  feed/profile/post-detail (a pre-existing gap shared with web - not
+  fixed, since web has the same gap on those exact surfaces) - but on
+  **ZRP Shorts** specifically (`GET /api/videos`), the missing field
+  meant `imageUrl` (server-redacted for a locked item) was the only
+  signal read, so the video pane showed a permanent blank/generic play
+  icon with no lock, price, or explanation at all - the same class of
+  bug the Task #4 Android audit found in Android's own Shorts feed.
+  `ShortsView.swift`'s `ShortPageView` now mirrors Discover's real
+  lock+price+"View post" treatment.
+- `ChatContactSheet`'s "Shared media" grid filtered on `imageUrl`
+  presence alone, which also matches voice notes/documents/videos (all
+  three share that field) - rendered a broken tile for each. Now uses
+  `ChatAttachmentKind.of(_:) == .image`, the same classifier
+  `GroupConversationView` already used elsewhere.
+
+**Real UI/UX gaps fixed:**
+- `Message.story` was decoded on every thread fetch but never read by
+  `MessageBubble` - a story reply arrived as an ordinary DM with no
+  thumbnail/"Replied to your story" badge on the **recipient's** side
+  (the send path itself was already correct). Same gap, same fix shape,
+  as the Android audit found and fixed this session.
+- `CommentRowView` rendered comment text via plain `Text(verbatim:)`
+  instead of `LinkifiedText` (already used for post text) - a comment's
+  `#hashtags`/`@mentions`/links were inert while web's `ParsedContent`
+  makes them tappable on comments too.
+- `LoginView` showed a failed unverified-email login's raw server error
+  with no way to resend the verification email, though
+  `AuthRepository.resendVerification()` already existed (wired only into
+  `RegisterView`) and web's login page has exactly this affordance.
+- `UserProfile` never decoded `followRequestStatus` - a sent follow
+  request to a private account read as a plain "Follow" button again the
+  moment the screen reloaded or the app relaunched, even though the
+  request had genuinely been sent server-side. Now shows a disabled
+  "Requested" pill, matching web's `isFollowRequested`.
+- PLAY's trending list showed REACTION/SEQUENCE challenges (no player
+  view exists for either) as normal-looking cards; tapping one produced
+  the generic "Failed to load challenge." string, indistinguishable from
+  a real error; and the "Challenge a Friend" panel was offered even
+  there, letting someone send a duel invite nobody could play. Trending
+  now filters these out (matching Android's `filterPlayableChallenges`),
+  the message is now an honest "This game type isn't supported in this
+  app version yet." (new key `ios.play.challengeUnsupported`, all 39
+  languages), and the duel panel is hidden for an unsupported type.
+- `/play/duel/{id}` links fell through `DeepLink.swift`'s `"play"` case
+  to the generic Play home tab instead of the specific duel, despite
+  `Route.playDuelDetail(id:)` already existing and being used internally
+  from `PlayDuelsView`.
+- `ReportRequest.Target` only covered 4 of the backend's 8 polymorphic
+  report targets - Opportunity listings and HELP campaigns had a real
+  backend field and working web + Android UI but no iOS case or entry
+  point at all. Added `.opportunity`/`.campaign` plus a toolbar flag
+  button on each detail screen, reusing the existing `ReportSheet`.
+
+**Corrections to this file itself** (claims that were stale or wrong,
+not just incomplete): Communities and Lists were marked `NOT APPLICABLE`
+("no communities feature anywhere in ZRP") five days *after* PR #299
+shipped both features for real, across all three clients - replaced with
+a real matrix (see "Communities & Lists" below). The News category count
+said "eleven" in three places (this file, `NewsArticle.swift`,
+`NewsView.swift`) after a twelfth (`GAMING`) was added and iOS already
+covered it - all three corrected. The admin Reports queue's "seven
+polymorphic targets" claim was stale by one - the schema now has eight
+(`liveAudioRoomId`), unhandled on every platform's admin UI, not just
+iOS. Creator dashboard (`GET /api/creator/dashboard`) and withdrawals
+(`POST /api/creator/withdraw`) were classified `OUT OF SCOPE (store
+policy)` - `rejectNativePayment()` is never called by either route
+(confirmed by grep across the 5 routes that do call it), and
+`src/lib/native-payment-policy.ts`'s own doc comment explicitly excludes
+withdrawals as "not a purchase." Reclassified `MISSING` (a real,
+addressable gap) rather than an intentional, policy-driven exclusion.
+
+**Confirmed still genuinely correct, re-verified independently rather
+than trusted:** Task #1's WebRTC calling (byte-for-byte signaling
+contract re-diffed against `server.js`/`socket-authz.js`), Task #2's
+Advanced Search (still calls the one real shared `GET /api/search`),
+Task #3's Discover/Explore (block/mute/premium-gating/people-near-you
+all still correct), PLAY's create-challenge/Duels server-authoritative
+scoring, the 39-language localization pipeline's CI-enforced
+completeness, and this app's near-total absence of Combine/manual
+`DispatchQueue` (a real architectural strength worth recording, not a
+gap).
+
+**Genuine remaining gaps, scoped out of this pass deliberately** (real
+"build a subsystem" work, not "fix a bug" work - documented honestly
+rather than attempted piecemeal): iOS device push remains entirely
+unbuilt (pre-existing, [B3](#b3-ios-device-push), unblocks CallKit and
+backgrounded/terminated incoming-call delivery too); no Achievements
+gallery / other-player PLAY-profile screen; PLAY leaderboard has no
+country/friends scope (global only); no group message reactions/delete
+despite full backend support (`socket-authz.js` explicitly handles a
+group message for both); no group typing indicator; no creator-side
+"mark post as premium"/tips-enabled toggle UI, no "accepts tips" profile
+badge, no withdrawal screen or the wallet-link-and-verify flow it
+depends on; no mention-autocomplete in the post composer; comment
+image/GIF attachment (backend field exists, validated, but no iOS
+composer or display support - matches a gap the Task #4 Android audit
+also found); no professional-category picker/visibility toggle (`PUT
+/api/user`); no app-wide background/foreground re-sync (`ScenePhase`
+observation is entirely absent - recovery depends on the socket's own
+backoff timer or a manual pull-to-refresh); `InlineVideoView` (the
+ordinary feed's video player) has no playback-error handling, unlike
+Discover/Shorts, which already do; site-admin (non-member) community
+deletion is not offered on iOS (`canDelete` undecoded) though the
+backend and web both support it; camera-permission denial relies on the
+system's own alert rather than an app-authored message (unlike the
+microphone path); no token-refresh/renewal mechanism (a fixed 30-day
+mobile JWT, no backend refresh route exists to consume); Universal
+Links' `associated-domains` entitlement is deliberately not yet declared
+(no Team ID yet), so deep links work only from in-app taps today, not
+from Safari/Messages.
+
+---
+
 ## Matrix
 
 ### Authentication & session
@@ -113,18 +263,44 @@ called and the real response being handled.
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | Profile header + stats | `GET /api/users/{username}` | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Professional category | same route, `category`/`showCategory` (already selected server-side) | ✅ | ✅ (`UsersApi.kt` already decodes it) | ✅ (`UserProfile.swift` already decodes it) | IMPLEMENTED |
+| Professional category (read) | same route, `category`/`showCategory` (already selected server-side) | ✅ | ✅ (`UsersApi.kt` already decodes it) | ✅ (`UserProfile.swift` already decodes it) | IMPLEMENTED |
+| Professional category (write: set/change + visibility toggle) | `PUT /api/user` (a **different** route from the one above - `category`/`showCategory` are write-only here, not on `PUT /api/user/profile`) | ✅ (Settings has a picker + toggle) | ⬜ | ⬜ no picker or toggle anywhere - iOS only ever reads this field, never writes it (Task #5 audit finding; the row above's "IMPLEMENTED" previously and incorrectly implied both directions) | MISSING |
 | Charity impact | same route, new `charityContributionUsdc` - the real sum of this profile's own completed tips'/purchases' `charityAmount` (`src/lib/charity.ts`), computed the same way `api/transparency/charity` computes it platform-wide. Web's own display of this was previously `Math.floor(Math.random() * 50) + 5` "meals" - fabricated, regenerated every page load, with no established $-to-"meals" conversion anywhere in this codebase to make real. Now a real USD figure on web; not yet consumed by Android or iOS | ✅ (fixed - was fake) | ⬜ | ✅ the real USDC figure, shown only when the route reports one; absent is not zero, since "$0.00 contributed" would be a claim the server never made. The 35% share matches the website's own constant | IMPLEMENTED |
 | Milestone badges | same route, new `milestones: [{key, icon, params?}]` (`src/lib/milestones.ts`) - years-on-ZRP / post-count / follower-count tiers, previously computed only in web's own client code so Android/iOS had no way to show the same badges a profile earned. Stable `key` + numeric `params`, same as Trust Passport - each client owns its own localized label | ✅ (now server-computed, was client-only) | ⬜ | ✅ key → this app's own translation, nothing recomputed. An unrecognised key is skipped rather than rendered raw, so a newer backend's badge never puts "posts_500" in front of an Arabic or Chinese reader | IMPLEMENTED |
 | User posts tab | `GET /api/users/{username}/posts` (**`{items,nextCursor}`**) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Replies / media / likes / reposts tabs | `GET /api/users/{username}/replies`, `/media`, `/likes`, `/reposts` | ✅ | 🔶 | ✅ all four, each paging on its own cursor (likes and reposts page on the join row, not the post); Likes is hidden unless it is your own profile or the account keeps likes public, matching the web | IMPLEMENTED |
 | Profile analytics tab | `GET /api/user/posts/stats`: keyed by the SESSION, so there is no route for anyone else's numbers; returns the 20 newest posts and totals summed over exactly those | ✅ | ⬜ | ✅ own-profile only, for that reason; the scope is stated on screen rather than letting the totals read as lifetime figures | IMPLEMENTED |
-| Follow / unfollow (+ request for private) | `POST /api/users/{username}/follow` | ✅ | ✅ | ✅ (all three outcomes: followed, unfollowed, request pending) | IMPLEMENTED |
+| Follow / unfollow (+ request for private) | `POST /api/users/{username}/follow` | ✅ | ✅ | ✅ (all three outcomes: followed, unfollowed, request pending). `UserProfile` now also decodes the route's `followRequestStatus` field, so a pending request shows a disabled "Requested" pill that survives a reload/relaunch (Task #5 fix) - previously the button silently read "Follow" again the moment the screen reloaded, even though the request had genuinely been sent | IMPLEMENTED |
+| Follow request accept / decline / cancel | **no such route exists anywhere in the backend** - `POST /api/users/{username}/follow` can only create a `pending` `FollowRequest` or re-open a `rejected` one; nothing in this codebase ever sets one to `approved`, and there is no cancel path either | ⬜ (no accept/decline UI; no cancel control) | ⬜ | ⬜ (matches web/Android - correctly builds no UI for a capability that does not exist) | NOT APPLICABLE (backend gap, confirmed cross-platform, Task #5 audit) |
 | Followers / Following lists | `/followers`, `/following` → `{items,nextCursor}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit profile | `PUT /api/user/profile`, `POST /api/user/update-avatar`, `POST /api/user/update-cover` | ✅ | ✅ | ✅ loads the real profile first, so blanks it never read cannot erase a bio | IMPLEMENTED |
 | Suggested users | `GET /api/users/suggested` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Private-account gating | every content route returns `{items: []}`, not 403 | ✅ | 🔶 | ✅ (explains the account is private instead of showing "no posts") | IMPLEMENTED |
 | Trust Passport | `GET /api/users/{username}/trust`: score, level, per-signal points and the breakdown are all computed server-side; the route's own comment says a client must never calculate them | ✅ | ⬜ | ✅ reached from any profile's menu; nothing is derived beyond the ring's fraction (reported score ÷ reported maximum); signal/category/level titles now also carry a `titleKey`/`descriptionKey` for localization; see L5 (FIXED) | IMPLEMENTED |
+
+### Communities & Lists
+
+**Correction (Task #5, iOS parity audit):** both features are real, built
+across Web/Android/iOS, and have been since PR #299
+("Add real Communities and Lists features across Web, Android, and iOS",
+merged 2026-09-13). An older revision of this file's "not built" table
+still marked both `NOT APPLICABLE` after that PR landed - itself
+contradicted two sections below, where iOS's own community picker is
+already referenced as reusing `CommunitiesRepository`. Corrected here
+with the real matrix.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Create a community | `POST /api/communities` (3-60 char name, 10-500 char description, unique slug, rate-limited 10/hr, creator seeded as OWNER) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Browse / join / leave | `GET /api/communities`, `/{id}/join`, `/{id}/leave` (owner cannot leave, 409 `OWNER_CANNOT_LEAVE`) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Community feed | `GET /api/communities/{id}/feed`: real hashtag-filtered `Post` query, cursor-paginated, premium-gated | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Delete a community | `DELETE /api/communities/{id}`: owner-or-site-admin only, real DB re-check every time (`leave-delete-authz.integration.test.ts`) | ✅ (owner or a real site admin, via server's own `canDelete`) | ✅ | 🔶 owner only - `CommunityDetailResponse` never decodes the route's `canDelete` field, so a site MODERATOR/ADMIN who is not a member gets no delete control on iOS even though the backend and web both support it | PARTIAL |
+| Member list / roles | **no backend route** returns a community's member list at all; `CommunityRole.ADMIN` is defined in the schema but no code path anywhere ever grants it - only OWNER and MEMBER are ever reachable, on any platform | ⬜ | ⬜ | ⬜ | NOT APPLICABLE (whole-product gap, not iOS-specific) |
+| Create a list | `POST /api/lists` (1-60 char name, ≤200 char description, max 50/user) | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Public/private, add/remove member | `PATCH`/`DELETE /api/lists/{id}/members/{userId}` etc., owner-only, blocked-pair-safe | ✅ | ✅ | ✅ | IMPLEMENTED |
+| List feed | `GET /api/lists/{id}/feed`: real `authorId IN (memberIds)` post feed, cursor-paginated, premium-gated, 403 if private and not owner | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Rename / edit a list | `PATCH /api/lists/{id}` exists server-side (name/description/isPrivate) but **no client calls it** | ⬜ | ⬜ | ⬜ | NOT APPLICABLE (whole-product gap: backend supports it, no UI anywhere ever calls it) |
+| "Lists I'm a member of" | `GET /api/lists` is hard-scoped to `ownerId: session.user.id` - no route anywhere reads `ListMember` for the current viewer's own memberships | ⬜ | ⬜ | ⬜ | NOT APPLICABLE (backend gap, confirmed cross-platform) |
 
 ### Discovery
 
@@ -226,6 +402,7 @@ own view of "who is in this room").
 | Create story (text/image/video) | `POST /api/stories` + UploadThing `storyMedia` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Story expiry | server filters `expiresAt > now`; no client handling needed | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Story view counts | returned to everyone, shown only to the author | ✅ | 🔶 | ✅ | IMPLEMENTED |
+| Story reply → DM quote badge (recipient side) | `Message.storyId`/`story` (`{id, mediaUrl, mediaType, content}`), same as every other DM | ✅ `ChatInterface.tsx`'s quote badge | ✅ (fixed) | ✅ (Task #5 fix) - `Message.story` was always decoded but `MessageBubble` never read it, so a story reply landed as an ordinary DM with no thumbnail/"Replied to your story" badge on the recipient's side, even though the send path itself was already correct | IMPLEMENTED |
 
 ### Messages
 
@@ -236,12 +413,12 @@ own view of "who is in this room").
 | Send message | `POST /api/messages` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Edit / delete message | `PUT /api/messages/edit/{id}`, `DELETE /delete/{id}` | ✅ | ✅ | ✅ (sender-only, 403-enforced) | IMPLEMENTED |
 | Reactions | `POST /api/messages/reaction/{id}`: one per person; same emoji removes, different replaces | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Unread badge | `GET /api/messages/unread` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Unread badge | `GET /api/messages/unread`, live via socket `receive-message`/`receive-group-message` | ✅ | ✅ (fixed - polling, no app-wide socket to listen on) | ✅ `UnreadBadgeViewModel` now listens on the app's own session-long socket for both events (Task #5 fix - previously refreshed only at launch and on switching to the Messages tab, so a message arriving on another tab left the badge stale) | IMPLEMENTED |
 | Realtime | Socket.IO (`server.js`, path `/api/socket.io`, websocket transport, session-cookie handshake) | ✅ | ✅ (Socket.IO Java client) | ✅ Engine.IO v4 + Socket.IO framing written directly on `URLSessionWebSocketTask` (no dependency added). Live `receive-message`, `message-edited`, `message-deleted`, `reaction-updated`, `message-read`; polling stays as the fallback while the socket is down (30 s connected, 6 s not) | IMPLEMENTED |
 | Typing indicator | `typing` → `user-typing` relay | ✅ | ✅ | ✅ throttled to one event every 2 s; the indicator clears itself after 5 s in case the "stopped" event is lost with the connection | IMPLEMENTED |
 | Contact drawer (avatar, name, badge, handle, profile, block/mute, shared media) | `POST /api/users/{username}/block`, `POST /api/users/mute` | ✅ `ChatContactDrawer` | 🔶 | ✅ (**without Call and Video**) | PARTIAL |
 | Voice / video calling: placing/answering/being called | WebRTC signalling over the same socket (`call-user`/`incoming-call`/`accept-call`/`call-accepted`/`reject-call`/`call-rejected`/`end-call`/`call-ended`, non-trickle - one full SDP per side) | ✅ simple-peer | ✅ (`org.webrtc.*`) | ✅ `CallViewModel`/`CallView`, `stasel/WebRTC` (a SwiftPM distribution of Google's own prebuilt libwebrtc binaries - this app's *second* third-party dependency, after LiveKit for Live Audio); mic/camera, mute, speaker toggle, front/back camera switch, the same non-trickle-ICE signal/answer timeouts as the Android sibling. Placed from `ConversationView`'s toolbar (matching where the Android sibling puts the buttons); the incoming-call overlay is shown app-wide (`MainTabView`), superseding the earlier decline-only `IncomingCallResponder`. Hardening pass: the overlay used to unmount (and take its own error text with it) in the same render pass a failure set `phase = .idle` - a person could never actually read why a call ended; it now stays up for that case until `dismissError()` is tapped. An ICE `.failed` state used to only set an error flag while leaving the "connected" UI running over a peer connection that could no longer carry media (the Android sibling still does); it now calls `endCall()`, matching the website. `accept-call`/`reject-call`/`end-call` now carry the `callId` `incoming-call` supplied (`socket-authz.js`'s own GENERATION RACE protection) when this side is the callee; the caller side still cannot learn its own outgoing call's id, since that requires a socket.io ACK `ZrpSocket` does not implement. Audio session interruptions (Siri, another app) and route changes (AirPods connecting/disconnecting) are now handled, mirroring `MusicPlayer`'s own observers. CallKit/VoIP push was evaluated and deliberately not added: it would require a working iOS push-delivery path, which does not exist yet for any feature (see [B3](#b3-ios-device-push)) - a CallKit UI with no way to be triggered while backgrounded would be exactly the "capability added blindly" this file warns against elsewhere. `ZRPSocialTests/CallViewModelTests.swift` covers the pure logic (error classification, duration formatting); no CI job runs `xcodebuild test` for this or any other iOS test target today - `ios-native-build.yml` only builds and archives, so this suite is automated but not CI-verified, a pre-existing gap wider than calling | IMPLEMENTED |
-| Read receipts | side effect of `GET /api/messages/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Read receipts | side effect of `GET /api/messages/{userId}`, live push via socket `mark-read` → `message-read` | ✅ | ✅ | ✅ display was always correct; the live `mark-read` emit on receiving a message while the thread is open was missing (Task #5 fix) - the sender's checkmark previously only caught up on their next ≤30s poll instead of flipping instantly | IMPLEMENTED |
 | Reply to a message | `POST /api/messages` + `replyToId` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Delete a conversation | `DELETE /api/messages/conversation/{userId}` | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Image attachments | `POST /api/messages` + `imageUrl` (UploadThing `chatImage`, 4 MB); the route accepts an empty `content` **only** alongside an image and refuses both-empty with a 400 | ✅ | ✅ | ✅ one picture per message (the row stores a single `imageUrl`), uploaded on send rather than on selection, and a failed upload stops the send rather than silently dropping the picture | IMPLEMENTED |
@@ -280,6 +457,7 @@ own view of "who is in this room").
 | My listings / my applications | `GET /api/opportunity/my-listings`, `/my-applications` | ✅ | ✅ | ✅ one screen, two tabs. Listings show status and a moderator's rejection reason verbatim; `my-listings` is the only route that returns a listing that is not live | IMPLEMENTED |
 | Review applicants | `GET /api/opportunity/{id}/applications`: poster or staff, 403 otherwise | ✅ | ✅ | ✅ cover notes, and the three decisions the route lets an owner set | IMPLEMENTED |
 | Decide on an application | `PUT /api/opportunity/applications/{id}` | ✅ | ✅ | ✅ the route splits by role: an applicant may set only `WITHDRAWN` on their own application, an owner only `REVIEWED`/`ACCEPTED`/`REJECTED`. Each side is offered only its own statuses, so the 403 explaining the rule is never how anyone finds out | IMPLEMENTED |
+| Report a listing | `POST /api/reports` (`opportunityId` - the fifth polymorphic target) | ✅ | ✅ | ✅ toolbar flag button on the detail screen, hidden for the poster's own listing (`ReportRequest.Target.opportunity`, Task #5 fix - the route and the field had existed since the type shipped, but no client-side case or UI ever called it) | IMPLEMENTED |
 
 ### ZRP HELP (Aid)
 
@@ -290,6 +468,7 @@ own view of "who is in this room").
 | Campaign detail | `GET /api/help/{id}`: reading it counts a view for anyone but the organiser | ✅ | ✅ | ✅ gallery, organiser, needs, description, and progress when money is one of the needs | IMPLEMENTED |
 | Offer supplies / skills / time | `POST /api/help/{id}/offer`: accepts exactly those three, refuses `MONEY` | ✅ | ✅ | ✅ one button per need the campaign actually asks for; a money-only campaign gets none rather than a control that cannot work | IMPLEMENTED |
 | **Contribute money** | `POST /api/help/{id}/contribute`: calls `rejectNativePayment()` | ✅ | ⬜ | ❌ **deliberately absent.** Every request from this app carries `x-zrp-native-app`, so that route can only refuse it (Apple 3.1.1). A button could produce nothing but that refusal | OUT OF SCOPE (store policy) |
+| Report a campaign | `POST /api/reports` (`campaignId`) | ✅ | ✅ | ✅ toolbar flag button on the campaign screen, hidden for the organizer's own campaign (`ReportRequest.Target.campaign`, Task #5 fix) | IMPLEMENTED |
 | Create a campaign | `POST /api/help`: `organization` badge only | ✅ | ✅ | ⬜ the badge is granted by manual verification off the app, so a composer would refuse almost everyone who opened it. The website's own `help.orgOnlyNote` is shown instead | MISSING (by design) |
 | Raised / goal figures | serialised as decimal strings by `jsonWithDecimals` | ✅ | ✅ | ✅ shown exactly as the server formatted them; a float is derived only for the progress bar's width, never for a figure on screen | IMPLEMENTED |
 
@@ -327,7 +506,7 @@ own view of "who is in this room").
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
 | News feed | `GET /api/news` (`category`, `cursor`, `limit`; the cursor is a `publishedAt` timestamp, not an opaque token, and an unparseable one is a 400) | ✅ | ✅ | ✅ cursor-paginated, public; the route serves it without a session, exactly as zrp.one/news does | IMPLEMENTED |
-| Category filter | same route, `?category=` against the schema's eleven `NewsArticleCategory` values | ✅ | ✅ | ✅ same eleven chips and the same "All" default; an unknown category decodes to a value that is never sent back as a filter, so a category added server-side cannot break an older build | IMPLEMENTED |
+| Category filter | same route, `?category=` against the schema's twelve `NewsArticleCategory` values (GAMING was added after this row was first written; iOS already covers it - `1835d72f` - corrected the stale "eleven" count here, Task #5) | ✅ | ✅ | ✅ same twelve chips and the same "All" default; an unknown category decodes to a value that is never sent back as a filter, so a category added server-side cannot break an older build | IMPLEMENTED |
 | Article | `GET /api/news/{slug}`: reading it is what increments the view tally, server-side | ✅ | ✅ | ✅ cover, category, byline (linking to the author's profile), excerpt, body, and the original source opened in the browser | IMPLEMENTED |
 | Article body formatting | N/A | rich | ✅ | 🔶 rendered as stored plain text. The route defines no markup, and interpreting one would be inventing a format the backend does not have | PARTIAL (by design) |
 
@@ -337,7 +516,7 @@ own view of "who is in this room").
 | --- | --- | --- | --- | --- | --- |
 | Notification list | `GET /api/notifications` (bare array, 50 max, unpaginated) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Mark all read | `PUT /api/notifications` (all-at-once is the only granularity offered) | ✅ | ✅ | ✅ | IMPLEMENTED |
-| Unread badge | `GET /api/notifications/unread` | ✅ | ✅ | ✅ | IMPLEMENTED |
+| Unread badge | `GET /api/notifications/unread`, live via socket `notification:new` | ✅ | ✅ | ✅ same `UnreadBadgeViewModel` fix as the Messages badge above (Task #5) - now listens for `notification:new`, the same event web's bell-icon badge listens for | IMPLEMENTED |
 | Notification tap-through | N/A | ✅ | ✅ | ✅ like/comment/repost → post, follow → profile, message → thread, appeal outcome → Appeals, listing decision → My listings (the payload carries no listing id, so it leads to where the outcome is visible rather than guessing at one) | IMPLEMENTED |
 | Unrecognised notification types | N/A | 🔶 renders with no action phrase | 🔶 same | 🔶 same, deliberately | PARTIAL |
 | Web Push (VAPID) | `POST /api/push/subscribe` | ✅ | n/a | n/a | WEB-ONLY |
@@ -401,7 +580,7 @@ own view of "who is in this room").
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
-| Report post / comment / listing | `POST /api/reports` | ✅ | ✅ | ✅ posts and listings; the site's exact stored reason strings | IMPLEMENTED |
+| Report post / comment / listing / opportunity / campaign / bare profile | `POST /api/reports` (six of the route's eight polymorphic targets) | ✅ | ✅ | ✅ `ReportRequest.Target` covers `.post`/`.comment`/`.listing`/`.user`/`.opportunity`/`.campaign` (the last two added Task #5 - previously only four of six were wired, despite web and Android already having Opportunity/HELP-campaign reporting); the site's exact stored reason strings. The remaining two targets (a PLAY challenge, a Live Audio room) have no report UI on **any** platform - see the ZRP PLAY and Admin Console tables | IMPLEMENTED |
 | Report a comment | `POST /api/reports` (`commentId`) | ✅ | ✅ | ✅ | IMPLEMENTED |
 | Report a profile (bare account report - harassment, impersonation, fake account) | `POST /api/reports` (`userId` → `reportedUserId`, a seventh polymorphic target distinct from the action-only `targetUserId`) | ✅ | ✅ | ✅ from the profile menu, not offered on your own profile (same guard as Block/Mute) | IMPLEMENTED |
 | Block / unblock | `POST /api/users/{username}/block` | ✅ | ✅ | ✅ toggle from the blocked list | IMPLEMENTED |
@@ -434,7 +613,10 @@ own view of "who is in this room").
 | --- | --- | --- | --- | --- | --- |
 | Content performance | `GET /api/creator/studio` → `content` (30-day totals, daily engagement trend, top 5 posts ranked server-side by `likes + comments*2 + reposts*3`) | ✅ | ⬜ | ✅ totals, trend chart and the ranked posts, each opening the post | IMPLEMENTED |
 | Audience growth | same route → `audience` (total followers, new in window, daily curve) | ✅ | ⬜ | ✅ | IMPLEMENTED |
-| Earnings / Overview tab | `GET /api/creator/dashboard`, `POST /api/creator/withdraw` | ✅ | ⬜ | ❌ deliberately absent (see [Store policy constraint](#store-policy-constraint)) | OUT OF SCOPE |
+| Earnings / Overview tab (read: balance, tip/premium history) | `GET /api/creator/dashboard` | ✅ | ⬜ | ❌ absent, and **misclassified** as store-policy-blocked - `rejectNativePayment()` is never called by this route (confirmed by grep: only 5 routes in the whole backend call it, and this is not one of them). It is a pure read of the creator's own already-earned balance, the same risk profile as `GET /api/creator/studio`, which iOS already implements. A real, addressable gap (Task #5 audit finding), not an intentional exclusion | MISSING |
+| Withdraw to a verified Solana wallet | `POST /api/creator/withdraw` + `/api/wallet/link-challenge`/`link-verify` | ✅ | ⬜ | ❌ absent, and **misclassified** - `src/lib/native-payment-policy.ts`'s own doc comment states withdrawals are explicitly *not* restricted here ("a creator cashing out money already credited to them, not a purchase"), and the route itself never calls `rejectNativePayment()`. Two things are genuinely missing to support it: the ed25519 wallet-link-and-verify flow (prerequisite, entirely unbuilt) and the withdraw request screen itself | MISSING |
+| Creator settings: tips-enabled / premium-posts-enabled toggle, mark-a-post-premium | `PATCH /api/creator/profile`, `POST /api/creator/premium-post` | ✅ | ⬜ | ❌ absent - neither route is restricted by native-payment policy (free, owner-gated operations), yet neither is ever called from iOS | MISSING |
+| "Accepts tips" indicator on a visited profile | `GET /api/users/{username}` already returns `creatorProfile.tipsEnabled` | ✅ (green Tip button, intercepted for the native shell) | ⬜ | ❌ the Tip button is correctly absent (store policy), but no read-only replacement badge exists either - `UserProfile.swift` doesn't even decode `creatorProfile.tipsEnabled`, though the backend already sends it | MISSING |
 
 The route is signed-in only and scoped to the caller by the session; there
 is no user parameter, so it can only ever return the viewer's own numbers.
@@ -487,7 +669,7 @@ what is, to them, the same slot. The website fetches once on mount too.
 | Group inbox | `GET /api/conversations` → `{id,name,avatarUrl,participantCount,lastMessage,unreadCount}[]` | ✅ | ✅ | ✅ merged with 1:1 into one list sorted by last activity; `GET /api/messages` filters on `conversationId IS NULL` and returns direct threads only, so an inbox that shows both must ask both routes | IMPLEMENTED |
 | Group thread | `GET /api/conversations/{id}/messages` (`{items,nextCursor}`, born paginated) | ✅ | ✅ | ✅ with "Load more", the same merge-not-assign refresh as the 1:1 thread | IMPLEMENTED |
 | Send to a group | `POST /api/conversations/{id}/messages` | ✅ | ✅ | ✅ the route's own refusals (empty, too long, media not from ZRP storage) shown as written | IMPLEMENTED |
-| Realtime group delivery | `join-conversation` → room `group:{id}` → `receive-group-message` | ✅ | ✅ | ✅ joins the room on open and leaves on close. **Joining is required**: group relays go to a room, not to a user's own room, so without it the thread would silently degrade to polling | IMPLEMENTED |
+| Realtime group delivery | `join-conversation` → room `group:{id}` → `receive-group-message` | ✅ | ✅ (fixed - now re-joins on reconnect too) | ✅ joins the room on open, leaves on close, **and now re-joins on every socket reconnect** (Task #5 fix - room membership is per-connection server-side; a reconnect silently dropped this socket out of the room, degrading live delivery to a ≤30s poll while the polling fallback's own logic assumed a connected socket meant live delivery was working). **Joining is required**: group relays go to a room, not to a user's own room, so without it the thread would silently degrade to polling | IMPLEMENTED |
 | Group members | `GET /api/conversations/{id}` | ✅ | ✅ | ✅ member list with the OWNER marked | IMPLEMENTED |
 | Leave a group | `DELETE /api/conversations/{id}/participants/{userId}` | ✅ | ✅ | ✅ removing yourself. The same route removes **someone else**, but only for an OWNER (see below) | IMPLEMENTED |
 | Create a group | `POST /api/conversations` | ✅ | ✅ | ✅ name + member picker, reusing `GET /api/users/suggested` for the starting list and `GET /api/search` (debounced, 2-char minimum, matching the route's own rule) for typing. The route's limits are mirrored (a name ≤100 and **at least 2 other members**), so the button says what is still needed instead of just being disabled | IMPLEMENTED |
@@ -622,8 +804,6 @@ not be until they exist in ZRP:
 
 | Reference item | Status |
 | --- | --- |
-| **Communities** | `NOT APPLICABLE`: there is no communities feature anywhere in ZRP: no page under `src/app`, no route under `src/app/api`, no table in `schema.prisma`. Only `/community-code` exists, and that is a legal document. A Communities screen would have to invent membership, join state and member counts. |
-| **Lists** | `NOT APPLICABLE`: same: no page, no route, no model. |
 | **Messages filters** (All / Unread / Groups / Requests) | `NOT APPLICABLE`: the web inbox has no filters at all, and there is no message-request feature anywhere in ZRP: no `MessageRequest` model, no route, no page. Unread and group state do exist in the data, but a filter web does not have is new product design rather than parity, and this branch is a parity branch. |
 | **Explore chips** (For You / Trending / People / Communities) | `NOT APPLICABLE` as drawn: `/explore` on the web has no tabs of its own. `/search` now has 8 Advanced Search category tabs (People/Posts/Hashtags/Communities/News/Music/Opportunities/Marketplace, see the Discovery table above) and iOS `SearchView` mirrors that set exactly - so Communities as a *search category* does exist now; this row is specifically about `/explore`'s own (nonexistent) chip row, not `/search`'s tabs. |
 | **Composer: Location** | `NOT APPLICABLE`: a plain post cannot carry one. `POST /api/posts` writes `location: type === "RECRUITMENT" ? location : null`, so the web composer's location field belongs to the recruitment form, not to posting generally. There is no check-in feature to be missing. |
@@ -653,7 +833,7 @@ own message for 403).
 | Users: change badge | `PUT /api/admin/users/{id}` `{badgeType}`: **ADMIN only** | ✅ | ✅ | ✅ verified/organization/government/team/journalist, or none. Clearing a badge sends a literal JSON `null`, not an omitted field - Swift's default `Encodable` synthesis would silently omit it instead, which the route reads as "leave it unchanged", so `AdminRepository.BadgeRequest` encodes it by hand (see its own doc comment, and `AdminRepositoryTests`) | IMPLEMENTED |
 | Users: ban / unban | `POST /api/admin/users/{id}/ban`: STAFF | ✅ | ✅ | ✅ toggle, confirmed with a dialog explaining it takes effect immediately and on every device | IMPLEMENTED |
 | Users: delete | `DELETE /api/admin/users/{id}`: **ADMIN only** | ✅ | ✅ | ✅ confirmed with explicit "irreversible, cascades to everything they own" copy; the route itself uses the same `deleteUserAccountAndFiles` helper as self-service account deletion | IMPLEMENTED |
-| Reports: review queue | `GET /api/admin/reports?status=&page=`: STAFF | ✅ | ✅ | ✅ status filter (pending/reviewed/dismissed/actioned/all), defaulting to pending like web. Every one of the report's seven polymorphic targets is handled (post, comment, listing, PLAY challenge, opportunity, HELP campaign, bare-profile) - `AdminReportTarget` in `AdminApi.swift`, covered by `AdminReportTargetTests` | IMPLEMENTED |
+| Reports: review queue | `GET /api/admin/reports?status=&page=`: STAFF | ✅ | ✅ | 🔶 status filter (pending/reviewed/dismissed/actioned/all), defaulting to pending like web. Seven of the report's now-**eight** polymorphic targets are handled (post, comment, listing, PLAY challenge, opportunity, HELP campaign, bare-profile) - `AdminReportTarget` in `AdminApi.swift`, covered by `AdminReportTargetTests`. The eighth and newest, `liveAudioRoomId`, is unhandled here (Task #5 audit finding: `GET /api/admin/reports`'s own `include` never selects the `liveAudioRoom` relation either, so this is a whole-product/backend gap, not iOS-specific - web's admin UI has the same gap) | PARTIAL |
 | Reports: dismiss / mark reviewed / record an action | `PUT /api/admin/reports/{id}` `{status, actionType?, actionNote?}`: STAFF | ✅ | ✅ | ✅ **matches web's real behaviour exactly**: `actionType` (Delete post / Warn user / Ban user / Mute user / Delete comment / Other) is a **descriptive label only** - selecting "Ban user" here does not ban anyone. Carrying out the action is a separate trip to Users (ban/delete) or Posts (delete), same as on web; this screen does not invent enforcement the backend doesn't have | IMPLEMENTED |
 | Reports: delete | `DELETE /api/admin/reports/{id}`: **ADMIN only** | ✅ | ✅ | ✅ offered only once a report has left `pending`, matching the route's own 409 for a still-pending report and for one with an appeal on file - both shown as the server's own message, not pre-guessed client-side | IMPLEMENTED |
 | Appeals: review queue | `GET /api/admin/appeals?status=&page=`: STAFF | ✅ | ✅ | ✅ status filter (pending/upheld/overturned/all), showing the original report's reason and action alongside each appeal | IMPLEMENTED |

@@ -30,8 +30,19 @@ struct ChatContactSheet: View {
     @State private var notice: String?
     @State private var isWorking = false
 
+    /// Filtering on `imageUrl` presence alone would also catch voice
+    /// notes, documents, and videos - all three share that same field
+    /// (see `ChatAttachment.swift`'s marker convention), so this grid
+    /// would render a broken tile for each instead of the actual photos
+    /// the "Shared media" heading promises. `ChatAttachmentKind.of(_:)`
+    /// is the same marker check `GroupConversationView` already uses to
+    /// tell these apart.
     private var sharedImages: [Message] {
-        Array(messages.filter { $0.imageUrl?.isEmpty == false }.reversed())
+        Array(
+            messages
+                .filter { $0.imageUrl?.isEmpty == false && ChatAttachmentKind.of($0.content) == .image }
+                .reversed()
+        )
     }
 
     var body: some View {

@@ -41,6 +41,7 @@ final class ZrpSocket: ObservableObject {
     private var task: URLSessionWebSocketTask?
     private var session: URLSession?
     private var handlers: [UUID: (SocketEvent) -> Void] = [:]
+    private var connectHandlers: [UUID: () -> Void] = [:]
 
     /// Backoff for reconnection, doubled on each consecutive failure and
     /// reset on a successful handshake. Capped so a long outage does not
@@ -72,6 +73,25 @@ final class ZrpSocket: ObservableObject {
 
     func unsubscribe(_ token: UUID) {
         handlers[token] = nil
+    }
+
+    /// Registers a handler run every time the socket (re)connects,
+    /// including the very first connection.
+    ///
+    /// Several screens need to redo something a fresh connection resets
+    /// server-side - re-request presence for everyone they are watching,
+    /// re-join a group conversation's room, refresh an unread badge that
+    /// may have gone stale while the socket was down. Rather than each of
+    /// them polling `isConnected` separately, this is the one place that
+    /// answers "the socket just came up."
+    func subscribeToConnect(_ handler: @escaping () -> Void) -> UUID {
+        let token = UUID()
+        connectHandlers[token] = handler
+        return token
+    }
+
+    func unsubscribeFromConnect(_ token: UUID) {
+        connectHandlers[token] = nil
     }
 
     // MARK: - Connection
@@ -237,6 +257,7 @@ final class ZrpSocket: ObservableObject {
             // CONNECT acknowledged - the namespace is joined and the
             // server has already put this socket in its own user's room.
             isConnected = true
+            for handler in connectHandlers.values { handler() }
 
         case "2":
             // EVENT: ["name", payload]

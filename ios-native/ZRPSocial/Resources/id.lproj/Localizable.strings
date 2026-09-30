@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Orang di dekat Anda";
 "ios.explore.peopleNearYouSubtitle" = "Negara yang sama dengan Anda";
 "ios.explore.peopleNearYouEmpty" = "Belum ada orang di dekat Anda.";
+"ios.play.challengeUnsupported" = "Jenis permainan ini belum didukung di versi aplikasi ini.";

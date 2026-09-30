@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Ľudia v okolí";
 "ios.explore.peopleNearYouSubtitle" = "Rovnaká krajina ako vy";
 "ios.explore.peopleNearYouEmpty" = "Zatiaľ nikto v okolí.";
+"ios.play.challengeUnsupported" = "Tento typ hry zatiaľ nie je v tejto verzii aplikácie podporovaný.";

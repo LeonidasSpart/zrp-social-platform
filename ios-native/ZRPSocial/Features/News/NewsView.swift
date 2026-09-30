@@ -90,7 +90,7 @@ final class NewsViewModel: ObservableObject {
 
 /// ZRP News.
 ///
-/// The public `GET /api/news` feed, with the same eleven categories and
+/// The public `GET /api/news` feed, with the same twelve categories and
 /// the same "All" default as the website. Nothing here needs a session -
 /// the route serves it signed out, exactly as zrp.one/news does.
 struct NewsView: View {

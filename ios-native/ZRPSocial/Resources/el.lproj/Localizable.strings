@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Άτομα κοντά σου";
 "ios.explore.peopleNearYouSubtitle" = "Ίδια χώρα με εσένα";
 "ios.explore.peopleNearYouEmpty" = "Δεν υπάρχει ακόμη κανείς κοντά.";
+"ios.play.challengeUnsupported" = "Αυτός ο τύπος παιχνιδιού δεν υποστηρίζεται ακόμη σε αυτήν την έκδοση της εφαρμογής.";

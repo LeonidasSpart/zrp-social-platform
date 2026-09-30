@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "Lidé poblíž";
 "ios.explore.peopleNearYouSubtitle" = "Stejná země jako vy";
 "ios.explore.peopleNearYouEmpty" = "Zatím nikdo poblíž.";
+"ios.play.challengeUnsupported" = "Tento typ hry zatím není v této verzi aplikace podporován.";

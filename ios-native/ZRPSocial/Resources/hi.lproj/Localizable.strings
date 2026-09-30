@@ -1574,3 +1574,4 @@
 "ios.explore.peopleNearYouTitle" = "आपके आस-पास के लोग";
 "ios.explore.peopleNearYouSubtitle" = "आपके जैसा ही देश";
 "ios.explore.peopleNearYouEmpty" = "अभी तक आस-पास कोई नहीं है।";
+"ios.play.challengeUnsupported" = "इस प्रकार का गेम अभी इस ऐप संस्करण में समर्थित नहीं है।";

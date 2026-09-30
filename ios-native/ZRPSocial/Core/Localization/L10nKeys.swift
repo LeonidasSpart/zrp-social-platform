@@ -3148,6 +3148,8 @@ enum L10nKey: String, CaseIterable {
     case iosExplorePeopleNearYouSubtitle = "ios.explore.peopleNearYouSubtitle"
     /// en: "No one else nearby yet."
     case iosExplorePeopleNearYouEmpty = "ios.explore.peopleNearYouEmpty"
+    /// en: "This game type isn't supported in this app version yet."
+    case iosPlayChallengeUnsupported = "ios.play.challengeUnsupported"
 }
 
 extension L10nKey {
