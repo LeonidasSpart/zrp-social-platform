@@ -2,8 +2,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "crypto";
-import { Keypair } from "@solana/web3.js";
 // ⚠️ SECURITY: getVerifiedToken is a drop-in for getToken() that overlays the
 // database's current role/isAdmin/plan/banned onto the decoded JWT and
 // returns null for a banned or deleted account - see src/lib/auth-guards.ts.
@@ -16,14 +14,12 @@ import { validateTrustedUploadUrls } from "@/lib/media-url";
 import { normalizeProfileWebsite } from "@/lib/profile-website";
 import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 import { checkPaymentSender } from "@/lib/payment-sender";
-import { getVerifiedWallet } from "@/lib/launchpad/entitlement";
-import { mintLaunchedToken } from "@/lib/launchpad/mint-service";
+import { scanTokenOnChain, verifyTransactionCreatedMint } from "@/lib/launchpad/mint-verification";
 import { creditReferralCommission } from "@/lib/referral";
+import { PublicKey } from "@solana/web3.js";
 
 // Flat USDC fee, matching the tip/premium-purchase pattern of a fixed,
-// on-chain-verified amount rather than a plan-tier price. zrppad charges
-// a flat fee (0.05 SOL, mainnet only) for the same action; this is the
-// USDC-denominated equivalent for ZRP's own payment rail.
+// on-chain-verified amount rather than a plan-tier price.
 const TOKEN_CREATION_FEE_USDC = 15;
 const FEE_TOLERANCE = 0.000001; // USDC has 6 decimals
 
@@ -37,6 +33,15 @@ const CREATOR_SELECT = {
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
+}
+
+function isValidPublicKey(value: string): boolean {
+  try {
+    new PublicKey(value);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // ─── GET: public browse - only CONFIRMED mints, newest first ────────
@@ -74,7 +79,14 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ─── POST: create (mint) a new SPL token ─────────────────────────────
+// ─── POST: verify + record an already-minted SPL token ───────────────
+// The mint itself happens entirely in the browser now
+// (src/lib/launchpad/client-token-mint.ts), atomically with the USDC fee
+// payment, signed once by the user's own connected wallet - the same
+// one-click UX zrppad always had. This route never signs or broadcasts
+// anything; it independently re-derives every verifiable fact about the
+// resulting mint from the chain itself (never trusting the client's
+// claimed decimals/supply/authorities/name/symbol) and records it.
 export async function POST(req: NextRequest) {
   try {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -83,8 +95,8 @@ export async function POST(req: NextRequest) {
     }
     const userId = token.id as string;
 
-    // Minting does real RPC work and moves real money - cap abuse.
-    // ⚠️ SECURITY: also keyed on the token id, not just IP.
+    // Verification does real RPC work - cap abuse the same as the old
+    // (more expensive) server-signed path did.
     const limit = await rateLimitByIpAndUser(req, userId, { limit: 5, window: 300, type: "launchpad-token-create" });
     if (!limit.success) return limit.response;
 
@@ -93,24 +105,10 @@ export async function POST(req: NextRequest) {
     if (nativeBlock) return nativeBlock;
 
     const body = await req.json();
-    const {
-      name,
-      symbol,
-      description,
-      imageUrl,
-      website,
-      twitter,
-      telegram,
-      discord,
-      supply,
-      decimals,
-      revokeMint,
-      revokeFreeze,
-      revokeUpdate,
-      transactionId,
-    } = body;
+    const { name, symbol, description, imageUrl, website, twitter, telegram, discord, mintAddress, transactionId } = body;
 
-    // ─── Field validation ───────────────────────────────────────
+    // ─── Off-chain display field validation (cosmetic only - every
+    // verifiable fact is re-derived from the chain below) ────────────
     if (!isNonEmptyString(name) || name.trim().length > 32) {
       return NextResponse.json({ error: "Name is required (max 32 characters)." }, { status: 400 });
     }
@@ -120,7 +118,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const cleanSymbol = symbol.trim().toUpperCase();
 
     let cleanDescription: string | null = null;
     if (description !== undefined && description !== null) {
@@ -155,45 +152,26 @@ export async function POST(req: NextRequest) {
       socialLinks[key] = result.value;
     }
 
-    const numericDecimals = Number(decimals);
-    if (!Number.isInteger(numericDecimals) || numericDecimals < 0 || numericDecimals > 9) {
-      return NextResponse.json({ error: "Decimals must be an integer between 0 and 9." }, { status: 400 });
+    if (!isNonEmptyString(mintAddress) || !isValidPublicKey(mintAddress.trim())) {
+      return NextResponse.json({ error: "A valid mint address is required." }, { status: 400 });
     }
-
-    // Whole-token supply, digits only - kept as a string and combined
-    // with decimals via BigInt arithmetic (never floating point) so
-    // large supplies can't lose precision before they're minted.
-    const supplyStr = typeof supply === "string" ? supply.trim() : typeof supply === "number" ? String(Math.trunc(supply)) : "";
-    if (!/^[1-9]\d*$/.test(supplyStr) || supplyStr.length > 20) {
-      return NextResponse.json({ error: "Supply must be a positive whole number." }, { status: 400 });
-    }
-    let decimalMultiplier = BigInt(1);
-    for (let i = 0; i < numericDecimals; i += 1) decimalMultiplier *= BigInt(10);
-    const rawSupply = BigInt(supplyStr) * decimalMultiplier;
+    const cleanMintAddress = mintAddress.trim();
 
     if (!isNonEmptyString(transactionId)) {
       return NextResponse.json({ error: "Transaction ID is required." }, { status: 400 });
     }
 
-    const cleanRevokeMint = revokeMint === true;
-    const cleanRevokeFreeze = revokeFreeze === true;
-    const cleanRevokeUpdate = revokeUpdate === true;
-
-    // ─── Verified wallet required - authorities are assigned to it ──
-    const walletAddress = await getVerifiedWallet(userId);
-    if (!walletAddress) {
-      return NextResponse.json(
-        { error: "Link and verify a Solana wallet in Settings before creating a token." },
-        { status: 403 }
-      );
-    }
-
-    // ─── Duplicate transaction fast path (see creator/tip for the
-    // race-proof guard, which is the ConsumedPaymentTransaction claim
-    // inside the $transaction below - this is only the fast path) ────
-    const existingClaim = await prisma.consumedPaymentTransaction.findUnique({ where: { transactionId } });
+    // ─── Fast-path duplicate checks (the real race-proof guards are the
+    // unique constraints hit inside the $transaction below) ──────────
+    const [existingClaim, existingToken] = await Promise.all([
+      prisma.consumedPaymentTransaction.findUnique({ where: { transactionId } }),
+      prisma.launchedToken.findUnique({ where: { mintAddress: cleanMintAddress } }),
+    ]);
     if (existingClaim) {
       return NextResponse.json({ error: "Transaction already processed." }, { status: 409 });
+    }
+    if (existingToken) {
+      return NextResponse.json({ error: "This mint has already been recorded." }, { status: 409 });
     }
 
     // ─── Verify the creation fee on-chain ────────────────────────
@@ -231,38 +209,70 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Failed to verify transaction: ${message}` }, { status: 400 });
     }
 
-    // ─── Claim the fee + create the PENDING row atomically ───────
-    // Same pattern as creator/tip: claiming ConsumedPaymentTransaction is
-    // the first statement in the transaction - its unique constraint on
-    // transactionId is the actual race-proof guard. The id is generated
-    // here (not left to @default(cuid())) so both rows can reference it
-    // without a second round trip, same as tip's own tipId.
-    const launchedTokenId = randomUUID();
+    // ⚠️ SECURITY: prove the SAME transaction that paid the fee is the
+    // one that created this exact mint - otherwise a real fee payment
+    // from an unrelated transfer could be replayed to falsely claim
+    // authorship of an arbitrary pre-existing mint address. See
+    // mint-verification.ts's own comment for the full rationale.
+    const createdThisMint = await verifyTransactionCreatedMint(transactionId, cleanMintAddress);
+    if (!createdThisMint) {
+      return NextResponse.json(
+        { error: "The fee transaction did not create this mint. Make sure both happened in the same signed transaction." },
+        { status: 400 }
+      );
+    }
+
+    // ─── Re-derive every verifiable fact from the chain itself - never
+    // trust client-submitted decimals/supply/authorities/name/symbol. ──
+    let onChain;
+    try {
+      onChain = await scanTokenOnChain(cleanMintAddress);
+    } catch (err: unknown) {
+      console.error("Launchpad mint verification error:", err);
+      return NextResponse.json({ error: "Could not read the mint from the chain. Try again in a moment." }, { status: 502 });
+    }
+    if (!onChain.metadata) {
+      return NextResponse.json({ error: "No metadata account found for this mint." }, { status: 400 });
+    }
+
+    const finalName = onChain.metadata.name || name.trim();
+    const finalSymbol = (onChain.metadata.symbol || symbol.trim()).toUpperCase();
+    const finalDecimals = onChain.decimals;
+    const finalSupply = onChain.supplyRaw;
+    const finalRevokeMint = onChain.mintAuthority === null;
+    const finalRevokeFreeze = onChain.freezeAuthority === null;
+    const finalRevokeUpdate = !onChain.metadata.isMutable;
+
+    // ─── Claim the fee + create the COMPLETED row atomically - by
+    // construction this route is only ever called after the mint has
+    // already succeeded on-chain, so there is no PENDING/FAILED
+    // transition to manage the way the old server-signed path needed. ──
     let launchedToken;
     try {
       const created = await prisma.$transaction([
         prisma.consumedPaymentTransaction.create({
-          data: { transactionId, paymentType: "token_creation_fee", paymentId: launchedTokenId },
+          data: { transactionId, paymentType: "token_creation_fee", paymentId: cleanMintAddress },
         }),
         prisma.launchedToken.create({
           data: {
-            id: launchedTokenId,
-            name: name.trim(),
-            symbol: cleanSymbol,
+            mintAddress: cleanMintAddress,
+            name: finalName,
+            symbol: finalSymbol,
             description: cleanDescription,
             imageUrl,
             website: socialLinks.website,
             twitter: socialLinks.twitter,
             telegram: socialLinks.telegram,
             discord: socialLinks.discord,
-            supply: rawSupply.toString(),
-            decimals: numericDecimals,
-            revokeMint: cleanRevokeMint,
-            revokeFreeze: cleanRevokeFreeze,
-            revokeUpdate: cleanRevokeUpdate,
+            supply: finalSupply,
+            decimals: finalDecimals,
+            revokeMint: finalRevokeMint,
+            revokeFreeze: finalRevokeFreeze,
+            revokeUpdate: finalRevokeUpdate,
             feeAmount: verifiedAmount,
             feeTransactionId: transactionId,
-            status: "PENDING",
+            mintTransactionId: transactionId,
+            status: "COMPLETED",
             creatorId: userId,
           },
         }),
@@ -270,51 +280,20 @@ export async function POST(req: NextRequest) {
       launchedToken = created[1];
     } catch (err: any) {
       if (err?.code === "P2002") {
-        return NextResponse.json({ error: "Transaction already processed." }, { status: 409 });
+        return NextResponse.json({ error: "Transaction or mint already processed." }, { status: 409 });
       }
       throw err;
     }
 
-    // ─── Mint synchronously (no queue for v1 - matches every other
-    // Solana write path in this codebase) ────────────────────────
-    // The mint keypair is generated HERE (not inside mint-service) so its
-    // public key - the mint address - is already known when building the
-    // metadata URI below, letting that URI be keyed by mint address
-    // (GET /api/launchpad/tokens/[mint]/metadata.json) rather than by an
-    // internal id that would leak before the mint exists on-chain.
-    const mintKeypair = Keypair.generate();
-    const metadataUri = new URL(
-      `/api/launchpad/tokens/${mintKeypair.publicKey.toBase58()}/metadata.json`,
-      process.env.NEXTAUTH_URL || req.nextUrl.origin
-    ).toString();
+    // Referral commission is only ever earned on a fee ZRP actually
+    // kept, for a mint that actually succeeded - by construction always
+    // true here, but this call never throws regardless (see its own
+    // comment) so it never risks this response either way.
+    await creditReferralCommission("LAUNCHPAD_TOKEN_CREATION", launchedToken.id, userId, verifiedAmount);
 
-    await mintLaunchedToken({
-      launchedTokenId: launchedToken.id,
-      ownerWalletAddress: walletAddress,
-      mintKeypair,
-      name: launchedToken.name,
-      symbol: launchedToken.symbol,
-      metadataUri,
-      decimals: numericDecimals,
-      supply: rawSupply,
-      revokeMint: cleanRevokeMint,
-      revokeFreeze: cleanRevokeFreeze,
-      revokeUpdate: cleanRevokeUpdate,
-    });
-
-    const finalRow = await prisma.launchedToken.findUnique({ where: { id: launchedToken.id } });
-
-    // Referral commission is only ever earned on a fee ZRP actually kept,
-    // for a mint that actually succeeded - never on a fee attached to a
-    // failed mint (see creditReferralCommission's own comment for why
-    // this never throws and so never risks this response).
-    if (finalRow?.status === "COMPLETED") {
-      await creditReferralCommission("LAUNCHPAD_TOKEN_CREATION", launchedToken.id, userId, verifiedAmount);
-    }
-
-    return jsonWithDecimals({ success: finalRow?.status === "COMPLETED", token: finalRow }, { status: 201 });
+    return jsonWithDecimals({ success: true, token: launchedToken }, { status: 201 });
   } catch (error) {
     console.error("Launchpad token creation error:", error);
-    return NextResponse.json({ error: "Failed to create token. Please try again." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to record the created token. Please try again." }, { status: 500 });
   }
 }

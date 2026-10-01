@@ -1,29 +1,32 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 import { NextRequest } from "next/server";
 import { randomUUID } from "crypto";
+import { Keypair } from "@solana/web3.js";
 
 /*
  * Integration coverage for POST /api/launchpad/tokens against a real
- * Postgres - the trust-boundary behaviors that matter here are the same
- * shape as creator/tip's own coverage (fee verification, sender binding,
- * replay protection via ConsumedPaymentTransaction) plus the two things
- * specific to this route: the verified-wallet gate, and that a mint
- * failure is surfaced as `success: false` rather than silently reported
- * as a created token. verifyUsdcTransaction and mintLaunchedToken are
- * both mocked (no real RPC call / no real Solana transaction); the
- * rate limiter, Prisma, and Postgres are real.
+ * Postgres. The mint now happens entirely in the browser (see
+ * client-token-mint.ts) before this route is ever called, so the trust
+ * boundary this route guards is different from the old server-signed
+ * path: it must never trust client-submitted decimals/supply/
+ * authorities/name/symbol, and must prove the SAME transaction that
+ * paid the fee also created the claimed mint (mint-verification.ts).
+ * verifyUsdcTransaction, scanTokenOnChain and verifyTransactionCreatedMint
+ * are all mocked (no real RPC call); the rate limiter, Prisma and
+ * Postgres are real.
  */
-const { getVerifiedToken, verifyUsdcTransaction, mintLaunchedToken } = vi.hoisted(() => ({
+const { getVerifiedToken, verifyUsdcTransaction, scanTokenOnChain, verifyTransactionCreatedMint } = vi.hoisted(() => ({
   getVerifiedToken: vi.fn(),
   verifyUsdcTransaction: vi.fn(),
-  mintLaunchedToken: vi.fn(),
+  scanTokenOnChain: vi.fn(),
+  verifyTransactionCreatedMint: vi.fn(),
 }));
 vi.mock("@/lib/auth-guards", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/auth-guards")>();
   return { ...actual, getVerifiedToken };
 });
 vi.mock("@/lib/solana", () => ({ verifyUsdcTransaction }));
-vi.mock("@/lib/launchpad/mint-service", () => ({ mintLaunchedToken }));
+vi.mock("@/lib/launchpad/mint-verification", () => ({ scanTokenOnChain, verifyTransactionCreatedMint }));
 
 import { prisma } from "@/lib/db";
 import { POST as createToken } from "../route";
@@ -51,53 +54,43 @@ function validVerification(overrides: Partial<{ amount: number; from: string }> 
   return { valid: true, amount: 15, from: "SenderWalletBase58Placeholder111111", ...overrides };
 }
 
+function validOnChainScan(overrides: Record<string, unknown> = {}) {
+  return {
+    mintAddress: "placeholder",
+    supplyRaw: "1000000000000000",
+    decimals: 9,
+    mintAuthority: null,
+    freezeAuthority: null,
+    metadata: { name: "Test Token", symbol: "TEST", uri: "https://example.com/metadata.json", updateAuthority: "x", isMutable: true },
+    topHolders: [],
+    topHolderConcentrationPercent: 0,
+    riskFlags: [],
+    ...overrides,
+  };
+}
+
 function validBody(overrides: Record<string, unknown> = {}) {
   return {
     name: "Test Token",
     symbol: "TEST",
     description: "a token",
     imageUrl: "https://uploadthing.com/f/abc123",
-    supply: "1000000",
-    decimals: 9,
-    revokeMint: true,
-    revokeFreeze: true,
-    revokeUpdate: false,
+    mintAddress: Keypair.generate().publicKey.toBase58(),
     transactionId: `tx-${randomUUID()}`,
     ...overrides,
   };
-}
-
-// mintLaunchedToken mocks that mirror the real function's crash-safety
-// contract: it writes the LaunchedToken row itself and returns void.
-function mockMintSuccess() {
-  mintLaunchedToken.mockImplementation(async (params: { launchedTokenId: string }) => {
-    await prisma.launchedToken.update({
-      where: { id: params.launchedTokenId },
-      data: { status: "COMPLETED", mintAddress: `MintAddr${randomUUID().slice(0, 8)}`, mintTransactionId: `mint-tx-${randomUUID()}` },
-    });
-  });
-}
-
-function mockMintFailure(reason = "Transaction failed on-chain.") {
-  mintLaunchedToken.mockImplementation(async (params: { launchedTokenId: string }) => {
-    await prisma.launchedToken.update({
-      where: { id: params.launchedTokenId },
-      data: { status: "FAILED", failureReason: reason },
-    });
-  });
 }
 
 describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, real Postgres)", () => {
   const userIds: string[] = [];
   const tokenIds: string[] = [];
 
-  async function createUser(label: string, verifiedSolanaWallet?: string) {
+  async function createUser(label: string) {
     const user = await prisma.user.create({
       data: {
         email: `${label}-${randomUUID().slice(0, 8)}@launchpadtest.example`,
         username: `${label}${randomUUID().slice(0, 8)}`.slice(0, 20),
         password: "x",
-        verifiedSolanaWallet: verifiedSolanaWallet ?? null,
       },
     });
     userIds.push(user.id);
@@ -113,30 +106,23 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
   beforeEach(() => {
     getVerifiedToken.mockReset();
     verifyUsdcTransaction.mockReset();
-    mintLaunchedToken.mockReset();
+    scanTokenOnChain.mockReset();
+    verifyTransactionCreatedMint.mockReset();
+    verifyTransactionCreatedMint.mockResolvedValue(true);
   });
 
-  it("rejects a user with no verified wallet (403), before touching payment verification", async () => {
-    const user = await createUser("nowallet1");
-    asUser(user.id);
-
-    const res = await createToken(req(validBody()));
-    expect(res.status).toBe(403);
-    expect(verifyUsdcTransaction).not.toHaveBeenCalled();
-  });
-
-  it("rejects an invalid/unverifiable fee transaction (400)", async () => {
-    const user = await createUser("badtx1", "WalletPlaceholder1111111111111111111");
+  it("rejects an invalid/unverifiable fee transaction (400), before reading the chain", async () => {
+    const user = await createUser("badtx1");
     asUser(user.id);
     verifyUsdcTransaction.mockRejectedValue(new Error("Transaction not found."));
 
     const res = await createToken(req(validBody()));
     expect(res.status).toBe(400);
-    expect(mintLaunchedToken).not.toHaveBeenCalled();
+    expect(scanTokenOnChain).not.toHaveBeenCalled();
   });
 
   it("rejects a fee amount that doesn't match the required creation fee (400)", async () => {
-    const user = await createUser("underpay1", "WalletPlaceholder2222222222222222222");
+    const user = await createUser("underpay1");
     asUser(user.id);
     verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 1 }));
 
@@ -144,9 +130,9 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
     expect(res.status).toBe(400);
   });
 
-  it("rejects a transaction ID already claimed by another payment (409), without minting", async () => {
+  it("rejects a transaction ID already claimed by another payment (409), without reading the chain", async () => {
     const claimant = await createUser("claimant1");
-    const attacker = await createUser("attacker1", "WalletPlaceholder3333333333333333333");
+    const attacker = await createUser("attacker1");
     const txId = `tx-already-claimed-${randomUUID()}`;
     await prisma.consumedPaymentTransaction.create({
       data: { transactionId: txId, paymentType: "tip", paymentId: claimant.id },
@@ -157,72 +143,123 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
 
     const res = await createToken(req(validBody({ transactionId: txId })));
     expect(res.status).toBe(409);
-    expect(mintLaunchedToken).not.toHaveBeenCalled();
-    expect(await prisma.launchedToken.count({ where: { feeTransactionId: txId } })).toBe(0);
+    expect(scanTokenOnChain).not.toHaveBeenCalled();
   });
 
-  it("happy path: verified wallet + valid fee creates the row and mints successfully (201)", async () => {
-    const user = await createUser("happy1", "WalletPlaceholder4444444444444444444");
+  it("rejects a mint address that's already been recorded (409)", async () => {
+    const original = await createUser("original1");
+    const mintAddress = Keypair.generate().publicKey.toBase58();
+    const row = await prisma.launchedToken.create({
+      data: {
+        mintAddress,
+        name: "Existing",
+        symbol: "EXIST",
+        imageUrl: "https://uploadthing.com/f/existing",
+        supply: "1",
+        decimals: 0,
+        revokeMint: true,
+        revokeFreeze: true,
+        revokeUpdate: false,
+        feeAmount: 15,
+        feeTransactionId: `tx-existing-${randomUUID()}`,
+        mintTransactionId: `tx-existing-${randomUUID()}`,
+        status: "COMPLETED",
+        creatorId: original.id,
+      },
+    });
+    tokenIds.push(row.id);
+
+    const attacker = await createUser("claimer1");
+    asUser(attacker.id);
+    verifyUsdcTransaction.mockResolvedValue(validVerification());
+
+    const res = await createToken(req(validBody({ mintAddress })));
+    expect(res.status).toBe(409);
+  });
+
+  it("rejects when the fee transaction did not create the claimed mint (400) - closes the replay-a-real-payment-against-an-unrelated-mint gap", async () => {
+    const user = await createUser("replay1");
     asUser(user.id);
-    verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder4444444444444444444" }));
-    mockMintSuccess();
+    verifyUsdcTransaction.mockResolvedValue(validVerification({ from: "ReplayWallet11111111111111111111111" }));
+    verifyTransactionCreatedMint.mockResolvedValue(false);
 
     const res = await createToken(req(validBody()));
+    expect(res.status).toBe(400);
+    expect(scanTokenOnChain).not.toHaveBeenCalled();
+  });
+
+  it("returns 502 when the mint can't be read from the chain", async () => {
+    const user = await createUser("rpcfail1");
+    asUser(user.id);
+    verifyUsdcTransaction.mockResolvedValue(validVerification({ from: "RpcFailWallet111111111111111111111" }));
+    scanTokenOnChain.mockRejectedValue(new Error("RPC unavailable"));
+
+    const res = await createToken(req(validBody()));
+    expect(res.status).toBe(502);
+  });
+
+  it("happy path: records the token using on-chain-derived fields, never the client's claimed ones (201)", async () => {
+    const user = await createUser("happy1");
+    asUser(user.id);
+    const mintAddress = Keypair.generate().publicKey.toBase58();
+    verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder4444444444444444444" }));
+    scanTokenOnChain.mockResolvedValue(
+      validOnChainScan({
+        mintAddress,
+        supplyRaw: "1000000000000000",
+        decimals: 9,
+        mintAuthority: null,
+        freezeAuthority: "StillHeldAuthority1111111111111111",
+        metadata: { name: "Real On-Chain Name", symbol: "REAL", uri: "https://x", updateAuthority: "x", isMutable: true },
+      })
+    );
+
+    // Client claims entirely different, untrustworthy values - the
+    // route must ignore all of them in favour of the on-chain read.
+    const res = await createToken(
+      req(
+        validBody({
+          mintAddress,
+          name: "Totally Different Claimed Name",
+          symbol: "FAKE",
+        })
+      )
+    );
     const data = await res.json();
     expect(res.status).toBe(201);
     expect(data.success).toBe(true);
-    expect(data.token.mintAddress).toBeTruthy();
-    expect(data.token.status).toBe("COMPLETED");
     tokenIds.push(data.token.id);
 
     const row = await prisma.launchedToken.findUnique({ where: { id: data.token.id } });
-    expect(row?.creatorId).toBe(user.id);
-    // supply="1000000", decimals=9 -> raw base units = 1_000_000 * 10^9
+    expect(row?.name).toBe("Real On-Chain Name");
+    expect(row?.symbol).toBe("REAL");
+    expect(row?.decimals).toBe(9);
     expect(row?.supply.toString()).toBe("1000000000000000");
-
-    expect(mintLaunchedToken).toHaveBeenCalledTimes(1);
-    const mintCall = mintLaunchedToken.mock.calls[0][0];
-    expect(mintCall.ownerWalletAddress).toBe("WalletPlaceholder4444444444444444444");
-    expect(mintCall.supply).toBe(BigInt(1000000000000000));
-  });
-
-  it("a mint that fails on-chain is reported as success:false, not silently as a created token", async () => {
-    const user = await createUser("mintfail1", "WalletPlaceholder5555555555555555555");
-    asUser(user.id);
-    verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder5555555555555555555" }));
-    mockMintFailure("Simulated on-chain failure.");
-
-    const res = await createToken(req(validBody()));
-    const data = await res.json();
-    expect(res.status).toBe(201);
-    expect(data.success).toBe(false);
-    expect(data.token.status).toBe("FAILED");
-    tokenIds.push(data.token.id);
-
-    // The fee was still consumed - this is the accepted, documented
-    // tradeoff for a v1 synchronous mint with no reconciliation job
-    // (see mint-service.ts's own comment on that).
-    expect(await prisma.consumedPaymentTransaction.count({ where: { paymentId: data.token.id } })).toBe(1);
+    expect(row?.revokeMint).toBe(true); // mintAuthority was null on-chain
+    expect(row?.revokeFreeze).toBe(false); // freezeAuthority was still held
+    expect(row?.revokeUpdate).toBe(false); // metadata.isMutable was true
+    expect(row?.status).toBe("COMPLETED");
+    expect(row?.creatorId).toBe(user.id);
   });
 
   it("rate limit: a 6th request in the window from the same user is rejected (429)", async () => {
-    const user = await createUser("ratelimited1", "WalletPlaceholder6666666666666666666");
+    const user = await createUser("ratelimited1");
     asUser(user.id);
     verifyUsdcTransaction.mockResolvedValue(validVerification());
+    scanTokenOnChain.mockResolvedValue(validOnChainScan());
 
-    // All 6 requests reuse the SAME ip/user deliberately (the per-route
-    // helper `req()` normally varies IP per call to avoid tripping the
-    // limiter - here that's the point, so build requests directly).
-    const fixedReq = () =>
+    const fixedReq = (mintAddress: string) =>
       new NextRequest("https://zrp.one/api/launchpad/tokens", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-forwarded-for": "10.99.99.99" },
-        body: JSON.stringify(validBody()),
+        body: JSON.stringify(validBody({ mintAddress })),
       });
 
     const statuses: number[] = [];
     for (let i = 0; i < 6; i += 1) {
-      const res = await createToken(fixedReq());
+      const mintAddress = Keypair.generate().publicKey.toBase58();
+      scanTokenOnChain.mockResolvedValue(validOnChainScan({ mintAddress }));
+      const res = await createToken(fixedReq(mintAddress));
       statuses.push(res.status);
       if (res.status === 201) {
         const data = await res.json();
@@ -251,17 +288,16 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
 
     it("credits the referring APPROVED ambassador 15% of the fee into their CreatorProfile balance", async () => {
       const { owner, ambassador } = await createAmbassador("approved", "APPROVED");
-      const referred = await createUser("refd1", "WalletPlaceholder7777777777777777777");
+      const referred = await createUser("refd1");
       await prisma.referral.create({ data: { ambassadorProfileId: ambassador.id, referredUserId: referred.id } });
 
       asUser(referred.id);
       verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder7777777777777777777" }));
-      mockMintSuccess();
+      scanTokenOnChain.mockResolvedValue(validOnChainScan());
 
       const res = await createToken(req(validBody()));
       const data = await res.json();
       expect(res.status).toBe(201);
-      expect(data.success).toBe(true);
       tokenIds.push(data.token.id);
 
       const commission = await prisma.referralCommission.findUnique({
@@ -277,12 +313,12 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
 
     it("does not credit commission when the referring ambassador is not APPROVED", async () => {
       const { owner, ambassador } = await createAmbassador("pending", "PENDING");
-      const referred = await createUser("refd2", "WalletPlaceholder8888888888888888888");
+      const referred = await createUser("refd2");
       await prisma.referral.create({ data: { ambassadorProfileId: ambassador.id, referredUserId: referred.id } });
 
       asUser(referred.id);
       verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder8888888888888888888" }));
-      mockMintSuccess();
+      scanTokenOnChain.mockResolvedValue(validOnChainScan());
 
       const res = await createToken(req(validBody()));
       const data = await res.json();
@@ -298,10 +334,10 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
     });
 
     it("does not credit commission for a fee-payer who was never referred", async () => {
-      const user = await createUser("notreferred1", "WalletPlaceholder9999999999999999999");
+      const user = await createUser("notreferred1");
       asUser(user.id);
       verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder9999999999999999999" }));
-      mockMintSuccess();
+      scanTokenOnChain.mockResolvedValue(validOnChainScan());
 
       const res = await createToken(req(validBody()));
       const data = await res.json();
@@ -313,29 +349,6 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
           where: { sourceType_sourceId: { sourceType: "LAUNCHPAD_TOKEN_CREATION", sourceId: data.token.id } },
         })
       ).toBeNull();
-    });
-
-    it("does not credit commission when the mint fails, even though the fee was already collected", async () => {
-      const { owner, ambassador } = await createAmbassador("mintfail", "APPROVED");
-      const referred = await createUser("refd3", "WalletPlaceholderAAAA111111111111111");
-      await prisma.referral.create({ data: { ambassadorProfileId: ambassador.id, referredUserId: referred.id } });
-
-      asUser(referred.id);
-      verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholderAAAA111111111111111" }));
-      mockMintFailure("Simulated on-chain failure.");
-
-      const res = await createToken(req(validBody()));
-      const data = await res.json();
-      expect(res.status).toBe(201);
-      expect(data.success).toBe(false);
-      tokenIds.push(data.token.id);
-
-      expect(
-        await prisma.referralCommission.findUnique({
-          where: { sourceType_sourceId: { sourceType: "LAUNCHPAD_TOKEN_CREATION", sourceId: data.token.id } },
-        })
-      ).toBeNull();
-      expect(await prisma.creatorProfile.findUnique({ where: { userId: owner.id } })).toBeNull();
     });
   });
 });
