@@ -9,6 +9,7 @@ import { useUploadThing } from "@/lib/uploadthing-client";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 import { mintTokenFromBrowser, AmbiguousMintError } from "@/lib/launchpad/client-token-mint";
+import { TOKEN_TEMPLATES, applyTokenTemplate, type TokenTemplateId } from "@/lib/launchpad/token-templates";
 
 // Kept in sync with the fee charged in
 // src/app/api/launchpad/tokens/route.ts (TOKEN_CREATION_FEE_USDC). The
@@ -50,6 +51,17 @@ export default function CreateTokenPage() {
   // error, so the user isn't tempted to resubmit the form and pay the
   // fee + mint a second token.
   const [ambiguousMint, setAmbiguousMint] = useState<{ mintAddress: string; signature: string } | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<TokenTemplateId | null>(null);
+
+  const handleSelectTemplate = (template: (typeof TOKEN_TEMPLATES)[number]) => {
+    setSelectedTemplateId(template.id);
+    const next = applyTokenTemplate({ supply, decimals, revokeMint, revokeFreeze, revokeUpdate }, template);
+    setSupply(next.supply);
+    setDecimals(next.decimals);
+    setRevokeMint(next.revokeMint);
+    setRevokeFreeze(next.revokeFreeze);
+    setRevokeUpdate(next.revokeUpdate);
+  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -217,6 +229,41 @@ export default function CreateTokenPage() {
         Mints a real SPL token on Solana mainnet. Connect your wallet and sign once - the {CREATION_FEE_USDC} USDC creation fee and the mint
         happen together, in the same transaction. Authorities go directly to the wallet you sign with.
       </p>
+
+      <div className="mb-6">
+        <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Choose a token template</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
+          {TOKEN_TEMPLATES.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              onClick={() => handleSelectTemplate(template)}
+              disabled={submitting}
+              className={`rounded-md border p-3 text-left text-sm transition-colors disabled:opacity-50 ${
+                selectedTemplateId === template.id
+                  ? "border-zrp-red bg-red-50 dark:bg-red-950/20"
+                  : "border-gray-300 hover:border-zrp-red dark:border-gray-700"
+              }`}
+            >
+              <p className="font-medium text-gray-900 dark:text-white">{template.label}</p>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{template.description}</p>
+              {template.preset ? (
+                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                  {template.preset.supply.toLocaleString()} supply &middot; {template.preset.decimals} decimals
+                  <br />
+                  {[
+                    template.preset.revokeMint ? "mint revoked" : "mint kept",
+                    template.preset.revokeFreeze ? "freeze revoked" : "freeze kept",
+                    template.preset.revokeUpdate ? "update revoked" : "update kept",
+                  ].join(" · ")}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Manual configuration</p>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <form onSubmit={handleCreate} className="space-y-5">
         <div>
