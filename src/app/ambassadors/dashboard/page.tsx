@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Check, Clock, Copy, Globe2, Loader2, MapPin, ShieldAlert, XCircle } from "lucide-react";
+import { Check, Clock, Copy, Globe2, Loader2, MapPin, ShieldAlert, Users, XCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { flagEmoji, getCountryName } from "@/lib/ambassadors/countries";
 import type { TranslationKey } from "@/lib/translations";
@@ -19,6 +19,11 @@ interface AmbassadorProfile {
   suspensionReason: string | null;
   appliedAt: string;
   codeOfConductVersion: string | null;
+}
+
+interface ReferralStats {
+  referralCount: number;
+  totalCommission: number;
 }
 
 const LEVEL_LABEL: Record<AmbassadorProfile["level"], TranslationKey> = {
@@ -48,6 +53,7 @@ export default function AmbassadorDashboardPage() {
   const [profile, setProfile] = useState<AmbassadorProfile | null | undefined>(undefined);
   const [copied, setCopied] = useState(false);
   const [acceptingCode, setAcceptingCode] = useState(false);
+  const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -64,6 +70,22 @@ export default function AmbassadorDashboardPage() {
       cancelled = true;
     };
   }, [status]);
+
+  useEffect(() => {
+    if (status !== "authenticated" || profile?.status !== "APPROVED") return;
+    let cancelled = false;
+    fetch("/api/ambassadors/referrals", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data) {
+          setReferralStats({ referralCount: data.referralCount, totalCommission: data.totalCommission });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [status, profile?.status]);
 
   const invitationLink =
     typeof window !== "undefined" && profile
@@ -233,6 +255,30 @@ export default function AmbassadorDashboardPage() {
                 {copied ? <Check className="h-4 w-4 text-green-600" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
               </button>
             </div>
+          </DashboardCard>
+        )}
+
+        {profile.status === "APPROVED" && referralStats && (
+          <DashboardCard label={t("ambassadors.dashboard.myReferrals")}>
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {t("ambassadors.dashboard.referralSignups", { count: String(referralStats.referralCount) })}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t("ambassadors.dashboard.referralEarnings", { amount: referralStats.totalCommission.toFixed(2) })}
+                </p>
+              </div>
+            </div>
+            {referralStats.totalCommission > 0 && (
+              <Link
+                href="/creator/dashboard"
+                className="mt-3 inline-flex items-center justify-center rounded-full border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+              >
+                {t("ambassadors.dashboard.referralWithdrawCta")}
+              </Link>
+            )}
           </DashboardCard>
         )}
 

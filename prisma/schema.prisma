@@ -660,6 +660,10 @@ model User {
   // Ambassador applications this user (an admin/moderator) has reviewed.
   ambassadorReviewsGiven AmbassadorProfile[] @relation("AmbassadorReviewedBy")
 
+  // Present only if this user signed up via an ambassador's invitation
+  // link - see the Referral model.
+  referredBy Referral? @relation("ReferralReferredUser")
+
   // ─── ZRP OPPORTUNITY ─────────────────────────────────────────
   opportunityListings     OpportunityListing[]      @relation("OpportunityPoster")
   opportunityApplications OpportunityApplication[]  @relation("OpportunityApplicant")
@@ -800,9 +804,65 @@ model AmbassadorProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  referrals Referral[]
+
   @@index([status])
   @@index([countryCode])
   @@index([reviewedById])
+}
+
+// Launchpad affiliate/referral program: credits an APPROVED ambassador a
+// commission when someone who signed up through their /signup?ref=<code>
+// link goes on to pay a real ZRP launchpad fee. Attribution (this row) is
+// permanent and first-touch, recorded once at signup regardless of the
+// ambassador's review status at the time; whether it currently EARNS
+// commission is re-checked at every fee event (see
+// src/lib/referral.ts:creditReferralCommission), so a since-suspended
+// ambassador's existing referrals stop paying out without needing any
+// retroactive cleanup here.
+model Referral {
+  id String @id @default(cuid())
+
+  ambassadorProfileId String
+  ambassadorProfile   AmbassadorProfile @relation(fields: [ambassadorProfileId], references: [id], onDelete: Cascade)
+
+  // One attribution per referred account, ever - the unique constraint is
+  // what makes this first-touch (a second ambassador's ref link on an
+  // already-attributed signup is simply not recorded).
+  referredUserId String @unique
+  referredUser   User   @relation("ReferralReferredUser", fields: [referredUserId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  commissions ReferralCommission[]
+
+  @@index([ambassadorProfileId])
+}
+
+enum ReferralCommissionSource {
+  LAUNCHPAD_TOKEN_CREATION
+}
+
+// One row per commission-earning event. Unique on (sourceType, sourceId)
+// so the same fee event (e.g. one LaunchedToken) can never be credited
+// twice, even if the caller is retried - the same idempotency shape as
+// LaunchedToken.feeTransactionId/mintTransactionId elsewhere in this file.
+model ReferralCommission {
+  id String @id @default(cuid())
+
+  referralId String
+  referral   Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  sourceType ReferralCommissionSource
+  sourceId   String
+
+  feeAmount        Decimal @db.Decimal(18, 6)
+  commissionAmount Decimal @db.Decimal(18, 6)
+
+  createdAt DateTime @default(now())
+
+  @@unique([sourceType, sourceId])
+  @@index([referralId])
 }
 
 model Post {

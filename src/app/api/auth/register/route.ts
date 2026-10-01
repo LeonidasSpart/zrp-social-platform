@@ -7,6 +7,7 @@ import { rateLimit, getRequestIp } from "@/lib/rate-limit";
 import { hashToken } from "@/lib/tokens";
 import { resolveCountryFromIp } from "@/lib/geo/ip-lookup";
 import { SUPPORTED_LANGUAGES } from "@/lib/translations";
+import { attributeReferral } from "@/lib/referral";
 
 // ─── Signup acquisition classification (Phase 5/6 of the geo/acquisition
 // mission - see docs/user-geography-and-acquisition.md) ─────────────
@@ -23,7 +24,16 @@ import { SUPPORTED_LANGUAGES } from "@/lib/translations";
 // engine) and "direct" (typed the URL) are collapsed into this one
 // DIRECT bucket for exactly that reason - ZRP cannot honestly tell them
 // apart today.
-type SignupAttribution = { source: "DIRECT" | "REFERRAL" | "CAMPAIGN"; campaign: string | null };
+type SignupAttribution = {
+  source: "DIRECT" | "REFERRAL" | "CAMPAIGN";
+  campaign: string | null;
+  // Set only when `source` is REFERRAL - used after the user row is
+  // created to record the Referral (see src/lib/referral.ts). Kept
+  // separate from `campaign` (which is just the raw code string, stored
+  // as-is on the User row for analytics) so the affiliate program never
+  // has to re-parse or re-resolve it.
+  ambassadorProfileId: string | null;
+};
 
 async function classifySignupAttribution(
   ref: unknown,
@@ -38,14 +48,14 @@ async function classifySignupAttribution(
       select: { id: true },
     });
     if (ambassador) {
-      return { source: "REFERRAL", campaign: trimmedRef };
+      return { source: "REFERRAL", campaign: trimmedRef, ambassadorProfileId: ambassador.id };
     }
     // An unrecognized `ref` value (typo'd, expired, or fabricated) must
     // NOT silently fall through to DIRECT - that would misclassify a
     // failed referral attempt as "no attribution attempted". CAMPAIGN
     // captures "something drove this signup, we just can't identify
     // exactly what" honestly, distinct from both REFERRAL and DIRECT.
-    return { source: "CAMPAIGN", campaign: trimmedRef };
+    return { source: "CAMPAIGN", campaign: trimmedRef, ambassadorProfileId: null };
   }
 
   const campaignValue =
@@ -53,10 +63,10 @@ async function classifySignupAttribution(
       (typeof utmSource === "string" && utmSource.trim()) ||
       "").slice(0, 100) || null;
   if (campaignValue) {
-    return { source: "CAMPAIGN", campaign: campaignValue };
+    return { source: "CAMPAIGN", campaign: campaignValue, ambassadorProfileId: null };
   }
 
-  return { source: "DIRECT", campaign: null };
+  return { source: "DIRECT", campaign: null, ambassadorProfileId: null };
 }
 
 export async function POST(req: NextRequest) {
@@ -159,22 +169,30 @@ export async function POST(req: NextRequest) {
       ? rawLangCookie
       : null;
 
-    // ─── Create user (explicitly set role) ─────────────────────
-    const user = await prisma.user.create({
-      data: {
-        name: name || null,
-        username: trimmedUsername,
-        email,
-        password: hashed,
-        role: "USER", // ✅ explicit default
-        verificationToken: hashToken(token),
-        verificationTokenExpiry: expiry,
-        signupCountryCode,
-        signupSource: attribution.source,
-        signupCampaign: attribution.campaign,
-        signupPlatform,
-        languageCode: langCookie || null,
-      },
+    // ─── Create user (explicitly set role), plus the Referral row in
+    // the same transaction when this signup came from an ambassador's
+    // invitation link - see src/lib/referral.ts. ────────────────────
+    const user = await prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          name: name || null,
+          username: trimmedUsername,
+          email,
+          password: hashed,
+          role: "USER", // ✅ explicit default
+          verificationToken: hashToken(token),
+          verificationTokenExpiry: expiry,
+          signupCountryCode,
+          signupSource: attribution.source,
+          signupCampaign: attribution.campaign,
+          signupPlatform,
+          languageCode: langCookie || null,
+        },
+      });
+      if (attribution.ambassadorProfileId) {
+        await attributeReferral(tx, attribution.ambassadorProfileId, created.id);
+      }
+      return created;
     });
 
     // ─── Send verification email (non‑blocking) ────────────────

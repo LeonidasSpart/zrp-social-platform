@@ -18,6 +18,7 @@ import { rejectNativePayment } from "@/lib/native-payment-policy.server";
 import { checkPaymentSender } from "@/lib/payment-sender";
 import { getVerifiedWallet } from "@/lib/launchpad/entitlement";
 import { mintLaunchedToken } from "@/lib/launchpad/mint-service";
+import { creditReferralCommission } from "@/lib/referral";
 
 // Flat USDC fee, matching the tip/premium-purchase pattern of a fixed,
 // on-chain-verified amount rather than a plan-tier price. zrppad charges
@@ -302,6 +303,15 @@ export async function POST(req: NextRequest) {
     });
 
     const finalRow = await prisma.launchedToken.findUnique({ where: { id: launchedToken.id } });
+
+    // Referral commission is only ever earned on a fee ZRP actually kept,
+    // for a mint that actually succeeded - never on a fee attached to a
+    // failed mint (see creditReferralCommission's own comment for why
+    // this never throws and so never risks this response).
+    if (finalRow?.status === "COMPLETED") {
+      await creditReferralCommission("LAUNCHPAD_TOKEN_CREATION", launchedToken.id, userId, verifiedAmount);
+    }
+
     return jsonWithDecimals({ success: finalRow?.status === "COMPLETED", token: finalRow }, { status: 201 });
   } catch (error) {
     console.error("Launchpad token creation error:", error);
