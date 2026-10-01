@@ -179,6 +179,27 @@ export interface MintTokenFromBrowserResult {
 }
 
 /**
+ * Thrown specifically when the mint transaction was broadcast
+ * (sendRawTransaction returned a signature) but its on-chain outcome
+ * could not be confirmed - e.g. an RPC timeout. The mint may have
+ * genuinely succeeded. Carries the mint address and signature so the
+ * caller can offer "finish recording it" instead of a blind retry,
+ * which would otherwise mint (and charge the 15 USDC fee) a second
+ * time for a token that may already exist.
+ */
+export class AmbiguousMintError extends Error {
+  mintAddress: string;
+  signature: string;
+
+  constructor(message: string, mintAddress: string, signature: string) {
+    super(message);
+    this.name = "AmbiguousMintError";
+    this.mintAddress = mintAddress;
+    this.signature = signature;
+  }
+}
+
+/**
  * Connects the user's injected wallet, builds the atomic fee+mint
  * transaction, has the wallet sign it, and broadcasts + confirms it.
  * Throws on any failure - never returns a partial/fabricated result;
@@ -232,8 +253,22 @@ export async function mintTokenFromBrowser(params: MintTokenFromBrowserParams): 
     preflightCommitment: "confirmed",
   });
 
-  const confirmation = await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+  let confirmation;
+  try {
+    confirmation = await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+  } catch (error: unknown) {
+    // The transaction was already broadcast (we have a signature) - a
+    // thrown error here (e.g. an RPC timeout) means the outcome is
+    // unknown, not "failed". Throwing the generic error the old code
+    // did would show the user an ordinary failure message and risk a
+    // blind retry that pays the 15 USDC fee and mints a second token
+    // for one that may have already succeeded.
+    const message = error instanceof Error ? error.message : "Could not confirm the mint transaction.";
+    throw new AmbiguousMintError(message, mintKeypair.publicKey.toBase58(), signature);
+  }
   if (confirmation.value.err) {
+    // A definite on-chain failure - the transaction landed and failed
+    // atomically, so nothing moved. Safe to report as a normal failure.
     throw new Error(`Transaction failed on-chain: ${JSON.stringify(confirmation.value.err)}`);
   }
 

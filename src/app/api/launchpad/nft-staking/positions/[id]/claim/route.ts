@@ -103,6 +103,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         amountRaw: BigInt(1),
       });
       if (!nftPayout.success) {
+        if (nftPayout.ambiguous) {
+          // Broadcast but unconfirmed - may have actually landed.
+          // Leave the position UNSTAKED and the reserve consumed as-is;
+          // reopening/refunding here is what would let a second, real
+          // payout through. See NftStakingPosition.disputedTransactionId.
+          await prisma.nftStakingPosition.update({
+            where: { id },
+            data: { disputedTransactionId: nftPayout.signature ?? "unknown", disputedAt: new Date() },
+          });
+          return NextResponse.json(
+            {
+              error: "This unstake's outcome could not be confirmed on-chain. It may have already succeeded - do not retry. Support will verify and resolve this.",
+              disputed: true,
+            },
+            { status: 409 }
+          );
+        }
         await refundNftRewardToPool(position.poolId, rewardRaw);
         await prisma.nftStakingPosition.updateMany({ where: { id, status: "UNSTAKED" }, data: { status: "ACTIVE" } });
         return NextResponse.json({ error: nftPayout.error || "Returning the NFT failed." }, { status: 502 });
@@ -163,6 +180,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     if (!payout.success) {
+      if (payout.ambiguous) {
+        await prisma.nftStakingPosition.update({
+          where: { id },
+          data: { disputedTransactionId: payout.signature ?? "unknown", disputedAt: new Date() },
+        });
+        return NextResponse.json(
+          {
+            error: "This claim's outcome could not be confirmed on-chain. It may have already succeeded - do not retry. Support will verify and resolve this.",
+            disputed: true,
+          },
+          { status: 409 }
+        );
+      }
       await refundNftRewardToPool(position.poolId, rewardRaw);
       return NextResponse.json({ error: payout.error || "Claim failed." }, { status: 502 });
     }

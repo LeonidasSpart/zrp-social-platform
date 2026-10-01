@@ -59,6 +59,15 @@ export interface ExecuteClaimResult {
   success: boolean;
   signature?: string;
   error?: string;
+  // True only when a transaction was actually broadcast (sendRawTransaction
+  // returned a signature) but its on-chain outcome then could not be
+  // confirmed - e.g. an RPC timeout mid-confirmation. The transfer may
+  // have genuinely succeeded. Callers MUST NOT treat this the same as a
+  // definite failure: do not re-open the contract for another claim and
+  // do not assume the funds are still at the platform. A confirmed
+  // `confirmation.value.err` (the transaction landed and failed
+  // atomically - nothing moved) is the only case safe to revert.
+  ambiguous?: boolean;
 }
 
 /**
@@ -69,10 +78,10 @@ export interface ExecuteClaimResult {
  *
  * Does not attempt crash-safe checkpointing of the broadcast signature
  * before confirmation - same accepted scope boundary as mint-service.ts
- * (see its own comment): a process death between broadcast and this
- * function returning leaves a genuinely ambiguous on-chain outcome with
- * no reconciliation job yet in Phase 2 either. Logged as loudly as
- * possible so it's at least visible to an operator.
+ * (see its own comment). What IS handled here is distinguishing that
+ * ambiguous state from a definite on-chain failure (see
+ * ExecuteClaimResult.ambiguous) so the caller can refuse to let a second
+ * claim through instead of silently allowing a double-payout.
  */
 export async function executeVestingClaim(params: {
   contractId: string;
@@ -87,7 +96,7 @@ export async function executeVestingClaim(params: {
   const mint = new PublicKey(mintAddress);
   const beneficiary = new PublicKey(beneficiaryWalletAddress);
 
-  let signature: string;
+  let signature: string | undefined;
   try {
     const platformAta = await getOrCreateAssociatedTokenAccount(connection, platform, mint, platform.publicKey);
     const beneficiaryAta = await getOrCreateAssociatedTokenAccount(connection, platform, mint, beneficiary);
@@ -110,12 +119,19 @@ export async function executeVestingClaim(params: {
     const confirmation = await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
     if (confirmation.value.err) {
       console.error(`Vesting claim ${contractId} failed on-chain:`, confirmation.value.err);
-      return { success: false, error: `Transaction failed on-chain: ${JSON.stringify(confirmation.value.err)}` };
+      return { success: false, error: `Transaction failed on-chain: ${JSON.stringify(confirmation.value.err)}`, ambiguous: false };
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error while claiming.";
-    console.error(`Vesting claim ${contractId} transfer error (on-chain outcome may be ambiguous - see mint-service.ts's own comment on this class of failure):`, error);
-    return { success: false, error: message };
+    // A signature means sendRawTransaction already succeeded - the
+    // failure happened waiting on confirmation, so the transfer's real
+    // outcome is unknown, not "didn't happen".
+    const ambiguous = signature !== undefined;
+    console.error(
+      `Vesting claim ${contractId} transfer error (ambiguous=${ambiguous}${signature ? `, signature=${signature}` : ""}):`,
+      error
+    );
+    return { success: false, error: message, ambiguous, signature };
   }
 
   await prisma.$transaction(async (tx) => {

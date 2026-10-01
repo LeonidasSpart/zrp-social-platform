@@ -17,9 +17,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!limitCheck.success) return limitCheck.response;
 
     const { id } = await params;
-    const position = await prisma.stakingPosition.findUnique({ where: { id }, select: { id: true } });
+    const position = await prisma.stakingPosition.findUnique({ where: { id }, select: { id: true, disputedTransactionId: true } });
     if (!position) {
       return NextResponse.json({ error: "Staking position not found." }, { status: 404 });
+    }
+    // A prior claim's on-chain outcome couldn't be confirmed and may
+    // have already paid out - see StakingPosition.disputedTransactionId.
+    if (position.disputedTransactionId) {
+      return NextResponse.json(
+        { error: "A previous claim on this position could not be confirmed and is under manual review. Contact support." },
+        { status: 409 }
+      );
     }
 
     const { nonce, expiresAt } = generateWalletLinkNonce();

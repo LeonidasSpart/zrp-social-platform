@@ -69,6 +69,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     if (!result.success) {
+      if (result.ambiguous) {
+        // The transfer was broadcast but its outcome couldn't be
+        // confirmed - it may have already succeeded. Never let another
+        // claim through against this contract until an operator has
+        // manually verified the signature on-chain (see
+        // VestingContract.disputedTransactionId's schema comment).
+        await prisma.vestingContract.update({
+          where: { id },
+          data: { disputedTransactionId: result.signature ?? "unknown", disputedAt: new Date() },
+        });
+        return NextResponse.json(
+          {
+            error: "This claim's outcome could not be confirmed on-chain. It may have already succeeded - do not retry. Support will verify and resolve this.",
+            disputed: true,
+          },
+          { status: 409 }
+        );
+      }
       return NextResponse.json({ error: result.error || "Claim failed." }, { status: 502 });
     }
 

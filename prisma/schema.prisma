@@ -2198,6 +2198,16 @@ model VestingContract {
   claimNonce          String?
   claimNonceExpiresAt DateTime?
 
+  // Set when a claim's on-chain outcome couldn't be confirmed (e.g. an
+  // RPC timeout after the transfer was already broadcast) - the payout
+  // may have genuinely succeeded. While set, no further claim-challenge
+  // can be issued, so a second claim can never be attempted against a
+  // payout whose real outcome is unknown. Cleared only by an operator
+  // after manually verifying disputedTransactionId on-chain (see
+  // executeVestingClaim's own comment on this class of failure).
+  disputedTransactionId String?
+  disputedAt             DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -2299,6 +2309,12 @@ model StakingPosition {
 
   claimNonce          String?
   claimNonceExpiresAt DateTime?
+
+  // See VestingContract.disputedTransactionId's comment - same
+  // ambiguous-payout guard, reused here since this position's claims
+  // go through the same executeStakingPayout().
+  disputedTransactionId String?
+  disputedAt             DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2448,6 +2464,12 @@ model NftStakingPosition {
   claimNonce          String?
   claimNonceExpiresAt DateTime?
 
+  // See VestingContract.disputedTransactionId's comment - same
+  // ambiguous-payout guard, reused here since this position's claims
+  // go through the same executeStakingPayout().
+  disputedTransactionId String?
+  disputedAt             DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -2543,6 +2565,12 @@ model FarmingPosition {
 
   claimNonce          String?
   claimNonceExpiresAt DateTime?
+
+  // See VestingContract.disputedTransactionId's comment - same
+  // ambiguous-payout guard, reused here since this position's claims
+  // go through the same executeStakingPayout().
+  disputedTransactionId String?
+  disputedAt             DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

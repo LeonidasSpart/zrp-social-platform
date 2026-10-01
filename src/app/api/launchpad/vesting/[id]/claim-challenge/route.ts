@@ -21,9 +21,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!limitCheck.success) return limitCheck.response;
 
     const { id } = await params;
-    const contract = await prisma.vestingContract.findUnique({ where: { id }, select: { id: true } });
+    const contract = await prisma.vestingContract.findUnique({ where: { id }, select: { id: true, disputedTransactionId: true } });
     if (!contract) {
       return NextResponse.json({ error: "Vesting contract not found." }, { status: 404 });
+    }
+    // A prior claim's on-chain outcome couldn't be confirmed and may
+    // have already paid out - never let a new claim attempt start
+    // until an operator has manually verified it (see
+    // VestingContract.disputedTransactionId's schema comment).
+    if (contract.disputedTransactionId) {
+      return NextResponse.json(
+        { error: "A previous claim on this contract could not be confirmed and is under manual review. Contact support." },
+        { status: 409 }
+      );
     }
 
     const { nonce, expiresAt } = generateWalletLinkNonce();
