@@ -25,6 +25,7 @@ import {
   Globe2,
   BarChart3,
   CreditCard,
+  Rocket,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -169,6 +170,11 @@ export default function AdminLayout({
             href: "/admin/subscriptions",
             labelKey: "adminSubscriptions.title" as TranslationKey,
             icon: CreditCard,
+          },
+          {
+            href: "/admin/launchpad",
+            labelKey: "adminLaunchpad.title" as TranslationKey,
+            icon: Rocket,
           },
           {
             href: "/admin/storage",
