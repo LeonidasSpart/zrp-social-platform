@@ -621,6 +621,8 @@ model User {
   launchedTokens LaunchedToken[]
   vestingContracts VestingContract[]
   stakingPools StakingPool[]
+  launchedNfts LaunchedNft[]
+  nftStakingPools NftStakingPool[] @relation("NftStakingPoolCreator")
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -2132,6 +2134,7 @@ model LaunchedToken {
 
   vestingContracts VestingContract[]
   stakingPools     StakingPool[]
+  nftStakingPoolsAsReward NftStakingPool[]
 }
 
 enum VestingContractStatus {
@@ -2304,6 +2307,155 @@ model StakingRewardDeposit {
 
   poolId String
   pool   StakingPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  amountRaw     Decimal @db.Decimal(38, 0)
+  transactionId String  @unique
+
+  createdAt DateTime @default(now())
+
+  @@index([poolId])
+}
+
+// ZRP Launchpad, phase 6a: NFT creation. A near-identical sibling of
+// LaunchedToken - server-signed mint, platform briefly holds authority
+// before handing it off to the creator's verified wallet, same "pay
+// externally, paste the signature" fee flow - but always supply=1,
+// decimals=0, plus a Metaplex Master Edition account (see
+// mint-service.ts's mintLaunchedNft()) so wallets/marketplaces
+// recognise it as a true non-fungible, not just a token that happens to
+// have one unit. `collectionName` is a free-text grouping the creator
+// chooses (shown on the browse page, and what an NftStakingPool below
+// is opened against) - deliberately NOT an on-chain Metaplex Certified
+// Collection (a separate Collection NFT + on-chain Verify instruction);
+// that trust is kept server-side instead, same posture as the rest of
+// this already-server-trusted launchpad, and it means zero extra
+// on-chain accounts or instructions for v1.
+model LaunchedNft {
+  id String @id @default(cuid())
+
+  mintAddress String? @unique
+
+  name        String
+  description String? @db.Text
+  imageUrl    String
+
+  collectionName String?
+
+  // Metaplex off-chain trait array: [{ trait_type, value }, ...] - served
+  // as-is inside GET /api/launchpad/nfts/[mint]/metadata.json.
+  attributes Json?
+
+  sellerFeeBasisPoints Int @default(0)
+
+  revokeUpdate Boolean @default(false)
+
+  feeAmount        Decimal @db.Decimal(18, 6)
+  feeTransactionId String  @unique
+
+  mintTransactionId String? @unique
+
+  status        TransactionStatus @default(PENDING)
+  failureReason String?
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stakingPositions NftStakingPosition[]
+
+  @@index([creatorId])
+  @@index([status])
+  @@index([collectionName])
+}
+
+enum NftStakingPositionStatus {
+  ACTIVE
+  UNSTAKED
+}
+
+// ZRP Launchpad, phase 6b: NFT staking. An NFT is just an SPL mint with
+// supply=1/decimals=0, so "stake" and "unstake" reuse the exact same
+// wallet-native primitives as fungible staking unchanged:
+//   - stake (user -> platform escrow): "pay externally, paste the tx
+//     signature", verified by the same mint-agnostic
+//     verifySplTransferToPlatform() - the expected mint is just this
+//     NFT's own mintAddress and the expected amount is always 1.
+//   - claim / unstake (platform -> user, server-signed): the same
+//     single-use ed25519 challenge pattern as a fungible staking claim.
+// What's genuinely different: a non-fungible position has no "amount"
+// to apply an APY to, so rewards accrue at a flat
+// rewardRatePerDayRaw per staked NFT, paid out in a SEPARATE fungible
+// LaunchedToken (rewardToken) rather than the NFT's own mint - and
+// unstaking returns the NFT itself (1 raw unit of ITS mint) as a
+// second, independent payout alongside the reward token payout.
+// Same funded-reserve safety as StakingPool.rewardReserveRaw: a claim
+// can never pay out more than this pool has actually been funded with.
+model NftStakingPool {
+  id String @id @default(cuid())
+
+  collectionName String
+  creatorId      String
+  creator        User   @relation("NftStakingPoolCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  rewardTokenId String
+  rewardToken   LaunchedToken @relation(fields: [rewardTokenId], references: [id], onDelete: Cascade)
+
+  rewardRatePerDayRaw Decimal @db.Decimal(38, 0)
+  lockSeconds         Int
+
+  rewardReserveRaw Decimal @db.Decimal(38, 0) @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  positions      NftStakingPosition[]
+  rewardDeposits NftStakingRewardDeposit[]
+
+  @@index([creatorId])
+  @@index([collectionName])
+}
+
+model NftStakingPosition {
+  id String @id @default(cuid())
+
+  poolId String
+  pool   NftStakingPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  nftId String
+  nft   LaunchedNft @relation(fields: [nftId], references: [id], onDelete: Cascade)
+
+  userWalletAddress String
+
+  rewardClaimedRaw Decimal @db.Decimal(38, 0) @default(0)
+
+  depositTransactionId String @unique
+
+  stakedAt  DateTime @default(now())
+  unlocksAt DateTime
+
+  status NftStakingPositionStatus @default(ACTIVE)
+
+  claimNonce          String?
+  claimNonceExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([poolId])
+  @@index([userWalletAddress])
+  @@index([nftId])
+  @@index([status])
+}
+
+model NftStakingRewardDeposit {
+  id String @id @default(cuid())
+
+  poolId String
+  pool   NftStakingPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
 
   amountRaw     Decimal @db.Decimal(38, 0)
   transactionId String  @unique
