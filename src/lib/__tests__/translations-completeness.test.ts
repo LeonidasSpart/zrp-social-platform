@@ -322,6 +322,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingPositions.statusActive", // "Active" status label kept identical (short/invariant form)
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   de: [
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
@@ -468,6 +469,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   it: [
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
@@ -592,6 +594,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   sq: [
     "investors.platform.music.title",
@@ -674,6 +677,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   es: [
     "investors.types.familyOffice",
@@ -788,6 +792,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   ru: [
     "investors.platform.music.title",
@@ -1017,6 +1022,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingCreate.minStakeLabel", // "Minimum stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   id: [
     "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1165,6 +1171,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   pt: [
     "investors.types.familyOffice",
@@ -1252,6 +1259,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   ja: [
     "investors.platform.music.title",
@@ -1579,6 +1587,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   pl: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1678,6 +1687,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   ro: [
     "liveAudio.visibilityPublic", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1833,6 +1843,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   cs: [
     "investors.types.familyOffice",
@@ -1930,6 +1941,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   hu: [
     "investors.types.familyOffice",
@@ -2014,6 +2026,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   sv: [
     // "Version" is a legitimate Swedish cognate (identical spelling); this key only became a
@@ -2166,6 +2179,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   da: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2358,6 +2372,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   hr: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2463,6 +2478,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   bg: [
     "investors.types.familyOffice",
@@ -2599,6 +2615,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   // Norwegian, Serbian (Latin), Bosnian and Macedonian: each list below
   // was computed from the real diff against English and hand-reviewed -
@@ -2679,6 +2696,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   sr: [
     "investors.platform.music.title",
@@ -2736,6 +2754,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   bs: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2804,6 +2823,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   mk: [
     "investors.platform.music.title",
@@ -2883,6 +2903,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   sk: [
     "action.repost", "onboarding.bio", "settings.video", "settings.bio", "chat.offline",
@@ -2926,6 +2947,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   sl: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2960,6 +2982,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   lt: [
     "group.lastMessagePrefix", "press.emailBadge", "marketplace.heroTitle", "faq.cat.marketPlus",
@@ -2978,6 +3001,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   // The 4-language 34->38 expansion (Estonian, Irish, Latvian, Maltese) -
   // same category of reviewed cognate/format exception as every list
@@ -3016,6 +3040,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   ga: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.news.title",
@@ -3045,6 +3070,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   lv: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
@@ -3070,6 +3096,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   mt: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
@@ -3112,6 +3139,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   // The 1-language 38->39 expansion (Romansh / Rumantsch Grischun).
   // Reviewed against French and German precedent for each key: genuine
@@ -3166,6 +3194,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
 };
 
