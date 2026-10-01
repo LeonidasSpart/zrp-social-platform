@@ -175,7 +175,18 @@ export default function LiveAudioRoomPage() {
           setSpeakingIds(new Set(speakers.map((p) => p.identity)));
         });
 
-        await room.connect(joinData.livekitUrl, joinData.token);
+        try {
+          await room.connect(joinData.livekitUrl, joinData.token);
+        } catch (connectErr) {
+          // The LiveKit client's own error text ("could not establish
+          // signal connection: invalid token", etc.) is an internal SDK
+          // detail - usually a server-side LiveKit credential/URL
+          // misconfiguration, never something a user can act on. Log it
+          // for operators and show the same generic, translated message
+          // every other unexpected Live Audio failure uses instead.
+          console.error("LiveKit connect() failed:", connectErr);
+          throw new Error(t("liveAudio.genericError"));
+        }
         if (cancelled) {
           room.disconnect();
           return;
