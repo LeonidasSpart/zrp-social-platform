@@ -75,7 +75,12 @@ export async function scanToken(mintAddress: string): Promise<TokenScanResult> {
     amountRaw: acc.amount,
     percent: supplyRaw > BigInt(0) ? (Number(BigInt(acc.amount) * BigInt(10000) / supplyRaw) / 100) : 0,
   }));
-  const topHolderConcentrationPercent = topHolders.length > 0 ? topHolders[0].percent : 0;
+  // Sum of the top holders fetched (already capped at 10 above), not
+  // just the single largest - a token split across several large
+  // wallets (e.g. ten at ~9% each, 90% combined) is just as
+  // concentrated as one wallet holding 90% alone, and should trip the
+  // same risk flag. Matches zrppad's own top-10-sum approach.
+  const topHolderConcentrationPercent = topHolders.reduce((sum, holder) => sum + holder.percent, 0);
 
   const riskFlags: TokenRiskFlag[] = [];
   if (mintInfo.mintAuthority) riskFlags.push("mint_authority_active");

@@ -67,6 +67,13 @@ export interface PayoutResult {
   success: boolean;
   signature?: string;
   error?: string;
+  // True only when a transaction was actually broadcast (sendRawTransaction
+  // returned a signature) but its on-chain outcome then could not be
+  // confirmed - e.g. an RPC timeout mid-confirmation. Callers MUST NOT
+  // revert any reservation/status change on this path - the transfer may
+  // have genuinely succeeded. Only a definite `confirmation.value.err`
+  // (ambiguous: false) means nothing moved and is safe to revert.
+  ambiguous?: boolean;
 }
 
 /**
@@ -78,7 +85,10 @@ export interface PayoutResult {
  * vesting-service.ts's executeVestingClaim(). Does not attempt
  * crash-safe checkpointing of the broadcast signature before
  * confirmation - same accepted scope boundary as mint-service.ts and
- * vesting-service.ts (no reconciliation job yet in Phase 3 either).
+ * vesting-service.ts. What IS handled here is distinguishing that
+ * ambiguous state from a definite on-chain failure (see
+ * PayoutResult.ambiguous) so callers can refuse to reopen a
+ * position/refund a reserve on a payout that may have actually landed.
  */
 export async function executeStakingPayout(params: {
   logContext: string;
@@ -93,6 +103,7 @@ export async function executeStakingPayout(params: {
   const mint = new PublicKey(mintAddress);
   const recipient = new PublicKey(recipientWalletAddress);
 
+  let signature: string | undefined;
   try {
     const platformAta = await getOrCreateAssociatedTokenAccount(connection, platform, mint, platform.publicKey);
     const recipientAta = await getOrCreateAssociatedTokenAccount(connection, platform, mint, recipient);
@@ -106,7 +117,7 @@ export async function executeStakingPayout(params: {
     transaction.recentBlockhash = blockhash;
     transaction.sign(platform);
 
-    const signature = await connection.sendRawTransaction(transaction.serialize(), {
+    signature = await connection.sendRawTransaction(transaction.serialize(), {
       skipPreflight: false,
       maxRetries: 3,
       preflightCommitment: "confirmed",
@@ -115,14 +126,18 @@ export async function executeStakingPayout(params: {
     const confirmation = await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
     if (confirmation.value.err) {
       console.error(`Staking payout ${logContext} failed on-chain:`, confirmation.value.err);
-      return { success: false, error: `Transaction failed on-chain: ${JSON.stringify(confirmation.value.err)}` };
+      return { success: false, error: `Transaction failed on-chain: ${JSON.stringify(confirmation.value.err)}`, ambiguous: false };
     }
 
     return { success: true, signature };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error while paying out.";
-    console.error(`Staking payout ${logContext} transfer error (on-chain outcome may be ambiguous):`, error);
-    return { success: false, error: message };
+    const ambiguous = signature !== undefined;
+    console.error(
+      `Staking payout ${logContext} transfer error (ambiguous=${ambiguous}${signature ? `, signature=${signature}` : ""}):`,
+      error
+    );
+    return { success: false, error: message, ambiguous, signature };
   }
 }
 

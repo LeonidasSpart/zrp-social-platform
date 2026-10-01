@@ -1,6 +1,29 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Prisma } from "@prisma/client";
-import { computeClaimableRaw, type VestingContractLike } from "../vesting-service";
+import { Keypair } from "@solana/web3.js";
+
+const { getConnection, getPlatformWallet, getOrCreateAssociatedTokenAccount, mockTx } = vi.hoisted(() => {
+  const mockTx = {
+    vestingRelease: { create: vi.fn() },
+    vestingContract: {
+      update: vi.fn().mockResolvedValue({ totalReleased: BigInt(0) as unknown as string, totalAmount: BigInt(1000000000) as unknown as string }),
+    },
+  };
+  return {
+    getConnection: vi.fn(),
+    getPlatformWallet: vi.fn(),
+    getOrCreateAssociatedTokenAccount: vi.fn(),
+    mockTx,
+  };
+});
+vi.mock("@/lib/solana", () => ({ getConnection, getPlatformWallet }));
+vi.mock("@solana/spl-token", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solana/spl-token")>();
+  return { ...actual, getOrCreateAssociatedTokenAccount };
+});
+vi.mock("@/lib/db", () => ({ prisma: { $transaction: (cb: (tx: typeof mockTx) => unknown) => cb(mockTx) } }));
+
+import { computeClaimableRaw, executeVestingClaim, type VestingContractLike } from "../vesting-service";
 
 function contract(overrides: Partial<VestingContractLike> = {}): VestingContractLike {
   return {
@@ -81,5 +104,94 @@ describe("computeClaimableRaw", () => {
     // truncates rather than rounding - assert the exact truncated value.
     const claimable = computeClaimableRaw(c, at(1));
     expect(claimable).toBe(BigInt("123456789012345678") / BigInt(3));
+  });
+});
+
+/*
+ * executeVestingClaim: the ambiguous-vs-definite-failure distinction is
+ * the actual bug fix under test here. A thrown error during
+ * confirmTransaction AFTER sendRawTransaction already returned a
+ * signature must never be treated the same as a definite on-chain
+ * failure - see the function's own comment and ExecuteClaimResult's
+ * `ambiguous` field.
+ */
+describe("executeVestingClaim", () => {
+  beforeEach(() => {
+    getConnection.mockReset();
+    getPlatformWallet.mockReset();
+    getOrCreateAssociatedTokenAccount.mockReset();
+    mockTx.vestingRelease.create.mockReset();
+    mockTx.vestingContract.update.mockReset().mockResolvedValue({
+      totalReleased: new Prisma.Decimal("0"),
+      totalAmount: new Prisma.Decimal("1000000000"),
+    });
+
+    getPlatformWallet.mockReturnValue(Keypair.generate());
+    getOrCreateAssociatedTokenAccount.mockResolvedValue({ address: Keypair.generate().publicKey });
+  });
+
+  function baseParams() {
+    return {
+      contractId: "contract1",
+      mintAddress: Keypair.generate().publicKey.toBase58(),
+      beneficiaryWalletAddress: Keypair.generate().publicKey.toBase58(),
+      claimableRaw: BigInt(1000),
+    };
+  }
+
+  it("succeeds and records the release when confirmation returns no error", async () => {
+    getConnection.mockReturnValue({
+      getLatestBlockhash: vi.fn().mockResolvedValue({ blockhash: Keypair.generate().publicKey.toBase58(), lastValidBlockHeight: 100 }),
+      sendRawTransaction: vi.fn().mockResolvedValue("sig-success"),
+      confirmTransaction: vi.fn().mockResolvedValue({ value: { err: null } }),
+    });
+
+    const result = await executeVestingClaim(baseParams());
+    expect(result).toEqual({ success: true, signature: "sig-success" });
+    expect(mockTx.vestingRelease.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("is a definite (non-ambiguous) failure when confirmation returns an on-chain error - nothing moved, safe to retry", async () => {
+    getConnection.mockReturnValue({
+      getLatestBlockhash: vi.fn().mockResolvedValue({ blockhash: Keypair.generate().publicKey.toBase58(), lastValidBlockHeight: 100 }),
+      sendRawTransaction: vi.fn().mockResolvedValue("sig-failed"),
+      confirmTransaction: vi.fn().mockResolvedValue({ value: { err: "InstructionError" } }),
+    });
+
+    const result = await executeVestingClaim(baseParams());
+    expect(result.success).toBe(false);
+    expect(result.ambiguous).toBe(false);
+    expect(mockTx.vestingRelease.create).not.toHaveBeenCalled();
+  });
+
+  it("is ambiguous when confirmTransaction throws AFTER a signature was already obtained - the claim may have actually succeeded", async () => {
+    getConnection.mockReturnValue({
+      getLatestBlockhash: vi.fn().mockResolvedValue({ blockhash: Keypair.generate().publicKey.toBase58(), lastValidBlockHeight: 100 }),
+      sendRawTransaction: vi.fn().mockResolvedValue("sig-ambiguous"),
+      confirmTransaction: vi.fn().mockRejectedValue(new Error("RPC timeout")),
+    });
+
+    const result = await executeVestingClaim(baseParams());
+    expect(result.success).toBe(false);
+    expect(result.ambiguous).toBe(true);
+    expect(result.signature).toBe("sig-ambiguous");
+    // Never records a release for an unconfirmed outcome - the caller
+    // (the claim route) is responsible for marking the contract
+    // disputed instead, never for silently proceeding as if nothing
+    // happened.
+    expect(mockTx.vestingRelease.create).not.toHaveBeenCalled();
+  });
+
+  it("is NOT ambiguous when sendRawTransaction itself throws BEFORE any signature exists - genuinely never broadcast", async () => {
+    getConnection.mockReturnValue({
+      getLatestBlockhash: vi.fn().mockResolvedValue({ blockhash: Keypair.generate().publicKey.toBase58(), lastValidBlockHeight: 100 }),
+      sendRawTransaction: vi.fn().mockRejectedValue(new Error("network error before broadcast")),
+      confirmTransaction: vi.fn(),
+    });
+
+    const result = await executeVestingClaim(baseParams());
+    expect(result.success).toBe(false);
+    expect(result.ambiguous).toBe(false);
+    expect(result.signature).toBeUndefined();
   });
 });

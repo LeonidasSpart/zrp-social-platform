@@ -94,9 +94,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
 
       if (!payout.success) {
-        // Roll back both reservations so the position isn't left
-        // stuck "UNSTAKED but never paid" - a fresh claim-challenge
-        // lets the user retry.
+        if (payout.ambiguous) {
+          // Broadcast but unconfirmed - the payout may have actually
+          // landed. Leave the position UNSTAKED and the reserve
+          // consumed exactly as they are; reopening/refunding here is
+          // what would let a second, real payout through. See
+          // StakingPosition.disputedTransactionId's schema comment.
+          await prisma.stakingPosition.update({
+            where: { id },
+            data: { disputedTransactionId: payout.signature ?? "unknown", disputedAt: new Date() },
+          });
+          return NextResponse.json(
+            {
+              error: "This unstake's outcome could not be confirmed on-chain. It may have already succeeded - do not retry. Support will verify and resolve this.",
+              disputed: true,
+            },
+            { status: 409 }
+          );
+        }
+        // A definite on-chain failure (nothing moved) - safe to roll
+        // back both reservations so the position isn't left stuck
+        // "UNSTAKED but never paid"; a fresh claim-challenge lets the
+        // user retry.
         await refundRewardToPool(position.poolId, rewardRaw);
         await prisma.stakingPosition.updateMany({ where: { id, status: "UNSTAKED" }, data: { status: "ACTIVE" } });
         return NextResponse.json({ error: payout.error || "Unstake failed." }, { status: 502 });
@@ -139,6 +158,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     if (!payout.success) {
+      if (payout.ambiguous) {
+        await prisma.stakingPosition.update({
+          where: { id },
+          data: { disputedTransactionId: payout.signature ?? "unknown", disputedAt: new Date() },
+        });
+        return NextResponse.json(
+          {
+            error: "This claim's outcome could not be confirmed on-chain. It may have already succeeded - do not retry. Support will verify and resolve this.",
+            disputed: true,
+          },
+          { status: 409 }
+        );
+      }
       await refundRewardToPool(position.poolId, rewardRaw);
       return NextResponse.json({ error: payout.error || "Claim failed." }, { status: 502 });
     }

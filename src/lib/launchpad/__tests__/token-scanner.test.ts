@@ -89,7 +89,7 @@ describe("scanToken", () => {
     expect(result.riskFlags).toContain("metadata_mutable");
   });
 
-  it("flags high holder concentration at or above 50% held by the top holder", async () => {
+  it("flags high holder concentration when a single holder is at or above 50%", async () => {
     getMint.mockResolvedValue({ supply: BigInt("1000000"), decimals: 9, mintAuthority: null, freezeAuthority: null });
     fromAccountAddress.mockRejectedValue(new Error("account not found"));
     mockConnection([
@@ -98,11 +98,16 @@ describe("scanToken", () => {
     ]);
 
     const result = await scanToken(mint.toBase58());
-    expect(result.topHolderConcentrationPercent).toBeCloseTo(50, 5);
+    // Sums the fetched top holders (50% + 20%), not just the largest.
+    expect(result.topHolderConcentrationPercent).toBeCloseTo(70, 5);
     expect(result.riskFlags).toContain("high_holder_concentration");
   });
 
-  it("does not flag concentration when the top holder is below 50%", async () => {
+  it("flags high holder concentration when several holders combined reach 50%, even though no single one does", async () => {
+    // Regression test: a token split across several large wallets is
+    // just as concentrated as one whale holding the same share, and
+    // must trip the same flag - this is exactly the case the single-
+    // largest-holder-only calculation used to miss.
     getMint.mockResolvedValue({ supply: BigInt("1000000"), decimals: 9, mintAuthority: null, freezeAuthority: null });
     fromAccountAddress.mockRejectedValue(new Error("account not found"));
     mockConnection([
@@ -111,7 +116,20 @@ describe("scanToken", () => {
     ]);
 
     const result = await scanToken(mint.toBase58());
-    expect(result.topHolderConcentrationPercent).toBeCloseTo(30, 5);
+    expect(result.topHolderConcentrationPercent).toBeCloseTo(60, 5);
+    expect(result.riskFlags).toContain("high_holder_concentration");
+  });
+
+  it("does not flag concentration when combined top holders are below 50%", async () => {
+    getMint.mockResolvedValue({ supply: BigInt("1000000"), decimals: 9, mintAuthority: null, freezeAuthority: null });
+    fromAccountAddress.mockRejectedValue(new Error("account not found"));
+    mockConnection([
+      { address: holder1, amount: "100000" },
+      { address: holder2, amount: "100000" },
+    ]);
+
+    const result = await scanToken(mint.toBase58());
+    expect(result.topHolderConcentrationPercent).toBeCloseTo(20, 5);
     expect(result.riskFlags).not.toContain("high_holder_concentration");
   });
 });
