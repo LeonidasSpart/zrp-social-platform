@@ -623,6 +623,7 @@ model User {
   stakingPools StakingPool[]
   launchedNfts LaunchedNft[]
   nftStakingPools NftStakingPool[] @relation("NftStakingPoolCreator")
+  farmingPools FarmingPool[]
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -2135,6 +2136,7 @@ model LaunchedToken {
   vestingContracts VestingContract[]
   stakingPools     StakingPool[]
   nftStakingPoolsAsReward NftStakingPool[]
+  farmingPoolsAsReward FarmingPool[]
 }
 
 enum VestingContractStatus {
@@ -2456,6 +2458,101 @@ model NftStakingRewardDeposit {
 
   poolId String
   pool   NftStakingPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  amountRaw     Decimal @db.Decimal(38, 0)
+  transactionId String  @unique
+
+  createdAt DateTime @default(now())
+
+  @@index([poolId])
+}
+
+// ZRP Launchpad, phase 7: liquidity farming. Mechanically identical to
+// fungible staking (StakingPool/StakingPosition) - same fixed-APY
+// accrual formula, same funded-reserve safety, same wallet-native
+// stake/claim/unstake primitives - the one real difference is WHAT gets
+// staked: an external LP token minted by a DEX (Raydium/Orca/etc.),
+// never a LaunchedToken ZRP itself minted. That's why this can't just
+// reuse StakingPool.launchedTokenId as a foreign key - there is no
+// corresponding LaunchedToken row for someone else's LP mint, only a
+// bare mint address the creator supplies. Reward math/payout logic is
+// reused as-is from staking-service.ts (computeTotalAccruedRewardRaw /
+// computeClaimableRewardRaw / executeStakingPayout); only the reward-
+// reserve reserve/refund helpers are duplicated against this table
+// (see farming-service.ts). Unlike StakingPool (gated to the
+// underlying token's own creator), ANY verified-wallet user may open a
+// farming pool - there's no "creator" of someone else's LP token to
+// check against, so the only natural gate left is "you're the one
+// responsible for actually funding its rewards," the same as every
+// other pool-creator-only action here.
+model FarmingPool {
+  id String @id @default(cuid())
+
+  lpMintAddress String
+  lpTokenName   String
+  lpTokenSymbol String
+  lpDecimals    Int
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  rewardTokenId String
+  rewardToken   LaunchedToken @relation(fields: [rewardTokenId], references: [id], onDelete: Cascade)
+
+  apyBasisPoints Int
+  lockSeconds    Int
+  minStakeRaw    Decimal  @db.Decimal(38, 0)
+  maxStakeRaw    Decimal? @db.Decimal(38, 0)
+
+  totalStakedRaw   Decimal @db.Decimal(38, 0) @default(0)
+  rewardReserveRaw Decimal @db.Decimal(38, 0) @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  positions      FarmingPosition[]
+  rewardDeposits FarmingRewardDeposit[]
+
+  @@index([creatorId])
+  @@index([lpMintAddress])
+}
+
+model FarmingPosition {
+  id String @id @default(cuid())
+
+  poolId String
+  pool   FarmingPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  userWalletAddress String
+
+  amountRaw        Decimal @db.Decimal(38, 0)
+  rewardClaimedRaw Decimal @db.Decimal(38, 0) @default(0)
+
+  depositTransactionId String @unique
+
+  stakedAt  DateTime @default(now())
+  unlocksAt DateTime
+
+  status StakingPositionStatus @default(ACTIVE)
+
+  claimNonce          String?
+  claimNonceExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([poolId])
+  @@index([userWalletAddress])
+  @@index([status])
+}
+
+model FarmingRewardDeposit {
+  id String @id @default(cuid())
+
+  poolId String
+  pool   FarmingPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
 
   amountRaw     Decimal @db.Decimal(38, 0)
   transactionId String  @unique
