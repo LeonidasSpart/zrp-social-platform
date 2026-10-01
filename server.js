@@ -12,8 +12,6 @@ loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 
 const { createServer } = require("http");
 const { parse } = require("url");
-const fs = require("fs");
-const path = require("path");
 const next = require("next");
 const { Server } = require("socket.io");
 const { createAdapter } = require("@socket.io/redis-adapter");
@@ -35,6 +33,7 @@ const {
   isLiveAudioParticipant,
 } = require("./socket-authz");
 const { runLegacyPasswordMigrationAtStartup } = require("./legacy-passwords");
+const { assertMigrationsApplied } = require("./migrations-check");
 const {
   createPresenceTracker,
   createRedisPresenceStore,
@@ -74,62 +73,6 @@ function parseCookieHeader(header) {
 // payloadObject(payload) instead.
 function payloadObject(payload) {
   return payload && typeof payload === "object" ? payload : {};
-}
-
-// ─── Boot-time migration-safety check ──────────────────────────────
-// ⚠️ RELIABILITY: railway.json's preDeployCommand (`npx prisma migrate
-// deploy`) is supposed to apply every pending migration before a new
-// release ever receives traffic - but that's an external deploy-
-// orchestration guarantee this process has no way to verify on its
-// own. When it silently didn't happen in production (a release went
-// live with code expecting User.credentialsVersion before that
-// column's migration had actually run), the failure mode was
-// catastrophic and silent: every authenticated request threw
-// PrismaClientKnownRequestError P2022 and login was down for everyone,
-// with nothing short-circuiting it before the first real user hit it.
-// This compares the migrations committed in prisma/migrations against
-// what Postgres's own _prisma_migrations table says has actually
-// finished, and refuses to start - rather than start and serve broken
-// auth to every request - if any are missing. A crash-looping deploy
-// is something Railway's own health check surfaces in seconds; a
-// silently broken one is not.
-async function assertMigrationsApplied(prisma) {
-  const migrationsDir = path.join(__dirname, "prisma", "migrations");
-  const onDisk = fs
-    .readdirSync(migrationsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name);
-
-  if (onDisk.length === 0) return;
-
-  let applied;
-  try {
-    applied = await prisma.$queryRaw`
-      SELECT migration_name FROM "_prisma_migrations"
-      WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL
-    `;
-  } catch (err) {
-    console.error(
-      "🔴 FATAL: could not read the _prisma_migrations table to verify the schema is up to date " +
-        "(it may not exist yet, meaning no migration has EVER been applied to this database). " +
-        "Run `npx prisma migrate deploy` against this database, then restart.",
-      err
-    );
-    process.exit(1);
-  }
-
-  const appliedNames = new Set(applied.map((row) => row.migration_name));
-  const pending = onDisk.filter((name) => !appliedNames.has(name));
-
-  if (pending.length > 0) {
-    console.error(
-      `🔴 FATAL: ${pending.length} migration(s) committed in prisma/migrations have NOT been applied ` +
-        `to this database: ${pending.join(", ")}. The running code expects the schema these migrations ` +
-        "produce and will error on nearly every request. Refusing to start. " +
-        "Run `npx prisma migrate deploy` against this database, then restart."
-    );
-    process.exit(1);
-  }
 }
 
 const dev = process.env.NODE_ENV !== "production";
