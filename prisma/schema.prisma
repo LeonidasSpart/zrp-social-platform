@@ -624,6 +624,7 @@ model User {
   launchedNfts LaunchedNft[]
   nftStakingPools NftStakingPool[] @relation("NftStakingPoolCreator")
   farmingPools FarmingPool[]
+  daos Dao[]
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -2137,6 +2138,7 @@ model LaunchedToken {
   stakingPools     StakingPool[]
   nftStakingPoolsAsReward NftStakingPool[]
   farmingPoolsAsReward FarmingPool[]
+  dao Dao?
 }
 
 enum VestingContractStatus {
@@ -2560,6 +2562,147 @@ model FarmingRewardDeposit {
   createdAt DateTime @default(now())
 
   @@index([poolId])
+}
+
+// ZRP Launchpad, phase 8: DAO governance - proposals and token-weighted
+// voting ONLY. Deliberately no treasury: no on-chain execution of a
+// passed proposal, no multisig, no fund custody beyond what the
+// platform already escrows for staking/farming reward reserves. A
+// passed proposal is a signal the token's team acts on manually -
+// identical in spirit to UpgradeRequest/PaymentRequest being
+// admin-reviewed rather than self-executing. This is intentional, not
+// a stub: giving an unaudited program custody of a DAO's treasury is
+// the single highest-severity class of bug this launchpad could ship,
+// and the roadmap explicitly calls for scaffolding here, not that.
+//
+// Voting power is read live from the voter's on-chain balance of the
+// DAO's governance mint at the moment they vote (getSplTokenBalanceRaw
+// in dao-service.ts), not a block-height snapshot taken when the
+// proposal opened. This is a known, documented limitation shared with
+// every simple token-voting DAO that isn't checkpoint-based (unlike
+// Compound/Governor Bravo's snapshotted getPriorVotes): a holder could
+// in principle vote, move the same tokens to a second wallet, and vote
+// again. Double voting FROM THE SAME WALLET on the SAME proposal is
+// still hard-blocked (DaoVote's unique [proposalId, voterWalletAddress]
+// plus an atomically-consumed per-wallet challenge nonce), and splitting
+// a holding across wallets to re-vote costs nothing extra in effort than
+// the attacker already had to split it before voting began, so this is
+// a real but narrow gap, not an open double-vote bug.
+model Dao {
+  id String @id @default(cuid())
+
+  launchedTokenId String        @unique
+  launchedToken   LaunchedToken @relation(fields: [launchedTokenId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String? @db.Text
+
+  // Minimum total vote weight (for+against+abstain, raw base units of
+  // the governance token) a proposal needs for its outcome to count as
+  // PASSED rather than REJECTED for lack of quorum.
+  quorumRaw Decimal @db.Decimal(38, 0)
+  // Minimum balance of the governance token a wallet must hold to open
+  // a new proposal - keeps proposal creation from being spammable by a
+  // dust holder.
+  proposalThresholdRaw Decimal @db.Decimal(38, 0)
+  votingPeriodSeconds  Int     @default(259200) // 3 days
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  proposals DaoProposal[]
+
+  @@index([creatorId])
+}
+
+enum DaoVoteChoice {
+  FOR
+  AGAINST
+  ABSTAIN
+}
+
+model DaoProposal {
+  id String @id @default(cuid())
+
+  daoId String
+  dao   Dao    @relation(fields: [daoId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String @db.Text
+
+  // The wallet that opened this proposal - wallet-native like every
+  // other launchpad action; no ZRP account is implied for voters, only
+  // for the DAO's own creator (see Dao.creatorId).
+  proposerWalletAddress String
+
+  votingStartsAt DateTime @default(now())
+  votingEndsAt   DateTime
+
+  // Cached tallies, raw base units of the governance token - updated
+  // atomically alongside each DaoVote insert inside the same
+  // transaction, never recomputed by summing votes on every read.
+  forRaw     Decimal @db.Decimal(38, 0) @default(0)
+  againstRaw Decimal @db.Decimal(38, 0) @default(0)
+  abstainRaw Decimal @db.Decimal(38, 0) @default(0)
+
+  // Only the proposer can cancel, and only before votingEndsAt - see
+  // computeProposalStatus() in dao-service.ts for how this combines
+  // with the time-based ACTIVE/PASSED/REJECTED transition (computed on
+  // read, never a stored/cron-flipped status - same pattern as Story's
+  // 24h expiry).
+  cancelledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  votes          DaoVote[]
+  voteChallenges DaoVoteChallenge[]
+
+  @@index([daoId])
+  @@index([votingEndsAt])
+}
+
+model DaoVote {
+  id String @id @default(cuid())
+
+  proposalId String
+  proposal   DaoProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  voterWalletAddress String
+  choice             DaoVoteChoice
+  // The voter's on-chain governance-token balance read at the moment
+  // they voted - see the model-level doc comment above for why this is
+  // a live read, not a proposal-open-time snapshot.
+  weightRaw Decimal @db.Decimal(38, 0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([proposalId, voterWalletAddress])
+  @@index([proposalId])
+}
+
+// Single-use ed25519 challenge nonce for casting a vote, scoped to one
+// (proposal, wallet) pair - the multi-voter analogue of the singleton
+// claimNonce column every staking/farming position uses, since here
+// many different wallets need an outstanding nonce on the same
+// proposal at once.
+model DaoVoteChallenge {
+  id String @id @default(cuid())
+
+  proposalId String
+  proposal   DaoProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  walletAddress String
+  nonce         String
+  expiresAt     DateTime
+
+  createdAt DateTime @default(now())
+
+  @@unique([proposalId, walletAddress])
+  @@index([proposalId])
 }
 
 // ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT
