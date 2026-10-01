@@ -83,6 +83,30 @@ enum WithdrawalStatus {
   REJECTED
 }
 
+// Lifecycle of a global announcement broadcast. DRAFT/SCHEDULED are the
+// only states a SEND request may transition out of (atomically, to
+// SENDING) - see src/lib/announcements/dispatch.ts. SENDING is itself
+// the idempotency guard: a second concurrent send request, or a
+// double-click, can never start a duplicate broadcast because the
+// conditional UPDATE that performs the transition only ever matches
+// one row once.
+enum AnnouncementStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  // Finished, but at least one batch recorded a processing-level error
+  // (e.g. a transient database failure writing that batch's
+  // Notification rows) - NOT the same thing as an individual invalid
+  // push token, which sendPushNotification already absorbs silently
+  // and never surfaces here. See dispatch.ts.
+  PARTIAL
+  // Every batch failed - distinct from PARTIAL (which means SOME
+  // recipients were reached).
+  FAILED
+  CANCELLED
+}
+
 enum TicketCategory {
   GENERAL
   ACCOUNT
@@ -1168,16 +1192,88 @@ model Notification {
   commentId String?
   comment   Comment? @relation("Notification_comment", fields: [commentId], references: [id], onDelete: Cascade)
 
+  // Links an "announcement"-type notification back to the broadcast
+  // that produced it. Nullable: every other notification type leaves
+  // this null, and Postgres does not enforce uniqueness across NULLs,
+  // so @@unique([announcementId, userId]) below only ever constrains
+  // the announcement rows - it has no effect on ordinary notifications.
+  // That uniqueness is what makes batch re-processing after a crash/
+  // restart idempotent (see dispatch.ts): re-inserting the same
+  // (announcementId, userId) pair is a no-op via createMany's
+  // skipDuplicates rather than a duplicate notification.
+  announcementId String?
+  announcement   Announcement? @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
   read Boolean @default(false)
 
   createdAt DateTime @default(now())
 
+  @@unique([announcementId, userId])
   @@index([userId])
   @@index([userId, read])
   @@index([userId, createdAt])
   @@index([createdAt])
   @@index([fromUserId])
   @@index([commentId])
+}
+
+// A single admin-authored message broadcast to all eligible ZRP
+// members (today's only supported target - see dispatch.ts/eligibility.ts
+// for what "eligible" excludes). Sits ON TOP of the existing
+// Notification + push (FCM/APNs/Web Push) infrastructure rather than
+// duplicating it: sending a broadcast creates one Notification row per
+// eligible recipient (announcementId set, fromUserId set to a single
+// reserved system account - see announcements/system-user.ts) and
+// calls the existing sendPushNotification() per recipient, exactly as
+// any other notification type would. No second push pipeline, no
+// second notification center.
+model Announcement {
+  id    String @id @default(cuid())
+  title String
+  body  String @db.Text
+
+  // Plain string + a TS union (src/lib/announcements/types.ts), not a
+  // Prisma enum - matching Notification.type's own established
+  // convention in this codebase rather than introducing the first
+  // Prisma enum for this domain.
+  type String @default("ANNOUNCEMENT")
+
+  status AnnouncementStatus @default(DRAFT)
+
+  imageUrl  String?
+  actionUrl String?
+
+  // Loose reference, not a Prisma relation/FK - same convention as
+  // AuditLog.actorId. A real FK with onDelete:Cascade here would mean
+  // deleting the admin's account later cascade-deletes this
+  // Announcement row and, via Notification.announcementId's own
+  // cascade, every recipient's Notification row with it - a single
+  // account deletion silently wiping a broadcast's entire history for
+  // everyone else. A loose id avoids that blast radius entirely.
+  createdById String
+
+  scheduledAt   DateTime?
+  sendStartedAt DateTime?
+  completedAt   DateTime?
+  cancelledAt   DateTime?
+
+  // Progress/resume cursor for the batch processor - set once eligibility
+  // is computed at send time, then advanced by each batch. See
+  // src/lib/announcements/dispatch.ts.
+  totalRecipients   Int     @default(0)
+  processedCount    Int     @default(0)
+  failedBatchCount  Int     @default(0)
+  lastProcessedUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notifications Notification[]
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([createdAt])
+  @@index([createdById])
 }
 
 model Message {
