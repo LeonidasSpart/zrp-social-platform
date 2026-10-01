@@ -57,7 +57,17 @@ interface CreateNotificationParams {
     // own request - that's the pair below).
     | "live_audio_speaker_invited"
     | "live_audio_speaker_approved"
-    | "live_audio_speaker_rejected";
+    | "live_audio_speaker_rejected"
+    // A global admin broadcast (src/lib/announcements/). Always
+    // written in bulk via prisma.notification.createMany() directly
+    // (src/lib/announcements/dispatch.ts), never through
+    // createNotification() itself - a broadcast has no single "actor"
+    // relationship to check for a block, and at announcement scale a
+    // per-row self-check/block-check/email round trip for every
+    // recipient would be the exact "N queries for N users" pattern this
+    // feature has to avoid. Listed here anyway so this union stays the
+    // authoritative list of every notification type that can exist.
+    | "announcement";
   fromUserId: string;
   postId?: string;
   // Disambiguates which comment a comment_like/comment_repost/reply
@@ -186,6 +196,11 @@ export async function createNotification({
       "live_audio_speaker_invited",
       "live_audio_speaker_approved",
       "live_audio_speaker_rejected",
+      // Defensive: the bulk broadcast path never calls createNotification()
+      // at all (see the "announcement" union member above), but if it
+      // or a future caller ever did, email campaigns are explicitly out
+      // of scope for this feature - a broadcast is push + in-app only.
+      "announcement",
     ]);
     if (NEVER_EMAIL_TYPES.has(type)) return true;
 
