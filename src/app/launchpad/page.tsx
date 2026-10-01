@@ -106,6 +106,24 @@ export default function LaunchpadHomePage() {
           >
             IDO campaigns
           </Link>
+          <Link
+            href="/launchpad/scanner"
+            className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
+          >
+            Token scanner
+          </Link>
+          <Link
+            href="/launchpad/swap"
+            className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
+          >
+            Swap
+          </Link>
+          <Link
+            href="/launchpad/ai-assistant"
+            className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
+          >
+            AI assistant
+          </Link>
         </div>
       </section>
 
