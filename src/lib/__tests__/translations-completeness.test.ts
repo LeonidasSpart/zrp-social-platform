@@ -91,6 +91,7 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   "ZRP Social",
   "ZRP Shorts",
   "ZRP PLAY",
+  "ZRP Launchpad",
   // Third-party payment brand names - never translated in any language
   "PayPal",
   // ISO banking standard acronyms - identical in every language (French/
