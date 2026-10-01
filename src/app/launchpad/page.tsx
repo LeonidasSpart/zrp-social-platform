@@ -76,6 +76,18 @@ export default function LaunchpadHomePage() {
           >
             Claim vested tokens
           </Link>
+          <Link
+            href="/launchpad/nft"
+            className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
+          >
+            NFTs
+          </Link>
+          <Link
+            href="/launchpad/nft-staking"
+            className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
+          >
+            NFT staking
+          </Link>
         </div>
       </section>
 
