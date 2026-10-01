@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Loader2, Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ProposalSummary {
   id: string;
@@ -48,9 +49,17 @@ const STATUS_STYLES: Record<ProposalSummary["status"], string> = {
   CANCELLED: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
 };
 
+const STATUS_LABEL_KEYS: Record<ProposalSummary["status"], "launchpad.daoDetail.statusActive" | "launchpad.daoDetail.statusPassed" | "launchpad.daoDetail.statusRejected" | "launchpad.daoDetail.statusCancelled"> = {
+  ACTIVE: "launchpad.daoDetail.statusActive",
+  PASSED: "launchpad.daoDetail.statusPassed",
+  REJECTED: "launchpad.daoDetail.statusRejected",
+  CANCELLED: "launchpad.daoDetail.statusCancelled",
+};
+
 export default function DaoDetailPage() {
   const params = useParams<{ id: string }>();
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [dao, setDao] = useState<DaoDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -74,7 +83,7 @@ export default function DaoDetailPage() {
   if (!dao) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">DAO not found.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.daoDetail.notFound")}</p>
       </div>
     );
   }
@@ -92,7 +101,9 @@ export default function DaoDetailPage() {
         />
         <div>
           <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">{dao.name}</h1>
-          <p className="text-gray-500 dark:text-gray-400">${dao.launchedToken.symbol} governance</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            {t("launchpad.daoDetail.tokenGovernance", { symbol: dao.launchedToken.symbol })}
+          </p>
         </div>
       </div>
 
@@ -100,30 +111,34 @@ export default function DaoDetailPage() {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Quorum</p>
-          <p className="font-semibold text-gray-900 dark:text-white">{formatRaw(dao.quorumRaw, dao.launchedToken.decimals)} tokens</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.daoDetail.quorumLabel")}</p>
+          <p className="font-semibold text-gray-900 dark:text-white">
+            {t("launchpad.daoDetail.tokenAmount", { value: formatRaw(dao.quorumRaw, dao.launchedToken.decimals) })}
+          </p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Proposal threshold</p>
-          <p className="font-semibold text-gray-900 dark:text-white">{formatRaw(dao.proposalThresholdRaw, dao.launchedToken.decimals)} tokens</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.daoDetail.thresholdLabel")}</p>
+          <p className="font-semibold text-gray-900 dark:text-white">
+            {t("launchpad.daoDetail.tokenAmount", { value: formatRaw(dao.proposalThresholdRaw, dao.launchedToken.decimals) })}
+          </p>
         </div>
       </div>
 
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-gray-900 dark:text-white">Proposals</h2>
+        <h2 className="font-semibold text-gray-900 dark:text-white">{t("launchpad.daoDetail.proposalsHeading")}</h2>
         {session?.user && (
           <Link
             href={`/launchpad/dao/${dao.id}/propose`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zrp-red text-white rounded-full font-semibold hover:bg-red-700 transition text-xs"
           >
             <Plus className="w-3.5 h-3.5" />
-            New proposal
+            {t("launchpad.daoDetail.newProposalButton")}
           </Link>
         )}
       </div>
 
       {dao.proposals.length === 0 ? (
-        <p className="text-center py-8 text-gray-500 dark:text-gray-400">No proposals yet.</p>
+        <p className="text-center py-8 text-gray-500 dark:text-gray-400">{t("launchpad.daoDetail.noProposals")}</p>
       ) : (
         <div className="space-y-3">
           {dao.proposals.map((p) => (
@@ -134,10 +149,15 @@ export default function DaoDetailPage() {
             >
               <div className="flex items-center justify-between gap-2">
                 <p className="font-semibold text-gray-900 dark:text-white truncate">{p.title}</p>
-                <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[p.status]}`}>{p.status}</span>
+                <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[p.status]}`}>
+                  {t(STATUS_LABEL_KEYS[p.status])}
+                </span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                For {formatRaw(p.forRaw, dao.launchedToken.decimals)} / Against {formatRaw(p.againstRaw, dao.launchedToken.decimals)}
+                {t("launchpad.daoDetail.voteSummary", {
+                  forAmount: formatRaw(p.forRaw, dao.launchedToken.decimals),
+                  againstAmount: formatRaw(p.againstRaw, dao.launchedToken.decimals),
+                })}
               </p>
             </Link>
           ))}

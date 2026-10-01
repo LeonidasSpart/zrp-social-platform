@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface OwnedToken {
   id: string;
@@ -15,6 +17,7 @@ interface OwnedToken {
 export default function CreateIdoCampaignPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [ownedTokens, setOwnedTokens] = useState<OwnedToken[]>([]);
   const [launchedTokenId, setLaunchedTokenId] = useState("");
@@ -47,34 +50,34 @@ export default function CreateIdoCampaignPage() {
     setError(null);
 
     if (!launchedTokenId) {
-      setError("Select a token you created.");
+      setError(t("launchpad.idoCreate.selectTokenError"));
       return;
     }
     if (!title.trim() || title.trim().length > 120) {
-      setError("Title is required (max 120 characters).");
+      setError(t("launchpad.idoCreate.titleRequiredError"));
       return;
     }
     if (!description.trim()) {
-      setError("Description is required.");
+      setError(t("launchpad.idoCreate.descriptionRequiredError"));
       return;
     }
     if (!participationInstructions.trim()) {
-      setError("Explain how an approved participant actually takes part (off-platform).");
+      setError(t("launchpad.idoCreate.participationInstructionsRequiredError"));
       return;
     }
     if (!saleStartsAt) {
-      setError("Sale start date/time is required.");
+      setError(t("launchpad.idoCreate.saleStartRequiredError"));
       return;
     }
     const price = Number(tokenPriceUsdc);
     const softCap = Number(softCapUsdc);
     const hardCap = Number(hardCapUsdc);
     if (!Number.isFinite(price) || price <= 0) {
-      setError("Invalid token price.");
+      setError(t("launchpad.idoCreate.invalidPriceError"));
       return;
     }
     if (!Number.isFinite(hardCap) || hardCap < softCap) {
-      setError("Hard cap must be at least the soft cap.");
+      setError(t("launchpad.idoCreate.hardCapTooLowError"));
       return;
     }
 
@@ -97,10 +100,11 @@ export default function CreateIdoCampaignPage() {
         }),
       });
       const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error || "Failed to create IDO campaign.");
+      if (!response.ok)
+        throw new Error(localizeApiMessage(data?.error, t) || t("launchpad.idoCreate.createFailedDefault"));
       router.push(`/launchpad/ido/${data.campaign.id}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create IDO campaign.");
+      setError(err instanceof Error ? err.message : t("launchpad.idoCreate.createFailedDefault"));
     } finally {
       setSubmitting(false);
     }
@@ -116,27 +120,28 @@ export default function CreateIdoCampaignPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to open an IDO campaign.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.idoCreate.signInRequired")}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Open an IDO campaign</h1>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">
+        {t("launchpad.idoCreate.heading")}
+      </h1>
       <div className="mb-6 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-        ZRP never pools, holds, or distributes contribution funds. This only publishes campaign terms and manages a whitelist - how
-        approved participants actually contribute is entirely up to you, described in your own participation instructions below.
+        {t("launchpad.idoCreate.nonCustodialDisclosure")}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {ownedTokens.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            You need a token you created to run a sale for. Create one on the Launchpad first.
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("launchpad.idoCreate.noOwnedTokensMessage")}</p>
         ) : (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Token</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.idoCreate.tokenLabel")}
+            </label>
             <select
               value={launchedTokenId}
               onChange={(e) => setLaunchedTokenId(e.target.value)}
@@ -153,7 +158,9 @@ export default function CreateIdoCampaignPage() {
         )}
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Campaign title</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t("launchpad.idoCreate.campaignTitleLabel")}
+          </label>
           <input
             type="text"
             value={title}
@@ -165,7 +172,9 @@ export default function CreateIdoCampaignPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t("launchpad.idoCreate.descriptionLabel")}
+          </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -178,7 +187,9 @@ export default function CreateIdoCampaignPage() {
 
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Price (USDC)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.idoCreate.priceLabel")}
+            </label>
             <input
               type="number"
               min={0}
@@ -190,7 +201,9 @@ export default function CreateIdoCampaignPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Soft cap (USDC)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.idoCreate.softCapLabel")}
+            </label>
             <input
               type="number"
               min={0}
@@ -202,7 +215,9 @@ export default function CreateIdoCampaignPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Hard cap (USDC)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.idoCreate.hardCapLabel")}
+            </label>
             <input
               type="number"
               min={0}
@@ -217,7 +232,9 @@ export default function CreateIdoCampaignPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Sale starts</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.idoCreate.saleStartsLabel")}
+            </label>
             <input
               type="datetime-local"
               value={saleStartsAt}
@@ -227,7 +244,9 @@ export default function CreateIdoCampaignPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (days)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.idoCreate.durationLabel")}
+            </label>
             <input
               type="number"
               min={0.05}
@@ -247,14 +266,15 @@ export default function CreateIdoCampaignPage() {
             onChange={(e) => setRequiresWhitelist(e.target.checked)}
             disabled={submitting}
           />
-          Require whitelist approval before participation
+          {t("launchpad.idoCreate.requireWhitelistLabel")}
         </label>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Participation instructions</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t("launchpad.idoCreate.participationInstructionsLabel")}
+          </label>
           <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">
-            Shown to approved participants - how do they actually contribute? (e.g. an external contract address, a form, a wallet to
-            send to directly). ZRP never executes this step.
+            {t("launchpad.idoCreate.participationInstructionsHint")}
           </p>
           <textarea
             value={participationInstructions}
@@ -276,10 +296,10 @@ export default function CreateIdoCampaignPage() {
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              {t("launchpad.idoCreate.creatingButton")}
             </>
           ) : (
-            "Open campaign"
+            t("launchpad.idoCreate.openCampaignButton")
           )}
         </button>
       </form>

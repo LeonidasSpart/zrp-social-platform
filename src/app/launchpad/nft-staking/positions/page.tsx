@@ -4,6 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { Loader2, Search } from "lucide-react";
 import { connectAndSignMessage } from "@/lib/launchpad/injected-wallet";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface NftStakingPositionSummary {
   id: string;
@@ -33,6 +35,7 @@ function formatRaw(raw: string, decimals: number): string {
 }
 
 export default function MyNftStakingPositionsPage() {
+  const { t } = useLanguage();
   const [walletInput, setWalletInput] = useState("");
   const [positions, setPositions] = useState<NftStakingPositionSummary[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -46,10 +49,10 @@ export default function MyNftStakingPositionsPage() {
     try {
       const res = await fetch(`/api/launchpad/nft-staking/positions?walletAddress=${encodeURIComponent(walletInput.trim())}`);
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to look up positions.");
+      if (!res.ok) throw new Error(localizeApiMessage(data?.error, t) || t("launchpad.nftStakingPositions.errLookupFailed"));
       setPositions(data.positions || []);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to look up positions.");
+      setError(err instanceof Error ? err.message : t("launchpad.nftStakingPositions.errLookupFailed"));
       setPositions(null);
     } finally {
       setLoading(false);
@@ -71,7 +74,7 @@ export default function MyNftStakingPositionsPage() {
       const challengeRes = await fetch(`/api/launchpad/nft-staking/positions/${position.id}/claim-challenge`, { method: "POST" });
       const challenge = await challengeRes.json().catch(() => null);
       if (!challengeRes.ok || typeof challenge?.message !== "string") {
-        throw new Error(challenge?.error || "Failed to request a claim challenge.");
+        throw new Error(localizeApiMessage(challenge?.error, t) || t("launchpad.nftStakingPositions.errClaimChallengeFailed"));
       }
 
       const { walletAddress, signature } = await connectAndSignMessage(challenge.message);
@@ -82,18 +85,27 @@ export default function MyNftStakingPositionsPage() {
         body: JSON.stringify({ walletAddress, signature, unstakeNft }),
       });
       const claimData = await claimRes.json().catch(() => null);
-      if (!claimRes.ok) throw new Error(claimData?.error || "Claim failed.");
+      if (!claimRes.ok) throw new Error(localizeApiMessage(claimData?.error, t) || t("launchpad.nftStakingPositions.errClaimFailed"));
 
       if (unstakeNft) {
         setResultMessage(
-          `Unstaked ${position.nft.name} + ${formatRaw(claimData.reward, position.pool.rewardToken.decimals)} ${position.pool.rewardToken.symbol} reward.`
+          t("launchpad.nftStakingPositions.unstakedMessage", {
+            name: position.nft.name,
+            amount: formatRaw(claimData.reward, position.pool.rewardToken.decimals),
+            symbol: position.pool.rewardToken.symbol,
+          })
         );
       } else {
-        setResultMessage(`Claimed ${formatRaw(claimData.reward, position.pool.rewardToken.decimals)} ${position.pool.rewardToken.symbol} reward.`);
+        setResultMessage(
+          t("launchpad.nftStakingPositions.claimedMessage", {
+            amount: formatRaw(claimData.reward, position.pool.rewardToken.decimals),
+            symbol: position.pool.rewardToken.symbol,
+          })
+        );
       }
       await lookupPositions();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Claim failed.");
+      setError(err instanceof Error ? err.message : t("launchpad.nftStakingPositions.errClaimFailed"));
     } finally {
       setBusyId(null);
     }
@@ -101,10 +113,9 @@ export default function MyNftStakingPositionsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">My NFT staking positions</h1>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.nftStakingPositions.title")}</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        No ZRP account needed - just the wallet you staked from. You&apos;ll be asked to sign a message with your wallet extension to prove
-        ownership; this never authorizes a transaction.
+        {t("launchpad.nftStakingPositions.subtitle")}
       </p>
 
       <form onSubmit={handleSearch} className="flex gap-2 mb-6">
@@ -112,7 +123,7 @@ export default function MyNftStakingPositionsPage() {
           type="text"
           value={walletInput}
           onChange={(e) => setWalletInput(e.target.value)}
-          placeholder="Your Solana wallet address"
+          placeholder={t("launchpad.nftStakingPositions.walletPlaceholder")}
           className="flex-1 h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
         <button
@@ -132,7 +143,7 @@ export default function MyNftStakingPositionsPage() {
       {positions && (
         <div className="space-y-3">
           {positions.length === 0 ? (
-            <p className="text-center py-8 text-gray-500 dark:text-gray-400">No NFT staking positions found for that wallet.</p>
+            <p className="text-center py-8 text-gray-500 dark:text-gray-400">{t("launchpad.nftStakingPositions.emptyState")}</p>
           ) : (
             positions.map((p) => {
               const claimable = formatRaw(p.claimableRewardRaw, p.pool.rewardToken.decimals);
@@ -152,10 +163,12 @@ export default function MyNftStakingPositionsPage() {
                     <span className="text-xs text-gray-500 dark:text-gray-400">{p.status}</span>
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white mt-3">
-                    Claimable reward: {claimable} {p.pool.rewardToken.symbol}
+                    {t("launchpad.nftStakingPositions.claimableRewardLabel", { amount: claimable, symbol: p.pool.rewardToken.symbol })}
                   </p>
                   {p.status === "ACTIVE" && !unlocked && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Unlocks {new Date(p.unlocksAt).toLocaleString()}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      {t("launchpad.nftStakingPositions.unlocksLabel", { date: new Date(p.unlocksAt).toLocaleString() })}
+                    </p>
                   )}
                   {p.status === "ACTIVE" && (
                     <div className="mt-3 grid grid-cols-2 gap-2">
@@ -165,7 +178,7 @@ export default function MyNftStakingPositionsPage() {
                         disabled={!canClaimReward || busyId === p.id}
                         className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                       >
-                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Claim reward"}
+                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.nftStakingPositions.claimRewardButton")}
                       </button>
                       <button
                         type="button"
@@ -173,7 +186,13 @@ export default function MyNftStakingPositionsPage() {
                         disabled={!canUnstake || busyId === p.id}
                         className="inline-flex items-center justify-center rounded-md bg-gray-900 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
                       >
-                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : canUnstake ? "Unstake NFT" : "Locked"}
+                        {busyId === p.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : canUnstake ? (
+                          t("launchpad.nftStakingPositions.unstakeNftButton")
+                        ) : (
+                          t("launchpad.nftStakingPositions.lockedButton")
+                        )}
                       </button>
                     </div>
                   )}

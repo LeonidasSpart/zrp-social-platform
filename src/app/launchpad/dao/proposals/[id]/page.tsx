@@ -6,6 +6,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { findInjectedSolanaProvider } from "@/lib/launchpad/injected-wallet";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
+import type { TranslationKey } from "@/lib/translations";
 
 interface ProposalDetail {
   id: string;
@@ -37,36 +40,44 @@ function formatRaw(raw: string, decimals: number): string {
   }
 }
 
-async function connectWallet(): Promise<{ walletAddress: string }> {
+async function connectWallet(t: (key: TranslationKey) => string): Promise<{ walletAddress: string }> {
   const provider = findInjectedSolanaProvider();
   if (!provider) {
-    throw new Error("No Solana wallet extension found. Install Phantom, Solflare or Backpack.");
+    throw new Error(t("launchpad.daoProposalDetail.errorNoWalletInstall"));
   }
   const connected = await provider.connect();
   const publicKey = (connected && connected.publicKey) || provider.publicKey;
   const walletAddress = publicKey?.toString();
   if (!walletAddress) {
-    throw new Error("Could not read the connected wallet's address.");
+    throw new Error(t("launchpad.daoProposalDetail.errorNoWalletAddress"));
   }
   return { walletAddress };
 }
 
-async function signWithConnectedWallet(message: string): Promise<string> {
+async function signWithConnectedWallet(message: string, t: (key: TranslationKey) => string): Promise<string> {
   const provider = findInjectedSolanaProvider();
   if (!provider) {
-    throw new Error("No Solana wallet extension found.");
+    throw new Error(t("launchpad.daoProposalDetail.errorNoWallet"));
   }
   const signed = await provider.signMessage(new TextEncoder().encode(message), "utf8");
   const signatureBytes = signed instanceof Uint8Array ? signed : signed?.signature;
   if (!(signatureBytes instanceof Uint8Array)) {
-    throw new Error("The wallet did not return a signature.");
+    throw new Error(t("launchpad.daoProposalDetail.errorNoSignature"));
   }
   const { default: bs58 } = await import("bs58");
   return bs58.encode(signatureBytes);
 }
 
+const STATUS_LABEL_KEYS: Record<ProposalDetail["status"], "launchpad.daoProposalDetail.statusActive" | "launchpad.daoProposalDetail.statusPassed" | "launchpad.daoProposalDetail.statusRejected" | "launchpad.daoProposalDetail.statusCancelled"> = {
+  ACTIVE: "launchpad.daoProposalDetail.statusActive",
+  PASSED: "launchpad.daoProposalDetail.statusPassed",
+  REJECTED: "launchpad.daoProposalDetail.statusRejected",
+  CANCELLED: "launchpad.daoProposalDetail.statusCancelled",
+};
+
 export default function DaoProposalDetailPage() {
   const params = useParams<{ id: string }>();
+  const { t } = useLanguage();
   const [proposal, setProposal] = useState<ProposalDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -92,7 +103,7 @@ export default function DaoProposalDetailPage() {
     setResultMessage(null);
     setBusy(choice);
     try {
-      const { walletAddress } = await connectWallet();
+      const { walletAddress } = await connectWallet(t);
 
       const challengeRes = await fetch(`/api/launchpad/dao/proposals/${proposal.id}/vote-challenge`, {
         method: "POST",
@@ -101,10 +112,10 @@ export default function DaoProposalDetailPage() {
       });
       const challenge = await challengeRes.json().catch(() => null);
       if (!challengeRes.ok || typeof challenge?.message !== "string") {
-        throw new Error(challenge?.error || "Failed to request a vote challenge.");
+        throw new Error(localizeApiMessage(challenge?.error, t) || t("launchpad.daoProposalDetail.errorVoteChallengeFailed"));
       }
 
-      const signature = await signWithConnectedWallet(challenge.message);
+      const signature = await signWithConnectedWallet(challenge.message, t);
 
       const voteRes = await fetch(`/api/launchpad/dao/proposals/${proposal.id}/vote`, {
         method: "POST",
@@ -112,12 +123,23 @@ export default function DaoProposalDetailPage() {
         body: JSON.stringify({ walletAddress, signature, choice }),
       });
       const voteData = await voteRes.json().catch(() => null);
-      if (!voteRes.ok) throw new Error(voteData?.error || "Vote failed.");
+      if (!voteRes.ok) throw new Error(localizeApiMessage(voteData?.error, t) || t("launchpad.daoProposalDetail.errorVoteFailed"));
 
-      setResultMessage(`Voted ${choice} with ${formatRaw(voteData.weight, proposal.dao.launchedToken.decimals)} tokens.`);
+      const choiceLabelKey =
+        choice === "FOR"
+          ? "launchpad.daoProposalDetail.choiceFor"
+          : choice === "AGAINST"
+            ? "launchpad.daoProposalDetail.choiceAgainst"
+            : "launchpad.daoProposalDetail.choiceAbstain";
+      setResultMessage(
+        t("launchpad.daoProposalDetail.votedWith", {
+          choice: t(choiceLabelKey),
+          amount: formatRaw(voteData.weight, proposal.dao.launchedToken.decimals),
+        })
+      );
       await loadProposal();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Vote failed.");
+      setError(err instanceof Error ? err.message : t("launchpad.daoProposalDetail.errorVoteFailed"));
     } finally {
       setBusy(null);
     }
@@ -129,7 +151,7 @@ export default function DaoProposalDetailPage() {
     setResultMessage(null);
     setBusy("cancel");
     try {
-      const { walletAddress } = await connectWallet();
+      const { walletAddress } = await connectWallet(t);
 
       const challengeRes = await fetch(`/api/launchpad/dao/proposals/${proposal.id}/vote-challenge`, {
         method: "POST",
@@ -138,10 +160,10 @@ export default function DaoProposalDetailPage() {
       });
       const challenge = await challengeRes.json().catch(() => null);
       if (!challengeRes.ok || typeof challenge?.message !== "string") {
-        throw new Error(challenge?.error || "Failed to request a challenge.");
+        throw new Error(localizeApiMessage(challenge?.error, t) || t("launchpad.daoProposalDetail.errorChallengeFailed"));
       }
 
-      const signature = await signWithConnectedWallet(challenge.message);
+      const signature = await signWithConnectedWallet(challenge.message, t);
 
       const cancelRes = await fetch(`/api/launchpad/dao/proposals/${proposal.id}/cancel`, {
         method: "POST",
@@ -149,12 +171,12 @@ export default function DaoProposalDetailPage() {
         body: JSON.stringify({ walletAddress, signature }),
       });
       const cancelData = await cancelRes.json().catch(() => null);
-      if (!cancelRes.ok) throw new Error(cancelData?.error || "Failed to cancel.");
+      if (!cancelRes.ok) throw new Error(localizeApiMessage(cancelData?.error, t) || t("launchpad.daoProposalDetail.errorCancelFailed"));
 
-      setResultMessage("Proposal cancelled.");
+      setResultMessage(t("launchpad.daoProposalDetail.resultCancelled"));
       await loadProposal();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to cancel.");
+      setError(err instanceof Error ? err.message : t("launchpad.daoProposalDetail.errorCancelFailed"));
     } finally {
       setBusy(null);
     }
@@ -170,7 +192,7 @@ export default function DaoProposalDetailPage() {
   if (!proposal) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Proposal not found.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.daoProposalDetail.notFound")}</p>
       </div>
     );
   }
@@ -196,7 +218,9 @@ export default function DaoProposalDetailPage() {
         <div>
           <h1 className="text-xl font-extrabold font-orbitron text-gray-900 dark:text-white">{proposal.title}</h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Proposed by {proposal.proposerWalletAddress.slice(0, 6)}...{proposal.proposerWalletAddress.slice(-4)}
+            {t("launchpad.daoProposalDetail.proposedBy", {
+              address: `${proposal.proposerWalletAddress.slice(0, 6)}...${proposal.proposerWalletAddress.slice(-4)}`,
+            })}
           </p>
         </div>
       </div>
@@ -205,21 +229,23 @@ export default function DaoProposalDetailPage() {
 
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">For</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.daoProposalDetail.forLabel")}</p>
           <p className="font-semibold text-green-600 dark:text-green-400">{formatRaw(proposal.forRaw, decimals)}</p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Against</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.daoProposalDetail.againstLabel")}</p>
           <p className="font-semibold text-red-600 dark:text-red-400">{formatRaw(proposal.againstRaw, decimals)}</p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Abstain</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.daoProposalDetail.abstainLabel")}</p>
           <p className="font-semibold text-gray-600 dark:text-gray-400">{formatRaw(proposal.abstainRaw, decimals)}</p>
         </div>
       </div>
 
       <p className="text-xs text-gray-400 dark:text-gray-500">
-        {proposal.status === "ACTIVE" ? `Voting ends ${new Date(proposal.votingEndsAt).toLocaleString()}` : `Status: ${proposal.status}`}
+        {proposal.status === "ACTIVE"
+          ? t("launchpad.daoProposalDetail.votingEndsAt", { date: new Date(proposal.votingEndsAt).toLocaleString() })
+          : t("launchpad.daoProposalDetail.statusLabel", { status: t(STATUS_LABEL_KEYS[proposal.status]) })}
       </p>
 
       {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">{error}</div>}
@@ -229,9 +255,7 @@ export default function DaoProposalDetailPage() {
 
       {canVote && (
         <div className="space-y-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Connect your wallet to vote - you&apos;ll be asked to sign a message proving ownership. This never authorizes a transaction.
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.daoProposalDetail.connectHint")}</p>
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
@@ -239,7 +263,7 @@ export default function DaoProposalDetailPage() {
               disabled={busy !== null}
               className="inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
             >
-              {busy === "FOR" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Vote For"}
+              {busy === "FOR" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.daoProposalDetail.voteForButton")}
             </button>
             <button
               type="button"
@@ -247,7 +271,7 @@ export default function DaoProposalDetailPage() {
               disabled={busy !== null}
               className="inline-flex items-center justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
             >
-              {busy === "AGAINST" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Vote Against"}
+              {busy === "AGAINST" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.daoProposalDetail.voteAgainstButton")}
             </button>
             <button
               type="button"
@@ -255,7 +279,7 @@ export default function DaoProposalDetailPage() {
               disabled={busy !== null}
               className="inline-flex items-center justify-center rounded-md bg-gray-900 dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
             >
-              {busy === "ABSTAIN" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Abstain"}
+              {busy === "ABSTAIN" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.daoProposalDetail.abstainLabel")}
             </button>
           </div>
           <button
@@ -264,7 +288,7 @@ export default function DaoProposalDetailPage() {
             disabled={busy !== null}
             className="w-full text-xs text-gray-400 hover:text-red-500 transition disabled:opacity-50"
           >
-            {busy === "cancel" ? "Cancelling..." : "I'm the proposer - cancel this proposal"}
+            {busy === "cancel" ? t("launchpad.daoProposalDetail.cancellingButton") : t("launchpad.daoProposalDetail.cancelProposerButton")}
           </button>
         </div>
       )}

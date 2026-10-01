@@ -9,6 +9,8 @@ import { useUploadThing } from "@/lib/uploadthing-client";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
 import { mintTokenFromBrowser, AmbiguousMintError } from "@/lib/launchpad/client-token-mint";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { TOKEN_TEMPLATES, applyTokenTemplate, type TokenTemplateId } from "@/lib/launchpad/token-templates";
 
 // Kept in sync with the fee charged in
@@ -22,6 +24,7 @@ const CREATION_FEE_RAW = BigInt(CREATION_FEE_USDC) * BigInt(1_000_000); // USDC 
 export default function CreateTokenPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET || "";
   const usdcMint = process.env.NEXT_PUBLIC_USDC_MINT || "";
   const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
@@ -72,12 +75,12 @@ export default function CreateTokenPage() {
       const result = await startUpload([file]);
       const uploaded = result?.[0];
       if (!uploaded?.ufsUrl) {
-        setError("Image upload failed. Please try again.");
+        setError(t("launchpad.createToken.imageUploadFailed"));
         return;
       }
       setImageUrl(uploaded.ufsUrl);
     } catch {
-      setError("Image upload failed. Please try again.");
+      setError(t("launchpad.createToken.imageUploadFailed"));
     }
   };
 
@@ -104,9 +107,8 @@ export default function CreateTokenPage() {
 
     const data = await response.json().catch(() => null);
     if (!response.ok) {
-      throw new Error(
-        `${data?.error || "Failed to record the created token."} Your token minted successfully on-chain (${mintAddress}) - contact support with this address if it doesn't appear.`
-      );
+      const serverError = localizeApiMessage(data?.error, t) || t("launchpad.createToken.recordFailedDefault");
+      throw new Error(t("launchpad.createToken.recordFailedWithMint", { error: serverError, mintAddress }));
     }
 
     router.push(`/launchpad/token/${mintAddress}`);
@@ -125,7 +127,7 @@ export default function CreateTokenPage() {
       // didn't happen (or hasn't propagated to this RPC yet), so
       // surface the real error rather than silently clearing the
       // recovery state.
-      setError(err instanceof Error ? err.message : "Failed to record the token.");
+      setError(err instanceof Error ? err.message : t("launchpad.createToken.recordFailedGeneric"));
     } finally {
       setStep("idle");
     }
@@ -137,28 +139,28 @@ export default function CreateTokenPage() {
     setAmbiguousMint(null);
 
     if (!name.trim() || name.trim().length > 32) {
-      setError("Name is required (max 32 characters).");
+      setError(t("launchpad.createToken.nameRequired"));
       return;
     }
     if (!/^[A-Za-z0-9]{1,10}$/.test(symbol.trim())) {
-      setError("Symbol is required (max 10 letters/numbers, no spaces).");
+      setError(t("launchpad.createToken.symbolRequired"));
       return;
     }
     if (!imageUrl) {
-      setError("Please upload a token image.");
+      setError(t("launchpad.createToken.imageRequired"));
       return;
     }
     if (!/^[1-9]\d*$/.test(supply.trim())) {
-      setError("Supply must be a positive whole number.");
+      setError(t("launchpad.createToken.supplyInvalid"));
       return;
     }
     const numericDecimals = Number(decimals);
     if (!Number.isInteger(numericDecimals) || numericDecimals < 0 || numericDecimals > 9) {
-      setError("Decimals must be between 0 and 9.");
+      setError(t("launchpad.createToken.decimalsInvalid"));
       return;
     }
     if (!platformWallet || !usdcMint || !rpcUrl) {
-      setError("Token creation is temporarily unavailable.");
+      setError(t("launchpad.createToken.unavailable"));
       return;
     }
 
@@ -197,7 +199,7 @@ export default function CreateTokenPage() {
         setAmbiguousMint({ mintAddress: err.mintAddress, signature: err.signature });
         setError(null);
       } else {
-        setError(err instanceof Error ? err.message : "Failed to create token.");
+        setError(err instanceof Error ? err.message : t("launchpad.createToken.createFailedGeneric"));
       }
     } finally {
       setStep("idle");
@@ -215,7 +217,7 @@ export default function CreateTokenPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to create a token.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.createToken.signInRequired")}</p>
       </div>
     );
   }
@@ -224,10 +226,9 @@ export default function CreateTokenPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Create a token</h1>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.createToken.heading")}</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Mints a real SPL token on Solana mainnet. Connect your wallet and sign once - the {CREATION_FEE_USDC} USDC creation fee and the mint
-        happen together, in the same transaction. Authorities go directly to the wallet you sign with.
+        {t("launchpad.createToken.intro", { fee: CREATION_FEE_USDC })}
       </p>
 
       <div className="mb-6">
@@ -267,7 +268,7 @@ export default function CreateTokenPage() {
 
       <form onSubmit={handleCreate} className="space-y-5">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Token image</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.createToken.imageLabel")}</label>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -275,12 +276,23 @@ export default function CreateTokenPage() {
             className="flex items-center gap-3 rounded-md border border-dashed border-gray-300 dark:border-gray-700 px-4 py-3 hover:border-zrp-red transition disabled:opacity-50"
           >
             {imagePreview ? (
-              <Image src={imagePreview} alt="Token preview" width={48} height={48} className="w-12 h-12 rounded-full object-cover" unoptimized />
+              <Image
+                src={imagePreview}
+                alt={t("launchpad.createToken.imagePreviewAlt")}
+                width={48}
+                height={48}
+                className="w-12 h-12 rounded-full object-cover"
+                unoptimized
+              />
             ) : (
               <Upload className="w-5 h-5 text-gray-400" />
             )}
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {isUploading ? "Uploading..." : imageUrl ? "Change image" : "Upload image (PNG, JPG, GIF, WebP - max 4MB)"}
+              {isUploading
+                ? t("launchpad.createToken.uploadingLabel")
+                : imageUrl
+                  ? t("launchpad.createToken.changeImageLabel")
+                  : t("launchpad.createToken.uploadImageHint")}
             </span>
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
@@ -288,7 +300,7 @@ export default function CreateTokenPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.createToken.nameLabel")}</label>
             <input
               type="text"
               value={name}
@@ -299,7 +311,7 @@ export default function CreateTokenPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Symbol</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.createToken.symbolLabel")}</label>
             <input
               type="text"
               value={symbol}
@@ -312,7 +324,7 @@ export default function CreateTokenPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.createToken.descriptionLabel")}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -324,7 +336,7 @@ export default function CreateTokenPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Total supply</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.createToken.supplyLabel")}</label>
             <input
               type="text"
               inputMode="numeric"
@@ -335,7 +347,7 @@ export default function CreateTokenPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Decimals</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.createToken.decimalsLabel")}</label>
             <input
               type="number"
               min={0}
@@ -351,7 +363,7 @@ export default function CreateTokenPage() {
         <div className="grid grid-cols-2 gap-3">
           <input
             type="text"
-            placeholder="Website (optional)"
+            placeholder={t("launchpad.createToken.websitePlaceholder")}
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
             disabled={submitting}
@@ -359,7 +371,7 @@ export default function CreateTokenPage() {
           />
           <input
             type="text"
-            placeholder="Twitter/X (optional)"
+            placeholder={t("launchpad.createToken.twitterPlaceholder")}
             value={twitter}
             onChange={(e) => setTwitter(e.target.value)}
             disabled={submitting}
@@ -367,7 +379,7 @@ export default function CreateTokenPage() {
           />
           <input
             type="text"
-            placeholder="Telegram (optional)"
+            placeholder={t("launchpad.createToken.telegramPlaceholder")}
             value={telegram}
             onChange={(e) => setTelegram(e.target.value)}
             disabled={submitting}
@@ -375,7 +387,7 @@ export default function CreateTokenPage() {
           />
           <input
             type="text"
-            placeholder="Discord (optional)"
+            placeholder={t("launchpad.createToken.discordPlaceholder")}
             value={discord}
             onChange={(e) => setDiscord(e.target.value)}
             disabled={submitting}
@@ -384,25 +396,25 @@ export default function CreateTokenPage() {
         </div>
 
         <div className="space-y-2 rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Authorities</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.createToken.authoritiesHeading")}</p>
           <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input type="checkbox" checked={revokeMint} onChange={(e) => setRevokeMint(e.target.checked)} disabled={submitting} />
-            Revoke mint authority (fixes the supply forever)
+            {t("launchpad.createToken.revokeMintLabel")}
           </label>
           <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input type="checkbox" checked={revokeFreeze} onChange={(e) => setRevokeFreeze(e.target.checked)} disabled={submitting} />
-            Revoke freeze authority
+            {t("launchpad.createToken.revokeFreezeLabel")}
           </label>
           <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input type="checkbox" checked={revokeUpdate} onChange={(e) => setRevokeUpdate(e.target.checked)} disabled={submitting} />
-            Revoke update (metadata) authority - makes name/image permanent
+            {t("launchpad.createToken.revokeUpdateLabel")}
           </label>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Any authority not revoked stays with the wallet you sign with.</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{t("launchpad.createToken.authorityHint")}</p>
         </div>
 
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Creation fee: {CREATION_FEE_USDC} USDC - paid in the same transaction as the mint
+            {t("launchpad.createToken.feeDisclaimer", { fee: CREATION_FEE_USDC })}
           </p>
           {walletAddress && (
             <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
@@ -413,11 +425,11 @@ export default function CreateTokenPage() {
 
         {ambiguousMint && (
           <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-            <p className="font-medium">We couldn&apos;t confirm your mint transaction - it may have already succeeded.</p>
+            <p className="font-medium">{t("launchpad.createToken.ambiguousMintTitle")}</p>
             <p className="mt-1 text-xs">
-              Mint address: <span className="font-mono break-all">{ambiguousMint.mintAddress}</span>
+              {t("launchpad.createToken.mintAddressLabel")} <span className="font-mono break-all">{ambiguousMint.mintAddress}</span>
             </p>
-            <p className="mt-1 text-xs">Don&apos;t submit the form again - that would mint (and charge) a second token. Try finishing instead:</p>
+            <p className="mt-1 text-xs">{t("launchpad.createToken.ambiguousMintWarning")}</p>
             <button
               type="button"
               onClick={handleFinishRecording}
@@ -425,7 +437,7 @@ export default function CreateTokenPage() {
               className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
             >
               {step === "recording" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-              Finish recording this token
+              {t("launchpad.createToken.finishRecordingButton")}
             </button>
           </div>
         )}
@@ -440,19 +452,19 @@ export default function CreateTokenPage() {
           {step === "minting" && (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Confirm in your wallet...
+              {t("launchpad.createToken.confirmingWallet")}
             </>
           )}
           {step === "recording" && (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Finishing up...
+              {t("launchpad.createToken.finishingUp")}
             </>
           )}
           {step === "idle" && (
             <>
               <Rocket className="h-4 w-4" />
-              Create & Mint Token ({CREATION_FEE_USDC} USDC)
+              {t("launchpad.createToken.submitButton", { fee: CREATION_FEE_USDC })}
             </>
           )}
         </button>

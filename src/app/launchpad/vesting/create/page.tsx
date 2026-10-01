@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader2, Copy, Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OwnedToken {
   id: string;
@@ -16,6 +17,7 @@ interface OwnedToken {
 }
 
 export default function CreateVestingPage() {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
   const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET || "";
@@ -59,29 +61,29 @@ export default function CreateVestingPage() {
     setError(null);
 
     if (!launchedTokenId) {
-      setError("Select a token you created.");
+      setError(t("launchpad.vestingCreate.errorSelectToken"));
       return;
     }
     if (!beneficiaryWalletAddress.trim()) {
-      setError("A beneficiary wallet address is required.");
+      setError(t("launchpad.vestingCreate.errorBeneficiaryRequired"));
       return;
     }
     if (!/^[1-9]\d*$/.test(amount.trim())) {
-      setError("Amount must be a positive whole number of tokens.");
+      setError(t("launchpad.vestingCreate.errorInvalidAmount"));
       return;
     }
     const cliffSeconds = Math.round(Number(cliffDays) * 86400);
     const vestingSeconds = Math.round(Number(vestingDays) * 86400);
     if (!Number.isFinite(cliffSeconds) || cliffSeconds < 0) {
-      setError("Invalid cliff duration.");
+      setError(t("launchpad.vestingCreate.errorInvalidCliff"));
       return;
     }
     if (!Number.isFinite(vestingSeconds) || vestingSeconds < 0) {
-      setError("Invalid vesting duration.");
+      setError(t("launchpad.vestingCreate.errorInvalidVestingDuration"));
       return;
     }
     if (!depositTransactionId.trim()) {
-      setError("Paste the transaction ID for the token deposit.");
+      setError(t("launchpad.vestingCreate.errorTransactionIdRequired"));
       return;
     }
 
@@ -101,11 +103,11 @@ export default function CreateVestingPage() {
       });
       const data = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(data?.error || "Failed to create vesting contract.");
+        throw new Error(data?.error || t("launchpad.vestingCreate.errorCreateFailed"));
       }
       router.push(`/launchpad/vesting`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create vesting contract.");
+      setError(err instanceof Error ? err.message : t("launchpad.vestingCreate.errorCreateFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -121,7 +123,7 @@ export default function CreateVestingPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to create a vesting contract.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.vestingCreate.signInPrompt")}</p>
       </div>
     );
   }
@@ -130,20 +132,20 @@ export default function CreateVestingPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Create a vesting contract</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Locks tokens you created into a linear release schedule for a beneficiary wallet - team, advisor or investor. The beneficiary claims
-        released tokens themselves later; they don&apos;t need a ZRP account.
-      </p>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.vestingCreate.title")}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.vestingCreate.description")}</p>
 
       {ownedTokens.length === 0 ? (
         <p className="text-gray-500 dark:text-gray-400">
-          You haven&apos;t created any tokens yet. <Link href="/launchpad/create" className="text-zrp-red hover:underline">Create one first.</Link>
+          {t("launchpad.vestingCreate.noTokensYet")}{" "}
+          <Link href="/launchpad/create" className="text-zrp-red hover:underline">
+            {t("launchpad.vestingCreate.noTokensYetLink")}
+          </Link>
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Token</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.vestingCreate.tokenLabel")}</label>
             <select
               value={launchedTokenId}
               onChange={(e) => setLaunchedTokenId(e.target.value)}
@@ -159,19 +161,21 @@ export default function CreateVestingPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Beneficiary wallet address</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.vestingCreate.beneficiaryLabel")}
+            </label>
             <input
               type="text"
               value={beneficiaryWalletAddress}
               onChange={(e) => setBeneficiaryWalletAddress(e.target.value)}
               disabled={submitting}
-              placeholder="Solana wallet address"
+              placeholder={t("launchpad.vestingCreate.beneficiaryPlaceholder")}
               className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Amount (whole tokens)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.vestingCreate.amountLabel")}</label>
             <input
               type="text"
               inputMode="numeric"
@@ -184,7 +188,7 @@ export default function CreateVestingPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Cliff (days)</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.vestingCreate.cliffLabel")}</label>
               <input
                 type="number"
                 min={0}
@@ -195,7 +199,9 @@ export default function CreateVestingPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Vesting duration (days)</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t("launchpad.vestingCreate.vestingDurationLabel")}
+              </label>
               <input
                 type="number"
                 min={0}
@@ -206,18 +212,18 @@ export default function CreateVestingPage() {
               />
             </div>
           </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 -mt-3">
-            Linear release over the vesting duration, starting after the cliff. Set vesting duration to 0 for a pure cliff (fully unlocked the
-            instant the cliff passes).
-          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 -mt-3">{t("launchpad.vestingCreate.linearReleaseHint")}</p>
 
           <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 space-y-3">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Deposit the tokens to vest</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.vestingCreate.depositSectionTitle")}</p>
             {platformWallet ? (
               <>
                 <div>
                   <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                    1. Send {amount || "the"} {selectedToken?.symbol || "tokens"} to
+                    {t("launchpad.vestingCreate.depositSendInstruction", {
+                      amount: amount || t("launchpad.vestingCreate.depositAmountFallback"),
+                      symbol: selectedToken?.symbol || t("launchpad.vestingCreate.depositSymbolFallback"),
+                    })}
                   </label>
                   <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
                     <span className="flex-1 truncate font-mono text-xs text-gray-700 dark:text-gray-300">{platformWallet}</span>
@@ -227,7 +233,9 @@ export default function CreateVestingPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">2. Paste the transaction ID</label>
+                  <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
+                    {t("launchpad.vestingCreate.depositTransactionIdInstruction")}
+                  </label>
                   <input
                     type="text"
                     value={depositTransactionId}
@@ -238,7 +246,7 @@ export default function CreateVestingPage() {
                 </div>
               </>
             ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">Deposits are temporarily unavailable.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("launchpad.vestingCreate.depositsUnavailable")}</p>
             )}
           </div>
 
@@ -252,10 +260,10 @@ export default function CreateVestingPage() {
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                {t("launchpad.vestingCreate.creatingButton")}
               </>
             ) : (
-              "Create vesting contract"
+              t("launchpad.vestingCreate.submitButton")
             )}
           </button>
         </form>

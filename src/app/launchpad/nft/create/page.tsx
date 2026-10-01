@@ -8,6 +8,7 @@ import { Loader2, Copy, Check, Upload, Plus, X } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Kept in sync with the fee charged in src/app/api/launchpad/nfts/route.ts
 // (NFT_CREATION_FEE_USDC). The server independently verifies the exact
@@ -20,6 +21,7 @@ interface AttributeRow {
 }
 
 export default function CreateNftPage() {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
   const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET || "";
@@ -60,12 +62,12 @@ export default function CreateNftPage() {
       const result = await startUpload([file]);
       const uploaded = result?.[0];
       if (!uploaded?.ufsUrl) {
-        setError("Image upload failed. Please try again.");
+        setError(t("launchpad.nftCreate.imageUploadError"));
         return;
       }
       setImageUrl(uploaded.ufsUrl);
     } catch {
-      setError("Image upload failed. Please try again.");
+      setError(t("launchpad.nftCreate.imageUploadError"));
     }
   };
 
@@ -79,24 +81,24 @@ export default function CreateNftPage() {
     setError(null);
 
     if (!name.trim() || name.trim().length > 32) {
-      setError("Name is required (max 32 characters).");
+      setError(t("launchpad.nftCreate.nameRequired"));
       return;
     }
     if (!/^[A-Za-z0-9]{1,10}$/.test(symbol.trim())) {
-      setError("Symbol is required (max 10 letters/numbers, no spaces).");
+      setError(t("launchpad.nftCreate.symbolRequired"));
       return;
     }
     if (!imageUrl) {
-      setError("Please upload an image.");
+      setError(t("launchpad.nftCreate.imageRequired"));
       return;
     }
     const royaltyBasisPoints = Math.round(Number(royaltyPercent) * 100);
     if (!Number.isInteger(royaltyBasisPoints) || royaltyBasisPoints < 0 || royaltyBasisPoints > 10000) {
-      setError("Royalty must be between 0 and 100%.");
+      setError(t("launchpad.nftCreate.royaltyInvalid"));
       return;
     }
     if (!transactionId.trim()) {
-      setError("Paste the transaction ID for the creation fee payment.");
+      setError(t("launchpad.nftCreate.transactionIdRequired"));
       return;
     }
 
@@ -123,15 +125,15 @@ export default function CreateNftPage() {
 
       const data = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(data?.error || "Failed to create NFT.");
+        throw new Error(data?.error || t("launchpad.nftCreate.createError"));
       }
       if (!data?.success || !data?.nft?.mintAddress) {
-        throw new Error(data?.nft?.failureReason || "The mint transaction did not complete. Contact support with your fee transaction ID.");
+        throw new Error(data?.nft?.failureReason || t("launchpad.nftCreate.mintIncomplete"));
       }
 
       router.push(`/launchpad/nft/${data.nft.mintAddress}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create NFT.");
+      setError(err instanceof Error ? err.message : t("launchpad.nftCreate.createError"));
     } finally {
       setSubmitting(false);
     }
@@ -148,22 +150,21 @@ export default function CreateNftPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to create an NFT.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.nftCreate.signInRequired")}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Create an NFT</h1>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.nftCreate.title")}</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Mints a real 1-of-1 Solana NFT (Metaplex standard) on mainnet. Authorities are assigned directly to your verified wallet - make sure
-        you&apos;ve linked and verified one in Settings first.
+        {t("launchpad.nftCreate.description")}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Image</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftCreate.imageLabel")}</label>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -171,12 +172,16 @@ export default function CreateNftPage() {
             className="flex items-center gap-3 rounded-md border border-dashed border-gray-300 dark:border-gray-700 px-4 py-3 hover:border-zrp-red transition disabled:opacity-50"
           >
             {imagePreview ? (
-              <Image src={imagePreview} alt="NFT preview" width={48} height={48} className="w-12 h-12 rounded-md object-cover" unoptimized />
+              <Image src={imagePreview} alt={t("launchpad.nftCreate.imagePreviewAlt")} width={48} height={48} className="w-12 h-12 rounded-md object-cover" unoptimized />
             ) : (
               <Upload className="w-5 h-5 text-gray-400" />
             )}
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {isUploading ? "Uploading..." : imageUrl ? "Change image" : "Upload image (PNG, JPG, GIF, WebP - max 4MB)"}
+              {isUploading
+                ? t("launchpad.nftCreate.uploading")
+                : imageUrl
+                  ? t("launchpad.nftCreate.changeImage")
+                  : t("launchpad.nftCreate.uploadImageHint")}
             </span>
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
@@ -184,7 +189,7 @@ export default function CreateNftPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftCreate.nameLabel")}</label>
             <input
               type="text"
               value={name}
@@ -195,7 +200,7 @@ export default function CreateNftPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Symbol</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftCreate.symbolLabel")}</label>
             <input
               type="text"
               value={symbol}
@@ -208,7 +213,7 @@ export default function CreateNftPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftCreate.descriptionLabel")}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -220,19 +225,19 @@ export default function CreateNftPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Collection (optional)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftCreate.collectionLabel")}</label>
             <input
               type="text"
               value={collectionName}
               onChange={(e) => setCollectionName(e.target.value)}
               maxLength={64}
-              placeholder="e.g. My First Drop"
+              placeholder={t("launchpad.nftCreate.collectionPlaceholder")}
               disabled={submitting}
               className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Royalty (%)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftCreate.royaltyLabel")}</label>
             <input
               type="number"
               min={0}
@@ -248,21 +253,21 @@ export default function CreateNftPage() {
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Attributes (optional)</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftCreate.attributesLabel")}</label>
             <button
               type="button"
               onClick={addAttribute}
               disabled={submitting || attributes.length >= 20}
               className="inline-flex items-center gap-1 text-xs text-zrp-red hover:underline disabled:opacity-50"
             >
-              <Plus className="h-3 w-3" /> Add
+              <Plus className="h-3 w-3" /> {t("launchpad.nftCreate.addAttribute")}
             </button>
           </div>
           {attributes.map((attr, i) => (
             <div key={i} className="flex gap-2">
               <input
                 type="text"
-                placeholder="Trait (e.g. Background)"
+                placeholder={t("launchpad.nftCreate.traitPlaceholder")}
                 value={attr.trait_type}
                 onChange={(e) => updateAttribute(i, "trait_type", e.target.value)}
                 maxLength={64}
@@ -271,7 +276,7 @@ export default function CreateNftPage() {
               />
               <input
                 type="text"
-                placeholder="Value (e.g. Blue)"
+                placeholder={t("launchpad.nftCreate.valuePlaceholder")}
                 value={attr.value}
                 onChange={(e) => updateAttribute(i, "value", e.target.value)}
                 maxLength={256}
@@ -293,20 +298,22 @@ export default function CreateNftPage() {
         <div className="space-y-2 rounded-md border border-gray-200 dark:border-gray-700 p-3">
           <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input type="checkbox" checked={revokeUpdate} onChange={(e) => setRevokeUpdate(e.target.checked)} disabled={submitting} />
-            Freeze metadata (makes name/image/attributes permanent)
+            {t("launchpad.nftCreate.freezeMetadataLabel")}
           </label>
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            If not frozen, metadata update authority is assigned to your verified wallet - never kept by ZRP.
+            {t("launchpad.nftCreate.freezeMetadataHint")}
           </p>
         </div>
 
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 space-y-3">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Creation fee: {CREATION_FEE_USDC} USDC</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t("launchpad.nftCreate.creationFee", { fee: CREATION_FEE_USDC })}
+          </p>
           {platformWallet ? (
             <>
               <div>
                 <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                  1. Send {CREATION_FEE_USDC} USDC to
+                  {t("launchpad.nftCreate.sendFeeStep", { fee: CREATION_FEE_USDC })}
                 </label>
                 <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
                   <span className="flex-1 truncate font-mono text-xs text-gray-700 dark:text-gray-300">{platformWallet}</span>
@@ -316,7 +323,7 @@ export default function CreateNftPage() {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">2. Paste the transaction ID</label>
+                <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">{t("launchpad.nftCreate.pasteTxStep")}</label>
                 <input
                   type="text"
                   value={transactionId}
@@ -327,7 +334,7 @@ export default function CreateNftPage() {
               </div>
             </>
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">Payments are temporarily unavailable.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("launchpad.nftCreate.paymentsUnavailable")}</p>
           )}
         </div>
 
@@ -341,10 +348,10 @@ export default function CreateNftPage() {
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Minting on-chain...
+              {t("launchpad.nftCreate.minting")}
             </>
           ) : (
-            "Create NFT"
+            t("launchpad.nftCreate.submitButton")
           )}
         </button>
       </form>

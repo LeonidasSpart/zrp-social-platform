@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Search } from "lucide-react";
 import { connectAndSignMessage } from "@/lib/launchpad/injected-wallet";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface StakingPositionSummary {
   id: string;
@@ -32,6 +33,7 @@ function formatRaw(raw: string, decimals: number): string {
 }
 
 export default function MyStakingPositionsPage() {
+  const { t } = useLanguage();
   const [walletInput, setWalletInput] = useState("");
   const [positions, setPositions] = useState<StakingPositionSummary[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -45,10 +47,10 @@ export default function MyStakingPositionsPage() {
     try {
       const res = await fetch(`/api/launchpad/staking/positions?walletAddress=${encodeURIComponent(walletInput.trim())}`);
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to look up positions.");
+      if (!res.ok) throw new Error(data?.error || t("launchpad.stakingPositions.errorLookupFailed"));
       setPositions(data.positions || []);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to look up positions.");
+      setError(err instanceof Error ? err.message : t("launchpad.stakingPositions.errorLookupFailed"));
       setPositions(null);
     } finally {
       setLoading(false);
@@ -70,7 +72,7 @@ export default function MyStakingPositionsPage() {
       const challengeRes = await fetch(`/api/launchpad/staking/positions/${position.id}/claim-challenge`, { method: "POST" });
       const challenge = await challengeRes.json().catch(() => null);
       if (!challengeRes.ok || typeof challenge?.message !== "string") {
-        throw new Error(challenge?.error || "Failed to request a claim challenge.");
+        throw new Error(challenge?.error || t("launchpad.stakingPositions.errorChallengeFailed"));
       }
 
       const { walletAddress, signature } = await connectAndSignMessage(challenge.message);
@@ -81,18 +83,27 @@ export default function MyStakingPositionsPage() {
         body: JSON.stringify({ walletAddress, signature, unstakePrincipal }),
       });
       const claimData = await claimRes.json().catch(() => null);
-      if (!claimRes.ok) throw new Error(claimData?.error || "Claim failed.");
+      if (!claimRes.ok) throw new Error(claimData?.error || t("launchpad.stakingPositions.errorClaimFailed"));
 
       if (unstakePrincipal) {
         setResultMessage(
-          `Unstaked ${formatRaw(claimData.principal, position.pool.launchedToken.decimals)} + ${formatRaw(claimData.reward, position.pool.launchedToken.decimals)} reward ${position.pool.launchedToken.symbol}.`
+          t("launchpad.stakingPositions.resultUnstaked", {
+            principal: formatRaw(claimData.principal, position.pool.launchedToken.decimals),
+            reward: formatRaw(claimData.reward, position.pool.launchedToken.decimals),
+            symbol: position.pool.launchedToken.symbol,
+          })
         );
       } else {
-        setResultMessage(`Claimed ${formatRaw(claimData.reward, position.pool.launchedToken.decimals)} ${position.pool.launchedToken.symbol} reward.`);
+        setResultMessage(
+          t("launchpad.stakingPositions.resultClaimed", {
+            reward: formatRaw(claimData.reward, position.pool.launchedToken.decimals),
+            symbol: position.pool.launchedToken.symbol,
+          })
+        );
       }
       await lookupPositions();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Claim failed.");
+      setError(err instanceof Error ? err.message : t("launchpad.stakingPositions.errorClaimFailed"));
     } finally {
       setBusyId(null);
     }
@@ -100,18 +111,15 @@ export default function MyStakingPositionsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">My staking positions</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        No ZRP account needed - just the wallet you staked from. You&apos;ll be asked to sign a message with your wallet extension to prove
-        ownership; this never authorizes a transaction.
-      </p>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.stakingPositions.title")}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.stakingPositions.subtitle")}</p>
 
       <form onSubmit={handleSearch} className="flex gap-2 mb-6">
         <input
           type="text"
           value={walletInput}
           onChange={(e) => setWalletInput(e.target.value)}
-          placeholder="Your Solana wallet address"
+          placeholder={t("launchpad.stakingPositions.walletPlaceholder")}
           className="flex-1 h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
         <button
@@ -131,7 +139,7 @@ export default function MyStakingPositionsPage() {
       {positions && (
         <div className="space-y-3">
           {positions.length === 0 ? (
-            <p className="text-center py-8 text-gray-500 dark:text-gray-400">No staking positions found for that wallet.</p>
+            <p className="text-center py-8 text-gray-500 dark:text-gray-400">{t("launchpad.stakingPositions.empty")}</p>
           ) : (
             positions.map((p) => {
               const claimable = formatRaw(p.claimableRewardRaw, p.pool.launchedToken.decimals);
@@ -144,16 +152,25 @@ export default function MyStakingPositionsPage() {
                     <p className="font-semibold text-gray-900 dark:text-white">
                       {p.pool.launchedToken.name} (${p.pool.launchedToken.symbol})
                     </p>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{p.status}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {p.status === "ACTIVE"
+                        ? t("launchpad.stakingPositions.statusActive")
+                        : t("launchpad.stakingPositions.statusUnstaked")}
+                    </span>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    Staked {formatRaw(p.amountRaw, p.pool.launchedToken.decimals)} at {(p.pool.apyBasisPoints / 100).toFixed(2)}% APY
+                    {t("launchpad.stakingPositions.stakedAtApy", {
+                      amount: formatRaw(p.amountRaw, p.pool.launchedToken.decimals),
+                      apy: (p.pool.apyBasisPoints / 100).toFixed(2),
+                    })}
                   </p>
                   <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                    Claimable reward: {claimable} {p.pool.launchedToken.symbol}
+                    {t("launchpad.stakingPositions.claimableReward", { amount: claimable, symbol: p.pool.launchedToken.symbol })}
                   </p>
                   {p.status === "ACTIVE" && !unlocked && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Unlocks {new Date(p.unlocksAt).toLocaleString()}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      {t("launchpad.stakingPositions.unlocksAt", { date: new Date(p.unlocksAt).toLocaleString() })}
+                    </p>
                   )}
                   {p.status === "ACTIVE" && (
                     <div className="mt-3 grid grid-cols-2 gap-2">
@@ -163,7 +180,7 @@ export default function MyStakingPositionsPage() {
                         disabled={!canClaimReward || busyId === p.id}
                         className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                       >
-                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Claim reward"}
+                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.stakingPositions.claimRewardButton")}
                       </button>
                       <button
                         type="button"
@@ -171,7 +188,13 @@ export default function MyStakingPositionsPage() {
                         disabled={!canUnstake || busyId === p.id}
                         className="inline-flex items-center justify-center rounded-md bg-gray-900 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
                       >
-                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : canUnstake ? "Unstake" : "Locked"}
+                        {busyId === p.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : canUnstake ? (
+                          t("launchpad.stakingPositions.unstakeButton")
+                        ) : (
+                          t("launchpad.stakingPositions.lockedButton")
+                        )}
                       </button>
                     </div>
                   )}

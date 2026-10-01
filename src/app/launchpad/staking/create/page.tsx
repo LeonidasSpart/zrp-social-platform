@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OwnedToken {
   id: string;
@@ -14,6 +15,7 @@ interface OwnedToken {
 }
 
 export default function CreateStakingPoolPage() {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -43,16 +45,16 @@ export default function CreateStakingPoolPage() {
     setError(null);
 
     if (!launchedTokenId) {
-      setError("Select a token you created.");
+      setError(t("launchpad.stakingCreate.errorSelectToken"));
       return;
     }
     const apyBasisPoints = Math.round(Number(apy) * 100);
     if (!Number.isFinite(apyBasisPoints) || apyBasisPoints < 0) {
-      setError("Invalid APY.");
+      setError(t("launchpad.stakingCreate.errorInvalidApy"));
       return;
     }
     if (!/^\d+$/.test(minStake.trim())) {
-      setError("Invalid minimum stake.");
+      setError(t("launchpad.stakingCreate.errorInvalidMinStake"));
       return;
     }
 
@@ -70,10 +72,10 @@ export default function CreateStakingPoolPage() {
         }),
       });
       const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error || "Failed to create staking pool.");
+      if (!response.ok) throw new Error(data?.error || t("launchpad.stakingCreate.errorCreateFailed"));
       router.push(`/launchpad/staking/${data.pool.id}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create staking pool.");
+      setError(err instanceof Error ? err.message : t("launchpad.stakingCreate.errorCreateFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -89,27 +91,27 @@ export default function CreateStakingPoolPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to create a staking pool.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.stakingCreate.signInRequired")}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Create a staking pool</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Anyone with a Solana wallet can stake into this pool - no ZRP account needed. You&apos;ll need to fund a reward reserve afterwards so
-        real payouts are actually backed.
-      </p>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.stakingCreate.title")}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.stakingCreate.subtitle")}</p>
 
       {ownedTokens.length === 0 ? (
         <p className="text-gray-500 dark:text-gray-400">
-          You haven&apos;t created any tokens yet. <Link href="/launchpad/create" className="text-zrp-red hover:underline">Create one first.</Link>
+          {t("launchpad.stakingCreate.noTokens")}{" "}
+          <Link href="/launchpad/create" className="text-zrp-red hover:underline">
+            {t("launchpad.stakingCreate.createTokenLink")}
+          </Link>
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Token</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.stakingCreate.tokenLabel")}</label>
             <select
               value={launchedTokenId}
               onChange={(e) => setLaunchedTokenId(e.target.value)}
@@ -126,7 +128,7 @@ export default function CreateStakingPoolPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">APY (%)</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.stakingCreate.apyLabel")}</label>
               <input
                 type="number"
                 min={0}
@@ -138,7 +140,7 @@ export default function CreateStakingPoolPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Lock (days)</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.stakingCreate.lockDaysLabel")}</label>
               <input
                 type="number"
                 min={0}
@@ -152,7 +154,7 @@ export default function CreateStakingPoolPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Minimum stake</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.stakingCreate.minStakeLabel")}</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -163,7 +165,7 @@ export default function CreateStakingPoolPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Maximum stake (optional)</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.stakingCreate.maxStakeLabel")}</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -185,10 +187,10 @@ export default function CreateStakingPoolPage() {
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                {t("launchpad.stakingCreate.creating")}
               </>
             ) : (
-              "Create pool"
+              t("launchpad.stakingCreate.submit")
             )}
           </button>
         </form>

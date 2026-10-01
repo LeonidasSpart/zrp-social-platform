@@ -5,6 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Layers, Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+type TFn = ReturnType<typeof useLanguage>["t"];
 
 interface NftStakingPoolSummary {
   id: string;
@@ -26,13 +29,14 @@ function formatRaw(raw: string, decimals: number): string {
   }
 }
 
-function formatLock(seconds: number): string {
-  if (seconds === 0) return "No lock";
+function formatLock(seconds: number, t: TFn): string {
+  if (seconds === 0) return t("launchpad.nftStaking.noLock");
   const days = Math.round(seconds / 86400);
-  return `${days} day${days === 1 ? "" : "s"} lock`;
+  return t("launchpad.nftStaking.lockDays", { days, s: days === 1 ? "" : "s" });
 }
 
 export default function NftStakingHomePage() {
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const [pools, setPools] = useState<NftStakingPoolSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,14 +55,14 @@ export default function NftStakingHomePage() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Layers className="w-7 h-7 text-zrp-red" />
-          <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">NFT staking pools</h1>
+          <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">{t("launchpad.nftStaking.title")}</h1>
         </div>
         <div className="flex gap-2">
           <Link
             href="/launchpad/nft-staking/positions"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-full font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
           >
-            My positions
+            {t("launchpad.nftStaking.myPositions")}
           </Link>
           {session?.user && (
             <Link
@@ -66,7 +70,7 @@ export default function NftStakingHomePage() {
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-zrp-red text-white rounded-full font-semibold hover:bg-red-700 transition text-sm"
             >
               <Plus className="w-4 h-4" />
-              New pool
+              {t("launchpad.nftStaking.newPool")}
             </Link>
           )}
         </div>
@@ -77,7 +81,7 @@ export default function NftStakingHomePage() {
           <div className="w-8 h-8 border-4 border-zrp-red border-t-transparent rounded-full animate-spin" />
         </div>
       ) : pools.length === 0 ? (
-        <p className="text-center py-16 text-gray-500 dark:text-gray-400">No NFT staking pools yet.</p>
+        <p className="text-center py-16 text-gray-500 dark:text-gray-400">{t("launchpad.nftStaking.empty")}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {pools.map((pool) => (
@@ -97,10 +101,13 @@ export default function NftStakingHomePage() {
                   unoptimized
                 />
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {formatRaw(pool.rewardRatePerDayRaw, pool.rewardToken.decimals)} {pool.rewardToken.symbol}/day per NFT
+                  {t("launchpad.nftStaking.rewardPerNftPerDay", {
+                    amount: formatRaw(pool.rewardRatePerDayRaw, pool.rewardToken.decimals),
+                    symbol: pool.rewardToken.symbol,
+                  })}
                 </p>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{formatLock(pool.lockSeconds)}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{formatLock(pool.lockSeconds, t)}</p>
             </Link>
           ))}
         </div>

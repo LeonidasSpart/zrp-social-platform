@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Loader2, Copy, Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PoolDetail {
   id: string;
@@ -36,6 +37,7 @@ function formatRaw(raw: string, decimals: number): string {
 
 export default function FarmingPoolDetailPage() {
   const params = useParams<{ id: string }>();
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET || "";
 
@@ -95,15 +97,15 @@ export default function FarmingPoolDetailPage() {
     setStakeSuccess(null);
     if (!pool) return;
     if (!/^[1-9]\d*$/.test(stakeAmount.trim())) {
-      setStakeError("Amount must be a positive whole number of LP tokens.");
+      setStakeError(t("launchpad.farmingDetail.errStakeAmountInvalid"));
       return;
     }
     if (!stakeWallet.trim()) {
-      setStakeError("Your wallet address is required.");
+      setStakeError(t("launchpad.farmingDetail.errWalletRequired"));
       return;
     }
     if (!stakeTx.trim()) {
-      setStakeError("Paste the transaction ID for your stake deposit.");
+      setStakeError(t("launchpad.farmingDetail.errStakeTxRequired"));
       return;
     }
     setStaking(true);
@@ -119,13 +121,13 @@ export default function FarmingPoolDetailPage() {
         }),
       });
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to open position.");
-      setStakeSuccess("Staked successfully. View it under My positions.");
+      if (!res.ok) throw new Error(data?.error || t("launchpad.farmingDetail.errStakeFailed"));
+      setStakeSuccess(t("launchpad.farmingDetail.stakeSuccess"));
       setStakeAmount("");
       setStakeTx("");
       await loadPool();
     } catch (err: unknown) {
-      setStakeError(err instanceof Error ? err.message : "Failed to open position.");
+      setStakeError(err instanceof Error ? err.message : t("launchpad.farmingDetail.errStakeFailed"));
     } finally {
       setStaking(false);
     }
@@ -136,11 +138,11 @@ export default function FarmingPoolDetailPage() {
     setFundError(null);
     if (!pool) return;
     if (!/^[1-9]\d*$/.test(fundAmount.trim())) {
-      setFundError("Amount must be a positive whole number of tokens.");
+      setFundError(t("launchpad.farmingDetail.errFundAmountInvalid"));
       return;
     }
     if (!fundTx.trim()) {
-      setFundError("Paste the transaction ID for your funding deposit.");
+      setFundError(t("launchpad.farmingDetail.errFundTxRequired"));
       return;
     }
     setFunding(true);
@@ -151,14 +153,14 @@ export default function FarmingPoolDetailPage() {
         body: JSON.stringify({ amount: fundAmount.trim(), transactionId: fundTx.trim() }),
       });
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to fund pool.");
+      if (!res.ok) throw new Error(data?.error || t("launchpad.farmingDetail.errFundFailed"));
       // The fund route's response pool has no rewardToken/creator
       // includes - reload the full detail instead of using it directly.
       await loadPool();
       setFundAmount("");
       setFundTx("");
     } catch (err: unknown) {
-      setFundError(err instanceof Error ? err.message : "Failed to fund pool.");
+      setFundError(err instanceof Error ? err.message : t("launchpad.farmingDetail.errFundFailed"));
     } finally {
       setFunding(false);
     }
@@ -174,7 +176,7 @@ export default function FarmingPoolDetailPage() {
   if (!pool) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Pool not found.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.farmingDetail.notFound")}</p>
       </div>
     );
   }
@@ -185,7 +187,7 @@ export default function FarmingPoolDetailPage() {
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
       <div>
         <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">{pool.lpTokenName}</h1>
-        <p className="text-gray-500 dark:text-gray-400">${pool.lpTokenSymbol} farming pool</p>
+        <p className="text-gray-500 dark:text-gray-400">{t("launchpad.farmingDetail.poolSubtitle", { symbol: pool.lpTokenSymbol })}</p>
         <p className="mt-1 break-all font-mono text-xs text-gray-400 dark:text-gray-500">{pool.lpMintAddress}</p>
       </div>
 
@@ -199,34 +201,37 @@ export default function FarmingPoolDetailPage() {
           unoptimized
         />
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Earn {pool.rewardToken.name} (${pool.rewardToken.symbol})
+          {t("launchpad.farmingDetail.earnReward", { name: pool.rewardToken.name, symbol: pool.rewardToken.symbol })}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">APY</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.farmingDetail.apy")}</p>
           <p className="text-xl font-bold text-green-600 dark:text-green-400">{(pool.apyBasisPoints / 100).toFixed(2)}%</p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Lock period</p>
-          <p className="text-xl font-bold text-gray-900 dark:text-white">{pool.lockSeconds === 0 ? "None" : `${Math.round(pool.lockSeconds / 86400)}d`}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.farmingDetail.lockPeriod")}</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">
+            {pool.lockSeconds === 0
+              ? t("launchpad.farmingDetail.lockNone")
+              : t("launchpad.farmingDetail.lockDaysShort", { days: Math.round(pool.lockSeconds / 86400) })}
+          </p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Total staked</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.farmingDetail.totalStaked")}</p>
           <p className="font-semibold text-gray-900 dark:text-white">{formatRaw(pool.totalStakedRaw, pool.lpDecimals)}</p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Reward reserve</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.farmingDetail.rewardReserve")}</p>
           <p className="font-semibold text-gray-900 dark:text-white">{formatRaw(pool.rewardReserveRaw, pool.rewardToken.decimals)}</p>
         </div>
       </div>
 
       <form onSubmit={handleStake} className="space-y-4 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-        <h2 className="font-semibold text-gray-900 dark:text-white">Stake LP tokens</h2>
+        <h2 className="font-semibold text-gray-900 dark:text-white">{t("launchpad.farmingDetail.stakeHeading")}</h2>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Send ${pool.lpTokenSymbol} LP tokens to the platform wallet below from your own wallet app, then submit the transaction ID
-          here. No ZRP account needed.
+          {t("launchpad.farmingDetail.stakeInstructions", { symbol: pool.lpTokenSymbol })}
         </p>
         {platformWallet && (
           <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
@@ -240,7 +245,7 @@ export default function FarmingPoolDetailPage() {
           <input
             type="text"
             inputMode="numeric"
-            placeholder="Amount"
+            placeholder={t("launchpad.farmingDetail.amountPlaceholder")}
             value={stakeAmount}
             onChange={(e) => setStakeAmount(e.target.value.replace(/[^\d]/g, ""))}
             disabled={staking}
@@ -248,7 +253,7 @@ export default function FarmingPoolDetailPage() {
           />
           <input
             type="text"
-            placeholder="Your wallet address"
+            placeholder={t("launchpad.farmingDetail.walletAddressPlaceholder")}
             value={stakeWallet}
             onChange={(e) => setStakeWallet(e.target.value)}
             disabled={staking}
@@ -257,34 +262,38 @@ export default function FarmingPoolDetailPage() {
         </div>
         <input
           type="text"
-          placeholder="Deposit transaction ID"
+          placeholder={t("launchpad.farmingDetail.depositTxPlaceholder")}
           value={stakeTx}
           onChange={(e) => setStakeTx(e.target.value)}
           disabled={staking}
           className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
-        {stakeError && <p className="text-sm text-red-600 dark:text-red-400">{stakeError}</p>}
+        {stakeError && (
+          <p role="alert" aria-live="polite" className="text-sm text-red-600 dark:text-red-400">
+            {stakeError}
+          </p>
+        )}
         {stakeSuccess && <p className="text-sm text-green-600 dark:text-green-400">{stakeSuccess}</p>}
         <button
           type="submit"
           disabled={staking}
           className="w-full inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
         >
-          {staking ? <Loader2 className="h-4 w-4 animate-spin" /> : "Stake"}
+          {staking ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.farmingDetail.stakeButton")}
         </button>
       </form>
 
       {isCreator && (
         <form onSubmit={handleFund} className="space-y-4 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-          <h2 className="font-semibold text-gray-900 dark:text-white">Fund reward reserve</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-white">{t("launchpad.farmingDetail.fundHeading")}</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Pay in ${pool.rewardToken.symbol}. Payouts can never exceed what this pool has actually been funded with.
+            {t("launchpad.farmingDetail.fundInstructions", { symbol: pool.rewardToken.symbol })}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <input
               type="text"
               inputMode="numeric"
-              placeholder="Amount"
+              placeholder={t("launchpad.farmingDetail.amountPlaceholder")}
               value={fundAmount}
               onChange={(e) => setFundAmount(e.target.value.replace(/[^\d]/g, ""))}
               disabled={funding}
@@ -292,20 +301,24 @@ export default function FarmingPoolDetailPage() {
             />
             <input
               type="text"
-              placeholder="Deposit transaction ID"
+              placeholder={t("launchpad.farmingDetail.depositTxPlaceholder")}
               value={fundTx}
               onChange={(e) => setFundTx(e.target.value)}
               disabled={funding}
               className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
-          {fundError && <p className="text-sm text-red-600 dark:text-red-400">{fundError}</p>}
+          {fundError && (
+            <p role="alert" aria-live="polite" className="text-sm text-red-600 dark:text-red-400">
+              {fundError}
+            </p>
+          )}
           <button
             type="submit"
             disabled={funding}
             className="w-full inline-flex items-center justify-center rounded-md bg-gray-900 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
           >
-            {funding ? <Loader2 className="h-4 w-4 animate-spin" /> : "Fund reserve"}
+            {funding ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.farmingDetail.fundButton")}
           </button>
         </form>
       )}

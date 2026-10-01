@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface CampaignDetail {
   id: string;
@@ -36,9 +38,16 @@ const STATUS_STYLES: Record<WhitelistApplication["status"], string> = {
   REJECTED: "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400",
 };
 
+const STATUS_LABEL_KEYS: Record<WhitelistApplication["status"], "launchpad.idoDetail.statusPending" | "launchpad.idoDetail.statusApproved" | "launchpad.idoDetail.statusRejected"> = {
+  PENDING: "launchpad.idoDetail.statusPending",
+  APPROVED: "launchpad.idoDetail.statusApproved",
+  REJECTED: "launchpad.idoDetail.statusRejected",
+};
+
 export default function IdoCampaignDetailPage() {
   const params = useParams<{ id: string }>();
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -83,7 +92,7 @@ export default function IdoCampaignDetailPage() {
     setApplyError(null);
     setApplySuccess(false);
     if (!walletAddress.trim()) {
-      setApplyError("Your wallet address is required.");
+      setApplyError(t("launchpad.idoDetail.walletRequiredError"));
       return;
     }
     setApplying(true);
@@ -94,12 +103,13 @@ export default function IdoCampaignDetailPage() {
         body: JSON.stringify({ walletAddress: walletAddress.trim(), contactEmail: contactEmail.trim() || undefined }),
       });
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to submit application.");
+      if (!res.ok)
+        throw new Error(localizeApiMessage(data?.error, t) || t("launchpad.idoDetail.applySubmitFailedDefault"));
       setApplySuccess(true);
       setWalletAddress("");
       setContactEmail("");
     } catch (err: unknown) {
-      setApplyError(err instanceof Error ? err.message : "Failed to submit application.");
+      setApplyError(err instanceof Error ? err.message : t("launchpad.idoDetail.applySubmitFailedDefault"));
     } finally {
       setApplying(false);
     }
@@ -129,7 +139,7 @@ export default function IdoCampaignDetailPage() {
   if (!campaign) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Campaign not found.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.idoDetail.notFound")}</p>
       </div>
     );
   }
@@ -155,47 +165,49 @@ export default function IdoCampaignDetailPage() {
       </div>
 
       <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-        ZRP does not pool, hold, or distribute contribution funds for this sale. Only approved participants should follow the
-        instructions below, provided by the project.
+        {t("launchpad.idoDetail.nonCustodialDisclosure")}
       </div>
 
       <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{campaign.description}</p>
 
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Price</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.idoDetail.priceLabel")}</p>
           <p className="font-semibold text-gray-900 dark:text-white">${campaign.tokenPriceUsdc}</p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Soft cap</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.idoDetail.softCapLabel")}</p>
           <p className="font-semibold text-gray-900 dark:text-white">${campaign.softCapUsdc.toLocaleString()}</p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Hard cap</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.idoDetail.hardCapLabel")}</p>
           <p className="font-semibold text-gray-900 dark:text-white">${campaign.hardCapUsdc.toLocaleString()}</p>
         </div>
       </div>
 
       <p className="text-xs text-gray-400 dark:text-gray-500">
         {campaign.cancelledAt
-          ? "Cancelled"
+          ? t("launchpad.idoDetail.cancelledStatus")
           : saleEnded
-            ? `Sale ended ${new Date(campaign.saleEndsAt).toLocaleString()}`
-            : `Sale ${new Date(campaign.saleStartsAt).toLocaleString()} - ${new Date(campaign.saleEndsAt).toLocaleString()}`}
+            ? t("launchpad.idoDetail.saleEndedStatus", { date: new Date(campaign.saleEndsAt).toLocaleString() })
+            : t("launchpad.idoDetail.saleScheduleStatus", {
+                start: new Date(campaign.saleStartsAt).toLocaleString(),
+                end: new Date(campaign.saleEndsAt).toLocaleString(),
+              })}
       </p>
 
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-        <h2 className="font-semibold text-gray-900 dark:text-white mb-2">How to participate</h2>
+        <h2 className="font-semibold text-gray-900 dark:text-white mb-2">{t("launchpad.idoDetail.howToParticipateHeading")}</h2>
         <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{campaign.participationInstructions}</p>
       </div>
 
       {campaign.requiresWhitelist && canApply && (
         <form onSubmit={handleApply} className="space-y-3 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-          <h2 className="font-semibold text-gray-900 dark:text-white">Apply for the whitelist</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400">No ZRP account needed - just your wallet address.</p>
+          <h2 className="font-semibold text-gray-900 dark:text-white">{t("launchpad.idoDetail.applyHeading")}</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.idoDetail.applyNoAccountHint")}</p>
           <input
             type="text"
-            placeholder="Your Solana wallet address"
+            placeholder={t("launchpad.idoDetail.walletPlaceholder")}
             value={walletAddress}
             onChange={(e) => setWalletAddress(e.target.value)}
             disabled={applying}
@@ -203,29 +215,31 @@ export default function IdoCampaignDetailPage() {
           />
           <input
             type="email"
-            placeholder="Contact email (optional)"
+            placeholder={t("launchpad.idoDetail.emailPlaceholder")}
             value={contactEmail}
             onChange={(e) => setContactEmail(e.target.value)}
             disabled={applying}
             className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           />
           {applyError && <p className="text-sm text-red-600 dark:text-red-400">{applyError}</p>}
-          {applySuccess && <p className="text-sm text-green-600 dark:text-green-400">Application submitted.</p>}
+          {applySuccess && <p className="text-sm text-green-600 dark:text-green-400">{t("launchpad.idoDetail.applySuccessMessage")}</p>}
           <button
             type="submit"
             disabled={applying}
             className="w-full inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
           >
-            {applying ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+            {applying ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.idoDetail.applyButton")}
           </button>
         </form>
       )}
 
       {isCreator && applications && (
         <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-          <h2 className="font-semibold text-gray-900 dark:text-white mb-3">Whitelist applications ({applications.length})</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-3">
+            {t("launchpad.idoDetail.applicationsHeading", { count: applications.length })}
+          </h2>
           {applications.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">No applications yet.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("launchpad.idoDetail.noApplicationsMessage")}</p>
           ) : (
             <div className="space-y-2">
               {applications.map((app) => (
@@ -242,7 +256,7 @@ export default function IdoCampaignDetailPage() {
                         disabled={reviewBusyId === app.id}
                         className="rounded-full bg-green-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50"
                       >
-                        Approve
+                        {t("launchpad.idoDetail.approveButton")}
                       </button>
                       <button
                         type="button"
@@ -250,11 +264,13 @@ export default function IdoCampaignDetailPage() {
                         disabled={reviewBusyId === app.id}
                         className="rounded-full bg-red-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                       >
-                        Reject
+                        {t("launchpad.idoDetail.rejectButton")}
                       </button>
                     </div>
                   ) : (
-                    <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[app.status]}`}>{app.status}</span>
+                    <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[app.status]}`}>
+                      {STATUS_LABEL_KEYS[app.status] ? t(STATUS_LABEL_KEYS[app.status]) : app.status}
+                    </span>
                   )}
                 </div>
               ))}
