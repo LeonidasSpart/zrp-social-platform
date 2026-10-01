@@ -625,6 +625,7 @@ model User {
   nftStakingPools NftStakingPool[] @relation("NftStakingPoolCreator")
   farmingPools FarmingPool[]
   daos Dao[]
+  idoCampaigns IdoCampaign[]
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -2139,6 +2140,7 @@ model LaunchedToken {
   nftStakingPoolsAsReward NftStakingPool[]
   farmingPoolsAsReward FarmingPool[]
   dao Dao?
+  idoCampaigns IdoCampaign[]
 }
 
 enum VestingContractStatus {
@@ -2703,6 +2705,88 @@ model DaoVoteChallenge {
 
   @@unique([proposalId, walletAddress])
   @@index([proposalId])
+}
+
+// ZRP Launchpad, phase 9: IDO (Initial DEX Offering) launchpad -
+// DELIBERATELY NON-CUSTODIAL SCAFFOLDING ONLY. This is the one roadmap
+// item where the natural feature (pool third-party contributor funds
+// during a sale window, then distribute tokens or refunds based on
+// whether a soft cap was met) was evaluated and explicitly declined:
+// pooling investor money for a future token distribution is a
+// fundamentally different risk class than anything else in this
+// launchpad (tips/purchases/staking/farming all move a user's OWN
+// funds for something already rendered or already escrowed by the
+// depositor themselves) and starts to look like operating a securities
+// offering or money-transmission business in most jurisdictions - not
+// a call this codebase can make unilaterally. What ships instead is a
+// genuinely useful non-custodial piece: campaign metadata plus a
+// whitelist application/review workflow, with a mandatory, prominently
+// rendered disclosure that ZRP never pools, holds, or distributes
+// contribution funds. Approved participants follow the project's own
+// participationInstructions to contribute off-platform; that mechanism
+// is the project's responsibility, not this schema's.
+model IdoCampaign {
+  id String @id @default(cuid())
+
+  launchedTokenId String
+  launchedToken   LaunchedToken @relation(fields: [launchedTokenId], references: [id], onDelete: Cascade)
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  title       String
+  description String @db.Text
+
+  // Informational only - never enforced or moved by this schema.
+  tokenPriceUsdc Decimal @db.Decimal(18, 6)
+  softCapUsdc    Decimal @db.Decimal(18, 6)
+  hardCapUsdc    Decimal @db.Decimal(18, 6)
+
+  requiresWhitelist Boolean @default(true)
+  // How an approved participant actually contributes, off-platform -
+  // see the model doc comment above. Rendered verbatim with a
+  // non-custodial disclosure banner, never parsed or acted on.
+  participationInstructions String @db.Text
+
+  saleStartsAt DateTime
+  saleEndsAt   DateTime
+
+  cancelledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  whitelistApplications IdoWhitelistApplication[]
+
+  @@index([creatorId])
+  @@index([launchedTokenId])
+  @@index([saleEndsAt])
+}
+
+enum IdoWhitelistStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model IdoWhitelistApplication {
+  id String @id @default(cuid())
+
+  campaignId String
+  campaign   IdoCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  applicantWalletAddress String
+  contactEmail           String?
+
+  status     IdoWhitelistStatus @default(PENDING)
+  reviewNote String?
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([campaignId, applicantWalletAddress])
+  @@index([campaignId])
+  @@index([status])
 }
 
 // ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT
