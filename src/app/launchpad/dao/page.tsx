@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Landmark, Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DaoSummary {
   id: string;
@@ -16,6 +17,7 @@ interface DaoSummary {
 
 export default function DaoHomePage() {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [daos, setDaos] = useState<DaoSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +35,7 @@ export default function DaoHomePage() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Landmark className="w-7 h-7 text-zrp-red" />
-          <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">DAOs</h1>
+          <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">{t("launchpad.dao.title")}</h1>
         </div>
         {session?.user && (
           <Link
@@ -41,21 +43,18 @@ export default function DaoHomePage() {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-zrp-red text-white rounded-full font-semibold hover:bg-red-700 transition text-sm"
           >
             <Plus className="w-4 h-4" />
-            Start a DAO
+            {t("launchpad.dao.startButton")}
           </Link>
         )}
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Proposal and token-weighted voting for a launched token&apos;s community. A passed proposal is a signal the project&apos;s team
-        acts on - there is no on-chain treasury or automatic execution here.
-      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.dao.subtitle")}</p>
 
       {loading ? (
         <div className="flex justify-center py-16">
           <div className="w-8 h-8 border-4 border-zrp-red border-t-transparent rounded-full animate-spin" />
         </div>
       ) : daos.length === 0 ? (
-        <p className="text-center py-16 text-gray-500 dark:text-gray-400">No DAOs yet.</p>
+        <p className="text-center py-16 text-gray-500 dark:text-gray-400">{t("launchpad.dao.empty")}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {daos.map((dao) => (
@@ -80,7 +79,9 @@ export default function DaoHomePage() {
               </div>
               {dao.description && <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">{dao.description}</p>}
               <p className="text-xs text-gray-400 dark:text-gray-500">
-                {dao._count.proposals} proposal{dao._count.proposals === 1 ? "" : "s"}
+                {dao._count.proposals === 1
+                  ? t("launchpad.dao.proposalCountOne", { count: dao._count.proposals })
+                  : t("launchpad.dao.proposalCountOther", { count: dao._count.proposals })}
               </p>
             </Link>
           ))}

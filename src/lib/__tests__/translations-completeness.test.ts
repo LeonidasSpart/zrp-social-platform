@@ -302,6 +302,26 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptions.colActions",
     "adminSubscriptionDetail.colDate",
     "adminNewsNetwork.scoreLabel",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.descriptionLabel", // "Description" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.quorumLabel", // "Quorum" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.statusActive", // "ACTIVE" status label kept identical (short/invariant form)
+    "launchpad.daoPropose.descriptionLabel", // "Description" is a genuine cognate/established loanword in this language
+    "launchpad.daoProposalDetail.statusActive", // "ACTIVE" status label kept identical (short/invariant form)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingPositions.statusActive", // "Active" status label kept identical (short/invariant form)
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.descriptionLabel", // "Description" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingCreate.collectionLabel", // "Collection" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.imageLabel", // "Image" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.descriptionLabel", // "Description" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingPositions.statusActive", // "Active" status label kept identical (short/invariant form)
   ],
   de: [
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
@@ -416,6 +436,38 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.fieldStatus",
     "adminSubscriptionDetail.planLabel",
     "adminSubscriptionDetail.colPlan",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.nameLabel", // "Name" is a genuine cognate/established loanword in this language
+    "launchpad.createToken.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.createToken.websitePlaceholder", // "Website (optional)" — platform brand name / optional-field label kept identical
+    "launchpad.createToken.twitterPlaceholder", // "Twitter/X (optional)" — platform brand name / optional-field label kept identical
+    "launchpad.createToken.telegramPlaceholder", // "Telegram (optional)" — platform brand name / optional-field label kept identical
+    "launchpad.createToken.discordPlaceholder", // "Discord (optional)" — platform brand name / optional-field label kept identical
+    "launchpad.dao.title", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.daoDetail.quorumLabel", // "Quorum" is a genuine cognate/established loanword in this language
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nfts", // "NFTs" is an acronym/industry term, kept untranslated
+    "launchpad.home.daos", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.tokenDetail.website", // "Website" is a genuine cognate/established loanword in this language
+    "launchpad.ido.capRange", // "Cap: ${softCap} - ${hardCap}" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.nft.title", // "ZRP NFTs" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.nameLabel", // "Name" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.scanner.supplyLabel", // "Supply" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   it: [
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
@@ -518,6 +570,28 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
     "adminSubscriptionDetail.no",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.daoDetail.quorumLabel", // "Quorum" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.ido.capRange", // "Cap: ${softCap} - ${hardCap}" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.nftDetail.royalty", // "Royalty: {percent}%" template — the fixed/label portion is a genuine cognate
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   sq: [
     "investors.platform.music.title",
@@ -580,6 +654,26 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title",
     "adminNewsNetwork.pilotOnly",
     "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.title", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.liquidityFarming", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   es: [
     "investors.types.familyOffice",
@@ -678,6 +772,22 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.no",
     "adminSubscriptionDetail.planLabel",
     "adminSubscriptionDetail.colPlan",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.daoDetail.tokenAmount", // "{value} tokens" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
   ],
   ru: [
     "investors.platform.music.title",
@@ -731,6 +841,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   ar: [
     "investors.platform.music.title",
@@ -765,6 +883,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nfts", // "NFTs" is an acronym/industry term, kept untranslated
+    "launchpad.nft.title", // "ZRP NFTs" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   zh: [
     "investors.platform.music.title",
@@ -795,6 +922,10 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.categoryZrp",
     "trust.outOf100",
     "adminNewsNetwork.title",
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   tr: [
     "investors.platform.music.title",
@@ -867,6 +998,25 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.fieldPlan",
     "adminSubscriptionDetail.planLabel",
     "adminSubscriptionDetail.colPlan",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.minStakeLabel", // "Minimum stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.minStakeLabel", // "Minimum stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   id: [
     "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -985,6 +1135,36 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.fieldInterval",
     "adminSubscriptionDetail.intervalLabel",
     "adminSubscriptionDetail.colInterval",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.dao.proposalCountOne", // "{count} proposal" template — the fixed/label portion is a genuine cognate
+    "launchpad.daoProposalDetail.choiceAbstain", // "ABSTAIN" vote-choice label kept identical (short/invariant form)
+    "launchpad.daoProposalDetail.abstainLabel", // "Abstain" is a genuine cognate/established loanword in this language
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.title", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.farmingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.liquidityFarming", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingPositions.unstakeNftButton", // "Unstake NFT" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   pt: [
     "investors.types.familyOffice",
@@ -1042,6 +1222,36 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title",
     "adminNewsNetwork.tabFeeds",
     "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.dao.title", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.daoDetail.tokenAmount", // "{value} tokens" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nfts", // "NFTs" is an acronym/industry term, kept untranslated
+    "launchpad.home.daos", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.tokenDetail.website", // "Website" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.ido.capRange", // "Cap: ${softCap} - ${hardCap}" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nft.title", // "ZRP NFTs" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.nftDetail.royalty", // "Royalty: {percent}%" template — the fixed/label portion is a genuine cognate
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
   ],
   ja: [
     "investors.platform.music.title",
@@ -1071,6 +1281,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   ko: [
     "group.lastMessagePrefix",
@@ -1083,6 +1295,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   hi: [
     "adminPayments.tx",
@@ -1097,6 +1311,12 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   nl: [
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1325,6 +1545,40 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.intervalLabel",
     "adminSubscriptionDetail.colInterval",
     "adminNewsNetwork.scoreLabel",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.daoCreate.quorumLabel", // "Quorum (tokens)" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.quorumLabel", // "Quorum" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.tokenAmount", // "{value} tokens" template — the fixed/label portion is a genuine cognate
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.title", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.liquidityFarming", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.tokenDetail.website", // "Website" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.ido.capRange", // "Cap: ${softCap} - ${hardCap}" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.nftDetail.royalty", // "Royalty: {percent}%" template — the fixed/label portion is a genuine cognate
+    "launchpad.scanner.supplyLabel", // "Supply" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
   ],
   pl: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1404,6 +1658,26 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.planLabel",
     "adminSubscriptionDetail.colPlan",
     "adminSubscriptionDetail.actorSystem",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   ro: [
     "liveAudio.visibilityPublic", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1533,6 +1807,32 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.intervalLabel",
     "adminSubscriptionDetail.colPlan",
     "adminSubscriptionDetail.colInterval",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.tokenDetail.website", // "Website" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingPositions.unstakeNftButton", // "Unstake NFT" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   cs: [
     "investors.types.familyOffice",
@@ -1605,6 +1905,31 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.fieldInterval",
     "adminSubscriptionDetail.intervalLabel",
     "adminSubscriptionDetail.colInterval",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   hu: [
     "investors.types.familyOffice",
@@ -1660,6 +1985,35 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title",
     "adminNewsNetwork.pilotOnly",
     "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.minStakeLabel", // "Minimum stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.poolSubtitle", // "${symbol} farming pool" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.subtitlePoolType", // "NFT staking pool" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.minStakeLabel", // "Minimum stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.poolSuffix", // "staking pool" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   sv: [
     // "Version" is a legitimate Swedish cognate (identical spelling); this key only became a
@@ -1777,6 +2131,41 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.planLabel",
     "adminSubscriptionDetail.colPlan",
     "adminSubscriptionDetail.actorSystem",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.createToken.supplyLabel", // "Total supply" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.tokenAmount", // "{value} tokens" template — the fixed/label portion is a genuine cognate
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.title", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.liquidityFarming", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.tokenDetail.totalSupply", // "Total supply" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.ido.capRange", // "Cap: ${softCap} - ${hardCap}" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.scanner.supplyLabel", // "Supply" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
   ],
   da: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1933,6 +2322,42 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.colInterval",
     "adminSubscriptionDetail.actorSystem",
     "adminNewsNetwork.scoreLabel",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.daoCreate.submitButton", // "Start DAO" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.tokenAmount", // "{value} tokens" template — the fixed/label portion is a genuine cognate
+    "launchpad.daoProposalDetail.choiceFor", // "FOR" vote-choice label kept identical (short/invariant form)
+    "launchpad.daoProposalDetail.forLabel", // "For" is a genuine cognate/established loanword in this language
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.title", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.liquidityFarming", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.ido.capRange", // "Cap: ${softCap} - ${hardCap}" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.scanner.supplyLabel", // "Supply" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingPositions.statusUnstaked", // "Unstaked" status label kept identical (short/invariant form)
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
   ],
   hr: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2009,6 +2434,35 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.intervalLabel",
     "adminSubscriptionDetail.colPlan",
     "adminSubscriptionDetail.colInterval",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingPositions.unstakeNftButton", // "Unstake NFT" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   bg: [
     "investors.types.familyOffice",
@@ -2049,6 +2503,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   el: [
     "investors.types.familyOffice",
@@ -2107,6 +2569,36 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "trust.outOf100",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.dao.title", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.daoDetail.tokenAmount", // "{value} tokens" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nfts", // "NFTs" is an acronym/industry term, kept untranslated
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.daos", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingPositions.unstakeNftButton", // "Unstake NFT" is a genuine cognate/established loanword in this language
+    "launchpad.nft.title", // "ZRP NFTs" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   // Norwegian, Serbian (Latin), Bosnian and Macedonian: each list below
   // was computed from the real diff against English and hand-reviewed -
@@ -2148,6 +2640,45 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptions.colStatus",
     "adminSubscriptionDetail.fieldStatus",
     "adminSubscriptionDetail.actorSystem",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.daoCreate.submitButton", // "Start DAO" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.quorumLabel", // "Quorum" is a genuine cognate/established loanword in this language
+    "launchpad.daoProposalDetail.choiceFor", // "FOR" vote-choice label kept identical (short/invariant form)
+    "launchpad.daoProposalDetail.forLabel", // "For" is a genuine cognate/established loanword in this language
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.title", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.liquidityFarming", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingPositions.unstakeNftButton", // "Unstake NFT" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.nftDetail.royalty", // "Royalty: {percent}%" template — the fixed/label portion is a genuine cognate
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   sr: [
     "investors.platform.music.title",
@@ -2176,6 +2707,35 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.fieldInterval",
     "adminSubscriptionDetail.intervalLabel",
     "adminSubscriptionDetail.colInterval",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingPositions.unstakeNftButton", // "Unstake NFT" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   bs: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2215,6 +2775,35 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptionDetail.intervalLabel",
     "adminSubscriptionDetail.colPlan",
     "adminSubscriptionDetail.colInterval",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.farmingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingPositions.unstakeNftButton", // "Unstake NFT" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   mk: [
     "investors.platform.music.title",
@@ -2228,6 +2817,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount",
     "adminNewsNetwork.title",
     "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   // The 5-language 29->34 expansion (Ukrainian, Finnish, Slovak,
   // Slovenian, Lithuanian): "ZRP Market Plus"/"News"/"Music" as
@@ -2244,6 +2841,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "press.emailBadge", "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
     "help.section.marketplace.title", "ads.dashboard.ctr", "trust.outOf100", "play.xp",
     "music.studio.explicitBadge", "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   fi: [
     "profile.media", "settings.video", "chat.contactVideo", "group.lastMessagePrefix",
@@ -2255,6 +2860,29 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "music.duration.minutes", "music.studio.explicitBadge", "tipModal.charCount",
     "professionalCategory.catering", "professionalCategory.freelancer",
     "communities.create.hashtagLabel", "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.title", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.liquidityFarming", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   sk: [
     "action.repost", "onboarding.bio", "settings.video", "settings.bio", "chat.offline",
@@ -2273,6 +2901,31 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed", "adminSubscriptions.filterInterval",
     "adminSubscriptionDetail.fieldInterval", "adminSubscriptionDetail.intervalLabel",
     "adminSubscriptionDetail.colInterval",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftCreate.symbolLabel", // "Symbol" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   sl: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2290,12 +2943,41 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptions.filterInterval", "adminSubscriptions.colStatus",
     "adminSubscriptionDetail.fieldStatus", "adminSubscriptionDetail.fieldInterval",
     "adminSubscriptionDetail.intervalLabel", "adminSubscriptionDetail.colInterval",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
   ],
   lt: [
     "group.lastMessagePrefix", "press.emailBadge", "marketplace.heroTitle", "faq.cat.marketPlus",
     "faq.whatIsMarketPlus.p1Bold", "help.section.marketplace.title", "ads.dashboard.ctr",
     "trust.outOf100", "play.xp", "nav.premium", "music.duration.minutes",
     "music.studio.explicitBadge", "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   // The 4-language 34->38 expansion (Estonian, Irish, Latvian, Maltese) -
   // same category of reviewed cognate/format exception as every list
@@ -2314,6 +2996,26 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
     "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
     "help.section.marketplace.title", "music.studio.explicitBadge",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.title", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nftStaking", // "NFT staking" is a genuine cognate/established loanword in this language
+    "launchpad.home.liquidityFarming", // "Liquidity farming" is a genuine cognate/established loanword in this language
+    "launchpad.home.swap", // "Swap" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   ga: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.news.title",
@@ -2327,6 +3029,22 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
     "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
     "help.section.marketplace.title",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   lv: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
@@ -2340,6 +3058,18 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "music.duration.minutes", "tipModal.charCount", "adminNewsNetwork.verificationFailedNamed",
     "marketplace.heroTitle", "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold",
     "help.section.marketplace.title", "music.studio.explicitBadge",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   mt: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
@@ -2359,6 +3089,29 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminSubscriptions.filterStatus", "adminSubscriptions.colStatus", "adminSubscriptionDetail.fieldStatus",
     "transparency.reasonSpam", "communityCode.e.category1", "marketplace.heroTitle",
     "faq.cat.marketPlus", "faq.whatIsMarketPlus.p1Bold", "help.section.marketplace.title",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.dao.title", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.daoDetail.tokenAmount", // "{value} tokens" template — the fixed/label portion is a genuine cognate
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nfts", // "NFTs" is an acronym/industry term, kept untranslated
+    "launchpad.home.daos", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nft.title", // "ZRP NFTs" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
   ],
   // The 1-language 38->39 expansion (Romansh / Rumantsch Grischun).
   // Reviewed against French and German precedent for each key: genuine
@@ -2374,6 +3127,45 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "music.albumDetail.eyebrow", "tipModal.charCount", "professionalCategory.blockchain",
     "professionalCategory.podcasting", "communities.create.hashtagLabel",
     "adminNewsNetwork.title", "adminNewsNetwork.verificationFailedNamed",
+    "nav.launchpad", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.createToken.decimalsLabel", // "Decimals" is a genuine cognate/established loanword in this language
+    "launchpad.dao.title", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.daoCreate.quorumLabel", // "Quorum (tokens)" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.quorumLabel", // "Quorum" is a genuine cognate/established loanword in this language
+    "launchpad.daoDetail.tokenAmount", // "{value} tokens" template — the fixed/label portion is a genuine cognate
+    "launchpad.daoProposalDetail.statusLabel", // "Status: {status}" template — the fixed/label portion is a genuine cognate
+    "launchpad.farming.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.decimalsLabel", // "Decimals" is a genuine cognate/established loanword in this language
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.home.title", // "Launchpad" is the established brand-name exception (see adminLaunchpad.title precedent)
+    "launchpad.home.nfts", // "NFTs" is an acronym/industry term, kept untranslated
+    "launchpad.home.daos", // "DAOs" is an acronym/industry term, kept untranslated
+    "launchpad.tokenDetail.decimals", // "Decimals" is a genuine cognate/established loanword in this language
+    "launchpad.tokenDetail.website", // "Website" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template — the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.softCapLabel", // "Soft cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoCreate.hardCapLabel", // "Hard cap (USDC)" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.softCapLabel", // "Soft cap" is a genuine cognate/established loanword in this language
+    "launchpad.idoDetail.hardCapLabel", // "Hard cap" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.nft.title", // "ZRP NFTs" is a genuine cognate/established loanword in this language
+    "launchpad.nftCreate.royaltyLabel", // "Royalty (%)" is a genuine cognate/established loanword in this language
+    "launchpad.nftDetail.royalty", // "Royalty: {percent}%" template — the fixed/label portion is a genuine cognate
+    "launchpad.scanner.decimalsLabel", // "Decimals" is a genuine cognate/established loanword in this language
+    "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
   ],
 };
 
@@ -2397,6 +3189,7 @@ const INTENTIONALLY_EMPTY_VALUES: Record<string, Set<string>> = {
     "faq.howToRegister.step1Prefix",
     "faq.howToLogin.step1Prefix",
     "faq.passwordReset.step1Prefix",
+    "launchpad.vestingCreate.depositAmountFallback",
   ]),
   // Japanese is SOV like Turkish: "Go to the" + "Sign Up" + "page." (en)
   // naturally becomes "" + "サインアップ" + "ページにアクセスします。" (ja) -
@@ -2410,13 +3203,34 @@ const INTENTIONALLY_EMPTY_VALUES: Record<string, Set<string>> = {
     "faq.supportTickets.step1Prefix",
     "faq.trackTickets.step1Prefix",
     "privacy.intro.p1Prefix",
+    "launchpad.vestingCreate.depositAmountFallback",
   ]),
   // Korean is also SOV: "Open the" + "Support" + "page." (en) becomes
   // "" + "지원" + " 페이지를 열어보세요." (ko) for the same reason.
   ko: new Set([
     "faq.supportTickets.step1Prefix",
     "privacy.intro.p1Prefix",
+    "launchpad.vestingCreate.depositAmountFallback",
   ]),
+  // launchpad.vestingCreate.depositAmountFallback is the English filler
+  // word "the" in a fallback phrase ("Enter the amount to deposit"-style
+  // string); these languages have no direct article and the translators
+  // independently converged on dropping the word rather than forcing an
+  // ungrammatical placeholder, consistent with the pattern above.
+  ru: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  ar: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  hi: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  ro: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  hu: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  hr: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  bg: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  el: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  sr: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  bs: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  mk: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  uk: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  fi: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
+  et: new Set(["launchpad.vestingCreate.depositAmountFallback"]),
 };
 
 describe("translations dictionary completeness (localization CI gate)", () => {

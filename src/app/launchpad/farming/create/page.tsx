@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OwnedToken {
   id: string;
@@ -13,6 +14,7 @@ interface OwnedToken {
 }
 
 export default function CreateFarmingPoolPage() {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -46,28 +48,28 @@ export default function CreateFarmingPoolPage() {
     setError(null);
 
     if (!lpMintAddress.trim()) {
-      setError("The LP token's mint address is required.");
+      setError(t("launchpad.farmingCreate.errMintAddressRequired"));
       return;
     }
     if (!lpTokenName.trim() || lpTokenName.trim().length > 32) {
-      setError("LP token name is required (max 32 characters).");
+      setError(t("launchpad.farmingCreate.errNameRequired"));
       return;
     }
     if (!/^[A-Za-z0-9]{1,10}$/.test(lpTokenSymbol.trim())) {
-      setError("LP token symbol is required (max 10 letters/numbers, no spaces).");
+      setError(t("launchpad.farmingCreate.errSymbolRequired"));
       return;
     }
     if (!rewardTokenId) {
-      setError("Select a reward token you created.");
+      setError(t("launchpad.farmingCreate.errRewardTokenRequired"));
       return;
     }
     const apyBasisPoints = Math.round(Number(apy) * 100);
     if (!Number.isFinite(apyBasisPoints) || apyBasisPoints < 0) {
-      setError("Invalid APY.");
+      setError(t("launchpad.farmingCreate.errInvalidApy"));
       return;
     }
     if (!/^\d+$/.test(minStake.trim())) {
-      setError("Invalid minimum stake.");
+      setError(t("launchpad.farmingCreate.errInvalidMinStake"));
       return;
     }
 
@@ -89,10 +91,10 @@ export default function CreateFarmingPoolPage() {
         }),
       });
       const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error || "Failed to create farming pool.");
+      if (!response.ok) throw new Error(data?.error || t("launchpad.farmingCreate.errCreateFailed"));
       router.push(`/launchpad/farming/${data.pool.id}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create farming pool.");
+      setError(err instanceof Error ? err.message : t("launchpad.farmingCreate.errCreateFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -108,27 +110,28 @@ export default function CreateFarmingPoolPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to create a farming pool.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.farmingCreate.signInPrompt")}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Create a farming pool</h1>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.farmingCreate.title")}</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Anyone with a Solana wallet can stake an LP token from any DEX into this pool - no ZRP account needed. You&apos;ll need to fund a
-        reward reserve afterwards so real payouts are actually backed.
+        {t("launchpad.farmingCreate.subtitle")}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">LP token mint address</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t("launchpad.farmingCreate.mintAddressLabel")}
+          </label>
           <input
             type="text"
             value={lpMintAddress}
             onChange={(e) => setLpMintAddress(e.target.value)}
-            placeholder="The Raydium/Orca LP token's mint address"
+            placeholder={t("launchpad.farmingCreate.mintAddressPlaceholder")}
             disabled={submitting}
             className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           />
@@ -136,7 +139,9 @@ export default function CreateFarmingPoolPage() {
 
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">LP token name</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.farmingCreate.tokenNameLabel")}
+            </label>
             <input
               type="text"
               value={lpTokenName}
@@ -147,7 +152,9 @@ export default function CreateFarmingPoolPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Symbol</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.farmingCreate.symbolLabel")}
+            </label>
             <input
               type="text"
               value={lpTokenSymbol}
@@ -158,7 +165,9 @@ export default function CreateFarmingPoolPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Decimals</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.farmingCreate.decimalsLabel")}
+            </label>
             <input
               type="number"
               min={0}
@@ -173,11 +182,13 @@ export default function CreateFarmingPoolPage() {
 
         {ownedTokens.length === 0 ? (
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            You need a token you created to pay rewards with. Create one on the Launchpad first.
+            {t("launchpad.farmingCreate.noOwnedTokens")}
           </p>
         ) : (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Reward token</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.farmingCreate.rewardTokenLabel")}
+            </label>
             <select
               value={rewardTokenId}
               onChange={(e) => setRewardTokenId(e.target.value)}
@@ -195,7 +206,9 @@ export default function CreateFarmingPoolPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">APY (%)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.farmingCreate.apyLabel")}
+            </label>
             <input
               type="number"
               min={0}
@@ -207,7 +220,9 @@ export default function CreateFarmingPoolPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Lock (days)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.farmingCreate.lockDaysLabel")}
+            </label>
             <input
               type="number"
               min={0}
@@ -221,7 +236,9 @@ export default function CreateFarmingPoolPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Minimum stake</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.farmingCreate.minStakeLabel")}
+            </label>
             <input
               type="text"
               inputMode="numeric"
@@ -232,7 +249,9 @@ export default function CreateFarmingPoolPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Maximum stake (optional)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("launchpad.farmingCreate.maxStakeLabel")}
+            </label>
             <input
               type="text"
               inputMode="numeric"
@@ -244,7 +263,11 @@ export default function CreateFarmingPoolPage() {
           </div>
         </div>
 
-        {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">{error}</div>}
+        {error && (
+          <div role="alert" aria-live="polite" className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
         <button
           type="submit"
@@ -254,10 +277,10 @@ export default function CreateFarmingPoolPage() {
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              {t("launchpad.farmingCreate.creating")}
             </>
           ) : (
-            "Create pool"
+            t("launchpad.farmingCreate.submitButton")
           )}
         </button>
       </form>

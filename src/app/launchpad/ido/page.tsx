@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Rocket, Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface IdoCampaignSummary {
   id: string;
@@ -19,6 +20,7 @@ interface IdoCampaignSummary {
 
 export default function IdoHomePage() {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [campaigns, setCampaigns] = useState<IdoCampaignSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +38,7 @@ export default function IdoHomePage() {
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Rocket className="w-7 h-7 text-zrp-red" />
-          <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">IDO campaigns</h1>
+          <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">{t("launchpad.ido.heading")}</h1>
         </div>
         {session?.user && (
           <Link
@@ -44,21 +46,18 @@ export default function IdoHomePage() {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-zrp-red text-white rounded-full font-semibold hover:bg-red-700 transition text-sm"
           >
             <Plus className="w-4 h-4" />
-            Open a campaign
+            {t("launchpad.ido.openCampaignButton")}
           </Link>
         )}
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        ZRP does not pool, hold, or distribute funds for any sale listed here. Each campaign shows its own off-platform instructions for
-        approved participants.
-      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.ido.nonCustodialDisclosure")}</p>
 
       {loading ? (
         <div className="flex justify-center py-16">
           <div className="w-8 h-8 border-4 border-zrp-red border-t-transparent rounded-full animate-spin" />
         </div>
       ) : campaigns.length === 0 ? (
-        <p className="text-center py-16 text-gray-500 dark:text-gray-400">No IDO campaigns yet.</p>
+        <p className="text-center py-16 text-gray-500 dark:text-gray-400">{t("launchpad.ido.emptyState")}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {campaigns.map((c) => (
@@ -81,9 +80,14 @@ export default function IdoHomePage() {
                   <p className="text-xs text-gray-500 dark:text-gray-400">${c.launchedToken.symbol}</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">${c.tokenPriceUsdc} / token</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {t("launchpad.ido.pricePerToken", { price: c.tokenPriceUsdc })}
+              </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                Cap: ${c.softCapUsdc.toLocaleString()} - ${c.hardCapUsdc.toLocaleString()}
+                {t("launchpad.ido.capRange", {
+                  softCap: c.softCapUsdc.toLocaleString(),
+                  hardCap: c.hardCapUsdc.toLocaleString(),
+                })}
               </p>
             </Link>
           ))}

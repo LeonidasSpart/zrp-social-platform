@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Loader2, Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface VestingContractSummary {
   id: string;
@@ -28,6 +29,7 @@ function formatRaw(raw: string, decimals: number): string {
 }
 
 export default function MyVestingPage() {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const [contracts, setContracts] = useState<VestingContractSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ export default function MyVestingPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to view your vesting contracts.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.vesting.signInPrompt")}</p>
       </div>
     );
   }
@@ -60,13 +62,13 @@ export default function MyVestingPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">My vesting contracts</h1>
+        <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">{t("launchpad.vesting.title")}</h1>
         <Link
           href="/launchpad/vesting/create"
           className="inline-flex items-center gap-1.5 px-4 py-2 bg-zrp-red text-white rounded-full font-semibold hover:bg-red-700 transition text-sm"
         >
           <Plus className="w-4 h-4" />
-          New
+          {t("launchpad.vesting.newButton")}
         </Link>
       </div>
 
@@ -75,7 +77,7 @@ export default function MyVestingPage() {
           <Loader2 className="w-6 h-6 animate-spin text-zrp-red" />
         </div>
       ) : contracts.length === 0 ? (
-        <p className="text-center py-16 text-gray-500 dark:text-gray-400">You haven&apos;t created any vesting contracts yet.</p>
+        <p className="text-center py-16 text-gray-500 dark:text-gray-400">{t("launchpad.vesting.emptyState")}</p>
       ) : (
         <div className="space-y-3">
           {contracts.map((c) => (
@@ -89,12 +91,17 @@ export default function MyVestingPage() {
                     c.status === "COMPLETED" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
                   }`}
                 >
-                  {c.status}
+                  {c.status === "COMPLETED" ? t("launchpad.vesting.statusCompleted") : t("launchpad.vesting.statusActive")}
                 </span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1 truncate">To: {c.beneficiaryWalletAddress}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1 truncate">
+                {t("launchpad.vesting.beneficiaryLabel", { address: c.beneficiaryWalletAddress })}
+              </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Released {formatRaw(c.totalReleased, c.launchedToken.decimals)} / {formatRaw(c.totalAmount, c.launchedToken.decimals)}
+                {t("launchpad.vesting.releasedProgress", {
+                  released: formatRaw(c.totalReleased, c.launchedToken.decimals),
+                  total: formatRaw(c.totalAmount, c.launchedToken.decimals),
+                })}
               </p>
             </div>
           ))}

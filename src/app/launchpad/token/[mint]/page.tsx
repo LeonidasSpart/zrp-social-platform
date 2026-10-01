@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2, ShieldCheck, ShieldOff, Copy, Check } from "lucide-react";
 import { safeExternalHref } from "@/lib/profile-website";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LaunchedTokenDetail {
   id: string;
@@ -42,6 +43,7 @@ function formatSupply(rawSupply: string, decimals: number): string {
 
 export default function TokenDetailPage() {
   const params = useParams<{ mint: string }>();
+  const { t } = useLanguage();
   const [token, setToken] = useState<LaunchedTokenDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,13 +54,13 @@ export default function TokenDetailPage() {
     setLoading(true);
     fetch(`/api/launchpad/tokens/${params.mint}`)
       .then(async (res) => {
-        if (!res.ok) throw new Error("Token not found.");
+        if (!res.ok) throw new Error(t("launchpad.tokenDetail.notFound"));
         return res.json();
       })
       .then((data) => setToken(data.token))
-      .catch(() => setError("Token not found."))
+      .catch(() => setError(t("launchpad.tokenDetail.notFound")))
       .finally(() => setLoading(false));
-  }, [params.mint]);
+  }, [params.mint, t]);
 
   const handleCopy = async () => {
     if (!token) return;
@@ -82,13 +84,13 @@ export default function TokenDetailPage() {
   if (error || !token) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">{error || "Token not found."}</p>
+        <p className="text-gray-600 dark:text-gray-400">{error || t("launchpad.tokenDetail.notFound")}</p>
       </div>
     );
   }
 
   const socialLinks = [
-    { label: "Website", href: safeExternalHref(token.website) },
+    { label: t("launchpad.tokenDetail.website"), href: safeExternalHref(token.website) },
     { label: "Twitter", href: safeExternalHref(token.twitter) },
     { label: "Telegram", href: safeExternalHref(token.telegram) },
     { label: "Discord", href: safeExternalHref(token.discord) },
@@ -107,7 +109,7 @@ export default function TokenDetailPage() {
       {token.description && <p className="text-gray-700 dark:text-gray-300 mb-4">{token.description}</p>}
 
       <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 mb-4">
-        <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">Mint address</label>
+        <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">{t("launchpad.tokenDetail.mintAddressLabel")}</label>
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
           <span className="flex-1 truncate font-mono text-xs text-gray-700 dark:text-gray-300">{token.mintAddress}</span>
           <button type="button" onClick={handleCopy} className="flex-shrink-0 text-gray-500 hover:text-zrp-red transition">
@@ -118,24 +120,24 @@ export default function TokenDetailPage() {
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Total supply</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.tokenDetail.totalSupply")}</p>
           <p className="font-semibold text-gray-900 dark:text-white">{formatSupply(token.supply, token.decimals)}</p>
         </div>
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Decimals</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.tokenDetail.decimals")}</p>
           <p className="font-semibold text-gray-900 dark:text-white">{token.decimals}</p>
         </div>
       </div>
 
       <div className="space-y-1 mb-4">
         {[
-          { label: "Mint authority", revoked: token.revokeMint },
-          { label: "Freeze authority", revoked: token.revokeFreeze },
-          { label: "Update authority", revoked: token.revokeUpdate },
+          { label: t("launchpad.tokenDetail.mintAuthority"), revoked: token.revokeMint },
+          { label: t("launchpad.tokenDetail.freezeAuthority"), revoked: token.revokeFreeze },
+          { label: t("launchpad.tokenDetail.updateAuthority"), revoked: token.revokeUpdate },
         ].map((row) => (
           <div key={row.label} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             {row.revoked ? <ShieldCheck className="w-4 h-4 text-green-500" /> : <ShieldOff className="w-4 h-4 text-gray-400" />}
-            {row.label}: {row.revoked ? "Revoked" : "Held by creator's wallet"}
+            {row.label}: {row.revoked ? t("launchpad.tokenDetail.revoked") : t("launchpad.tokenDetail.heldByCreator")}
           </div>
         ))}
       </div>
@@ -152,7 +154,7 @@ export default function TokenDetailPage() {
 
       {token.creator && (
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Created by{" "}
+          {t("launchpad.tokenDetail.createdBy")}{" "}
           <Link href={`/profile/${token.creator.username}`} className="text-zrp-red hover:underline">
             @{token.creator.username}
           </Link>

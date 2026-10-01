@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { Sparkles, Loader2, Copy, Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 export default function AiTokenAssistantPage() {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const [theme, setTheme] = useState("");
   const [suggestion, setSuggestion] = useState<string | null>(null);
@@ -26,11 +29,11 @@ export default function AiTokenAssistantPage() {
         body: JSON.stringify({ theme: theme.trim() }),
       });
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to generate a suggestion.");
+      if (!res.ok) throw new Error(localizeApiMessage(data?.error, t) || t("launchpad.aiAssistant.generateFailed"));
       setSuggestion(data.suggestion);
       setRemaining(data.remaining ?? null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to generate a suggestion.");
+      setError(err instanceof Error ? err.message : t("launchpad.aiAssistant.generateFailed"));
     } finally {
       setLoading(false);
     }
@@ -57,7 +60,7 @@ export default function AiTokenAssistantPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to use the AI token assistant.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.aiAssistant.signInRequired")}</p>
       </div>
     );
   }
@@ -66,18 +69,15 @@ export default function AiTokenAssistantPage() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center gap-2 mb-1">
         <Sparkles className="w-6 h-6 text-zrp-red" />
-        <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">AI token assistant</h1>
+        <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">{t("launchpad.aiAssistant.title")}</h1>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Describe your token&apos;s theme and get a name, ticker, and one-line description to start from. Text only - shares your daily AI
-        message quota with ZRP AI chat.
-      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.aiAssistant.description")}</p>
 
       <form onSubmit={handleGenerate} className="space-y-4">
         <textarea
           value={theme}
           onChange={(e) => setTheme(e.target.value)}
-          placeholder="e.g. a community token for indie game developers"
+          placeholder={t("launchpad.aiAssistant.themePlaceholder")}
           maxLength={300}
           rows={3}
           disabled={loading}
@@ -94,10 +94,10 @@ export default function AiTokenAssistantPage() {
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
+              {t("launchpad.aiAssistant.generatingButton")}
             </>
           ) : (
-            "Generate suggestion"
+            t("launchpad.aiAssistant.generateButton")
           )}
         </button>
       </form>
@@ -110,7 +110,11 @@ export default function AiTokenAssistantPage() {
               {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
             </button>
           </div>
-          {remaining !== null && <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">{remaining} AI messages left today.</p>}
+          {remaining !== null && (
+            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+              {t("launchpad.aiAssistant.messagesLeftToday", { remaining })}
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface OwnedNft {
   id: string;
@@ -20,6 +22,7 @@ interface OwnedToken {
 }
 
 export default function CreateNftStakingPoolPage() {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -58,15 +61,15 @@ export default function CreateNftStakingPoolPage() {
     setError(null);
 
     if (!collectionName) {
-      setError("Select a collection you've minted into.");
+      setError(t("launchpad.nftStakingCreate.errSelectCollection"));
       return;
     }
     if (!rewardTokenId) {
-      setError("Select a reward token you created.");
+      setError(t("launchpad.nftStakingCreate.errSelectToken"));
       return;
     }
     if (!/^\d+$/.test(rewardRatePerDay.trim())) {
-      setError("Invalid reward rate.");
+      setError(t("launchpad.nftStakingCreate.errInvalidRate"));
       return;
     }
 
@@ -83,10 +86,10 @@ export default function CreateNftStakingPoolPage() {
         }),
       });
       const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error || "Failed to create NFT staking pool.");
+      if (!response.ok) throw new Error(localizeApiMessage(data?.error, t) || t("launchpad.nftStakingCreate.errCreateFailed"));
       router.push(`/launchpad/nft-staking/${data.pool.id}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create NFT staking pool.");
+      setError(err instanceof Error ? err.message : t("launchpad.nftStakingCreate.errCreateFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -102,35 +105,32 @@ export default function CreateNftStakingPoolPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to create an NFT staking pool.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.nftStakingCreate.signInRequired")}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Create an NFT staking pool</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Anyone with a Solana wallet can stake an NFT from this collection into the pool - no ZRP account needed. You&apos;ll need to fund a
-        reward reserve afterwards so real payouts are actually backed.
-      </p>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.nftStakingCreate.title")}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.nftStakingCreate.subtitle")}</p>
 
       {collectionNames.length === 0 || ownedTokens.length === 0 ? (
         <p className="text-gray-500 dark:text-gray-400">
-          You need at least one minted NFT (with a collection name) and one fungible token to pay rewards with.{" "}
+          {t("launchpad.nftStakingCreate.needNftAndToken")}{" "}
           <Link href="/launchpad/nft/create" className="text-zrp-red hover:underline">
-            Mint an NFT
+            {t("launchpad.nftStakingCreate.mintNftLink")}
           </Link>{" "}
-          or{" "}
+          {t("launchpad.nftStakingCreate.orWord")}{" "}
           <Link href="/launchpad/create" className="text-zrp-red hover:underline">
-            create a token
+            {t("launchpad.nftStakingCreate.createTokenLink")}
           </Link>{" "}
-          first.
+          {t("launchpad.nftStakingCreate.firstSuffix")}
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Collection</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftStakingCreate.collectionLabel")}</label>
             <select
               value={collectionName}
               onChange={(e) => setCollectionName(e.target.value)}
@@ -146,16 +146,16 @@ export default function CreateNftStakingPoolPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Reward token</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftStakingCreate.rewardTokenLabel")}</label>
             <select
               value={rewardTokenId}
               onChange={(e) => setRewardTokenId(e.target.value)}
               disabled={submitting}
               className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             >
-              {ownedTokens.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} (${t.symbol})
+              {ownedTokens.map((token) => (
+                <option key={token.id} value={token.id}>
+                  {token.name} (${token.symbol})
                 </option>
               ))}
             </select>
@@ -163,7 +163,7 @@ export default function CreateNftStakingPoolPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Reward per NFT / day</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftStakingCreate.rewardPerNftDayLabel")}</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -174,7 +174,7 @@ export default function CreateNftStakingPoolPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Lock (days)</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftStakingCreate.lockDaysLabel")}</label>
               <input
                 type="number"
                 min={0}
@@ -196,10 +196,10 @@ export default function CreateNftStakingPoolPage() {
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                {t("launchpad.nftStakingCreate.creating")}
               </>
             ) : (
-              "Create pool"
+              t("launchpad.nftStakingCreate.submit")
             )}
           </button>
         </form>

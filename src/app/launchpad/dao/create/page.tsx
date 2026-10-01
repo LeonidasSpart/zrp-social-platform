@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface OwnedToken {
   id: string;
@@ -15,6 +17,7 @@ interface OwnedToken {
 export default function CreateDaoPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [ownedTokens, setOwnedTokens] = useState<OwnedToken[]>([]);
   const [launchedTokenId, setLaunchedTokenId] = useState("");
@@ -43,19 +46,19 @@ export default function CreateDaoPage() {
     setError(null);
 
     if (!launchedTokenId) {
-      setError("Select a token you created.");
+      setError(t("launchpad.daoCreate.errorSelectToken"));
       return;
     }
     if (!name.trim() || name.trim().length > 60) {
-      setError("DAO name is required (max 60 characters).");
+      setError(t("launchpad.daoCreate.errorNameRequired"));
       return;
     }
     if (!/^\d+$/.test(quorum.trim())) {
-      setError("Invalid quorum.");
+      setError(t("launchpad.daoCreate.errorInvalidQuorum"));
       return;
     }
     if (!/^\d+$/.test(proposalThreshold.trim())) {
-      setError("Invalid proposal threshold.");
+      setError(t("launchpad.daoCreate.errorInvalidThreshold"));
       return;
     }
 
@@ -74,10 +77,10 @@ export default function CreateDaoPage() {
         }),
       });
       const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.error || "Failed to create DAO.");
+      if (!response.ok) throw new Error(localizeApiMessage(data?.error, t) || t("launchpad.daoCreate.errorCreateFailed"));
       router.push(`/launchpad/dao/${data.dao.id}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create DAO.");
+      setError(err instanceof Error ? err.message : t("launchpad.daoCreate.errorCreateFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -93,27 +96,22 @@ export default function CreateDaoPage() {
   if (!session?.user) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">Sign in to start a DAO.</p>
+        <p className="text-gray-600 dark:text-gray-400">{t("launchpad.daoCreate.signInPrompt")}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Start a DAO</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Only the creator of a token can set up its DAO. Voting is token-weighted and fully wallet-native - voters never need a ZRP
-        account. There is no treasury: a passed proposal is a signal your team acts on manually.
-      </p>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.daoCreate.title")}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.daoCreate.subtitle")}</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {ownedTokens.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            You need a token you created to govern. Create one on the Launchpad first.
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("launchpad.daoCreate.noTokensHint")}</p>
         ) : (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Governance token</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.daoCreate.governanceTokenLabel")}</label>
             <select
               value={launchedTokenId}
               onChange={(e) => setLaunchedTokenId(e.target.value)}
@@ -130,7 +128,7 @@ export default function CreateDaoPage() {
         )}
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">DAO name</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.daoCreate.nameLabel")}</label>
           <input
             type="text"
             value={name}
@@ -142,7 +140,7 @@ export default function CreateDaoPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.daoCreate.descriptionLabel")}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -155,7 +153,7 @@ export default function CreateDaoPage() {
 
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Quorum (tokens)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.daoCreate.quorumLabel")}</label>
             <input
               type="text"
               inputMode="numeric"
@@ -166,7 +164,7 @@ export default function CreateDaoPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Proposal threshold</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.daoCreate.thresholdLabel")}</label>
             <input
               type="text"
               inputMode="numeric"
@@ -177,7 +175,7 @@ export default function CreateDaoPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Voting period (days)</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.daoCreate.votingPeriodLabel")}</label>
             <input
               type="number"
               min={0.05}
@@ -200,10 +198,10 @@ export default function CreateDaoPage() {
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
+              {t("launchpad.daoCreate.creatingButton")}
             </>
           ) : (
-            "Start DAO"
+            t("launchpad.daoCreate.submitButton")
           )}
         </button>
       </form>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Search } from "lucide-react";
 import { connectAndSignMessage } from "@/lib/launchpad/injected-wallet";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FarmingPositionSummary {
   id: string;
@@ -35,6 +36,7 @@ function formatRaw(raw: string, decimals: number): string {
 }
 
 export default function MyFarmingPositionsPage() {
+  const { t } = useLanguage();
   const [walletInput, setWalletInput] = useState("");
   const [positions, setPositions] = useState<FarmingPositionSummary[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,10 +50,10 @@ export default function MyFarmingPositionsPage() {
     try {
       const res = await fetch(`/api/launchpad/farming/positions?walletAddress=${encodeURIComponent(walletInput.trim())}`);
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to look up positions.");
+      if (!res.ok) throw new Error(data?.error || t("launchpad.farmingPositions.errLookupFailed"));
       setPositions(data.positions || []);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to look up positions.");
+      setError(err instanceof Error ? err.message : t("launchpad.farmingPositions.errLookupFailed"));
       setPositions(null);
     } finally {
       setLoading(false);
@@ -73,7 +75,7 @@ export default function MyFarmingPositionsPage() {
       const challengeRes = await fetch(`/api/launchpad/farming/positions/${position.id}/claim-challenge`, { method: "POST" });
       const challenge = await challengeRes.json().catch(() => null);
       if (!challengeRes.ok || typeof challenge?.message !== "string") {
-        throw new Error(challenge?.error || "Failed to request a claim challenge.");
+        throw new Error(challenge?.error || t("launchpad.farmingPositions.errChallengeFailed"));
       }
 
       const { walletAddress, signature } = await connectAndSignMessage(challenge.message);
@@ -84,18 +86,28 @@ export default function MyFarmingPositionsPage() {
         body: JSON.stringify({ walletAddress, signature, unstakePrincipal }),
       });
       const claimData = await claimRes.json().catch(() => null);
-      if (!claimRes.ok) throw new Error(claimData?.error || "Claim failed.");
+      if (!claimRes.ok) throw new Error(claimData?.error || t("launchpad.farmingPositions.errClaimFailed"));
 
       if (unstakePrincipal) {
         setResultMessage(
-          `Unstaked ${formatRaw(claimData.principal, position.pool.lpDecimals)} ${position.pool.lpTokenSymbol} + ${formatRaw(claimData.reward, position.pool.rewardToken.decimals)} ${position.pool.rewardToken.symbol} reward.`
+          t("launchpad.farmingPositions.unstakedMessage", {
+            principal: formatRaw(claimData.principal, position.pool.lpDecimals),
+            lpSymbol: position.pool.lpTokenSymbol,
+            reward: formatRaw(claimData.reward, position.pool.rewardToken.decimals),
+            rewardSymbol: position.pool.rewardToken.symbol,
+          })
         );
       } else {
-        setResultMessage(`Claimed ${formatRaw(claimData.reward, position.pool.rewardToken.decimals)} ${position.pool.rewardToken.symbol} reward.`);
+        setResultMessage(
+          t("launchpad.farmingPositions.claimedMessage", {
+            reward: formatRaw(claimData.reward, position.pool.rewardToken.decimals),
+            rewardSymbol: position.pool.rewardToken.symbol,
+          })
+        );
       }
       await lookupPositions();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Claim failed.");
+      setError(err instanceof Error ? err.message : t("launchpad.farmingPositions.errClaimFailed"));
     } finally {
       setBusyId(null);
     }
@@ -103,10 +115,9 @@ export default function MyFarmingPositionsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">My farming positions</h1>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.farmingPositions.title")}</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        No ZRP account needed - just the wallet you staked from. You&apos;ll be asked to sign a message with your wallet extension to prove
-        ownership; this never authorizes a transaction.
+        {t("launchpad.farmingPositions.subtitle")}
       </p>
 
       <form onSubmit={handleSearch} className="flex gap-2 mb-6">
@@ -114,7 +125,7 @@ export default function MyFarmingPositionsPage() {
           type="text"
           value={walletInput}
           onChange={(e) => setWalletInput(e.target.value)}
-          placeholder="Your Solana wallet address"
+          placeholder={t("launchpad.farmingPositions.walletAddressPlaceholder")}
           className="flex-1 h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
         <button
@@ -126,7 +137,11 @@ export default function MyFarmingPositionsPage() {
         </button>
       </form>
 
-      {error && <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">{error}</div>}
+      {error && (
+        <div role="alert" aria-live="polite" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400">
+          {error}
+        </div>
+      )}
       {resultMessage && (
         <div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950/30 dark:text-green-400">{resultMessage}</div>
       )}
@@ -134,7 +149,7 @@ export default function MyFarmingPositionsPage() {
       {positions && (
         <div className="space-y-3">
           {positions.length === 0 ? (
-            <p className="text-center py-8 text-gray-500 dark:text-gray-400">No farming positions found for that wallet.</p>
+            <p className="text-center py-8 text-gray-500 dark:text-gray-400">{t("launchpad.farmingPositions.empty")}</p>
           ) : (
             positions.map((p) => {
               const claimable = formatRaw(p.claimableRewardRaw, p.pool.rewardToken.decimals);
@@ -147,16 +162,23 @@ export default function MyFarmingPositionsPage() {
                     <p className="font-semibold text-gray-900 dark:text-white">
                       {p.pool.lpTokenName} (${p.pool.lpTokenSymbol})
                     </p>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{p.status}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {p.status === "ACTIVE" ? t("launchpad.farmingPositions.statusActive") : t("launchpad.farmingPositions.statusUnstaked")}
+                    </span>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    Staked {formatRaw(p.amountRaw, p.pool.lpDecimals)} at {(p.pool.apyBasisPoints / 100).toFixed(2)}% APY
+                    {t("launchpad.farmingPositions.stakedAtApy", {
+                      amount: formatRaw(p.amountRaw, p.pool.lpDecimals),
+                      apy: (p.pool.apyBasisPoints / 100).toFixed(2),
+                    })}
                   </p>
                   <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
-                    Claimable reward: {claimable} {p.pool.rewardToken.symbol}
+                    {t("launchpad.farmingPositions.claimableReward", { amount: claimable, symbol: p.pool.rewardToken.symbol })}
                   </p>
                   {p.status === "ACTIVE" && !unlocked && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Unlocks {new Date(p.unlocksAt).toLocaleString()}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      {t("launchpad.farmingPositions.unlocksAt", { date: new Date(p.unlocksAt).toLocaleString() })}
+                    </p>
                   )}
                   {p.status === "ACTIVE" && (
                     <div className="mt-3 grid grid-cols-2 gap-2">
@@ -166,7 +188,7 @@ export default function MyFarmingPositionsPage() {
                         disabled={!canClaimReward || busyId === p.id}
                         className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                       >
-                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Claim reward"}
+                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.farmingPositions.claimRewardButton")}
                       </button>
                       <button
                         type="button"
@@ -174,7 +196,13 @@ export default function MyFarmingPositionsPage() {
                         disabled={!canUnstake || busyId === p.id}
                         className="inline-flex items-center justify-center rounded-md bg-gray-900 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
                       >
-                        {busyId === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : canUnstake ? "Unstake" : "Locked"}
+                        {busyId === p.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : canUnstake ? (
+                          t("launchpad.farmingPositions.unstakeButton")
+                        ) : (
+                          t("launchpad.farmingPositions.lockedButton")
+                        )}
                       </button>
                     </div>
                   )}

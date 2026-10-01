@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Image as ImageIcon, Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LaunchedNftSummary {
   id: string;
@@ -18,6 +19,7 @@ interface LaunchedNftSummary {
 }
 
 export default function NftBrowsePage() {
+  const { t } = useLanguage();
   const { data: session } = useSession();
   const [nfts, setNfts] = useState<LaunchedNftSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,18 +30,18 @@ export default function NftBrowsePage() {
     fetch("/api/launchpad/nfts")
       .then((res) => res.json())
       .then((data) => setNfts(data.nfts || []))
-      .catch(() => setError("Failed to load NFTs."))
+      .catch(() => setError(t("launchpad.nft.loadError")))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack rounded-2xl px-6 py-10 text-center mb-8">
         <div className="flex items-center justify-center gap-2">
           <ImageIcon className="w-8 h-8 text-white" />
-          <h1 className="text-3xl sm:text-4xl font-extrabold font-orbitron text-white">ZRP NFTs</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold font-orbitron text-white">{t("launchpad.nft.title")}</h1>
         </div>
-        <p className="mt-3 text-white/80 max-w-xl mx-auto">Mint a real 1-of-1 Solana NFT in minutes - no code required.</p>
+        <p className="mt-3 text-white/80 max-w-xl mx-auto">{t("launchpad.nft.subtitle")}</p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           {session?.user && (
@@ -48,14 +50,14 @@ export default function NftBrowsePage() {
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-zrp-darkRed rounded-full font-semibold hover:bg-gray-100 transition text-sm"
             >
               <Plus className="w-4 h-4" />
-              Create an NFT
+              {t("launchpad.nft.createButton")}
             </Link>
           )}
           <Link
             href="/launchpad/nft-staking"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            NFT staking pools
+            {t("launchpad.nft.stakingPoolsLink")}
           </Link>
         </div>
       </section>
@@ -67,7 +69,7 @@ export default function NftBrowsePage() {
           <div className="w-8 h-8 border-4 border-zrp-red border-t-transparent rounded-full animate-spin" />
         </div>
       ) : nfts.length === 0 ? (
-        <p className="text-center py-16 text-gray-500 dark:text-gray-400">No NFTs have been minted yet.</p>
+        <p className="text-center py-16 text-gray-500 dark:text-gray-400">{t("launchpad.nft.emptyState")}</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {nfts.map((nft) => (

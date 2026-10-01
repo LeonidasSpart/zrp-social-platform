@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { ArrowDown, ExternalLink, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface SwapQuote {
   inputMint: string;
@@ -16,6 +18,7 @@ const SOL_MINT = "So11111111111111111111111111111111111111112";
 const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 export default function SwapAggregatorPage() {
+  const { t } = useLanguage();
   const [inputMint, setInputMint] = useState(SOL_MINT);
   const [outputMint, setOutputMint] = useState(USDC_MINT);
   const [amount, setAmount] = useState("1000000000");
@@ -35,11 +38,11 @@ export default function SwapAggregatorPage() {
       const params = new URLSearchParams({ inputMint: inputMint.trim(), outputMint: outputMint.trim(), amount: amount.trim() });
       const res = await fetch(`/api/launchpad/swap/quote?${params.toString()}`);
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to fetch a quote.");
+      if (!res.ok) throw new Error(localizeApiMessage(data?.error, t) || t("launchpad.swap.quoteFailed"));
       setQuote(data.quote);
       setSwapLink(data.swapLink);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to fetch a quote.");
+      setError(err instanceof Error ? err.message : t("launchpad.swap.quoteFailed"));
     } finally {
       setLoading(false);
     }
@@ -47,15 +50,12 @@ export default function SwapAggregatorPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Swap aggregator</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Best-price quote across Solana DEXs, powered by Jupiter. ZRP never holds or routes the actual trade - you sign and swap on
-        Jupiter&apos;s own app with your own wallet.
-      </p>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.swap.title")}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.swap.description")}</p>
 
       <form onSubmit={handleGetQuote} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">From (mint address)</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.swap.fromLabel")}</label>
           <input
             type="text"
             value={inputMint}
@@ -68,7 +68,7 @@ export default function SwapAggregatorPage() {
           <ArrowDown className="w-5 h-5 text-gray-400" />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">To (mint address)</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.swap.toLabel")}</label>
           <input
             type="text"
             value={outputMint}
@@ -78,7 +78,7 @@ export default function SwapAggregatorPage() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Amount (raw base units)</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.swap.amountLabel")}</label>
           <input
             type="text"
             inputMode="numeric"
@@ -96,7 +96,7 @@ export default function SwapAggregatorPage() {
           disabled={loading}
           className="w-full inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Get quote"}
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.swap.getQuoteButton")}
         </button>
       </form>
 
@@ -104,18 +104,20 @@ export default function SwapAggregatorPage() {
         <div className="mt-6 space-y-4 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">You send</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.swap.youSendLabel")}</p>
               <p className="font-semibold text-gray-900 dark:text-white">{quote.inAmountRaw}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">You receive (estimated)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.swap.youReceiveLabel")}</p>
               <p className="font-semibold text-gray-900 dark:text-white">{quote.outAmountRaw}</p>
             </div>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Price impact: {quote.priceImpactPercent.toFixed(3)}%</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {t("launchpad.swap.priceImpact", { percent: quote.priceImpactPercent.toFixed(3) })}
+          </p>
           {quote.routePlan.length > 0 && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Routed via {quote.routePlan.map((s) => `${s.label} (${s.percent}%)`).join(", ")}
+              {t("launchpad.swap.routedVia", { routes: quote.routePlan.map((s) => `${s.label} (${s.percent}%)`).join(", ") })}
             </p>
           )}
           {swapLink && (
@@ -125,7 +127,7 @@ export default function SwapAggregatorPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-zrp-red hover:underline"
             >
-              Trade on Jupiter
+              {t("launchpad.swap.tradeOnJupiter")}
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           )}

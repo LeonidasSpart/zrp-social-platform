@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Rocket, Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LaunchedTokenSummary {
   id: string;
@@ -24,6 +25,7 @@ interface LaunchedTokenSummary {
 
 export default function LaunchpadHomePage() {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [tokens, setTokens] = useState<LaunchedTokenSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,18 +35,18 @@ export default function LaunchpadHomePage() {
     fetch("/api/launchpad/tokens")
       .then((res) => res.json())
       .then((data) => setTokens(data.tokens || []))
-      .catch(() => setError("Failed to load tokens."))
+      .catch(() => setError(t("launchpad.home.loadError")))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <section className="relative bg-gradient-to-br from-zrp-darkRed to-zrp-deepBlack rounded-2xl px-6 py-10 text-center mb-8">
         <div className="flex items-center justify-center gap-2">
           <Rocket className="w-8 h-8 text-white" />
-          <h1 className="text-3xl sm:text-4xl font-extrabold font-orbitron text-white">ZRP Launchpad</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold font-orbitron text-white">{t("launchpad.home.title")}</h1>
         </div>
-        <p className="mt-3 text-white/80 max-w-xl mx-auto">Create your own Solana SPL token in minutes - no code required.</p>
+        <p className="mt-3 text-white/80 max-w-xl mx-auto">{t("launchpad.home.subtitle")}</p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           {session?.user && (
@@ -54,13 +56,13 @@ export default function LaunchpadHomePage() {
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-zrp-darkRed rounded-full font-semibold hover:bg-gray-100 transition text-sm"
               >
                 <Plus className="w-4 h-4" />
-                Create a token
+                {t("launchpad.home.createToken")}
               </Link>
               <Link
                 href="/launchpad/vesting"
                 className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
               >
-                My vesting contracts
+                {t("launchpad.home.myVestingContracts")}
               </Link>
             </>
           )}
@@ -68,61 +70,61 @@ export default function LaunchpadHomePage() {
             href="/launchpad/staking"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            Staking pools
+            {t("launchpad.home.stakingPools")}
           </Link>
           <Link
             href="/launchpad/vesting/claim"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            Claim vested tokens
+            {t("launchpad.home.claimVestedTokens")}
           </Link>
           <Link
             href="/launchpad/nft"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            NFTs
+            {t("launchpad.home.nfts")}
           </Link>
           <Link
             href="/launchpad/nft-staking"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            NFT staking
+            {t("launchpad.home.nftStaking")}
           </Link>
           <Link
             href="/launchpad/farming"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            Liquidity farming
+            {t("launchpad.home.liquidityFarming")}
           </Link>
           <Link
             href="/launchpad/dao"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            DAOs
+            {t("launchpad.home.daos")}
           </Link>
           <Link
             href="/launchpad/ido"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            IDO campaigns
+            {t("launchpad.home.idoCampaigns")}
           </Link>
           <Link
             href="/launchpad/scanner"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            Token scanner
+            {t("launchpad.home.tokenScanner")}
           </Link>
           <Link
             href="/launchpad/swap"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            Swap
+            {t("launchpad.home.swap")}
           </Link>
           <Link
             href="/launchpad/ai-assistant"
             className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
           >
-            AI assistant
+            {t("launchpad.home.aiAssistant")}
           </Link>
         </div>
       </section>
@@ -134,7 +136,7 @@ export default function LaunchpadHomePage() {
           <div className="w-8 h-8 border-4 border-zrp-red border-t-transparent rounded-full animate-spin" />
         </div>
       ) : tokens.length === 0 ? (
-        <p className="text-center py-16 text-gray-500 dark:text-gray-400">No tokens have been launched yet.</p>
+        <p className="text-center py-16 text-gray-500 dark:text-gray-400">{t("launchpad.home.emptyState")}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {tokens.map((token) => (

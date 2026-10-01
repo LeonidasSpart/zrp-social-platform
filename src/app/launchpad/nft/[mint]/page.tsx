@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2, ShieldCheck, ShieldOff, Copy, Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LaunchedNftDetail {
   id: string;
@@ -21,6 +22,7 @@ interface LaunchedNftDetail {
 }
 
 export default function NftDetailPage() {
+  const { t } = useLanguage();
   const params = useParams<{ mint: string }>();
   const [nft, setNft] = useState<LaunchedNftDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,13 +34,13 @@ export default function NftDetailPage() {
     setLoading(true);
     fetch(`/api/launchpad/nfts/${params.mint}`)
       .then(async (res) => {
-        if (!res.ok) throw new Error("NFT not found.");
+        if (!res.ok) throw new Error(t("launchpad.nftDetail.notFound"));
         return res.json();
       })
       .then((data) => setNft(data.nft))
-      .catch(() => setError("NFT not found."))
+      .catch(() => setError(t("launchpad.nftDetail.notFound")))
       .finally(() => setLoading(false));
-  }, [params.mint]);
+  }, [params.mint, t]);
 
   const handleCopy = async () => {
     if (!nft) return;
@@ -62,7 +64,7 @@ export default function NftDetailPage() {
   if (error || !nft) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600 dark:text-gray-400">{error || "NFT not found."}</p>
+        <p className="text-gray-600 dark:text-gray-400">{error || t("launchpad.nftDetail.notFound")}</p>
       </div>
     );
   }
@@ -77,7 +79,7 @@ export default function NftDetailPage() {
       {nft.description && <p className="text-gray-700 dark:text-gray-300 my-4">{nft.description}</p>}
 
       <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 mb-4">
-        <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">Mint address</label>
+        <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">{t("launchpad.nftDetail.mintAddressLabel")}</label>
         <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
           <span className="flex-1 truncate font-mono text-xs text-gray-700 dark:text-gray-300">{nft.mintAddress}</span>
           <button type="button" onClick={handleCopy} className="flex-shrink-0 text-gray-500 hover:text-zrp-red transition">
@@ -88,7 +90,7 @@ export default function NftDetailPage() {
 
       {nft.attributes && nft.attributes.length > 0 && (
         <div className="mb-4">
-          <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Attributes</p>
+          <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.nftDetail.attributesLabel")}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {nft.attributes.map((attr, i) => (
               <div key={i} className="rounded-md border border-gray-200 dark:border-gray-700 p-2 text-center">
@@ -103,14 +105,16 @@ export default function NftDetailPage() {
       <div className="space-y-1 mb-4">
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
           {nft.revokeUpdate ? <ShieldCheck className="w-4 h-4 text-green-500" /> : <ShieldOff className="w-4 h-4 text-gray-400" />}
-          Metadata: {nft.revokeUpdate ? "Frozen (immutable)" : "Mutable (held by creator's wallet)"}
+          {nft.revokeUpdate ? t("launchpad.nftDetail.metadataFrozen") : t("launchpad.nftDetail.metadataMutable")}
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">Royalty: {(nft.sellerFeeBasisPoints / 100).toFixed(2)}%</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {t("launchpad.nftDetail.royalty", { percent: (nft.sellerFeeBasisPoints / 100).toFixed(2) })}
+        </p>
       </div>
 
       {nft.creator && (
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Created by{" "}
+          {t("launchpad.nftDetail.createdBy")}{" "}
           <Link href={`/profile/${nft.creator.username}`} className="text-zrp-red hover:underline">
             @{nft.creator.username}
           </Link>

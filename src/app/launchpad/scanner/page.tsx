@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { ShieldAlert, ShieldCheck, Search, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeApiMessage } from "@/lib/api-error-i18n";
+import type { TranslationKey } from "@/lib/translations";
 
 interface TokenScanResult {
   mintAddress: string;
@@ -15,12 +18,12 @@ interface TokenScanResult {
   riskFlags: string[];
 }
 
-const RISK_LABELS: Record<string, string> = {
-  mint_authority_active: "Mint authority is still active - supply can be inflated at any time",
-  freeze_authority_active: "Freeze authority is still active - token accounts can be frozen",
-  metadata_mutable: "Metadata is mutable - name/image can be changed after launch",
-  metadata_missing: "No on-chain metadata found for this mint",
-  high_holder_concentration: "A single wallet holds a large share of supply",
+const RISK_LABEL_KEYS: Record<string, TranslationKey> = {
+  mint_authority_active: "launchpad.scanner.riskMintAuthorityActive",
+  freeze_authority_active: "launchpad.scanner.riskFreezeAuthorityActive",
+  metadata_mutable: "launchpad.scanner.riskMetadataMutable",
+  metadata_missing: "launchpad.scanner.riskMetadataMissing",
+  high_holder_concentration: "launchpad.scanner.riskHighHolderConcentration",
 };
 
 function formatSupply(raw: string, decimals: number): string {
@@ -36,6 +39,7 @@ function formatSupply(raw: string, decimals: number): string {
 }
 
 export default function TokenScannerPage() {
+  const { t } = useLanguage();
   const [mintInput, setMintInput] = useState("");
   const [result, setResult] = useState<TokenScanResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,10 +54,10 @@ export default function TokenScannerPage() {
     try {
       const res = await fetch(`/api/launchpad/scanner/${mintInput.trim()}`);
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Failed to scan this token.");
+      if (!res.ok) throw new Error(localizeApiMessage(data?.error, t) || t("launchpad.scanner.scanFailed"));
       setResult(data.scan);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to scan this token.");
+      setError(err instanceof Error ? err.message : t("launchpad.scanner.scanFailed"));
     } finally {
       setLoading(false);
     }
@@ -61,18 +65,15 @@ export default function TokenScannerPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Token scanner</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Check any Solana SPL token&apos;s mint/freeze authorities, metadata, and holder concentration directly on-chain. Read-only -
-        nothing here moves funds or requires a wallet.
-      </p>
+      <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">{t("launchpad.scanner.title")}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.scanner.description")}</p>
 
       <form onSubmit={handleScan} className="flex gap-2 mb-6">
         <input
           type="text"
           value={mintInput}
           onChange={(e) => setMintInput(e.target.value)}
-          placeholder="Token mint address"
+          placeholder={t("launchpad.scanner.mintPlaceholder")}
           className="flex-1 h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
         <button
@@ -96,7 +97,7 @@ export default function TokenScannerPage() {
             )}
             <div>
               <p className="font-semibold text-gray-900 dark:text-white">
-                {result.metadata ? `${result.metadata.name} ($${result.metadata.symbol})` : "Unknown token"}
+                {result.metadata ? `${result.metadata.name} ($${result.metadata.symbol})` : t("launchpad.scanner.unknownToken")}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-mono break-all">{result.mintAddress}</p>
             </div>
@@ -104,36 +105,43 @@ export default function TokenScannerPage() {
 
           {result.riskFlags.length > 0 && (
             <div className="rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30 space-y-1">
-              {result.riskFlags.map((flag) => (
-                <p key={flag} className="text-sm text-amber-800 dark:text-amber-300">
-                  &bull; {RISK_LABELS[flag] ?? flag}
-                </p>
-              ))}
+              {result.riskFlags.map((flag) => {
+                const labelKey = RISK_LABEL_KEYS[flag];
+                return (
+                  <p key={flag} className="text-sm text-amber-800 dark:text-amber-300">
+                    &bull; {labelKey ? t(labelKey) : flag}
+                  </p>
+                );
+              })}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Supply</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.scanner.supplyLabel")}</p>
               <p className="font-semibold text-gray-900 dark:text-white">{formatSupply(result.supplyRaw, result.decimals)}</p>
             </div>
             <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Decimals</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.scanner.decimalsLabel")}</p>
               <p className="font-semibold text-gray-900 dark:text-white">{result.decimals}</p>
             </div>
             <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Mint authority</p>
-              <p className="font-mono text-xs break-all text-gray-900 dark:text-white">{result.mintAuthority ?? "Revoked"}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.scanner.mintAuthorityLabel")}</p>
+              <p className="font-mono text-xs break-all text-gray-900 dark:text-white">
+                {result.mintAuthority ?? t("launchpad.scanner.revoked")}
+              </p>
             </div>
             <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Freeze authority</p>
-              <p className="font-mono text-xs break-all text-gray-900 dark:text-white">{result.freezeAuthority ?? "Revoked"}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.scanner.freezeAuthorityLabel")}</p>
+              <p className="font-mono text-xs break-all text-gray-900 dark:text-white">
+                {result.freezeAuthority ?? t("launchpad.scanner.revoked")}
+              </p>
             </div>
           </div>
 
           {result.topHolders.length > 0 && (
             <div>
-              <h2 className="font-semibold text-gray-900 dark:text-white mb-2">Top holders</h2>
+              <h2 className="font-semibold text-gray-900 dark:text-white mb-2">{t("launchpad.scanner.topHoldersTitle")}</h2>
               <div className="space-y-1">
                 {result.topHolders.map((holder) => (
                   <div key={holder.address} className="flex items-center justify-between text-sm">
