@@ -163,3 +163,60 @@ export async function forceDisconnectParticipant(roomId: string, userId: string)
     console.error(`Failed to force-disconnect ${userId} from LiveKit room ${roomId}:`, err);
   }
 }
+
+export type LiveKitHealthStatus = "not_configured" | "unauthorized" | "unreachable" | "healthy";
+
+export interface LiveKitHealthResult {
+  status: LiveKitHealthStatus;
+  /** Plain-English diagnostic for an operator - never shown to end users. */
+  detail: string;
+}
+
+/**
+ * On-demand credential/connectivity check for ops - deliberately NOT
+ * called from the join/token-mint path (mintLiveKitToken stays pure
+ * local JWT signing, by design: see the file-level comment above on
+ * why minting must never require LiveKit to be reachable). This is for
+ * an operator to run after touching LIVEKIT_* env vars or rotating a
+ * key in the LiveKit dashboard, to get a real yes/no answer - "the key
+ * pair is configured but rejected by the server" vs. "the server isn't
+ * reachable at all" - without having to reproduce the failure by
+ * actually joining a live room (see docs/live-audio-architecture.md).
+ *
+ * Uses RoomServiceClient.listRooms(), the cheapest authenticated call
+ * the server SDK exposes: it has to succeed against the real LiveKit
+ * project to return anything, so a 401/403-shaped rejection can only
+ * mean the configured key/secret don't match what that project has on
+ * file, while a network-level failure (DNS, connection refused,
+ * timeout) means the project/URL itself is unreachable - distinct
+ * failure modes an operator needs to tell apart before deciding
+ * whether to rotate a key or check the URL/network instead.
+ */
+export async function checkLiveKitHealth(): Promise<LiveKitHealthResult> {
+  const config = getLiveKitConfig();
+  if (!config) {
+    return {
+      status: "not_configured",
+      detail: "LIVEKIT_API_KEY, LIVEKIT_API_SECRET and LIVEKIT_URL are not all set.",
+    };
+  }
+
+  try {
+    const { RoomServiceClient } = await import("livekit-server-sdk");
+    const client = new RoomServiceClient(config.url, config.apiKey, config.apiSecret);
+    await client.listRooms();
+    return { status: "healthy", detail: "LiveKit accepted the configured API key/secret." };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const isAuthRejection = /\b(401|403)\b|unauthenticated|permission_denied|invalid api key/i.test(message);
+    return isAuthRejection
+      ? {
+          status: "unauthorized",
+          detail: `LiveKit rejected the configured LIVEKIT_API_KEY/LIVEKIT_API_SECRET: ${message}`,
+        }
+      : {
+          status: "unreachable",
+          detail: `Could not reach the LiveKit server at the configured LIVEKIT_URL: ${message}`,
+        };
+  }
+}

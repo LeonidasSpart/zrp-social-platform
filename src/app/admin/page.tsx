@@ -15,6 +15,10 @@ import {
   CreditCard,
   Ticket,
   Newspaper,
+  Radio,
+  Loader2,
+  XCircle,
+  HelpCircle,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
@@ -44,12 +48,22 @@ interface TicketStats {
   total: number;
 }
 
+type LiveKitHealthStatus = "not_configured" | "unauthorized" | "unreachable" | "healthy";
+
+interface LiveKitHealthResult {
+  status: LiveKitHealthStatus;
+  detail: string;
+}
+
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [pendingPayments, setPendingPayments] = useState(0);
+  const [liveKitHealth, setLiveKitHealth] = useState<LiveKitHealthResult | null>(null);
+  const [liveKitChecking, setLiveKitChecking] = useState(false);
+  const [liveKitCheckError, setLiveKitCheckError] = useState(false);
 
   const [ticketStats, setTicketStats] = useState<TicketStats>({
     open: 0,
@@ -95,6 +109,22 @@ export default function AdminDashboard() {
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-zrp-red border-t-transparent" />
       </div>
     );
+  }
+
+  async function checkLiveKitHealth() {
+    setLiveKitChecking(true);
+    setLiveKitCheckError(false);
+    try {
+      const res = await fetch("/api/admin/live-audio/health", { cache: "no-store" });
+      if (!res.ok) throw new Error("request failed");
+      const data: LiveKitHealthResult = await res.json();
+      setLiveKitHealth(data);
+    } catch {
+      setLiveKitHealth(null);
+      setLiveKitCheckError(true);
+    } finally {
+      setLiveKitChecking(false);
+    }
   }
 
   const cards = [
@@ -334,6 +364,72 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Live Audio (LiveKit) health - on-demand only, never auto-run; see
+          checkLiveKitHealth() in src/lib/live-audio/livekit.ts for why this
+          stays a separate, explicitly-triggered check rather than running
+          on every room join. */}
+      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+              <Radio className="h-5 w-5 text-zrp-red" aria-hidden="true" />
+              {t("adminLiveAudio.healthTitle")}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {t("adminLiveAudio.healthDesc")}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={checkLiveKitHealth}
+            disabled={liveKitChecking}
+            aria-busy={liveKitChecking}
+            className="inline-flex items-center gap-1.5 rounded-full bg-zrp-red px-4 py-2 text-sm font-semibold text-white transition hover:bg-zrp-darkRed disabled:opacity-50"
+          >
+            {liveKitChecking && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+            {liveKitChecking ? t("adminLiveAudio.checking") : t("adminLiveAudio.checkNow")}
+          </button>
+        </div>
+
+        {liveKitCheckError && (
+          <p role="alert" className="mt-4 text-sm text-zrp-red">
+            {t("adminLiveAudio.checkFailed")}
+          </p>
+        )}
+
+        {liveKitHealth && (
+          <div className="mt-4 flex items-start gap-3 rounded-lg bg-gray-50 p-4 dark:bg-gray-900/40">
+            <LiveKitStatusIcon status={liveKitHealth.status} />
+            <div className="min-w-0">
+              <p className="font-medium text-gray-900 dark:text-white">
+                {t(LIVEKIT_STATUS_LABEL_KEYS[liveKitHealth.status])}
+              </p>
+              <p className="mt-0.5 break-words font-mono text-xs text-gray-500 dark:text-gray-400">
+                {liveKitHealth.detail}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+const LIVEKIT_STATUS_LABEL_KEYS: Record<LiveKitHealthStatus, TranslationKey> = {
+  not_configured: "adminLiveAudio.statusNotConfigured",
+  unauthorized: "adminLiveAudio.statusUnauthorized",
+  unreachable: "adminLiveAudio.statusUnreachable",
+  healthy: "adminLiveAudio.statusHealthy",
+};
+
+function LiveKitStatusIcon({ status }: { status: LiveKitHealthStatus }) {
+  if (status === "healthy") {
+    return <CheckCircle className="h-5 w-5 shrink-0 text-green-500" aria-hidden="true" />;
+  }
+  if (status === "not_configured") {
+    return <HelpCircle className="h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />;
+  }
+  return <XCircle className="h-5 w-5 shrink-0 text-zrp-red" aria-hidden="true" />;
 }
