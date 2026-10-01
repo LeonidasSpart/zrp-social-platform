@@ -4,21 +4,26 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { Loader2, Copy, Check, Upload } from "lucide-react";
+import { Loader2, Wallet, Rocket, Upload } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { isNativeApp } from "@/lib/nativeAuth";
 import { nativePaymentHeaders } from "@/lib/native-payment-policy";
+import { mintTokenFromBrowser } from "@/lib/launchpad/client-token-mint";
 
 // Kept in sync with the fee charged in
 // src/app/api/launchpad/tokens/route.ts (TOKEN_CREATION_FEE_USDC). The
-// server independently verifies the exact amount on-chain - this constant
-// is only what the form displays to the user before they pay.
+// server independently re-derives and verifies the exact amount
+// on-chain - this constant only drives what the client builds into the
+// transaction and what the form displays before the user signs.
 const CREATION_FEE_USDC = 15;
+const CREATION_FEE_RAW = BigInt(CREATION_FEE_USDC) * BigInt(1_000_000); // USDC has 6 decimals
 
 export default function CreateTokenPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET || "";
+  const usdcMint = process.env.NEXT_PUBLIC_USDC_MINT || "";
+  const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { startUpload, isUploading } = useUploadThing("tokenImage");
 
@@ -36,21 +41,9 @@ export default function CreateTokenPage() {
   const [revokeMint, setRevokeMint] = useState(true);
   const [revokeFreeze, setRevokeFreeze] = useState(true);
   const [revokeUpdate, setRevokeUpdate] = useState(false);
-  const [transactionId, setTransactionId] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [step, setStep] = useState<"idle" | "minting" | "recording">("idle");
   const [error, setError] = useState<string | null>(null);
-
-  const handleCopyAddress = async () => {
-    if (!platformWallet) return;
-    try {
-      await navigator.clipboard.writeText(platformWallet);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard access can fail silently - the address is still visible.
-    }
-  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,7 +63,7 @@ export default function CreateTokenPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -95,13 +88,40 @@ export default function CreateTokenPage() {
       setError("Decimals must be between 0 and 9.");
       return;
     }
-    if (!transactionId.trim()) {
-      setError("Paste the transaction ID for the creation fee payment.");
+    if (!platformWallet || !usdcMint || !rpcUrl) {
+      setError("Token creation is temporarily unavailable.");
       return;
     }
 
-    setSubmitting(true);
+    let decimalMultiplier = BigInt(1);
+    for (let i = 0; i < numericDecimals; i += 1) decimalMultiplier *= BigInt(10);
+    const rawSupply = BigInt(supply.trim()) * decimalMultiplier;
+
+    const cleanName = name.trim();
+    const cleanSymbol = symbol.trim().toUpperCase();
+
     try {
+      setStep("minting");
+      const mintResult = await mintTokenFromBrowser({
+        rpcUrl,
+        platformWalletAddress: platformWallet,
+        usdcMintAddress: usdcMint,
+        feeUsdcRawAmount: CREATION_FEE_RAW,
+        decimals: numericDecimals,
+        supply: rawSupply,
+        name: cleanName,
+        symbol: cleanSymbol,
+        // Resolves dynamically from the DB row this same flow creates
+        // right after - Solana never validates a metadata URI resolves
+        // at mint time, only wallets/explorers fetch it later.
+        metadataOrigin: window.location.origin,
+        revokeMint,
+        revokeFreeze,
+        revokeUpdate,
+      });
+      setWalletAddress(mintResult.ownerWalletAddress);
+
+      setStep("recording");
       const response = await fetch("/api/launchpad/tokens", {
         method: "POST",
         headers: {
@@ -109,36 +129,31 @@ export default function CreateTokenPage() {
           ...nativePaymentHeaders(isNativeApp()),
         },
         body: JSON.stringify({
-          name: name.trim(),
-          symbol: symbol.trim(),
+          name: cleanName,
+          symbol: cleanSymbol,
           description: description.trim() || undefined,
           imageUrl,
-          supply: supply.trim(),
-          decimals: numericDecimals,
           website: website.trim() || undefined,
           twitter: twitter.trim() || undefined,
           telegram: telegram.trim() || undefined,
           discord: discord.trim() || undefined,
-          revokeMint,
-          revokeFreeze,
-          revokeUpdate,
-          transactionId: transactionId.trim(),
+          mintAddress: mintResult.mintAddress,
+          transactionId: mintResult.signature,
         }),
       });
 
       const data = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(data?.error || "Failed to create token.");
-      }
-      if (!data?.success || !data?.token?.mintAddress) {
-        throw new Error(data?.token?.failureReason || "The mint transaction did not complete. Contact support with your fee transaction ID.");
+        throw new Error(
+          `${data?.error || "Failed to record the created token."} Your token minted successfully on-chain (${mintResult.mintAddress}) - contact support with this address if it doesn't appear.`
+        );
       }
 
-      router.push(`/launchpad/token/${data.token.mintAddress}`);
+      router.push(`/launchpad/token/${mintResult.mintAddress}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create token.");
     } finally {
-      setSubmitting(false);
+      setStep("idle");
     }
   };
 
@@ -158,15 +173,17 @@ export default function CreateTokenPage() {
     );
   }
 
+  const submitting = step !== "idle";
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1">Create a token</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        Mints a real SPL token on Solana mainnet. Authorities are assigned directly to your verified wallet - make sure you&apos;ve linked and
-        verified one in Settings first.
+        Mints a real SPL token on Solana mainnet. Connect your wallet and sign once - the {CREATION_FEE_USDC} USDC creation fee and the mint
+        happen together, in the same transaction. Authorities go directly to the wallet you sign with.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleCreate} className="space-y-5">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Token image</label>
           <button
@@ -298,39 +315,17 @@ export default function CreateTokenPage() {
             <input type="checkbox" checked={revokeUpdate} onChange={(e) => setRevokeUpdate(e.target.checked)} disabled={submitting} />
             Revoke update (metadata) authority - makes name/image permanent
           </label>
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            Any authority not revoked is assigned to your verified wallet - never kept by ZRP.
-          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Any authority not revoked stays with the wallet you sign with.</p>
         </div>
 
-        <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 space-y-3">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Creation fee: {CREATION_FEE_USDC} USDC</p>
-          {platformWallet ? (
-            <>
-              <div>
-                <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                  1. Send {CREATION_FEE_USDC} USDC to
-                </label>
-                <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
-                  <span className="flex-1 truncate font-mono text-xs text-gray-700 dark:text-gray-300">{platformWallet}</span>
-                  <button type="button" onClick={handleCopyAddress} className="flex-shrink-0 text-gray-500 hover:text-zrp-red transition">
-                    {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">2. Paste the transaction ID</label>
-                <input
-                  type="text"
-                  value={transactionId}
-                  onChange={(e) => setTransactionId(e.target.value)}
-                  disabled={submitting}
-                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
-              </div>
-            </>
-          ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">Payments are temporarily unavailable.</p>
+        <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Creation fee: {CREATION_FEE_USDC} USDC - paid in the same transaction as the mint
+          </p>
+          {walletAddress && (
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+              <Wallet className="h-3.5 w-3.5" /> {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+            </p>
           )}
         </div>
 
@@ -339,15 +334,25 @@ export default function CreateTokenPage() {
         <button
           type="submit"
           disabled={submitting || isUploading || !platformWallet}
-          className="w-full inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50 disabled:pointer-events-none"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50 disabled:pointer-events-none"
         >
-          {submitting ? (
+          {step === "minting" && (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Minting on-chain...
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Confirm in your wallet...
             </>
-          ) : (
-            "Create token"
+          )}
+          {step === "recording" && (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Finishing up...
+            </>
+          )}
+          {step === "idle" && (
+            <>
+              <Rocket className="h-4 w-4" />
+              Create & Mint Token ({CREATION_FEE_USDC} USDC)
+            </>
           )}
         </button>
       </form>

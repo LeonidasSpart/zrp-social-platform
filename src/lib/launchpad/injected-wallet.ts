@@ -1,19 +1,25 @@
 "use client";
 
 /*
- * Shared "connect + sign a message" helper for the launchpad's claim-
- * style flows (vesting now; staking/farming rewards claims later reuse
- * this same shape). Talks directly to the standard injected provider
- * Phantom/Solflare/Backpack expose - the exact pattern already proven
- * in WalletVerifyPanel.tsx for wallet linking. No wallet-adapter
- * dependency (see TipModal.tsx's own comment on why that was removed).
- * Signing a message never authorizes a transaction.
+ * Shared "connect + sign" helper for the launchpad's wallet-driven flows:
+ * message-signing for claim-style actions (vesting/staking/farming
+ * rewards, DAO voting) and, as of the atomic token-create flow, raw
+ * transaction signing too. Talks directly to the standard injected
+ * provider Phantom/Solflare/Backpack expose - the exact pattern already
+ * proven in WalletVerifyPanel.tsx for wallet linking. No wallet-adapter
+ * dependency (see TipModal.tsx's own comment on why that was removed);
+ * extending this existing provider-talks-directly pattern to cover
+ * `signTransaction` gets the same one-click, atomically-signed UX
+ * zrppad had without reintroducing that library's audit surface.
  */
+
+import type { Transaction } from "@solana/web3.js";
 
 export interface InjectedSolanaProvider {
   connect: () => Promise<{ publicKey?: { toString(): string } } | void>;
   publicKey?: { toString(): string } | null;
   signMessage: (message: Uint8Array, display?: string) => Promise<{ signature: Uint8Array } | Uint8Array>;
+  signTransaction?: (transaction: Transaction) => Promise<Transaction>;
 }
 
 export function findInjectedSolanaProvider(): InjectedSolanaProvider | null {
@@ -28,7 +34,7 @@ export function findInjectedSolanaProvider(): InjectedSolanaProvider | null {
   return candidates.find((p) => p && typeof p.signMessage === "function" && typeof p.connect === "function") ?? null;
 }
 
-export async function connectAndSignMessage(message: string): Promise<{ walletAddress: string; signature: string }> {
+export async function connectInjectedWallet(): Promise<{ walletAddress: string; provider: InjectedSolanaProvider }> {
   const provider = findInjectedSolanaProvider();
   if (!provider) {
     throw new Error("No Solana wallet extension found. Install Phantom, Solflare or Backpack.");
@@ -40,6 +46,12 @@ export async function connectAndSignMessage(message: string): Promise<{ walletAd
   if (!walletAddress) {
     throw new Error("Could not read the connected wallet's address.");
   }
+
+  return { walletAddress, provider };
+}
+
+export async function connectAndSignMessage(message: string): Promise<{ walletAddress: string; signature: string }> {
+  const { walletAddress, provider } = await connectInjectedWallet();
 
   const signed = await provider.signMessage(new TextEncoder().encode(message), "utf8");
   const signatureBytes = signed instanceof Uint8Array ? signed : signed?.signature;
