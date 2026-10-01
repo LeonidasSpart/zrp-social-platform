@@ -232,4 +232,110 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/launchpad/tokens (integration, r
 
     expect(statuses[5]).toBe(429);
   });
+
+  // ─── Affiliate/referral commission crediting (src/lib/referral.ts) ───
+  describe("referral commission on a successful mint", () => {
+    async function createAmbassador(label: string, status: "PENDING" | "APPROVED" | "SUSPENDED") {
+      const owner = await createUser(`${label}owner`);
+      const ambassador = await prisma.ambassadorProfile.create({
+        data: {
+          userId: owner.id,
+          status,
+          invitationCode: `REF-${label}-${randomUUID().slice(0, 8)}`,
+          countryCode: "CH",
+          motivation: "integration test fixture",
+        },
+      });
+      return { owner, ambassador };
+    }
+
+    it("credits the referring APPROVED ambassador 15% of the fee into their CreatorProfile balance", async () => {
+      const { owner, ambassador } = await createAmbassador("approved", "APPROVED");
+      const referred = await createUser("refd1", "WalletPlaceholder7777777777777777777");
+      await prisma.referral.create({ data: { ambassadorProfileId: ambassador.id, referredUserId: referred.id } });
+
+      asUser(referred.id);
+      verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder7777777777777777777" }));
+      mockMintSuccess();
+
+      const res = await createToken(req(validBody()));
+      const data = await res.json();
+      expect(res.status).toBe(201);
+      expect(data.success).toBe(true);
+      tokenIds.push(data.token.id);
+
+      const commission = await prisma.referralCommission.findUnique({
+        where: { sourceType_sourceId: { sourceType: "LAUNCHPAD_TOKEN_CREATION", sourceId: data.token.id } },
+      });
+      expect(commission?.feeAmount.toString()).toBe("15");
+      expect(commission?.commissionAmount.toString()).toBe("2.25");
+
+      const creatorProfile = await prisma.creatorProfile.findUnique({ where: { userId: owner.id } });
+      expect(creatorProfile?.balance.toString()).toBe("2.25");
+      expect(creatorProfile?.totalEarnings.toString()).toBe("2.25");
+    });
+
+    it("does not credit commission when the referring ambassador is not APPROVED", async () => {
+      const { owner, ambassador } = await createAmbassador("pending", "PENDING");
+      const referred = await createUser("refd2", "WalletPlaceholder8888888888888888888");
+      await prisma.referral.create({ data: { ambassadorProfileId: ambassador.id, referredUserId: referred.id } });
+
+      asUser(referred.id);
+      verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder8888888888888888888" }));
+      mockMintSuccess();
+
+      const res = await createToken(req(validBody()));
+      const data = await res.json();
+      expect(res.status).toBe(201);
+      tokenIds.push(data.token.id);
+
+      expect(
+        await prisma.referralCommission.findUnique({
+          where: { sourceType_sourceId: { sourceType: "LAUNCHPAD_TOKEN_CREATION", sourceId: data.token.id } },
+        })
+      ).toBeNull();
+      expect(await prisma.creatorProfile.findUnique({ where: { userId: owner.id } })).toBeNull();
+    });
+
+    it("does not credit commission for a fee-payer who was never referred", async () => {
+      const user = await createUser("notreferred1", "WalletPlaceholder9999999999999999999");
+      asUser(user.id);
+      verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholder9999999999999999999" }));
+      mockMintSuccess();
+
+      const res = await createToken(req(validBody()));
+      const data = await res.json();
+      expect(res.status).toBe(201);
+      tokenIds.push(data.token.id);
+
+      expect(
+        await prisma.referralCommission.findUnique({
+          where: { sourceType_sourceId: { sourceType: "LAUNCHPAD_TOKEN_CREATION", sourceId: data.token.id } },
+        })
+      ).toBeNull();
+    });
+
+    it("does not credit commission when the mint fails, even though the fee was already collected", async () => {
+      const { owner, ambassador } = await createAmbassador("mintfail", "APPROVED");
+      const referred = await createUser("refd3", "WalletPlaceholderAAAA111111111111111");
+      await prisma.referral.create({ data: { ambassadorProfileId: ambassador.id, referredUserId: referred.id } });
+
+      asUser(referred.id);
+      verifyUsdcTransaction.mockResolvedValue(validVerification({ amount: 15, from: "WalletPlaceholderAAAA111111111111111" }));
+      mockMintFailure("Simulated on-chain failure.");
+
+      const res = await createToken(req(validBody()));
+      const data = await res.json();
+      expect(res.status).toBe(201);
+      expect(data.success).toBe(false);
+      tokenIds.push(data.token.id);
+
+      expect(
+        await prisma.referralCommission.findUnique({
+          where: { sourceType_sourceId: { sourceType: "LAUNCHPAD_TOKEN_CREATION", sourceId: data.token.id } },
+        })
+      ).toBeNull();
+      expect(await prisma.creatorProfile.findUnique({ where: { userId: owner.id } })).toBeNull();
+    });
+  });
 });

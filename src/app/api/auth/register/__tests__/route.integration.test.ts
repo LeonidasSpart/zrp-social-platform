@@ -90,9 +90,26 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/auth/register - signup attributi
       const user = await registerAndFetch("referral", { ref: code }, { ip: "203.0.113.20" });
       expect(user.signupSource).toBe("REFERRAL");
       expect(user.signupCampaign).toBe(code);
+
+      // Attribution for the affiliate/referral program (src/lib/referral.ts)
+      // happens in the same transaction as user creation - a real Referral
+      // row, not just the signupSource snapshot.
+      const referral = await prisma.referral.findUnique({ where: { referredUserId: user.id } });
+      expect(referral?.ambassadorProfileId).toBe(ambassador.id);
     } finally {
       await prisma.ambassadorProfile.delete({ where: { id: ambassador.id } }).catch(() => {});
     }
+  });
+
+  it("does not create a Referral row for a CAMPAIGN (unrecognized ref) or DIRECT signup", async () => {
+    const directUser = await registerAndFetch("norefdirect", {}, { ip: "203.0.113.21" });
+    const campaignUser = await registerAndFetch(
+      "norefcampaign",
+      { ref: "TOTALLY-MADE-UP-CODE-2" },
+      { ip: "203.0.113.22" }
+    );
+    expect(await prisma.referral.findUnique({ where: { referredUserId: directUser.id } })).toBeNull();
+    expect(await prisma.referral.findUnique({ where: { referredUserId: campaignUser.id } })).toBeNull();
   });
 
   it("classifies an unrecognized ref code as CAMPAIGN, not DIRECT (a failed referral attempt is not 'no attribution')", async () => {

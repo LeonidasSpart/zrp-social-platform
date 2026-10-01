@@ -295,13 +295,19 @@ describe.skipIf(!hasRealDatabaseUrl)("Admin subscriptions & billing routes (inte
       { params: Promise.resolve({ userId: farOut.id }) }
     );
 
-    const res = await listGET(new NextRequest("https://zrp.one/api/admin/subscriptions?expiringWithin=30&limit=200"));
+    // 32, not 30: a "monthly" grant's real period end is calendar-month
+    // math (src/lib/subscriptions.ts addMonthsUtc/computePeriodEnd), which
+    // spans 28-31 days depending on which month it lands in - a flat
+    // 30-day window would flake every time "now" falls in a 31-day month
+    // (7 of the 12). 32 reliably covers any monthly grant while still
+    // excluding the yearly "farOut" one.
+    const res = await listGET(new NextRequest("https://zrp.one/api/admin/subscriptions?expiringWithin=32&limit=200"));
     const list = await res.json();
     const ids = list.subscriptions.map((s: { userId: string }) => s.userId);
     expect(ids).toContain(soon.id);
     expect(ids).not.toContain(farOut.id);
     for (const row of list.subscriptions) {
-      expect(new Date(row.currentPeriodEnd).getTime()).toBeLessThanOrEqual(Date.now() + 30 * 86400000);
+      expect(new Date(row.currentPeriodEnd).getTime()).toBeLessThanOrEqual(Date.now() + 32 * 86400000);
     }
   });
 });
