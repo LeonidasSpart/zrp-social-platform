@@ -626,6 +626,7 @@ model User {
   farmingPools FarmingPool[]
   daos Dao[]
   idoCampaigns IdoCampaign[]
+  airdrops Airdrop[]
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -2141,6 +2142,7 @@ model LaunchedToken {
   farmingPoolsAsReward FarmingPool[]
   dao Dao?
   idoCampaigns IdoCampaign[]
+  airdrops Airdrop[]
 }
 
 enum VestingContractStatus {
@@ -2815,6 +2817,78 @@ model IdoWhitelistApplication {
   @@unique([campaignId, applicantWalletAddress])
   @@index([campaignId])
   @@index([status])
+}
+
+// ZRP Launchpad: airdrop - a creator distributing their own already-held
+// token supply to a list of recipient wallets. Unlike vesting/staking,
+// there is no platform custody or shared reward reserve to protect: the
+// creator's own connected wallet signs each batch transaction directly
+// (see client-airdrop.ts), so the only thing this model exists for is an
+// honest audit trail of what the chain actually recorded - never a
+// client-reported claim taken at face value. Each AirdropRecipient row's
+// status is set only after verifyAirdropBatchTransaction() independently
+// re-derives the real pre/post token-balance delta for that wallet from
+// the transaction, the same technique spl-transfer-verify.ts already
+// uses for payment-in verification, just applied to arbitrary recipients
+// instead of a single platform destination.
+model Airdrop {
+  id String @id @default(cuid())
+
+  launchedTokenId String
+  launchedToken   LaunchedToken @relation(fields: [launchedTokenId], references: [id], onDelete: Cascade)
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  senderWalletAddress   String
+  amountPerRecipientRaw Decimal @db.Decimal(38, 0)
+
+  createdAt DateTime @default(now())
+
+  recipients AirdropRecipient[]
+
+  @@index([launchedTokenId])
+  @@index([creatorId])
+}
+
+enum AirdropRecipientStatus {
+  // Independently verified on-chain: the recipient's token balance for
+  // this mint actually increased by exactly amountPerRecipientRaw in
+  // the referenced transaction.
+  SUCCESS
+  // The batch transaction never confirmed, or confirmed with an
+  // on-chain error - nothing moved, matching every other Launchpad
+  // claim flow's "definite failure" case.
+  FAILED
+  // The batch transaction broadcast (a signature exists) but its
+  // on-chain outcome could not be confirmed client-side (e.g. an RPC
+  // timeout) - see AmbiguousMintError/AmbiguousSwapError for the
+  // identical rationale. Recorded as-is for the creator's own records;
+  // unlike a claim flow there is no shared reserve to protect here, so
+  // this status carries no further gating.
+  DISPUTED
+}
+
+model AirdropRecipient {
+  id String @id @default(cuid())
+
+  airdropId String
+  airdrop   Airdrop @relation(fields: [airdropId], references: [id], onDelete: Cascade)
+
+  walletAddress String
+  status        AirdropRecipientStatus
+  // Null only for a FAILED entry whose transaction never broadcast at
+  // all (e.g. the wallet rejected the signature request).
+  transactionId String?
+
+  createdAt DateTime @default(now())
+
+  // A given transaction can legitimately cover several recipients (one
+  // batch), so uniqueness is on the pair, not the signature alone; NULL
+  // transactionIds are never considered duplicates of each other.
+  @@unique([transactionId, walletAddress])
+  @@index([airdropId])
+  @@index([walletAddress])
 }
 
 // ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT
