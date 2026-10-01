@@ -64,6 +64,21 @@ export async function GET(req: NextRequest) {
             content: true,
           },
         },
+        // Present only for type:"announcement" rows (see
+        // src/lib/announcements/) - additive to the existing bare-array
+        // contract: an older client that doesn't know this field exists
+        // simply ignores it, same as iOS's JSONDecoder does for any
+        // unmapped key.
+        announcement: {
+          select: {
+            id: true,
+            title: true,
+            body: true,
+            type: true,
+            imageUrl: true,
+            actionUrl: true,
+          },
+        },
       },
     });
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDown, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowDown, ExternalLink, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
+import { executeSwapFromBrowser, AmbiguousSwapError } from "@/lib/launchpad/client-swap";
 
 interface SwapQuote {
   inputMint: string;
@@ -12,6 +13,7 @@ interface SwapQuote {
   outAmountRaw: string;
   priceImpactPercent: number;
   routePlan: Array<{ label: string; percent: number }>;
+  raw: unknown;
 }
 
 const SOL_MINT = "So11111111111111111111111111111111111111112";
@@ -26,12 +28,19 @@ export default function SwapAggregatorPage() {
   const [swapLink, setSwapLink] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [swapping, setSwapping] = useState(false);
+  const [swapSignature, setSwapSignature] = useState<string | null>(null);
+  const [ambiguousSignature, setAmbiguousSignature] = useState<string | null>(null);
+
+  const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
 
   const handleGetQuote = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setQuote(null);
     setSwapLink(null);
+    setSwapSignature(null);
+    setAmbiguousSignature(null);
     if (!inputMint.trim() || !outputMint.trim() || !amount.trim()) return;
     setLoading(true);
     try {
@@ -45,6 +54,24 @@ export default function SwapAggregatorPage() {
       setError(err instanceof Error ? err.message : t("launchpad.swap.quoteFailed"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSwap = async () => {
+    if (!quote || !rpcUrl) return;
+    setError(null);
+    setSwapping(true);
+    try {
+      const result = await executeSwapFromBrowser({ rpcUrl, quoteResponse: quote.raw });
+      setSwapSignature(result.signature);
+    } catch (err: unknown) {
+      if (err instanceof AmbiguousSwapError) {
+        setAmbiguousSignature(err.signature);
+      } else {
+        setError(err instanceof Error ? err.message : t("launchpad.swap.executeFailed"));
+      }
+    } finally {
+      setSwapping(false);
     }
   };
 
@@ -120,16 +147,61 @@ export default function SwapAggregatorPage() {
               {t("launchpad.swap.routedVia", { routes: quote.routePlan.map((s) => `${s.label} (${s.percent}%)`).join(", ") })}
             </p>
           )}
-          {swapLink && (
-            <a
-              href={swapLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-zrp-red hover:underline"
-            >
-              {t("launchpad.swap.tradeOnJupiter")}
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+          {ambiguousSignature ? (
+            <div className="flex items-start gap-2 rounded-md bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <div>
+                <p className="font-medium">{t("launchpad.swap.ambiguousTitle")}</p>
+                <p className="mt-1">{t("launchpad.swap.ambiguousBody")}</p>
+                <a
+                  href={`https://solscan.io/tx/${ambiguousSignature}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex items-center gap-1 font-mono text-xs font-semibold underline"
+                >
+                  {ambiguousSignature}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+          ) : swapSignature ? (
+            <div className="flex items-start gap-2 rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-950/30 dark:text-green-300">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+              <div>
+                <p className="font-medium">{t("launchpad.swap.confirmedTitle")}</p>
+                <a
+                  href={`https://solscan.io/tx/${swapSignature}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex items-center gap-1 font-mono text-xs font-semibold underline"
+                >
+                  {swapSignature}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={handleSwap}
+                disabled={swapping || !rpcUrl}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-zrp-red px-4 py-3 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
+              >
+                {swapping ? <Loader2 className="h-4 w-4 animate-spin" /> : t("launchpad.swap.swapNowButton")}
+              </button>
+              {swapLink && (
+                <a
+                  href={swapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-zrp-red hover:underline"
+                >
+                  {t("launchpad.swap.orTradeOnJupiter")}
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
           )}
         </div>
       )}

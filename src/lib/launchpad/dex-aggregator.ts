@@ -1,24 +1,30 @@
 /*
- * ZRP Launchpad, phase 10: DEX aggregator - QUOTE ONLY, deliberately.
+ * ZRP Launchpad, phase 10/11: DEX aggregator via Jupiter.
  *
- * Executing a real swap means building a transaction that moves a
- * user's funds and getting it signed - a materially different risk
- * (and UX) than every "sign a message to prove ownership" flow this
- * launchpad uses elsewhere. Reintroducing that would mean either (a)
- * the platform custodying the swap itself (the exact custody risk the
- * whole launchpad has avoided since Phase 1's wallet-adapter removal),
- * or (b) a full in-browser transaction-signing integration, out of
- * scope for what the roadmap calls a "utility feature." Instead this
- * calls Jupiter's public quote API (jup.ag) - the de facto Solana
- * aggregator - for a read-only best-price-across-DEXs quote, and the
- * UI links out to Jupiter's own app to actually execute. No funds,
- * keys, or transactions ever touch this codebase.
+ * Quoting (getSwapQuote) was always safe - read-only, no funds or keys
+ * involved. Execution was deliberately deferred: building a transaction
+ * that moves a user's funds and getting it signed is a materially
+ * different risk than every "sign a message to prove ownership" flow
+ * this launchpad used elsewhere at the time, and the only way to do it
+ * without the platform custodying the swap itself (the exact custody
+ * risk the whole launchpad has avoided since Phase 1's wallet-adapter
+ * removal) was a full in-browser transaction-signing integration.
  *
- * "Never fake an integration": a failed/unreachable quote call throws
- * rather than returning a fabricated price.
+ * That integration now exists (injected-wallet.ts's signTransaction,
+ * proven by the atomic token-creation flow in client-token-mint.ts), so
+ * execution is no longer out of scope: getSwapTransaction asks Jupiter
+ * to build the swap as a transaction with the user's own wallet as fee
+ * payer and only signer, and src/lib/launchpad/client-swap.ts has that
+ * same wallet sign and broadcast it. ZRP never holds funds, keys, or a
+ * signature at any point - it only relays an opaque quote/transaction
+ * payload between the browser and Jupiter's public API.
+ *
+ * "Never fake an integration": a failed/unreachable call throws rather
+ * than returning a fabricated price or transaction.
  */
 
 const JUPITER_QUOTE_URL = "https://quote-api.jup.ag/v6/quote";
+const JUPITER_SWAP_URL = "https://quote-api.jup.ag/v6/swap";
 
 export interface SwapQuoteParams {
   inputMint: string;
@@ -39,6 +45,13 @@ export interface SwapQuote {
   outAmountRaw: string;
   priceImpactPercent: number;
   routePlan: SwapQuoteRoutePlanStep[];
+  // The verbatim Jupiter quote response, opaque to us. Jupiter's /swap
+  // endpoint requires this exact object back (its internal shape can
+  // change between API versions), so it's carried through the quote
+  // round-trip to the browser and echoed back unmodified when the user
+  // asks to execute - never reconstructed from the normalized fields
+  // above, which would risk silently diverging from what was quoted.
+  raw: unknown;
 }
 
 interface JupiterQuoteResponse {
@@ -79,9 +92,51 @@ export async function getSwapQuote(params: SwapQuoteParams): Promise<SwapQuote> 
       label: step.swapInfo?.label ?? "Unknown",
       percent: step.percent ?? 0,
     })),
+    raw: data,
   };
 }
 
 export function buildJupiterSwapLink(inputMint: string, outputMint: string): string {
   return `https://jup.ag/swap/${inputMint}-${outputMint}`;
+}
+
+export interface SwapTransactionParams {
+  // The verbatim SwapQuote.raw object from a prior getSwapQuote() call -
+  // never re-derived from the normalized quote fields.
+  quoteResponse: unknown;
+  userPublicKey: string;
+}
+
+export interface SwapTransaction {
+  // Base64-encoded, Jupiter-built VersionedTransaction. The user's own
+  // wallet is its fee payer and sole signer - ZRP never signs, holds, or
+  // even sees a signed copy of this.
+  swapTransactionBase64: string;
+  lastValidBlockHeight: number;
+}
+
+interface JupiterSwapResponse {
+  swapTransaction: string;
+  lastValidBlockHeight: number;
+}
+
+export async function getSwapTransaction(params: SwapTransactionParams): Promise<SwapTransaction> {
+  const { quoteResponse, userPublicKey } = params;
+
+  const res = await fetch(JUPITER_SWAP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quoteResponse, userPublicKey, wrapAndUnwrapSol: true }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!res.ok) {
+    throw new Error(`Jupiter swap-transaction request failed (${res.status}).`);
+  }
+
+  const data = (await res.json()) as JupiterSwapResponse;
+  if (!data || typeof data.swapTransaction !== "string" || typeof data.lastValidBlockHeight !== "number") {
+    throw new Error("Jupiter returned an unexpected swap-transaction response.");
+  }
+
+  return { swapTransactionBase64: data.swapTransaction, lastValidBlockHeight: data.lastValidBlockHeight };
 }

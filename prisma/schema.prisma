@@ -83,6 +83,30 @@ enum WithdrawalStatus {
   REJECTED
 }
 
+// Lifecycle of a global announcement broadcast. DRAFT/SCHEDULED are the
+// only states a SEND request may transition out of (atomically, to
+// SENDING) - see src/lib/announcements/dispatch.ts. SENDING is itself
+// the idempotency guard: a second concurrent send request, or a
+// double-click, can never start a duplicate broadcast because the
+// conditional UPDATE that performs the transition only ever matches
+// one row once.
+enum AnnouncementStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  // Finished, but at least one batch recorded a processing-level error
+  // (e.g. a transient database failure writing that batch's
+  // Notification rows) - NOT the same thing as an individual invalid
+  // push token, which sendPushNotification already absorbs silently
+  // and never surfaces here. See dispatch.ts.
+  PARTIAL
+  // Every batch failed - distinct from PARTIAL (which means SOME
+  // recipients were reached).
+  FAILED
+  CANCELLED
+}
+
 enum TicketCategory {
   GENERAL
   ACCOUNT
@@ -626,6 +650,7 @@ model User {
   farmingPools FarmingPool[]
   daos Dao[]
   idoCampaigns IdoCampaign[]
+  airdrops Airdrop[]
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -1168,16 +1193,88 @@ model Notification {
   commentId String?
   comment   Comment? @relation("Notification_comment", fields: [commentId], references: [id], onDelete: Cascade)
 
+  // Links an "announcement"-type notification back to the broadcast
+  // that produced it. Nullable: every other notification type leaves
+  // this null, and Postgres does not enforce uniqueness across NULLs,
+  // so @@unique([announcementId, userId]) below only ever constrains
+  // the announcement rows - it has no effect on ordinary notifications.
+  // That uniqueness is what makes batch re-processing after a crash/
+  // restart idempotent (see dispatch.ts): re-inserting the same
+  // (announcementId, userId) pair is a no-op via createMany's
+  // skipDuplicates rather than a duplicate notification.
+  announcementId String?
+  announcement   Announcement? @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
   read Boolean @default(false)
 
   createdAt DateTime @default(now())
 
+  @@unique([announcementId, userId])
   @@index([userId])
   @@index([userId, read])
   @@index([userId, createdAt])
   @@index([createdAt])
   @@index([fromUserId])
   @@index([commentId])
+}
+
+// A single admin-authored message broadcast to all eligible ZRP
+// members (today's only supported target - see dispatch.ts/eligibility.ts
+// for what "eligible" excludes). Sits ON TOP of the existing
+// Notification + push (FCM/APNs/Web Push) infrastructure rather than
+// duplicating it: sending a broadcast creates one Notification row per
+// eligible recipient (announcementId set, fromUserId set to a single
+// reserved system account - see announcements/system-user.ts) and
+// calls the existing sendPushNotification() per recipient, exactly as
+// any other notification type would. No second push pipeline, no
+// second notification center.
+model Announcement {
+  id    String @id @default(cuid())
+  title String
+  body  String @db.Text
+
+  // Plain string + a TS union (src/lib/announcements/types.ts), not a
+  // Prisma enum - matching Notification.type's own established
+  // convention in this codebase rather than introducing the first
+  // Prisma enum for this domain.
+  type String @default("ANNOUNCEMENT")
+
+  status AnnouncementStatus @default(DRAFT)
+
+  imageUrl  String?
+  actionUrl String?
+
+  // Loose reference, not a Prisma relation/FK - same convention as
+  // AuditLog.actorId. A real FK with onDelete:Cascade here would mean
+  // deleting the admin's account later cascade-deletes this
+  // Announcement row and, via Notification.announcementId's own
+  // cascade, every recipient's Notification row with it - a single
+  // account deletion silently wiping a broadcast's entire history for
+  // everyone else. A loose id avoids that blast radius entirely.
+  createdById String
+
+  scheduledAt   DateTime?
+  sendStartedAt DateTime?
+  completedAt   DateTime?
+  cancelledAt   DateTime?
+
+  // Progress/resume cursor for the batch processor - set once eligibility
+  // is computed at send time, then advanced by each batch. See
+  // src/lib/announcements/dispatch.ts.
+  totalRecipients   Int     @default(0)
+  processedCount    Int     @default(0)
+  failedBatchCount  Int     @default(0)
+  lastProcessedUserId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notifications Notification[]
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([createdAt])
+  @@index([createdById])
 }
 
 model Message {
@@ -2141,6 +2238,7 @@ model LaunchedToken {
   farmingPoolsAsReward FarmingPool[]
   dao Dao?
   idoCampaigns IdoCampaign[]
+  airdrops Airdrop[]
 }
 
 enum VestingContractStatus {
@@ -2815,6 +2913,78 @@ model IdoWhitelistApplication {
   @@unique([campaignId, applicantWalletAddress])
   @@index([campaignId])
   @@index([status])
+}
+
+// ZRP Launchpad: airdrop - a creator distributing their own already-held
+// token supply to a list of recipient wallets. Unlike vesting/staking,
+// there is no platform custody or shared reward reserve to protect: the
+// creator's own connected wallet signs each batch transaction directly
+// (see client-airdrop.ts), so the only thing this model exists for is an
+// honest audit trail of what the chain actually recorded - never a
+// client-reported claim taken at face value. Each AirdropRecipient row's
+// status is set only after verifyAirdropBatchTransaction() independently
+// re-derives the real pre/post token-balance delta for that wallet from
+// the transaction, the same technique spl-transfer-verify.ts already
+// uses for payment-in verification, just applied to arbitrary recipients
+// instead of a single platform destination.
+model Airdrop {
+  id String @id @default(cuid())
+
+  launchedTokenId String
+  launchedToken   LaunchedToken @relation(fields: [launchedTokenId], references: [id], onDelete: Cascade)
+
+  creatorId String?
+  creator   User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+
+  senderWalletAddress   String
+  amountPerRecipientRaw Decimal @db.Decimal(38, 0)
+
+  createdAt DateTime @default(now())
+
+  recipients AirdropRecipient[]
+
+  @@index([launchedTokenId])
+  @@index([creatorId])
+}
+
+enum AirdropRecipientStatus {
+  // Independently verified on-chain: the recipient's token balance for
+  // this mint actually increased by exactly amountPerRecipientRaw in
+  // the referenced transaction.
+  SUCCESS
+  // The batch transaction never confirmed, or confirmed with an
+  // on-chain error - nothing moved, matching every other Launchpad
+  // claim flow's "definite failure" case.
+  FAILED
+  // The batch transaction broadcast (a signature exists) but its
+  // on-chain outcome could not be confirmed client-side (e.g. an RPC
+  // timeout) - see AmbiguousMintError/AmbiguousSwapError for the
+  // identical rationale. Recorded as-is for the creator's own records;
+  // unlike a claim flow there is no shared reserve to protect here, so
+  // this status carries no further gating.
+  DISPUTED
+}
+
+model AirdropRecipient {
+  id String @id @default(cuid())
+
+  airdropId String
+  airdrop   Airdrop @relation(fields: [airdropId], references: [id], onDelete: Cascade)
+
+  walletAddress String
+  status        AirdropRecipientStatus
+  // Null only for a FAILED entry whose transaction never broadcast at
+  // all (e.g. the wallet rejected the signature request).
+  transactionId String?
+
+  createdAt DateTime @default(now())
+
+  // A given transaction can legitimately cover several recipients (one
+  // batch), so uniqueness is on the pair, not the signature alone; NULL
+  // transactionIds are never considered duplicates of each other.
+  @@unique([transactionId, walletAddress])
+  @@index([airdropId])
+  @@index([walletAddress])
 }
 
 // ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT
