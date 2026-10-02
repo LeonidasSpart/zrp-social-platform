@@ -60,11 +60,28 @@ export async function GET(req: NextRequest) {
   try {
     const { cursor, limit } = parseCursorParams(req);
     const hasPool = req.nextUrl.searchParams.get("hasPool") === "1";
+    // "graduated"/"notGraduated" read the real GraduationEvent table
+    // (populated only from an independently-verified on-chain `complete`
+    // read - see tokens/[mint]/graduation/route.ts), never a guess. A
+    // mint with no pump bonding curve at all is "notGraduated" (it was
+    // never on a curve to graduate from), same as one still bonding.
+    const graduationFilter = req.nextUrl.searchParams.get("graduated");
+
+    let graduatedMintAddresses: string[] | null = null;
+    if (graduationFilter === "1" || graduationFilter === "0") {
+      const events = await prisma.graduationEvent.findMany({ select: { mintAddress: true } });
+      graduatedMintAddresses = events.map((e) => e.mintAddress);
+    }
 
     const tokens = await prisma.launchedToken.findMany({
       where: {
         status: "COMPLETED",
-        mintAddress: { not: null },
+        mintAddress:
+          graduationFilter === "1"
+            ? { not: null, in: graduatedMintAddresses ?? [] }
+            : graduationFilter === "0"
+              ? { not: null, notIn: graduatedMintAddresses ?? [] }
+              : { not: null },
         ...(hasPool ? { pools: { some: { status: "ACTIVE" } } } : {}),
       },
       orderBy: { createdAt: "desc" },

@@ -20,6 +20,7 @@
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
+    "@pump-fun/pump-sdk": "^2.0.0",
     "@raydium-io/raydium-sdk-v2": "^0.2.73-alpha",
     "@sentry/nextjs": "^10.69.0",
     "@socket.io/redis-adapter": "^8.3.0",

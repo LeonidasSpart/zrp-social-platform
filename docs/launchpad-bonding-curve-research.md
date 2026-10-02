@@ -115,3 +115,46 @@ before being recorded. A token launched on ZRP today can have real,
 immediately-tradable liquidity without waiting on bonding-curve
 graduation at all - a different path to the same end state (a liquid,
 tradable token), not a lesser one.
+
+## Update: the bonding curve was built in a later session
+
+Everything above was this document's original conclusion. A follow-up
+session built the integration this section once deferred, after
+confirming `@pump-fun/pump-sdk` is the project's actively-maintained,
+official package. What actually shipped differs in a few ways from the
+plan sketched above - recorded here so this file stays an accurate map of
+the real code, not a stale proposal next to it:
+
+- **Files**: `src/lib/launchpad/pump-curve-keys.ts` (pure PDA/math, as
+  planned), `src/lib/launchpad/pump-curve-service.ts` (not
+  `bonding-curve-service.ts` - server-side live reads + independent
+  buy/sell/graduation verification), `src/lib/launchpad/client-bonding-curve.ts`
+  (wallet-signed buy/sell, as planned, built entirely on the SDK's own
+  `PumpSdk.buyInstructions`/`sellInstructions` rather than hand-assembled
+  instructions - a wrong account in hand-rolled buy/sell code risks real
+  fund loss in a way a wrong account in a read-only decode never does).
+- **No `BondingCurveState` table.** Curve state is read live from chain on
+  every request with a 30s in-process cache for the `Global`/`FeeConfig`
+  singletons only (mirrors `token-analytics.ts`'s own cache) - never
+  persisted as a row that could silently go stale between reads.
+  `GraduationEvent` is the one new on-chain-state table, recorded only
+  after independently reading the curve's own `complete` flag.
+- **Historical price/volume/liquidity/holder data** lives in a new
+  `AnalyticsSnapshot` table (one row per mint per cron tick, not per
+  curve-state read), covering both Raydium pool-based tokens and pump
+  bonding-curve tokens uniformly.
+- **Scope**: only the classic, legacy SOL-quoted curve (`buy`/`sell`,
+  `PublicKey.default`/`NATIVE_MINT` quote) is supported - mayhem-mode,
+  holder-reward, cashback, and non-SOL quote-control curves are detected
+  and reported as `UNSUPPORTED_CURVE_VARIANT` rather than mis-read or
+  mis-traded. Post-graduation, this integration detects graduation and the
+  resulting canonical PumpSwap pool's *existence*, but does not decode
+  that pool's own reserves/liquidity (a separate `@pump-fun/pump-swap-sdk`
+  integration, not built this session).
+- **Token creation through the curve itself was not built.** This session
+  covers discovering, pricing, and trading *existing* pump bonding-curve
+  tokens non-custodially. Initiating a brand-new token via pump's own
+  `createV2`/`createV2AndBuy` (new mint keypair, metadata upload, a
+  first-buy transaction) is materially higher-risk, untestable-against-
+  live-RPC code that was deliberately left out rather than rushed - see
+  that session's final delivery report for the full reasoning.
