@@ -4,12 +4,13 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale, Store, Bell, RefreshCw } from "lucide-react";
+import { Heart, MessageCircle, Repeat, UserPlus, BadgeCheck, Loader2, Mail, Scale, Store, Bell, Megaphone, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import EmptyState from "@/components/ui/EmptyState";
 import { useUnreadCount } from "@/contexts/UnreadCountContext";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { getNotificationHref, NOTIFICATION_FALLBACK_ACTION } from "@/lib/notification-links";
+import { classifyAnnouncementActionUrl } from "@/lib/announcements/types";
 
 interface FromUser {
   id: string;
@@ -19,9 +20,18 @@ interface FromUser {
   badgeType?: string | null;
 }
 
+interface AnnouncementSummary {
+  id: string;
+  title: string;
+  body: string;
+  type: string;
+  imageUrl: string | null;
+  actionUrl: string | null;
+}
+
 interface Notification {
   id: string;
-  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_back" | "follow_request" | "repost" | "comment_repost" | "message" | "post_from_subscription";
+  type: "like" | "comment_like" | "comment" | "reply" | "follow" | "follow_back" | "follow_request" | "repost" | "comment_repost" | "message" | "post_from_subscription" | "announcement";
   read: boolean;
   createdAt: string;
   fromUser: FromUser;
@@ -33,6 +43,10 @@ interface Notification {
   // reply that triggered this notification, so a tap can jump straight
   // to it instead of opening the post at the top of its comment list.
   commentId?: string | null;
+  // Set only on "announcement" notifications (src/lib/announcements/) -
+  // the admin broadcast this row represents. See GET /api/notifications'
+  // `announcement` include.
+  announcement?: AnnouncementSummary | null;
 }
 
 // ─── A grouped row: one or more original notifications of the same type,
@@ -48,6 +62,8 @@ interface GroupedNotification {
   // GROUPABLE_TYPES below - those two types never merge into a group of
   // several people, so this always identifies one exact comment).
   commentId?: string | null;
+  // Only ever set on an ungrouped "announcement" row - see Notification.
+  announcement?: AnnouncementSummary | null;
   read: boolean;
   // Every underlying Notification.id this row represents - a click marks
   // ALL of them read (not just the group's synthetic key), since one row
@@ -71,6 +87,7 @@ function groupNotifications(list: Notification[]): GroupedNotification[] {
         postId: n.post?.id,
         postContent: n.post?.content,
         commentId: n.commentId,
+        announcement: n.announcement,
         read: n.read,
         ids: [n.id],
       });
@@ -229,6 +246,8 @@ export default function NotificationsPage() {
       case "listing_rejected":
       case "listing_removed":
         return <Store className="w-4 h-4 text-zrp-red" />;
+      case "announcement":
+        return <Megaphone className="w-4 h-4 text-zrp-red" />;
       default:
         return null;
     }
@@ -375,6 +394,78 @@ export default function NotificationsPage() {
       ) : (
         <div className="space-y-2">
           {grouped.map((g) => {
+            // Announcements render as their own card shape (ZRP sender,
+            // a real title + body + optional image, optional action
+            // link) rather than the generic "X liked your post"
+            // avatar/action-suffix row below - that shape has nowhere to
+            // put a title and a multi-line body. Never grouped (see
+            // GROUPABLE_TYPES), so this is always exactly one real
+            // Notification row. Its destination is whatever actionUrl
+            // the admin set (internal path -> in-app Link, external
+            // https -> a plain new-tab anchor) rather than
+            // getNotificationHref()'s postId/fromUsername-derived
+            // routing, which has no notion of an admin-supplied link.
+            if (g.type === "announcement" && g.announcement) {
+              const ann = g.announcement;
+              const linkKind = classifyAnnouncementActionUrl(ann.actionUrl);
+              const isInternalLink = linkKind === "internal";
+              const isExternalLink = linkKind === "external";
+              const cardClasses = `bg-white dark:bg-zrp-deepBlack rounded-lg shadow-sm p-4 border transition ${
+                g.read
+                  ? "border-gray-200 dark:border-gray-800"
+                  : "border-blue-200 dark:border-blue-900 bg-blue-50/30 dark:bg-blue-900/10"
+              }`;
+              const content = (
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-zrp-red/10 text-zrp-red">
+                    <Megaphone className="w-5 h-5" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">ZRP</p>
+                    <p className="mt-0.5 font-semibold text-gray-900 dark:text-white break-words">{ann.title}</p>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words">{ann.body}</p>
+                    {ann.imageUrl && (
+                      <img src={ann.imageUrl} alt="" className="mt-2 max-h-48 w-full rounded-lg object-cover" />
+                    )}
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">{timeAgo(g.latestDate)}</p>
+                  </div>
+                  {!g.read && <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2" />}
+                </div>
+              );
+
+              if (isInternalLink) {
+                return (
+                  <Link key={g.key} href={ann.actionUrl!} onClick={() => markOneRead(g.ids)} className={`block ${cardClasses}`}>
+                    {content}
+                  </Link>
+                );
+              }
+              if (isExternalLink) {
+                return (
+                  <a
+                    key={g.key}
+                    href={ann.actionUrl!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => markOneRead(g.ids)}
+                    className={`block ${cardClasses}`}
+                  >
+                    {content}
+                  </a>
+                );
+              }
+              return (
+                <button
+                  key={g.key}
+                  type="button"
+                  onClick={() => markOneRead(g.ids)}
+                  className={`block w-full text-left ${cardClasses}`}
+                >
+                  {content}
+                </button>
+              );
+            }
+
             const primaryUser = g.users[0];
             const name = primaryUser.name || primaryUser.username;
             const others = g.users.length - 1;

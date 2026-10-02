@@ -131,3 +131,23 @@ export function truncateForPush(body: string): string {
   if (body.length <= PUSH_BODY_MAX_LENGTH) return body;
   return `${body.slice(0, PUSH_BODY_MAX_LENGTH - 1).trimEnd()}…`;
 }
+
+/**
+ * How the notification center (src/app/notifications/page.tsx) should
+ * navigate a stored, already-validated announcement.actionUrl: an
+ * internal path through Next's own <Link> (in-app, no full reload), an
+ * external https URL through a plain new-tab anchor, or no link at all.
+ * Mirrors validateActionUrl()'s own internal/external split exactly
+ * (single leading "/", not "//") rather than re-deriving it ad hoc at
+ * the render call site - a value reaching here already passed that
+ * validator at create/edit time, so this never actually sees a
+ * protocol-relative "//" value in practice, but matching the same rule
+ * keeps the two in lockstep if that ever changes.
+ */
+export type AnnouncementLinkKind = "internal" | "external" | "none";
+
+export function classifyAnnouncementActionUrl(actionUrl: string | null | undefined): AnnouncementLinkKind {
+  if (!actionUrl) return "none";
+  if (actionUrl.startsWith("/") && !actionUrl.startsWith("//")) return "internal";
+  return "external";
+}

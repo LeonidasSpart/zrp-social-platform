@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { validateAnnouncementContent, validateActionUrl, truncateForPush, PUSH_BODY_MAX_LENGTH } from "../types";
+import {
+  validateAnnouncementContent,
+  validateActionUrl,
+  truncateForPush,
+  classifyAnnouncementActionUrl,
+  PUSH_BODY_MAX_LENGTH,
+} from "../types";
 
 describe("validateActionUrl", () => {
   it("accepts a null/empty value as no action URL", () => {
@@ -111,5 +117,33 @@ describe("truncateForPush", () => {
     const result = truncateForPush(long);
     expect(result.length).toBeLessThanOrEqual(PUSH_BODY_MAX_LENGTH);
     expect(result.endsWith("…")).toBe(true);
+  });
+});
+
+// The notification center (src/app/notifications/page.tsx) uses this to
+// decide whether an announcement's stored actionUrl navigates through
+// Next's in-app <Link> or a plain new-tab external anchor.
+describe("classifyAnnouncementActionUrl", () => {
+  it("returns 'none' for a missing action URL", () => {
+    expect(classifyAnnouncementActionUrl(null)).toBe("none");
+    expect(classifyAnnouncementActionUrl(undefined)).toBe("none");
+    expect(classifyAnnouncementActionUrl("")).toBe("none");
+  });
+
+  it("returns 'internal' for a real internal path", () => {
+    expect(classifyAnnouncementActionUrl("/settings")).toBe("internal");
+    expect(classifyAnnouncementActionUrl("/launchpad/create")).toBe("internal");
+  });
+
+  it("returns 'external' for an https URL", () => {
+    expect(classifyAnnouncementActionUrl("https://blog.zrp.one/release-notes")).toBe("external");
+  });
+
+  it("treats a protocol-relative path as external, matching validateActionUrl's own rejection of it as an internal path", () => {
+    // validateActionUrl() already rejects "//host/path" outright at
+    // create/edit time, so a stored actionUrl can never actually be one
+    // in practice - this just proves the two stay in lockstep rather
+    // than silently treating it as safe to render as an in-app <Link>.
+    expect(classifyAnnouncementActionUrl("//evil.example.com/phish")).toBe("external");
   });
 });
