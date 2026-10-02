@@ -4,9 +4,31 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, ShieldCheck, ShieldOff, Copy, Check } from "lucide-react";
+import { Loader2, ShieldCheck, ShieldOff, Copy, Check, TrendingUp, Users } from "lucide-react";
 import { safeExternalHref } from "@/lib/profile-website";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+interface TokenAnalytics {
+  market: {
+    priceUsdc: number | null;
+    priceStatus: "OK" | "UNAVAILABLE";
+    priceUnavailableReason: string | null;
+    priceImpactPercent: number | null;
+    fdvUsdc: number | null;
+  };
+  holders: {
+    topHolderAccounts: Array<{ address: string; amountRaw: string; percent: number }>;
+    top10ConcentrationPercent: number;
+    note: string;
+  };
+  risk: { riskFlags: string[] };
+}
+
+const PRICE_UNAVAILABLE_LABEL: Record<string, string> = {
+  NO_RELIABLE_MARKET: "No tradeable market found for this token yet.",
+  SOURCE_UNREACHABLE: "Price source is temporarily unreachable.",
+  INVALID_INPUT: "Price could not be determined.",
+};
 
 interface LaunchedTokenDetail {
   id: string;
@@ -48,6 +70,7 @@ export default function TokenDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [analytics, setAnalytics] = useState<TokenAnalytics | null>(null);
 
   useEffect(() => {
     if (!params.mint) return;
@@ -60,6 +83,14 @@ export default function TokenDetailPage() {
       .then((data) => setToken(data.token))
       .catch(() => setError(t("launchpad.tokenDetail.notFound")))
       .finally(() => setLoading(false));
+
+    // Independent of the ZRP-record fetch above - works for any mint,
+    // not just ones ZRP itself launched. A failure here never blocks
+    // the rest of the page; market/holder data simply stays absent.
+    fetch(`/api/launchpad/tokens/${params.mint}/analytics`)
+      .then(async (res) => (res.ok ? res.json() : null))
+      .then((data) => setAnalytics(data))
+      .catch(() => setAnalytics(null));
   }, [params.mint, t]);
 
   const handleCopy = async () => {
@@ -107,6 +138,48 @@ export default function TokenDetailPage() {
       </div>
 
       {token.description && <p className="text-gray-700 dark:text-gray-300 mb-4">{token.description}</p>}
+
+      {analytics && (
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
+            <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+              <TrendingUp className="h-3.5 w-3.5" /> Price
+            </p>
+            {analytics.market.priceStatus === "OK" && analytics.market.priceUsdc !== null ? (
+              <>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  ${analytics.market.priceUsdc < 0.01 ? analytics.market.priceUsdc.toExponential(2) : analytics.market.priceUsdc.toFixed(4)}
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">via Jupiter</p>
+              </>
+            ) : (
+              <p className="text-sm text-gray-400 dark:text-gray-500">
+                {PRICE_UNAVAILABLE_LABEL[analytics.market.priceUnavailableReason ?? ""] ?? "Unavailable"}
+              </p>
+            )}
+          </div>
+          <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Fully diluted value</p>
+            {analytics.market.fdvUsdc !== null ? (
+              <p className="font-semibold text-gray-900 dark:text-white">
+                ${analytics.market.fdvUsdc.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-400 dark:text-gray-500">Unavailable</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {analytics && analytics.holders.topHolderAccounts.length > 0 && (
+        <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 mb-4">
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
+            <Users className="h-3.5 w-3.5" /> Top 10 holder concentration
+          </p>
+          <p className="font-semibold text-gray-900 dark:text-white">{analytics.holders.top10ConcentrationPercent.toFixed(2)}%</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{analytics.holders.note}</p>
+        </div>
+      )}
 
       <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 mb-4">
         <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">{t("launchpad.tokenDetail.mintAddressLabel")}</label>

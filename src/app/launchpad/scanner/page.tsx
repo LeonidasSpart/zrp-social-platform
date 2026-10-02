@@ -8,6 +8,7 @@ import type { TranslationKey } from "@/lib/translations";
 
 interface TokenScanResult {
   mintAddress: string;
+  tokenProgram: "TOKEN_PROGRAM" | "TOKEN_2022_PROGRAM";
   supplyRaw: string;
   decimals: number;
   mintAuthority: string | null;
@@ -100,6 +101,9 @@ export default function TokenScannerPage() {
                 {result.metadata ? `${result.metadata.name} ($${result.metadata.symbol})` : t("launchpad.scanner.unknownToken")}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-mono break-all">{result.mintAddress}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                {result.tokenProgram === "TOKEN_2022_PROGRAM" ? "Token-2022" : "Classic SPL Token"}
+              </p>
             </div>
           </div>
 
