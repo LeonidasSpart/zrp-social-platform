@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
   Users,
@@ -16,6 +17,7 @@ import {
   Ticket,
   Newspaper,
   Radio,
+  BellRing,
   Loader2,
   XCircle,
   HelpCircle,
@@ -57,6 +59,13 @@ interface LiveKitHealthResult {
 
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
+  const { data: session } = useSession();
+  // Global Announcements is a full-admin-only capability (the backend
+  // enforces this with requireAdmin on every /api/admin/announcements/*
+  // route) - this dashboard is otherwise shared with moderators via the
+  // layout's broader staff-level gate, so the Quick Actions link itself
+  // must not appear for a moderator even though the rest of the page does.
+  const isFullAdmin = session?.user?.isAdmin || session?.user?.role === "ADMIN";
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -361,6 +370,18 @@ export default function AdminDashboard() {
                 )}
               </span>
             </Link>
+
+            {/* Global Announcements - full admin only */}
+            {isFullAdmin && (
+              <Link
+                href="/admin/announcements"
+                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <BellRing className="h-5 w-5 text-zrp-red" />
+
+                <span>{t("adminDash.manageAnnouncements")}</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>
