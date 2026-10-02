@@ -651,6 +651,7 @@ model User {
   daos Dao[]
   idoCampaigns IdoCampaign[]
   airdrops Airdrop[]
+  tokenPoolsCreated TokenPool[]
 
   followRequestsSent     FollowRequest[] @relation("FollowRequester")
   followRequestsReceived FollowRequest[] @relation("FollowTarget")
@@ -2239,6 +2240,7 @@ model LaunchedToken {
   dao Dao?
   idoCampaigns IdoCampaign[]
   airdrops Airdrop[]
+  pools TokenPool[]
 }
 
 enum VestingContractStatus {
@@ -2985,6 +2987,159 @@ model AirdropRecipient {
   @@unique([transactionId, walletAddress])
   @@index([airdropId])
   @@index([walletAddress])
+}
+
+/*
+ * ============================================================
+ * ZRP Launchpad, phase 11: real AMM liquidity
+ * ============================================================
+ *
+ * Pool creation, add/remove liquidity, and LP burn against Raydium's
+ * public, already-audited CPMM program (src/lib/launchpad/
+ * raydium-pool-service.ts) - never a ZRP-owned program, never a
+ * database simulation of on-chain state. Every operation is wallet-
+ * signed (the connected wallet, never the platform, owns the
+ * liquidity) and independently re-verified against the real
+ * transaction before being recorded here; these tables are a cache/
+ * index of chain truth, not the source of it.
+ */
+enum TokenPoolDex {
+  RAYDIUM_CPMM
+}
+
+enum TokenPoolStatus {
+  PENDING
+  ACTIVE
+  FAILED
+}
+
+model TokenPool {
+  id String @id @default(cuid())
+
+  // Nullable: a pool can be created for any mint, not only ones ZRP
+  // itself launched (matches the scanner/analytics' own "works for any
+  // token" posture).
+  launchedTokenId String?
+  launchedToken   LaunchedToken? @relation(fields: [launchedTokenId], references: [id], onDelete: SetNull)
+
+  dex         TokenPoolDex
+  poolAddress String       @unique
+  baseMint    String
+  quoteMint   String
+  lpMint      String
+  baseVault   String
+  quoteVault  String
+
+  creatorId            String?
+  creator              User?   @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  creatorWalletAddress String
+
+  createTransactionId String @unique
+
+  status        TokenPoolStatus @default(PENDING)
+  failureReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  liquidityEvents LiquidityEvent[]
+  trades          TokenTrade[]
+
+  @@index([launchedTokenId])
+  @@index([baseMint])
+  @@index([creatorId])
+}
+
+enum LiquidityEventType {
+  ADD
+  REMOVE
+  BURN
+}
+
+enum LiquidityEventStatus {
+  // Independently verified on-chain against the real transaction.
+  SUCCESS
+  // The transaction never broadcast, or confirmed with an on-chain
+  // error - nothing moved.
+  FAILED
+  // Broadcast (a signature exists) but its on-chain outcome could not
+  // be confirmed client-side (e.g. an RPC timeout) - identical
+  // rationale to AmbiguousMintError/AirdropRecipientStatus.DISPUTED.
+  DISPUTED
+}
+
+model LiquidityEvent {
+  id String @id @default(cuid())
+
+  poolId String
+  pool   TokenPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  type   LiquidityEventType
+  status LiquidityEventStatus
+
+  walletAddress String
+  // Null only for a FAILED entry whose transaction never broadcast at
+  // all (e.g. the wallet rejected the signature request).
+  transactionId String? @unique
+
+  lpAmountRaw    Decimal? @db.Decimal(38, 0)
+  baseAmountRaw  Decimal? @db.Decimal(38, 0)
+  quoteAmountRaw Decimal? @db.Decimal(38, 0)
+
+  createdAt DateTime @default(now())
+
+  @@index([poolId])
+  @@index([walletAddress])
+}
+
+enum TradeSide {
+  BUY
+  SELL
+}
+
+// Indexed, not read live from RPC on every analytics request - a pool's
+// full trade history can be thousands of transactions, far too slow and
+// RPC-expensive to re-fetch per page view. TokenVolumeSyncState below is
+// the resumable cursor the background indexing job
+// (src/app/api/cron/launchpad-volume-sync) uses to index incrementally;
+// this table is the resulting append-only log aggregation queries read
+// from. txSignature is globally unique, so a resumed/retried sync tick
+// can never double-count the same trade.
+model TokenTrade {
+  id String @id @default(cuid())
+
+  poolId String
+  pool   TokenPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  mintAddress    String
+  txSignature    String    @unique
+  side           TradeSide
+  baseAmountRaw  Decimal   @db.Decimal(38, 0)
+  quoteAmountRaw Decimal   @db.Decimal(38, 0)
+  walletAddress  String
+
+  blockTime DateTime
+  slot      Int
+
+  createdAt DateTime @default(now())
+
+  @@index([poolId, blockTime])
+  @@index([mintAddress, blockTime])
+}
+
+// One row per pool - the resumable cursor for the background
+// trade-indexing job. Kept separate from TokenPool itself so a sync
+// failure/restart never risks touching the pool's own on-chain-verified
+// record.
+model TokenVolumeSyncState {
+  id String @id @default(cuid())
+
+  poolAddress   String    @unique
+  lastSignature String?
+  lastSyncedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ZRP Market Plus: luxury-only listings marketplace. Deliberately NOT

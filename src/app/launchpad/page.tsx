@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { Rocket, Plus } from "lucide-react";
+import { Rocket, Plus, Droplets } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LaunchedTokenSummary {
@@ -20,6 +20,7 @@ interface LaunchedTokenSummary {
   revokeFreeze: boolean;
   revokeUpdate: boolean;
   createdAt: string;
+  activePoolCount: number;
   creator: { id: string; username: string; name: string | null; avatarUrl: string | null } | null;
 }
 
@@ -29,15 +30,22 @@ export default function LaunchpadHomePage() {
   const [tokens, setTokens] = useState<LaunchedTokenSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // "New" (createdAt desc, always real) and "With Liquidity" (has at
+  // least one independently-verified ACTIVE pool) are the only two
+  // discovery filters offered - see the GET route's own comment for why
+  // volume/liquidity-amount/holder-count sorting isn't offered yet
+  // rather than being faked.
+  const [filter, setFilter] = useState<"all" | "withLiquidity">("all");
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/launchpad/tokens")
+    const qs = filter === "withLiquidity" ? "?hasPool=1" : "";
+    fetch(`/api/launchpad/tokens${qs}`)
       .then((res) => res.json())
       .then((data) => setTokens(data.tokens || []))
       .catch(() => setError(t("launchpad.home.loadError")))
       .finally(() => setLoading(false));
-  }, [t]);
+  }, [t, filter]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
@@ -135,6 +143,23 @@ export default function LaunchpadHomePage() {
         </div>
       </section>
 
+      <div className="flex justify-center gap-2 mb-6">
+        {(["all", "withLiquidity"] as const).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              filter === f
+                ? "bg-zrp-red text-white"
+                : "border border-gray-300 text-gray-600 hover:border-zrp-red dark:border-gray-700 dark:text-gray-400"
+            }`}
+          >
+            {f === "all" ? t("launchpad.home.filterAll") : t("launchpad.home.filterWithLiquidity")}
+          </button>
+        ))}
+      </div>
+
       {error && <p className="text-center py-4 text-red-500">{error}</p>}
 
       {loading ? (
@@ -162,6 +187,11 @@ export default function LaunchpadHomePage() {
               <div className="min-w-0">
                 <p className="font-semibold text-gray-900 dark:text-white truncate">{token.name}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">${token.symbol}</p>
+                {token.activePoolCount > 0 && (
+                  <p className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 mt-0.5">
+                    <Droplets className="h-3 w-3" /> {token.activePoolCount}
+                  </p>
+                )}
               </div>
             </Link>
           ))}
