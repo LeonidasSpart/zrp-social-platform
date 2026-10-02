@@ -3208,6 +3208,17 @@ model GraduationEvent {
 
   detectedAt DateTime @default(now())
 
+  // Stamped every time findVerifiedMigration actually runs (found or not),
+  // never on a plain checkGraduation read. Gates retries of that expensive,
+  // multi-getTransaction search behind MIGRATION_SEARCH_COOLDOWN_MS in
+  // pump-curve-service.ts so a still-unverified graduated token being
+  // viewed repeatedly (a popular token page, not just one user retrying)
+  // cannot re-trigger the full search on every single page load - without
+  // this, an aged-out migration signature would mean paying the search's
+  // full RPC cost once per page view, forever, for as long as the token
+  // stays unverified.
+  lastMigrationSearchAt DateTime?
+
   @@index([mintAddress])
 }
 

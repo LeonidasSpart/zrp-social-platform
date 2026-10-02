@@ -684,50 +684,81 @@ export interface VerifiedMigration {
   blockTime: Date | null;
 }
 
-const MIGRATION_SEARCH_LIMIT = 15;
+// Each page is a cheap getSignaturesForAddress call; MIGRATION_SEARCH_MAX_PAGES
+// bounds how many of those list calls one search makes (a safe historical
+// boundary - an account with less history than this simply returns fewer
+// signatures and the loop stops early). MIGRATION_SEARCH_MAX_TRANSACTIONS
+// separately bounds the expensive part - real getTransaction calls - across
+// however many pages it takes to reach it, so paginating doesn't multiply
+// RPC cost, only search depth. At 25/page x 4 pages this can look back up to
+// 100 signatures while never issuing more than 40 getTransaction calls for a
+// single search.
+const MIGRATION_SEARCH_PAGE_SIZE = 25;
+const MIGRATION_SEARCH_MAX_PAGES = 4;
+const MIGRATION_SEARCH_MAX_TRANSACTIONS = 40;
+
+// How long a mint that is graduated but still not migrationVerified must
+// wait before the graduation route will pay for another findVerifiedMigration
+// search. Without this, every page view of a popular, still-unverified
+// graduated token re-runs the full paginated search (see the route's own
+// comment) - the search itself being bounded is not enough to avoid
+// hammering RPC in aggregate when many viewers hit it concurrently.
+export const MIGRATION_SEARCH_COOLDOWN_MS = 5 * 60 * 1000;
 
 /**
- * Searches a bounded window of the bonding curve's most recent confirmed
- * signatures for the real, decoded `CompletePumpAmmMigrationEvent` for
- * this exact mint (see pump-event-service.ts's parseMigrationEvent) -
- * never inferred from "last activity." Returns null if none is found
- * within the window (e.g. the migration transaction has aged out of this
- * RPC's signature-history retention, or genuinely has not happened yet
- * despite `complete` being true, which should not occur under the
- * protocol but is reported as "not found" rather than fabricated either
- * way).
+ * Searches a bounded, paginated window of the bonding curve's most recent
+ * confirmed signatures for the real, decoded `CompletePumpAmmMigrationEvent`
+ * for this exact mint (see pump-event-service.ts's parseMigrationEvent) -
+ * never inferred from "last activity." Returns null if none is found within
+ * the window (e.g. the migration transaction has aged out of this RPC's
+ * signature-history retention, or genuinely has not happened yet despite
+ * `complete` being true, which should not occur under the protocol but is
+ * reported as "not found" rather than fabricated either way).
  *
- * Deliberately NOT called from checkGraduation's hot path: this does up
- * to MIGRATION_SEARCH_LIMIT full `getTransaction` calls, real RPC cost
- * that must only be paid once per mint (on first graduation detection, or
- * on a retry while still unverified) - see the graduation route's own
- * comment for exactly when it calls this.
+ * Deliberately NOT called from checkGraduation's hot path, and gated by
+ * MIGRATION_SEARCH_COOLDOWN_MS at the call site (see the graduation route) -
+ * this real RPC cost must only be paid periodically per still-unverified
+ * mint, never on every page view.
  */
 export async function findVerifiedMigration(connection: Connection, mintAddress: string): Promise<VerifiedMigration | null> {
   const mint = new PublicKey(mintAddress);
   const bondingCurve = bondingCurvePda(mint);
 
-  const signatures = await connection.getSignaturesForAddress(bondingCurve, { limit: MIGRATION_SEARCH_LIMIT });
-  for (const sigInfo of signatures) {
-    if (sigInfo.err) continue;
-    let tx;
-    try {
-      tx = await connection.getTransaction(sigInfo.signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
-    } catch {
-      continue;
+  let before: string | undefined;
+  let transactionsFetched = 0;
+
+  for (let page = 0; page < MIGRATION_SEARCH_MAX_PAGES; page += 1) {
+    const signatures = await connection.getSignaturesForAddress(bondingCurve, { limit: MIGRATION_SEARCH_PAGE_SIZE, before });
+    if (signatures.length === 0) break; // safe historical boundary - no more signatures for this account
+
+    for (const sigInfo of signatures) {
+      if (sigInfo.err) continue;
+      if (transactionsFetched >= MIGRATION_SEARCH_MAX_TRANSACTIONS) break;
+      transactionsFetched += 1;
+
+      let tx;
+      try {
+        tx = await connection.getTransaction(sigInfo.signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
+      } catch {
+        continue;
+      }
+      if (!tx?.meta?.logMessages) continue;
+      const event = parseMigrationEvent(tx.meta.logMessages, mint);
+      if (!event) continue;
+      return {
+        poolAddress: event.pool.toBase58(),
+        mintAmountRaw: bnToBigInt(event.mintAmount).toString(),
+        solAmountLamports: bnToBigInt(event.solAmount).toString(),
+        poolMigrationFeeLamports: bnToBigInt(event.poolMigrationFee).toString(),
+        signature: sigInfo.signature,
+        slot: tx.slot,
+        blockTime: tx.blockTime ? new Date(tx.blockTime * 1000) : null,
+      };
     }
-    if (!tx?.meta?.logMessages) continue;
-    const event = parseMigrationEvent(tx.meta.logMessages, mint);
-    if (!event) continue;
-    return {
-      poolAddress: event.pool.toBase58(),
-      mintAmountRaw: bnToBigInt(event.mintAmount).toString(),
-      solAmountLamports: bnToBigInt(event.solAmount).toString(),
-      poolMigrationFeeLamports: bnToBigInt(event.poolMigrationFee).toString(),
-      signature: sigInfo.signature,
-      slot: tx.slot,
-      blockTime: tx.blockTime ? new Date(tx.blockTime * 1000) : null,
-    };
+
+    if (transactionsFetched >= MIGRATION_SEARCH_MAX_TRANSACTIONS) break; // configurable maximum reached
+    if (signatures.length < MIGRATION_SEARCH_PAGE_SIZE) break; // fewer than requested = end of history
+    before = signatures[signatures.length - 1].signature;
   }
   return null;
 }

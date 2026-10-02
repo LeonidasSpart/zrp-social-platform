@@ -373,6 +373,7 @@ interface GraduationCheck {
   graduated: boolean;
   poolAddress: string | null;
   poolAccountExists: boolean;
+  record: { migrationVerified: boolean } | null;
 }
 
 interface PumpSwapPoolState {
@@ -641,6 +642,17 @@ function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; d
         <div className="space-y-1">
           <p className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
             {t("launchpad.curve.statusGraduated")}
+          </p>
+          <p
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ml-1.5 ${
+              graduation.record?.migrationVerified
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+            }`}
+          >
+            {graduation.record?.migrationVerified
+              ? t("launchpad.curve.migrationVerified")
+              : t("launchpad.curve.migrationPending")}
           </p>
           {graduation.poolAddress && (
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">

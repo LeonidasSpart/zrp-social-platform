@@ -642,4 +642,44 @@ describe("findVerifiedMigration", () => {
     const result = await findVerifiedMigration(connection, keypair(42).toBase58());
     expect(result).toBeNull();
   });
+
+  it("paginates with the `before` cursor into a second page when the first full page has no match", async () => {
+    const mint = keypair(43);
+    const pool = canonicalPumpPoolPda(mint);
+    const firstPage = Array.from({ length: 25 }, (_, i) => ({ signature: `page1-sig${i}`, slot: i, err: null }));
+    const secondPage = [{ signature: "page2-migrationSig", slot: 100, err: null }];
+    const getSignaturesForAddress = vi.fn().mockImplementation(async (_addr: unknown, opts: { before?: string }) => {
+      if (!opts.before) return firstPage;
+      expect(opts.before).toBe("page1-sig24"); // cursor is the last signature of the prior page
+      return secondPage;
+    });
+    const getTransaction = vi.fn().mockImplementation(async (sig: string) => {
+      if (sig === "page2-migrationSig") {
+        return { slot: 100, blockTime: 1_700_000_400, meta: { logMessages: migrationLogs(mint, pool) } };
+      }
+      return { slot: 1, blockTime: 1_699_999_000, meta: { logMessages: ["Program log: some unrelated buy"] } };
+    });
+    const connection = { getSignaturesForAddress, getTransaction } as any;
+
+    const result = await findVerifiedMigration(connection, mint.toBase58());
+    expect(result).not.toBeNull();
+    expect(result!.signature).toBe("page2-migrationSig");
+    expect(getSignaturesForAddress).toHaveBeenCalledTimes(2);
+  });
+
+  it("stops issuing getTransaction calls once the configurable transaction cap is reached, without fabricating a result", async () => {
+    const mint = keypair(44);
+    // Four full pages of 25 non-erroring, non-matching signatures (100
+    // total) - the cap (40 getTransaction calls) must bite well before all
+    // 100 would otherwise be fetched one-by-one.
+    const pages = Array.from({ length: 4 }, (_, p) => Array.from({ length: 25 }, (_, i) => ({ signature: `p${p}-s${i}`, slot: p * 25 + i, err: null })));
+    let callIndex = 0;
+    const getSignaturesForAddress = vi.fn().mockImplementation(async () => pages[callIndex++]);
+    const getTransaction = vi.fn().mockResolvedValue({ slot: 1, blockTime: 1_699_999_000, meta: { logMessages: ["Program log: some unrelated buy"] } });
+    const connection = { getSignaturesForAddress, getTransaction } as any;
+
+    const result = await findVerifiedMigration(connection, mint.toBase58());
+    expect(result).toBeNull();
+    expect(getTransaction).toHaveBeenCalledTimes(40);
+  });
 });

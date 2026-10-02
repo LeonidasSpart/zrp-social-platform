@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getConnection } from "@/lib/solana";
-import { checkGraduation, findVerifiedMigration } from "@/lib/launchpad/pump-curve-service";
+import { checkGraduation, findVerifiedMigration, MIGRATION_SEARCH_COOLDOWN_MS } from "@/lib/launchpad/pump-curve-service";
 
 /*
  * Real graduation detection - re-reads the bonding curve's own `complete`
@@ -18,14 +18,17 @@ import { checkGraduation, findVerifiedMigration } from "@/lib/launchpad/pump-cur
  * only ever written from this independently-verified on-chain read, never
  * from a client claim.
  *
- * While the record is not yet migrationVerified, this route also attempts
- * the more expensive real-migration-event search (findVerifiedMigration -
- * up to 15 getTransaction calls) exactly once per request, not per every
- * graduated-mint page view in general: once verified, the result latches
- * (migrationVerified stays true forever, the search never runs again for
- * this mint). A mint that graduated long enough ago for its migration
- * signature to have aged out of RPC history may never verify - reported
- * honestly via migrationVerified: false, never silently upgraded to true.
+ * While the record is not yet migrationVerified, this route attempts the
+ * more expensive real-migration-event search (findVerifiedMigration - a
+ * bounded, paginated search, see its own doc comment) at most once per
+ * MIGRATION_SEARCH_COOLDOWN_MS per mint, gated by lastMigrationSearchAt -
+ * not on every graduated-mint page view, which a popular still-unverified
+ * token would otherwise turn into one full search per viewer per visit.
+ * Once verified, the result latches (migrationVerified stays true forever,
+ * the search never runs again for this mint). A mint that graduated long
+ * enough ago for its migration signature to have aged out of RPC history
+ * may never verify - reported honestly via migrationVerified: false, never
+ * silently upgraded to true.
  */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ mint: string }> }) {
   const limitCheck = await rateLimit(req, { limit: 60, window: 60, type: "launchpad-token-graduation" });
@@ -38,8 +41,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
   if (check.graduated) {
     const existing = await prisma.graduationEvent.findUnique({ where: { mintAddress: mint } });
 
+    const cooledDown =
+      !existing?.lastMigrationSearchAt || Date.now() - existing.lastMigrationSearchAt.getTime() >= MIGRATION_SEARCH_COOLDOWN_MS;
+    const shouldSearch = (!existing || !existing.migrationVerified) && cooledDown;
+
     let verified: Awaited<ReturnType<typeof findVerifiedMigration>> = null;
-    if (!existing || !existing.migrationVerified) {
+    if (shouldSearch) {
       try {
         verified = await findVerifiedMigration(getConnection(), mint);
       } catch (err) {
@@ -59,6 +66,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
           mintAmountRaw: verified.mintAmountRaw,
           solAmountLamports: verified.solAmountLamports,
           poolMigrationFeeLamports: verified.poolMigrationFeeLamports,
+          lastMigrationSearchAt: new Date(),
         }
       : {
           mintAddress: mint,
@@ -67,6 +75,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
           signature: check.anchorSignature,
           slot: check.anchorSlot,
           blockTime: check.anchorBlockTime,
+          lastMigrationSearchAt: shouldSearch ? new Date() : null,
         };
 
     try {
@@ -83,12 +92,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
               mintAmountRaw: verified.mintAmountRaw,
               solAmountLamports: verified.solAmountLamports,
               poolMigrationFeeLamports: verified.poolMigrationFeeLamports,
+              lastMigrationSearchAt: new Date(),
             }
-          : // Not verified this time either - keep the pool address fresh
-            // (it can take a moment to appear after `complete` flips)
-            // without touching the signature/slot/blockTime fields an
-            // earlier, already-verified write may have set.
-            { poolAddress: check.poolAddress },
+          : // Not verified this time either (or skipped via cooldown) - keep
+            // the pool address fresh (it can take a moment to appear after
+            // `complete` flips) without touching the signature/slot/
+            // blockTime fields an earlier, already-verified write may have
+            // set. Only stamp lastMigrationSearchAt when a search actually
+            // ran this request, so the cooldown window is measured from the
+            // real attempt, not from every cheap page view.
+            { poolAddress: check.poolAddress, ...(shouldSearch ? { lastMigrationSearchAt: new Date() } : {}) },
       });
     } catch (err: any) {
       // A concurrent request already upserted this mint, or the anchor
