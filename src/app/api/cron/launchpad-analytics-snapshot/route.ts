@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { isAuthorizedCronRequest } from "@/lib/cron-auth";
 import { getConnection } from "@/lib/solana";
 import { getCurveState } from "@/lib/launchpad/pump-curve-service";
+import { getPumpSwapPoolState } from "@/lib/launchpad/pumpswap-pool-service";
 import { readPoolLiquidity } from "@/lib/launchpad/pool-liquidity-reader";
 import { indexFullHolderCount } from "@/lib/launchpad/full-holder-count-service";
 import { getQuoteVolumeSince } from "@/lib/launchpad/volume-index-service";
@@ -57,16 +58,18 @@ export async function GET(req: NextRequest) {
       });
       const since = lastSnapshot?.takenAt ?? new Date(0);
 
-      const [curve, activePools, volumeDelta] = await Promise.all([
+      const [curve, activePools, volumeDelta, graduationRecord] = await Promise.all([
         getCurveState(connection, mintAddress),
         prisma.tokenPool.findMany({
           where: { status: "ACTIVE", OR: [{ baseMint: mintAddress }, { quoteMint: mintAddress }] },
           select: { baseVault: true, quoteVault: true, lpMint: true },
         }),
         getQuoteVolumeSince(mintAddress, since),
+        prisma.graduationEvent.findUnique({ where: { mintAddress }, select: { poolAddress: true } }),
       ]);
 
       let liquidityTotalLamports = BigInt(0);
+      let poolCount = activePools.length;
       for (const pool of activePools) {
         const snapshot = await readPoolLiquidity(connection, pool);
         // Only the SOL/USDC-quote side of liquidity is summed as
@@ -76,6 +79,34 @@ export async function GET(req: NextRequest) {
         // own status already distinguishes "pool gone" from "zero".
         if (snapshot.status === "OK" && snapshot.reserveQuoteRaw) {
           liquidityTotalLamports += BigInt(snapshot.reserveQuoteRaw);
+        }
+      }
+
+      // Post-graduation: the curve's own price/market-cap fields are
+      // frozen at the migration moment (pump stops accepting buy/sell
+      // once complete), so the real, live source for both is the
+      // PumpSwap pool it migrated into - read and substituted here rather
+      // than reporting a stale curve price as if it were current. Market
+      // cap is recomputed from the pool's real effective price times the
+      // curve's own (permanent, unchanging) tokenTotalSupply - never
+      // guessed when either input is unavailable.
+      let priceQuoteLamports = curve.status === "OK" ? curve.priceQuoteLamports : null;
+      let priceTokenRaw = curve.status === "OK" ? curve.priceTokenRaw : null;
+      let marketCapLamports = curve.status === "OK" ? curve.marketCapLamports : null;
+
+      if (graduationRecord?.poolAddress) {
+        const pumpSwapState = await getPumpSwapPoolState(connection, graduationRecord.poolAddress);
+        if (pumpSwapState.status === "OK") {
+          poolCount += 1;
+          if (pumpSwapState.quoteReserveRaw) {
+            liquidityTotalLamports += BigInt(pumpSwapState.quoteReserveRaw);
+          }
+          priceQuoteLamports = pumpSwapState.priceQuoteRaw;
+          priceTokenRaw = pumpSwapState.priceBaseRaw;
+          marketCapLamports =
+            curve.status === "OK" && curve.tokenTotalSupplyRaw && pumpSwapState.priceQuoteRaw && pumpSwapState.priceBaseRaw
+              ? ((BigInt(pumpSwapState.priceQuoteRaw) * BigInt(curve.tokenTotalSupplyRaw)) / BigInt(pumpSwapState.priceBaseRaw)).toString()
+              : null;
         }
       }
 
@@ -89,12 +120,12 @@ export async function GET(req: NextRequest) {
         create: {
           mintAddress,
           takenAt,
-          priceQuoteLamports: curve.status === "OK" ? curve.priceQuoteLamports : null,
-          priceTokenRaw: curve.status === "OK" ? curve.priceTokenRaw : null,
-          marketCapLamports: curve.status === "OK" ? curve.marketCapLamports : null,
+          priceQuoteLamports,
+          priceTokenRaw,
+          marketCapLamports,
           curveProgressBps: curve.status === "OK" ? curve.progressBps : null,
           liquidityTotalLamports: liquidityTotalLamports.toString(),
-          poolCount: activePools.length,
+          poolCount,
           holderCount: holderResult.status === "OK" ? holderResult.holderCount : null,
           buyVolumeLamports: volumeDelta.buyQuoteRaw,
           sellVolumeLamports: volumeDelta.sellQuoteRaw,

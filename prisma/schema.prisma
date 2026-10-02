@@ -75,6 +75,11 @@ enum TransactionStatus {
   FAILED
 }
 
+enum TokenVenue {
+  DIRECT_MINT
+  PUMP_CURVE
+}
+
 enum WithdrawalStatus {
   PENDING
   PROCESSING
@@ -2199,6 +2204,14 @@ model LaunchedToken {
 
   mintAddress String? @unique
 
+  // DIRECT_MINT (default): ZRP's own atomic client-signed SPL mint, a
+  // flat USDC fee charged and recorded below. PUMP_CURVE: created through
+  // pump.fun's real bonding-curve program (create_v2/create_v2_and_buy,
+  // see client-pump-create.ts) - ZRP charges no separate fee for this
+  // path (pump.fun's own protocol fees apply on every curve trade
+  // instead), so feeAmount/feeTransactionId are null for these rows.
+  venue TokenVenue @default(DIRECT_MINT)
+
   name        String
   symbol      String
   description String? @db.Text
@@ -2216,8 +2229,8 @@ model LaunchedToken {
   revokeFreeze Boolean @default(false)
   revokeUpdate Boolean @default(false)
 
-  feeAmount        Decimal @db.Decimal(18, 6)
-  feeTransactionId String  @unique
+  feeAmount        Decimal? @db.Decimal(18, 6)
+  feeTransactionId String?  @unique
 
   mintTransactionId String? @unique
 
@@ -3163,6 +3176,25 @@ model GraduationEvent {
   // graduation was detected (complete == true) but the destination pool
   // has not yet been independently confirmed.
   poolAddress String?
+
+  // true only when `signature`/`slot`/`blockTime` below were read from a
+  // real, decoded CompletePumpAmmMigrationEvent for this exact mint (see
+  // pump-event-service.ts's parseMigrationEvent) - the actual migration
+  // transaction, not an inference. false means checkGraduation could not
+  // find that event within its bounded signature-history search window
+  // and fell back to "the newest confirmed signature touching the
+  // bonding-curve account" as a practical anchor; the graduated:true
+  // signal itself (the on-chain `complete` flag) is equally real either
+  // way - only the *attribution* of this specific signature differs.
+  migrationVerified Boolean @default(false)
+
+  // Real amounts from the decoded CompletePumpAmmMigrationEvent - the
+  // base tokens and quote (sol_amount; actually the curve's quote mint)
+  // moved into the new pool, and the migration fee pump charged. Null
+  // when migrationVerified is false (nothing decoded to read them from).
+  mintAmountRaw            Decimal? @db.Decimal(38, 0)
+  solAmountLamports        Decimal? @db.Decimal(38, 0)
+  poolMigrationFeeLamports Decimal? @db.Decimal(38, 0)
 
   // Null only when graduation was detected (complete == true) but no
   // confirmed signature could be found for the curve account at detection

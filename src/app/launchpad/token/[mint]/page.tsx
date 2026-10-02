@@ -375,6 +375,13 @@ interface GraduationCheck {
   poolAccountExists: boolean;
 }
 
+interface PumpSwapPoolState {
+  status: "OK" | "NOT_FOUND" | "UNAVAILABLE";
+  baseReserveRaw: string | null;
+  quoteReserveRaw: string | null;
+  priceDisplay: string | null;
+}
+
 function lamportsToSol(raw: string | null): string {
   if (!raw) return "0";
   try {
@@ -530,6 +537,7 @@ function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; d
   const [error, setError] = useState<string | null>(null);
   const [ambiguous, setAmbiguous] = useState<{ signature: string } | null>(null);
   const [done, setDone] = useState(false);
+  const [pumpSwapPool, setPumpSwapPool] = useState<PumpSwapPoolState | null>(null);
 
   useEffect(() => {
     fetch(`/api/launchpad/tokens/${mintAddress}/curve`)
@@ -541,6 +549,17 @@ function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; d
       .then((data) => setGraduation(data))
       .catch(() => setGraduation(null));
   }, [mintAddress]);
+
+  useEffect(() => {
+    if (!graduation?.graduated || !graduation.poolAccountExists) {
+      setPumpSwapPool(null);
+      return;
+    }
+    fetch(`/api/launchpad/tokens/${mintAddress}/pumpswap-pool`)
+      .then((res) => res.json())
+      .then((data) => setPumpSwapPool(data.pool ?? null))
+      .catch(() => setPumpSwapPool(null));
+  }, [mintAddress, graduation?.graduated, graduation?.poolAccountExists]);
 
   useEffect(() => {
     setQuote(null);
@@ -629,6 +648,22 @@ function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; d
               <span className="font-mono">{graduation.poolAddress.slice(0, 6)}...{graduation.poolAddress.slice(-4)}</span>
               {!graduation.poolAccountExists && <span className="ml-1 text-amber-600 dark:text-amber-400">({t("launchpad.curve.unavailable")})</span>}
             </p>
+          )}
+          {graduation.poolAccountExists && pumpSwapPool && (
+            pumpSwapPool.status === "OK" ? (
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.idoDetail.priceLabel")}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{pumpSwapPool.priceDisplay ?? "-"} SOL</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.curve.liquidityLabel")}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{lamportsToSol(pumpSwapPool.quoteReserveRaw)} SOL</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">{t("launchpad.curve.unavailable")}</p>
+            )
           )}
         </div>
       ) : curve.status !== "OK" ? (

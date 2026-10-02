@@ -30,6 +30,8 @@ import {
   PUMP_EVENT_AUTHORITY_PDA,
   PUMP_PROGRAM_ID,
   PUMP_AMM_PROGRAM_ID,
+  getPumpProgram,
+  getPumpAmmProgram,
 } from "@pump-fun/pump-sdk";
 
 export {
@@ -43,6 +45,13 @@ export {
   PUMP_PROGRAM_ID,
   PUMP_AMM_PROGRAM_ID,
 };
+
+// Offline (connection-less) program instances, used only for their
+// `.coder` - decoding accounts/events never needs a live RPC connection,
+// just the IDL. Mirrors @pump-fun/pump-swap-sdk's own
+// OFFLINE_PUMP_AMM_PROGRAM = getPumpAmmProgram(null) pattern exactly.
+export const OFFLINE_PUMP_PROGRAM = getPumpProgram(null as unknown as import("@solana/web3.js").Connection);
+export const OFFLINE_PUMP_AMM_PROGRAM = getPumpAmmProgram(null as unknown as import("@solana/web3.js").Connection);
 
 // pump's legacy (SOL-quoted) bonding curve always holds SPL Token mints,
 // never Token-2022 - only create_v2's new-quote-mint path uses Token-2022.

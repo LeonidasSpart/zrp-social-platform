@@ -8,9 +8,12 @@ import {
   getCurveState,
   getBuyQuote,
   getSellQuote,
+  getInitialBuyQuote,
   verifyCurveTradeTransaction,
+  verifyCreateTransaction,
   CurveVerificationError,
   checkGraduation,
+  findVerifiedMigration,
 } from "../pump-curve-service";
 
 function keypair(seed: number): PublicKey {
@@ -261,6 +264,44 @@ describe("getBuyQuote / getSellQuote", () => {
   });
 });
 
+describe("getInitialBuyQuote", () => {
+  it("quotes a positive token amount against the fresh initial curve (no curve account needed yet)", async () => {
+    const globalData = encodeGlobal({ initialRealTokenReserves: new BN("793100000000000") });
+    const connection = {
+      getAccountInfo: vi.fn().mockImplementation(async (pubkey: PublicKey) =>
+        pubkey.equals(PUMP_FEE_CONFIG_PDA) ? null : { data: globalData }
+      ),
+    } as any;
+
+    const quote = await getInitialBuyQuote(connection, BigInt(1_000_000_000), 100);
+    expect(quote.status).toBe("OK");
+    expect(BigInt(quote.tokenAmountRaw!)).toBeGreaterThan(BigInt(0));
+    // A brand-new curve has no on-chain creator yet (PublicKey.default placeholder),
+    // so isNewBondingCurve must still charge the real creator-fee rate -
+    // the total fee for a non-zero buy should never be zero.
+    expect(BigInt(quote.totalFeeLamports!)).toBeGreaterThan(BigInt(0));
+  });
+
+  it("quotes more tokens out as the SOL amount increases, same monotonic curve as an existing one", async () => {
+    const globalData = encodeGlobal({ initialRealTokenReserves: new BN("793100000000000") });
+    const connection = {
+      getAccountInfo: vi.fn().mockImplementation(async (pubkey: PublicKey) =>
+        pubkey.equals(PUMP_FEE_CONFIG_PDA) ? null : { data: globalData }
+      ),
+    } as any;
+
+    const small = await getInitialBuyQuote(connection, BigInt(1_000_000_000), 100);
+    const large = await getInitialBuyQuote(connection, BigInt(2_000_000_000), 100);
+    expect(BigInt(large.tokenAmountRaw!)).toBeGreaterThan(BigInt(small.tokenAmountRaw!));
+  });
+
+  // Global-fetch-failure -> UNAVAILABLE is already covered by
+  // getCurveState's own dedicated test; not re-tested here because this
+  // module's 30s in-process Global cache (shared across every test in this
+  // file, keyed process-wide rather than per-connection) can mask a fresh
+  // failure behind an earlier test's successful fetch within the same run.
+});
+
 describe("verifyCurveTradeTransaction", () => {
   const mint = keypair(20);
   const wallet = keypair(21);
@@ -357,6 +398,135 @@ describe("verifyCurveTradeTransaction", () => {
   });
 });
 
+describe("verifyCreateTransaction", () => {
+  function createEventLogs(mint: PublicKey, bondingCurve: PublicKey, creator: PublicKey): string[] {
+    const data = {
+      name: "Real Token",
+      symbol: "REAL",
+      uri: "https://example.com/metadata.json",
+      mint,
+      bondingCurve,
+      user: creator,
+      creator,
+      timestamp: new BN(1_700_000_000),
+      virtualTokenReserves: new BN("1073000000000000"),
+      virtualSolReserves: new BN("30000000000"),
+      realTokenReserves: new BN("793100000000000"),
+      tokenTotalSupply: new BN("1000000000000000"),
+      tokenProgram: PublicKey.default,
+      isMayhemMode: false,
+      isCashbackEnabled: false,
+      quoteMint: PublicKey.default,
+      virtualQuoteReserves: new BN("30000000000"),
+      creatorFeeBps: new BN(0),
+      isHolderReward: false,
+    };
+    const encoded = OFFLINE_PROGRAM.coder.types.encode("createEvent", data);
+    const idl = OFFLINE_PROGRAM.idl as unknown as { events: Array<{ name: string; discriminator: number[] }> };
+    const discriminator = Buffer.from(idl.events.find((e) => e.name === "createEvent")!.discriminator);
+    const payload = Buffer.concat([discriminator, encoded]).toString("base64");
+    return [
+      `Program ${PUMP_PROGRAM_ID.toBase58()} invoke [1]`,
+      `Program data: ${payload}`,
+      `Program ${PUMP_PROGRAM_ID.toBase58()} success`,
+    ];
+  }
+
+  function buildCreateTx(params: { mint: PublicKey; creator: PublicKey; accountKeys: PublicKey[]; signerIndexes: number[]; err?: unknown; logs?: string[] }) {
+    const bondingCurve = bondingCurvePda(params.mint);
+    return {
+      slot: 999,
+      blockTime: 1_700_000_000,
+      meta: {
+        err: params.err ?? null,
+        logMessages: params.logs ?? createEventLogs(params.mint, bondingCurve, params.creator),
+      },
+      transaction: {
+        message: {
+          getAccountKeys: () => ({ staticAccountKeys: params.accountKeys }),
+          isAccountSigner: (index: number) => params.signerIndexes.includes(index),
+        },
+      },
+    };
+  }
+
+  function fakeConnection(tx: unknown) {
+    return { getTransaction: vi.fn().mockResolvedValue(tx) } as any;
+  }
+
+  it("verifies a genuine create_v2 transaction and returns the real on-chain name/symbol", async () => {
+    const mint = keypair(60);
+    const creator = keypair(61);
+    const accountKeys = [mint, creator, PUMP_PROGRAM_ID];
+    const tx = buildCreateTx({ mint, creator, accountKeys, signerIndexes: [0, 1] });
+
+    const result = await verifyCreateTransaction(fakeConnection(tx), "createSig1", {
+      mintAddress: mint.toBase58(),
+      walletAddress: creator.toBase58(),
+    });
+    expect(result.name).toBe("Real Token");
+    expect(result.symbol).toBe("REAL");
+    expect(result.bondingCurveAddress).toBe(bondingCurvePda(mint).toBase58());
+  });
+
+  it("rejects when the new mint did not sign the transaction", async () => {
+    const mint = keypair(62);
+    const creator = keypair(63);
+    const accountKeys = [mint, creator, PUMP_PROGRAM_ID];
+    const tx = buildCreateTx({ mint, creator, accountKeys, signerIndexes: [1] }); // mint (index 0) not a signer
+    await expect(
+      verifyCreateTransaction(fakeConnection(tx), "createSig2", { mintAddress: mint.toBase58(), walletAddress: creator.toBase58() })
+    ).rejects.toMatchObject({ status: "ON_CHAIN_FAILURE" });
+  });
+
+  it("rejects when the claimed wallet never signed the transaction", async () => {
+    const mint = keypair(64);
+    const creator = keypair(65);
+    const accountKeys = [mint, creator, PUMP_PROGRAM_ID];
+    const tx = buildCreateTx({ mint, creator, accountKeys, signerIndexes: [0] }); // creator (index 1) not a signer
+    await expect(
+      verifyCreateTransaction(fakeConnection(tx), "createSig3", { mintAddress: mint.toBase58(), walletAddress: creator.toBase58() })
+    ).rejects.toMatchObject({ status: "ON_CHAIN_FAILURE" });
+  });
+
+  it("rejects when the claimed wallet is not the real on-chain creator (anti-replay)", async () => {
+    const mint = keypair(66);
+    const realCreator = keypair(67);
+    const impostor = keypair(68);
+    const accountKeys = [mint, realCreator, impostor, PUMP_PROGRAM_ID];
+    const tx = buildCreateTx({ mint, creator: realCreator, accountKeys, signerIndexes: [0, 2] });
+    await expect(
+      verifyCreateTransaction(fakeConnection(tx), "createSig4", { mintAddress: mint.toBase58(), walletAddress: impostor.toBase58() })
+    ).rejects.toMatchObject({ status: "ON_CHAIN_FAILURE" });
+  });
+
+  it("rejects when no CreateEvent is found in the transaction logs", async () => {
+    const mint = keypair(69);
+    const creator = keypair(70);
+    const accountKeys = [mint, creator, PUMP_PROGRAM_ID];
+    const tx = buildCreateTx({ mint, creator, accountKeys, signerIndexes: [0, 1], logs: ["Program log: unrelated"] });
+    await expect(
+      verifyCreateTransaction(fakeConnection(tx), "createSig5", { mintAddress: mint.toBase58(), walletAddress: creator.toBase58() })
+    ).rejects.toMatchObject({ status: "ON_CHAIN_FAILURE" });
+  });
+
+  it("reports NOT_FOUND_YET (retryable) rather than a hard failure when the RPC hasn't seen the signature", async () => {
+    await expect(
+      verifyCreateTransaction(fakeConnection(null), "createSig6", { mintAddress: keypair(71).toBase58(), walletAddress: keypair(72).toBase58() })
+    ).rejects.toMatchObject({ status: "NOT_FOUND_YET" });
+  });
+
+  it("rejects a transaction that failed on-chain", async () => {
+    const mint = keypair(73);
+    const creator = keypair(74);
+    const accountKeys = [mint, creator, PUMP_PROGRAM_ID];
+    const tx = buildCreateTx({ mint, creator, accountKeys, signerIndexes: [0, 1], err: { Custom: 1 } });
+    await expect(
+      verifyCreateTransaction(fakeConnection(tx), "createSig7", { mintAddress: mint.toBase58(), walletAddress: creator.toBase58() })
+    ).rejects.toMatchObject({ status: "ON_CHAIN_FAILURE" });
+  });
+});
+
 describe("checkGraduation", () => {
   it("reports graduated: false when there is no curve account at all", async () => {
     const connection = { getAccountInfo: vi.fn().mockResolvedValue(null) } as any;
@@ -403,5 +573,73 @@ describe("checkGraduation", () => {
     expect(result.poolAddress).toBe(pool.toBase58());
     expect(result.poolAccountExists).toBe(true);
     expect(result.anchorSignature).toBe("realSig");
+  });
+});
+
+describe("findVerifiedMigration", () => {
+  function migrationLogs(mint: PublicKey, pool: PublicKey): string[] {
+    const data = {
+      user: keypair(1),
+      mint,
+      mintAmount: new BN("793100000000"),
+      solAmount: new BN("85000000000"),
+      poolMigrationFee: new BN("500000000"),
+      bondingCurve: bondingCurvePda(mint),
+      timestamp: new BN(1_700_000_300),
+      pool,
+      quoteMint: PublicKey.default,
+    };
+    const encoded = OFFLINE_PROGRAM.coder.types.encode("completePumpAmmMigrationEvent", data);
+    const idl = OFFLINE_PROGRAM.idl as unknown as { events: Array<{ name: string; discriminator: number[] }> };
+    const discriminator = Buffer.from(idl.events.find((e) => e.name === "completePumpAmmMigrationEvent")!.discriminator);
+    const payload = Buffer.concat([discriminator, encoded]).toString("base64");
+    return [
+      `Program ${PUMP_PROGRAM_ID.toBase58()} invoke [1]`,
+      `Program data: ${payload}`,
+      `Program ${PUMP_PROGRAM_ID.toBase58()} success`,
+    ];
+  }
+
+  it("finds and decodes the real migration event among recent curve signatures", async () => {
+    const mint = keypair(40);
+    const pool = canonicalPumpPoolPda(mint);
+    const connection = {
+      getSignaturesForAddress: vi.fn().mockResolvedValue([
+        { signature: "unrelatedTradeSig", slot: 10, err: null },
+        { signature: "migrationSig", slot: 11, err: null },
+      ]),
+      getTransaction: vi.fn().mockImplementation(async (sig: string) => {
+        if (sig === "migrationSig") {
+          return { slot: 11, blockTime: 1_700_000_300, meta: { logMessages: migrationLogs(mint, pool) } };
+        }
+        return { slot: 10, blockTime: 1_699_999_000, meta: { logMessages: ["Program log: some unrelated buy"] } };
+      }),
+    } as any;
+
+    const result = await findVerifiedMigration(connection, mint.toBase58());
+    expect(result).not.toBeNull();
+    expect(result!.poolAddress).toBe(pool.toBase58());
+    expect(result!.signature).toBe("migrationSig");
+    expect(result!.mintAmountRaw).toBe("793100000000");
+    expect(result!.solAmountLamports).toBe("85000000000");
+    expect(result!.poolMigrationFeeLamports).toBe("500000000");
+  });
+
+  it("skips failed transactions and returns null when no migration event is found in the window", async () => {
+    const mint = keypair(41);
+    const connection = {
+      getSignaturesForAddress: vi.fn().mockResolvedValue([{ signature: "failedSig", slot: 1, err: { InstructionError: [0, {}] } }]),
+      getTransaction: vi.fn(),
+    } as any;
+
+    const result = await findVerifiedMigration(connection, mint.toBase58());
+    expect(result).toBeNull();
+    expect(connection.getTransaction).not.toHaveBeenCalled();
+  });
+
+  it("returns null (never fabricates) when the signature history is empty", async () => {
+    const connection = { getSignaturesForAddress: vi.fn().mockResolvedValue([]) } as any;
+    const result = await findVerifiedMigration(connection, keypair(42).toBase58());
+    expect(result).toBeNull();
   });
 });

@@ -32,6 +32,7 @@ import {
   computeFeesBps,
   getFee,
   bondingCurveMarketCap,
+  newBondingCurve,
   PUMP_PROGRAM_ID,
 } from "@pump-fun/pump-sdk";
 import {
@@ -45,6 +46,7 @@ import {
   curveProgressBps,
   formatExactRatio,
 } from "./pump-curve-keys";
+import { parseCreateEvent, parseMigrationEvent } from "./pump-event-service";
 
 const PUMP_SDK = new PumpSdk();
 const ZERO = BigInt(0);
@@ -236,6 +238,70 @@ async function loadCurveForQuote(
   return { global, feeConfig, bondingCurve };
 }
 
+/**
+ * Shared buy-quote math against any BondingCurve state (a live, existing
+ * curve for getBuyQuote, or a synthetic freshly-initialized one for
+ * getInitialBuyQuote) - extracted so both share the exact same fee/
+ * slippage logic rather than risking the two drifting apart.
+ * `isNewBondingCurve` must be true for a not-yet-created curve: the
+ * synthetic curve's `creator` field is `PublicKey.default` as a
+ * placeholder (the real creator is a separate instruction argument, not
+ * part of the curve account), and pump's own fee logic treats a default
+ * creator as "no creator fee" unless `isNewBondingCurve` says otherwise
+ * (see @pump-fun/pump-sdk's fees.ts getFee).
+ */
+function quoteBuyFromCurve(
+  global: Global,
+  feeConfig: FeeConfig | null,
+  bondingCurve: BondingCurve,
+  solLamports: bigint,
+  slippageBps: number,
+  isNewBondingCurve: boolean
+): CurveQuote {
+  const solAmount = bigIntToBn(solLamports);
+  const tokensOut = getBuyTokenAmountFromSolAmount({
+    global,
+    feeConfig,
+    mintSupply: bondingCurve.tokenTotalSupply,
+    bondingCurve,
+    amount: solAmount,
+    quoteMint: bondingCurve.quoteMint,
+  });
+
+  const { protocolFeeBps, creatorFeeBps } = computeFeesBps({
+    global,
+    feeConfig,
+    mintSupply: bondingCurve.tokenTotalSupply,
+    virtualQuoteReserves: bondingCurve.virtualQuoteReserves,
+    virtualTokenReserves: bondingCurve.virtualTokenReserves,
+    quoteMint: bondingCurve.quoteMint,
+    creatorFeeBps: bondingCurve.creatorFeeBps,
+  });
+  const totalFee = getFee({
+    global,
+    feeConfig,
+    mintSupply: bondingCurve.tokenTotalSupply,
+    bondingCurve,
+    amount: solAmount,
+    isNewBondingCurve,
+  });
+  const { protocolFeeLamports, creatorFeeLamports } = splitFeeExact(totalFee, protocolFeeBps, creatorFeeBps);
+
+  const tokensOutRaw = bnToBigInt(tokensOut);
+  const minimumReceivedRaw = (tokensOutRaw * BigInt(10_000 - slippageBps)) / BigInt(10_000);
+
+  return {
+    status: "OK",
+    reason: null,
+    tokenAmountRaw: tokensOutRaw.toString(),
+    solAmountLamports: solLamports.toString(),
+    protocolFeeLamports: protocolFeeLamports.toString(),
+    creatorFeeLamports: creatorFeeLamports.toString(),
+    totalFeeLamports: bnToBigInt(totalFee).toString(),
+    minimumReceivedRaw: (minimumReceivedRaw < ZERO ? ZERO : minimumReceivedRaw).toString(),
+  };
+}
+
 /** A buy quote: how many tokens `solLamports` buys right now, plus fees. */
 export async function getBuyQuote(
   connection: Connection,
@@ -247,49 +313,24 @@ export async function getBuyQuote(
     const loaded = await loadCurveForQuote(connection, mintAddress);
     if ("status" in loaded) return loaded;
     const { global, feeConfig, bondingCurve } = loaded;
+    return quoteBuyFromCurve(global, feeConfig, bondingCurve, solLamports, slippageBps, false);
+  } catch (error: unknown) {
+    return emptyQuote("UNAVAILABLE", error instanceof Error ? error.message : "RPC_UNAVAILABLE");
+  }
+}
 
-    const solAmount = bigIntToBn(solLamports);
-    const tokensOut = getBuyTokenAmountFromSolAmount({
-      global,
-      feeConfig,
-      mintSupply: bondingCurve.tokenTotalSupply,
-      bondingCurve,
-      amount: solAmount,
-      quoteMint: bondingCurve.quoteMint,
-    });
-
-    const { protocolFeeBps, creatorFeeBps } = computeFeesBps({
-      global,
-      feeConfig,
-      mintSupply: bondingCurve.tokenTotalSupply,
-      virtualQuoteReserves: bondingCurve.virtualQuoteReserves,
-      virtualTokenReserves: bondingCurve.virtualTokenReserves,
-      quoteMint: bondingCurve.quoteMint,
-      creatorFeeBps: bondingCurve.creatorFeeBps,
-    });
-    const totalFee = getFee({
-      global,
-      feeConfig,
-      mintSupply: bondingCurve.tokenTotalSupply,
-      bondingCurve,
-      amount: solAmount,
-      isNewBondingCurve: false,
-    });
-    const { protocolFeeLamports, creatorFeeLamports } = splitFeeExact(totalFee, protocolFeeBps, creatorFeeBps);
-
-    const tokensOutRaw = bnToBigInt(tokensOut);
-    const minimumReceivedRaw = (tokensOutRaw * BigInt(10_000 - slippageBps)) / BigInt(10_000);
-
-    return {
-      status: "OK",
-      reason: null,
-      tokenAmountRaw: tokensOutRaw.toString(),
-      solAmountLamports: solLamports.toString(),
-      protocolFeeLamports: protocolFeeLamports.toString(),
-      creatorFeeLamports: creatorFeeLamports.toString(),
-      totalFeeLamports: bnToBigInt(totalFee).toString(),
-      minimumReceivedRaw: (minimumReceivedRaw < ZERO ? ZERO : minimumReceivedRaw).toString(),
-    };
+/**
+ * A buy quote for a curve that does not exist yet - the "optional initial
+ * buy" step of token creation (create_v2_and_buy). Uses the SDK's own
+ * newBondingCurve(global) to build the exact initial virtual/real reserve
+ * state the program itself initializes a classic SOL-quoted curve with,
+ * so this quote matches what the on-chain create+buy will actually do.
+ */
+export async function getInitialBuyQuote(connection: Connection, solLamports: bigint, slippageBps: number): Promise<CurveQuote> {
+  try {
+    const [global, feeConfig] = await Promise.all([getCachedGlobal(connection), getCachedFeeConfig(connection)]);
+    const bondingCurve = newBondingCurve(global);
+    return quoteBuyFromCurve(global, feeConfig, bondingCurve, solLamports, slippageBps, true);
   } catch (error: unknown) {
     return emptyQuote("UNAVAILABLE", error instanceof Error ? error.message : "RPC_UNAVAILABLE");
   }
@@ -503,13 +544,71 @@ export async function verifyCurveTradeTransaction(
   };
 }
 
+export interface VerifiedCreate {
+  name: string;
+  symbol: string;
+  bondingCurveAddress: string;
+  blockTime: Date | null;
+  slot: number;
+}
+
+/**
+ * Confirms `signature` is a real pump `create_v2` (or `create_v2_and_buy`)
+ * transaction for `mintAddress` by the claimed wallet, and returns the
+ * exact name/symbol pump's own program recorded - never the client's
+ * submitted display fields, which are cosmetic-only elsewhere in this
+ * route. Requires the claimed wallet to be both a transaction signer and
+ * the on-chain `creator` the CreateEvent recorded, so a real fee-paying
+ * signature for someone else's token can never be replayed to claim
+ * authorship of it (the same anti-replay shape as
+ * verifyTransactionCreatedMint for the direct-mint flow).
+ */
+export async function verifyCreateTransaction(
+  connection: Connection,
+  signature: string,
+  params: { mintAddress: string; walletAddress: string }
+): Promise<VerifiedCreate> {
+  const mint = new PublicKey(params.mintAddress);
+  const wallet = new PublicKey(params.walletAddress);
+
+  const tx = await fetchConfirmedTransaction(connection, signature);
+  const accountKeys = getStaticAccountKeys(tx);
+
+  requireAccountIndex(accountKeys, PUMP_PROGRAM_ID, "pump program");
+  const mintIndex = requireAccountIndex(accountKeys, mint, "mint");
+  if (!tx.transaction.message.isAccountSigner(mintIndex)) {
+    throw new CurveVerificationError("ON_CHAIN_FAILURE", "The claimed mint did not sign this transaction.");
+  }
+  const walletIndex = requireAccountIndex(accountKeys, wallet, "wallet");
+  if (!tx.transaction.message.isAccountSigner(walletIndex)) {
+    throw new CurveVerificationError("ON_CHAIN_FAILURE", "Claimed wallet did not sign this transaction.");
+  }
+
+  const logMessages = tx.meta?.logMessages;
+  const event = logMessages ? parseCreateEvent(logMessages, mint) : null;
+  if (!event) {
+    throw new CurveVerificationError("ON_CHAIN_FAILURE", "No CreateEvent found for this mint in the transaction logs.");
+  }
+  if (!event.creator.equals(wallet)) {
+    throw new CurveVerificationError("ON_CHAIN_FAILURE", "The claimed wallet is not this token's on-chain creator.");
+  }
+
+  return {
+    name: event.name,
+    symbol: event.symbol,
+    bondingCurveAddress: event.bondingCurve.toBase58(),
+    blockTime: tx.blockTime ? new Date(tx.blockTime * 1000) : null,
+    slot: tx.slot,
+  };
+}
+
 /*
  * ============================================================
  * Graduation detection - re-reads the curve's own `complete` flag live,
  * never trusts a client claim or a stale DB row. Once graduated, confirms
  * the canonical pump-amm pool account actually exists before reporting a
- * pool address; detailed PumpSwap pool reserve/liquidity decoding is a
- * disclosed limitation (see module comment / final report).
+ * pool address; real PumpSwap pool reserve/liquidity decoding lives in
+ * pumpswap-pool-service.ts.
  * ============================================================
  */
 export interface GraduationCheck {
@@ -521,14 +620,24 @@ export interface GraduationCheck {
   // against it - the newest confirmed signature touching the bonding-curve
   // account is therefore, in practice, the migrate/graduation transaction
   // itself. Used only to anchor GraduationEvent's required signature/slot/
-  // blockTime to something real and independently fetched; never presented
-  // as a parsed/verified "graduation instruction" (this module does not
-  // decode CompleteEventBc), only as "the last activity on this curve."
+  // blockTime to something real and independently fetched when a verified
+  // migration event (see findVerifiedMigration below) could not be found -
+  // never presented as a parsed/verified instruction on its own, only as
+  // "the last activity on this curve."
   anchorSignature: string | null;
   anchorSlot: number | null;
   anchorBlockTime: Date | null;
 }
 
+/**
+ * Cheap, always-safe-to-call-on-every-request graduation check: one
+ * account read for `complete`, plus (only once true) one account read for
+ * the canonical pool's existence and one cheap signature-history call for
+ * a last-activity anchor. Deliberately does NOT attempt to find/parse the
+ * real migration event - that is a separate, more expensive search (see
+ * findVerifiedMigration) meant to run only once per mint (on first
+ * detection, or while still unverified), not on every page view.
+ */
 export async function checkGraduation(connection: Connection, mintAddress: string): Promise<GraduationCheck> {
   const mint = new PublicKey(mintAddress);
   const bondingCurve = bondingCurvePda(mint);
@@ -563,4 +672,62 @@ export async function checkGraduation(connection: Connection, mintAddress: strin
     anchorSlot: newest?.slot ?? null,
     anchorBlockTime: newest?.blockTime ? new Date(newest.blockTime * 1000) : null,
   };
+}
+
+export interface VerifiedMigration {
+  poolAddress: string;
+  mintAmountRaw: string;
+  solAmountLamports: string;
+  poolMigrationFeeLamports: string;
+  signature: string;
+  slot: number;
+  blockTime: Date | null;
+}
+
+const MIGRATION_SEARCH_LIMIT = 15;
+
+/**
+ * Searches a bounded window of the bonding curve's most recent confirmed
+ * signatures for the real, decoded `CompletePumpAmmMigrationEvent` for
+ * this exact mint (see pump-event-service.ts's parseMigrationEvent) -
+ * never inferred from "last activity." Returns null if none is found
+ * within the window (e.g. the migration transaction has aged out of this
+ * RPC's signature-history retention, or genuinely has not happened yet
+ * despite `complete` being true, which should not occur under the
+ * protocol but is reported as "not found" rather than fabricated either
+ * way).
+ *
+ * Deliberately NOT called from checkGraduation's hot path: this does up
+ * to MIGRATION_SEARCH_LIMIT full `getTransaction` calls, real RPC cost
+ * that must only be paid once per mint (on first graduation detection, or
+ * on a retry while still unverified) - see the graduation route's own
+ * comment for exactly when it calls this.
+ */
+export async function findVerifiedMigration(connection: Connection, mintAddress: string): Promise<VerifiedMigration | null> {
+  const mint = new PublicKey(mintAddress);
+  const bondingCurve = bondingCurvePda(mint);
+
+  const signatures = await connection.getSignaturesForAddress(bondingCurve, { limit: MIGRATION_SEARCH_LIMIT });
+  for (const sigInfo of signatures) {
+    if (sigInfo.err) continue;
+    let tx;
+    try {
+      tx = await connection.getTransaction(sigInfo.signature, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
+    } catch {
+      continue;
+    }
+    if (!tx?.meta?.logMessages) continue;
+    const event = parseMigrationEvent(tx.meta.logMessages, mint);
+    if (!event) continue;
+    return {
+      poolAddress: event.pool.toBase58(),
+      mintAmountRaw: bnToBigInt(event.mintAmount).toString(),
+      solAmountLamports: bnToBigInt(event.solAmount).toString(),
+      poolMigrationFeeLamports: bnToBigInt(event.poolMigrationFee).toString(),
+      signature: sigInfo.signature,
+      slot: tx.slot,
+      blockTime: tx.blockTime ? new Date(tx.blockTime * 1000) : null,
+    };
+  }
+  return null;
 }
