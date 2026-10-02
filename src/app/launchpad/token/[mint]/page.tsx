@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, ShieldCheck, ShieldOff, Copy, Check, TrendingUp, Users } from "lucide-react";
+import { Loader2, ShieldCheck, ShieldOff, Copy, Check, TrendingUp, Users, Droplets, BarChart3 } from "lucide-react";
 import { safeExternalHref } from "@/lib/profile-website";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -29,6 +29,28 @@ const PRICE_UNAVAILABLE_LABEL: Record<string, string> = {
   SOURCE_UNREACHABLE: "Price source is temporarily unreachable.",
   INVALID_INPUT: "Price could not be determined.",
 };
+
+interface PoolInfo {
+  id: string;
+  poolAddress: string;
+  dex: string;
+  baseMint: string;
+  quoteMint: string;
+}
+
+interface LiquiditySnapshot {
+  poolId: string;
+  poolAddress: string;
+  status: "OK" | "UNAVAILABLE";
+  reserveBaseRaw: string | null;
+  reserveQuoteRaw: string | null;
+  lpSupplyRaw: string | null;
+}
+
+interface VolumeSnapshot {
+  poolId: string;
+  buckets: Array<{ windowLabel: string; buyBaseRaw: string; sellBaseRaw: string; tradeCount: number }>;
+}
 
 interface LaunchedTokenDetail {
   id: string;
@@ -71,6 +93,9 @@ export default function TokenDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [analytics, setAnalytics] = useState<TokenAnalytics | null>(null);
+  const [pools, setPools] = useState<PoolInfo[]>([]);
+  const [liquidity, setLiquidity] = useState<LiquiditySnapshot[]>([]);
+  const [volume, setVolume] = useState<VolumeSnapshot[]>([]);
 
   useEffect(() => {
     if (!params.mint) return;
@@ -91,6 +116,23 @@ export default function TokenDetailPage() {
       .then(async (res) => (res.ok ? res.json() : null))
       .then((data) => setAnalytics(data))
       .catch(() => setAnalytics(null));
+
+    // Real Raydium pools for this mint, if any - independent of whether
+    // this token was launched on ZRP (any mint can have a real pool).
+    fetch(`/api/launchpad/tokens/${params.mint}/pools`)
+      .then(async (res) => (res.ok ? res.json() : null))
+      .then((data) => setPools(data?.pools ?? []))
+      .catch(() => setPools([]));
+
+    fetch(`/api/launchpad/tokens/${params.mint}/liquidity`)
+      .then(async (res) => (res.ok ? res.json() : null))
+      .then((data) => setLiquidity(data?.pools ?? []))
+      .catch(() => setLiquidity([]));
+
+    fetch(`/api/launchpad/tokens/${params.mint}/volume`)
+      .then(async (res) => (res.ok ? res.json() : null))
+      .then((data) => setVolume(data?.pools ?? []))
+      .catch(() => setVolume([]));
   }, [params.mint, t]);
 
   const handleCopy = async () => {
@@ -180,6 +222,45 @@ export default function TokenDetailPage() {
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{analytics.holders.note}</p>
         </div>
       )}
+
+      <div className="mb-4">
+        <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white mb-2">
+          <Droplets className="h-4 w-4" /> {t("launchpad.tokenDetail.poolsTitle")}
+        </p>
+        {pools.length === 0 ? (
+          <p className="text-sm text-gray-400 dark:text-gray-500">{t("launchpad.tokenDetail.noPoolsYet")}</p>
+        ) : (
+          <div className="space-y-2">
+            {pools.map((pool) => {
+              const snapshot = liquidity.find((l) => l.poolId === pool.id);
+              const vol = volume.find((v) => v.poolId === pool.id)?.buckets.find((b) => b.windowLabel === "24h");
+              return (
+                <div key={pool.id} className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono text-gray-500 dark:text-gray-400 truncate">
+                      {pool.poolAddress.slice(0, 6)}...{pool.poolAddress.slice(-4)}
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">{pool.dex === "RAYDIUM_CPMM" ? "Raydium CPMM" : pool.dex}</span>
+                  </div>
+                  {snapshot?.status === "OK" ? (
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      Reserves: {snapshot.reserveBaseRaw} / {snapshot.reserveQuoteRaw}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Liquidity unavailable</p>
+                  )}
+                  {vol && (
+                    <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <BarChart3 className="h-3 w-3" /> {t("launchpad.tokenDetail.volume24hLabel")}: {vol.tradeCount}{" "}
+                      trades
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3 mb-4">
         <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">{t("launchpad.tokenDetail.mintAddressLabel")}</label>

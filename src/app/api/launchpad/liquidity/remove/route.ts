@@ -1,0 +1,91 @@
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+import { NextRequest, NextResponse } from "next/server";
+// ⚠️ SECURITY: getVerifiedToken overlays the database's current
+// role/isAdmin/plan/banned onto the decoded JWT - see src/lib/auth-guards.ts.
+import { getVerifiedToken as getToken } from "@/lib/auth-guards";
+import { prisma } from "@/lib/db";
+import { rateLimitByIpAndUser } from "@/lib/rate-limit";
+import { jsonWithDecimalStrings } from "@/lib/launchpad/json";
+import { getConnection } from "@/lib/solana";
+import { verifyLiquidityTransaction, PoolVerificationError } from "@/lib/launchpad/raydium-pool-service";
+
+export async function POST(req: NextRequest) {
+  try {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = token.id as string;
+
+    const limit = await rateLimitByIpAndUser(req, userId, { limit: 20, window: 300, type: "launchpad-liquidity-remove" });
+    if (!limit.success) return limit.response;
+
+    const body = await req.json();
+    const { poolId, walletAddress, transactionId } = body;
+
+    if (typeof poolId !== "string" || !poolId) {
+      return NextResponse.json({ error: "poolId is required." }, { status: 400 });
+    }
+    if (typeof walletAddress !== "string" || !walletAddress) {
+      return NextResponse.json({ error: "walletAddress is required." }, { status: 400 });
+    }
+    if (typeof transactionId !== "string" || !transactionId.trim()) {
+      return NextResponse.json({ error: "Transaction ID is required." }, { status: 400 });
+    }
+    const cleanTxId = transactionId.trim();
+
+    const pool = await prisma.tokenPool.findUnique({ where: { id: poolId } });
+    if (!pool || pool.status !== "ACTIVE") {
+      return NextResponse.json({ error: "Pool not found or not active." }, { status: 404 });
+    }
+
+    const existing = await prisma.liquidityEvent.findUnique({ where: { transactionId: cleanTxId } });
+    if (existing) return jsonWithDecimalStrings({ event: existing }, { status: 200 });
+
+    let verified;
+    try {
+      verified = await verifyLiquidityTransaction(getConnection(), cleanTxId, {
+        poolId: pool.poolAddress,
+        vaultA: pool.baseVault,
+        vaultB: pool.quoteVault,
+        lpMint: pool.lpMint,
+        walletAddress,
+        type: "REMOVE",
+      });
+    } catch (err: unknown) {
+      if (err instanceof PoolVerificationError) {
+        const status = err.status === "NOT_FOUND_YET" ? 202 : 400;
+        return NextResponse.json({ error: err.message, status: err.status }, { status });
+      }
+      console.error("Remove-liquidity verification error:", err);
+      return NextResponse.json({ error: "Failed to verify the remove-liquidity transaction." }, { status: 502 });
+    }
+
+    let event;
+    try {
+      event = await prisma.liquidityEvent.create({
+        data: {
+          poolId: pool.id,
+          type: "REMOVE",
+          status: "SUCCESS",
+          walletAddress,
+          transactionId: cleanTxId,
+          lpAmountRaw: verified.lpAmountRaw.toString(),
+          baseAmountRaw: verified.baseAmountRaw.toString(),
+          quoteAmountRaw: verified.quoteAmountRaw.toString(),
+        },
+      });
+    } catch (err: any) {
+      if (err?.code === "P2002") {
+        const retry = await prisma.liquidityEvent.findUnique({ where: { transactionId: cleanTxId } });
+        if (retry) return jsonWithDecimalStrings({ event: retry }, { status: 200 });
+      }
+      throw err;
+    }
+
+    return jsonWithDecimalStrings({ event }, { status: 201 });
+  } catch (error) {
+    console.error("Remove-liquidity recording error:", error);
+    return NextResponse.json({ error: "Failed to record the remove-liquidity transaction. Please try again." }, { status: 500 });
+  }
+}
