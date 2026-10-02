@@ -80,6 +80,8 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   "32 MB",
   // Version metadata
   "1.0",
+  // Pure numeric/format template with no actual words to translate
+  "{count}/{max}",
   // Placeholder examples shown in form fields
   "https://your-site.com",
   "https://your-website.com",
@@ -136,6 +138,9 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
  */
 const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   fr: [
+    "adminAnnouncements.typeMaintenance", // "Maintenance" is a genuine French word, not an untranslated copy
+    "adminAnnouncements.formBodyLabel", // "Message" is a genuine French word, not an untranslated copy
+    "adminAnnouncements.formTypeLabel", // "Type" is a genuine French word, not an untranslated copy
     "liveAudio.visibilityPublic", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.traction.heading",
     "investors.types.familyOffice",
@@ -325,6 +330,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
   ],
   de: [
+    "adminAnnouncements.typeUpdate", // "Update" is a genuine established German loanword, not an untranslated copy
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1334,6 +1340,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
   ],
   nl: [
+    "adminAnnouncements.typeUpdate", // "Update" is a genuine established Dutch loanword, not an untranslated copy
+    "adminAnnouncements.formTypeLabel", // "Type" is a genuine established Dutch loanword, not an untranslated copy
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2195,6 +2203,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
   ],
   da: [
+    "adminAnnouncements.formTypeLabel", // "Type" is a genuine established Danish loanword, not an untranslated copy
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.roadmap.heading",
     "investors.platform.marketplace.title",
@@ -2639,6 +2648,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   // Market Plus/Shorts), a short admin/nav label, or a format-only value
   // (e.g. "/ 100", "{count}/1000", "{name}: {msg}", "24/7", "CTR").
   no: [
+    "adminAnnouncements.formTypeLabel", // "Type" is a genuine established Norwegian loanword, not an untranslated copy
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.music.title",
     "investors.platform.news.title",

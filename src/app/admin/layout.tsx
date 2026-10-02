@@ -10,6 +10,7 @@ import {
   FileText,
   Flag,
   Megaphone,
+  BellRing,
   DollarSign,
   Newspaper,
   BadgeCheck,
@@ -150,12 +151,21 @@ export default function AdminLayout({
       icon: Music2,
     },
 
-    // Analytics, Upgrade Requests, Storage Cleanup and HELP fund
-    // withdrawals require full admin access - platform-wide metrics and
-    // approving a payout are both a sensitive bar, same as the existing
-    // creator withdrawals.
+    // Analytics, Upgrade Requests, Storage Cleanup, HELP fund
+    // withdrawals and Global Announcements require full admin access -
+    // platform-wide metrics, approving a payout, and broadcasting to
+    // every eligible member are all a sensitive bar, same as the
+    // existing creator withdrawals. The backend already enforces this
+    // (requireAdmin on every /api/admin/announcements/* route, see
+    // src/app/api/admin/announcements/route.ts) - this is only the
+    // frontend mirror of it, never the real gate.
     ...(isFullAdmin
       ? [
+          {
+            href: "/admin/announcements",
+            labelKey: "adminNav.announcements" as TranslationKey,
+            icon: BellRing,
+          },
           {
             href: "/admin/analytics",
             labelKey: "analytics.title" as TranslationKey,
