@@ -149,14 +149,21 @@ export function buildCreatePoolTransaction(params: BuildCreatePoolTransactionPar
  */
 export class AmbiguousLiquidityError extends Error {
   signature: string;
-  constructor(message: string, signature: string) {
+  walletAddress: string;
+  constructor(message: string, signature: string, walletAddress: string) {
     super(message);
     this.name = "AmbiguousLiquidityError";
     this.signature = signature;
+    this.walletAddress = walletAddress;
   }
 }
 
-async function signBroadcastConfirm(connection: Connection, transaction: Transaction, provider: { signTransaction?: (t: Transaction) => Promise<Transaction> }): Promise<string> {
+async function signBroadcastConfirm(
+  connection: Connection,
+  transaction: Transaction,
+  provider: { signTransaction?: (t: Transaction) => Promise<Transaction> },
+  walletAddress: string
+): Promise<string> {
   if (typeof provider.signTransaction !== "function") {
     throw new Error("This wallet does not support signing transactions. Try Phantom, Solflare or Backpack.");
   }
@@ -175,7 +182,7 @@ async function signBroadcastConfirm(connection: Connection, transaction: Transac
     confirmation = await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Could not confirm the transaction.";
-    throw new AmbiguousLiquidityError(message, signature);
+    throw new AmbiguousLiquidityError(message, signature, walletAddress);
   }
   if (confirmation.value.err) {
     throw new Error(`Transaction failed on-chain: ${JSON.stringify(confirmation.value.err)}`);
@@ -210,7 +217,7 @@ export async function createPoolFromBrowser(
     quoteIsNativeSol: params.quoteIsNativeSol,
   });
 
-  const signature = await signBroadcastConfirm(connection, transaction, provider);
+  const signature = await signBroadcastConfirm(connection, transaction, provider, walletAddress);
   return { signature, poolAddress: keys.poolId.toBase58(), walletAddress };
 }
 
@@ -288,7 +295,7 @@ export async function addLiquidityFromBrowser(
     )
   );
 
-  const signature = await signBroadcastConfirm(connection, transaction, provider);
+  const signature = await signBroadcastConfirm(connection, transaction, provider, walletAddress);
   return { signature, walletAddress };
 }
 
@@ -344,7 +351,7 @@ export async function removeLiquidityFromBrowser(
     )
   );
 
-  const signature = await signBroadcastConfirm(connection, transaction, provider);
+  const signature = await signBroadcastConfirm(connection, transaction, provider, walletAddress);
   return { signature, walletAddress };
 }
 
@@ -375,6 +382,6 @@ export async function burnLpFromBrowser(
   transaction.feePayer = ownerPubkey;
   transaction.add(createBurnInstruction(lpAccount, lpMint, ownerPubkey, params.lpRawAmount));
 
-  const signature = await signBroadcastConfirm(connection, transaction, provider);
+  const signature = await signBroadcastConfirm(connection, transaction, provider, walletAddress);
   return { signature, walletAddress };
 }
