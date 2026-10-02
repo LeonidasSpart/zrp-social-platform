@@ -45,12 +45,28 @@ function isValidPublicKey(value: string): boolean {
 }
 
 // ─── GET: public browse - only CONFIRMED mints, newest first ────────
+//
+// `hasPool=1` filters to tokens with at least one real, independently-
+// verified ACTIVE Raydium pool (src/app/api/launchpad/pools/create) -
+// a genuine "is this actually tradeable yet" signal, not a fabricated
+// one. Sorting by volume/liquidity/holder-count is deliberately NOT
+// offered here: doing it honestly needs either a live cross-pool RPC
+// aggregation per request (too expensive/rate-limit-risky at list scale)
+// or the AnalyticsSnapshot-style cache table described in
+// docs/launchpad-bonding-curve-research.md's sibling indexing work,
+// neither of which exists yet - this never silently approximates that
+// with a fabricated ordering.
 export async function GET(req: NextRequest) {
   try {
     const { cursor, limit } = parseCursorParams(req);
+    const hasPool = req.nextUrl.searchParams.get("hasPool") === "1";
 
     const tokens = await prisma.launchedToken.findMany({
-      where: { status: "COMPLETED", mintAddress: { not: null } },
+      where: {
+        status: "COMPLETED",
+        mintAddress: { not: null },
+        ...(hasPool ? { pools: { some: { status: "ACTIVE" } } } : {}),
+      },
       orderBy: { createdAt: "desc" },
       take: limit + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
@@ -68,11 +84,13 @@ export async function GET(req: NextRequest) {
         revokeUpdate: true,
         createdAt: true,
         creator: { select: CREATOR_SELECT },
+        _count: { select: { pools: { where: { status: "ACTIVE" } } } },
       },
     });
 
     const { items, nextCursor } = buildPage(tokens, limit);
-    return jsonWithDecimals({ tokens: items, nextCursor });
+    const tokensWithPoolCount = items.map(({ _count, ...rest }) => ({ ...rest, activePoolCount: _count.pools }));
+    return jsonWithDecimals({ tokens: tokensWithPoolCount, nextCursor });
   } catch (error) {
     console.error("Error fetching launched tokens:", error);
     return NextResponse.json({ error: "Failed to fetch tokens" }, { status: 500 });
