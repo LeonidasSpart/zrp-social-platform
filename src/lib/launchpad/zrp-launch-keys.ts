@@ -18,6 +18,7 @@
 import { PublicKey } from "@solana/web3.js";
 import { BinaryWriter } from "borsh";
 import BN from "bn.js";
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 const DEVNET_PROGRAM_ID = "3vr1SHa9LvEvELb23NBG1J6oFRCSDs8cj8wS55zuoRxK";
 
@@ -28,7 +29,21 @@ export function getZrpLaunchProgramId(): PublicKey {
     // Matches src/lib/solana.ts's getConnection() fail-closed posture: a
     // production deploy with this var unset must never silently derive
     // devnet PDAs/transactions - it must refuse to start instead.
-    if (process.env.NODE_ENV === "production") {
+    //
+    // NEXT_PHASE guard: this module is imported (not just at request time)
+    // by `next build`'s "Collecting page data" step, which statically
+    // evaluates every route module's top-level exports - including this
+    // file's own `export const ZRP_LAUNCH_PROGRAM_ID = getZrpLaunchProgramId()`
+    // below - with NODE_ENV already "production" and no real request in
+    // flight. Without this guard, a build run anywhere this var isn't set
+    // (exactly the current state - mainnet isn't deployed yet) throws
+    // during the build itself, not at runtime - confirmed the hard way:
+    // this broke the Railway production build the first time this check
+    // shipped. next/constants' PHASE_PRODUCTION_BUILD is Next's own
+    // documented way to distinguish "building" from "actually serving
+    // requests" - the fail-closed check still applies at real server
+    // startup/first use, just not during static build-time analysis.
+    if (process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== PHASE_PRODUCTION_BUILD) {
       throw new Error(
         "ZRP_LAUNCH_PROGRAM_ID (or NEXT_PUBLIC_ZRP_LAUNCH_PROGRAM_ID) must be configured in production. Refusing to fall back to the devnet ZRP Launchpad program ID."
       );
