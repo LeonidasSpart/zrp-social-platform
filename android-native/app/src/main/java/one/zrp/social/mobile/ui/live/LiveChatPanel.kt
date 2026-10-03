@@ -257,7 +257,7 @@ private fun ChatRow(
     val canMute = canModerate && !isMine && !isHostMessage
     val hasActions = canDelete || canMute
     val name = author?.name ?: author?.username ?: stringResource(R.string.live_chat_unknown_author)
-    val actionsLabel = stringResource(R.string.live_chat_message_actions)
+    val actionsLabel = stringResource(R.string.chat_message_actions_cd)
 
     Box {
         Row(
@@ -316,7 +316,7 @@ private fun ChatRow(
         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             if (canDelete) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.live_chat_delete), color = ZrpRed) },
+                    text = { Text(stringResource(R.string.chat_delete_message), color = ZrpRed) },
                     onClick = {
                         menuOpen = false
                         onDelete()
@@ -420,7 +420,7 @@ private fun ChatComposer(
                 else -> IconButton(onClick = submit, enabled = canSend) {
                     Icon(
                         Icons.Filled.Send,
-                        contentDescription = stringResource(R.string.live_chat_send),
+                        contentDescription = stringResource(R.string.message_send_cd),
                         tint = if (canSend) ZrpRed else mutedTextColor,
                     )
                 }

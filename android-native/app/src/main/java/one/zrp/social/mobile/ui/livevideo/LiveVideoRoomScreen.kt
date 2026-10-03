@@ -190,7 +190,7 @@ fun LiveVideoRoomScreen(roomId: String, onBack: () -> Unit) {
         LiveVideoPhase.SCHEDULED -> {
             val reminder by viewModel.interactions.reminder.collectAsState()
             val room = state.room
-            val shareTitle = stringResource(R.string.live_share_room)
+            val shareTitle = stringResource(R.string.action_share)
             LiveScheduledRoomContent(
                 title = room?.title ?: "",
                 description = room?.description,
@@ -262,7 +262,7 @@ private fun LiveVideoConnectedContent(
     var confirmRemoveUserId by remember { mutableStateOf<String?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
     val giftSentText = stringResource(R.string.live_gift_sent)
-    val shareTitle = stringResource(R.string.live_share_room)
+    val shareTitle = stringResource(R.string.action_share)
     val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black).imePadding()) {
@@ -318,11 +318,11 @@ private fun LiveVideoConnectedContent(
                 }
                 Box {
                     IconButton(onClick = { overflowOpen = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.live_room_more_options), tint = Color.White)
+                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.discover_more), tint = Color.White)
                     }
                     DropdownMenu(expanded = overflowOpen, onDismissRequest = { overflowOpen = false }) {
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.live_people_title)) },
+                            text = { Text(stringResource(R.string.search_category_people)) },
                             leadingIcon = { Icon(Icons.Filled.Groups, contentDescription = null) },
                             onClick = {
                                 overflowOpen = false
@@ -330,7 +330,7 @@ private fun LiveVideoConnectedContent(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.live_share_room)) },
+                            text = { Text(stringResource(R.string.action_share)) },
                             leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
                             onClick = {
                                 overflowOpen = false

@@ -177,7 +177,7 @@ fun LiveAudioRoomScreen(roomId: String, onBack: () -> Unit) {
         LiveAudioPhase.SCHEDULED -> {
             val reminder by viewModel.interactions.reminder.collectAsState()
             val room = state.room
-            val shareTitle = stringResource(R.string.live_share_room)
+            val shareTitle = stringResource(R.string.action_share)
             LiveScheduledRoomContent(
                 title = room?.title ?: "",
                 description = room?.description,
@@ -234,7 +234,7 @@ private fun LiveAudioConnectedContent(
     var overflowOpen by remember { mutableStateOf(false) }
     var notice by remember { mutableStateOf<String?>(null) }
     val giftSentText = stringResource(R.string.live_gift_sent)
-    val shareTitle = stringResource(R.string.live_share_room)
+    val shareTitle = stringResource(R.string.action_share)
     val context = LocalContext.current
     // The host can't gift themselves (cannot_gift_self) - no control offered.
     val isHost = room != null && room.hostId == state.myUserId
@@ -264,11 +264,11 @@ private fun LiveAudioConnectedContent(
             }
             Box {
                 IconButton(onClick = { overflowOpen = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.live_room_more_options))
+                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.discover_more))
                 }
                 DropdownMenu(expanded = overflowOpen, onDismissRequest = { overflowOpen = false }) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.live_share_room)) },
+                        text = { Text(stringResource(R.string.action_share)) },
                         leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
                         onClick = {
                             overflowOpen = false

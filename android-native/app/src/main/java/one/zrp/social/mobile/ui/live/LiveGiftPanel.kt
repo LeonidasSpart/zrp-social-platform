@@ -209,7 +209,7 @@ fun LiveGiftPanel(
                 when {
                     state.sending -> {
                         CircularProgressIndicator(modifier = Modifier.size(IconSize.sm), color = Color.White, strokeWidth = 2.dp)
-                        Text(stringResource(R.string.live_gift_sending), modifier = Modifier.padding(start = Spacing.sm))
+                        Text(stringResource(R.string.settings_sending), modifier = Modifier.padding(start = Spacing.sm))
                     }
                     selected == null -> Text(stringResource(R.string.live_gift_select_prompt))
                     balanceKnown && !affordable -> Text(stringResource(R.string.live_gift_not_enough))

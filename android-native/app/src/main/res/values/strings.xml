@@ -2609,9 +2609,6 @@
     <string name="live_video_camera_on_self">Turn on your camera</string>
     <string name="live_video_camera_off_self">Turn off your camera</string>
     <string name="live_video_switch_camera">Switch camera</string>
-    <string name="live_people_title">People</string>
-    <string name="live_room_more_options">More options</string>
-    <string name="live_share_room">Share room</string>
     <plurals name="live_coins">
         <item quantity="one">%1$d coin</item>
         <item quantity="other">%1$d coins</item>
@@ -2630,7 +2627,6 @@
     <string name="live_gift_not_enough">Not enough coins</string>
     <string name="live_gift_send">Send gift</string>
     <string name="live_gift_send_with_total">Send gift · %1$s</string>
-    <string name="live_gift_sending">Sending…</string>
     <string name="live_gift_sent">Gift sent</string>
     <string name="live_gift_unconfirmed">We couldn\'t confirm your gift. Check your connection and tap Send gift again; you won\'t be charged twice.</string>
     <string name="live_gift_banner_sent">sent %1$s</string>
@@ -2642,12 +2638,9 @@
     <string name="live_chat_show">Show chat</string>
     <string name="live_chat_hide">Hide chat</string>
     <string name="live_chat_placeholder">Say something…</string>
-    <string name="live_chat_send">Send message</string>
     <string name="live_chat_empty">No messages yet. Start the conversation.</string>
     <string name="live_chat_history_error">Couldn\'t load earlier messages.</string>
     <string name="live_chat_unknown_author">Participant</string>
-    <string name="live_chat_message_actions">Message actions</string>
-    <string name="live_chat_delete">Delete message</string>
     <string name="live_chat_mute_user">Mute in chat</string>
     <string name="live_chat_unmute_user">Unmute in chat</string>
     <string name="live_chat_muted_notice">You\'ve been muted in this room\'s chat.</string>
@@ -2655,7 +2648,7 @@
     <string name="live_chat_slow_mode_off">Off</string>
     <string name="live_chat_slow_mode_seconds">%1$d seconds</string>
     <string name="live_chat_slow_mode_status">Slow mode: %1$d s between messages</string>
-    <string name="live_chat_cooldown">%1$ds</string>
+    <string name="live_chat_cooldown" translatable="false">%1$ds</string>
     <string name="live_chat_char_count" translatable="false">%1$d/%2$d</string>
     <string name="live_err_insufficient_balance">You don\'t have enough coins for this gift.</string>
     <string name="live_err_gift_unavailable">This gift isn\'t available right now.</string>
@@ -2703,5 +2696,5 @@
     <string name="creator_live_gifts_empty_title">No gifts yet</string>
     <string name="creator_live_gifts_empty_body">Gifts viewers send during your live rooms will appear here.</string>
     <string name="creator_live_gifts_error">Couldn\'t load your gifts</string>
-    <string name="creator_live_gift_row">%1$s × %2$d</string>
+    <string name="creator_live_gift_row" translatable="false">%1$s × %2$d</string>
 </resources>

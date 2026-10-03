@@ -393,7 +393,7 @@ fun LiveScheduledRoomContent(
                 modifier = Modifier.weight(1f).padding(start = Spacing.xs),
             )
             IconButton(onClick = onShare) {
-                Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.live_share_room))
+                Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.action_share))
             }
         }
 
