@@ -559,12 +559,35 @@ pub mod zrp_launchpad {
         // forwarding from `caller` to `migration_authority` goes through a
         // real System Program CPI. Both legs happen atomically within this
         // one instruction, so `caller` never actually retains the funds.
+        // TEMPORARY diagnostic logging (not a protocol change): the first
+        // fix attempt (routing the SOL leg through `caller` via a real
+        // System Program CPI instead of raw-crediting `migration_authority`
+        // directly) did NOT resolve the "sum of account balances" error -
+        // it still fails at the exact same point, which means the SOL leg
+        // was never the actual cause. This instruments every lamport-moving
+        // step (including the token leg) to find the real one. Remove once
+        // root-caused.
+        msg!(
+            "graduate: start bonding_curve={} caller={} migration_authority={} curve_token_vault={} migration_token_account={} sol_amount={} token_amount={}",
+            ctx.accounts.bonding_curve.to_account_info().lamports(),
+            ctx.accounts.caller.to_account_info().lamports(),
+            ctx.accounts.migration_authority.to_account_info().lamports(),
+            ctx.accounts.curve_token_vault.to_account_info().lamports(),
+            ctx.accounts.migration_token_account.to_account_info().lamports(),
+            sol_amount,
+            token_amount
+        );
         if sol_amount > 0 {
             transfer_lamports_from_pda(
                 &ctx.accounts.bonding_curve.to_account_info(),
                 &ctx.accounts.caller.to_account_info(),
                 sol_amount,
             )?;
+            msg!(
+                "graduate: after raw credit to caller bonding_curve={} caller={}",
+                ctx.accounts.bonding_curve.to_account_info().lamports(),
+                ctx.accounts.caller.to_account_info().lamports()
+            );
             system_program::transfer(
                 CpiContext::new(
                     ctx.accounts.system_program.to_account_info(),
@@ -575,6 +598,11 @@ pub mod zrp_launchpad {
                 ),
                 sol_amount,
             )?;
+            msg!(
+                "graduate: after system transfer to migration_authority caller={} migration_authority={}",
+                ctx.accounts.caller.to_account_info().lamports(),
+                ctx.accounts.migration_authority.to_account_info().lamports()
+            );
         }
         if token_amount > 0 {
             let curve_signer_seeds: &[&[u8]] =
@@ -591,7 +619,20 @@ pub mod zrp_launchpad {
                 ),
                 token_amount,
             )?;
+            msg!(
+                "graduate: after token transfer curve_token_vault={} migration_token_account={}",
+                ctx.accounts.curve_token_vault.to_account_info().lamports(),
+                ctx.accounts.migration_token_account.to_account_info().lamports()
+            );
         }
+        msg!(
+            "graduate: end bonding_curve={} caller={} migration_authority={} curve_token_vault={} migration_token_account={}",
+            ctx.accounts.bonding_curve.to_account_info().lamports(),
+            ctx.accounts.caller.to_account_info().lamports(),
+            ctx.accounts.migration_authority.to_account_info().lamports(),
+            ctx.accounts.curve_token_vault.to_account_info().lamports(),
+            ctx.accounts.migration_token_account.to_account_info().lamports()
+        );
 
         let curve = &mut ctx.accounts.bonding_curve;
         curve.real_sol_reserves = 0;
