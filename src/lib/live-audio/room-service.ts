@@ -4,8 +4,10 @@ import { isBlockedEitherWay } from "@/lib/auth-guards";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { emitToLiveAudioRoom, emitToUser, evictUserFromLiveAudioRoom } from "@/lib/socket-emit";
+import { notifyReminderSubscribers } from "@/lib/live-reminders/reminder-service";
 import { mintLiveKitToken, forceDisconnectParticipant, getLiveKitConfig } from "./livekit";
 import { canViewRoom, canPromoteSpeaker, isRoomAuthority } from "./permissions";
+import { rankAndPaginate } from "./discovery-ranking";
 import { requireLiveAudioAccess } from "./entitlement";
 import { LiveAudioErrors } from "./errors";
 
@@ -166,6 +168,7 @@ export async function startScheduledRoom(roomId: string, actorId: string): Promi
   if (updated.visibility === "COMMUNITY" && updated.communityId) {
     await notifyCommunityRoomStarted(updated.communityId, updated);
   }
+  await notifyReminderSubscribers("AUDIO", updated);
   return updated;
 }
 
@@ -227,10 +230,14 @@ export async function listDiscoverableRooms({ viewerId, cursor, limit }: Discove
     OR: [{ visibility: "PUBLIC" }, ...(memberCommunityIds.length > 0 ? [{ visibility: "COMMUNITY" as const, communityId: { in: memberCommunityIds } }] : [])],
   };
 
+  // A larger candidate pool than one page - ranking (see
+  // discovery-ranking.ts) needs enough rooms to actually compete on
+  // score, not just the next `limit` by recency. Still bounded, never
+  // the whole table.
+  const CANDIDATE_POOL_SIZE = 200;
   const rooms = await prisma.liveAudioRoom.findMany({
     where,
-    take: limit + 1,
-    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+    take: CANDIDATE_POOL_SIZE,
     orderBy: [{ startedAt: "desc" }],
     select: {
       id: true,
@@ -248,7 +255,7 @@ export async function listDiscoverableRooms({ viewerId, cursor, limit }: Discove
   // _count.participants counts every row ever created for this room
   // (including departed ones), which is wrong for "how many people are
   // in this room right now" - re-derive the live count per room rather
-  // than trust the relation count. Bounded by `limit` rooms per page
+  // than trust the relation count. Bounded by the candidate pool size
   // (never the whole table), so this stays a handful of extra queries,
   // not an N+1 across the platform.
   const withLiveCounts = await Promise.all(
@@ -258,17 +265,14 @@ export async function listDiscoverableRooms({ viewerId, cursor, limit }: Discove
       });
       const { _count, ...rest } = room;
       void _count;
-      return { ...rest, listenerCount };
+      return { ...rest, viewerCount: listenerCount, listenerCount };
     })
   );
 
-  let nextCursor: string | null = null;
-  if (withLiveCounts.length > limit) {
-    const page = withLiveCounts.slice(0, limit);
-    nextCursor = page[page.length - 1].id;
-    return { rooms: page, nextCursor };
-  }
-  return { rooms: withLiveCounts, nextCursor };
+  const { page, nextCursor } = rankAndPaginate(withLiveCounts, cursor, limit);
+  // viewerCount above exists only to feed the ranking score - the
+  // public shape keeps its original listenerCount field, unchanged.
+  return { rooms: page.map(({ viewerCount: _viewerCount, ...rest }) => rest), nextCursor };
 }
 
 // ─── Join / leave ────────────────────────────────────────────────────
