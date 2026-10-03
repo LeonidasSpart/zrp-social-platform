@@ -24,25 +24,73 @@ interface LaunchedTokenSummary {
   creator: { id: string; username: string; name: string | null; avatarUrl: string | null } | null;
 }
 
+// Trending/Volume/Holders/Liquidity come from the dedicated, indexed
+// discover/* endpoints (see discovery-ranking.ts) and work for any mint
+// ZRP has indexed activity for, not only ones in the LaunchedToken
+// registry - launchedToken is null for a mint ZRP never recorded a
+// LaunchedToken row for (e.g. a pump.fun token traded via the curve but
+// not launched through ZRP's own mint flow).
+interface DiscoverTile {
+  mintAddress: string;
+  launchedToken: { name: string; symbol: string; imageUrl: string } | null;
+  metricLabel: string;
+  metricValue: string;
+}
+
+type Filter = "all" | "withLiquidity" | "trending" | "volume" | "holders" | "liquidity" | "graduated";
+
 export default function LaunchpadHomePage() {
   const { data: session } = useSession();
   const { t } = useLanguage();
   const [tokens, setTokens] = useState<LaunchedTokenSummary[]>([]);
+  const [discoverTiles, setDiscoverTiles] = useState<DiscoverTile[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // "New" (createdAt desc, always real) and "With Liquidity" (has at
-  // least one independently-verified ACTIVE pool) are the only two
-  // discovery filters offered - see the GET route's own comment for why
-  // volume/liquidity-amount/holder-count sorting isn't offered yet
-  // rather than being faked.
-  const [filter, setFilter] = useState<"all" | "withLiquidity">("all");
+  const [filter, setFilter] = useState<Filter>("all");
 
   useEffect(() => {
     setLoading(true);
-    const qs = filter === "withLiquidity" ? "?hasPool=1" : "";
-    fetch(`/api/launchpad/tokens${qs}`)
+    setError(null);
+
+    if (filter === "all" || filter === "withLiquidity" || filter === "graduated") {
+      setDiscoverTiles(null);
+      const qs =
+        filter === "withLiquidity" ? "?hasPool=1" : filter === "graduated" ? "?graduated=1" : "";
+      fetch(`/api/launchpad/tokens${qs}`)
+        .then((res) => res.json())
+        .then((data) => setTokens(data.tokens || []))
+        .catch(() => setError(t("launchpad.home.loadError")))
+        .finally(() => setLoading(false));
+      return;
+    }
+
+    const endpoint =
+      filter === "trending" ? "trending" : filter === "volume" ? "volume?window=24h" : filter === "holders" ? "holders" : "liquidity";
+    fetch(`/api/launchpad/discover/${endpoint}`)
       .then((res) => res.json())
-      .then((data) => setTokens(data.tokens || []))
+      .then((data) => {
+        const tiles: DiscoverTile[] = (data.tokens || []).map((row: any) => ({
+          mintAddress: row.mintAddress,
+          launchedToken: row.launchedToken,
+          metricLabel:
+            filter === "trending"
+              ? t("launchpad.home.filterTrending")
+              : filter === "volume"
+                ? t("launchpad.curve.volumeLabel")
+                : filter === "holders"
+                  ? t("launchpad.home.filterHolders")
+                  : t("launchpad.curve.liquidityLabel"),
+          metricValue:
+            filter === "trending"
+              ? Number(row.trendingScore).toFixed(2)
+              : filter === "volume"
+                ? `${(Number(row.volumeLamports) / 1e9).toLocaleString(undefined, { maximumFractionDigits: 3 })} SOL`
+                : filter === "holders"
+                  ? String(row.holderCount)
+                  : `${(Number(row.liquidityTotalLamports) / 1e9).toLocaleString(undefined, { maximumFractionDigits: 3 })} SOL`,
+        }));
+        setDiscoverTiles(tiles);
+      })
       .catch(() => setError(t("launchpad.home.loadError")))
       .finally(() => setLoading(false));
   }, [t, filter]);
@@ -65,6 +113,13 @@ export default function LaunchpadHomePage() {
               >
                 <Plus className="w-4 h-4" />
                 {t("launchpad.home.createToken")}
+              </Link>
+              <Link
+                href="/launchpad/create/pump"
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-white/40 text-white rounded-full font-semibold hover:bg-white/10 transition text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                {t("launchpad.pumpCreate.submitButton")}
               </Link>
               <Link
                 href="/launchpad/vesting"
@@ -143,8 +198,8 @@ export default function LaunchpadHomePage() {
         </div>
       </section>
 
-      <div className="flex justify-center gap-2 mb-6">
-        {(["all", "withLiquidity"] as const).map((f) => (
+      <div className="flex flex-wrap justify-center gap-2 mb-6">
+        {(["all", "trending", "volume", "holders", "liquidity", "withLiquidity", "graduated"] as const).map((f) => (
           <button
             key={f}
             type="button"
@@ -155,7 +210,13 @@ export default function LaunchpadHomePage() {
                 : "border border-gray-300 text-gray-600 hover:border-zrp-red dark:border-gray-700 dark:text-gray-400"
             }`}
           >
-            {f === "all" ? t("launchpad.home.filterAll") : t("launchpad.home.filterWithLiquidity")}
+            {f === "all" && t("launchpad.home.filterAll")}
+            {f === "withLiquidity" && t("launchpad.home.filterWithLiquidity")}
+            {f === "trending" && t("launchpad.home.filterTrending")}
+            {f === "volume" && t("launchpad.home.filterVolume")}
+            {f === "holders" && t("launchpad.home.filterHolders")}
+            {f === "liquidity" && t("launchpad.home.filterLiquidity")}
+            {f === "graduated" && t("launchpad.home.filterGraduated")}
           </button>
         ))}
       </div>
@@ -166,6 +227,42 @@ export default function LaunchpadHomePage() {
         <div className="flex justify-center py-16">
           <div className="w-8 h-8 border-4 border-zrp-red border-t-transparent rounded-full animate-spin" />
         </div>
+      ) : discoverTiles !== null ? (
+        discoverTiles.length === 0 ? (
+          <p className="text-center py-16 text-gray-500 dark:text-gray-400">{t("launchpad.home.emptyState")}</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {discoverTiles.map((tile) => (
+              <Link
+                key={tile.mintAddress}
+                href={`/launchpad/token/${tile.mintAddress}`}
+                className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-zrp-red transition bg-white dark:bg-gray-900"
+              >
+                {tile.launchedToken ? (
+                  <Image
+                    src={tile.launchedToken.imageUrl}
+                    alt={tile.launchedToken.name}
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
+                )}
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-900 dark:text-white truncate">
+                    {tile.launchedToken ? tile.launchedToken.name : `${tile.mintAddress.slice(0, 6)}...${tile.mintAddress.slice(-4)}`}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{tile.launchedToken ? `$${tile.launchedToken.symbol}` : ""}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {tile.metricLabel}: {tile.metricValue}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )
       ) : tokens.length === 0 ? (
         <p className="text-center py-16 text-gray-500 dark:text-gray-400">{t("launchpad.home.emptyState")}</p>
       ) : (

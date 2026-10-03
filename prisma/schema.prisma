@@ -75,6 +75,11 @@ enum TransactionStatus {
   FAILED
 }
 
+enum TokenVenue {
+  DIRECT_MINT
+  PUMP_CURVE
+}
+
 enum WithdrawalStatus {
   PENDING
   PROCESSING
@@ -2199,6 +2204,14 @@ model LaunchedToken {
 
   mintAddress String? @unique
 
+  // DIRECT_MINT (default): ZRP's own atomic client-signed SPL mint, a
+  // flat USDC fee charged and recorded below. PUMP_CURVE: created through
+  // pump.fun's real bonding-curve program (create_v2/create_v2_and_buy,
+  // see client-pump-create.ts) - ZRP charges no separate fee for this
+  // path (pump.fun's own protocol fees apply on every curve trade
+  // instead), so feeAmount/feeTransactionId are null for these rows.
+  venue TokenVenue @default(DIRECT_MINT)
+
   name        String
   symbol      String
   description String? @db.Text
@@ -2216,8 +2229,8 @@ model LaunchedToken {
   revokeFreeze Boolean @default(false)
   revokeUpdate Boolean @default(false)
 
-  feeAmount        Decimal @db.Decimal(18, 6)
-  feeTransactionId String  @unique
+  feeAmount        Decimal? @db.Decimal(18, 6)
+  feeTransactionId String?  @unique
 
   mintTransactionId String? @unique
 
@@ -3097,6 +3110,19 @@ enum TradeSide {
   SELL
 }
 
+// A trade's venue: the original Raydium CPMM pool swaps from PR #444, or
+// a pump-style bonding-curve buy/sell (see pump-curve-service.ts). Both
+// land in the same table keyed by mintAddress so volume aggregation
+// (getVolumeBuckets / getVolumeBucketsForMint) and AnalyticsSnapshot never
+// have to merge two separate trade logs - a mint's total volume is just
+// every TokenTrade row for it, whichever venue it traded on. Defaults to
+// the pre-existing value so the migration backfills every historical row
+// correctly without a data migration script.
+enum TradeSource {
+  POOL_SWAP
+  BONDING_CURVE
+}
+
 // Indexed, not read live from RPC on every analytics request - a pool's
 // full trade history can be thousands of transactions, far too slow and
 // RPC-expensive to re-fetch per page view. TokenVolumeSyncState below is
@@ -3108,8 +3134,15 @@ enum TradeSide {
 model TokenTrade {
   id String @id @default(cuid())
 
-  poolId String
-  pool   TokenPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  // Null for a BONDING_CURVE trade: it happens directly against the
+  // mint's pump bonding-curve PDA, never a TokenPool row. Always set for
+  // POOL_SWAP. onDelete: SetNull (not Cascade) because a curve trade's
+  // row has no pool to cascade from in the first place, and a pool-swap
+  // trade's history should outlive a pool record being removed.
+  poolId String?
+  pool   TokenPool? @relation(fields: [poolId], references: [id], onDelete: SetNull)
+
+  source TradeSource @default(POOL_SWAP)
 
   mintAddress    String
   txSignature    String    @unique
@@ -3125,6 +3158,116 @@ model TokenTrade {
 
   @@index([poolId, blockTime])
   @@index([mintAddress, blockTime])
+  @@index([mintAddress, source, blockTime])
+}
+
+// Real, independently-verified pump-fun bonding-curve graduations - never
+// a simulated/inferred state. Recorded only after pump-curve-service.ts
+// re-reads the curve's own `complete` flag (or the on-chain CompleteEvent)
+// directly from chain; mintAddress is unique because a curve graduates
+// at most once and `complete` never reverts to false.
+model GraduationEvent {
+  id String @id @default(cuid())
+
+  mintAddress         String @unique
+  bondingCurveAddress String
+  // The pump-amm canonical pool pump migrates liquidity into - populated
+  // once that pool account is confirmed to exist on-chain; null means
+  // graduation was detected (complete == true) but the destination pool
+  // has not yet been independently confirmed.
+  poolAddress String?
+
+  // true only when `signature`/`slot`/`blockTime` below were read from a
+  // real, decoded CompletePumpAmmMigrationEvent for this exact mint (see
+  // pump-event-service.ts's parseMigrationEvent) - the actual migration
+  // transaction, not an inference. false means checkGraduation could not
+  // find that event within its bounded signature-history search window
+  // and fell back to "the newest confirmed signature touching the
+  // bonding-curve account" as a practical anchor; the graduated:true
+  // signal itself (the on-chain `complete` flag) is equally real either
+  // way - only the *attribution* of this specific signature differs.
+  migrationVerified Boolean @default(false)
+
+  // Real amounts from the decoded CompletePumpAmmMigrationEvent - the
+  // base tokens and quote (sol_amount; actually the curve's quote mint)
+  // moved into the new pool, and the migration fee pump charged. Null
+  // when migrationVerified is false (nothing decoded to read them from).
+  mintAmountRaw            Decimal? @db.Decimal(38, 0)
+  solAmountLamports        Decimal? @db.Decimal(38, 0)
+  poolMigrationFeeLamports Decimal? @db.Decimal(38, 0)
+
+  // Null only when graduation was detected (complete == true) but no
+  // confirmed signature could be found for the curve account at detection
+  // time (e.g. RPC history already pruned) - see checkGraduation's
+  // anchorSignature doc comment. A nullable unique column allows this to
+  // happen for more than one mint; Postgres never treats two NULLs as a
+  // duplicate.
+  signature String?  @unique
+  slot      Int?
+  blockTime DateTime?
+
+  detectedAt DateTime @default(now())
+
+  // Stamped every time findVerifiedMigration actually runs (found or not),
+  // never on a plain checkGraduation read. Gates retries of that expensive,
+  // multi-getTransaction search behind MIGRATION_SEARCH_COOLDOWN_MS in
+  // pump-curve-service.ts so a still-unverified graduated token being
+  // viewed repeatedly (a popular token page, not just one user retrying)
+  // cannot re-trigger the full search on every single page load - without
+  // this, an aged-out migration signature would mean paying the search's
+  // full RPC cost once per page view, forever, for as long as the token
+  // stays unverified.
+  lastMigrationSearchAt DateTime?
+
+  @@index([mintAddress])
+}
+
+// Periodic, real historical snapshots for the Launchpad's price/volume/
+// liquidity/holder charts and discovery ranking - never a fabricated or
+// interpolated data point. One row per (mint, takenAt) written by the
+// launchpad-analytics-snapshot cron on a fixed interval (see that route's
+// comment for the exact cadence and why); chart/ranking queries resample
+// from these real rows rather than ever synthesizing a value for a period
+// with no snapshot. priceQuote/priceTokenRaw are stored as the exact
+// integer virtual reserves a bonding-curve price is derived from (never
+// pre-divided into a float) so a chart can recompute an exact price at
+// render time; both are null when the mint has no live bonding curve to
+// read a price from at snapshot time (e.g. already graduated, or a plain
+// LaunchedToken with no curve at all).
+model AnalyticsSnapshot {
+  id String @id @default(cuid())
+
+  mintAddress String
+  takenAt     DateTime
+
+  priceQuoteLamports Decimal? @db.Decimal(38, 0)
+  priceTokenRaw      Decimal? @db.Decimal(38, 0)
+  marketCapLamports  Decimal? @db.Decimal(38, 0)
+  // Bonding-curve progress toward graduation in basis points (10_000 =
+  // 100%), from curveProgressBps at snapshot time - null when the mint
+  // has no live pump curve to read progress from. Powers the "Graduating"
+  // discovery filter and a historical progress view without a live RPC
+  // call per request.
+  curveProgressBps Int?
+
+  liquidityTotalLamports Decimal @db.Decimal(38, 0) @default(0)
+  poolCount              Int     @default(0)
+
+  // Null means "not available this snapshot" (see full-holder-count-
+  // service.ts's own honest UNAVAILABLE status) - never backfilled as 0,
+  // which would be indistinguishable from a real zero-holder mint.
+  holderCount Int?
+
+  // Deltas since the previous snapshot for this mint, not cumulative
+  // totals - summing a range of rows gives that range's real volume.
+  buyVolumeLamports  Decimal @db.Decimal(38, 0) @default(0)
+  sellVolumeLamports Decimal @db.Decimal(38, 0) @default(0)
+  tradeCount         Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([mintAddress, takenAt])
+  @@index([mintAddress, takenAt])
 }
 
 // One row per pool - the resumable cursor for the background

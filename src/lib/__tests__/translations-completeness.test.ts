@@ -328,6 +328,17 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingPositions.statusActive", // "Active" status label kept identical (short/invariant form)
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.curve.volumeLabel", // "Volume" is a genuine cognate (identical French word, same meaning)
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.metricVolume", // "Volume" is a genuine cognate/established loanword in this language
   ],
   de: [
     "adminAnnouncements.typeUpdate", // "Update" is a genuine established German loanword, not an untranslated copy
@@ -477,6 +488,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   it: [
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
@@ -603,6 +623,17 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.curve.volumeLabel", // "Volume" is a genuine cognate (identical spelling, same meaning)
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.metricVolume", // "Volume" is a genuine cognate/established loanword in this language
   ],
   sq: [
     "investors.platform.music.title",
@@ -687,6 +718,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   es: [
     "investors.types.familyOffice",
@@ -803,6 +843,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   ru: [
     "investors.platform.music.title",
@@ -864,6 +913,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   ar: [
     "investors.platform.music.title",
@@ -907,6 +964,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   zh: [
     "investors.platform.music.title",
@@ -941,6 +1006,13 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   tr: [
     "investors.platform.music.title",
@@ -1034,6 +1106,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   id: [
     "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1184,6 +1264,17 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.curve.volumeLabel", // "Volume" is a genuine cognate (identical spelling, same meaning)
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.metricVolume", // "Volume" is a genuine cognate/established loanword in this language
   ],
   pt: [
     "investors.types.familyOffice",
@@ -1273,6 +1364,17 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.curve.volumeLabel", // "Volume" is a genuine cognate (identical spelling, same meaning)
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.metricVolume", // "Volume" is a genuine cognate/established loanword in this language
   ],
   ja: [
     "investors.platform.music.title",
@@ -1304,6 +1406,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
     "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   ko: [
     "group.lastMessagePrefix",
@@ -1318,6 +1428,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.verificationFailedNamed",
     "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   hi: [
     "adminPayments.tx",
@@ -1338,6 +1456,13 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   nl: [
     "adminAnnouncements.typeUpdate", // "Update" is a genuine established Dutch loanword, not an untranslated copy
@@ -1604,6 +1729,19 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.statusBonding", // "Bonding" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.curve.volumeLabel", // "Volume" is a genuine cognate (identical spelling, same meaning)
+    "launchpad.home.filterTrending", // "Trending" is a genuine cognate/established loanword in this language
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.metricVolume", // "Volume" is a genuine cognate/established loanword in this language
   ],
   pl: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1705,6 +1843,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   ro: [
     "liveAudio.visibilityPublic", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1862,6 +2008,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   cs: [
     "investors.types.familyOffice",
@@ -1961,6 +2116,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   hu: [
     "investors.types.familyOffice",
@@ -2047,6 +2211,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   sv: [
     // "Version" is a legitimate Swedish cognate (identical spelling); this key only became a
@@ -2201,6 +2374,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   da: [
     "adminAnnouncements.formTypeLabel", // "Type" is a genuine established Danish loanword, not an untranslated copy
@@ -2396,6 +2578,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   hr: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2503,6 +2694,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   bg: [
     "investors.types.familyOffice",
@@ -2551,6 +2751,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   el: [
     "investors.types.familyOffice",
@@ -2641,6 +2849,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   // Norwegian, Serbian (Latin), Bosnian and Macedonian: each list below
   // was computed from the real diff against English and hand-reviewed -
@@ -2724,6 +2941,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   sr: [
     "investors.platform.music.title",
@@ -2782,6 +3008,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingPositions.unstakeButton", // "Unstake" is a genuine cognate/established loanword in this language
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   bs: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -2852,6 +3086,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   mk: [
     "investors.platform.music.title",
@@ -2873,6 +3116,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   // The 5-language 29->34 expansion (Ukrainian, Finnish, Slovak,
   // Slovenian, Lithuanian): "ZRP Market Plus"/"News"/"Music" as
@@ -2897,6 +3148,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.staking.apyLabel", // template kept — "APY" is the industry-standard acronym, untranslated
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   fi: [
     "profile.media", "settings.video", "chat.contactVideo", "group.lastMessagePrefix",
@@ -2933,6 +3192,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   sk: [
     "action.repost", "onboarding.bio", "settings.video", "settings.bio", "chat.offline",
@@ -2978,6 +3246,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   sl: [
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -3013,6 +3290,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.stakingDetail.lockDaysShort", // "{days}d" template — the fixed/label portion is a genuine cognate
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   lt: [
     "group.lastMessagePrefix", "press.emailBadge", "marketplace.heroTitle", "faq.cat.marketPlus",
@@ -3032,6 +3318,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   // The 4-language 34->38 expansion (Estonian, Irish, Latvian, Maltese) -
   // same category of reviewed cognate/format exception as every list
@@ -3072,6 +3367,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   ga: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.news.title",
@@ -3102,6 +3406,14 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   lv: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
@@ -3128,6 +3440,15 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
     "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
+    "launchpad.curve.progressLabel", // "Progress" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   mt: [
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
@@ -3172,6 +3493,16 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.progressLabel", // "Progress" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   // The 1-language 38->39 expansion (Romansh / Rumantsch Grischun).
   // Reviewed against French and German precedent for each key: genuine
@@ -3228,6 +3559,16 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.vestingCreate.depositSymbolFallback", // "tokens" is a genuine cognate/established loanword in this language
     "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated, same precedent as "Launchpad"/"NFT"/"DAO"
     "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.progressLabel", // "Progress" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range15m", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range1h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range6h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range24h", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range7d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
+    "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
 };
 

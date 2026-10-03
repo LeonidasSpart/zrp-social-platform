@@ -22,6 +22,20 @@ export default defineConfig({
     // overlapping data concurrently is a real source of flakiness
     // independent of the code under test - keep files sequential.
     fileParallelism: false,
+    server: {
+      deps: {
+        // @pump-fun/pump-sdk's ESM build pulls in @pump-fun/agent-payments-sdk,
+        // whose ESM build does `import { BN } from "@coral-xyz/anchor"` - a
+        // named import from a CJS package. Externalized (Vitest's default for
+        // node_modules), Node's own ESM loader can't always synthesize that
+        // named export via its CJS interop heuristic and the import throws.
+        // Inlining both here routes them through Vite's own esbuild-based
+        // commonjs transform instead, which handles this interop correctly -
+        // this only affects how the test runner loads the packages, not how
+        // Next.js's own bundler resolves them for the real app.
+        inline: ["@pump-fun/agent-payments-sdk", "@coral-xyz/anchor"],
+      },
+    },
   },
   resolve: {
     alias: {

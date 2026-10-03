@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
 
     const tokensWithMoneyAsNumber = items.map((token) => ({
       ...token,
-      feeAmount: token.feeAmount.toNumber(),
+      feeAmount: decimalToNumber(token.feeAmount),
     }));
 
     return jsonWithDecimals({

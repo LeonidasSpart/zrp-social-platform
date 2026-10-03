@@ -179,20 +179,10 @@ const WINDOWS: Array<{ label: VolumeBucket["windowLabel"]; ms: number }> = [
   { label: "30d", ms: 30 * 24 * 60 * 60_000 },
 ];
 
-/**
- * Real bucketed volume - computed from the TokenTrade rows this module
- * itself recorded, never estimated or extrapolated. A bucket with zero
- * trades genuinely had zero volume in that window; it is never
- * backfilled or smoothed.
- */
-export async function getVolumeBuckets(poolId: string): Promise<VolumeBucket[]> {
-  const now = Date.now();
-  const earliest = new Date(now - WINDOWS[WINDOWS.length - 1].ms);
-  const trades = await prisma.tokenTrade.findMany({
-    where: { poolId, blockTime: { gte: earliest } },
-    select: { side: true, baseAmountRaw: true, quoteAmountRaw: true, blockTime: true },
-  });
+type TradeRow = { side: "BUY" | "SELL"; baseAmountRaw: { toString(): string }; quoteAmountRaw: { toString(): string }; blockTime: Date };
 
+function bucketize(trades: TradeRow[]): VolumeBucket[] {
+  const now = Date.now();
   return WINDOWS.map(({ label, ms }) => {
     const cutoff = now - ms;
     const inWindow = trades.filter((t) => t.blockTime.getTime() >= cutoff);
@@ -220,4 +210,62 @@ export async function getVolumeBuckets(poolId: string): Promise<VolumeBucket[]> 
       tradeCount: inWindow.length,
     };
   });
+}
+
+/**
+ * Real bucketed volume - computed from the TokenTrade rows this module
+ * itself recorded, never estimated or extrapolated. A bucket with zero
+ * trades genuinely had zero volume in that window; it is never
+ * backfilled or smoothed.
+ */
+export async function getVolumeBuckets(poolId: string): Promise<VolumeBucket[]> {
+  const earliest = new Date(Date.now() - WINDOWS[WINDOWS.length - 1].ms);
+  const trades = await prisma.tokenTrade.findMany({
+    where: { poolId, blockTime: { gte: earliest } },
+    select: { side: true, baseAmountRaw: true, quoteAmountRaw: true, blockTime: true },
+  });
+  return bucketize(trades);
+}
+
+/**
+ * Same bucketed volume, but keyed by mintAddress rather than one pool -
+ * covers every TokenTrade for the mint regardless of venue (Raydium pool
+ * swap or pump bonding-curve trade, see the TradeSource enum), so a
+ * mint's "total volume" is never split across two separate reads that the
+ * UI/ranking would then have to merge itself.
+ */
+export async function getVolumeBucketsForMint(mintAddress: string): Promise<VolumeBucket[]> {
+  const earliest = new Date(Date.now() - WINDOWS[WINDOWS.length - 1].ms);
+  const trades = await prisma.tokenTrade.findMany({
+    where: { mintAddress, blockTime: { gte: earliest } },
+    select: { side: true, baseAmountRaw: true, quoteAmountRaw: true, blockTime: true },
+  });
+  return bucketize(trades);
+}
+
+export interface TradeVolumeDelta {
+  buyQuoteRaw: string;
+  sellQuoteRaw: string;
+  tradeCount: number;
+}
+
+/**
+ * Real quote-side (SOL/lamports) volume for a mint strictly after `since`
+ * - used by the AnalyticsSnapshot cron to record a period delta rather
+ * than a cumulative total, so summing a range of snapshot rows gives that
+ * range's real volume without double-counting earlier periods.
+ */
+export async function getQuoteVolumeSince(mintAddress: string, since: Date): Promise<TradeVolumeDelta> {
+  const trades = await prisma.tokenTrade.findMany({
+    where: { mintAddress, blockTime: { gt: since } },
+    select: { side: true, quoteAmountRaw: true },
+  });
+  let buyQuoteRaw = ZERO;
+  let sellQuoteRaw = ZERO;
+  for (const t of trades) {
+    const quote = BigInt(t.quoteAmountRaw.toString());
+    if (t.side === "BUY") buyQuoteRaw += quote;
+    else sellQuoteRaw += quote;
+  }
+  return { buyQuoteRaw: buyQuoteRaw.toString(), sellQuoteRaw: sellQuoteRaw.toString(), tradeCount: trades.length };
 }

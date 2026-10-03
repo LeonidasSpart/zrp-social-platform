@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, ShieldCheck, ShieldOff, Copy, Check, TrendingUp, Users, Droplets, BarChart3, Flame } from "lucide-react";
+import { Loader2, ShieldCheck, ShieldOff, Copy, Check, TrendingUp, Users, Droplets, BarChart3, Flame, Rocket, GraduationCap, LineChart as LineChartIcon } from "lucide-react";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { safeExternalHref } from "@/lib/profile-website";
@@ -17,7 +18,14 @@ import {
   AmbiguousLiquidityError,
   type PoolOnChainState,
 } from "@/lib/launchpad/client-liquidity";
+import { buyOnCurve, sellOnCurve, AmbiguousTradeError } from "@/lib/launchpad/client-bonding-curve";
 import { connectInjectedWallet } from "@/lib/launchpad/injected-wallet";
+import type { HistoryChartPoint } from "@/components/launchpad/TokenHistoryChart";
+
+const TokenMetricChart = dynamic(
+  () => import("@/components/launchpad/TokenHistoryChart").then((m) => m.TokenMetricChart),
+  { ssr: false }
+);
 
 interface TokenAnalytics {
   market: {
@@ -341,6 +349,431 @@ function PoolLiquidityCard({
   );
 }
 
+interface CurveState {
+  status: "OK" | "NO_CURVE" | "UNSUPPORTED_CURVE_VARIANT" | "UNAVAILABLE";
+  reason: string | null;
+  bondingCurveAddress: string;
+  graduated: boolean;
+  realQuoteLamports: string | null;
+  realTokenReservesRaw: string | null;
+  priceDisplay: string | null;
+  progressBps: number | null;
+}
+
+interface CurveQuote {
+  status: "OK" | "NO_CURVE" | "GRADUATED" | "UNSUPPORTED_CURVE_VARIANT" | "UNAVAILABLE";
+  reason: string | null;
+  tokenAmountRaw: string | null;
+  solAmountLamports: string | null;
+  totalFeeLamports: string | null;
+  minimumReceivedRaw: string | null;
+}
+
+interface GraduationCheck {
+  graduated: boolean;
+  poolAddress: string | null;
+  poolAccountExists: boolean;
+  record: { migrationVerified: boolean } | null;
+}
+
+interface PumpSwapPoolState {
+  status: "OK" | "NOT_FOUND" | "UNAVAILABLE";
+  baseReserveRaw: string | null;
+  quoteReserveRaw: string | null;
+  priceDisplay: string | null;
+}
+
+function lamportsToSol(raw: string | null): string {
+  if (!raw) return "0";
+  try {
+    return (Number(BigInt(raw)) / 1e9).toLocaleString(undefined, { maximumFractionDigits: 6 });
+  } catch {
+    return "0";
+  }
+}
+
+type HistoryMetric = "price" | "volume" | "liquidity" | "holders";
+type HistoryRange = "5m" | "15m" | "1h" | "6h" | "24h" | "7d" | "30d";
+
+interface HistoryApiPoint {
+  timestamp: string;
+  price?: string | null;
+  totalVolumeLamports?: string;
+  liquidityTotalLamports?: string;
+  holderCount?: number | null;
+}
+
+interface HistoryApiResponse {
+  status: "OK" | "NO_HISTORY";
+  points: HistoryApiPoint[];
+  insufficientHistory: { available: boolean; firstObservedAt: string | null; message: string | null };
+}
+
+function TokenHistorySection({ mintAddress, t }: { mintAddress: string; t: ReturnType<typeof useLanguage>["t"] }) {
+  const [metric, setMetric] = useState<HistoryMetric>("price");
+  const [range, setRange] = useState<HistoryRange>("24h");
+  const [data, setData] = useState<HistoryApiResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/launchpad/tokens/${mintAddress}/history?metric=${metric}&range=${range}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (!cancelled) setData(json);
+      })
+      .catch(() => {
+        if (!cancelled) setData(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mintAddress, metric, range]);
+
+  const points: HistoryChartPoint[] = (data?.points ?? []).map((p) => {
+    let value: number | null = null;
+    switch (metric) {
+      case "price":
+        value = p.price ? Number(p.price) : null;
+        break;
+      case "volume":
+        value = p.totalVolumeLamports ? Number(p.totalVolumeLamports) / 1e9 : null;
+        break;
+      case "liquidity":
+        value = p.liquidityTotalLamports ? Number(p.liquidityTotalLamports) / 1e9 : null;
+        break;
+      case "holders":
+        value = typeof p.holderCount === "number" ? p.holderCount : null;
+        break;
+    }
+    return { timestamp: p.timestamp, value };
+  });
+
+  const metricLabels: Record<HistoryMetric, string> = {
+    price: t("launchpad.history.metricPrice"),
+    volume: t("launchpad.history.metricVolume"),
+    liquidity: t("launchpad.history.metricLiquidity"),
+    holders: t("launchpad.history.metricHolders"),
+  };
+  const rangeLabels: Record<HistoryRange, string> = {
+    "5m": t("launchpad.history.range5m"),
+    "15m": t("launchpad.history.range15m"),
+    "1h": t("launchpad.history.range1h"),
+    "6h": t("launchpad.history.range6h"),
+    "24h": t("launchpad.history.range24h"),
+    "7d": t("launchpad.history.range7d"),
+    "30d": t("launchpad.history.range30d"),
+  };
+
+  return (
+    <div className="rounded-md border border-gray-200 dark:border-gray-700 p-4 mb-4">
+      <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white mb-3">
+        <LineChartIcon className="h-4 w-4" /> {t("launchpad.history.heading")}
+      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div className="flex gap-1">
+          {(Object.keys(metricLabels) as HistoryMetric[]).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMetric(m)}
+              className={`rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                metric === m
+                  ? "bg-zrp-red text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              }`}
+            >
+              {metricLabels[m]}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1">
+          {(Object.keys(rangeLabels) as HistoryRange[]).map((r) => (
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              className={`rounded-md px-2 py-0.5 text-xs font-medium transition-colors ${
+                range === r
+                  ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+              }`}
+            >
+              {rangeLabels[r]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">{t("launchpad.history.loadingChart")}</p>
+      ) : !data || data.status === "NO_HISTORY" || points.every((p) => p.value === null) ? (
+        <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">{t("launchpad.history.noHistory")}</p>
+      ) : (
+        <>
+          <TokenMetricChart points={points} t={t} />
+          {data.insufficientHistory.available && data.insufficientHistory.message && data.insufficientHistory.firstObservedAt && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+              {t("launchpad.history.insufficientHistory", {
+                date: new Date(data.insufficientHistory.firstObservedAt).toLocaleString(),
+              })}
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; decimals: number; t: ReturnType<typeof useLanguage>["t"] }) {
+  const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
+  const [curve, setCurve] = useState<CurveState | null>(null);
+  const [graduation, setGraduation] = useState<GraduationCheck | null>(null);
+  const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [amount, setAmount] = useState("");
+  const [quote, setQuote] = useState<CurveQuote | null>(null);
+  const [step, setStep] = useState<"idle" | "quoting" | "working" | "recording">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [ambiguous, setAmbiguous] = useState<{ signature: string } | null>(null);
+  const [done, setDone] = useState(false);
+  const [pumpSwapPool, setPumpSwapPool] = useState<PumpSwapPoolState | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/launchpad/tokens/${mintAddress}/curve`)
+      .then((res) => res.json())
+      .then((data) => setCurve(data.curve ?? null))
+      .catch(() => setCurve(null));
+    fetch(`/api/launchpad/tokens/${mintAddress}/graduation`)
+      .then((res) => res.json())
+      .then((data) => setGraduation(data))
+      .catch(() => setGraduation(null));
+  }, [mintAddress]);
+
+  useEffect(() => {
+    if (!graduation?.graduated || !graduation.poolAccountExists) {
+      setPumpSwapPool(null);
+      return;
+    }
+    fetch(`/api/launchpad/tokens/${mintAddress}/pumpswap-pool`)
+      .then((res) => res.json())
+      .then((data) => setPumpSwapPool(data.pool ?? null))
+      .catch(() => setPumpSwapPool(null));
+  }, [mintAddress, graduation?.graduated, graduation?.poolAccountExists]);
+
+  useEffect(() => {
+    setQuote(null);
+    setError(null);
+    const numeric = Number(amount || "0");
+    if (!amount || numeric <= 0) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      setStep("quoting");
+      const rawAmount =
+        side === "buy" ? BigInt(Math.round(numeric * 1e9)).toString() : BigInt(Math.round(numeric * 10 ** decimals)).toString();
+      fetch(`/api/launchpad/tokens/${mintAddress}/curve?side=${side}&amount=${rawAmount}&slippageBps=100`, { signal: controller.signal })
+        .then((res) => res.json())
+        .then((data) => setQuote(data.quote ?? null))
+        .catch(() => {})
+        .finally(() => setStep("idle"));
+    }, 400);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [amount, side, mintAddress, decimals]);
+
+  if (!curve || curve.status === "NO_CURVE") return null;
+
+  const handleTrade = async () => {
+    if (!quote || quote.status !== "OK" || !quote.tokenAmountRaw || !quote.solAmountLamports) return;
+    try {
+      setStep("working");
+      setError(null);
+      setDone(false);
+      const result =
+        side === "buy"
+          ? await buyOnCurve({
+              rpcUrl,
+              mintAddress,
+              solLamports: BigInt(quote.solAmountLamports),
+              quotedTokenAmountRaw: BigInt(quote.tokenAmountRaw),
+              slippagePercent: 1,
+            })
+          : await sellOnCurve({
+              rpcUrl,
+              mintAddress,
+              tokenAmountRaw: BigInt(quote.tokenAmountRaw),
+              quotedSolLamports: BigInt(quote.solAmountLamports),
+              slippagePercent: 1,
+            });
+
+      setStep("recording");
+      await fetch(`/api/launchpad/curve/${side}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mintAddress, walletAddress: result.walletAddress, transactionId: result.signature }),
+      });
+      setDone(true);
+      setAmount("");
+      setQuote(null);
+    } catch (err: unknown) {
+      if (err instanceof AmbiguousTradeError) {
+        setAmbiguous({ signature: err.signature });
+      } else {
+        setError(err instanceof Error ? err.message : t("launchpad.pool.createFailedGeneric"));
+      }
+    } finally {
+      setStep("idle");
+    }
+  };
+
+  const progressPercent = curve.progressBps !== null ? curve.progressBps / 100 : 0;
+
+  return (
+    <div className="rounded-md border border-gray-200 dark:border-gray-700 p-4 mb-4">
+      <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white mb-3">
+        {graduation?.graduated ? <GraduationCap className="h-4 w-4" /> : <Rocket className="h-4 w-4" />}
+        {t("launchpad.curve.heading")}
+      </p>
+
+      {graduation?.graduated ? (
+        <div className="space-y-1">
+          <p className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+            {t("launchpad.curve.statusGraduated")}
+          </p>
+          <p
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ml-1.5 ${
+              graduation.record?.migrationVerified
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+            }`}
+          >
+            {graduation.record?.migrationVerified
+              ? t("launchpad.curve.migrationVerified")
+              : t("launchpad.curve.migrationPending")}
+          </p>
+          {graduation.poolAddress && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              {t("launchpad.curve.poolAddressLabel")}:{" "}
+              <span className="font-mono">{graduation.poolAddress.slice(0, 6)}...{graduation.poolAddress.slice(-4)}</span>
+              {!graduation.poolAccountExists && <span className="ml-1 text-amber-600 dark:text-amber-400">({t("launchpad.curve.unavailable")})</span>}
+            </p>
+          )}
+          {graduation.poolAccountExists && pumpSwapPool && (
+            pumpSwapPool.status === "OK" ? (
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.idoDetail.priceLabel")}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{pumpSwapPool.priceDisplay ?? "-"} SOL</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.curve.liquidityLabel")}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{lamportsToSol(pumpSwapPool.quoteReserveRaw)} SOL</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">{t("launchpad.curve.unavailable")}</p>
+            )
+          )}
+        </div>
+      ) : curve.status !== "OK" ? (
+        <p className="text-sm text-gray-400 dark:text-gray-500">
+          {curve.status === "UNSUPPORTED_CURVE_VARIANT" ? t("launchpad.curve.unsupportedVariant") : t("launchpad.curve.unavailable")}
+        </p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.idoDetail.priceLabel")}</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-sm">{curve.priceDisplay} SOL</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("launchpad.curve.raisedLabel")}</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-sm">{lamportsToSol(curve.realQuoteLamports)} SOL</p>
+            </div>
+          </div>
+          <div className="mb-3">
+            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <span>{t("launchpad.curve.progressLabel")}</span>
+              <span>{progressPercent.toFixed(1)}%</span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+              <div className="h-full bg-zrp-red" style={{ width: `${Math.min(100, progressPercent)}%` }} />
+            </div>
+          </div>
+
+          <div className="flex gap-2 mb-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSide("buy");
+                setAmount("");
+              }}
+              className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${side === "buy" ? "bg-green-600 text-white" : "border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300"}`}
+            >
+              {t("launchpad.curve.buyButton")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSide("sell");
+                setAmount("");
+              }}
+              className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${side === "sell" ? "bg-red-600 text-white" : "border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300"}`}
+            >
+              {t("launchpad.curve.sellButton")}
+            </button>
+          </div>
+
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder={side === "buy" ? t("launchpad.pool.quoteAmountLabel") : t("launchpad.pool.tokenAmountLabel")}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+            className="h-9 w-full rounded-md border border-gray-300 bg-white px-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white mb-2"
+          />
+
+          {quote && quote.status === "OK" && (
+            <div className="rounded-md bg-gray-50 dark:bg-gray-800/50 p-2 text-xs text-gray-600 dark:text-gray-400 space-y-0.5 mb-2">
+              <p>
+                {t("launchpad.curve.estimatedReceiveLabel")}:{" "}
+                {side === "buy" ? (Number(quote.tokenAmountRaw) / 10 ** decimals).toLocaleString() : `${lamportsToSol(quote.solAmountLamports)} SOL`}
+              </p>
+              <p>{t("launchpad.curve.feeLabel")}: {lamportsToSol(quote.totalFeeLamports)} SOL</p>
+              <p>
+                {t("launchpad.curve.minReceivedLabel")}:{" "}
+                {side === "buy" ? (Number(quote.minimumReceivedRaw) / 10 ** decimals).toLocaleString() : `${lamportsToSol(quote.minimumReceivedRaw)} SOL`}
+              </p>
+            </div>
+          )}
+
+          {ambiguous && (
+            <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">
+              {t("launchpad.pool.ambiguousTitle")} {t("launchpad.pool.ambiguousBody")}{" "}
+              <span className="font-mono break-all">{ambiguous.signature}</span>
+            </p>
+          )}
+          {error && <p className="text-xs text-red-600 dark:text-red-400 mb-2">{error}</p>}
+          {done && <p className="text-xs text-green-600 dark:text-green-400 mb-2">{t("launchpad.pool.actionSucceeded")}</p>}
+
+          <button
+            type="button"
+            onClick={() => void handleTrade()}
+            disabled={step !== "idle" || !quote || quote.status !== "OK"}
+            className={`inline-flex w-full items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-white transition-colors disabled:opacity-50 ${side === "buy" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}`}
+          >
+            {step !== "idle" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {side === "buy" ? t("launchpad.curve.buyButton") : t("launchpad.curve.sellButton")}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 function formatSupply(rawSupply: string, decimals: number): string {
   try {
     const raw = BigInt(rawSupply);
@@ -491,6 +924,10 @@ export default function TokenDetailPage() {
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{analytics.holders.note}</p>
         </div>
       )}
+
+      <TokenHistorySection mintAddress={token.mintAddress} t={t} />
+
+      <BondingCurveCard mintAddress={token.mintAddress} decimals={token.decimals} t={t} />
 
       <div className="mb-4">
         <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white mb-2">
