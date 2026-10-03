@@ -53,6 +53,7 @@ export function getNotificationHref(n: {
       return "/music";
     case "TIP":
     case "PURCHASE":
+    case "LIVE_GIFT":
       return "/creator/dashboard";
   }
 
