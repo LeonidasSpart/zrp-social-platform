@@ -666,6 +666,15 @@ include:
   the call itself is unaffected)
 - **Blockchain**: `SOLANA_RPC_URL`, `NEXT_PUBLIC_SOLANA_RPC_URL`,
   `SOLANA_WALLET_ADDRESS`, `SOLANA_PRIVATE_KEY`, `NEXT_PUBLIC_USDC_MINT`
+- **ZRP Launchpad (ZRP-native bonding-curve program)**: `ZRP_LAUNCH_PROGRAM_ID` /
+  `NEXT_PUBLIC_ZRP_LAUNCH_PROGRAM_ID` - the deployed program ID for
+  `programs/zrp-launchpad/`. **Required in production** once a non-devnet
+  deploy exists: both `src/lib/launchpad/zrp-launch-keys.ts` and
+  `src/lib/solana-client.ts`'s RPC resolution fail closed (throw rather than
+  silently defaulting to the devnet program ID / devnet RPC) when
+  `NODE_ENV=production` and the corresponding var is unset. See
+  `docs/zrp-launchpad-deployment.md` for the full devnet→mainnet cutover
+  procedure.
 - **Live Audio (SFU)**: `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` (paired
   credential for `livekit-server-sdk`; mints room access tokens and
   verifies webhooks locally, no network call required; never sent to any

@@ -510,8 +510,19 @@ jobs:
           mkdir -p target/deploy
           cp "$RUNNER_TEMP/mainnet-keys/program-keypair.json" target/deploy/zrp_launchpad-keypair.json
           MAINNET_PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
+          echo "MAINNET_PROGRAM_ID=$MAINNET_PROGRAM_ID" >> "$GITHUB_ENV"
           sed -i "s/declare_id!(\"[^\"]*\");/declare_id!(\"$MAINNET_PROGRAM_ID\");/" programs/zrp-launchpad/src/lib.rs
           anchor build
+
+      - name: Verify declare_id! matches the mainnet program keypair
+        run: |
+          DECLARED_ID=$(grep -oE '"[1-9A-HJ-NP-Za-km-z]{32,44}"' programs/zrp-launchpad/src/lib.rs | head -1 | tr -d '"')
+          echo "declare_id!: $DECLARED_ID"
+          echo "keypair:     $MAINNET_PROGRAM_ID"
+          if [ "$DECLARED_ID" != "$MAINNET_PROGRAM_ID" ]; then
+            echo "::error::declare_id! in the built program does not match SOLANA_MAINNET_PROGRAM_KEYPAIR after the sed rewrite - refusing to deploy a program whose on-chain identity won't match its own source."
+            exit 1
+          fi
 
       - name: Check deployer balance
         run: |
@@ -532,13 +543,56 @@ jobs:
             --program-name zrp_launchpad \
             --program-keypair target/deploy/zrp_launchpad-keypair.json
 
+      # `anchor deploy`/`solana program deploy` sets the deploying wallet
+      # (the fee-payer) as upgrade authority by default - this step makes
+      # that explicit and idempotent rather than relying on an implicit
+      # default, and keeps it on the DEPLOYER key (never the program's own
+      # identity key, unlike the devnet job's self-authority pattern),
+      # since this one is held separately and can be rotated to a multisig
+      # later without touching the program's permanent on-chain identity.
+      - name: Set upgrade authority to the deployer wallet
+        run: |
+          solana program set-upgrade-authority "$MAINNET_PROGRAM_ID" \
+            --new-upgrade-authority "$RUNNER_TEMP/mainnet-keys/deployer-keypair.json" \
+            --upgrade-authority "$RUNNER_TEMP/mainnet-keys/deployer-keypair.json" \
+            --url mainnet-beta || echo "Upgrade authority already set to the deployer (expected on repeat deploys) - continuing."
+
+      - name: Verify program is executable and upgrade authority is correct
+        run: |
+          DEPLOYER_PUBKEY=$(solana-keygen pubkey "$RUNNER_TEMP/mainnet-keys/deployer-keypair.json")
+          PROGRAM_INFO=$(solana program show "$MAINNET_PROGRAM_ID" --url mainnet-beta)
+          echo "$PROGRAM_INFO"
+          echo "$PROGRAM_INFO" | grep -q "Authority: $DEPLOYER_PUBKEY" || {
+            echo "::error::Upgrade authority on-chain does not match the mainnet deployer wallet ($DEPLOYER_PUBKEY). Refusing to report success with an unverified authority."
+            exit 1
+          }
+          solana account "$MAINNET_PROGRAM_ID" --url mainnet-beta --output json | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if d.get('account',{}).get('executable') else 1)" || {
+            echo "::error::Program account is not marked executable after deploy."
+            exit 1
+          }
+          echo "VERIFIED_UPGRADE_AUTHORITY=$DEPLOYER_PUBKEY" >> "$GITHUB_ENV"
+
+      - name: Upload IDL + types for the deployed mainnet program
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrp-launchpad-mainnet-deploy
+          path: |
+            target/idl/zrp_launchpad.json
+            target/types/zrp_launchpad.ts
+          if-no-files-found: error
+          retention-days: 90
+
       - name: Report deployed program
         run: |
-          PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
           echo "## ZRP Launchpad deployed to mainnet-beta" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Program ID: \`$PROGRAM_ID\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Explorer: https://explorer.solana.com/address/$PROGRAM_ID" >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice::Record this program ID in ZRP_LAUNCH_PROGRAM_ID (env) for the TS client and server verification to use."
+          echo "- Commit: \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Program ID: \`$MAINNET_PROGRAM_ID\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- declare_id! match: verified" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Executable: verified" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Upgrade authority: \`$VERIFIED_UPGRADE_AUTHORITY\` (deployer wallet, verified on-chain)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- IDL/types artifact: zrp-launchpad-mainnet-deploy" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Explorer: https://explorer.solana.com/address/$MAINNET_PROGRAM_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Record this program ID in ZRP_LAUNCH_PROGRAM_ID / NEXT_PUBLIC_ZRP_LAUNCH_PROGRAM_ID for the TS client and server verification to use. Both src/lib/launchpad/zrp-launch-keys.ts and src/lib/solana-client.ts now fail closed in production if these/NEXT_PUBLIC_SOLANA_RPC_URL are left unset - the app will refuse to start against devnet by accident, but it also will not work until these are set."
 
       - name: Clean up mainnet key material
         if: always()

@@ -24,7 +24,18 @@ const DEVNET_PROGRAM_ID = "3vr1SHa9LvEvELb23NBG1J6oFRCSDs8cj8wS55zuoRxK";
 export function getZrpLaunchProgramId(): PublicKey {
   const configured =
     process.env.NEXT_PUBLIC_ZRP_LAUNCH_PROGRAM_ID || process.env.ZRP_LAUNCH_PROGRAM_ID;
-  return new PublicKey(configured || DEVNET_PROGRAM_ID);
+  if (!configured) {
+    // Matches src/lib/solana.ts's getConnection() fail-closed posture: a
+    // production deploy with this var unset must never silently derive
+    // devnet PDAs/transactions - it must refuse to start instead.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "ZRP_LAUNCH_PROGRAM_ID (or NEXT_PUBLIC_ZRP_LAUNCH_PROGRAM_ID) must be configured in production. Refusing to fall back to the devnet ZRP Launchpad program ID."
+      );
+    }
+    return new PublicKey(DEVNET_PROGRAM_ID);
+  }
+  return new PublicKey(configured);
 }
 
 export const ZRP_LAUNCH_PROGRAM_ID = getZrpLaunchProgramId();

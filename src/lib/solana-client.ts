@@ -49,9 +49,22 @@ export function getConnection(): Connection {
     return connection;
   }
 
-  const rpcUrl =
-    process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
-    DEFAULT_RPC_URL;
+  const configuredRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+
+  if (!configuredRpcUrl) {
+    // Same fail-closed posture as getConnection() in src/lib/solana.ts: a
+    // misconfigured production deploy (NEXT_PUBLIC_SOLANA_RPC_URL unset)
+    // must not silently build/sign client-side transactions against the
+    // public Devnet endpoint - every Launchpad create/buy/sell transaction
+    // built client-side goes through this connection.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "NEXT_PUBLIC_SOLANA_RPC_URL must be configured in production. Refusing to fall back to the public Devnet endpoint."
+      );
+    }
+  }
+
+  const rpcUrl = configuredRpcUrl || DEFAULT_RPC_URL;
 
   if (
     !rpcUrl.startsWith("http://") &&
