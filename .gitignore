@@ -20,3 +20,6 @@ node_modules
 *.p12
 keystore.properties
 dump.rdb
+
+# Cargo build output for the Solana program workspace (programs/zrp-launchpad)
+target/
