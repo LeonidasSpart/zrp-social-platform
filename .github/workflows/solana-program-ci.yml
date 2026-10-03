@@ -97,35 +97,37 @@ jobs:
       - name: Install repo npm dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Cache AVM/Anchor CLI install
+      - name: Cache Anchor CLI install
         id: anchor-cache
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/anchor
           key: ${{ runner.os }}-anchor-${{ env.ANCHOR_VERSION }}
 
+      # anchor-cli links against libudev (hardware-wallet/hidapi support in
+      # its Solana CLI dependencies), which isn't guaranteed present on the
+      # bare runner image.
+      - name: Install system build dependencies for Anchor CLI
+        if: steps.anchor-cache.outputs.cache-hit != 'true'
+        run: sudo apt-get update && sudo apt-get install -y libudev-dev
+
       - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
         if: steps.anchor-cache.outputs.cache-hit != 'true'
         run: |
-          # Installing avm via `--git .../anchor` builds it from the
-          # anchor-lang monorepo's current HEAD, which drifts independently
-          # of the pinned ANCHOR_VERSION and can require a newer Cargo
-          # edition than RUST_TOOLCHAIN provides (observed: HEAD required
-          # edition2024, unavailable on Rust 1.82). Installing the `avm`
-          # crate itself from crates.io at the exact pinned version keeps
-          # the whole toolchain reproducible instead of silently tracking
-          # anchor's latest source tree.
-          cargo install --force avm --version ${{ env.ANCHOR_VERSION }} --locked
-          avm install ${{ env.ANCHOR_VERSION }}
-          avm use ${{ env.ANCHOR_VERSION }}
-          cp "$(avm which ${{ env.ANCHOR_VERSION }} 2>/dev/null || echo "$HOME/.avm/bin/anchor")" ~/.cargo/bin/anchor || true
+          # avm (Anchor's version-switcher) isn't published as its own
+          # crate on crates.io - `cargo install avm` resolves to an
+          # unrelated package of the same name, and installing it via
+          # `--git .../anchor` builds it from the monorepo's current HEAD,
+          # which drifts independently of the pinned ANCHOR_VERSION and can
+          # require a newer Cargo edition than RUST_TOOLCHAIN provides
+          # (observed: HEAD required edition2024, unavailable on Rust
+          # 1.82). Installing `anchor-cli` itself, directly, from crates.io
+          # at the exact pinned version sidesteps avm entirely and keeps
+          # the toolchain reproducible.
+          cargo install anchor-cli --version ${{ env.ANCHOR_VERSION }} --locked --force
 
-      - name: Select Anchor ${{ env.ANCHOR_VERSION }}
-        run: |
-          if command -v avm >/dev/null 2>&1; then
-            avm use ${{ env.ANCHOR_VERSION }}
-          fi
-          anchor --version
+      - name: Verify Anchor ${{ env.ANCHOR_VERSION }}
+        run: anchor --version
 
       - name: Generate ephemeral local wallet (test fee-payer, no real funds)
         run: |
@@ -201,11 +203,11 @@ jobs:
           sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
 
+      - name: Install system build dependencies for Anchor CLI
+        run: sudo apt-get update && sudo apt-get install -y libudev-dev
+
       - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
-        run: |
-          cargo install --force avm --version ${{ env.ANCHOR_VERSION }} --locked
-          avm install ${{ env.ANCHOR_VERSION }}
-          avm use ${{ env.ANCHOR_VERSION }}
+        run: cargo install anchor-cli --version ${{ env.ANCHOR_VERSION }} --locked --force
 
       # The DEPLOYER wallet pays rent/fees and (for repeat deploys) must
       # match whatever account is currently the program's upgrade
@@ -403,11 +405,11 @@ jobs:
           sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
 
+      - name: Install system build dependencies for Anchor CLI
+        run: sudo apt-get update && sudo apt-get install -y libudev-dev
+
       - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
-        run: |
-          cargo install --force avm --version ${{ env.ANCHOR_VERSION }} --locked
-          avm install ${{ env.ANCHOR_VERSION }}
-          avm use ${{ env.ANCHOR_VERSION }}
+        run: cargo install anchor-cli --version ${{ env.ANCHOR_VERSION }} --locked --force
 
       # Both secrets are provisioned and funded by a human ahead of time -
       # this workflow never generates or funds a mainnet keypair itself.
