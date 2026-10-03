@@ -39,5 +39,16 @@ anchor-spl = { version = "0.31.1", features = ["metadata"] }
 # instead of floating to the newest edition2024 release.
 zeroize = "=1.8.2"
 
+# Same pattern as zeroize above, hit on the very next CI run after that
+# pin was confirmed working: `anchor build` failed parsing
+# toml_edit-0.25.15+spec-1.1.0's manifest, "feature `edition2024` is
+# required". toml_edit 0.25.6 bumped to edition2024; 0.25.5+spec-1.1.0
+# is the newest release still on edition2021, and - since Cargo treats
+# the first nonzero component of a pre-1.0 version as its compatibility
+# class - it satisfies the same "^0.25" range every real dependent in
+# the graph (cargo_toml, spl-discriminator-syn, and their own anchor-
+# proc-macro dependents) already declares.
+toml_edit = "=0.25.5+spec-1.1.0"
+
 [profile.release]
 overflow-checks = true
