@@ -79,6 +79,11 @@ import one.zrp.social.mobile.util.localizedError
 fun HomeScreen(
     onAuthorClick: (String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
+    // A quoted post's own preview needs to open THAT post's real detail
+    // page, not the comments-only screen onOpenComments leads to - see
+    // PostCard's own onQuotedPostClick doc comment for why reusing
+    // onOpenComments there was the actual bug.
+    onOpenPost: (postId: String) -> Unit = onOpenComments,
     onOpenStoryViewer: (userId: String) -> Unit,
     onCreateStory: () -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
@@ -340,6 +345,7 @@ fun HomeScreen(
                                 onViewReposts = onOpenReposts,
                                 onViewQuotes = onOpenQuotes,
                                 onClick = onOpenComments,
+                                onQuotedPostClick = onOpenPost,
                                 onAuthorClick = onAuthorClick,
                                 onHashtagClick = onOpenHashtag,
                                 onOpenVideoViewer = onOpenVideoViewer,

@@ -55,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -114,6 +115,7 @@ fun StoryViewerScreen(
         factory = remember(userId) { StoryViewerViewModelFactory(StoriesRepository(), userId) },
     )
     val state by viewModel.state.collectAsState()
+    val focusManager = LocalFocusManager.current
     // Keyed on the *current author's* id, not the nav-route `userId` -
     // this screen now stays mounted across several authors in a row
     // (see advanceToNextUnseenGroup in the ViewModel), so these need to
@@ -151,6 +153,25 @@ fun StoryViewerScreen(
 
                 LaunchedEffect(story.id) {
                     if (!story.viewed) viewModel.markViewed(story.id)
+                }
+
+                // The reply OutlinedTextField below is NOT re-keyed per
+                // story (only the media layer above is, via key(story.id))
+                // - it's the same composable instance reused across every
+                // story this author has, so Compose's focus system can
+                // carry real focus on it across a story transition even
+                // though `paused` itself resets to false on the new
+                // story.id. Since the field's onFocusChanged wires
+                // `paused = it.isFocused` directly, a focus event that
+                // survives the transition re-sets paused back to true
+                // almost immediately - auto-advance silently never fires
+                // again (manual left/right tap zones still work, since
+                // those don't read `paused`), which is exactly the "I have
+                // to tap each story myself" symptom reported. Explicitly
+                // releasing focus on every story change closes that gap at
+                // the source rather than special-casing the symptom.
+                LaunchedEffect(story.id) {
+                    focusManager.clearFocus(force = true)
                 }
 
                 var paused by remember(story.id) { mutableStateOf(false) }

@@ -51,6 +51,9 @@ fun QuotesScreen(
     postId: String,
     onAuthorClick: (String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
+    // A quoted post's preview opens its real detail page, not the
+    // comments-only screen onOpenComments leads to.
+    onOpenPost: (postId: String) -> Unit = onOpenComments,
     onOpenQuotePost: (postId: String) -> Unit,
     onOpenReposts: (postId: String) -> Unit = {},
     onOpenQuotes: (postId: String) -> Unit = {},
@@ -149,6 +152,7 @@ fun QuotesScreen(
                             onViewReposts = onOpenReposts,
                             onViewQuotes = onOpenQuotes,
                             onClick = onOpenComments,
+                            onQuotedPostClick = onOpenPost,
                             onAuthorClick = onAuthorClick,
                             onHashtagClick = onOpenHashtag,
                             onOpenVideoViewer = onOpenVideoViewer,
