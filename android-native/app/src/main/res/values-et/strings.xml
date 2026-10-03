@@ -2520,4 +2520,26 @@ Seda tegevust ei saa tagasi võtta.</string>
     <string name="post_recruitment_heading">Töövõimalus</string>
     <string name="post_recruitment_subtitle">Tööpakkumine</string>
     <string name="post_repost_rate_limited_error">Päevane korduspostituste limiit (%1$d) on täis. Proovi homme uuesti või uuenda kõrgema limiidi saamiseks.</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Otseülekande video</string>
+    <string name="live_video_page_title">Otseülekande video</string>
+    <string name="live_video_subtitle">Liitu otseülekande videoruumiga või alusta oma ruumi.</string>
+    <string name="live_video_no_rooms_desc">Ole esimene, kes alustab otseülekannet.</string>
+    <string name="live_video_viewer_count">%1$d vaatab</string>
+    <string name="live_video_back">Tagasi Otseülekande video juurde</string>
+    <string name="live_video_participants_heading">Kaamera ees</string>
+    <string name="live_video_viewers_heading">Vaatajad</string>
+    <string name="live_video_camera_off_label">Kaamera väljas</string>
+    <string name="live_video_raise_hand">Taotle liitumist kaameraga</string>
+    <string name="live_video_pending_requests">Liitumistaotlused (%1$d)</string>
+    <string name="live_video_invite_on_camera">Kutsu kaamera ette</string>
+    <string name="live_video_move_to_viewer">Liiguta vaatajaks</string>
+    <string name="live_video_camera_off_action">Lülita kaamera välja</string>
+    <string name="live_video_camera_on_action">Lülita kaamera sisse</string>
+    <string name="live_video_camera_on_self">Lülita oma kaamera sisse</string>
+    <string name="live_video_camera_off_self">Lülita oma kaamera välja</string>
+    <string name="live_people_title">Inimesed</string>
+    <string name="live_room_more_options">Rohkem valikuid</string>
+    <string name="live_chat_send">Saada sõnum</string>
+    <string name="live_chat_delete">Kustuta sõnum</string>
 </resources>

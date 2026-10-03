@@ -2529,4 +2529,26 @@ Tega dejanja ni mogoče razveljaviti.</string>
     <string name="settings_theme_system">Uporabi nastavitev naprave</string>
     <string name="music_player_hidden">Predvajalnik skrit. Predvajanje se nadaljuje.</string>
     <string name="music_show_player">Prikaži predvajalnik</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Video v živo</string>
+    <string name="live_video_page_title">Video v živo</string>
+    <string name="live_video_subtitle">Pridruži se video sobi v živo ali začni svojo.</string>
+    <string name="live_video_no_rooms_desc">Bodi prvi, ki začne prenos v živo.</string>
+    <string name="live_video_viewer_count">%1$d gleda</string>
+    <string name="live_video_back">Nazaj na Video v živo</string>
+    <string name="live_video_participants_heading">V kameri</string>
+    <string name="live_video_viewers_heading">Gledalci</string>
+    <string name="live_video_camera_off_label">Kamera izklopljena</string>
+    <string name="live_video_raise_hand">Zahtevaj vključitev s kamero</string>
+    <string name="live_video_pending_requests">Zahteve za vključitev (%1$d)</string>
+    <string name="live_video_invite_on_camera">Povabi v kamero</string>
+    <string name="live_video_move_to_viewer">Premakni med gledalce</string>
+    <string name="live_video_camera_off_action">Izklopi kamero</string>
+    <string name="live_video_camera_on_action">Vklopi kamero</string>
+    <string name="live_video_camera_on_self">Vklopi svojo kamero</string>
+    <string name="live_video_camera_off_self">Izklopi svojo kamero</string>
+    <string name="live_people_title">Ljudje</string>
+    <string name="live_room_more_options">Več možnosti</string>
+    <string name="live_chat_send">Pošlji sporočilo</string>
+    <string name="live_chat_delete">Izbriši sporočilo</string>
 </resources>

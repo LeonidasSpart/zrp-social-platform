@@ -48,6 +48,13 @@ data class LiveAudioRoom(
     val endedAt: String?,
     val createdAt: String,
     val updatedAt: String,
+    // Host-configurable chat slow mode, 0 = off (live-chat/chat-service.ts);
+    // updated live by `live-chat:slow-mode-changed`.
+    val slowModeSeconds: Int = 0,
+    // Running aggregate of every reaction tap in this room
+    // (live-reactions/reaction-service.ts); updated live by
+    // `live-reaction:tap`'s roomReactionCount.
+    val reactionCount: Int = 0,
 )
 
 data class CreateLiveAudioRoomResponse(val room: LiveAudioRoom)

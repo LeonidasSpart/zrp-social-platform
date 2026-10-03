@@ -2520,4 +2520,26 @@
     <string name="settings_theme_system">Χρήση ρύθμισης συσκευής</string>
     <string name="music_player_hidden">Ο player αποκρύφθηκε. Η αναπαραγωγή συνεχίζεται.</string>
     <string name="music_show_player">Εμφάνιση player</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Ζωντανό βίντεο</string>
+    <string name="live_video_page_title">Ζωντανό βίντεο</string>
+    <string name="live_video_subtitle">Μπείτε σε μια αίθουσα ζωντανού βίντεο ή ξεκινήστε τη δική σας.</string>
+    <string name="live_video_no_rooms_desc">Γίνε ο πρώτος που θα κάνει ζωντανή μετάδοση.</string>
+    <string name="live_video_viewer_count">%1$d παρακολουθούν</string>
+    <string name="live_video_back">Πίσω στο Ζωντανό βίντεο</string>
+    <string name="live_video_participants_heading">Σε κάμερα</string>
+    <string name="live_video_viewers_heading">Θεατές</string>
+    <string name="live_video_camera_off_label">Η κάμερα είναι απενεργοποιημένη</string>
+    <string name="live_video_raise_hand">Ζήτησε να συμμετάσχεις με κάμερα</string>
+    <string name="live_video_pending_requests">Αιτήματα συμμετοχής (%1$d)</string>
+    <string name="live_video_invite_on_camera">Πρόσκληση σε κάμερα</string>
+    <string name="live_video_move_to_viewer">Μετακίνηση σε θεατή</string>
+    <string name="live_video_camera_off_action">Απενεργοποίηση κάμερας</string>
+    <string name="live_video_camera_on_action">Ενεργοποίηση κάμερας</string>
+    <string name="live_video_camera_on_self">Ενεργοποίησε την κάμερά σου</string>
+    <string name="live_video_camera_off_self">Απενεργοποίησε την κάμερά σου</string>
+    <string name="live_people_title">Άτομα</string>
+    <string name="live_room_more_options">Περισσότερες επιλογές</string>
+    <string name="live_chat_send">Αποστολή μηνύματος</string>
+    <string name="live_chat_delete">Διαγραφή μηνύματος</string>
 </resources>

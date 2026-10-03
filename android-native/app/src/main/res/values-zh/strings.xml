@@ -2575,4 +2575,26 @@
     <string name="settings_theme_system">跟随设备设置</string>
     <string name="music_player_hidden">播放器已隐藏，播放继续。</string>
     <string name="music_show_player">显示播放器</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">视频直播</string>
+    <string name="live_video_page_title">视频直播</string>
+    <string name="live_video_subtitle">加入一个视频直播间，或开启你自己的直播。</string>
+    <string name="live_video_no_rooms_desc">成为第一个开始直播的人。</string>
+    <string name="live_video_viewer_count">%1$d 人观看</string>
+    <string name="live_video_back">返回视频直播</string>
+    <string name="live_video_participants_heading">镜头中</string>
+    <string name="live_video_viewers_heading">观众</string>
+    <string name="live_video_camera_off_label">摄像头已关闭</string>
+    <string name="live_video_raise_hand">请求开启摄像头加入</string>
+    <string name="live_video_pending_requests">加入请求 (%1$d)</string>
+    <string name="live_video_invite_on_camera">邀请开启摄像头</string>
+    <string name="live_video_move_to_viewer">移至观众</string>
+    <string name="live_video_camera_off_action">关闭摄像头</string>
+    <string name="live_video_camera_on_action">开启摄像头</string>
+    <string name="live_video_camera_on_self">开启你的摄像头</string>
+    <string name="live_video_camera_off_self">关闭你的摄像头</string>
+    <string name="live_people_title">用户</string>
+    <string name="live_room_more_options">更多选项</string>
+    <string name="live_chat_send">发送消息</string>
+    <string name="live_chat_delete">删除 消息</string>
 </resources>

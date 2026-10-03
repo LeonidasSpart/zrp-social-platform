@@ -2527,4 +2527,26 @@
     <string name="settings_theme_system">Naudoti įrenginio nustatymą</string>
     <string name="music_player_hidden">Grotuvas paslėptas. Grojimas tęsiamas.</string>
     <string name="music_show_player">Rodyti grotuvą</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Tiesioginis vaizdo įrašas</string>
+    <string name="live_video_page_title">Tiesioginis vaizdo įrašas</string>
+    <string name="live_video_subtitle">Prisijunk prie tiesioginio vaizdo kambario arba pradėk savo.</string>
+    <string name="live_video_no_rooms_desc">Būk pirmas, kuris pradės transliaciją tiesiogiai.</string>
+    <string name="live_video_viewer_count">%1$d žiūri</string>
+    <string name="live_video_back">Atgal į Tiesioginį vaizdo įrašą</string>
+    <string name="live_video_participants_heading">Kameroje</string>
+    <string name="live_video_viewers_heading">Žiūrovai</string>
+    <string name="live_video_camera_off_label">Kamera išjungta</string>
+    <string name="live_video_raise_hand">Prašyti prisijungti su kamera</string>
+    <string name="live_video_pending_requests">Prisijungimo prašymai (%1$d)</string>
+    <string name="live_video_invite_on_camera">Pakviesti prie kameros</string>
+    <string name="live_video_move_to_viewer">Perkelti į žiūrovus</string>
+    <string name="live_video_camera_off_action">Išjungti kamerą</string>
+    <string name="live_video_camera_on_action">Įjungti kamerą</string>
+    <string name="live_video_camera_on_self">Įjunk savo kamerą</string>
+    <string name="live_video_camera_off_self">Išjunk savo kamerą</string>
+    <string name="live_people_title">Žmonės</string>
+    <string name="live_room_more_options">Daugiau parinkčių</string>
+    <string name="live_chat_send">Siųsti žinutę</string>
+    <string name="live_chat_delete">Ištrinti žinutę</string>
 </resources>

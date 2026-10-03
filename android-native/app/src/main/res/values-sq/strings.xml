@@ -2575,4 +2575,26 @@
     <string name="settings_theme_system">Përdor cilësimin e pajisjes</string>
     <string name="music_player_hidden">Luajtësi u fsheh. Luajtja vazhdon.</string>
     <string name="music_show_player">Shfaq luajtësin</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Video live</string>
+    <string name="live_video_page_title">Video live</string>
+    <string name="live_video_subtitle">Bashkohu në një dhomë video live, ose fillo tëndën.</string>
+    <string name="live_video_no_rooms_desc">Bëhu i pari që shkon live.</string>
+    <string name="live_video_viewer_count">%1$d po shikojnë</string>
+    <string name="live_video_back">Kthehu te Video live</string>
+    <string name="live_video_participants_heading">Në kamerë</string>
+    <string name="live_video_viewers_heading">Shikues</string>
+    <string name="live_video_camera_off_label">Kamera fikur</string>
+    <string name="live_video_raise_hand">Kërko të bashkohesh në kamerë</string>
+    <string name="live_video_pending_requests">Kërkesa për t\'u bashkuar (%1$d)</string>
+    <string name="live_video_invite_on_camera">Fto në kamerë</string>
+    <string name="live_video_move_to_viewer">Kalo te shikues</string>
+    <string name="live_video_camera_off_action">Fik kamerën</string>
+    <string name="live_video_camera_on_action">Ndiz kamerën</string>
+    <string name="live_video_camera_on_self">Ndize kamerën tënde</string>
+    <string name="live_video_camera_off_self">Fike kamerën tënde</string>
+    <string name="live_people_title">Njerëz</string>
+    <string name="live_room_more_options">Më shumë opsione</string>
+    <string name="live_chat_send">Dërgo mesazhin</string>
+    <string name="live_chat_delete">Fshi mesazhin</string>
 </resources>

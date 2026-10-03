@@ -2533,4 +2533,26 @@
     <string name="post_recruitment_heading">Deis fostaíochta</string>
     <string name="post_recruitment_subtitle">Earcaíocht</string>
     <string name="post_repost_rate_limited_error">Sroicheadh an teorainn laethúil athphostála (%1$d). Bain triail eile as amárach nó uasghrádaigh chun teorainn níos airde a fháil.</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Físeán Beo</string>
+    <string name="live_video_page_title">Físeán Beo</string>
+    <string name="live_video_subtitle">Glac páirt i seomra físeáin beo, nó tosaigh do sheomra féin.</string>
+    <string name="live_video_no_rooms_desc">Bí an duine is túisce a théann beo.</string>
+    <string name="live_video_viewer_count">%1$d ag féachaint</string>
+    <string name="live_video_back">Ar ais chuig Físeán Beo</string>
+    <string name="live_video_participants_heading">Ar an gceamara</string>
+    <string name="live_video_viewers_heading">Lucht féachana</string>
+    <string name="live_video_camera_off_label">Ceamara múchta</string>
+    <string name="live_video_raise_hand">Iarr a bheith san áireamh ar an gceamara</string>
+    <string name="live_video_pending_requests">Iarrataí le bheith san áireamh (%1$d)</string>
+    <string name="live_video_invite_on_camera">Tabhair cuireadh ar an gceamara</string>
+    <string name="live_video_move_to_viewer">Bog chuig féachadóir</string>
+    <string name="live_video_camera_off_action">Cas an ceamara as</string>
+    <string name="live_video_camera_on_action">Cas an ceamara air</string>
+    <string name="live_video_camera_on_self">Cas do cheamara air</string>
+    <string name="live_video_camera_off_self">Cas do cheamara as</string>
+    <string name="live_people_title">Daoine</string>
+    <string name="live_room_more_options">Tuilleadh roghanna</string>
+    <string name="live_chat_send">Seol teachtaireacht</string>
+    <string name="live_chat_delete">Scrios an teachtaireacht</string>
 </resources>

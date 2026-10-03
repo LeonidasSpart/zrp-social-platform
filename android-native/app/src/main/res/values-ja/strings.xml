@@ -2520,4 +2520,26 @@
     <string name="settings_theme_system">端末の設定に従う</string>
     <string name="music_player_hidden">プレイヤーを非表示にしました。再生は続きます。</string>
     <string name="music_show_player">プレイヤーを表示</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">ライブビデオ</string>
+    <string name="live_video_page_title">ライブビデオ</string>
+    <string name="live_video_subtitle">ライブビデオルームに参加するか、自分のルームを開始しましょう。</string>
+    <string name="live_video_no_rooms_desc">最初にライブを始めましょう。</string>
+    <string name="live_video_viewer_count">%1$d人が視聴中</string>
+    <string name="live_video_back">ライブビデオに戻る</string>
+    <string name="live_video_participants_heading">カメラON中</string>
+    <string name="live_video_viewers_heading">視聴者</string>
+    <string name="live_video_camera_off_label">カメラオフ</string>
+    <string name="live_video_raise_hand">カメラ参加をリクエスト</string>
+    <string name="live_video_pending_requests">参加リクエスト(%1$d件)</string>
+    <string name="live_video_invite_on_camera">カメラに招待</string>
+    <string name="live_video_move_to_viewer">視聴者にする</string>
+    <string name="live_video_camera_off_action">カメラをオフにする</string>
+    <string name="live_video_camera_on_action">カメラをオンにする</string>
+    <string name="live_video_camera_on_self">カメラをオンにしてください</string>
+    <string name="live_video_camera_off_self">カメラをオフにしてください</string>
+    <string name="live_people_title">ユーザー</string>
+    <string name="live_room_more_options">その他のオプション</string>
+    <string name="live_chat_send">メッセージを送信</string>
+    <string name="live_chat_delete">メッセージを削除</string>
 </resources>

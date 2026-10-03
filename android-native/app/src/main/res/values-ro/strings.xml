@@ -2525,4 +2525,26 @@
     <string name="settings_theme_system">Folosește setarea dispozitivului</string>
     <string name="music_player_hidden">Player ascuns. Redarea continuă.</string>
     <string name="music_show_player">Arată playerul</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Video live</string>
+    <string name="live_video_page_title">Video live</string>
+    <string name="live_video_subtitle">Alătură-te unei camere video live sau pornește-o pe a ta.</string>
+    <string name="live_video_no_rooms_desc">Fii primul care intră live.</string>
+    <string name="live_video_viewer_count">%1$d urmăresc</string>
+    <string name="live_video_back">Înapoi la Video live</string>
+    <string name="live_video_participants_heading">În cameră video</string>
+    <string name="live_video_viewers_heading">Spectatori</string>
+    <string name="live_video_camera_off_label">Camera dezactivată</string>
+    <string name="live_video_raise_hand">Cere să te alături cu camera</string>
+    <string name="live_video_pending_requests">Cereri de participare (%1$d)</string>
+    <string name="live_video_invite_on_camera">Invită la cameră</string>
+    <string name="live_video_move_to_viewer">Mută la spectator</string>
+    <string name="live_video_camera_off_action">Dezactivează camera</string>
+    <string name="live_video_camera_on_action">Activează camera</string>
+    <string name="live_video_camera_on_self">Activează-ți camera</string>
+    <string name="live_video_camera_off_self">Dezactivează-ți camera</string>
+    <string name="live_people_title">Persoane</string>
+    <string name="live_room_more_options">Mai multe opțiuni</string>
+    <string name="live_chat_send">Trimite mesajul</string>
+    <string name="live_chat_delete">Șterge mesajul</string>
 </resources>

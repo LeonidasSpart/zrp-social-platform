@@ -2523,4 +2523,26 @@
     <string name="post_recruitment_heading">Darba iespēja</string>
     <string name="post_recruitment_subtitle">Vakance</string>
     <string name="post_repost_rate_limited_error">Sasniegts dienas repostu limits (%1$d). Mēģini vēlreiz rīt vai jaunini, lai iegūtu augstāku limitu.</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Tiešraides video</string>
+    <string name="live_video_page_title">Tiešraides video</string>
+    <string name="live_video_subtitle">Pievienojies tiešraides video telpai vai sāc savu.</string>
+    <string name="live_video_no_rooms_desc">Kļūsti par pirmo, kurš sāk tiešraidi.</string>
+    <string name="live_video_viewer_count">%1$d skatās</string>
+    <string name="live_video_back">Atpakaļ uz Tiešraides video</string>
+    <string name="live_video_participants_heading">Kamerā</string>
+    <string name="live_video_viewers_heading">Skatītāji</string>
+    <string name="live_video_camera_off_label">Kamera izslēgta</string>
+    <string name="live_video_raise_hand">Lūgt pievienoties ar kameru</string>
+    <string name="live_video_pending_requests">Pievienošanās pieprasījumi (%1$d)</string>
+    <string name="live_video_invite_on_camera">Uzaicināt pie kameras</string>
+    <string name="live_video_move_to_viewer">Pārvietot uz skatītājiem</string>
+    <string name="live_video_camera_off_action">Izslēgt kameru</string>
+    <string name="live_video_camera_on_action">Ieslēgt kameru</string>
+    <string name="live_video_camera_on_self">Ieslēdz savu kameru</string>
+    <string name="live_video_camera_off_self">Izslēdz savu kameru</string>
+    <string name="live_people_title">Cilvēki</string>
+    <string name="live_room_more_options">Vairāk iespēju</string>
+    <string name="live_chat_send">Sūtīt ziņu</string>
+    <string name="live_chat_delete">Dzēst ziņu</string>
 </resources>

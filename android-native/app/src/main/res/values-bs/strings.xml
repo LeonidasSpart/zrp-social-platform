@@ -2520,4 +2520,26 @@
     <string name="settings_theme_system">Koristi postavku uređaja</string>
     <string name="music_player_hidden">Plejer je sakriven. Reprodukcija se nastavlja.</string>
     <string name="music_show_player">Prikaži plejer</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Video uživo</string>
+    <string name="live_video_page_title">Video uživo</string>
+    <string name="live_video_subtitle">Pridruži se video sobi uživo ili pokreni svoju.</string>
+    <string name="live_video_no_rooms_desc">Budi prvi koji će ići uživo.</string>
+    <string name="live_video_viewer_count">%1$d gleda</string>
+    <string name="live_video_back">Povratak na Video uživo</string>
+    <string name="live_video_participants_heading">Na kameri</string>
+    <string name="live_video_viewers_heading">Gledatelji</string>
+    <string name="live_video_camera_off_label">Kamera isključena</string>
+    <string name="live_video_raise_hand">Zatraži pridruživanje sa kamerom</string>
+    <string name="live_video_pending_requests">Zahtjevi za pridruživanje (%1$d)</string>
+    <string name="live_video_invite_on_camera">Pozovi na kameru</string>
+    <string name="live_video_move_to_viewer">Premjesti u gledatelje</string>
+    <string name="live_video_camera_off_action">Isključi kameru</string>
+    <string name="live_video_camera_on_action">Uključi kameru</string>
+    <string name="live_video_camera_on_self">Uključi svoju kameru</string>
+    <string name="live_video_camera_off_self">Isključi svoju kameru</string>
+    <string name="live_people_title">Ljudi</string>
+    <string name="live_room_more_options">Više opcija</string>
+    <string name="live_chat_send">Pošalji poruku</string>
+    <string name="live_chat_delete">Izbriši poruku</string>
 </resources>

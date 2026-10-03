@@ -2530,4 +2530,26 @@
     <string name="settings_theme_system">Użyj ustawienia urządzenia</string>
     <string name="music_player_hidden">Odtwarzacz ukryty. Odtwarzanie trwa.</string>
     <string name="music_show_player">Pokaż odtwarzacz</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Wideo na żywo</string>
+    <string name="live_video_page_title">Wideo na żywo</string>
+    <string name="live_video_subtitle">Przyłącz się do pokoju wideo na żywo albo zacznij swój.</string>
+    <string name="live_video_no_rooms_desc">Bądź pierwszą osobą, która rozpocznie transmisję.</string>
+    <string name="live_video_viewer_count">%1$d ogląda</string>
+    <string name="live_video_back">Wróć do Wideo na żywo</string>
+    <string name="live_video_participants_heading">Na kamerze</string>
+    <string name="live_video_viewers_heading">Widzowie</string>
+    <string name="live_video_camera_off_label">Kamera wyłączona</string>
+    <string name="live_video_raise_hand">Poproś o dołączenie z kamerą</string>
+    <string name="live_video_pending_requests">Prośby o dołączenie (%1$d)</string>
+    <string name="live_video_invite_on_camera">Zaproś do kamery</string>
+    <string name="live_video_move_to_viewer">Przenieś do widzów</string>
+    <string name="live_video_camera_off_action">Wyłącz kamerę</string>
+    <string name="live_video_camera_on_action">Włącz kamerę</string>
+    <string name="live_video_camera_on_self">Włącz swoją kamerę</string>
+    <string name="live_video_camera_off_self">Wyłącz swoją kamerę</string>
+    <string name="live_people_title">Osoby</string>
+    <string name="live_room_more_options">Więcej opcji</string>
+    <string name="live_chat_send">Wyślij wiadomość</string>
+    <string name="live_chat_delete">Usuń wiadomość</string>
 </resources>

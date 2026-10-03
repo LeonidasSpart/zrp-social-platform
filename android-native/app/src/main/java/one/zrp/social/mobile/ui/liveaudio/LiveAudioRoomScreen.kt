@@ -13,15 +13,23 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
@@ -44,6 +52,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,9 +66,23 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
+import one.zrp.social.mobile.data.LiveRoomKind
 import one.zrp.social.mobile.network.LiveAudioParticipant
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.live.DismissibleErrorRow
+import one.zrp.social.mobile.ui.live.LiveChatPanel
+import one.zrp.social.mobile.ui.live.LiveEndedContent
+import one.zrp.social.mobile.ui.live.LiveGiftAnimationLayer
+import one.zrp.social.mobile.ui.live.LiveGiftPanel
+import one.zrp.social.mobile.ui.live.LiveReactionLayer
+import one.zrp.social.mobile.ui.live.LiveRecordingMenuItems
+import one.zrp.social.mobile.ui.live.LiveRecordingPill
+import one.zrp.social.mobile.ui.live.LiveScheduledRoomContent
+import one.zrp.social.mobile.ui.live.LiveTransientNotice
+import one.zrp.social.mobile.ui.live.liveErrorText
+import one.zrp.social.mobile.ui.live.shareLiveRoom
 import one.zrp.social.mobile.ui.theme.Spacing
+import one.zrp.social.mobile.ui.theme.TouchTarget
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.localizedError
 
@@ -82,7 +105,12 @@ fun LiveAudioRoomScreen(roomId: String, onBack: () -> Unit) {
         contract = ActivityResultContracts.RequestPermission(),
     ) { granted -> if (granted) viewModel.toggleMic() }
 
-    LaunchedEffect(Unit) { viewModel.connect(context) }
+    // LOADING is the initial phase, and also where a SCHEDULED room
+    // returns to once it's been started - either way, (re)join it.
+    // connect() itself no-ops while already connecting/connected.
+    LaunchedEffect(state.phase) {
+        if (state.phase == LiveAudioPhase.LOADING) viewModel.connect(context)
+    }
 
     fun leaveAndBack() {
         viewModel.leave()
@@ -115,16 +143,14 @@ fun LiveAudioRoomScreen(roomId: String, onBack: () -> Unit) {
                 }
             }
         }
-        LiveAudioPhase.ENDED, LiveAudioPhase.REMOVED -> {
+        LiveAudioPhase.REMOVED -> {
             Column(
                 modifier = Modifier.fillMaxSize().padding(Spacing.xl),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = stringResource(
-                        if (state.phase == LiveAudioPhase.ENDED) R.string.live_audio_room_ended_title else R.string.live_audio_removed_title,
-                    ),
+                    text = stringResource(R.string.live_audio_removed_title),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                 )
@@ -132,6 +158,42 @@ fun LiveAudioRoomScreen(roomId: String, onBack: () -> Unit) {
                     Text(stringResource(R.string.live_audio_back))
                 }
             }
+        }
+        LiveAudioPhase.ENDED -> {
+            val recording by viewModel.interactions.recording.collectAsState()
+            val cancelled = state.room?.status == "CANCELLED"
+            val hostId = state.room?.hostId
+            LiveEndedContent(
+                title = stringResource(if (cancelled) R.string.live_scheduled_cancelled_title else R.string.live_audio_room_ended_title),
+                showReplays = !cancelled,
+                recordingState = recording,
+                canDeleteReplays = hostId != null && hostId == state.myUserId,
+                backLabel = stringResource(R.string.live_audio_back),
+                onLoadReplays = viewModel.interactions::loadReplays,
+                onDeleteReplay = viewModel.interactions::deleteReplay,
+                onBack = onBack,
+            )
+        }
+        LiveAudioPhase.SCHEDULED -> {
+            val reminder by viewModel.interactions.reminder.collectAsState()
+            val room = state.room
+            val shareTitle = stringResource(R.string.live_share_room)
+            LiveScheduledRoomContent(
+                title = room?.title ?: "",
+                description = room?.description,
+                scheduledAtIso = room?.scheduledAt,
+                host = state.participants.firstOrNull { it.role == "HOST" }?.user,
+                isHost = room != null && room.hostId == state.myUserId,
+                reminder = reminder,
+                hostActionBusy = state.scheduledActionBusy,
+                hostActionError = localizedError(state.scheduledActionError),
+                onSetReminder = viewModel.interactions::setReminder,
+                onStartNow = { viewModel.startScheduledRoom(context) },
+                onCancelRoom = viewModel::cancelScheduledRoom,
+                onShare = { shareLiveRoom(context, LiveRoomKind.AUDIO, roomId, room?.title, shareTitle) },
+                onCheckAgain = { viewModel.recheckScheduledRoom(context) },
+                onBack = onBack,
+            )
         }
         LiveAudioPhase.CONNECTED -> {
             LiveAudioConnectedContent(
@@ -163,6 +225,24 @@ private fun LiveAudioConnectedContent(
     var confirmEnd by remember { mutableStateOf(false) }
     var confirmRemoveUserId by remember { mutableStateOf<String?>(null) }
 
+    val chat by viewModel.interactions.chat.collectAsState()
+    val gifts by viewModel.interactions.gifts.collectAsState()
+    val reactions by viewModel.interactions.reactions.collectAsState()
+    val recording by viewModel.interactions.recording.collectAsState()
+    var chatOpen by rememberSaveable { mutableStateOf(false) }
+    var giftPanelOpen by remember { mutableStateOf(false) }
+    var overflowOpen by remember { mutableStateOf(false) }
+    var notice by remember { mutableStateOf<String?>(null) }
+    val giftSentText = stringResource(R.string.live_gift_sent)
+    val shareTitle = stringResource(R.string.live_share_room)
+    val context = LocalContext.current
+    // The host can't gift themselves (cannot_gift_self) - no control offered.
+    val isHost = room != null && room.hostId == state.myUserId
+    val hostUser = state.participants.firstOrNull { it.role == "HOST" }?.user
+
+    // imePadding: see AiChatScreen/ConversationScreen - lifts the chat
+    // composer above the keyboard under enableEdgeToEdge().
+    Box(modifier = Modifier.fillMaxSize().imePadding()) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.md, vertical = Spacing.sm),
@@ -179,6 +259,32 @@ private fun LiveAudioConnectedContent(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f).padding(start = Spacing.sm),
             )
+            if (recording.isRecording) {
+                LiveRecordingPill(onMedia = false, modifier = Modifier.padding(horizontal = Spacing.xs))
+            }
+            Box {
+                IconButton(onClick = { overflowOpen = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.live_room_more_options))
+                }
+                DropdownMenu(expanded = overflowOpen, onDismissRequest = { overflowOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.live_share_room)) },
+                        leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                        onClick = {
+                            overflowOpen = false
+                            if (room != null) shareLiveRoom(context, LiveRoomKind.AUDIO, room.id, room.title, shareTitle)
+                        },
+                    )
+                    if (amAuthority) {
+                        LiveRecordingMenuItems(
+                            state = recording,
+                            onStart = viewModel.interactions::startRecording,
+                            onStop = viewModel.interactions::stopRecording,
+                            onDismissMenu = { overflowOpen = false },
+                        )
+                    }
+                }
+            }
             if (state.myRole == "HOST") {
                 TextButton(onClick = { confirmEnd = true }) {
                     Text(stringResource(R.string.live_audio_end_room), color = ZrpRed)
@@ -205,6 +311,11 @@ private fun LiveAudioConnectedContent(
                     Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_cancel), modifier = Modifier.size(18.dp))
                 }
             }
+        }
+
+        val recordingError = liveErrorText(recording.error)
+        if (recordingError != null) {
+            DismissibleErrorRow(text = recordingError, onMedia = false, onDismiss = viewModel.interactions::dismissRecordingError)
         }
 
         if (amAuthority && state.pendingSpeakerRequestUserIds.isNotEmpty()) {
@@ -264,6 +375,54 @@ private fun LiveAudioConnectedContent(
             }
         }
 
+        if (chatOpen) {
+            LiveChatPanel(
+                state = chat,
+                myUserId = state.myUserId,
+                hostId = room?.hostId,
+                canModerate = amAuthority,
+                onMedia = false,
+                onSend = viewModel.interactions::sendChat,
+                onLoadOlder = viewModel.interactions::loadOlderChat,
+                onRetryHistory = viewModel.interactions::loadChatHistory,
+                onDeleteMessage = viewModel.interactions::deleteChatMessage,
+                onSetUserChatMuted = viewModel.interactions::setUserChatMuted,
+                onSetSlowMode = viewModel.interactions::setSlowMode,
+                onDismissSendError = viewModel.interactions::dismissChatSendError,
+                onDismissActionError = viewModel.interactions::dismissChatActionError,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.45f)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+            )
+        }
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            LiveAudioInteractionBar(
+                chatOpen = chatOpen,
+                canGift = !isHost,
+                reactionCount = reactions.roomReactionCount,
+                onToggleChat = { chatOpen = !chatOpen },
+                onOpenGifts = {
+                    giftPanelOpen = true
+                    viewModel.interactions.openGiftPanel()
+                },
+                onTapReaction = viewModel.interactions::tapReaction,
+            )
+            // Hearts rise from the heart button over the room; drawn via
+            // graphicsLayer outside this row's bounds (nothing clips it).
+            LiveReactionLayer(
+                bursts = reactions.bursts,
+                onConsumed = viewModel.interactions::consumeReactionBurst,
+                modifier = Modifier
+                    .matchParentSize()
+                    .wrapContentWidth(Alignment.End)
+                    .padding(end = Spacing.md)
+                    .width(TouchTarget.min),
+            )
+        }
+
         LiveAudioControlBar(
             canPublish = canPublishLiveAudio(state.myRole),
             isMicOn = state.isMicOn,
@@ -271,6 +430,36 @@ private fun LiveAudioConnectedContent(
             speakRequestSent = state.speakRequestSent,
             onToggleMic = onToggleMic,
             onRequestToSpeak = viewModel::requestToSpeak,
+        )
+    }
+
+        LiveGiftAnimationLayer(
+            queue = gifts.animationQueue,
+            authors = chat.authors,
+            catalog = gifts.catalog,
+            onConsumed = viewModel.interactions::consumeGiftAnimation,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = TouchTarget.min + Spacing.lg, start = Spacing.lg, end = Spacing.lg),
+        )
+        LiveTransientNotice(
+            text = notice,
+            onExpired = { notice = null },
+            modifier = Modifier.align(Alignment.Center),
+        )
+    }
+
+    if (giftPanelOpen) {
+        LiveGiftPanel(
+            state = gifts,
+            hostName = hostUser?.name ?: hostUser?.username ?: "",
+            onRetryCatalog = viewModel.interactions::loadCatalog,
+            onRetryBalance = viewModel.interactions::refreshBalance,
+            onSend = viewModel.interactions::sendGift,
+            onDismissError = viewModel.interactions::dismissGiftSendError,
+            onConfirmedSend = {
+                giftPanelOpen = false
+                notice = giftSentText
+            },
+            onDismiss = { giftPanelOpen = false },
         )
     }
 
@@ -491,6 +680,55 @@ private fun LiveAudioControlBar(
                     modifier = Modifier.padding(start = Spacing.xs),
                 )
             }
+        }
+    }
+}
+
+/**
+ * Chat / gift / heart, on its own row ABOVE the existing mic/raise-hand
+ * control bar rather than squeezed into it - the control bar stays
+ * exactly as it was, and a 320dp-wide phone in a long language never has
+ * to fit four controls plus "Request to speak" on one line.
+ */
+@Composable
+private fun LiveAudioInteractionBar(
+    chatOpen: Boolean,
+    canGift: Boolean,
+    reactionCount: Int,
+    onToggleChat: () -> Unit,
+    onOpenGifts: () -> Unit,
+    onTapReaction: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onToggleChat) {
+            Icon(
+                Icons.Filled.ChatBubbleOutline,
+                contentDescription = stringResource(if (chatOpen) R.string.live_chat_hide else R.string.live_chat_show),
+                tint = if (chatOpen) ZrpRed else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (canGift) {
+            IconButton(onClick = onOpenGifts) {
+                Icon(
+                    Icons.Filled.CardGiftcard,
+                    contentDescription = stringResource(R.string.live_gift_open),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Box(modifier = Modifier.weight(1f))
+        if (reactionCount > 0) {
+            Text(
+                text = reactionCount.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        IconButton(onClick = onTapReaction) {
+            Icon(Icons.Filled.Favorite, contentDescription = stringResource(R.string.live_reaction_send), tint = ZrpRed)
         }
     }
 }

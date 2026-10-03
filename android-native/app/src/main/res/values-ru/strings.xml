@@ -2575,4 +2575,26 @@
     <string name="settings_theme_system">Как в настройках устройства</string>
     <string name="music_player_hidden">Плеер скрыт. Воспроизведение продолжается.</string>
     <string name="music_show_player">Показать плеер</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Видеоэфир</string>
+    <string name="live_video_page_title">Видеоэфир</string>
+    <string name="live_video_subtitle">Присоединяйтесь к видеокомнате в прямом эфире или начните свою.</string>
+    <string name="live_video_no_rooms_desc">Начните эфир первым.</string>
+    <string name="live_video_viewer_count">%1$d смотрят</string>
+    <string name="live_video_back">Назад к видеоэфиру</string>
+    <string name="live_video_participants_heading">В эфире с камерой</string>
+    <string name="live_video_viewers_heading">Зрители</string>
+    <string name="live_video_camera_off_label">Камера выключена</string>
+    <string name="live_video_raise_hand">Запросить подключение с камерой</string>
+    <string name="live_video_pending_requests">Запросы на подключение (%1$d)</string>
+    <string name="live_video_invite_on_camera">Пригласить в эфир</string>
+    <string name="live_video_move_to_viewer">Перевести в зрители</string>
+    <string name="live_video_camera_off_action">Выключить камеру</string>
+    <string name="live_video_camera_on_action">Включить камеру</string>
+    <string name="live_video_camera_on_self">Включите свою камеру</string>
+    <string name="live_video_camera_off_self">Выключите свою камеру</string>
+    <string name="live_people_title">Люди</string>
+    <string name="live_room_more_options">Ещё</string>
+    <string name="live_chat_send">Отправить сообщение</string>
+    <string name="live_chat_delete">удалить сообщение</string>
 </resources>

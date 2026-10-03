@@ -2520,4 +2520,26 @@
     <string name="settings_theme_system">기기 설정 사용</string>
     <string name="music_player_hidden">플레이어를 숨겼습니다. 재생은 계속됩니다.</string>
     <string name="music_show_player">플레이어 표시</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">라이브 비디오</string>
+    <string name="live_video_page_title">라이브 비디오</string>
+    <string name="live_video_subtitle">라이브 비디오 방에 참여하거나 직접 방을 시작하세요.</string>
+    <string name="live_video_no_rooms_desc">가장 먼저 라이브를 시작해 보세요.</string>
+    <string name="live_video_viewer_count">%1$d명 시청 중</string>
+    <string name="live_video_back">라이브 비디오로 돌아가기</string>
+    <string name="live_video_participants_heading">카메라 켬</string>
+    <string name="live_video_viewers_heading">시청자</string>
+    <string name="live_video_camera_off_label">카메라 꺼짐</string>
+    <string name="live_video_raise_hand">카메라로 참여 요청</string>
+    <string name="live_video_pending_requests">참여 요청 (%1$d)</string>
+    <string name="live_video_invite_on_camera">카메라로 초대</string>
+    <string name="live_video_move_to_viewer">시청자로 이동</string>
+    <string name="live_video_camera_off_action">카메라 끄기</string>
+    <string name="live_video_camera_on_action">카메라 켜기</string>
+    <string name="live_video_camera_on_self">카메라를 켜주세요</string>
+    <string name="live_video_camera_off_self">카메라를 꺼주세요</string>
+    <string name="live_people_title">사람</string>
+    <string name="live_room_more_options">더보기</string>
+    <string name="live_chat_send">메시지 보내기</string>
+    <string name="live_chat_delete">메시지 삭제</string>
 </resources>

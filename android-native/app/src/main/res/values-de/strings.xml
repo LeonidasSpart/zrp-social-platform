@@ -2575,4 +2575,26 @@
     <string name="settings_theme_system">Geräteeinstellung verwenden</string>
     <string name="music_player_hidden">Player ausgeblendet. Die Wiedergabe läuft weiter.</string>
     <string name="music_show_player">Player anzeigen</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Live-Video</string>
+    <string name="live_video_page_title">Live-Video</string>
+    <string name="live_video_subtitle">Tritt einem Live-Video-Raum bei oder starte deinen eigenen.</string>
+    <string name="live_video_no_rooms_desc">Sei der Erste, der live geht.</string>
+    <string name="live_video_viewer_count">%1$d schauen zu</string>
+    <string name="live_video_back">Zurück zu Live-Video</string>
+    <string name="live_video_participants_heading">Auf Kamera</string>
+    <string name="live_video_viewers_heading">Zuschauer</string>
+    <string name="live_video_camera_off_label">Kamera aus</string>
+    <string name="live_video_raise_hand">Anfragen, zur Kamera dazuzukommen</string>
+    <string name="live_video_pending_requests">Beitrittsanfragen (%1$d)</string>
+    <string name="live_video_invite_on_camera">Zur Kamera einladen</string>
+    <string name="live_video_move_to_viewer">Zum Zuschauer machen</string>
+    <string name="live_video_camera_off_action">Kamera ausschalten</string>
+    <string name="live_video_camera_on_action">Kamera einschalten</string>
+    <string name="live_video_camera_on_self">Schalte deine Kamera ein</string>
+    <string name="live_video_camera_off_self">Schalte deine Kamera aus</string>
+    <string name="live_people_title">Personen</string>
+    <string name="live_room_more_options">Weitere Optionen</string>
+    <string name="live_chat_send">Nachricht senden</string>
+    <string name="live_chat_delete">Nachricht löschen</string>
 </resources>

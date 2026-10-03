@@ -2575,4 +2575,26 @@
     <string name="settings_theme_system">Utiliser le réglage de l\'appareil</string>
     <string name="music_player_hidden">Lecteur masqué. La lecture continue.</string>
     <string name="music_show_player">Afficher le lecteur</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Vidéo en direct</string>
+    <string name="live_video_page_title">Vidéo en direct</string>
+    <string name="live_video_subtitle">Rejoignez un salon vidéo en direct, ou démarrez le vôtre.</string>
+    <string name="live_video_no_rooms_desc">Soyez le premier à démarrer un direct.</string>
+    <string name="live_video_viewer_count">%1$d en train de regarder</string>
+    <string name="live_video_back">Retour à Vidéo en direct</string>
+    <string name="live_video_participants_heading">À la caméra</string>
+    <string name="live_video_viewers_heading">Spectateurs</string>
+    <string name="live_video_camera_off_label">Caméra coupée</string>
+    <string name="live_video_raise_hand">Demander à rejoindre à la caméra</string>
+    <string name="live_video_pending_requests">Demandes pour rejoindre (%1$d)</string>
+    <string name="live_video_invite_on_camera">Inviter à la caméra</string>
+    <string name="live_video_move_to_viewer">Repasser spectateur</string>
+    <string name="live_video_camera_off_action">Couper la caméra</string>
+    <string name="live_video_camera_on_action">Activer la caméra</string>
+    <string name="live_video_camera_on_self">Activez votre caméra</string>
+    <string name="live_video_camera_off_self">Coupez votre caméra</string>
+    <string name="live_people_title">Personnes</string>
+    <string name="live_room_more_options">Plus d\'options</string>
+    <string name="live_chat_send">Envoyer le message</string>
+    <string name="live_chat_delete">Supprimer le message</string>
 </resources>

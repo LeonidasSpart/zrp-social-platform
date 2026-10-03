@@ -2575,4 +2575,26 @@
     <string name="settings_theme_system">Ikuti pengaturan perangkat</string>
     <string name="music_player_hidden">Pemutar disembunyikan. Pemutaran berlanjut.</string>
     <string name="music_show_player">Tampilkan pemutar</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Video Live</string>
+    <string name="live_video_page_title">Video Live</string>
+    <string name="live_video_subtitle">Gabung ke ruang video live, atau mulai milikmu sendiri.</string>
+    <string name="live_video_no_rooms_desc">Jadilah yang pertama live.</string>
+    <string name="live_video_viewer_count">%1$d menonton</string>
+    <string name="live_video_back">Kembali ke Video Live</string>
+    <string name="live_video_participants_heading">Di kamera</string>
+    <string name="live_video_viewers_heading">Penonton</string>
+    <string name="live_video_camera_off_label">Kamera nonaktif</string>
+    <string name="live_video_raise_hand">Minta bergabung dengan kamera</string>
+    <string name="live_video_pending_requests">Permintaan bergabung (%1$d)</string>
+    <string name="live_video_invite_on_camera">Undang ke kamera</string>
+    <string name="live_video_move_to_viewer">Pindahkan ke penonton</string>
+    <string name="live_video_camera_off_action">Matikan kamera</string>
+    <string name="live_video_camera_on_action">Nyalakan kamera</string>
+    <string name="live_video_camera_on_self">Nyalakan kameramu</string>
+    <string name="live_video_camera_off_self">Matikan kameramu</string>
+    <string name="live_people_title">Orang</string>
+    <string name="live_room_more_options">Opsi lainnya</string>
+    <string name="live_chat_send">Kirim pesan</string>
+    <string name="live_chat_delete">Hapus pesan</string>
 </resources>

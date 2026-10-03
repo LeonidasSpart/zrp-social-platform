@@ -2575,4 +2575,26 @@
     <string name="settings_theme_system">استخدام إعداد الجهاز</string>
     <string name="music_player_hidden">تم إخفاء المشغل. التشغيل مستمر.</string>
     <string name="music_show_player">إظهار المشغل</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">فيديو مباشر</string>
+    <string name="live_video_page_title">فيديو مباشر</string>
+    <string name="live_video_subtitle">انضم إلى غرفة فيديو مباشرة، أو ابدأ غرفتك الخاصة.</string>
+    <string name="live_video_no_rooms_desc">كن أول من يبدأ البث المباشر.</string>
+    <string name="live_video_viewer_count">%1$d يشاهدون</string>
+    <string name="live_video_back">الرجوع إلى الفيديو المباشر</string>
+    <string name="live_video_participants_heading">على الكاميرا</string>
+    <string name="live_video_viewers_heading">المشاهدون</string>
+    <string name="live_video_camera_off_label">الكاميرا مغلقة</string>
+    <string name="live_video_raise_hand">طلب الانضمام بالكاميرا</string>
+    <string name="live_video_pending_requests">طلبات الانضمام (%1$d)</string>
+    <string name="live_video_invite_on_camera">دعوة للظهور بالكاميرا</string>
+    <string name="live_video_move_to_viewer">التحويل إلى مشاهد</string>
+    <string name="live_video_camera_off_action">إيقاف الكاميرا</string>
+    <string name="live_video_camera_on_action">تشغيل الكاميرا</string>
+    <string name="live_video_camera_on_self">شغّل كاميرتك</string>
+    <string name="live_video_camera_off_self">أوقف كاميرتك</string>
+    <string name="live_people_title">أشخاص</string>
+    <string name="live_room_more_options">مزيد من الخيارات</string>
+    <string name="live_chat_send">إرسال الرسالة</string>
+    <string name="live_chat_delete">حذف رسالة</string>
 </resources>

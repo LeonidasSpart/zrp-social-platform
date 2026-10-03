@@ -2517,4 +2517,26 @@
     <string name="settings_theme_system">Käytä laitteen asetusta</string>
     <string name="music_player_hidden">Soitin piilotettu. Toisto jatkuu.</string>
     <string name="music_show_player">Näytä soitin</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Livevideo</string>
+    <string name="live_video_page_title">Livevideo</string>
+    <string name="live_video_subtitle">Liity livevideohuoneeseen tai aloita omasi.</string>
+    <string name="live_video_no_rooms_desc">Ole ensimmäinen, joka menee livenä.</string>
+    <string name="live_video_viewer_count">%1$d katsoo</string>
+    <string name="live_video_back">Takaisin Livevideoon</string>
+    <string name="live_video_participants_heading">Kamera päällä</string>
+    <string name="live_video_viewers_heading">Katsojat</string>
+    <string name="live_video_camera_off_label">Kamera pois</string>
+    <string name="live_video_raise_hand">Pyydä liittymistä kameralla</string>
+    <string name="live_video_pending_requests">Liittymispyynnöt (%1$d)</string>
+    <string name="live_video_invite_on_camera">Kutsu kameralle</string>
+    <string name="live_video_move_to_viewer">Siirrä katsojaksi</string>
+    <string name="live_video_camera_off_action">Sammuta kamera</string>
+    <string name="live_video_camera_on_action">Käynnistä kamera</string>
+    <string name="live_video_camera_on_self">Käynnistä kamerasi</string>
+    <string name="live_video_camera_off_self">Sammuta kamerasi</string>
+    <string name="live_people_title">Ihmiset</string>
+    <string name="live_room_more_options">Lisää vaihtoehtoja</string>
+    <string name="live_chat_send">Lähetä viesti</string>
+    <string name="live_chat_delete">Poista viesti</string>
 </resources>

@@ -2528,4 +2528,26 @@
     <string name="post_recruitment_heading">Opportunità ta\' xogħol</string>
     <string name="post_recruitment_subtitle">Reklutaġġ</string>
     <string name="post_repost_rate_limited_error">Intlaħaq il-limitu ta\' ripostjar ta\' kuljum (%1$d). Erġa\' pprova għada jew agħmel upgrade għal limitu ogħla.</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Vidjo Dirett</string>
+    <string name="live_video_page_title">Vidjo Dirett</string>
+    <string name="live_video_subtitle">Ingħaqad ma\' kamra tal-vidjo diretta, jew ibda l-kamra tiegħek stess.</string>
+    <string name="live_video_no_rooms_desc">Kun l-ewwel wieħed li jmur live.</string>
+    <string name="live_video_viewer_count">%1$d qed jaraw</string>
+    <string name="live_video_back">Lura għal Vidjo Dirett</string>
+    <string name="live_video_participants_heading">Fuq il-kamera</string>
+    <string name="live_video_viewers_heading">Telespettaturi</string>
+    <string name="live_video_camera_off_label">Kamera mitfija</string>
+    <string name="live_video_raise_hand">Itlob biex tingħaqad bil-kamera</string>
+    <string name="live_video_pending_requests">Talbiet biex tingħaqad (%1$d)</string>
+    <string name="live_video_invite_on_camera">Stieden fuq il-kamera</string>
+    <string name="live_video_move_to_viewer">Mexxi għal telespettatur</string>
+    <string name="live_video_camera_off_action">Itfi l-kamera</string>
+    <string name="live_video_camera_on_action">Ixgħel il-kamera</string>
+    <string name="live_video_camera_on_self">Ixgħel il-kamera tiegħek</string>
+    <string name="live_video_camera_off_self">Itfi l-kamera tiegħek</string>
+    <string name="live_people_title">Nies</string>
+    <string name="live_room_more_options">Aktar għażliet</string>
+    <string name="live_chat_send">Ibgħat messaġġ</string>
+    <string name="live_chat_delete">Ħassar il-messaġġ</string>
 </resources>

@@ -2529,4 +2529,26 @@ Túto akciu nemožno vrátiť späť.</string>
     <string name="settings_theme_system">Použiť nastavenie zariadenia</string>
     <string name="music_player_hidden">Prehrávač skrytý. Prehrávanie pokračuje.</string>
     <string name="music_show_player">Zobraziť prehrávač</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Živé video</string>
+    <string name="live_video_page_title">Živé video</string>
+    <string name="live_video_subtitle">Pripoj sa do miestnosti so živým videom, alebo si spusti vlastnú.</string>
+    <string name="live_video_no_rooms_desc">Buď prvý, kto začne vysielať naživo.</string>
+    <string name="live_video_viewer_count">%1$d sleduje</string>
+    <string name="live_video_back">Späť na Živé video</string>
+    <string name="live_video_participants_heading">Na kamere</string>
+    <string name="live_video_viewers_heading">Diváci</string>
+    <string name="live_video_camera_off_label">Kamera vypnutá</string>
+    <string name="live_video_raise_hand">Požiadať o pripojenie s kamerou</string>
+    <string name="live_video_pending_requests">Žiadosti o pripojenie (%1$d)</string>
+    <string name="live_video_invite_on_camera">Pozvať na kameru</string>
+    <string name="live_video_move_to_viewer">Presunúť medzi divákov</string>
+    <string name="live_video_camera_off_action">Vypnúť kameru</string>
+    <string name="live_video_camera_on_action">Zapnúť kameru</string>
+    <string name="live_video_camera_on_self">Zapni si kameru</string>
+    <string name="live_video_camera_off_self">Vypni si kameru</string>
+    <string name="live_people_title">Ľudia</string>
+    <string name="live_room_more_options">Ďalšie možnosti</string>
+    <string name="live_chat_send">Odoslať správu</string>
+    <string name="live_chat_delete">Vymazať správu</string>
 </resources>

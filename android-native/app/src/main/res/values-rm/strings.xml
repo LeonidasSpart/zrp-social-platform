@@ -2518,4 +2518,26 @@
     <string name="post_recruitment_heading">Occasiun da lavur</string>
     <string name="post_recruitment_subtitle">Recrutament</string>
     <string name="post_repost_rate_limited_error">Limit dal di per republicaziuns cuntanschì (%1$d). Empruvai damaun anc ina giada u fai in upgrade per in limit pli aut.</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Video live</string>
+    <string name="live_video_page_title">Video live</string>
+    <string name="live_video_subtitle">Participescha en ina sala da video live, u cumenza la tia atgna.</string>
+    <string name="live_video_no_rooms_desc">Sajas il emprim che vegn live.</string>
+    <string name="live_video_viewer_count">%1$d guardan</string>
+    <string name="live_video_back">Enavos a Video live</string>
+    <string name="live_video_participants_heading">En camera</string>
+    <string name="live_video_viewers_heading">Spectaturs</string>
+    <string name="live_video_camera_off_label">Camera deactivada</string>
+    <string name="live_video_raise_hand">Pretender da participar cun camera</string>
+    <string name="live_video_pending_requests">Dumondas da participar (%1$d)</string>
+    <string name="live_video_invite_on_camera">Envidar en camera</string>
+    <string name="live_video_move_to_viewer">Spustar a spectatur</string>
+    <string name="live_video_camera_off_action">Deactivar la camera</string>
+    <string name="live_video_camera_on_action">Activar la camera</string>
+    <string name="live_video_camera_on_self">Activescha tia camera</string>
+    <string name="live_video_camera_off_self">Deactivescha tia camera</string>
+    <string name="live_people_title">Persunas</string>
+    <string name="live_room_more_options">Dapli opziuns</string>
+    <string name="live_chat_send">Trametter il messadi</string>
+    <string name="live_chat_delete">Stizzar il messadi</string>
 </resources>

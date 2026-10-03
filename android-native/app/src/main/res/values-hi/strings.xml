@@ -2520,4 +2520,26 @@
     <string name="settings_theme_system">डिवाइस की सेटिंग उपयोग करें</string>
     <string name="music_player_hidden">प्लेयर छुपा दिया गया। प्लेबैक जारी है।</string>
     <string name="music_show_player">प्लेयर दिखाएं</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">लाइव वीडियो</string>
+    <string name="live_video_page_title">लाइव वीडियो</string>
+    <string name="live_video_subtitle">लाइव वीडियो रूम में शामिल हों, या अपना खुद शुरू करें।</string>
+    <string name="live_video_no_rooms_desc">सबसे पहले लाइव शुरू करें।</string>
+    <string name="live_video_viewer_count">%1$d देख रहे हैं</string>
+    <string name="live_video_back">लाइव वीडियो पर वापस जाएं</string>
+    <string name="live_video_participants_heading">कैमरे पर</string>
+    <string name="live_video_viewers_heading">दर्शक</string>
+    <string name="live_video_camera_off_label">कैमरा बंद</string>
+    <string name="live_video_raise_hand">कैमरे के साथ शामिल होने का अनुरोध करें</string>
+    <string name="live_video_pending_requests">शामिल होने के अनुरोध (%1$d)</string>
+    <string name="live_video_invite_on_camera">कैमरे पर आमंत्रित करें</string>
+    <string name="live_video_move_to_viewer">दर्शक बनाएं</string>
+    <string name="live_video_camera_off_action">कैमरा बंद करें</string>
+    <string name="live_video_camera_on_action">कैमरा चालू करें</string>
+    <string name="live_video_camera_on_self">अपना कैमरा चालू करें</string>
+    <string name="live_video_camera_off_self">अपना कैमरा बंद करें</string>
+    <string name="live_people_title">लोग</string>
+    <string name="live_room_more_options">अधिक विकल्प</string>
+    <string name="live_chat_send">मैसेज भेजें</string>
+    <string name="live_chat_delete">मैसेज डिलीट करें</string>
 </resources>

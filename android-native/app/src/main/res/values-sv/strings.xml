@@ -2520,4 +2520,26 @@
     <string name="settings_theme_system">Använd enhetens inställning</string>
     <string name="music_player_hidden">Spelaren är dold. Uppspelningen fortsätter.</string>
     <string name="music_show_player">Visa spelaren</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Livevideo</string>
+    <string name="live_video_page_title">Livevideo</string>
+    <string name="live_video_subtitle">Gå med i ett livevideorum, eller starta ditt eget.</string>
+    <string name="live_video_no_rooms_desc">Bli först med att sända live.</string>
+    <string name="live_video_viewer_count">%1$d tittar</string>
+    <string name="live_video_back">Tillbaka till Livevideo</string>
+    <string name="live_video_participants_heading">På kamera</string>
+    <string name="live_video_viewers_heading">Tittare</string>
+    <string name="live_video_camera_off_label">Kameran av</string>
+    <string name="live_video_raise_hand">Begär att gå med på kamera</string>
+    <string name="live_video_pending_requests">Förfrågningar om att gå med (%1$d)</string>
+    <string name="live_video_invite_on_camera">Bjud in på kamera</string>
+    <string name="live_video_move_to_viewer">Flytta till tittare</string>
+    <string name="live_video_camera_off_action">Stäng av kameran</string>
+    <string name="live_video_camera_on_action">Sätt på kameran</string>
+    <string name="live_video_camera_on_self">Sätt på din kamera</string>
+    <string name="live_video_camera_off_self">Stäng av din kamera</string>
+    <string name="live_people_title">Personer</string>
+    <string name="live_room_more_options">Fler alternativ</string>
+    <string name="live_chat_send">Skicka meddelande</string>
+    <string name="live_chat_delete">Ta bort meddelande</string>
 </resources>

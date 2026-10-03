@@ -2520,4 +2520,26 @@
     <string name="settings_theme_system">Eszköz beállításának használata</string>
     <string name="music_player_hidden">Lejátszó elrejtve. A lejátszás folytatódik.</string>
     <string name="music_show_player">Lejátszó megjelenítése</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Élő videó</string>
+    <string name="live_video_page_title">Élő videó</string>
+    <string name="live_video_subtitle">Csatlakozz egy élő videószobához, vagy indíts saját szobát.</string>
+    <string name="live_video_no_rooms_desc">Legyél az első, aki élőben megy.</string>
+    <string name="live_video_viewer_count">%1$d néző</string>
+    <string name="live_video_back">Vissza az Élő videóhoz</string>
+    <string name="live_video_participants_heading">Kamerán</string>
+    <string name="live_video_viewers_heading">Nézők</string>
+    <string name="live_video_camera_off_label">Kamera kikapcsolva</string>
+    <string name="live_video_raise_hand">Csatlakozás kéréssel kamerával</string>
+    <string name="live_video_pending_requests">Csatlakozási kérések (%1$d)</string>
+    <string name="live_video_invite_on_camera">Meghívás kamerára</string>
+    <string name="live_video_move_to_viewer">Áthelyezés nézőnek</string>
+    <string name="live_video_camera_off_action">Kamera kikapcsolása</string>
+    <string name="live_video_camera_on_action">Kamera bekapcsolása</string>
+    <string name="live_video_camera_on_self">Kapcsold be a kamerádat</string>
+    <string name="live_video_camera_off_self">Kapcsold ki a kamerádat</string>
+    <string name="live_people_title">Emberek</string>
+    <string name="live_room_more_options">További lehetőségek</string>
+    <string name="live_chat_send">Üzenet küldése</string>
+    <string name="live_chat_delete">Üzenet törlése</string>
 </resources>

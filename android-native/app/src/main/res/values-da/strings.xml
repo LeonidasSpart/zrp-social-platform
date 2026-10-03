@@ -2520,4 +2520,26 @@
     <string name="settings_theme_system">Brug enhedens indstilling</string>
     <string name="music_player_hidden">Afspiller skjult. Afspilningen fortsætter.</string>
     <string name="music_show_player">Vis afspiller</string>
+    <!-- ZRP Live: strings reused verbatim from web's translations.ts (same keys/meaning). -->
+    <string name="nav_live_video">Livevideo</string>
+    <string name="live_video_page_title">Livevideo</string>
+    <string name="live_video_subtitle">Deltag i et livevideorum, eller start dit eget.</string>
+    <string name="live_video_no_rooms_desc">Vær den første til at gå live.</string>
+    <string name="live_video_viewer_count">%1$d ser på</string>
+    <string name="live_video_back">Tilbage til Livevideo</string>
+    <string name="live_video_participants_heading">På kamera</string>
+    <string name="live_video_viewers_heading">Seere</string>
+    <string name="live_video_camera_off_label">Kamera slukket</string>
+    <string name="live_video_raise_hand">Anmod om at deltage med kamera</string>
+    <string name="live_video_pending_requests">Anmodninger om at deltage (%1$d)</string>
+    <string name="live_video_invite_on_camera">Inviter på kamera</string>
+    <string name="live_video_move_to_viewer">Flyt til seer</string>
+    <string name="live_video_camera_off_action">Sluk kameraet</string>
+    <string name="live_video_camera_on_action">Tænd kameraet</string>
+    <string name="live_video_camera_on_self">Tænd dit kamera</string>
+    <string name="live_video_camera_off_self">Sluk dit kamera</string>
+    <string name="live_people_title">Personer</string>
+    <string name="live_room_more_options">Flere muligheder</string>
+    <string name="live_chat_send">Send besked</string>
+    <string name="live_chat_delete">Slet besked</string>
 </resources>
