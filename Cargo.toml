@@ -2,24 +2,6 @@
 members = ["programs/zrp-launchpad"]
 resolver = "2"
 
-# cargo build-sbf (invoked by `anchor build`) uses Solana's own bundled
-# "platform-tools" cross-compiler to build the on-chain program - a fixed,
-# old Cargo (1.79 as of SOLANA_VERSION 2.1.0) that predates the Cargo
-# `edition2024` feature. Confirmed root cause for zeroize (verified via
-# `cargo tree -i zeroize`, see .github/workflows/solana-program-ci.yml):
-# solana-zk-sdk (pulled in transitively through anchor-spl's spl-token-2022
-# confidential-transfer sub-crates, used nowhere in this program's own
-# code) and several of its own dependencies (aes-gcm-siv, curve25519-dalek,
-# merlin) declare loose "^1"/"^1.7"-style zeroize requirements that have
-# since floated to zeroize 1.9.0, which requires edition2024. 1.8.2 is the
-# newest zeroize release that is still edition2021 and satisfies every one
-# of those requirements (confirmed against each dependent's own declared
-# range), so this patch doesn't change which zeroize API surface anything
-# in the graph actually uses - only which otherwise-compatible patch
-# version of it gets built.
-[patch.crates-io]
-zeroize = { version = "=1.8.2" }
-
 [profile.release]
 overflow-checks = true
 lto = "fat"

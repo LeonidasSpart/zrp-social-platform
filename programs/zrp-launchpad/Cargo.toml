@@ -19,5 +19,25 @@ default = []
 anchor-lang = { version = "0.31.1", features = ["init-if-needed"] }
 anchor-spl = { version = "0.31.1", features = ["metadata"] }
 
+# Pins a transitive dependency this crate never calls directly. cargo
+# build-sbf (invoked by `anchor build`) uses Solana's own bundled
+# "platform-tools" cross-compiler to build the on-chain program - a
+# fixed, old Cargo (1.79 as of SOLANA_VERSION 2.1.0, see
+# .github/workflows/solana-program-ci.yml) that predates the Cargo
+# `edition2024` feature. Confirmed via `cargo tree -i zeroize` (run with
+# the host's modern cargo, which does support edition2024): zeroize is
+# pulled in transitively through anchor-spl's spl-token-2022
+# confidential-transfer sub-crates (solana-zk-sdk and its own
+# dependents aes-gcm-siv, curve25519-dalek, merlin), each declaring a
+# loose "^1"/"^1.7"-style zeroize requirement that has since floated to
+# zeroize 1.9.0, which itself requires edition2024. 1.8.2 is the newest
+# zeroize release that is still edition2021 and satisfies every one of
+# those requirements (checked against each dependent's own declared
+# range via crates.io), so declaring it directly here - even though
+# this crate's own code never imports it - forces the workspace's
+# single unified dependency graph to use that version everywhere
+# instead of floating to the newest edition2024 release.
+zeroize = "=1.8.2"
+
 [profile.release]
 overflow-checks = true
