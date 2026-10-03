@@ -19,6 +19,7 @@ import {
   type PoolOnChainState,
 } from "@/lib/launchpad/client-liquidity";
 import { buyOnCurve, sellOnCurve, AmbiguousTradeError } from "@/lib/launchpad/client-bonding-curve";
+import { buyOnZrpCurve, sellOnZrpCurve, AmbiguousZrpLaunchError } from "@/lib/launchpad/client-zrp-launch";
 import { connectInjectedWallet } from "@/lib/launchpad/injected-wallet";
 import type { HistoryChartPoint } from "@/components/launchpad/TokenHistoryChart";
 
@@ -530,6 +531,7 @@ function TokenHistorySection({ mintAddress, t }: { mintAddress: string; t: Retur
 function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; decimals: number; t: ReturnType<typeof useLanguage>["t"] }) {
   const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
   const [curve, setCurve] = useState<CurveState | null>(null);
+  const [venue, setVenue] = useState<"ZRP_LAUNCH" | "PUMP_CURVE">("PUMP_CURVE");
   const [graduation, setGraduation] = useState<GraduationCheck | null>(null);
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState("");
@@ -543,7 +545,10 @@ function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; d
   useEffect(() => {
     fetch(`/api/launchpad/tokens/${mintAddress}/curve`)
       .then((res) => res.json())
-      .then((data) => setCurve(data.curve ?? null))
+      .then((data) => {
+        setCurve(data.curve ?? null);
+        setVenue(data.venue === "ZRP_LAUNCH" ? "ZRP_LAUNCH" : "PUMP_CURVE");
+      })
       .catch(() => setCurve(null));
     fetch(`/api/launchpad/tokens/${mintAddress}/graduation`)
       .then((res) => res.json())
@@ -592,22 +597,37 @@ function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; d
       setStep("working");
       setError(null);
       setDone(false);
+      const minimumReceivedRaw = BigInt(quote.minimumReceivedRaw ?? "0");
       const result =
-        side === "buy"
-          ? await buyOnCurve({
-              rpcUrl,
-              mintAddress,
-              solLamports: BigInt(quote.solAmountLamports),
-              quotedTokenAmountRaw: BigInt(quote.tokenAmountRaw),
-              slippagePercent: 1,
-            })
-          : await sellOnCurve({
-              rpcUrl,
-              mintAddress,
-              tokenAmountRaw: BigInt(quote.tokenAmountRaw),
-              quotedSolLamports: BigInt(quote.solAmountLamports),
-              slippagePercent: 1,
-            });
+        venue === "ZRP_LAUNCH"
+          ? side === "buy"
+            ? await buyOnZrpCurve({
+                rpcUrl,
+                mintAddress,
+                solLamports: BigInt(quote.solAmountLamports),
+                minTokensOut: minimumReceivedRaw,
+              })
+            : await sellOnZrpCurve({
+                rpcUrl,
+                mintAddress,
+                tokenAmountRaw: BigInt(quote.tokenAmountRaw),
+                minSolOut: minimumReceivedRaw,
+              })
+          : side === "buy"
+            ? await buyOnCurve({
+                rpcUrl,
+                mintAddress,
+                solLamports: BigInt(quote.solAmountLamports),
+                quotedTokenAmountRaw: BigInt(quote.tokenAmountRaw),
+                slippagePercent: 1,
+              })
+            : await sellOnCurve({
+                rpcUrl,
+                mintAddress,
+                tokenAmountRaw: BigInt(quote.tokenAmountRaw),
+                quotedSolLamports: BigInt(quote.solAmountLamports),
+                slippagePercent: 1,
+              });
 
       setStep("recording");
       await fetch(`/api/launchpad/curve/${side}`, {
@@ -619,7 +639,7 @@ function BondingCurveCard({ mintAddress, decimals, t }: { mintAddress: string; d
       setAmount("");
       setQuote(null);
     } catch (err: unknown) {
-      if (err instanceof AmbiguousTradeError) {
+      if (err instanceof AmbiguousTradeError || err instanceof AmbiguousZrpLaunchError) {
         setAmbiguous({ signature: err.signature });
       } else {
         setError(err instanceof Error ? err.message : t("launchpad.pool.createFailedGeneric"));

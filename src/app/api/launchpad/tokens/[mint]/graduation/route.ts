@@ -45,7 +45,7 @@ import { checkZrpGraduation, findZrpGraduateEvent } from "@/lib/launchpad/zrp-la
 async function handleZrpGraduation(mint: string) {
   const check = await checkZrpGraduation(getConnection(), mint);
   if (!check.migrated) {
-    return { graduated: check.graduated, bondingCurveAddress: check.bondingCurveAddress, record: null };
+    return { graduated: check.graduated, bondingCurveAddress: check.bondingCurveAddress, poolAddress: null, poolAccountExists: false, record: null };
   }
 
   const existing = await prisma.graduationEvent.findUnique({ where: { mintAddress: mint } });
@@ -104,7 +104,11 @@ async function handleZrpGraduation(mint: string) {
     }
   }
 
-  return { graduated: true, bondingCurveAddress: check.bondingCurveAddress, record: event };
+  // poolAddress/poolAccountExists stay false until a follow-up phase wires
+  // ZRP's existing Raydium CPMM pool-service (src/lib/launchpad/
+  // pool-service.ts) to actually seed post-graduation liquidity from the
+  // swept reserves this GraduateEvent reports - not fabricated here.
+  return { graduated: true, bondingCurveAddress: check.bondingCurveAddress, poolAddress: null, poolAccountExists: false, record: event };
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ mint: string }> }) {

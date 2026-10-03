@@ -85,8 +85,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
   const slippageBpsParam = req.nextUrl.searchParams.get("slippageBps");
   const slippageBps = slippageBpsParam ? Number(slippageBpsParam) : 100; // default 1%
 
+  const venue = isZrp ? "ZRP_LAUNCH" : "PUMP_CURVE";
+
   if (!side || !amountParam) {
-    return NextResponse.json({ curve: state, quote: null });
+    return NextResponse.json({ curve: state, quote: null, venue });
   }
   if (!Number.isFinite(slippageBps) || slippageBps < 0 || slippageBps > 5000) {
     return NextResponse.json({ error: "slippageBps must be between 0 and 5000." }, { status: 400 });
@@ -109,5 +111,5 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
     return NextResponse.json({ error: "side must be 'buy' or 'sell'." }, { status: 400 });
   }
 
-  return NextResponse.json({ curve: state, quote });
+  return NextResponse.json({ curve: state, quote, venue });
 }

@@ -13,7 +13,7 @@ import { getZrpInitialBuyQuote } from "@/lib/launchpad/zrp-launch-service";
  * an existing curve's buy quote, just against GlobalConfig's own
  * configured starting reserves instead of a live curve account, so the
  * numbers shown here match what create_and_buy will actually execute
- * on-chain. The ZRP-native counterpart to ../pump/create-quote/route.ts.
+ * on-chain.
  */
 export async function GET(req: NextRequest) {
   const limitCheck = await rateLimit(req, { limit: 60, window: 60, type: "launchpad-zrp-create-quote" });

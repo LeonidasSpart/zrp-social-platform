@@ -6,14 +6,14 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Loader2, Wallet, Rocket, Upload } from "lucide-react";
 import { useUploadThing } from "@/lib/uploadthing-client";
-import { createPumpTokenFromBrowser, AmbiguousCreateError } from "@/lib/launchpad/client-pump-create";
+import { createZrpTokenFromBrowser, AmbiguousZrpLaunchError } from "@/lib/launchpad/client-zrp-launch";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 
 interface InitialBuyQuote {
   status: string;
   tokenAmountRaw: string | null;
-  totalFeeLamports: string | null;
+  feeLamports: string | null;
   minimumReceivedRaw: string | null;
 }
 
@@ -23,7 +23,18 @@ function lamportsToSol(sol: string): bigint {
   return BigInt(Math.round(numeric * 1e9));
 }
 
-export default function CreatePumpTokenPage() {
+/*
+ * ZRP-native token creation - mints through ZRP's own Launchpad program
+ * (programs/zrp-launchpad/) exclusively, via client-zrp-launch.ts. This is
+ * the single bonding-curve creation path; it does not call, construct, or
+ * depend on Pump.fun's program in any way - see
+ * docs/zrp-launchpad-deployment.md for the on-chain architecture this
+ * mints against. Same shape as the ZRP direct-mint flow
+ * (/launchpad/create), since this repo's established "connect wallet ->
+ * sign -> broadcast -> record" UX pattern applies identically regardless
+ * of which on-chain program a creation targets.
+ */
+export default function CreateZrpTokenPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useLanguage();
@@ -57,7 +68,7 @@ export default function CreatePumpTokenPage() {
     if (solLamports <= BigInt(0)) return;
     const controller = new AbortController();
     const timer = setTimeout(() => {
-      fetch(`/api/launchpad/pump/create-quote?solLamports=${solLamports.toString()}&slippageBps=100`, { signal: controller.signal })
+      fetch(`/api/launchpad/zrp/create-quote?solLamports=${solLamports.toString()}&slippageBps=100`, { signal: controller.signal })
         .then((res) => res.json())
         .then((data) => setQuote(data.quote ?? null))
         .catch(() => {});
@@ -87,7 +98,7 @@ export default function CreatePumpTokenPage() {
   };
 
   const recordCreatedToken = async (mintAddress: string, signature: string, walletAddr: string) => {
-    const response = await fetch("/api/launchpad/pump/create", {
+    const response = await fetch("/api/launchpad/zrp/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -153,30 +164,31 @@ export default function CreatePumpTokenPage() {
     const solLamports = lamportsToSol(initialBuySol);
     const wantsInitialBuy = solLamports > BigInt(0);
     if (wantsInitialBuy && (!quote || quote.status !== "OK" || !quote.tokenAmountRaw)) {
-      setError(t("launchpad.pumpCreate.quoteUnavailable"));
+      setError(t("launchpad.zrpCreate.quoteUnavailable"));
       return;
     }
 
     try {
       setStep("creating");
-      const result = await createPumpTokenFromBrowser({
+      const result = await createZrpTokenFromBrowser({
         rpcUrl,
         name: name.trim(),
         symbol: symbol.trim().toUpperCase(),
         metadataOrigin: window.location.origin,
         initialBuySolLamports: wantsInitialBuy ? solLamports : undefined,
-        quotedTokenAmountRaw: wantsInitialBuy ? BigInt(quote!.tokenAmountRaw!) : undefined,
-        slippagePercent: 1,
+        minTokensOut: wantsInitialBuy ? BigInt(quote!.minimumReceivedRaw!) : undefined,
       });
       setWalletAddress(result.walletAddress);
 
       setStep("recording");
       await recordCreatedToken(result.mintAddress, result.signature, result.walletAddress);
     } catch (err: unknown) {
-      if (err instanceof AmbiguousCreateError) {
+      if (err instanceof AmbiguousZrpLaunchError) {
         setWalletAddress(err.walletAddress);
-        setAmbiguousCreate({ mintAddress: err.mintAddress, signature: err.signature });
-        setError(null);
+        if (err.mintAddress) {
+          setAmbiguousCreate({ mintAddress: err.mintAddress, signature: err.signature });
+        }
+        setError(err.mintAddress ? null : err.message);
       } else {
         setError(err instanceof Error ? err.message : t("launchpad.createToken.createFailedGeneric"));
       }
@@ -206,9 +218,9 @@ export default function CreatePumpTokenPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-        <Rocket className="h-6 w-6" /> {t("launchpad.pumpCreate.heading")}
+        <Rocket className="h-6 w-6" /> {t("launchpad.zrpCreate.heading")}
       </h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.pumpCreate.intro")}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t("launchpad.zrpCreate.intro")}</p>
 
       <form onSubmit={handleCreate} className="space-y-5">
         <div>
@@ -314,7 +326,7 @@ export default function CreatePumpTokenPage() {
         </div>
 
         <div className="space-y-2 rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.pumpCreate.initialBuyLabel")}</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.zrpCreate.initialBuyLabel")}</label>
           <input
             type="text"
             inputMode="decimal"
@@ -324,14 +336,14 @@ export default function CreatePumpTokenPage() {
             disabled={submitting}
             className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           />
-          <p className="text-xs text-gray-400 dark:text-gray-500">{t("launchpad.pumpCreate.initialBuyHint")}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{t("launchpad.zrpCreate.initialBuyHint")}</p>
           {quote && quote.status === "OK" && quote.tokenAmountRaw && (
             <div className="mt-2 space-y-1 text-xs text-gray-600 dark:text-gray-400">
               <p>
                 {t("launchpad.curve.estimatedReceiveLabel")}: {(Number(quote.tokenAmountRaw) / 1e6).toLocaleString()}
               </p>
               <p>
-                {t("launchpad.curve.feeLabel")}: {(Number(quote.totalFeeLamports ?? "0") / 1e9).toLocaleString()} SOL
+                {t("launchpad.curve.feeLabel")}: {(Number(quote.feeLamports ?? "0") / 1e9).toLocaleString()} SOL
               </p>
               <p>
                 {t("launchpad.curve.minReceivedLabel")}: {(Number(quote.minimumReceivedRaw ?? "0") / 1e6).toLocaleString()}
@@ -341,7 +353,7 @@ export default function CreatePumpTokenPage() {
         </div>
 
         <div className="rounded-md border border-gray-200 dark:border-gray-700 p-3">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.pumpCreate.noFeeDisclaimer")}</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("launchpad.zrpCreate.noFeeDisclaimer")}</p>
           {walletAddress && (
             <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
               <Wallet className="h-3.5 w-3.5" /> {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
@@ -390,7 +402,7 @@ export default function CreatePumpTokenPage() {
           {step === "idle" && (
             <>
               <Rocket className="h-4 w-4" />
-              {t("launchpad.pumpCreate.submitButton")}
+              {t("launchpad.zrpCreate.submitButton")}
             </>
           )}
         </button>

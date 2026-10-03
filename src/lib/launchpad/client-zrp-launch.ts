@@ -2,8 +2,11 @@
 
 /*
  * Browser-side, wallet-signed ZRP-native token creation and bonding-curve
- * buy/sell - the ZRP-owned replacement for client-pump-create.ts/
- * client-bonding-curve.ts. Every instruction here targets
+ * buy/sell - ZRP's own creation/trading client. Replaces
+ * client-pump-create.ts (removed) as the only token-creation path; legacy
+ * PUMP_CURVE tokens created before this change keep trading through
+ * client-bonding-curve.ts (kept, read/trade-only, never used for new
+ * creations). Every instruction here targets
  * ZRP_LAUNCH_PROGRAM_ID (programs/zrp-launchpad/) exclusively; none of
  * them ever construct or send a Pump.fun instruction. See
  * docs/zrp-launchpad-deployment.md for the program's build/deploy story

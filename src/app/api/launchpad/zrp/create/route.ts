@@ -42,12 +42,13 @@ function isValidPublicKey(value: string): boolean {
  * resulting mint account for its real decimals/supply, before recording
  * anything - "never record a token as created before chain verification."
  *
- * This is the ZRP-native counterpart to ../pump/create/route.ts; see that
- * file's comment for the shape this mirrors. The one structural
- * difference: ZRP charges its own creation fee on-chain, in the same
- * create_and_buy transaction (verified here via the TokenCreatedEvent's
- * own reserves, not a separate payment-verification step), so there is no
- * feeTransactionId for these rows - only feeAmount, in SOL.
+ * ZRP charges its own creation fee on-chain, in the same create_and_buy
+ * transaction (verified here via the TokenCreatedEvent's own reserves,
+ * not a separate payment-verification step), so there is no
+ * feeTransactionId for these rows - only feeAmount, in SOL. This replaces
+ * the old pump.fun-backed creation path (venue PUMP_CURVE), which has
+ * been removed from ZRP's own creation UI entirely - see
+ * docs/zrp-launchpad-deployment.md.
  */
 export async function POST(req: NextRequest) {
   try {
