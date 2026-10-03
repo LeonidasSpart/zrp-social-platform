@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { getConnection } from "@/lib/solana";
 import { checkGraduation, findVerifiedMigration, MIGRATION_SEARCH_COOLDOWN_MS } from "@/lib/launchpad/pump-curve-service";
+import { checkZrpGraduation, findZrpGraduateEvent } from "@/lib/launchpad/zrp-launch-service";
 
 /*
  * Real graduation detection - re-reads the bonding curve's own `complete`
@@ -30,11 +31,93 @@ import { checkGraduation, findVerifiedMigration, MIGRATION_SEARCH_COOLDOWN_MS } 
  * may never verify - reported honestly via migrationVerified: false, never
  * silently upgraded to true.
  */
+/*
+ * ZRP-native graduation is fully deterministic (BondingCurve.complete/
+ * migrated read directly, see checkZrpGraduation) - no heuristic "last
+ * activity" fallback is ever needed to know WHETHER a curve graduated,
+ * only (rarely) to find the exact GraduateEvent signature when
+ * `graduate()` was called out-of-band (it is permissionless) rather than
+ * through this app's own flow. Still gated by the same
+ * MIGRATION_SEARCH_COOLDOWN_MS as the pump path, for the same reason: a
+ * popular, still-unrecorded graduated token must not re-trigger a bounded
+ * signature search on every page view.
+ */
+async function handleZrpGraduation(mint: string) {
+  const check = await checkZrpGraduation(getConnection(), mint);
+  if (!check.migrated) {
+    return { graduated: check.graduated, bondingCurveAddress: check.bondingCurveAddress, record: null };
+  }
+
+  const existing = await prisma.graduationEvent.findUnique({ where: { mintAddress: mint } });
+  const cooledDown =
+    !existing?.lastMigrationSearchAt || Date.now() - existing.lastMigrationSearchAt.getTime() >= MIGRATION_SEARCH_COOLDOWN_MS;
+  const shouldSearch = (!existing || !existing.migrationVerified) && cooledDown;
+
+  let verified: Awaited<ReturnType<typeof findZrpGraduateEvent>> = null;
+  if (shouldSearch) {
+    try {
+      verified = await findZrpGraduateEvent(getConnection(), mint);
+    } catch (err) {
+      console.error("ZRP verified-migration search error:", err);
+    }
+  }
+
+  const writeData = {
+    mintAddress: mint,
+    bondingCurveAddress: check.bondingCurveAddress,
+    poolAddress: null, // populated once the ZRP-managed Raydium CPMM pool-service creates the post-graduation pool
+    signature: verified?.signature ?? null,
+    slot: verified?.slot ?? null,
+    blockTime: verified?.blockTime ?? null,
+    migrationVerified: !!verified,
+    mintAmountRaw: verified?.realTokenReservesMigratedRaw ?? null,
+    solAmountLamports: verified?.realSolReservesMigratedLamports ?? null,
+    poolMigrationFeeLamports: null,
+    lastMigrationSearchAt: shouldSearch ? new Date() : null,
+  };
+
+  let event;
+  try {
+    event = await prisma.graduationEvent.upsert({
+      where: { mintAddress: mint },
+      create: writeData,
+      update: verified
+        ? {
+            signature: verified.signature,
+            slot: verified.slot,
+            blockTime: verified.blockTime,
+            migrationVerified: true,
+            mintAmountRaw: verified.realTokenReservesMigratedRaw,
+            solAmountLamports: verified.realSolReservesMigratedLamports,
+            lastMigrationSearchAt: new Date(),
+          }
+        : shouldSearch
+          ? { lastMigrationSearchAt: new Date() }
+          : {},
+    });
+  } catch (err: any) {
+    if (err?.code === "P2002") {
+      event = await prisma.graduationEvent.findUnique({ where: { mintAddress: mint } });
+    } else {
+      console.error("ZRP graduation event upsert error:", err);
+      event = null;
+    }
+  }
+
+  return { graduated: true, bondingCurveAddress: check.bondingCurveAddress, record: event };
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ mint: string }> }) {
   const limitCheck = await rateLimit(req, { limit: 60, window: 60, type: "launchpad-token-graduation" });
   if (!limitCheck.success) return limitCheck.response;
 
   const { mint } = await params;
+
+  const launchedToken = await prisma.launchedToken.findUnique({ where: { mintAddress: mint }, select: { venue: true } });
+  if (launchedToken?.venue === "ZRP_LAUNCH") {
+    return NextResponse.json(await handleZrpGraduation(mint));
+  }
+
   const check = await checkGraduation(getConnection(), mint);
 
   let event = null;

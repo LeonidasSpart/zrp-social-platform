@@ -66,6 +66,11 @@ async function getCachedGlobalConfig(connection: Connection): Promise<DecodedGlo
   return result;
 }
 
+/** Exposed for callers (e.g. the create route, to record the real on-chain creation fee) that need GlobalConfig without the rest of this module's surface. */
+export async function getZrpGlobalConfig(connection: Connection): Promise<DecodedGlobalConfig> {
+  return getCachedGlobalConfig(connection);
+}
+
 export type ZrpCurveStateStatus = "OK" | "NO_CURVE" | "UNAVAILABLE";
 
 export interface ZrpCurveState {

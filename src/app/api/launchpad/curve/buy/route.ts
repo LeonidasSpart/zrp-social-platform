@@ -10,16 +10,19 @@ import { rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { jsonWithDecimalStrings } from "@/lib/launchpad/json";
 import { getConnection } from "@/lib/solana";
 import { verifyCurveTradeTransaction, CurveVerificationError } from "@/lib/launchpad/pump-curve-service";
+import { verifyZrpTradeTransaction, ZrpVerificationError } from "@/lib/launchpad/zrp-launch-service";
 
 /*
- * Records a real, independently-verified pump bonding-curve BUY. Mirrors
- * liquidity/add/route.ts's shape exactly: the client reports a broadcast,
- * already-confirmed transaction signature; this route re-verifies it
- * on-chain (see pump-curve-service.verifyCurveTradeTransaction) before
- * writing anything. A client-claimed amount or "success" is never trusted
- * on its own. The resulting TokenTrade row (source: BONDING_CURVE, no
- * poolId) feeds the same volume index / AnalyticsSnapshot / discovery
- * ranking pipeline as a Raydium pool swap for this mint.
+ * Records a real, independently-verified bonding-curve BUY - either venue.
+ * Mirrors liquidity/add/route.ts's shape exactly: the client reports a
+ * broadcast, already-confirmed transaction signature; this route looks up
+ * which protocol actually launched this mint (LaunchedToken.venue) and
+ * re-verifies the signature against THAT protocol's own program
+ * (pump-curve-service for PUMP_CURVE, zrp-launch-service for ZRP_LAUNCH)
+ * before writing anything - a client-claimed amount, side, or venue is
+ * never trusted on its own. The resulting TokenTrade row (source:
+ * BONDING_CURVE, no poolId) feeds the same volume index / AnalyticsSnapshot
+ * / discovery ranking pipeline for this mint regardless of venue.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -47,15 +50,19 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.tokenTrade.findUnique({ where: { txSignature: cleanTxId } });
     if (existing) return jsonWithDecimalStrings({ trade: existing }, { status: 200 });
 
+    const launchedToken = await prisma.launchedToken.findUnique({ where: { mintAddress }, select: { venue: true } });
+    if (!launchedToken) {
+      return NextResponse.json({ error: "This mint has not been recorded as a launched token." }, { status: 404 });
+    }
+
     let verified;
     try {
-      verified = await verifyCurveTradeTransaction(getConnection(), cleanTxId, {
-        mintAddress,
-        walletAddress,
-        expectedSide: "BUY",
-      });
+      verified =
+        launchedToken.venue === "ZRP_LAUNCH"
+          ? await verifyZrpTradeTransaction(getConnection(), cleanTxId, { mintAddress, walletAddress, expectedSide: "BUY" })
+          : await verifyCurveTradeTransaction(getConnection(), cleanTxId, { mintAddress, walletAddress, expectedSide: "BUY" });
     } catch (err: unknown) {
-      if (err instanceof CurveVerificationError) {
+      if (err instanceof CurveVerificationError || err instanceof ZrpVerificationError) {
         const status = err.status === "NOT_FOUND_YET" ? 202 : 400;
         return NextResponse.json({ error: err.message, status: err.status }, { status });
       }
