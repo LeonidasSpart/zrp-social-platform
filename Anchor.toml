@@ -16,7 +16,13 @@ zrp_launchpad = "3vr1SHa9LvEvELb23NBG1J6oFRCSDs8cj8wS55zuoRxK"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+# "localnet" so `anchor test` boots the ephemeral local validator
+# configured in [test.validator] below instead of trying to deploy to a
+# real cluster with the throwaway, unfunded CI wallet. `anchor deploy`
+# (devnet/mainnet CI jobs) and `anchor migrate` always pass their own
+# explicit --provider.cluster flag, so they are unaffected by this
+# default; nothing relies on it being "devnet" here.
+cluster = "localnet"
 # The DEPLOYER/fee-payer wallet (pays rent + tx fees), never the program's own
 # identity keypair. CI generates this fresh per run via `solana-keygen new` and
 # funds it from the devnet faucet - it is deliberately NOT the file in
