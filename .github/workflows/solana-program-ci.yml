@@ -58,18 +58,6 @@ permissions:
 env:
   SOLANA_VERSION: "2.1.0"
   ANCHOR_VERSION: "0.31.1"
-  # The actual on-chain program is compiled by `cargo build-sbf`'s own
-  # bundled "platform-tools" cross-compiler, not by RUST_TOOLCHAIN below -
-  # and the platform-tools version Solana CLI 2.1.0 defaults to bundles a
-  # Rust/Cargo old enough (1.79) to predate edition2024, which some of
-  # anchor-lang 0.31.1's own transitive dependencies (observed: zeroize,
-  # crypto-common) now require as crates.io's ecosystem has moved on since
-  # that anchor-cli version was published. Passing `--tools-version` to
-  # `anchor build` (forwarded straight to cargo build-sbf) selects a newer
-  # platform-tools release with a modern enough Rust, without touching the
-  # pinned Anchor/Solana CLI versions themselves or the program's own
-  # edition (2021). v1.57 is comfortably past the v1.53 minimum needed.
-  PLATFORM_TOOLS_VERSION: "v1.57"
   # This is the HOST toolchain used only to build/install the anchor-cli
   # binary and drive cargo as a build tool - it never compiles the
   # on-chain program itself (anchor build / cargo build-sbf download and
@@ -97,6 +85,35 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      # cargo build-sbf (invoked by `anchor build` below) uses Solana's own
+      # bundled "platform-tools" cross-compiler to actually compile the
+      # on-chain program - an old, fixed Cargo (1.79 as of SOLANA_VERSION
+      # 2.1.0) that predates the `edition2024` Cargo feature. Without a
+      # committed Cargo.lock, that old cargo re-resolves the dependency
+      # graph fresh against crates.io's CURRENT state on every run, and
+      # transitive RustCrypto-family crates (zeroize, crypto-common, ...)
+      # have since published releases requiring edition2024 - a problem
+      # that will keep recurring as those crates publish further releases,
+      # regardless of which exact versions are pinned below.
+      #
+      # This step resolves the graph with the HOST's modern "stable" cargo
+      # (which parses edition2024 fine) and writes the result as
+      # Cargo.lock (committed to the repo once confirmed clean), so cargo
+      # build-sbf's old cargo never has to resolve anything itself - it
+      # just reads the locked, already-decided versions. [patch.crates-io]
+      # entries in the root Cargo.toml pin any crate whose
+      # otherwise-newest-compatible version requires edition2024 back to
+      # its newest edition2021 release, so the versions this lockfile
+      # records are ones the old platform-tools cargo can actually
+      # compile.
+      - name: Resolve dependency graph (prints reverse-deps for the pinned crates)
+        run: |
+          cargo generate-lockfile
+          echo "--- reverse dependencies: zeroize ---"
+          cargo tree -i zeroize || true
+          echo "--- reverse dependencies: crypto-common ---"
+          cargo tree -i crypto-common || true
 
       - name: Cache cargo registry and build artifacts
         uses: actions/cache@v4
@@ -171,7 +188,7 @@ jobs:
           cp programs/zrp-launchpad/keys/zrp-launchpad-devnet-keypair.json target/deploy/zrp_launchpad-keypair.json
 
       - name: anchor build
-        run: anchor build -- --tools-version "${{ env.PLATFORM_TOOLS_VERSION }}"
+        run: anchor build
 
       - name: Verify declare_id! matches the committed program keypair
         run: |
@@ -294,7 +311,7 @@ jobs:
           cp programs/zrp-launchpad/keys/zrp-launchpad-devnet-keypair.json target/deploy/zrp_launchpad-keypair.json
 
       - name: anchor build
-        run: anchor build -- --tools-version "${{ env.PLATFORM_TOOLS_VERSION }}"
+        run: anchor build
 
       - name: Deploy to devnet
         run: |
@@ -470,7 +487,7 @@ jobs:
           cp "$RUNNER_TEMP/mainnet-keys/program-keypair.json" target/deploy/zrp_launchpad-keypair.json
           MAINNET_PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
           sed -i "s/declare_id!(\"[^\"]*\");/declare_id!(\"$MAINNET_PROGRAM_ID\");/" programs/zrp-launchpad/src/lib.rs
-          anchor build -- --tools-version "${{ env.PLATFORM_TOOLS_VERSION }}"
+          anchor build
 
       - name: Check deployer balance
         run: |
