@@ -543,6 +543,21 @@ pub mod zrp_launchpad {
         let mint_key = ctx.accounts.mint.key();
         let bump = curve.bump;
 
+        // TEMPORARY diagnostic logging (not a protocol change) to pin down
+        // the exact point where "sum of account balances before and after
+        // instruction do not match" originates - static review of this
+        // instruction and a side-by-side diff against the passing sell()
+        // (same transfer_lamports_from_pda helper, no init_if_needed/CPI
+        // account creation in the same instruction) didn't surface the
+        // cause, and this sandbox has no network path to Solana's own
+        // install script to reproduce with a local validator. Remove once
+        // root-caused.
+        msg!(
+            "graduate: pre-transfer bonding_curve={} migration_authority={} sol_amount={}",
+            ctx.accounts.bonding_curve.to_account_info().lamports(),
+            ctx.accounts.migration_authority.to_account_info().lamports(),
+            sol_amount
+        );
         if sol_amount > 0 {
             transfer_lamports_from_pda(
                 &ctx.accounts.bonding_curve.to_account_info(),
@@ -550,6 +565,11 @@ pub mod zrp_launchpad {
                 sol_amount,
             )?;
         }
+        msg!(
+            "graduate: post-sol-transfer bonding_curve={} migration_authority={}",
+            ctx.accounts.bonding_curve.to_account_info().lamports(),
+            ctx.accounts.migration_authority.to_account_info().lamports()
+        );
         if token_amount > 0 {
             let curve_signer_seeds: &[&[u8]] =
                 &[BondingCurve::SEED_PREFIX, mint_key.as_ref(), &[bump]];
@@ -566,6 +586,13 @@ pub mod zrp_launchpad {
                 token_amount,
             )?;
         }
+        msg!(
+            "graduate: post-token-transfer bonding_curve={} migration_authority={} caller={} migration_token_account={}",
+            ctx.accounts.bonding_curve.to_account_info().lamports(),
+            ctx.accounts.migration_authority.to_account_info().lamports(),
+            ctx.accounts.caller.to_account_info().lamports(),
+            ctx.accounts.migration_token_account.to_account_info().lamports()
+        );
 
         let curve = &mut ctx.accounts.bonding_curve;
         curve.real_sol_reserves = 0;
