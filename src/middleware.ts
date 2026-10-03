@@ -135,6 +135,7 @@ const RESERVED_TOP_LEVEL_SEGMENTS = new Set([
   "launchpad",
   "lists",
   "live-audio",
+  "live-video",
   "login",
   "marketplace",
   "messages",

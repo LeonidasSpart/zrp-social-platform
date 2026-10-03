@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { invalidateUserAuthState } from "@/lib/auth-state";
 import { logAdminAction } from "@/lib/audit-log";
 import { forceLeaveAllLiveAudioRooms } from "@/lib/live-audio/room-service";
+import { forceLeaveAllLiveVideoRooms } from "@/lib/live-video/room-service";
 import { disconnectAllSocketsForUser } from "@/lib/socket-emit";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -66,6 +67,9 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     if (updated.banned) {
       void forceLeaveAllLiveAudioRooms(userId).catch((err) =>
         console.error(`Failed to sweep Live Audio rooms for banned user ${userId}:`, err)
+      );
+      void forceLeaveAllLiveVideoRooms(userId).catch((err) =>
+        console.error(`Failed to sweep Live Video rooms for banned user ${userId}:`, err)
       );
 
       // ⚠️ SECURITY: the same "already-open connection outlives the

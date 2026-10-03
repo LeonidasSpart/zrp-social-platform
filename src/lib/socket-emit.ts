@@ -89,6 +89,28 @@ export function evictUserFromLiveAudioRoom(userId: string, roomId: string): void
   }
 }
 
+/** Live Video rooms - same shape/rationale as emitToLiveAudioRoom() above. */
+export function emitToLiveVideoRoom(roomId: string, event: string, payload?: unknown): void {
+  const io = (globalThis as ZrpGlobal).__zrpIO;
+  if (!io) return;
+  try {
+    io.to(`live-video:${roomId}`).emit(event, payload);
+  } catch (err) {
+    console.error(`socket emit failed for event "${event}":`, err);
+  }
+}
+
+/** Live Video rooms - same shape/rationale as evictUserFromLiveAudioRoom() above. */
+export function evictUserFromLiveVideoRoom(userId: string, roomId: string): void {
+  const io = (globalThis as ZrpGlobal).__zrpIO;
+  if (!io) return;
+  try {
+    io.in(userId).socketsLeave(`live-video:${roomId}`);
+  } catch (err) {
+    console.error("socket eviction from live-video room failed:", err);
+  }
+}
+
 /**
  * ⚠️ SECURITY: the Socket.IO handshake re-checks `banned` against the
  * database (server.js), but that only runs at CONNECT time - a socket

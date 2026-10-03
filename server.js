@@ -31,6 +31,8 @@ const {
   createCallRegistry,
   liveAudioRoom,
   isLiveAudioParticipant,
+  liveVideoRoom,
+  isLiveVideoParticipant,
 } = require("./socket-authz");
 const { runLegacyPasswordMigrationAtStartup } = require("./legacy-passwords");
 const { assertMigrationsApplied } = require("./migrations-check");
@@ -750,6 +752,27 @@ app.prepare().then(async () => {
     socket.on("leave-live-audio-room", (roomId) => {
       if (!roomId || typeof roomId !== "string") return;
       socket.leave(liveAudioRoom(roomId));
+    });
+
+    // ─── Live Video realtime broadcasts ────────────────────────────
+    // Same pattern as Live Audio above - Postgres via
+    // src/lib/live-video/room-service.ts is authoritative, this only
+    // gates which sockets receive the realtime fan-out.
+    socket.on("join-live-video-room", async (roomId) => {
+      if (!roomId || typeof roomId !== "string") return;
+      if (!checkEventRateLimit(userId, "join-live-video-room", 30, 10_000)) return;
+      try {
+        if (await isLiveVideoParticipant(prisma, userId, roomId)) {
+          socket.join(liveVideoRoom(roomId));
+        }
+      } catch (err) {
+        console.error("join-live-video-room error:", err);
+      }
+    });
+
+    socket.on("leave-live-video-room", (roomId) => {
+      if (!roomId || typeof roomId !== "string") return;
+      socket.leave(liveVideoRoom(roomId));
     });
 
     // ⚠️ SECURITY: like send-message above, the relayed record is the
