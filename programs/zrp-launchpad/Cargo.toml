@@ -109,14 +109,37 @@ blake3 = "=1.5.5"
 # toml_edit 0.25.5 pin above pulls in `indexmap`, which CI resolved to
 # 2.14.2 - and indexmap bumped to `edition = "2024"` (and to requiring
 # `hashbrown ^0.17`, itself also edition2024) starting at exactly
-# 2.14.0. indexmap 2.13.1 is the newest release still on edition2021;
-# it declares `hashbrown ^0.16.1` (0.16.1 is itself the newest
-# edition2021 hashbrown release, confirmed via crates.io's version
-# metadata), and satisfies toml_edit's own "^2.11.4" requirement on
-# indexmap (the only other thing in this graph that depends on it), so
-# pinning indexmap here avoids the edition2024 chain at both levels
-# without touching hashbrown directly.
-indexmap = "=2.13.1"
+# 2.14.0.
+#
+# The edition fix alone isn't enough here: cargo build-sbf's bundled
+# cargo checks each crate's declared `rust-version` (MSRV) against its
+# own version (1.79.0-dev), independently of edition, and rejects
+# anything whose MSRV is newer - a second, separate gate from
+# edition2024 that an edition-only audit misses. indexmap 2.13.1 (the
+# newest edition2021 release) itself declares `rust-version = "1.82"`,
+# above 1.79, so it still fails even though its edition is fine.
+# 2.11.4 is the newest indexmap release satisfying both constraints
+# (edition2021, rust-version 1.63) and satisfies toml_edit's own
+# "^2.11.4" requirement on indexmap (the only other thing in this
+# graph that depends on it) at exactly its floor; its own hashbrown
+# requirement (">=0.15.0, <0.17.0") is compatible with hashbrown
+# 0.16.1, so the edition2024 hashbrown chain stays avoided too.
+indexmap = "=2.11.4"
+
+# Same MSRV gate as indexmap above (not an edition issue - both of
+# these are edition2018/2021), caught by scanning every resolved
+# crate's `rust-version` field against the platform-tools cargo's own
+# version (1.79.0-dev), not just `edition`, after the previous pins
+# still failed `anchor build` with "rustc 1.79.0-dev is not supported
+# by the following packages". unicode-segmentation 1.13.3 (pulled in
+# via anchor-syn/anchor-attribute-program's `heck 0.3.3` dependency,
+# which declares unicode-segmentation "^1.2.0") declares rust-version
+# 1.85.0; 1.12.0 is the newest release at or below 1.79 and satisfies
+# heck's range. proc-macro-crate 3.5.0 (pulled in via borsh-derive
+# 1.8.1's "^3" requirement) declares rust-version 1.82.0; 3.4.0 is the
+# newest release at or below 1.79 and satisfies borsh-derive's range.
+unicode-segmentation = "=1.12.0"
+proc-macro-crate = "=3.4.0"
 
 [profile.release]
 overflow-checks = true
