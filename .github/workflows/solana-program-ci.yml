@@ -107,7 +107,15 @@ jobs:
       - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
         if: steps.anchor-cache.outputs.cache-hit != 'true'
         run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+          # Installing avm via `--git .../anchor` builds it from the
+          # anchor-lang monorepo's current HEAD, which drifts independently
+          # of the pinned ANCHOR_VERSION and can require a newer Cargo
+          # edition than RUST_TOOLCHAIN provides (observed: HEAD required
+          # edition2024, unavailable on Rust 1.82). Installing the `avm`
+          # crate itself from crates.io at the exact pinned version keeps
+          # the whole toolchain reproducible instead of silently tracking
+          # anchor's latest source tree.
+          cargo install --force avm --version ${{ env.ANCHOR_VERSION }} --locked
           avm install ${{ env.ANCHOR_VERSION }}
           avm use ${{ env.ANCHOR_VERSION }}
           cp "$(avm which ${{ env.ANCHOR_VERSION }} 2>/dev/null || echo "$HOME/.avm/bin/anchor")" ~/.cargo/bin/anchor || true
@@ -195,7 +203,7 @@ jobs:
 
       - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
         run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+          cargo install --force avm --version ${{ env.ANCHOR_VERSION }} --locked
           avm install ${{ env.ANCHOR_VERSION }}
           avm use ${{ env.ANCHOR_VERSION }}
 
@@ -397,7 +405,7 @@ jobs:
 
       - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
         run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+          cargo install --force avm --version ${{ env.ANCHOR_VERSION }} --locked
           avm install ${{ env.ANCHOR_VERSION }}
           avm use ${{ env.ANCHOR_VERSION }}
 
