@@ -17,6 +17,7 @@ import {
   Ticket,
   Newspaper,
   Radio,
+  Video,
   BellRing,
   Loader2,
   XCircle,
@@ -57,6 +58,19 @@ interface LiveKitHealthResult {
   detail: string;
 }
 
+interface AdminLiveRoom {
+  id: string;
+  kind: "AUDIO" | "VIDEO";
+  title: string;
+  visibility: "PUBLIC" | "COMMUNITY" | "PRIVATE";
+  startedAt: string | null;
+  host: { id: string; username: string | null; name: string | null };
+  // Live Audio calls this listenerCount, Live Video calls it
+  // viewerCount - both mean the same thing here (live participant
+  // count), normalized to one field for the merged admin list.
+  participantCount: number;
+}
+
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
   const { data: session } = useSession();
@@ -73,6 +87,10 @@ export default function AdminDashboard() {
   const [liveKitHealth, setLiveKitHealth] = useState<LiveKitHealthResult | null>(null);
   const [liveKitChecking, setLiveKitChecking] = useState(false);
   const [liveKitCheckError, setLiveKitCheckError] = useState(false);
+  const [liveRooms, setLiveRooms] = useState<AdminLiveRoom[]>([]);
+  const [liveRoomsLoading, setLiveRoomsLoading] = useState(true);
+  const [liveRoomsError, setLiveRoomsError] = useState(false);
+  const [endingRoomId, setEndingRoomId] = useState<string | null>(null);
 
   const [ticketStats, setTicketStats] = useState<TicketStats>({
     open: 0,
@@ -110,7 +128,58 @@ export default function AdminDashboard() {
         setTicketStats(data);
       })
       .catch(() => {});
+
+    loadLiveRooms();
   }, []);
+
+  async function loadLiveRooms() {
+    setLiveRoomsLoading(true);
+    setLiveRoomsError(false);
+    try {
+      const [audioRes, videoRes] = await Promise.all([
+        fetch("/api/admin/live-audio/rooms", { cache: "no-store" }),
+        fetch("/api/admin/live-video/rooms", { cache: "no-store" }),
+      ]);
+      if (!audioRes.ok || !videoRes.ok) throw new Error("request failed");
+      type BaseRoom = Omit<AdminLiveRoom, "kind" | "participantCount">;
+      const audioData: { rooms: (BaseRoom & { listenerCount: number })[] } = await audioRes.json();
+      const videoData: { rooms: (BaseRoom & { viewerCount: number })[] } = await videoRes.json();
+      const audioRooms: AdminLiveRoom[] = audioData.rooms.map((r) => ({
+        ...r,
+        kind: "AUDIO",
+        participantCount: r.listenerCount,
+      }));
+      const videoRooms: AdminLiveRoom[] = videoData.rooms.map((r) => ({
+        ...r,
+        kind: "VIDEO",
+        participantCount: r.viewerCount,
+      }));
+      setLiveRooms(
+        [...audioRooms, ...videoRooms].sort(
+          (a, b) => new Date(a.startedAt ?? 0).getTime() - new Date(b.startedAt ?? 0).getTime()
+        )
+      );
+    } catch {
+      setLiveRoomsError(true);
+    } finally {
+      setLiveRoomsLoading(false);
+    }
+  }
+
+  async function handleForceEnd(room: AdminLiveRoom) {
+    if (!confirm(t("adminLiveAudio.forceEndConfirm", { title: room.title }))) return;
+    setEndingRoomId(room.id);
+    try {
+      const endpoint = room.kind === "AUDIO" ? "live-audio" : "live-video";
+      const res = await fetch(`/api/admin/${endpoint}/rooms/${room.id}/end`, { method: "POST" });
+      if (!res.ok) throw new Error("request failed");
+      setLiveRooms((prev) => prev.filter((r) => r.id !== room.id));
+    } catch {
+      alert(t("adminLiveAudio.forceEndFailed"));
+    } finally {
+      setEndingRoomId(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -432,6 +501,75 @@ export default function AdminDashboard() {
               </p>
             </div>
           </div>
+        )}
+      </div>
+
+      {/* Live rooms - lets an admin force-end a room a host forgot to
+          close. Lists every currently-LIVE room regardless of visibility
+          (PUBLIC/COMMUNITY/PRIVATE), unlike the regular discovery feed. */}
+      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div>
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <Radio className="h-5 w-5 text-zrp-red" aria-hidden="true" />
+            {t("adminLiveAudio.liveRoomsTitle")}
+          </h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {t("adminLiveAudio.liveRoomsDesc")}
+          </p>
+        </div>
+
+        {liveRoomsLoading ? (
+          <div className="mt-4 flex justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-gray-400" aria-hidden="true" />
+          </div>
+        ) : liveRoomsError ? (
+          <p role="alert" className="mt-4 text-sm text-zrp-red">
+            {t("adminLiveAudio.loadRoomsFailed")}
+          </p>
+        ) : liveRooms.length === 0 ? (
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            {t("adminLiveAudio.liveRoomsEmpty")}
+          </p>
+        ) : (
+          <ul className="mt-4 divide-y divide-gray-100 dark:divide-gray-700">
+            {liveRooms.map((room) => (
+              <li key={room.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    {room.kind === "VIDEO" ? (
+                      <Video className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+                    ) : (
+                      <Radio className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+                    )}
+                    <p className="truncate font-medium text-gray-900 dark:text-white">{room.title}</p>
+                  </div>
+                  <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                    {t("liveAudio.hostedBy", { name: room.host.name || room.host.username || "" })}
+                    {" · "}
+                    {room.kind === "VIDEO"
+                      ? t("liveVideo.viewerCount", { n: room.participantCount })
+                      : t("liveAudio.listenerCount", { n: room.participantCount })}
+                    {room.startedAt && (
+                      <>
+                        {" · "}
+                        {new Date(room.startedAt).toLocaleTimeString(getDateLocale(language))}
+                      </>
+                    )}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleForceEnd(room)}
+                  disabled={endingRoomId === room.id}
+                  aria-busy={endingRoomId === room.id}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-zrp-red px-3 py-1.5 text-sm font-semibold text-zrp-red transition hover:bg-zrp-red hover:text-white disabled:opacity-50"
+                >
+                  {endingRoomId === room.id && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+                  {t("adminLiveAudio.forceEndButton")}
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>

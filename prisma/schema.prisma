@@ -742,6 +742,15 @@ model User {
   liveAudioModerationActionsPerformed LiveAudioModerationAction[] @relation("LiveAudioModerationActor")
   liveAudioModerationActionsReceived  LiveAudioModerationAction[] @relation("LiveAudioModerationTarget")
 
+  // ─── ZRP Live Video ──────────────────────────────────────────
+  liveVideoRoomsHosted                LiveVideoRoom[]             @relation("LiveVideoHost")
+  liveVideoParticipations             LiveVideoParticipant[]      @relation("LiveVideoParticipantUser")
+  liveVideoParticipantsRemoved        LiveVideoParticipant[]      @relation("LiveVideoParticipantRemovedBy")
+  liveVideoSpeakerRequests            LiveVideoSpeakerRequest[]   @relation("LiveVideoSpeakerRequestUser")
+  liveVideoSpeakerRequestsResolved    LiveVideoSpeakerRequest[]   @relation("LiveVideoSpeakerRequestResolvedBy")
+  liveVideoModerationActionsPerformed LiveVideoModerationAction[] @relation("LiveVideoModerationActor")
+  liveVideoModerationActionsReceived  LiveVideoModerationAction[] @relation("LiveVideoModerationTarget")
+
   // Admin Subscriptions & Billing (list/KPI queries filter and group by
   // plan directly on User, since a legacy-paid user may have no
   // Subscription row yet - see docs/subscriptions.md "Legacy users").
@@ -4625,6 +4634,7 @@ model Community {
 
   members        CommunityMember[]
   liveAudioRooms LiveAudioRoom[]
+  liveVideoRooms LiveVideoRoom[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -4829,6 +4839,138 @@ model LiveAudioModerationAction {
   // Room audit trail.
   @@index([roomId])
   // "Has this user been actioned before" (in any room).
+  @@index([targetUserId])
+}
+
+// ─── ZRP Live Video ────────────────────────────────────────────
+// A separate section parallel to Live Audio (not a "video mode" bolted
+// onto LiveAudioRoom) - same real-time-room architecture, camera feeds
+// instead of audio-only. Deliberately reuses LiveAudioRoomStatus,
+// LiveAudioVisibility, LiveAudioParticipantRole and
+// LiveAudioSpeakerRequestStatus/LiveAudioModerationActionType as-is:
+// their semantics (room lifecycle, visibility, "can this participant
+// publish a track," moderation action types) are identical for video,
+// and a second copy of each enum would only add migration surface with
+// no behavioral difference. LISTENER/SPEAKER naming is a touch
+// audio-flavored but drives the exact same canPublish grant in
+// mintLiveKitToken() (src/lib/live-audio/livekit.ts), which is reused
+// unchanged - LiveKit's publish grant already covers both audio and
+// video tracks. The product-facing "Viewer"/"Participant" labels live
+// in the translation layer, not the enum.
+//
+// Known, deliberate gap: unlike LiveAudioRoom, this is NOT one of
+// Report's eight polymorphic target types (see the model comment on
+// Report) - adding a ninth touches every target-type switch across
+// admin/appeals, which is its own follow-up. A video room's host can
+// still be reported today via the existing bare-profile report path.
+model LiveVideoRoom {
+  id String @id @default(cuid())
+
+  hostId String
+  host   User   @relation("LiveVideoHost", fields: [hostId], references: [id], onDelete: Cascade)
+
+  communityId String?
+  community   Community? @relation(fields: [communityId], references: [id], onDelete: SetNull)
+
+  title       String
+  description String?             @db.Text
+  category    String?
+  status      LiveAudioRoomStatus @default(SCHEDULED)
+  visibility  LiveAudioVisibility @default(PUBLIC)
+
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  endedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Same "final stats written once at ENDED, live counts read directly
+  // from LiveVideoParticipant" pattern as LiveAudioRoom - see its own
+  // comment for why.
+  peakParticipantCount    Int @default(0)
+  peakViewerCount         Int @default(0)
+  totalUniqueParticipants Int @default(0)
+
+  participants      LiveVideoParticipant[]
+  speakerRequests   LiveVideoSpeakerRequest[]
+  moderationActions LiveVideoModerationAction[]
+
+  @@index([visibility, status])
+  @@index([status])
+  @@index([communityId])
+  @@index([hostId])
+}
+
+model LiveVideoParticipant {
+  id String @id @default(cuid())
+
+  roomId String
+  room   LiveVideoRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("LiveVideoParticipantUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  role LiveAudioParticipantRole @default(LISTENER)
+
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
+  // Independent audio/video moderation flags - a camera and a mic are
+  // two separate LiveKit tracks, each independently force-mutable by a
+  // moderator (see muteParticipant/toggleParticipantCamera in
+  // live-video/room-service.ts), unlike Live Audio which only ever has
+  // the one (audio) track to moderate.
+  isMuted     Boolean @default(false)
+  isCameraOff Boolean @default(false)
+
+  removedAt   DateTime?
+  removedById String?
+  removedBy   User?     @relation("LiveVideoParticipantRemovedBy", fields: [removedById], references: [id], onDelete: SetNull)
+
+  @@unique([roomId, userId])
+  @@index([roomId, role])
+  @@index([userId])
+}
+
+model LiveVideoSpeakerRequest {
+  id String @id @default(cuid())
+
+  roomId String
+  room   LiveVideoRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation("LiveVideoSpeakerRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  status LiveAudioSpeakerRequestStatus @default(PENDING)
+
+  requestedAt DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  resolvedById String?
+  resolvedBy   User?   @relation("LiveVideoSpeakerRequestResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@unique([roomId, userId])
+  @@index([roomId, status])
+}
+
+model LiveVideoModerationAction {
+  id String @id @default(cuid())
+
+  roomId String
+  room   LiveVideoRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  actorId String
+  actor   User   @relation("LiveVideoModerationActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  targetUserId String
+  target       User   @relation("LiveVideoModerationTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  action LiveAudioModerationActionType
+  reason String?                       @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([roomId])
   @@index([targetUserId])
 }
 

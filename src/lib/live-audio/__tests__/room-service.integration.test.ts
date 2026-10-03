@@ -14,6 +14,8 @@ import {
   resolveSpeakerRequest,
   getRoomForViewer,
   listDiscoverableRooms,
+  listLiveRoomsForAdmin,
+  adminForceEndRoom,
   cleanupAbandonedRooms,
   forceLeaveAllLiveAudioRooms,
 } from "../room-service";
@@ -432,6 +434,64 @@ describe.skipIf(!hasRealDatabaseUrl)(
 
         const stillLive = await prisma.liveAudioRoom.findUnique({ where: { id: room.id } });
         expect(stillLive?.status).toBe("LIVE");
+      });
+
+      // Admin force-close: the host never gets asked, and no active
+      // HOST/MODERATOR role is required - this is the whole point (a
+      // host who forgot to close the room is, by definition, not around
+      // to end it themselves).
+      it("adminForceEndRoom ends a LIVE room with an active host, bypassing the host-only check", async () => {
+        const host = await createUser("hostt");
+        const listener = await createUser("listenert");
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} t`, visibility: "PUBLIC" });
+        roomIds.push(room.id);
+        await joinRoom(room.id, listener.id);
+
+        await adminForceEndRoom(room.id);
+
+        const updated = await prisma.liveAudioRoom.findUnique({ where: { id: room.id } });
+        expect(updated?.status).toBe("ENDED");
+        expect(updated?.endedAt).not.toBeNull();
+
+        const activeParticipants = await prisma.liveAudioParticipant.findMany({
+          where: { roomId: room.id, leftAt: null },
+        });
+        expect(activeParticipants).toHaveLength(0);
+      });
+
+      it("adminForceEndRoom rejects a room that isn't LIVE", async () => {
+        const host = await createUser("hostu");
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} u`, visibility: "PUBLIC" });
+        roomIds.push(room.id);
+        await endRoom(room.id, host.id);
+
+        await expect(adminForceEndRoom(room.id)).rejects.toMatchObject({ code: "room_already_ended" });
+      });
+
+      it("listLiveRoomsForAdmin includes a PRIVATE live room (unlike listDiscoverableRooms) with a live listener count", async () => {
+        const host = await createUser("hostv");
+        const listener = await createUser("listenerv");
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} v`, visibility: "PRIVATE" });
+        roomIds.push(room.id);
+        // A stranger can't join a PRIVATE room via joinRoom() (canViewRoom
+        // requires isParticipant OR PUBLIC/community-member visibility,
+        // which a brand-new participant never has for PRIVATE) - this
+        // models the documented "host already put them in the room" case
+        // by inserting the participant row directly, same as a real
+        // host-added PRIVATE member would look in Postgres.
+        await prisma.liveAudioParticipant.create({
+          data: { roomId: room.id, userId: listener.id, role: "LISTENER" },
+        });
+
+        const rooms = await listLiveRoomsForAdmin();
+        const found = rooms.find((r) => r.id === room.id);
+        expect(found).toBeDefined();
+        expect(found?.listenerCount).toBe(2); // host + listener are both active participants
+        expect(found?.host.id).toBe(host.id);
+
+        await adminForceEndRoom(room.id);
+        const afterEnd = await listLiveRoomsForAdmin();
+        expect(afterEnd.find((r) => r.id === room.id)).toBeUndefined();
       });
 
       it("forceLeaveAllLiveAudioRooms ends a room where the banned user was HOST", async () => {

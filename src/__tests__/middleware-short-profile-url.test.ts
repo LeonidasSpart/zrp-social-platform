@@ -30,6 +30,8 @@ describe("isShortProfileUrlPath", () => {
     "/post",
     "/onboarding",
     "/launchpad",
+    "/live-audio",
+    "/live-video",
   ])("never shadows a real top-level route: %s", (p) => {
     expect(isShortProfileUrlPath(p)).toBe(false);
   });

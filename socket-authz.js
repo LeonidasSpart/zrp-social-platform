@@ -119,6 +119,19 @@ async function isLiveAudioParticipant(prisma, userId, roomId) {
   return !!participant && !participant.leftAt && !participant.removedAt;
 }
 
+/** Live Video rooms - same shape/rationale as liveAudioRoom()/isLiveAudioParticipant() above. */
+function liveVideoRoom(roomId) {
+  return `live-video:${roomId}`;
+}
+
+async function isLiveVideoParticipant(prisma, userId, roomId) {
+  const participant = await prisma.liveVideoParticipant.findUnique({
+    where: { roomId_userId: { roomId, userId } },
+    select: { leftAt: true, removedAt: true },
+  });
+  return !!participant && !participant.leftAt && !participant.removedAt;
+}
+
 /**
  * send-group-message: the message must exist, have been sent BY the
  * verified user INTO the claimed conversation, and the user must still
@@ -653,4 +666,6 @@ module.exports = {
   createCallRegistry,
   liveAudioRoom,
   isLiveAudioParticipant,
+  liveVideoRoom,
+  isLiveVideoParticipant,
 };

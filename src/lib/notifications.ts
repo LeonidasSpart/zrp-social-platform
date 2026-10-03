@@ -58,6 +58,13 @@ interface CreateNotificationParams {
     | "live_audio_speaker_invited"
     | "live_audio_speaker_approved"
     | "live_audio_speaker_rejected"
+    // Live Video's own four, mirroring the Live Audio set directly
+    // above - same rationale, same gaps (see src/lib/live-video/
+    // room-service.ts and the NEVER_EMAIL_TYPES/actionMap entries below).
+    | "live_video_started"
+    | "live_video_speaker_invited"
+    | "live_video_speaker_approved"
+    | "live_video_speaker_rejected"
     // A global admin broadcast (src/lib/announcements/). Always
     // written in bulk via prisma.notification.createMany() directly
     // (src/lib/announcements/dispatch.ts), never through
@@ -196,6 +203,10 @@ export async function createNotification({
       "live_audio_speaker_invited",
       "live_audio_speaker_approved",
       "live_audio_speaker_rejected",
+      "live_video_started",
+      "live_video_speaker_invited",
+      "live_video_speaker_approved",
+      "live_video_speaker_rejected",
       // Defensive: the bulk broadcast path never calls createNotification()
       // at all (see the "announcement" union member above), but if it
       // or a future caller ever did, email campaigns are explicitly out
@@ -284,6 +295,10 @@ export async function createNotification({
       live_audio_speaker_invited: { action: "invited you to speak", emoji: "🎙️" },
       live_audio_speaker_approved: { action: "approved your request to speak", emoji: "✅" },
       live_audio_speaker_rejected: { action: "didn't approve your request to speak", emoji: "🚫" },
+      live_video_started: { action: "started a Live Video room", emoji: "🎥" },
+      live_video_speaker_invited: { action: "invited you to join on camera", emoji: "🎥" },
+      live_video_speaker_approved: { action: "approved your request to join on camera", emoji: "✅" },
+      live_video_speaker_rejected: { action: "didn't approve your request to join on camera", emoji: "🚫" },
     };
     const { action, emoji } = actionMap[type] || { action: "interacted with you", emoji: "🔔" };
 

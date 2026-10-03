@@ -10,7 +10,7 @@ import {
   LayoutDashboard, Settings, Users, Key, LogOut, MoreHorizontal,
   PenSquare, Sun, Moon, Globe, Film, Newspaper, Store, Gamepad2,
   Briefcase, HeartHandshake, Music2, ChevronDown, Sparkles, Rocket,
-  Bot, Info, LifeBuoy, Scale, ListChecks, Megaphone, Zap, Radio,
+  Bot, Info, LifeBuoy, Scale, ListChecks, Megaphone, Zap, Radio, Video,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -167,6 +167,7 @@ export default function Sidebar() {
     { href: "/music", icon: Music2, label: t("nav.music") },
     { href: "/communities", icon: Users, label: t("nav.communities") },
     { href: "/live-audio", icon: Radio, label: t("nav.liveAudio") },
+    { href: "/live-video", icon: Video, label: t("nav.liveVideo") },
     { href: "/play", icon: Gamepad2, label: t("nav.play") },
     { href: "/opportunity", icon: Briefcase, label: t("nav.opportunity") },
     { href: "/launchpad", icon: Rocket, label: t("nav.launchpad") },

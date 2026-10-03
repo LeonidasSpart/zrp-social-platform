@@ -1,6 +1,24 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { TokenVerifier, AccessToken, WebhookReceiver } from "livekit-server-sdk";
 
+// checkLiveKitHealth's whole point is categorizing a real LiveKit server
+// rejection without actually reaching one, so RoomServiceClient.listRooms
+// is the one thing here that's mocked - everything else in this file
+// stays real per the top-of-file comment.
+const listRoomsMock = vi.fn();
+vi.mock("livekit-server-sdk", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("livekit-server-sdk")>();
+  return {
+    ...actual,
+    // `new RoomServiceClient(...)` requires a real constructor - an
+    // arrow function throws "is not a constructor" here, so this has
+    // to be a plain function (whose returned object becomes `this`).
+    RoomServiceClient: vi.fn().mockImplementation(function () {
+      return { listRooms: listRoomsMock };
+    }),
+  };
+});
+
 /*
  * These are the parts of the LiveKit integration that are REAL,
  * production code independent of a reachable LiveKit server - see
@@ -183,6 +201,58 @@ describe("Live Audio / LiveKit integration", () => {
       const { verifyLiveKitWebhook } = await import("../livekit");
       const result = await verifyLiveKitWebhook("{}", "Bearer whatever");
       expect(result).toBeNull();
+    });
+  });
+
+  describe("checkLiveKitHealth", () => {
+    afterEach(() => {
+      listRoomsMock.mockReset();
+    });
+
+    it("returns not_configured when env vars are missing, without ever calling LiveKit", async () => {
+      vi.stubEnv("LIVEKIT_API_KEY", "");
+      const { checkLiveKitHealth } = await import("../livekit");
+      const result = await checkLiveKitHealth();
+      expect(result.status).toBe("not_configured");
+      expect(listRoomsMock).not.toHaveBeenCalled();
+    });
+
+    it("returns healthy when listRooms succeeds", async () => {
+      listRoomsMock.mockResolvedValue([]);
+      const { checkLiveKitHealth } = await import("../livekit");
+      const result = await checkLiveKitHealth();
+      expect(result.status).toBe("healthy");
+    });
+
+    // Regression test: this is LiveKit's actual server-side rejection
+    // string for a key/secret that doesn't match the project on file -
+    // it must be categorized "unauthorized", not "unreachable", or an
+    // operator is misled into debugging network/DNS instead of rotating
+    // the credential pair.
+    it('categorizes LiveKit\'s literal "invalid token" rejection as unauthorized, not unreachable', async () => {
+      listRoomsMock.mockRejectedValue(
+        new Error("could not establish signal connection: invalid token")
+      );
+      const { checkLiveKitHealth } = await import("../livekit");
+      const result = await checkLiveKitHealth();
+      expect(result.status).toBe("unauthorized");
+    });
+
+    it.each(["invalid API key", "401: unauthenticated", "permission_denied"])(
+      "also categorizes %s as unauthorized",
+      async (message) => {
+        listRoomsMock.mockRejectedValue(new Error(message));
+        const { checkLiveKitHealth } = await import("../livekit");
+        const result = await checkLiveKitHealth();
+        expect(result.status).toBe("unauthorized");
+      }
+    );
+
+    it("categorizes a genuine network failure as unreachable", async () => {
+      listRoomsMock.mockRejectedValue(new Error("getaddrinfo ENOTFOUND example.livekit.cloud"));
+      const { checkLiveKitHealth } = await import("../livekit");
+      const result = await checkLiveKitHealth();
+      expect(result.status).toBe("unreachable");
     });
   });
 });

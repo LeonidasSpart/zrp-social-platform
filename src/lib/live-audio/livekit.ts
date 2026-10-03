@@ -208,7 +208,10 @@ export async function checkLiveKitHealth(): Promise<LiveKitHealthResult> {
     return { status: "healthy", detail: "LiveKit accepted the configured API key/secret." };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    const isAuthRejection = /\b(401|403)\b|unauthenticated|permission_denied|invalid api key/i.test(message);
+    const isAuthRejection =
+      /\b(401|403)\b|unauthenticated|permission_denied|invalid api key|invalid token|invalid signature|jwt/i.test(
+        message
+      );
     return isAuthRejection
       ? {
           status: "unauthorized",

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyLiveKitWebhook } from "@/lib/live-audio/livekit";
-import { emitToLiveAudioRoom } from "@/lib/socket-emit";
+import { emitToLiveAudioRoom, emitToLiveVideoRoom } from "@/lib/socket-emit";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +38,12 @@ export async function POST(req: NextRequest) {
         // an error (LiveKit may resend webhooks; this must be
         // idempotent).
         const now = new Date();
-        await prisma.$transaction([
+        // One LiveKit project, two DB-backed room kinds (LiveAudioRoom,
+        // LiveVideoRoom) sharing it - `roomId` is each table's own cuid
+        // primary key, so it can only ever match a row in at most one
+        // of them. Try audio first; only fall through to video if
+        // nothing in the audio table matched.
+        const [audioResult] = await prisma.$transaction([
           prisma.liveAudioRoom.updateMany({
             where: { id: roomId, status: "LIVE" },
             data: { status: "ENDED", endedAt: now },
@@ -48,7 +53,23 @@ export async function POST(req: NextRequest) {
             data: { leftAt: now },
           }),
         ]);
-        emitToLiveAudioRoom(roomId, "live-audio:room-ended", { roomId });
+        if (audioResult.count > 0) {
+          emitToLiveAudioRoom(roomId, "live-audio:room-ended", { roomId });
+        } else {
+          const [videoResult] = await prisma.$transaction([
+            prisma.liveVideoRoom.updateMany({
+              where: { id: roomId, status: "LIVE" },
+              data: { status: "ENDED", endedAt: now },
+            }),
+            prisma.liveVideoParticipant.updateMany({
+              where: { roomId, leftAt: null, removedAt: null },
+              data: { leftAt: now },
+            }),
+          ]);
+          if (videoResult.count > 0) {
+            emitToLiveVideoRoom(roomId, "live-video:room-ended", { roomId });
+          }
+        }
         break;
       }
       case "participant_left": {
@@ -64,6 +85,14 @@ export async function POST(req: NextRequest) {
         });
         if (updated.count > 0) {
           emitToLiveAudioRoom(roomId, "live-audio:participant-left", { userId: identity });
+        } else {
+          const videoUpdated = await prisma.liveVideoParticipant.updateMany({
+            where: { roomId, userId: identity, leftAt: null, removedAt: null },
+            data: { leftAt: new Date() },
+          });
+          if (videoUpdated.count > 0) {
+            emitToLiveVideoRoom(roomId, "live-video:participant-left", { userId: identity });
+          }
         }
         break;
       }

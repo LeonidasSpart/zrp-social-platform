@@ -439,6 +439,50 @@ async function performEndRoom(roomId: string): Promise<void> {
   for (const p of activeParticipants) emitToUser(p.userId, "live-audio:room-ended", { roomId });
 }
 
+/**
+ * Every currently-LIVE room, regardless of visibility - an admin must
+ * be able to see and close a PRIVATE/COMMUNITY room a host forgot to
+ * end, not just the PUBLIC ones listDiscoverableRooms() surfaces to
+ * regular users.
+ */
+export async function listLiveRoomsForAdmin() {
+  const rooms = await prisma.liveAudioRoom.findMany({
+    where: { status: "LIVE" },
+    orderBy: [{ startedAt: "asc" }],
+    select: {
+      id: true,
+      title: true,
+      visibility: true,
+      startedAt: true,
+      host: { select: { id: true, username: true, name: true } },
+    },
+  });
+
+  return Promise.all(
+    rooms.map(async (room) => {
+      const listenerCount = await prisma.liveAudioParticipant.count({
+        where: activeParticipantWhere(room.id),
+      });
+      return { ...room, listenerCount };
+    })
+  );
+}
+
+/**
+ * Admin force-close: an admin ends a LIVE room a host forgot to close,
+ * bypassing the host/moderator-only check inside endRoom() entirely -
+ * same pattern as cleanupAbandonedRooms(), which also calls
+ * performEndRoom() directly because the acting party (the system, here
+ * an admin) is not and need not be a participant in the room at all.
+ * Caller (the admin route) is responsible for the requireAdmin() check
+ * and for writing the audit log entry.
+ */
+export async function adminForceEndRoom(roomId: string): Promise<void> {
+  const room = await getRoomOrThrow(roomId);
+  if (room.status !== "LIVE") throw LiveAudioErrors.roomAlreadyEnded();
+  await performEndRoom(roomId);
+}
+
 async function forceEndLiveKitRoom(roomId: string): Promise<void> {
   const config = getLiveKitConfig();
   if (!config) return;
