@@ -58,6 +58,18 @@ permissions:
 env:
   SOLANA_VERSION: "2.1.0"
   ANCHOR_VERSION: "0.31.1"
+  # The actual on-chain program is compiled by `cargo build-sbf`'s own
+  # bundled "platform-tools" cross-compiler, not by RUST_TOOLCHAIN below -
+  # and the platform-tools version Solana CLI 2.1.0 defaults to bundles a
+  # Rust/Cargo old enough (1.79) to predate edition2024, which some of
+  # anchor-lang 0.31.1's own transitive dependencies (observed: zeroize,
+  # crypto-common) now require as crates.io's ecosystem has moved on since
+  # that anchor-cli version was published. Passing `--tools-version` to
+  # `anchor build` (forwarded straight to cargo build-sbf) selects a newer
+  # platform-tools release with a modern enough Rust, without touching the
+  # pinned Anchor/Solana CLI versions themselves or the program's own
+  # edition (2021). v1.57 is comfortably past the v1.53 minimum needed.
+  PLATFORM_TOOLS_VERSION: "v1.57"
   # This is the HOST toolchain used only to build/install the anchor-cli
   # binary and drive cargo as a build tool - it never compiles the
   # on-chain program itself (anchor build / cargo build-sbf download and
@@ -159,7 +171,7 @@ jobs:
           cp programs/zrp-launchpad/keys/zrp-launchpad-devnet-keypair.json target/deploy/zrp_launchpad-keypair.json
 
       - name: anchor build
-        run: anchor build
+        run: anchor build -- --tools-version "${{ env.PLATFORM_TOOLS_VERSION }}"
 
       - name: Verify declare_id! matches the committed program keypair
         run: |
@@ -282,7 +294,7 @@ jobs:
           cp programs/zrp-launchpad/keys/zrp-launchpad-devnet-keypair.json target/deploy/zrp_launchpad-keypair.json
 
       - name: anchor build
-        run: anchor build
+        run: anchor build -- --tools-version "${{ env.PLATFORM_TOOLS_VERSION }}"
 
       - name: Deploy to devnet
         run: |
@@ -458,7 +470,7 @@ jobs:
           cp "$RUNNER_TEMP/mainnet-keys/program-keypair.json" target/deploy/zrp_launchpad-keypair.json
           MAINNET_PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
           sed -i "s/declare_id!(\"[^\"]*\");/declare_id!(\"$MAINNET_PROGRAM_ID\");/" programs/zrp-launchpad/src/lib.rs
-          anchor build
+          anchor build -- --tools-version "${{ env.PLATFORM_TOOLS_VERSION }}"
 
       - name: Check deployer balance
         run: |
