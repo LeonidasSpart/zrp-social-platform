@@ -13,6 +13,7 @@ import one.zrp.social.mobile.data.LiveAudioRepository
 import one.zrp.social.mobile.network.CommunitySummary
 import one.zrp.social.mobile.network.CreateLiveAudioRoomRequest
 import one.zrp.social.mobile.network.LiveAudioRoomSummary
+import one.zrp.social.mobile.ui.live.liveIsoFromMillis
 
 data class LiveAudioListUiState(
     val isLoading: Boolean = true,
@@ -125,7 +126,10 @@ class LiveAudioListViewModel(
                 category = category?.trim()?.ifEmpty { null },
                 visibility = visibility,
                 communityId = if (visibility == "COMMUNITY") communityId else null,
-                scheduledAt = scheduledAtMillis?.let { java.time.Instant.ofEpochMilli(it).toString() },
+                // SimpleDateFormat-based, not java.time.Instant: minSdk 24 has no
+                // java.time without desugaring (this line was unreachable before
+                // scheduling existed in the UI, so it never crashed).
+                scheduledAt = scheduledAtMillis?.let { liveIsoFromMillis(it) },
             )
             repository.createRoom(request)
                 .onSuccess { response ->

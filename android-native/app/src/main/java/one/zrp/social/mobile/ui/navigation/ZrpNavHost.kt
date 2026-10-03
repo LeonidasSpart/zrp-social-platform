@@ -106,6 +106,8 @@ import one.zrp.social.mobile.ui.create.CreatePostScreen
 import one.zrp.social.mobile.ui.discover.DiscoverFeedScreen
 import one.zrp.social.mobile.ui.liveaudio.LiveAudioListScreen
 import one.zrp.social.mobile.ui.liveaudio.LiveAudioRoomScreen
+import one.zrp.social.mobile.ui.livevideo.LiveVideoListScreen
+import one.zrp.social.mobile.ui.livevideo.LiveVideoRoomScreen
 import one.zrp.social.mobile.ui.followlist.FollowListMode
 import one.zrp.social.mobile.ui.followlist.FollowListScreen
 import one.zrp.social.mobile.ui.hashtag.HashtagScreen
@@ -173,6 +175,7 @@ import one.zrp.social.mobile.ui.search.ExploreTrendingScreen
 import one.zrp.social.mobile.ui.search.SearchScreen
 import one.zrp.social.mobile.ui.ai.AiChatScreen
 import one.zrp.social.mobile.ui.creator.CreatorScreen
+import one.zrp.social.mobile.ui.creator.LiveGiftsReceivedScreen
 import one.zrp.social.mobile.ui.journalist.ArticleEditorScreen
 import one.zrp.social.mobile.ui.journalist.JournalistDashboardScreen
 import one.zrp.social.mobile.ui.support.NewTicketScreen
@@ -295,6 +298,8 @@ fun ZrpNavHost(
     val goToDiscover: () -> Unit = { navController.navigate("discover") }
     val goToLiveAudio: () -> Unit = { navController.navigate("live-audio") }
     val goToLiveAudioRoom: (String) -> Unit = { id -> navController.navigate("live-audio/$id") }
+    val goToLiveVideo: () -> Unit = { navController.navigate("live-video") }
+    val goToLiveVideoRoom: (String) -> Unit = { id -> navController.navigate("live-video/$id") }
     // Matches PostCard.tsx's own video-tap behavior: opens the same
     // full-screen swipeable video feed as the Shorts tab, starting at
     // this exact post (VideoFeedViewer's own startPostId prop).
@@ -493,6 +498,7 @@ fun ZrpNavHost(
                     goShorts = goToShorts,
                     goDiscover = goToDiscover,
                     goLiveAudio = goToLiveAudio,
+                    goLiveVideo = goToLiveVideo,
                     goMusic = goToMusic,
                     goMarketplace = goToMarketplace,
                     goOpportunity = goToOpportunity,
@@ -1329,19 +1335,48 @@ fun ZrpNavHost(
                     onAuthorClick = goToProfile,
                 )
             }
-            composable("live-audio") {
+            composable(
+                route = "live-audio",
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/live-audio" }),
+            ) {
                 LiveAudioListScreen(
                     onBack = { navController.popBackStack() },
                     onOpenRoom = goToLiveAudioRoom,
                 )
             }
+            // The deep link is what a scheduled-room reminder push
+            // (notifyReminderSubscribers' "/live-audio/{id}" path) and a
+            // shared room link open into - natively, not the web page.
             composable(
                 route = "live-audio/{roomId}",
                 arguments = listOf(navArgument("roomId") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/live-audio/{roomId}" }),
             ) { backStackEntry ->
                 val roomId = backStackEntry.arguments?.getString("roomId")
                 if (roomId != null) {
                     LiveAudioRoomScreen(
+                        roomId = roomId,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+            }
+            composable(
+                route = "live-video",
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/live-video" }),
+            ) {
+                LiveVideoListScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenRoom = goToLiveVideoRoom,
+                )
+            }
+            composable(
+                route = "live-video/{roomId}",
+                arguments = listOf(navArgument("roomId") { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://zrp.one/live-video/{roomId}" }),
+            ) { backStackEntry ->
+                val roomId = backStackEntry.arguments?.getString("roomId")
+                if (roomId != null) {
+                    LiveVideoRoomScreen(
                         roomId = roomId,
                         onBack = { navController.popBackStack() },
                     )
@@ -1761,6 +1796,13 @@ fun ZrpNavHost(
                 CreatorScreen(
                     onBack = { navController.popBackStack() },
                     onOpenPost = goToComments,
+                    onOpenProfile = goToProfile,
+                    onOpenLiveGifts = { navController.navigate("creator/live-gifts") },
+                )
+            }
+            composable("creator/live-gifts") {
+                LiveGiftsReceivedScreen(
+                    onBack = { navController.popBackStack() },
                     onOpenProfile = goToProfile,
                 )
             }

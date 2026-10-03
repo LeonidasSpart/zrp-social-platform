@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import one.zrp.social.mobile.data.LiveAudioRepository
+import one.zrp.social.mobile.data.LiveRoomKind
 import one.zrp.social.mobile.network.ApiClient
 import one.zrp.social.mobile.network.LiveAudioMuteChangedPayload
 import one.zrp.social.mobile.network.LiveAudioParticipant
@@ -25,6 +26,7 @@ import one.zrp.social.mobile.network.LiveAudioRoleChangedPayload
 import one.zrp.social.mobile.network.LiveAudioRoom
 import one.zrp.social.mobile.network.LiveAudioSpeakerRequestPayload
 import one.zrp.social.mobile.network.ZrpSocket
+import one.zrp.social.mobile.ui.live.LiveInteractionsController
 import org.json.JSONObject
 
 /** LISTENER < SPEAKER < MODERATOR ~= HOST - matches src/lib/live-audio/room-service.ts's own role checks (canPromoteSpeaker/isRoomAuthority). Exposed `internal` for LiveAudioRoomViewModelTest and reused by LiveAudioRoomScreen to group participants/gate action buttons. */
@@ -39,7 +41,11 @@ internal fun addPendingSpeakerRequest(current: List<String>, userId: String): Li
 internal fun removePendingSpeakerRequest(current: List<String>, userId: String): List<String> =
     current.filterNot { it == userId }
 
-enum class LiveAudioPhase { LOADING, CONNECTING, CONNECTED, ENDED, REMOVED, ERROR }
+// SCHEDULED: the room exists but its host hasn't started it - GET
+// /rooms/{id} works, POST /join would fail with room_not_live, so the
+// screen shows the scheduled state (reminder / host start) instead.
+// ENDED also covers a room that was already ENDED/CANCELLED when opened.
+enum class LiveAudioPhase { LOADING, CONNECTING, CONNECTED, SCHEDULED, ENDED, REMOVED, ERROR }
 
 data class LiveAudioRoomUiState(
     val phase: LiveAudioPhase = LiveAudioPhase.LOADING,
@@ -63,6 +69,9 @@ data class LiveAudioRoomUiState(
     val actionBusyUserId: String? = null,
     val error: String? = null,
     val actionError: String? = null,
+    // Host start/cancel of a SCHEDULED room.
+    val scheduledActionBusy: Boolean = false,
+    val scheduledActionError: String? = null,
 )
 
 /**
@@ -119,6 +128,19 @@ class LiveAudioRoomViewModel(
     private var livekitRoom: Room? = null
     private var joinedSuccessfully = false
 
+    /**
+     * Gifts, chat, reactions, recording and reminders for this room -
+     * see LiveInteractionsController's KDoc. Shares this screen's socket
+     * (attached in connectSocket) rather than opening a second one.
+     */
+    val interactions = LiveInteractionsController(
+        kind = LiveRoomKind.AUDIO,
+        roomId = roomId,
+        scope = viewModelScope,
+        onUnknownUser = { loadDetail() },
+        onRoomStateStale = { loadDetail() },
+    )
+
     init {
         loadDetail()
     }
@@ -127,11 +149,21 @@ class LiveAudioRoomViewModel(
         viewModelScope.launch {
             repository.getRoom(roomId)
                 .onSuccess { detail ->
+                    interactions.updateKnownUsers(detail.participants.map { it.user })
+                    interactions.seedFromRoom(detail.room.slowModeSeconds, detail.room.reactionCount)
                     _state.update { current ->
                         current.copy(
                             room = detail.room,
                             participants = detail.participants,
                             myRole = detail.myRole,
+                            // A scheduled room whose host just started it (seen
+                            // on a re-read) leaves the scheduled state; the
+                            // screen then calls connect() to actually join.
+                            phase = if (current.phase == LiveAudioPhase.SCHEDULED && detail.room.status != "SCHEDULED") {
+                                if (detail.room.status == "LIVE") LiveAudioPhase.LOADING else LiveAudioPhase.ENDED
+                            } else {
+                                current.phase
+                            },
                             pendingSpeakerRequestUserIds = removePendingSpeakerRequest(
                                 current.pendingSpeakerRequestUserIds,
                                 current.myUserId ?: "",
@@ -161,6 +193,27 @@ class LiveAudioRoomViewModel(
         viewModelScope.launch {
             val ownUserId = repository.getOwnUserId().getOrNull()
             _state.update { it.copy(myUserId = ownUserId) }
+            interactions.setMyUserId(ownUserId)
+
+            // Only a LIVE room can be joined. A SCHEDULED one gets its own
+            // screen state (reminder / host start), and an ENDED/CANCELLED
+            // one goes straight to the ended state with its replays -
+            // instead of both dead-ending on a join error. If this read
+            // itself fails, fall through to the join exactly as before so
+            // the join's own (more specific) error is what surfaces.
+            val preJoin = repository.getRoom(roomId).getOrNull()
+            if (preJoin != null && preJoin.room.status != "LIVE") {
+                interactions.updateKnownUsers(preJoin.participants.map { it.user })
+                _state.update {
+                    it.copy(
+                        room = preJoin.room,
+                        participants = preJoin.participants,
+                        myRole = preJoin.myRole,
+                        phase = if (preJoin.room.status == "SCHEDULED") LiveAudioPhase.SCHEDULED else LiveAudioPhase.ENDED,
+                    )
+                }
+                return@launch
+            }
 
             repository.joinRoom(roomId)
                 .onSuccess { join ->
@@ -173,6 +226,11 @@ class LiveAudioRoomViewModel(
                         _state.update { it.copy(phase = LiveAudioPhase.CONNECTED, myRole = join.participant.role) }
                         connectSocket(ownUserId)
                         loadDetail()
+                        interactions.loadChatHistory()
+                        // Loaded eagerly (one small GET) so every viewer's gift
+                        // animation can show the real icon, not only after
+                        // they open the panel themselves.
+                        interactions.loadCatalog()
                     } catch (e: Exception) {
                         livekitRoom?.disconnect()
                         livekitRoom = null
@@ -230,7 +288,7 @@ class LiveAudioRoomViewModel(
         })
 
         liveSocket.on("live-audio:room-ended", Emitter.Listener {
-            _state.update { it.copy(phase = LiveAudioPhase.ENDED) }
+            _state.update { it.copy(phase = LiveAudioPhase.ENDED, room = it.room?.copy(status = "ENDED")) }
             livekitRoom?.disconnect()
         })
 
@@ -247,6 +305,15 @@ class LiveAudioRoomViewModel(
                 )
             }
         })
+
+        interactions.attach(liveSocket)
+
+        // A Socket.IO reconnect (reconnection=true) gets a brand-new
+        // server-side socket with no room memberships - re-join on every
+        // (re)connect so chat/gift/reaction broadcasts resume after a
+        // network blip. The first connect's join is the buffered emit
+        // below; a duplicate join is a no-op server-side.
+        liveSocket.on(Socket.EVENT_CONNECT, Emitter.Listener { liveSocket.emit("join-live-audio-room", roomId) })
 
         liveSocket.emit("join-live-audio-room", roomId)
     }
@@ -337,6 +404,39 @@ class LiveAudioRoomViewModel(
         _state.update { it.copy(actionError = null) }
     }
 
+    /** Host starts their SCHEDULED room now; on success the screen joins it like any live room. */
+    fun startScheduledRoom(context: Context) {
+        if (_state.value.scheduledActionBusy) return
+        _state.update { it.copy(scheduledActionBusy = true, scheduledActionError = null) }
+        viewModelScope.launch {
+            repository.startRoom(roomId)
+                .onSuccess { response ->
+                    _state.update { it.copy(scheduledActionBusy = false, room = response.room, phase = LiveAudioPhase.LOADING) }
+                    connect(context)
+                }
+                .onFailure { error -> _state.update { it.copy(scheduledActionBusy = false, scheduledActionError = error.message) } }
+        }
+    }
+
+    fun cancelScheduledRoom() {
+        if (_state.value.scheduledActionBusy) return
+        _state.update { it.copy(scheduledActionBusy = true, scheduledActionError = null) }
+        viewModelScope.launch {
+            repository.cancelRoom(roomId)
+                .onSuccess {
+                    _state.update { it.copy(scheduledActionBusy = false, room = it.room?.copy(status = "CANCELLED"), phase = LiveAudioPhase.ENDED) }
+                }
+                .onFailure { error -> _state.update { it.copy(scheduledActionBusy = false, scheduledActionError = error.message) } }
+        }
+    }
+
+    /** Re-checks a SCHEDULED room (e.g. after the reminder notification) and joins if it has gone live. */
+    fun recheckScheduledRoom(context: Context) {
+        if (_state.value.phase != LiveAudioPhase.SCHEDULED) return
+        _state.update { it.copy(phase = LiveAudioPhase.LOADING) }
+        connect(context)
+    }
+
     fun endRoom() {
         viewModelScope.launch {
             repository.endRoom(roomId).onFailure { error -> _state.update { it.copy(actionError = error.message) } }
@@ -361,6 +461,8 @@ class LiveAudioRoomViewModel(
             liveSocket.off("live-audio:room-ended")
             liveSocket.off("live-audio:you-were-removed")
             liveSocket.off("live-audio:speaker-request")
+            liveSocket.off(Socket.EVENT_CONNECT)
+            interactions.detach(liveSocket)
             if (joinedSuccessfully) liveSocket.emit("leave-live-audio-room", roomId)
             liveSocket.disconnect()
         }
@@ -368,6 +470,7 @@ class LiveAudioRoomViewModel(
         livekitRoom?.disconnect()
         livekitRoom = null
         joinedSuccessfully = false
+        interactions.cancelPendingWork()
     }
 
     override fun onCleared() {
