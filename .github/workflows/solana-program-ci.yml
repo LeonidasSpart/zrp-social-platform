@@ -199,27 +199,59 @@ jobs:
           avm install ${{ env.ANCHOR_VERSION }}
           avm use ${{ env.ANCHOR_VERSION }}
 
-      # The DEPLOYER wallet, generated fresh every run and funded only from
-      # the devnet faucet - never the program's own identity keypair, and
-      # never holding anything of real value. A program upgrade on devnet
-      # requires the upgrade authority to match the account that originally
-      # deployed it; since this deployer is ephemeral, the committed
-      # program keypair itself (not this wallet) is set as upgrade
-      # authority below so repeat deploys keep working across CI runs.
-      - name: Generate ephemeral deployer wallet
+      # The DEPLOYER wallet pays rent/fees and (for repeat deploys) must
+      # match whatever account is currently the program's upgrade
+      # authority - never the program's own identity keypair. Two optional
+      # repo secrets make this reliable instead of depending on the public
+      # devnet faucet every run (it's shared infrastructure and frequently
+      # rate-limits CI IP ranges):
+      #   SOLANA_RPC_URL           - a dedicated devnet RPC endpoint. Falls
+      #                              back to the public https://api.devnet.solana.com
+      #                              if unset.
+      #   SOLANA_DEPLOYER_KEYPAIR  - a persistent devnet keypair JSON,
+      #                              pre-funded by a human once (e.g.
+      #                              `solana airdrop 5` run locally, or a
+      #                              devnet faucet website). Falls back to a
+      #                              fresh ephemeral keypair + CI-driven
+      #                              faucet airdrop if unset - fine for an
+      #                              occasional run, flaky under heavier use.
+      # Neither secret is required for this job to exist; both are
+      # documented in docs/zrp-launchpad-deployment.md.
+      - name: Configure deployer wallet
+        env:
+          SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
+          SOLANA_DEPLOYER_KEYPAIR: ${{ secrets.SOLANA_DEPLOYER_KEYPAIR }}
         run: |
           mkdir -p ~/.config/solana
-          solana-keygen new --no-bip39-passphrase --silent --outfile ~/.config/solana/id.json
-          solana config set --url devnet
+          RPC_URL="${SOLANA_RPC_URL:-https://api.devnet.solana.com}"
+          solana config set --url "$RPC_URL"
+          echo "RPC_URL=$RPC_URL" >> "$GITHUB_ENV"
 
-      - name: Fund deployer from devnet faucet
+          if [ -n "$SOLANA_DEPLOYER_KEYPAIR" ]; then
+            printf '%s' "$SOLANA_DEPLOYER_KEYPAIR" > ~/.config/solana/id.json
+            if ! solana-keygen pubkey ~/.config/solana/id.json > /dev/null 2>&1; then
+              echo "::error::SOLANA_DEPLOYER_KEYPAIR is not a valid Solana keypair JSON."
+              exit 1
+            fi
+            echo "Using the persistent SOLANA_DEPLOYER_KEYPAIR secret."
+          else
+            solana-keygen new --no-bip39-passphrase --silent --outfile ~/.config/solana/id.json
+            echo "No SOLANA_DEPLOYER_KEYPAIR secret set - generated an ephemeral deployer wallet for this run."
+          fi
+
+      - name: Fund deployer (airdrop if balance is low)
         run: |
-          for i in 1 2 3 4 5; do
-            solana airdrop 2 && break
-            echo "Airdrop attempt $i failed/rate-limited, retrying in 10s..."
-            sleep 10
-          done
-          solana balance
+          BALANCE=$(solana balance --url "$RPC_URL" | awk '{print $1}')
+          echo "Current balance: $BALANCE SOL"
+          NEEDS_FUNDING=$(awk -v bal="$BALANCE" 'BEGIN { print (bal < 2) ? 1 : 0 }')
+          if [ "$NEEDS_FUNDING" = "1" ]; then
+            for i in 1 2 3 4 5; do
+              solana airdrop 2 --url "$RPC_URL" && break
+              echo "Airdrop attempt $i failed/rate-limited, retrying in 10s..."
+              sleep 10
+            done
+          fi
+          solana balance --url "$RPC_URL"
 
       - name: Place program identity keypair for build
         run: |
@@ -231,7 +263,7 @@ jobs:
 
       - name: Deploy to devnet
         run: |
-          anchor deploy --provider.cluster devnet --provider.wallet ~/.config/solana/id.json \
+          anchor deploy --provider.cluster "$RPC_URL" --provider.wallet ~/.config/solana/id.json \
             --program-name zrp_launchpad \
             --program-keypair target/deploy/zrp_launchpad-keypair.json
 
@@ -241,14 +273,105 @@ jobs:
           solana program set-upgrade-authority "$PROGRAM_ID" \
             --new-upgrade-authority target/deploy/zrp_launchpad-keypair.json \
             --upgrade-authority ~/.config/solana/id.json \
-            --url devnet || echo "Upgrade authority already set (expected on repeat deploys) or program is immutable - continuing."
+            --url "$RPC_URL" || echo "Upgrade authority already set (expected on repeat deploys) or program is immutable - continuing."
 
       - name: Report deployed program
         run: |
           PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
           echo "## ZRP Launchpad deployed to devnet" >> "$GITHUB_STEP_SUMMARY"
           echo "- Program ID: \`$PROGRAM_ID\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- RPC: \`$RPC_URL\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Explorer: https://explorer.solana.com/address/$PROGRAM_ID?cluster=devnet" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload IDL + types for the verification job
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrp-launchpad-devnet-deploy
+          path: |
+            target/idl/zrp_launchpad.json
+            target/types/zrp_launchpad.ts
+          if-no-files-found: error
+          retention-days: 30
+
+  verify-devnet:
+    name: Verify devnet deployment (real on-chain smoke test)
+    needs: deploy-devnet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+
+      - name: Install repo npm dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Download IDL from the deploy job
+        uses: actions/download-artifact@v4
+        with:
+          name: zrp-launchpad-devnet-deploy
+          path: target
+
+      # Same secret-or-fallback pattern as deploy-devnet. The smoke test
+      # spends real (free, worthless) devnet SOL across create + 3 buys +
+      # a sell + graduate - noticeably more than a bare deploy, so the
+      # funding floor here is higher.
+      - name: Configure smoke-test wallet
+        env:
+          SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
+          SOLANA_DEPLOYER_KEYPAIR: ${{ secrets.SOLANA_DEPLOYER_KEYPAIR }}
+        run: |
+          mkdir -p ~/.config/solana
+          RPC_URL="${SOLANA_RPC_URL:-https://api.devnet.solana.com}"
+          solana config set --url "$RPC_URL"
+          echo "RPC_URL=$RPC_URL" >> "$GITHUB_ENV"
+
+          if [ -n "$SOLANA_DEPLOYER_KEYPAIR" ]; then
+            printf '%s' "$SOLANA_DEPLOYER_KEYPAIR" > ~/.config/solana/id.json
+          else
+            solana-keygen new --no-bip39-passphrase --silent --outfile ~/.config/solana/id.json
+          fi
+
+          BALANCE=$(solana balance --url "$RPC_URL" | awk '{print $1}')
+          NEEDS_FUNDING=$(awk -v bal="$BALANCE" 'BEGIN { print (bal < 8) ? 1 : 0 }')
+          if [ "$NEEDS_FUNDING" = "1" ]; then
+            for i in 1 2 3 4 5 6 7 8; do
+              solana airdrop 2 --url "$RPC_URL" || true
+              BALANCE=$(solana balance --url "$RPC_URL" | awk '{print $1}')
+              awk -v bal="$BALANCE" 'BEGIN { exit !(bal >= 8) }' && break
+              echo "Balance $BALANCE SOL after attempt $i, retrying in 10s..."
+              sleep 10
+            done
+          fi
+          solana balance --url "$RPC_URL"
+
+      # DEPLOYER_KEYPAIR_PATH is deliberately not set here - the script
+      # defaults it to $HOME/.config/solana/id.json, which is exactly where
+      # the step above wrote it, and resolving $HOME at Node runtime avoids
+      # hardcoding a runner-specific home directory in this YAML.
+      - name: Run verification + full on-chain smoke test
+        env:
+          SOLANA_RPC_URL: ${{ env.RPC_URL }}
+          IDL_PATH: target/idl/zrp_launchpad.json
+          RUN_SMOKE_TEST: "true"
+        run: npx ts-node --project tsconfig.anchor.json scripts/verify-zrp-launchpad.ts
+
+      - name: Upload verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrp-launchpad-devnet-verification-report
+          path: devnet-verification-report.json
+          if-no-files-found: warn
+          retention-days: 90
 
   deploy-mainnet:
     name: Deploy to mainnet (manual, gated)

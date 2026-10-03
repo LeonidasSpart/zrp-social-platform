@@ -12,7 +12,8 @@
     "lint": "next lint",
     "test": "vitest run",
     "postinstall": "prisma generate",
-    "anchor:test": "ts-mocha -p ./tsconfig.anchor.json -t 1000000 tests/**/*.ts"
+    "anchor:test": "ts-mocha -p ./tsconfig.anchor.json -t 1000000 tests/**/*.ts",
+    "launchpad:verify": "ts-node --project tsconfig.anchor.json scripts/verify-zrp-launchpad.ts"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",
@@ -79,6 +80,7 @@
     "chai": "^4.5.0",
     "mocha": "^10.8.2",
     "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
     "@types/geoip-lite": "^1.4.4",
     "@types/node": "^20.0.0",
     "@types/pg": "^8.23.1",
