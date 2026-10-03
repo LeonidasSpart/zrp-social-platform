@@ -110,10 +110,17 @@ jobs:
       - name: Resolve dependency graph (prints reverse-deps for the pinned crates)
         run: |
           cargo generate-lockfile
-          echo "--- reverse dependencies: zeroize ---"
+          echo "--- reverse dependencies: zeroize (now patched to 1.8.2) ---"
           cargo tree -i zeroize || true
-          echo "--- reverse dependencies: crypto-common ---"
-          cargo tree -i crypto-common || true
+          # crypto-common has two coexisting major versions in the graph
+          # (0.1.x used by the normal digest/aead chain, 0.2.x - the one
+          # that requires edition2024 - from an as-yet-unidentified
+          # dependent) - `-i crypto-common` alone is ambiguous and errors
+          # without printing a tree, so query each version explicitly.
+          echo "--- reverse dependencies: crypto-common 0.1.x ---"
+          cargo tree -i crypto-common@0.1.7 || true
+          echo "--- reverse dependencies: crypto-common 0.2.x ---"
+          cargo tree -i crypto-common@0.2.2 || true
 
       - name: Cache cargo registry and build artifacts
         uses: actions/cache@v4
