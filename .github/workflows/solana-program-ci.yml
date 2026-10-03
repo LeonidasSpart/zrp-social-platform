@@ -58,7 +58,20 @@ permissions:
 env:
   SOLANA_VERSION: "2.1.0"
   ANCHOR_VERSION: "0.31.1"
-  RUST_TOOLCHAIN: "1.82.0"
+  # This is the HOST toolchain used only to build/install the anchor-cli
+  # binary and drive cargo as a build tool - it never compiles the
+  # on-chain program itself (anchor build / cargo build-sbf download and
+  # use Solana's own bundled platform-tools Rust fork for that, completely
+  # independent of this value). Pinning an exact version here caused a
+  # real failure: anchor-cli 0.31.1 was published against crates.io's
+  # dependency graph as it existed in April 2025, and by the time this
+  # runs, transitive deps (observed: zeroize) had moved on to releases
+  # requiring a newer Cargo edition than an old pinned host toolchain
+  # supports. "stable" always matches what crates.io's current graph
+  # needs, which is exactly the property this host toolchain needs to
+  # have - unlike the on-chain program/SPL-dependency versions, which
+  # stay genuinely pinned via Cargo.lock.
+  RUST_TOOLCHAIN: "stable"
 
 jobs:
   build-and-test:
