@@ -250,7 +250,7 @@ final class ApiClient: @unchecked Sendable {
         case 404:
             return .notFound(message: message)
         case 429:
-            return .rateLimited(message: message)
+            return .rateLimited(message: message, code: code, retryAfter: parsed?.retryAfter)
         default:
             return .server(status: status, message: message, code: code)
         }

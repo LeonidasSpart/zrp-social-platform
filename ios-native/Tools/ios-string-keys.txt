@@ -1476,6 +1476,40 @@ liveAudio.genericError
 liveAudio.roomNotFound
 liveAudio.connecting
 
+# ── Live Video (camera tiles on the same LiveKit SFU, paid-gated) ──────
+nav.liveVideo
+liveVideo.pageTitle
+liveVideo.subtitle
+liveVideo.noRoomsDesc
+liveVideo.viewerCount
+liveVideo.backToLiveVideo
+liveVideo.participantsHeading
+liveVideo.viewersHeading
+liveVideo.cameraOffLabel
+liveVideo.raiseHand
+liveVideo.pendingRequests
+liveVideo.inviteToSpeak
+liveVideo.moveToViewer
+liveVideo.cameraOffAction
+liveVideo.cameraOnAction
+liveVideo.cameraOnSelf
+liveVideo.cameraOffSelf
+liveVideo.notConfigured
+
+# ── Live engagement (chat, gifts, reactions, scheduling) - web copy
+#    reused verbatim; everything with no web counterpart is an ios.live.*
+#    key in ios-extra-strings.json ─────────────────────────────────────
+chat.noMessagesYet
+chat.dismiss
+chat.reactAria
+chat.sendMessageAria
+composer.schedule
+composer.scheduleButton
+composer.errScheduleFuture
+settings.scheduled
+creatorDash.statBalance
+native.paymentUnavailable.title
+
 # ── Calling (WebRTC voice/video, same signaling protocol as web/Android) ─
 chat.callRejected
 chat.connectionError

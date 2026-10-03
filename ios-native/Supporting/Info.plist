@@ -102,8 +102,14 @@
 	  Removing it while VoiceRecorder exists would take the app down the
 	  first time somebody tapped the mic button.
 	-->
+	<!--
+	  Also used by Live Audio and Live Video rooms (LiveKit
+	  setMicrophone(enabled:)) and by calls, so the purpose string names
+	  every place the microphone is genuinely used - App Review rejects a
+	  purpose string that undersells what the permission is for.
+	-->
 	<key>NSMicrophoneUsageDescription</key>
-	<string>ZRP uses the microphone to record voice messages you send in chat.</string>
+	<string>ZRP uses the microphone so you can speak in calls and live rooms, and to record voice messages you send in chat.</string>
 
 	<!--
 	  The chat composer's Camera button (ConversationView/
@@ -116,8 +122,13 @@
 	  while CameraCapture.swift exists would take the app down the first
 	  time somebody tapped the Camera button.
 	-->
+	<!--
+	  Live Video rooms publish the camera (LiveKit setCamera(enabled:))
+	  once an on-camera participant turns it on - never automatically on
+	  join - and video calls use it too, so the purpose string covers both.
+	-->
 	<key>NSCameraUsageDescription</key>
-	<string>ZRP uses the camera to let you take a photo to send in a message.</string>
+	<string>ZRP uses the camera so you can appear on video in calls and live video rooms, and to take a photo to send in a message.</string>
 
 	<!--
 	  Still deliberately absent. Apple rejects permissions an app does
