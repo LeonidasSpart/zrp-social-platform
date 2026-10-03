@@ -1,0 +1,346 @@
+name: ZRP Launchpad Solana Program
+
+# Builds, tests and deploys the ZRP-native bonding-curve program
+# (programs/zrp-launchpad/) that replaces Pump.fun as ZRP's token-creation
+# protocol. This is the verification oracle for that program: the
+# development sandbox this repo is normally edited in has no network path
+# to crates.io or any Solana RPC endpoint, so nothing here can be compiled
+# or tested locally - every change to programs/zrp-launchpad/ must be
+# proven here, in CI, before it's trusted.
+#
+# Three jobs, in increasing order of consequence:
+#   1. build-and-test  - PRs, pushes to main, and manual runs. Compiles the
+#      program and runs the full Anchor test suite (tests/zrp-launchpad.ts)
+#      against a fresh local-validator. No deploy, no funds at risk.
+#   2. deploy-devnet   - push to main only. Deploys to Solana devnet using
+#      the devnet program keypair committed in this repo
+#      (programs/zrp-launchpad/keys/) - devnet SOL has no value, so this is
+#      safe to automate the same way android-native-build.yml auto-builds a
+#      debug APK on every change to main.
+#   3. deploy-mainnet  - manual-only (workflow_dispatch), requires typing an
+#      exact confirmation phrase, and needs two repository secrets
+#      (SOLANA_MAINNET_PROGRAM_KEYPAIR, SOLANA_MAINNET_DEPLOYER_KEYPAIR)
+#      that must be provisioned and funded by a human first - this workflow
+#      cannot create or fund them, matching android-native-build.yml's own
+#      "release signing only on push to main / workflow_dispatch, secrets
+#      decoded and validated before use, never logged" convention for the
+#      other irreversible, real-money-adjacent artifact in this repo.
+on:
+  pull_request:
+    paths:
+      - "programs/**"
+      - "tests/zrp-launchpad.ts"
+      - "Anchor.toml"
+      - "Cargo.toml"
+      - ".github/workflows/solana-program-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "programs/**"
+      - "tests/zrp-launchpad.ts"
+      - "Anchor.toml"
+      - "Cargo.toml"
+      - ".github/workflows/solana-program-ci.yml"
+  workflow_dispatch:
+    inputs:
+      confirm_mainnet_deploy:
+        description: >-
+          Type exactly DEPLOY ZRP LAUNCHPAD TO MAINNET to run the mainnet
+          deploy job. Any other value (including empty) runs build-and-test
+          only - this is deliberately not a checkbox, so it can't be
+          triggered by habit.
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  SOLANA_VERSION: "2.1.0"
+  ANCHOR_VERSION: "0.31.1"
+  RUST_TOOLCHAIN: "1.82.0"
+
+jobs:
+  build-and-test:
+    name: Build program + run Anchor test suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust ${{ env.RUST_TOOLCHAIN }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache cargo registry and build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+
+      - name: Install Node (for the TS test suite)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install repo npm dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Cache AVM/Anchor CLI install
+        id: anchor-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/anchor
+          key: ${{ runner.os }}-anchor-${{ env.ANCHOR_VERSION }}
+
+      - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
+        if: steps.anchor-cache.outputs.cache-hit != 'true'
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+          avm install ${{ env.ANCHOR_VERSION }}
+          avm use ${{ env.ANCHOR_VERSION }}
+          cp "$(avm which ${{ env.ANCHOR_VERSION }} 2>/dev/null || echo "$HOME/.avm/bin/anchor")" ~/.cargo/bin/anchor || true
+
+      - name: Select Anchor ${{ env.ANCHOR_VERSION }}
+        run: |
+          if command -v avm >/dev/null 2>&1; then
+            avm use ${{ env.ANCHOR_VERSION }}
+          fi
+          anchor --version
+
+      - name: Generate ephemeral local wallet (test fee-payer, no real funds)
+        run: |
+          mkdir -p ~/.config/solana
+          solana-keygen new --no-bip39-passphrase --silent --outfile ~/.config/solana/id.json
+
+      # Wires this program's permanent devnet identity
+      # (programs/zrp-launchpad/keys/zrp-launchpad-devnet-keypair.json, whose
+      # public key is the `declare_id!` in lib.rs and the [programs.*]
+      # entries in Anchor.toml) into the path `anchor build` expects it at.
+      # This keypair only ever signs as the program's own address during
+      # (re)deploys - it is never the fee-payer/wallet above.
+      - name: Place program identity keypair for build
+        run: |
+          mkdir -p target/deploy
+          cp programs/zrp-launchpad/keys/zrp-launchpad-devnet-keypair.json target/deploy/zrp_launchpad-keypair.json
+
+      - name: anchor build
+        run: anchor build
+
+      - name: Verify declare_id! matches the committed program keypair
+        run: |
+          DECLARED_ID=$(grep -oE '"[1-9A-HJ-NP-Za-km-z]{32,44}"' programs/zrp-launchpad/src/lib.rs | head -1 | tr -d '"')
+          KEYPAIR_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
+          echo "declare_id!: $DECLARED_ID"
+          echo "keypair:     $KEYPAIR_ID"
+          if [ "$DECLARED_ID" != "$KEYPAIR_ID" ]; then
+            echo "::error::declare_id! in lib.rs does not match the committed devnet program keypair - anchor build/deploy would target the wrong program."
+            exit 1
+          fi
+
+      - name: anchor test (local validator, Metaplex cloned from mainnet)
+        run: anchor test --skip-build
+
+      - name: Upload build artifacts (.so + generated IDL/types)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrp-launchpad-build
+          path: |
+            target/deploy/zrp_launchpad.so
+            target/idl/zrp_launchpad.json
+            target/types/zrp_launchpad.ts
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy-devnet:
+    name: Deploy to devnet
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust ${{ env.RUST_TOOLCHAIN }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache cargo registry and build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+
+      - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+          avm install ${{ env.ANCHOR_VERSION }}
+          avm use ${{ env.ANCHOR_VERSION }}
+
+      # The DEPLOYER wallet, generated fresh every run and funded only from
+      # the devnet faucet - never the program's own identity keypair, and
+      # never holding anything of real value. A program upgrade on devnet
+      # requires the upgrade authority to match the account that originally
+      # deployed it; since this deployer is ephemeral, the committed
+      # program keypair itself (not this wallet) is set as upgrade
+      # authority below so repeat deploys keep working across CI runs.
+      - name: Generate ephemeral deployer wallet
+        run: |
+          mkdir -p ~/.config/solana
+          solana-keygen new --no-bip39-passphrase --silent --outfile ~/.config/solana/id.json
+          solana config set --url devnet
+
+      - name: Fund deployer from devnet faucet
+        run: |
+          for i in 1 2 3 4 5; do
+            solana airdrop 2 && break
+            echo "Airdrop attempt $i failed/rate-limited, retrying in 10s..."
+            sleep 10
+          done
+          solana balance
+
+      - name: Place program identity keypair for build
+        run: |
+          mkdir -p target/deploy
+          cp programs/zrp-launchpad/keys/zrp-launchpad-devnet-keypair.json target/deploy/zrp_launchpad-keypair.json
+
+      - name: anchor build
+        run: anchor build
+
+      - name: Deploy to devnet
+        run: |
+          anchor deploy --provider.cluster devnet --provider.wallet ~/.config/solana/id.json \
+            --program-name zrp_launchpad \
+            --program-keypair target/deploy/zrp_launchpad-keypair.json
+
+      - name: Set upgrade authority to the program's own keypair
+        run: |
+          PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
+          solana program set-upgrade-authority "$PROGRAM_ID" \
+            --new-upgrade-authority target/deploy/zrp_launchpad-keypair.json \
+            --upgrade-authority ~/.config/solana/id.json \
+            --url devnet || echo "Upgrade authority already set (expected on repeat deploys) or program is immutable - continuing."
+
+      - name: Report deployed program
+        run: |
+          PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
+          echo "## ZRP Launchpad deployed to devnet" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Program ID: \`$PROGRAM_ID\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Explorer: https://explorer.solana.com/address/$PROGRAM_ID?cluster=devnet" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-mainnet:
+    name: Deploy to mainnet (manual, gated)
+    needs: build-and-test
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.confirm_mainnet_deploy == 'DEPLOY ZRP LAUNCHPAD TO MAINNET'
+    runs-on: ubuntu-latest
+    environment: solana-mainnet
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust ${{ env.RUST_TOOLCHAIN }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+
+      - name: Install Anchor CLI ${{ env.ANCHOR_VERSION }}
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+          avm install ${{ env.ANCHOR_VERSION }}
+          avm use ${{ env.ANCHOR_VERSION }}
+
+      # Both secrets are provisioned and funded by a human ahead of time -
+      # this workflow never generates or funds a mainnet keypair itself.
+      # SOLANA_MAINNET_PROGRAM_KEYPAIR is the program's permanent on-chain
+      # identity (its pubkey becomes the real, final mainnet program ID -
+      # generate it ONCE, store it only as this secret, never commit it).
+      # SOLANA_MAINNET_DEPLOYER_KEYPAIR pays the deploy rent/fees (several
+      # SOL for a program this size) and is set as upgrade authority.
+      - name: Decode mainnet secrets
+        env:
+          SOLANA_MAINNET_PROGRAM_KEYPAIR: ${{ secrets.SOLANA_MAINNET_PROGRAM_KEYPAIR }}
+          SOLANA_MAINNET_DEPLOYER_KEYPAIR: ${{ secrets.SOLANA_MAINNET_DEPLOYER_KEYPAIR }}
+        run: |
+          if [ -z "$SOLANA_MAINNET_PROGRAM_KEYPAIR" ] || [ -z "$SOLANA_MAINNET_DEPLOYER_KEYPAIR" ]; then
+            echo "::error::SOLANA_MAINNET_PROGRAM_KEYPAIR and/or SOLANA_MAINNET_DEPLOYER_KEYPAIR repository secrets are not set. A human must generate, fund (deployer only) and store both before this job can run. Nothing was deployed."
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/mainnet-keys"
+          printf '%s' "$SOLANA_MAINNET_PROGRAM_KEYPAIR" > "$RUNNER_TEMP/mainnet-keys/program-keypair.json"
+          printf '%s' "$SOLANA_MAINNET_DEPLOYER_KEYPAIR" > "$RUNNER_TEMP/mainnet-keys/deployer-keypair.json"
+          if ! solana-keygen pubkey "$RUNNER_TEMP/mainnet-keys/program-keypair.json" > /dev/null 2>&1; then
+            echo "::error::SOLANA_MAINNET_PROGRAM_KEYPAIR is not a valid Solana keypair JSON."
+            exit 1
+          fi
+          if ! solana-keygen pubkey "$RUNNER_TEMP/mainnet-keys/deployer-keypair.json" > /dev/null 2>&1; then
+            echo "::error::SOLANA_MAINNET_DEPLOYER_KEYPAIR is not a valid Solana keypair JSON."
+            exit 1
+          fi
+
+      - name: Build with the mainnet program identity
+        run: |
+          mkdir -p target/deploy
+          cp "$RUNNER_TEMP/mainnet-keys/program-keypair.json" target/deploy/zrp_launchpad-keypair.json
+          MAINNET_PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
+          sed -i "s/declare_id!(\"[^\"]*\");/declare_id!(\"$MAINNET_PROGRAM_ID\");/" programs/zrp-launchpad/src/lib.rs
+          anchor build
+
+      - name: Check deployer balance
+        run: |
+          solana config set --url mainnet-beta
+          BALANCE=$(solana balance "$RUNNER_TEMP/mainnet-keys/deployer-keypair.json" --url mainnet-beta | awk '{print $1}')
+          echo "Deployer balance: $BALANCE SOL"
+          # Program deploys for a project this size typically cost ~3-6 SOL
+          # in rent; fail closed with a clear message rather than letting
+          # `anchor deploy` fail midway with a partially-written buffer.
+          awk -v bal="$BALANCE" 'BEGIN { exit !(bal >= 3) }' || {
+            echo "::error::Deployer wallet balance ($BALANCE SOL) looks too low for a mainnet program deploy. Fund it and re-run."
+            exit 1
+          }
+
+      - name: Deploy to mainnet-beta
+        run: |
+          anchor deploy --provider.cluster mainnet --provider.wallet "$RUNNER_TEMP/mainnet-keys/deployer-keypair.json" \
+            --program-name zrp_launchpad \
+            --program-keypair target/deploy/zrp_launchpad-keypair.json
+
+      - name: Report deployed program
+        run: |
+          PROGRAM_ID=$(solana-keygen pubkey target/deploy/zrp_launchpad-keypair.json)
+          echo "## ZRP Launchpad deployed to mainnet-beta" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Program ID: \`$PROGRAM_ID\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Explorer: https://explorer.solana.com/address/$PROGRAM_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Record this program ID in ZRP_LAUNCH_PROGRAM_ID (env) for the TS client and server verification to use."
+
+      - name: Clean up mainnet key material
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/mainnet-keys"

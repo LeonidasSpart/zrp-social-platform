@@ -1,0 +1,42 @@
+[toolchain]
+anchor_version = "0.31.1"
+solana_version = "2.1.0"
+
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+zrp_launchpad = "3vr1SHa9LvEvELb23NBG1J6oFRCSDs8cj8wS55zuoRxK"
+
+[programs.devnet]
+zrp_launchpad = "3vr1SHa9LvEvELb23NBG1J6oFRCSDs8cj8wS55zuoRxK"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+# The DEPLOYER/fee-payer wallet (pays rent + tx fees), never the program's own
+# identity keypair. CI generates this fresh per run via `solana-keygen new` and
+# funds it from the devnet faucet - it is deliberately NOT the file in
+# programs/zrp-launchpad/keys/, which is the program's permanent on-chain
+# address and must never be used to pay for anything.
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.anchor.json -t 1000000 tests/**/*.ts"
+
+[test]
+startup_wait = 20000
+
+# `anchor test` boots a fresh local-validator (fast, deterministic) rather
+# than running against devnet directly. It needs the real Metaplex Token
+# Metadata program present on-chain for create_metadata_accounts_v3 to
+# resolve, which genesis doesn't include by default - cloned in from
+# mainnet at validator startup instead of vendoring a program binary.
+[test.validator]
+url = "https://api.mainnet-beta.solana.com"
+
+[[test.validator.clone]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
