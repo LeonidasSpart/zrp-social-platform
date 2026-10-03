@@ -78,6 +78,13 @@ enum TransactionStatus {
 enum TokenVenue {
   DIRECT_MINT
   PUMP_CURVE
+  // Created through ZRP's own on-chain bonding-curve program
+  // (programs/zrp-launchpad/, see docs/zrp-launchpad-deployment.md) - the
+  // ZRP-native replacement for PUMP_CURVE. The mint, curve state, fees and
+  // graduation lifecycle are all owned by ZRP's program, never Pump.fun's;
+  // Pump.fun's SDK/program informed only the product's UX/mechanics, not
+  // this venue's implementation. See src/lib/launchpad/zrp-launch-service.ts.
+  ZRP_LAUNCH
 }
 
 enum WithdrawalStatus {
@@ -2210,6 +2217,12 @@ model LaunchedToken {
   // see client-pump-create.ts) - ZRP charges no separate fee for this
   // path (pump.fun's own protocol fees apply on every curve trade
   // instead), so feeAmount/feeTransactionId are null for these rows.
+  // ZRP_LAUNCH: created through ZRP's own bonding-curve program
+  // (see client-zrp-launch.ts/zrp-launch-service.ts) - feeAmount for these
+  // rows is the on-chain creation fee actually charged, in SOL (not USDC
+  // like DIRECT_MINT), paid directly to the program's fee recipient within
+  // the same create_and_buy transaction; feeTransactionId stays null since
+  // there is no separate payment-verification step, only mintTransactionId.
   venue TokenVenue @default(DIRECT_MINT)
 
   name        String
@@ -2231,6 +2244,12 @@ model LaunchedToken {
 
   feeAmount        Decimal? @db.Decimal(18, 6)
   feeTransactionId String?  @unique
+
+  // The ZRP_LAUNCH bonding-curve PDA for this mint (seeds
+  // ["bonding-curve", mint], programs/zrp-launchpad/src/state.rs) - the
+  // authoritative on-chain account this row indexes. Null for every other
+  // venue, which has no equivalent account.
+  bondingCurveAddress String?
 
   mintTransactionId String? @unique
 
