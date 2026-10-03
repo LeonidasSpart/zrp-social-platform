@@ -1,5 +1,15 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
+// @coral-xyz/anchor re-exports BN from bn.js via a getter that wraps a
+// TS __importDefault() call (`Object.defineProperty(exports, "BN", { get:
+// () => __importDefault(bn_js_1).default })`). Node's cjs-module-lexer,
+// used for CJS->ESM named-export interop, can't statically resolve that
+// indirection, so `BN` is undefined when this file loads as ESM
+// (reproduced locally: every other anchor export - Program, workspace,
+// AnchorProvider, setProvider - comes through fine via the same `import *
+// as anchor`; only BN's specific re-export pattern is affected). Importing
+// bn.js directly sidesteps the broken re-export entirely.
+import BN from "bn.js";
 import {
   PublicKey,
   Keypair,
@@ -31,12 +41,12 @@ const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
 const GLOBAL_CONFIG_SEED = Buffer.from("global");
 const BONDING_CURVE_SEED = Buffer.from("bonding-curve");
 
-const INITIAL_VIRTUAL_SOL_RESERVES = new anchor.BN(30 * LAMPORTS_PER_SOL);
-const INITIAL_VIRTUAL_TOKEN_RESERVES = new anchor.BN(1_073_000_000_000_000);
-const TOKEN_TOTAL_SUPPLY = new anchor.BN(1_000_000_000_000_000);
-const GRADUATION_SOL_TARGET = new anchor.BN(5 * LAMPORTS_PER_SOL);
+const INITIAL_VIRTUAL_SOL_RESERVES = new BN(30 * LAMPORTS_PER_SOL);
+const INITIAL_VIRTUAL_TOKEN_RESERVES = new BN(1_073_000_000_000_000);
+const TOKEN_TOTAL_SUPPLY = new BN(1_000_000_000_000_000);
+const GRADUATION_SOL_TARGET = new BN(5 * LAMPORTS_PER_SOL);
 const TOKEN_DECIMALS = 6;
-const CREATION_FEE_LAMPORTS = new anchor.BN(0.02 * LAMPORTS_PER_SOL);
+const CREATION_FEE_LAMPORTS = new BN(0.02 * LAMPORTS_PER_SOL);
 const BUY_FEE_BPS = 100; // 1%
 const SELL_FEE_BPS = 100; // 1%
 
@@ -79,8 +89,8 @@ async function airdrop(pubkey: PublicKey, sol: number) {
 
 async function createMintAndCurve(opts: {
   creator: Keypair;
-  initialBuyLamports?: anchor.BN;
-  minTokensOut?: anchor.BN;
+  initialBuyLamports?: BN;
+  minTokensOut?: BN;
 }) {
   const mint = Keypair.generate();
   const [globalConfig] = findGlobalConfigPda();
@@ -103,8 +113,8 @@ async function createMintAndCurve(opts: {
       "ZRP Test Token",
       "ZRPT",
       "https://example.com/zrp-test.json",
-      opts.initialBuyLamports ?? new anchor.BN(0),
-      opts.minTokensOut ?? new anchor.BN(0)
+      opts.initialBuyLamports ?? new BN(0),
+      opts.minTokensOut ?? new BN(0)
     )
     .accounts({
       globalConfig,
@@ -203,7 +213,7 @@ describe("zrp-launchpad", () => {
         .updateConfig(
           attacker.publicKey,
           attacker.publicKey,
-          new anchor.BN(0),
+          new BN(0),
           0,
           0,
           GRADUATION_SOL_TARGET
@@ -257,11 +267,11 @@ describe("zrp-launchpad", () => {
     const creator = Keypair.generate();
     await airdrop(creator.publicKey, 5);
 
-    const initialBuy = new anchor.BN(1 * LAMPORTS_PER_SOL);
+    const initialBuy = new BN(1 * LAMPORTS_PER_SOL);
     const { bondingCurve, creatorTokenAccount } = await createMintAndCurve({
       creator,
       initialBuyLamports: initialBuy,
-      minTokensOut: new anchor.BN(1),
+      minTokensOut: new BN(1),
     });
 
     const curve = await (program.account as any).bondingCurve.fetch(bondingCurve);
@@ -291,7 +301,7 @@ describe("zrp-launchpad", () => {
     let threw = false;
     try {
       await (program.methods as any)
-        .buy(new anchor.BN(1 * LAMPORTS_PER_SOL), new anchor.BN("999999999999999999"))
+        .buy(new BN(1 * LAMPORTS_PER_SOL), new BN("999999999999999999"))
         .accounts({
           globalConfig,
           bondingCurve,
@@ -327,7 +337,7 @@ describe("zrp-launchpad", () => {
     );
 
     await (program.methods as any)
-      .buy(new anchor.BN(1 * LAMPORTS_PER_SOL), new anchor.BN(0))
+      .buy(new BN(1 * LAMPORTS_PER_SOL), new BN(0))
       .accounts({
         globalConfig,
         bondingCurve,
@@ -348,7 +358,7 @@ describe("zrp-launchpad", () => {
     assert.isAbove(Number(tokensHeld.toString()), 0);
 
     await (program.methods as any)
-      .sell(new anchor.BN(tokensHeld.toString()), new anchor.BN(0))
+      .sell(new BN(tokensHeld.toString()), new BN(0))
       .accounts({
         globalConfig,
         bondingCurve,
@@ -378,8 +388,8 @@ describe("zrp-launchpad", () => {
     const { mint, bondingCurve, curveTokenVault, creatorTokenAccount } =
       await createMintAndCurve({
         creator,
-        initialBuyLamports: new anchor.BN(0.1 * LAMPORTS_PER_SOL),
-        minTokensOut: new anchor.BN(1),
+        initialBuyLamports: new BN(0.1 * LAMPORTS_PER_SOL),
+        minTokensOut: new BN(1),
       });
 
     const held = await getAccount(provider.connection, creatorTokenAccount);
@@ -388,8 +398,8 @@ describe("zrp-launchpad", () => {
     try {
       await (program.methods as any)
         .sell(
-          new anchor.BN(held.amount.toString()),
-          new anchor.BN("999999999999999999")
+          new BN(held.amount.toString()),
+          new BN("999999999999999999")
         )
         .accounts({
           globalConfig,
@@ -425,7 +435,7 @@ describe("zrp-launchpad", () => {
 
     // One large buy, comfortably past GRADUATION_SOL_TARGET (5 SOL).
     await (program.methods as any)
-      .buy(new anchor.BN(15 * LAMPORTS_PER_SOL), new anchor.BN(0))
+      .buy(new BN(15 * LAMPORTS_PER_SOL), new BN(0))
       .accounts({
         globalConfig,
         bondingCurve,
@@ -450,7 +460,7 @@ describe("zrp-launchpad", () => {
     let tradeThrew = false;
     try {
       await (program.methods as any)
-        .buy(new anchor.BN(0.1 * LAMPORTS_PER_SOL), new anchor.BN(0))
+        .buy(new BN(0.1 * LAMPORTS_PER_SOL), new BN(0))
         .accounts({
           globalConfig,
           bondingCurve,
