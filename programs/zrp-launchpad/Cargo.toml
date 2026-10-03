@@ -42,13 +42,43 @@ zeroize = "=1.8.2"
 # Same pattern as zeroize above, hit on the very next CI run after that
 # pin was confirmed working: `anchor build` failed parsing
 # toml_edit-0.25.15+spec-1.1.0's manifest, "feature `edition2024` is
-# required". toml_edit 0.25.6 bumped to edition2024; 0.25.5+spec-1.1.0
-# is the newest release still on edition2021, and - since Cargo treats
-# the first nonzero component of a pre-1.0 version as its compatibility
+# required". toml_edit 0.25.6 bumped to edition2024; 0.25.5 is the
+# newest release still on edition2021, and - since Cargo treats the
+# first nonzero component of a pre-1.0 version as its compatibility
 # class - it satisfies the same "^0.25" range every real dependent in
 # the graph (cargo_toml, spl-discriminator-syn, and their own anchor-
-# proc-macro dependents) already declares.
-toml_edit = "=0.25.5+spec-1.1.0"
+# proc-macro dependents) already declares. (Build metadata dropped from
+# the version string: Cargo ignores "+..." suffixes for matching
+# purposes and warns if one is present in an exact requirement.)
+toml_edit = "=0.25.5"
+
+# Third crate in the same cascade, hit on the CI run after the toml_edit
+# fix: `digest v0.11.3` itself declares `edition = "2024"` - and every
+# release in digest's 0.11.x line (0.11.0/0.11.1 yanked, 0.11.2, 0.11.3)
+# does the same, so digest can't be pinned within its own compatibility
+# class the way zeroize/toml_edit were. One level up: the chain pulling
+# it in is crypto-common 0.2.2 -> digest 0.11.3 -> blake3 1.8.7 ->
+# solana-blake3-hasher -> solana-program. solana-blake3-hasher 2.2.1
+# declares a loose "^1.5.5" requirement on blake3 (not pinned to the
+# newest release), and blake3 1.5.5 itself declares only "digest =
+# ^0.10.1" (optional, "mac" feature) - so pinning blake3 down to 1.5.5
+# satisfies solana-blake3-hasher's own range while skipping the
+# digest-0.11.x/edition2024 chain entirely.
+#
+# Security check performed per project requirement before pinning: the
+# only relevant advisory in this version range is RUSTSEC-2026-0260, a
+# supply-chain attack via a single malicious `arrayref 0.3.10` release
+# that blake3 depends on. It affects exactly that one version; it was
+# removed (not yanked) from crates.io ~86 minutes after publication, so
+# it can never be freshly resolved by any `cargo generate-lockfile` run
+# again regardless of which blake3 version is chosen here - this is not
+# a live risk from the downgrade. Note for the record: blake3 1.8.7 is
+# itself the release that *fixed* that incident by dropping the
+# arrayref dependency entirely, so pinning back to 1.5.5 does reinstate
+# a (structurally dormant, not exploitable) dependency on arrayref via
+# a "^0.3.5" range; no CVE/RUSTSEC advisory was found against blake3's
+# own hashing implementation anywhere in the 1.5.5-1.8.7 range.
+blake3 = "=1.5.5"
 
 [profile.release]
 overflow-checks = true

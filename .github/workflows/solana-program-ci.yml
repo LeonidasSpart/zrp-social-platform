@@ -115,8 +115,12 @@ jobs:
           cargo generate-lockfile
           echo "--- reverse dependencies: zeroize (pinned to 1.8.2) ---"
           cargo tree -i zeroize || true
-          echo "--- reverse dependencies: toml_edit (pinned to 0.25.5+spec-1.1.0) ---"
-          cargo tree -i toml_edit@0.25.5+spec-1.1.0 || true
+          echo "--- reverse dependencies: toml_edit (pinned to 0.25.5) ---"
+          cargo tree -i toml_edit || true
+          echo "--- reverse dependencies: blake3 (pinned to 1.5.5) ---"
+          cargo tree -i blake3 || true
+          echo "--- reverse dependencies: digest (should no longer resolve to 0.11.x) ---"
+          cargo tree -i digest || true
 
       - name: Cache cargo registry and build artifacts
         uses: actions/cache@v4
