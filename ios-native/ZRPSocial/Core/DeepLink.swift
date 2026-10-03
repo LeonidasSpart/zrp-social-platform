@@ -152,6 +152,17 @@ enum DeepLink {
                 return DeepLinkTarget(.home, .opportunity)
             }
 
+        case "live-audio":
+            // /live-audio is the room list; /live-audio/{id} is one room -
+            // the path a scheduled-live reminder push and a shared room
+            // link both carry (`notifyReminderSubscribers`). Opening it
+            // lands on the room screen, which reads the room's status and
+            // joins, shows it as scheduled, or shows it as over.
+            return DeepLinkTarget(.home, second.map { .liveAudioRoom(id: $0) } ?? .liveAudio)
+
+        case "live-video":
+            return DeepLinkTarget(.home, second.map { .liveVideoRoom(id: $0) } ?? .liveVideo)
+
         case "aid":
             // /aid is the list; /aid/campaign/{id} is one campaign.
             if second == "campaign", let id = third {

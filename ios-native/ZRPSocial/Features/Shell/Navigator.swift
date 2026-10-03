@@ -94,6 +94,13 @@ enum Route: Hashable {
     /// Clubhouse-style), paid-gated to pro/business/enterprise server-side.
     case liveAudio
     case liveAudioRoom(id: String)
+    /// ZRP Live Video - the camera-tile sibling of Live Audio, on the
+    /// same LiveKit SFU and the same paid gate (`liveVideo` in `PLANS`).
+    case liveVideo
+    case liveVideoRoom(id: String)
+    /// Gifts the signed-in person received while hosting a live room
+    /// (`GET /api/creator/gifts`).
+    case liveGiftsReceived
     case news
     case newsArticle(slug: String)
     case explore

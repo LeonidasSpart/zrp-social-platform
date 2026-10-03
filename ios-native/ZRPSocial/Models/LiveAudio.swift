@@ -51,7 +51,10 @@ struct LiveAudioRoomsPage: Decodable {
 }
 
 /// The raw Prisma row returned by create/detail/start -
-/// `src/lib/live-audio/room-service.ts`.
+/// `src/lib/live-audio/room-service.ts`. Live Video's room row
+/// (`LiveVideoRoom` in schema.prisma) carries exactly the fields this
+/// decodes, so `LiveVideoRepository` reuses this type rather than
+/// declaring a second identical one.
 struct LiveAudioRoom: Decodable, Equatable {
     let id: String
     let hostId: String
@@ -67,6 +70,15 @@ struct LiveAudioRoom: Decodable, Equatable {
     let endedAt: Date?
     let createdAt: Date
     let updatedAt: Date
+    /// Host-set chat slow mode in seconds (0 = off) - written by
+    /// `POST .../chat/slow-mode`, kept current afterwards by the
+    /// `live-chat:slow-mode-changed` socket event. Optional so a row
+    /// served before that column existed still decodes.
+    let slowModeSeconds: Int?
+    /// The room's running reaction total (`src/lib/live-reactions/
+    /// reaction-service.ts` - one aggregate counter, never a row per
+    /// tap), kept current afterwards by `live-reaction:tap`.
+    let reactionCount: Int?
 }
 
 struct CreateLiveAudioRoomResponse: Decodable {
@@ -81,10 +93,11 @@ struct CreateLiveAudioRoomRequest: Encodable {
     let visibility: String
     let communityId: String?
     /// ISO date string - a future value creates a SCHEDULED room
-    /// instead of one that's LIVE immediately. Not offered from this
-    /// app's own create form (see `LiveAudioListView`'s doc comment),
-    /// matching the web composer's own choice, but the field is still
-    /// declared since the route accepts it.
+    /// instead of one that's LIVE immediately. Offered by this app's
+    /// create form ("Schedule"), since a scheduled-live reminder
+    /// (`POST .../reminder`) only means something for a room that can be
+    /// scheduled in the first place. Live Video's create route takes the
+    /// identical body, so `LiveVideoRepository` reuses this type.
     let scheduledAt: String?
 }
 

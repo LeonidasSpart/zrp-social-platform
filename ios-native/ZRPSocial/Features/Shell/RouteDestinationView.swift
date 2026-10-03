@@ -113,6 +113,12 @@ struct RouteDestinationView: View {
             LiveAudioListView()
         case .liveAudioRoom(let id):
             LiveAudioRoomView(roomId: id)
+        case .liveVideo:
+            LiveVideoListView()
+        case .liveVideoRoom(let id):
+            LiveVideoRoomView(roomId: id)
+        case .liveGiftsReceived:
+            LiveGiftsReceivedView()
         case .news:
             NewsView()
         case .newsArticle(let slug):

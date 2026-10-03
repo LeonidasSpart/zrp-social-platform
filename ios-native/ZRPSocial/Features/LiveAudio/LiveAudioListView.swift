@@ -99,15 +99,8 @@ final class LiveAudioListViewModel: ObservableObject {
     /// free account simply sees the server's own rejection surface as
     /// `createError`, the same way every other plan-gated action in this
     /// app degrades.
-    func createRoom(
-        title: String,
-        description: String?,
-        category: String?,
-        visibility: String,
-        communityId: String?
-    ) async -> LiveAudioRoom? {
-        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedTitle.isEmpty else {
+    func createRoom(_ draft: LiveRoomDraft) async -> LiveAudioRoom? {
+        guard !draft.title.isEmpty else {
             createError = L10n.string(.liveAudioTitleRequired)
             return nil
         }
@@ -115,16 +108,11 @@ final class LiveAudioListViewModel: ObservableObject {
         defer { isCreating = false }
 
         do {
-            return try await repository.createRoom(CreateLiveAudioRoomRequest(
-                title: trimmedTitle,
-                description: description?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
-                category: category?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
-                visibility: visibility,
-                communityId: visibility == "COMMUNITY" ? communityId : nil,
-                scheduledAt: nil
-            ))
+            return try await repository.createRoom(draft.request)
         } catch let error as ApiError {
-            createError = error.userFacingMessage
+            createError = error.serverCode == "not_configured"
+                ? L10n.string(.liveAudioNotConfigured)
+                : error.userFacingMessage
             return nil
         } catch {
             createError = L10n.string(.liveAudioCreateError)
@@ -144,6 +132,7 @@ final class LiveAudioListViewModel: ObservableObject {
 struct LiveAudioListView: View {
 
     @EnvironmentObject private var navigator: Navigator
+    @EnvironmentObject private var session: SessionController
     @StateObject private var viewModel = LiveAudioListViewModel()
     @State private var showCreate = false
 
@@ -161,7 +150,14 @@ struct LiveAudioListView: View {
         .navigationTitle(Text(.liveAudioPageTitle))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if session.currentUser != nil {
+                    Button {
+                        navigator.push(.liveGiftsReceived)
+                    } label: {
+                        Label { Text(.iosLiveGiftReceivedTitle) } icon: { Image(systemName: "gift") }
+                    }
+                }
                 Button {
                     viewModel.loadMyCommunitiesIfNeeded()
                     showCreate = true
@@ -171,10 +167,23 @@ struct LiveAudioListView: View {
             }
         }
         .sheet(isPresented: $showCreate) {
-            CreateLiveAudioRoomView(viewModel: viewModel) { room in
-                showCreate = false
-                navigator.push(.liveAudioRoom(id: room.id))
-            }
+            LiveCreateRoomSheet(
+                myCommunities: viewModel.myCommunities,
+                isCreating: viewModel.isCreating,
+                createError: viewModel.createError,
+                onCancel: {
+                    viewModel.dismissCreateError()
+                    showCreate = false
+                },
+                onSubmit: { draft in
+                    Task {
+                        if let room = await viewModel.createRoom(draft) {
+                            showCreate = false
+                            navigator.push(.liveAudioRoom(id: room.id))
+                        }
+                    }
+                }
+            )
         }
         .task { await viewModel.loadIfNeeded() }
     }
@@ -272,134 +281,5 @@ private struct LiveAudioRoomRow: View {
         .padding(ZrpSpacing.md)
         .background(ZrpColor.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: ZrpRadius.md, style: .continuous))
-    }
-}
-
-/// The "Go Live" sheet - ported from `CreateLiveAudioModal.tsx`. Visibility
-/// defaults to PUBLIC; COMMUNITY requires picking one of the caller's own
-/// communities (server-enforced membership, not re-checked here).
-private struct CreateLiveAudioRoomView: View {
-
-    private enum Visibility: String, CaseIterable {
-        case pub = "PUBLIC"
-        case community = "COMMUNITY"
-        case priv = "PRIVATE"
-
-        var titleKey: L10nKey {
-            switch self {
-            case .pub: return .liveAudioVisibilityPublic
-            case .community: return .liveAudioVisibilityCommunity
-            case .priv: return .liveAudioVisibilityPrivate
-            }
-        }
-    }
-
-    @ObservedObject var viewModel: LiveAudioListViewModel
-    let onCreated: (LiveAudioRoom) -> Void
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var title = ""
-    @State private var description = ""
-    @State private var category = ""
-    @State private var visibility: Visibility = .pub
-    @State private var communityId: String?
-
-    private var canSubmit: Bool {
-        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, trimmed.count <= 200, !viewModel.isCreating else { return false }
-        if visibility == .community, communityId == nil { return false }
-        return true
-    }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                if let createError = viewModel.createError {
-                    Section {
-                        Text(verbatim: createError)
-                            .foregroundStyle(.red)
-                    }
-                }
-
-                Section {
-                    TextField(L10n.string(.liveAudioTitlePlaceholder), text: $title)
-                } header: {
-                    Text(.liveAudioTitleLabel)
-                }
-
-                Section {
-                    TextField(L10n.string(.liveAudioDescriptionLabel), text: $description, axis: .vertical)
-                        .lineLimit(2...5)
-                } header: {
-                    Text(.liveAudioDescriptionLabel)
-                }
-
-                Section {
-                    TextField(L10n.string(.liveAudioCategoryLabel), text: $category)
-                } header: {
-                    Text(.liveAudioCategoryLabel)
-                }
-
-                Section {
-                    Picker(L10n.string(.liveAudioVisibilityLabel), selection: $visibility) {
-                        ForEach(Visibility.allCases, id: \.self) { option in
-                            Text(option.titleKey).tag(option)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    if visibility == .community {
-                        if viewModel.myCommunities.isEmpty {
-                            Text(.liveAudioNoCommunitiesHint)
-                                .font(.footnote)
-                                .foregroundStyle(ZrpColor.onSurfaceMuted)
-                        } else {
-                            Picker(L10n.string(.liveAudioCommunityLabel), selection: $communityId) {
-                                Text(.liveAudioSelectCommunityPlaceholder).tag(String?.none)
-                                ForEach(viewModel.myCommunities) { community in
-                                    Text(verbatim: community.name).tag(String?.some(community.id))
-                                }
-                            }
-                        }
-                    }
-                } header: {
-                    Text(.liveAudioVisibilityLabel)
-                }
-            }
-            .navigationTitle(Text(.liveAudioCreateTitle))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        viewModel.dismissCreateError()
-                        dismiss()
-                    } label: {
-                        Text(.actionCancel)
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    if viewModel.isCreating {
-                        ProgressView()
-                    } else {
-                        Button {
-                            Task {
-                                if let room = await viewModel.createRoom(
-                                    title: title,
-                                    description: description,
-                                    category: category,
-                                    visibility: visibility.rawValue,
-                                    communityId: communityId
-                                ) {
-                                    onCreated(room)
-                                }
-                            }
-                        } label: {
-                            Text(.liveAudioCreateSubmit)
-                        }
-                        .disabled(!canSubmit)
-                    }
-                }
-            }
-        }
     }
 }

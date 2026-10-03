@@ -379,6 +379,67 @@ own view of "who is in this room").
 | Remove participant | `POST /live-audio/rooms/{id}/remove` | ✅ | ✅ | ✅ confirmation dialog | IMPLEMENTED |
 | Realtime room/participant state | 8 `live-audio:*` Socket.IO events (`participant-joined/left/removed`, `room-ended`, `role-changed`, `mute-changed`, `you-were-removed`, `speaker-request`) over the app's existing `ZrpSocket` | ✅ | ✅ | ✅ every event re-fetches `GET /live-audio/rooms/{id}` rather than trusting the payload as the full state, matching the web page's own approach | IMPLEMENTED |
 | Active-speaker highlight | LiveKit `RoomEvent.ActiveSpeakersChanged` | ✅ | ✅ | ✅ `RoomDelegate.room(_:didUpdateSpeakingParticipants:)`, a red ring on the speaking participant's avatar | IMPLEMENTED |
+| Socket channel join survives reconnects | `join-live-audio-room` (`server.js`) | ✅ | ✅ | ✅ fixed: the join was emitted once, right after `ZrpSocket.connect()` - but `emit` is a no-op until the handshake completes and a reconnect starts a socket in no room, so a room opened on a cold socket (or one that reconnected) silently received no `live-audio:*` events. Now (re)sent from `subscribeToConnect` on every connect, followed by a detail re-read | IMPLEMENTED |
+| Scheduled room: start / cancel (host) | `GET /api/live-audio/rooms/{id}` (status), `POST /api/live-audio/rooms/{id}/start`, `POST /api/live-audio/rooms/{id}/cancel` | ⬜ (web joins blindly and shows `room_not_live`) | ⬜ | ✅ the room is read before joining; a SCHEDULED room shows its scheduled state (start now / cancel for the host) instead of a failed join, ENDED/CANCELLED rooms go straight to their end state. Create sheet gained "Schedule" (future-only date picker) - the route always accepted `scheduledAt`, no client exposed it | IMPLEMENTED |
+| Ghost participant on failed media connect | `POST /api/live-audio/rooms/{id}/leave` | n/a | n/a | ✅ fixed: `/leave` was only sent when the LiveKit connect also succeeded, so a join whose media connection failed left an active participant row behind until the cleanup cron. Now sent whenever `/join` succeeded | IMPLEMENTED |
+
+### ZRP Live Video (LiveKit-backed camera rooms)
+
+The camera-tile sibling of Live Audio: `src/lib/live-video/room-service.ts`
+is a structural mirror of the Live Audio state machine (same roles, same
+lifecycle, same LiveKit token minting and plan gate - `liveVideo` in
+`PLANS`) with one real addition, an independently moderated camera
+(`isCameraOff`, `POST .../camera`, `live-video:camera-changed`). iOS had
+no Live Video code at all before this; Android still has none. Vertical
+full-bleed stage: the host's tile takes the whole stage when alone and the
+top ~60% otherwise, other on-camera participants share a strip beneath;
+a tile shows video only when LiveKit has a subscribed camera track for
+that identity AND the database's `isCameraOff` is false (avatar otherwise).
+Rendering uses the LiveKit SDK's own `SwiftUIVideoView`; no new
+dependency.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Room discovery list | `GET /api/live-video/rooms` (server-ranked, `{rooms,nextCursor}`, `viewerCount`, works signed-out for PUBLIC rooms) | ✅ `/live-video` | ⬜ | ✅ `LiveVideoListView`, cursor-paginated; menu entry next to Live Audio | IMPLEMENTED |
+| Create room (now or scheduled) | `POST /api/live-video/rooms` (paid-gated) | ✅ (no scheduling) | ⬜ | ✅ shared `LiveCreateRoomSheet` (same body as Live Audio), plus "Schedule" | IMPLEMENTED |
+| Room detail / scheduled state | `GET /api/live-video/rooms/{id}`, `POST /api/live-video/rooms/{id}/start`, `POST /api/live-video/rooms/{id}/cancel` | ✅ detail only | ⬜ | ✅ read before joining, same scheduled/ended handling as Live Audio | IMPLEMENTED |
+| Join + LiveKit connect | `POST /api/live-video/rooms/{id}/join` | ✅ | ⬜ | ✅ `LiveVideoRoomViewModel` | IMPLEMENTED |
+| Token refresh on role change | `POST /api/live-video/rooms/{id}/token` | ✅ | ⬜ | ✅ same `Room` reconnects with the new grants | IMPLEMENTED |
+| Leave / end | `POST /api/live-video/rooms/{id}/leave`, `POST /api/live-video/rooms/{id}/end` | ✅ | ⬜ | ✅ leave on every exit path; end is host-only behind a confirmation | IMPLEMENTED |
+| Mic + camera (self) | LiveKit `setMicrophone(enabled:)` / `setCamera(enabled:)`, `CameraCapturer.switchCameraPosition()` | ✅ (no camera flip) | ⬜ | ✅ both start off for everyone, host included; front/back switch while the camera is on; the self-camera toggle is disabled while a moderator has forced it off | IMPLEMENTED |
+| Join-on-camera requests | `POST /api/live-video/rooms/{id}/speak/request`, `POST /api/live-video/rooms/{id}/speak/approve`, `POST /api/live-video/rooms/{id}/speak/reject` | ✅ | ⬜ | ✅ request button for viewers; requests banner + People sheet for host/moderator | IMPLEMENTED |
+| Promote / demote | `POST /api/live-video/rooms/{id}/promote`, `POST /api/live-video/rooms/{id}/demote` | ✅ | ⬜ | ✅ People sheet, host/moderator only, never against yourself | IMPLEMENTED |
+| Mute / force camera off | `POST /api/live-video/rooms/{id}/mute`, `POST /api/live-video/rooms/{id}/camera` | ✅ | ⬜ | ✅ offered only for on-camera roles (the routes reject anyone else) | IMPLEMENTED |
+| Remove participant | `POST /api/live-video/rooms/{id}/remove` | ✅ | ⬜ | ✅ confirmation; never offered for the host (the route rejects it) | IMPLEMENTED |
+| Realtime room state | 9 `live-video:*` events incl. `camera-changed`, channel joined via `join-live-video-room` on every socket (re)connect | ✅ | ⬜ | ✅ every event re-reads the detail; camera tracks rebuilt from LiveKit on every subscribe/unsubscribe/publish/mute event | IMPLEMENTED |
+
+### ZRP Live engagement (both room kinds)
+
+Gifts, chat, reactions, scheduled-live reminders and replay - every route
+exists under both `live-audio/rooms/{id}/...` and
+`live-video/rooms/{id}/...` with the same body, so one
+`LiveEngagementRepository`/`LiveEngagementViewModel` serves both rooms,
+keyed on `LiveRoomKind`. No client (web or Android) had UI for any of
+these when iOS built it. Every typed error `code` maps to its own
+translated sentence (`LiveErrorText`) rather than the server's English
+`error` text.
+
+| Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
+| --- | --- | --- | --- | --- | --- |
+| Gift catalog | `GET /api/live/gifts` | ⬜ | ⬜ | ✅ gift panel grid. The server sends no display name and gift keys are admin-defined slugs, so the name is derived from the key (`fire_heart` → "Fire heart"); there is no translation path for an arbitrary admin-created key | IMPLEMENTED |
+| Coin balance | `GET /api/wallet/coins/balance` | ⬜ | ⬜ | ✅ re-read every time the panel opens and after every send - never decremented locally | IMPLEMENTED |
+| Buy coins | `POST /api/wallet/coins/purchase` | ⬜ | ⬜ | Not built: real-money top-up, refused for native apps server-side (`rejectNativePayment`). When the balance cannot cover a gift the panel says adding coins is unavailable in the app (`native.paymentUnavailable.title`), with no link out | OUT OF SCOPE (store policy) |
+| Send a gift | `POST /api/live-audio/rooms/{id}/gifts`, `POST /api/live-video/rooms/{id}/gifts` | ⬜ | ⬜ | ✅ quantity 1-100, a confirmation that states the exact cost, an idempotency key generated per confirmed send and reused only when a retry follows an unknown outcome (offline/transport/5xx). Hidden for the host (`cannot_gift_self`) | IMPLEMENTED |
+| Gift animation | `live-gift:sent` (broadcast after commit) | ⬜ | ⬜ | ✅ every viewer, sender included, animates from the broadcast only; at most two banners on screen, repeat gifts fold into a combo counter, bounded queue, hit-testing disabled, Reduce Motion respected, GIF `animationUrl` played via `AnimatedImage` | IMPLEMENTED |
+| Gifts received (host) | `GET /api/creator/gifts` | ⬜ | ⬜ | ✅ "Gifts received" from both live lists: sender, gift, quantity, coin value. The USDC split the route also returns is not shown (the same 3.1.1 earnings exclusion as Creator Studio) | IMPLEMENTED |
+| Live chat | `GET /api/live-audio/rooms/{id}/chat`, `POST /api/live-audio/rooms/{id}/chat`, `GET /api/live-video/rooms/{id}/chat`, `POST /api/live-video/rooms/{id}/chat` | ⬜ | ⬜ | ✅ overlay over the room (translucent over video, a panel over the audio grid), cursor "Load more", `live-chat:message` merged by id, 500-unit limit counted in UTF-16 like the server, slow-mode countdown from `retryAfter`, muted state | IMPLEMENTED |
+| Delete a chat message | `DELETE /api/live-audio/rooms/{id}/chat/{messageId}`, `DELETE /api/live-video/rooms/{id}/chat/{messageId}` | ⬜ | ⬜ | ✅ offered only to the author or a host/moderator | IMPLEMENTED |
+| Chat mute / slow mode | `POST /api/live-audio/rooms/{id}/chat/mute`, `POST /api/live-video/rooms/{id}/chat/mute`, `POST /api/live-audio/rooms/{id}/chat/slow-mode`, `POST /api/live-video/rooms/{id}/chat/slow-mode` | ⬜ | ⬜ | ✅ host/moderator only. The detail route does not report `isChatMuted`, so a mute that predates the screen is unknown until it changes - both "Mute in chat" and "Allow in chat" are offered in that case | IMPLEMENTED |
+| Reactions | `POST /api/live-audio/rooms/{id}/reactions`, `POST /api/live-video/rooms/{id}/reactions` | ⬜ | ⬜ | ✅ taps batched into one `{count}` request (max 20, the server's cap), own taps animate instantly, `live-reaction:tap` bursts proportional to `count` but capped at six particles plus "+N"; `rate_limited` silently pauses counting until `retryAfter` | IMPLEMENTED |
+| Scheduled-live reminder | `POST /api/live-audio/rooms/{id}/reminder`, `DELETE /api/live-audio/rooms/{id}/reminder`, `POST /api/live-video/rooms/{id}/reminder`, `DELETE /api/live-video/rooms/{id}/reminder` | ⬜ | ⬜ | ✅ "Remind me" on the scheduled state, hidden for the host. No route reports an existing reminder, so the toggle starts off each visit (setting it again is idempotent). The push the server sends on start carries `/live-audio/{id}` / `/live-video/{id}`, which `DeepLink` now opens in-app | IMPLEMENTED |
+| Replay list | `GET /api/live-audio/rooms/{id}/replay`, `GET /api/live-video/rooms/{id}/replay` | ⬜ | ⬜ | ✅ on the ended-room screen, played with `AVPlayer` when the URL is http(s). Empty today, correctly - nothing has ever been recorded | IMPLEMENTED |
+| Start / stop recording | `POST /api/live-audio/rooms/{id}/replay/start`, `POST /api/live-audio/rooms/{id}/replay/stop`, `POST /api/live-video/rooms/{id}/replay/start`, `POST /api/live-video/rooms/{id}/replay/stop` | ⬜ | ⬜ | ✅ host/moderator menu. This deployment answers `503 replay_not_configured` (no Egress storage bucket); the control stays visible and the room shows "Recording isn't available yet" instead of faking a recording. There is no `recording-stopped` event, so the "Recording" chip (driven by `live-replay:recording-started`) is shown to hosts/moderators only - showing it to listeners would leave it stuck on after a stop nobody else hears about. A listener-visible recording indicator needs that event added server-side | IMPLEMENTED (client); server returns 503 until Egress storage is configured |
+| Delete a replay | `DELETE /api/live-audio/rooms/{id}/replay/{recordingId}`, `DELETE /api/live-video/rooms/{id}/replay/{recordingId}` | ⬜ | ⬜ | wired (`LiveReplayList(canDelete:)`), but no screen currently shows a replay list to an active host/moderator - the server only allows deletion by an active authority participant, and recordings exist only after a room ends | PARTIAL |
 
 ### Comments & replies
 

@@ -32,7 +32,14 @@ enum ApiError: Error, Equatable {
     case notFound(message: String?)
 
     /// HTTP 429, with the server's own message where it gave one.
-    case rateLimited(message: String?)
+    ///
+    /// `code` and `retryAfter` are carried because two different 429s
+    /// can need two different responses from the same screen: Live
+    /// chat's `slow_mode` (a host-set cooldown, shown as a countdown) and
+    /// its anti-spam `rate_limited` are both 429s, distinguishable only
+    /// by `code`, and both say how long to wait in `retryAfter` (seconds).
+    /// Defaulted so every other construction site stays unchanged.
+    case rateLimited(message: String?, code: String? = nil, retryAfter: Double? = nil)
 
     /// Any other non-2xx response.
     case server(status: Int, message: String?, code: String?)
@@ -66,7 +73,7 @@ extension ApiError {
         switch self {
         case .forbidden(let message, _),
              .notFound(let message),
-             .rateLimited(let message),
+             .rateLimited(let message, _, _),
              .server(_, let message, _):
             return message
         case .offline, .cancelled, .unauthorized, .decoding, .transport:
@@ -78,11 +85,18 @@ extension ApiError {
     /// a specific server condition rather than display a message.
     var serverCode: String? {
         switch self {
-        case .forbidden(_, let code), .server(_, _, let code):
+        case .forbidden(_, let code), .server(_, _, let code), .rateLimited(_, let code, _):
             return code
         default:
             return nil
         }
+    }
+
+    /// Seconds the server asked the caller to wait before retrying, when
+    /// a 429 said so. `nil` for every other error.
+    var retryAfterSeconds: Double? {
+        if case .rateLimited(_, _, let retryAfter) = self { return retryAfter }
+        return nil
     }
 
     /// Copy to put in front of the user. Falls back to the server's own
@@ -119,4 +133,7 @@ extension ApiError {
 struct ApiErrorBody: Decodable {
     let error: String?
     let code: String?
+    /// Seconds, on a 429 from a route that says how long to wait
+    /// (`liveAudioErrorResponseBody` on the server).
+    let retryAfter: Double?
 }
