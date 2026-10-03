@@ -553,9 +553,13 @@ pub mod zrp_launchpad {
         // install script to reproduce with a local validator. Remove once
         // root-caused.
         msg!(
-            "graduate: pre-transfer bonding_curve={} migration_authority={} sol_amount={}",
+            "graduate: pre-transfer bonding_curve={} (writable={}) migration_authority={} (writable={}) caller={} (writable={}) sol_amount={}",
             ctx.accounts.bonding_curve.to_account_info().lamports(),
+            ctx.accounts.bonding_curve.to_account_info().is_writable,
             ctx.accounts.migration_authority.to_account_info().lamports(),
+            ctx.accounts.migration_authority.to_account_info().is_writable,
+            ctx.accounts.caller.to_account_info().lamports(),
+            ctx.accounts.caller.to_account_info().is_writable,
             sol_amount
         );
         if sol_amount > 0 {
