@@ -93,6 +93,87 @@ function pathMatches(path: string, list: string[]) {
   );
 }
 
+// ─── SHORT PROFILE URLS (/username) ─────────────────────────────────
+//
+// /username and /@username are a single-segment alias for
+// /profile/username (see handleShareProfile in
+// profile/[username]/page.tsx, which is what actually generates these
+// links, and the catch-all route at src/app/[username]/page.tsx that
+// serves them). Every other single-segment path under src/app is a
+// real, literal top-level route - Next.js's router always prefers that
+// literal match over the [username] catch-all, but middleware runs
+// before that routing decision, so it has no way to tell "/login" and
+// "/Debbie" apart without this list. Keep it in sync with the actual
+// top-level directories under src/app (excluding [username] itself,
+// the (auth) route group, which contributes no URL segment, and
+// __tests__, which isn't a route).
+const RESERVED_TOP_LEVEL_SEGMENTS = new Set([
+  "about",
+  "admin",
+  "ads",
+  "ai",
+  "aid",
+  "ambassadors",
+  "api",
+  "bookmarks",
+  "careers",
+  "charity",
+  "child-safety-standards",
+  "communities",
+  "community-code",
+  "contact",
+  "creator",
+  "discover",
+  "explore",
+  "faq",
+  "forgot-password",
+  "guidelines",
+  "hashtag",
+  "help",
+  "investors",
+  "journalist",
+  "launchpad",
+  "lists",
+  "live-audio",
+  "login",
+  "marketplace",
+  "messages",
+  "music",
+  "news",
+  "notifications",
+  "onboarding",
+  "opportunity",
+  "play",
+  "post",
+  "press",
+  "pricing",
+  "privacy",
+  "profile",
+  "reset-password",
+  "search",
+  "settings",
+  "shorts",
+  "signup",
+  "support",
+  "terms",
+  "transparency",
+  "trust",
+  "verify-email",
+]);
+
+// Matches a plausible username/custom-URL segment (see the character
+// sets enforced at registration in api/auth/register/route.ts and for
+// a custom URL in CustomUrlSettings.tsx) - this is only a cheap filter
+// against garbage/bot-scan paths, not the source of truth for what's a
+// real user; the page itself resolves that from the database.
+const SHORT_PROFILE_URL_RE = /^\/@?[A-Za-z0-9_-]{1,32}$/;
+
+export function isShortProfileUrlPath(path: string): boolean {
+  if (!SHORT_PROFILE_URL_RE.test(path)) return false;
+  const segment = path.slice(1).replace(/^@/, "").toLowerCase();
+  return segment.length > 0 && !RESERVED_TOP_LEVEL_SEGMENTS.has(segment);
+}
+
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
@@ -267,6 +348,15 @@ export async function middleware(req: NextRequest) {
 
   if (!token) {
     if (pathMatches(path, PUBLIC_WHEN_LOGGED_OUT_PATHS)) {
+      return NextResponse.next();
+    }
+    // The short /username alias (see isShortProfileUrlPath above) was
+    // missed when /profile joined the list above, even though it's the
+    // literal URL ZRP's own Share button generates - so every profile
+    // link actually shared from the app still unfurled as a generic
+    // "Log In | ZRP Social" card with no image, the same bug for the
+    // one path format that matters most.
+    if (isShortProfileUrlPath(path)) {
       return NextResponse.next();
     }
     return NextResponse.redirect(
