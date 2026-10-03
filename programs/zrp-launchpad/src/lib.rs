@@ -543,67 +543,21 @@ pub mod zrp_launchpad {
         let mint_key = ctx.accounts.mint.key();
         let bump = curve.bump;
 
-        // `migration_authority` is an arbitrary protocol-configured pubkey that
-        // may never have held a balance before (a fresh address, not yet
-        // "materialized" on chain). Crediting such an account directly via
-        // `transfer_lamports_from_pda`'s raw lamport manipulation - fine for
-        // `sell()`'s payouts, whose recipients (`seller`, `fee_recipient`)
-        // are always pre-existing, already-funded accounts - trips the
-        // runtime's "sum of account balances before and after instruction do
-        // not match" check here, because `bonding_curve` (the source) is a
-        // program-owned PDA, not the System Program, and only the System
-        // Program's own transfer path correctly brings a zero-lamport
-        // account into existence. Route the SOL leg through `caller`
-        // instead: it is always an existing, funded `Signer`, so crediting
-        // it from the PDA is the same proven pattern `sell()` uses, and
-        // forwarding from `caller` to `migration_authority` goes through a
-        // real System Program CPI. Both legs happen atomically within this
-        // one instruction, so `caller` never actually retains the funds.
-        // TEMPORARY diagnostic logging (not a protocol change): the first
-        // fix attempt (routing the SOL leg through `caller` via a real
-        // System Program CPI instead of raw-crediting `migration_authority`
-        // directly) did NOT resolve the "sum of account balances" error -
-        // it still fails at the exact same point, which means the SOL leg
-        // was never the actual cause. This instruments every lamport-moving
-        // step (including the token leg) to find the real one. Remove once
-        // root-caused.
-        msg!(
-            "graduate: start bonding_curve={} caller={} migration_authority={} curve_token_vault={} migration_token_account={} sol_amount={} token_amount={}",
-            ctx.accounts.bonding_curve.to_account_info().lamports(),
-            ctx.accounts.caller.to_account_info().lamports(),
-            ctx.accounts.migration_authority.to_account_info().lamports(),
-            ctx.accounts.curve_token_vault.to_account_info().lamports(),
-            ctx.accounts.migration_token_account.to_account_info().lamports(),
-            sol_amount,
-            token_amount
-        );
-        if sol_amount > 0 {
-            transfer_lamports_from_pda(
-                &ctx.accounts.bonding_curve.to_account_info(),
-                &ctx.accounts.caller.to_account_info(),
-                sol_amount,
-            )?;
-            msg!(
-                "graduate: after raw credit to caller bonding_curve={} caller={}",
-                ctx.accounts.bonding_curve.to_account_info().lamports(),
-                ctx.accounts.caller.to_account_info().lamports()
-            );
-            system_program::transfer(
-                CpiContext::new(
-                    ctx.accounts.system_program.to_account_info(),
-                    system_program::Transfer {
-                        from: ctx.accounts.caller.to_account_info(),
-                        to: ctx.accounts.migration_authority.to_account_info(),
-                    },
-                ),
-                sol_amount,
-            )?;
-            msg!(
-                "graduate: after system transfer to migration_authority caller={} migration_authority={}",
-                ctx.accounts.caller.to_account_info().lamports(),
-                ctx.accounts.migration_authority.to_account_info().lamports()
-            );
-        }
+        // The token transfer (a CPI) must run BEFORE the raw SOL credit
+        // below, not after. Diagnostic logging across two prior attempts
+        // showed the "sum of account balances before and after instruction
+        // do not match" runtime check firing immediately after a raw
+        // `AccountInfo` lamport manipulation (via `transfer_lamports_from_pda`
+        // or an equivalent direct credit) is followed by ANY subsequent CPI
+        // in the same instruction - first with a direct credit to
+        // `migration_authority` followed by the token CPI, then with a raw
+        // credit to `caller` followed by a `system_program::transfer` CPI;
+        // both failed at the exact same point regardless of which accounts
+        // the following CPI touched. `sell()`'s proven-working payouts never
+        // hit this because its CPI (the incoming token transfer) always runs
+        // *before* its raw lamport credits, with no further CPI after them.
+        // Matching that order here - CPI first, raw credit last - avoids the
+        // problem entirely.
         if token_amount > 0 {
             let curve_signer_seeds: &[&[u8]] =
                 &[BondingCurve::SEED_PREFIX, mint_key.as_ref(), &[bump]];
@@ -619,20 +573,14 @@ pub mod zrp_launchpad {
                 ),
                 token_amount,
             )?;
-            msg!(
-                "graduate: after token transfer curve_token_vault={} migration_token_account={}",
-                ctx.accounts.curve_token_vault.to_account_info().lamports(),
-                ctx.accounts.migration_token_account.to_account_info().lamports()
-            );
         }
-        msg!(
-            "graduate: end bonding_curve={} caller={} migration_authority={} curve_token_vault={} migration_token_account={}",
-            ctx.accounts.bonding_curve.to_account_info().lamports(),
-            ctx.accounts.caller.to_account_info().lamports(),
-            ctx.accounts.migration_authority.to_account_info().lamports(),
-            ctx.accounts.curve_token_vault.to_account_info().lamports(),
-            ctx.accounts.migration_token_account.to_account_info().lamports()
-        );
+        if sol_amount > 0 {
+            transfer_lamports_from_pda(
+                &ctx.accounts.bonding_curve.to_account_info(),
+                &ctx.accounts.migration_authority.to_account_info(),
+                sol_amount,
+            )?;
+        }
 
         let curve = &mut ctx.accounts.bonding_curve;
         curve.real_sol_reserves = 0;
