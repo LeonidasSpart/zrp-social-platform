@@ -75,6 +75,7 @@ interface VolumeSnapshot {
 interface LaunchedTokenDetail {
   id: string;
   mintAddress: string;
+  venue: "DIRECT_MINT" | "PUMP_CURVE" | "ZRP_LAUNCH";
   name: string;
   symbol: string;
   description: string | null;
@@ -898,6 +899,18 @@ export default function TokenDetailPage() {
         <div>
           <h1 className="text-2xl font-extrabold font-orbitron text-gray-900 dark:text-white">{token.name}</h1>
           <p className="text-gray-500 dark:text-gray-400">${token.symbol}</p>
+          {/* Every token's real origin, never a guess - a ZRP_LAUNCH mint
+              was created through ZRP's own on-chain program
+              (programs/zrp-launchpad/), never Pump.fun's; a PUMP_CURVE mint
+              predates this architecture correction and is labeled
+              accordingly, never silently relabeled as ZRP's own. */}
+          <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+            {token.venue === "ZRP_LAUNCH"
+              ? t("launchpad.tokenDetail.venueZrpLaunch")
+              : token.venue === "PUMP_CURVE"
+                ? t("launchpad.tokenDetail.venuePumpLegacy")
+                : t("launchpad.tokenDetail.venueDirectMint")}
+          </p>
         </div>
       </div>
 
