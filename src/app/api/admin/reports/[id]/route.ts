@@ -56,6 +56,8 @@ export async function PUT(
           opportunity: { select: { posterId: true } },
           campaign: { select: { organizerId: true } },
           liveAudioRoom: { select: { hostId: true } },
+          liveVideoRoom: { select: { hostId: true } },
+          liveChatMessage: { select: { authorId: true } },
           reportedUserId: true,
         },
       });
@@ -67,6 +69,8 @@ export async function PUT(
         current?.opportunity?.posterId ??
         current?.campaign?.organizerId ??
         current?.liveAudioRoom?.hostId ??
+        current?.liveVideoRoom?.hostId ??
+        current?.liveChatMessage?.authorId ??
         current?.reportedUserId ??
         null;
     } else {

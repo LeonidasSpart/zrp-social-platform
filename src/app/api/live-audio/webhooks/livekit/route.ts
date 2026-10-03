@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { EgressStatus } from "@livekit/protocol";
 import { prisma } from "@/lib/db";
 import { verifyLiveKitWebhook } from "@/lib/live-audio/livekit";
 import { emitToLiveAudioRoom, emitToLiveVideoRoom } from "@/lib/socket-emit";
+import { handleEgressEnded } from "@/lib/live-replay/replay-service";
 
 export const dynamic = "force-dynamic";
 
@@ -96,12 +98,25 @@ export async function POST(req: NextRequest) {
         }
         break;
       }
+      case "egress_ended": {
+        const info = event.egressInfo;
+        if (!info) break;
+        // LiveKit's own Egress status names, passed straight through -
+        // see LiveRecording.status's schema comment on why this is a
+        // plain string, not a re-declared enum.
+        const status = EgressStatus[info.status] ?? "EGRESS_FAILED";
+        const file = info.fileResults?.[0];
+        const mediaUrl = status === "EGRESS_COMPLETE" && file?.location ? file.location : null;
+        const durationSeconds = file?.duration ? Number(file.duration / BigInt(1_000_000_000)) : null;
+        await handleEgressEnded({ egressId: info.egressId, status, mediaUrl, durationSeconds });
+        break;
+      }
       default:
-        // room_started/participant_joined/track_*/egress_*/ingress_* -
-        // no action needed; our own REST routes are already the source
-        // of truth for those transitions (they call LiveKit, not the
-        // other way around, for the events this app currently cares
-        // about).
+        // room_started/participant_joined/track_*/egress_started/
+        // egress_updated/ingress_* - no action needed; our own REST
+        // routes are already the source of truth for those transitions
+        // (they call LiveKit, not the other way around), and only the
+        // terminal egress_ended event changes a LiveRecording's status.
         break;
     }
   } catch (err) {

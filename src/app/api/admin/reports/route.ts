@@ -74,6 +74,28 @@ export async function GET(req: NextRequest) {
           reportedUser: {
             select: { id: true, username: true, name: true },
           },
+          liveAudioRoom: {
+            select: {
+              id: true,
+              title: true,
+              host: { select: { id: true, username: true, name: true } },
+            },
+          },
+          liveVideoRoom: {
+            select: {
+              id: true,
+              title: true,
+              host: { select: { id: true, username: true, name: true } },
+            },
+          },
+          liveChatMessage: {
+            select: {
+              id: true,
+              body: true,
+              deletedAt: true,
+              author: { select: { id: true, username: true, name: true } },
+            },
+          },
         },
       }),
       prisma.report.count({ where }),
