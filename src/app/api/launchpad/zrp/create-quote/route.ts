@@ -4,19 +4,19 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { getConnection } from "@/lib/solana";
-import { getInitialBuyQuote } from "@/lib/launchpad/pump-curve-service";
+import { getZrpInitialBuyQuote } from "@/lib/launchpad/zrp-launch-service";
 
 /*
  * Real initial-buy quote for a token that does not exist yet - the
- * "optional initial buy" step of creating a token on pump's bonding
- * curve. Uses the exact same math pump-curve-service.ts already uses for
- * an existing curve's buy quote, just against the SDK's own
- * newBondingCurve(global) initial-state object instead of a live curve
- * account, so the numbers shown here match what create_v2_and_buy will
- * actually execute on-chain.
+ * "optional initial buy" step of creating a token on ZRP's own bonding
+ * curve. Uses the exact same math zrp-launch-service.ts already uses for
+ * an existing curve's buy quote, just against GlobalConfig's own
+ * configured starting reserves instead of a live curve account, so the
+ * numbers shown here match what create_and_buy will actually execute
+ * on-chain.
  */
 export async function GET(req: NextRequest) {
-  const limitCheck = await rateLimit(req, { limit: 60, window: 60, type: "launchpad-pump-create-quote" });
+  const limitCheck = await rateLimit(req, { limit: 60, window: 60, type: "launchpad-zrp-create-quote" });
   if (!limitCheck.success) return limitCheck.response;
 
   const amountParam = req.nextUrl.searchParams.get("solLamports");
@@ -35,6 +35,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "solLamports must be a positive integer string." }, { status: 400 });
   }
 
-  const quote = await getInitialBuyQuote(getConnection(), solLamports, slippageBps);
+  const quote = await getZrpInitialBuyQuote(getConnection(), solLamports, slippageBps);
   return NextResponse.json({ quote });
 }

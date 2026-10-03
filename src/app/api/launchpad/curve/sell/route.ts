@@ -10,10 +10,12 @@ import { rateLimitByIpAndUser } from "@/lib/rate-limit";
 import { jsonWithDecimalStrings } from "@/lib/launchpad/json";
 import { getConnection } from "@/lib/solana";
 import { verifyCurveTradeTransaction, CurveVerificationError } from "@/lib/launchpad/pump-curve-service";
+import { verifyZrpTradeTransaction, ZrpVerificationError } from "@/lib/launchpad/zrp-launch-service";
 
 /*
- * Records a real, independently-verified pump bonding-curve SELL. See
- * curve/buy/route.ts's comment - identical shape, opposite expected side.
+ * Records a real, independently-verified bonding-curve SELL - either
+ * venue. See curve/buy/route.ts's comment - identical shape, opposite
+ * expected side.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -41,15 +43,19 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.tokenTrade.findUnique({ where: { txSignature: cleanTxId } });
     if (existing) return jsonWithDecimalStrings({ trade: existing }, { status: 200 });
 
+    const launchedToken = await prisma.launchedToken.findUnique({ where: { mintAddress }, select: { venue: true } });
+    if (!launchedToken) {
+      return NextResponse.json({ error: "This mint has not been recorded as a launched token." }, { status: 404 });
+    }
+
     let verified;
     try {
-      verified = await verifyCurveTradeTransaction(getConnection(), cleanTxId, {
-        mintAddress,
-        walletAddress,
-        expectedSide: "SELL",
-      });
+      verified =
+        launchedToken.venue === "ZRP_LAUNCH"
+          ? await verifyZrpTradeTransaction(getConnection(), cleanTxId, { mintAddress, walletAddress, expectedSide: "SELL" })
+          : await verifyCurveTradeTransaction(getConnection(), cleanTxId, { mintAddress, walletAddress, expectedSide: "SELL" });
     } catch (err: unknown) {
-      if (err instanceof CurveVerificationError) {
+      if (err instanceof CurveVerificationError || err instanceof ZrpVerificationError) {
         const status = err.status === "NOT_FOUND_YET" ? 202 : 400;
         return NextResponse.json({ error: err.message, status: err.status }, { status });
       }

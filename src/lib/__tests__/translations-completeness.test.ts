@@ -117,6 +117,18 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
   // - none of which translate - the exact same pattern as the JPEG/MP4
   // format lists above.
   "Web, PWA, Android, iOS",
+  // ZRP-native Launchpad (zrpCreate.* fee-disclosure copy and the
+  // tokenDetail.* venue-identity badge): deliberately shipped as an
+  // accurate English fallback rather than a mechanically-translated string
+  // that could misstate ZRP's real on-chain fee model or a token's real
+  // origin - "accurate in English" over "wrong in the user's own
+  // language", same policy already applied elsewhere in this file. Revisit
+  // once these get real per-language review.
+  "Launch a token on ZRP's own bonding curve - tradable immediately, no liquidity needed upfront. ZRP charges a creation fee and a small protocol fee on every buy/sell, enforced entirely on-chain.",
+  "ZRP's creation fee and trading fees are enforced on-chain and shown above before you confirm - never a surprise after the fact.",
+  "Launched on ZRP",
+  "Launched on Pump.fun (legacy)",
+  "ZRP direct mint",
 ]);
 
 /**

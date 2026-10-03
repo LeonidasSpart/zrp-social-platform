@@ -22,6 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ mint
       select: {
         id: true,
         mintAddress: true,
+        venue: true,
         name: true,
         symbol: true,
         description: true,

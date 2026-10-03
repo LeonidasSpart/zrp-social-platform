@@ -12,7 +12,7 @@ import { jsonWithDecimalStrings as jsonWithDecimals } from "@/lib/launchpad/json
 import { validateTrustedUploadUrls } from "@/lib/media-url";
 import { normalizeProfileWebsite } from "@/lib/profile-website";
 import { rejectNativePayment } from "@/lib/native-payment-policy.server";
-import { verifyCreateTransaction, CurveVerificationError } from "@/lib/launchpad/pump-curve-service";
+import { verifyZrpCreateTransaction, ZrpVerificationError, getZrpGlobalConfig } from "@/lib/launchpad/zrp-launch-service";
 import { scanTokenOnChain } from "@/lib/launchpad/mint-verification";
 import { getConnection } from "@/lib/solana";
 import { PublicKey } from "@solana/web3.js";
@@ -31,18 +31,24 @@ function isValidPublicKey(value: string): boolean {
 }
 
 /*
- * POST: verify + record an already-created pump bonding-curve token.
- * The mint itself happens entirely in the browser
- * (src/lib/launchpad/client-pump-create.ts), against pump.fun's own
- * mainnet program - ZRP never signs or custodies anything here, and
- * charges no separate creation fee for this path (pump.fun's own protocol
- * fees apply on curve trades instead). This route independently
- * re-derives the token's real on-chain name/symbol/creator from the
- * transaction's own decoded CreateEvent (never trusting the client's
- * submitted name/symbol beyond initial cosmetic validation) and re-scans
- * the resulting mint account for its real decimals/supply, before
- * recording anything - "never record a token as created before chain
- * verification."
+ * POST: verify + record an already-created ZRP-native bonding-curve
+ * token. The mint itself happens entirely in the browser
+ * (src/lib/launchpad/client-zrp-launch.ts), against ZRP's own Launchpad
+ * program (programs/zrp-launchpad/) - never Pump.fun's. ZRP never signs
+ * or custodies anything here. This route independently re-derives the
+ * token's real on-chain name/symbol/creator/supply from the transaction's
+ * own decoded TokenCreatedEvent (never trusting the client's submitted
+ * name/symbol beyond initial cosmetic validation) and re-scans the
+ * resulting mint account for its real decimals/supply, before recording
+ * anything - "never record a token as created before chain verification."
+ *
+ * ZRP charges its own creation fee on-chain, in the same create_and_buy
+ * transaction (verified here via the TokenCreatedEvent's own reserves,
+ * not a separate payment-verification step), so there is no
+ * feeTransactionId for these rows - only feeAmount, in SOL. This replaces
+ * the old pump.fun-backed creation path (venue PUMP_CURVE), which has
+ * been removed from ZRP's own creation UI entirely - see
+ * docs/zrp-launchpad-deployment.md.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -52,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
     const userId = token.id as string;
 
-    const limit = await rateLimitByIpAndUser(req, userId, { limit: 5, window: 300, type: "launchpad-pump-create" });
+    const limit = await rateLimitByIpAndUser(req, userId, { limit: 5, window: 300, type: "launchpad-zrp-create" });
     if (!limit.success) return limit.response;
 
     const nativeBlock = rejectNativePayment(req);
@@ -63,8 +69,8 @@ export async function POST(req: NextRequest) {
 
     // ─── Off-chain display field validation (cosmetic only for
     // description/image/socials - name/symbol are re-derived from the
-    // real on-chain CreateEvent below and never trusted from the client
-    // for the stored record) ──────────────────────────────────────────
+    // real on-chain TokenCreatedEvent below and never trusted from the
+    // client for the stored record) ──────────────────────────────────
     if (!isNonEmptyString(name) || name.trim().length > 32) {
       return NextResponse.json({ error: "Name is required (max 32 characters)." }, { status: 400 });
     }
@@ -131,39 +137,53 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Independently verify the real on-chain creation - never trust
-    // the client's claimed name/symbol/creator ────────────────────────
+    // the client's claimed name/symbol/creator/program ────────────────
     let verifiedCreate;
     try {
-      verifiedCreate = await verifyCreateTransaction(getConnection(), transactionId, {
+      verifiedCreate = await verifyZrpCreateTransaction(getConnection(), transactionId, {
         mintAddress: cleanMintAddress,
         walletAddress: cleanWalletAddress,
       });
     } catch (err: unknown) {
-      if (err instanceof CurveVerificationError) {
+      if (err instanceof ZrpVerificationError) {
         const status = err.status === "NOT_FOUND_YET" ? 202 : 400;
         return NextResponse.json({ error: err.message, status: err.status }, { status });
       }
-      console.error("Pump create verification error:", err);
+      console.error("ZRP create verification error:", err);
       return NextResponse.json({ error: "Could not verify the creation transaction. Try again in a moment." }, { status: 502 });
     }
 
-    // ─── Re-scan the real mint account for decimals/supply - pump sets
-    // these on-chain (Token-2022, fixed total supply); never guessed or
-    // taken from the client ────────────────────────────────────────────
+    // ─── Re-scan the real mint account for decimals/supply - ZRP's
+    // program fixes these on-chain (mint/freeze authority revoked
+    // immediately after minting); never guessed or taken from the client
+    // ────────────────────────────────────────────────────────────────
     let onChain;
     try {
       onChain = await scanTokenOnChain(cleanMintAddress);
     } catch (err: unknown) {
-      console.error("Pump create mint scan error:", err);
+      console.error("ZRP create mint scan error:", err);
       return NextResponse.json({ error: "Could not read the mint from the chain. Try again in a moment." }, { status: 502 });
+    }
+
+    // The real on-chain creation fee, read from GlobalConfig (not the
+    // client) and formatted in SOL to match the Decimal(18,6) column -
+    // every ZRP_LAUNCH row charges the same fee at a given time, so this
+    // is a fact about the protocol's current config, not a client claim.
+    let feeAmountSol: string | null = null;
+    try {
+      const config = await getZrpGlobalConfig(getConnection());
+      feeAmountSol = (Number(config.creationFeeLamports) / 1_000_000_000).toFixed(6);
+    } catch (err) {
+      console.error("ZRP create: could not read GlobalConfig for fee recording:", err);
     }
 
     let launchedToken;
     try {
       launchedToken = await prisma.launchedToken.create({
         data: {
-          venue: "PUMP_CURVE",
+          venue: "ZRP_LAUNCH",
           mintAddress: cleanMintAddress,
+          bondingCurveAddress: verifiedCreate.bondingCurveAddress,
           name: verifiedCreate.name || name.trim(),
           symbol: (verifiedCreate.symbol || symbol.trim()).toUpperCase(),
           description: cleanDescription,
@@ -174,16 +194,14 @@ export async function POST(req: NextRequest) {
           discord: socialLinks.discord,
           supply: onChain.supplyRaw,
           decimals: onChain.decimals,
-          // Mint/freeze authority on a pump-created token are the
-          // program's own PDAs, never the creator's wallet, and there is
-          // no separate update-authority concept (pump stores name/
-          // symbol/uri directly in its own on-chain state, not via a
-          // Metaplex metadata account) - functionally equivalent to
-          // "revoked" from the connecting user's own authority.
+          // ZRP's program revokes both authorities immediately after
+          // minting and metadata creation (see create_and_buy in
+          // programs/zrp-launchpad/src/lib.rs) - always true for this
+          // venue, never a claim taken from the client.
           revokeMint: true,
           revokeFreeze: true,
           revokeUpdate: true,
-          feeAmount: null,
+          feeAmount: feeAmountSol,
           feeTransactionId: null,
           mintTransactionId: transactionId,
           status: "COMPLETED",
@@ -199,7 +217,7 @@ export async function POST(req: NextRequest) {
 
     return jsonWithDecimals({ success: true, token: launchedToken }, { status: 201 });
   } catch (error) {
-    console.error("Pump token creation error:", error);
+    console.error("ZRP token creation error:", error);
     return NextResponse.json({ error: "Failed to record the created token. Please try again." }, { status: 500 });
   }
 }
