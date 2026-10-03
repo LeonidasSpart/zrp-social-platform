@@ -222,6 +222,13 @@ fun PostCard(
     onCommentClick: (String) -> Unit,
     onRepostClick: (String) -> Unit,
     onClick: (String) -> Unit,
+    // Every call site currently wires `onClick` to "open comments" -
+    // correct for tapping your own card, wrong for tapping a quoted
+    // post's preview below, which should open THAT post's own detail
+    // page, not jump straight into its comments. Defaults to `onClick`
+    // only so a call site that hasn't been updated yet still compiles
+    // with the prior (imperfect) behavior rather than silently no-op'ing.
+    onQuotedPostClick: (String) -> Unit = onClick,
     onAuthorClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit = {},
     onBookmarkClick: (String) -> Unit = {},
@@ -497,7 +504,7 @@ fun PostCard(
                 if (quotedPost != null) {
                     QuotedPostPreview(
                         quotedPost = quotedPost,
-                        onClick = { onClick(quotedPost.id) },
+                        onClick = { onQuotedPostClick(quotedPost.id) },
                     )
                 }
 

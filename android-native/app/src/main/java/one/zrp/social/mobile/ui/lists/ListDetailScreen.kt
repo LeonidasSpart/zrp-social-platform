@@ -56,6 +56,9 @@ fun ListDetailScreen(
     onBack: () -> Unit,
     onAuthorClick: (String) -> Unit,
     onOpenComments: (String) -> Unit,
+    // A quoted post's preview opens its real detail page, not the
+    // comments-only screen onOpenComments leads to.
+    onOpenPost: (String) -> Unit = onOpenComments,
     onOpenHashtag: (String) -> Unit = {},
     onOpenQuotePost: (String) -> Unit = {},
     onOpenReposts: (String) -> Unit = {},
@@ -258,6 +261,7 @@ fun ListDetailScreen(
                                 onViewReposts = onOpenReposts,
                                 onViewQuotes = onOpenQuotes,
                                 onClick = onOpenComments,
+                                onQuotedPostClick = onOpenPost,
                                 onAuthorClick = onAuthorClick,
                                 onHashtagClick = onOpenHashtag,
                                 onOpenVideoViewer = onOpenVideoViewer,

@@ -79,6 +79,10 @@ fun PostDetailScreen(
     onBack: () -> Unit,
     onAuthorClick: (String) -> Unit = {},
     onOpenHashtag: (String) -> Unit = {},
+    // If the viewed post itself quotes another post, tapping that quoted
+    // preview must open THAT post's own detail page (a different postId),
+    // never this screen's no-op onClick for the post already being shown.
+    onOpenPost: (String) -> Unit = {},
     // The exact comment/reply a "someone commented"/"someone replied"
     // notification (or a shared comment link) pointed at - see
     // CommentThread's own doc comment for how this reaches a reply at
@@ -152,6 +156,7 @@ fun PostDetailScreen(
                                 onRepostClick = { postViewModel.toggleRepost() },
                                 onBookmarkClick = { postViewModel.toggleBookmark() },
                                 onClick = {},
+                                onQuotedPostClick = onOpenPost,
                                 onAuthorClick = onAuthorClick,
                                 onHashtagClick = onOpenHashtag,
                             )

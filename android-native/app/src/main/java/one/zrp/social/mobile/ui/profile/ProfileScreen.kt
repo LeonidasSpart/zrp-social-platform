@@ -135,6 +135,9 @@ fun ProfileScreen(
     onAuthorClick: (String) -> Unit,
     onMessageClick: (partnerId: String, partnerUsername: String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
+    // A quoted post's preview opens its real detail page, not the
+    // comments-only screen onOpenComments leads to.
+    onOpenPost: (postId: String) -> Unit = onOpenComments,
     onOpenBookmarks: () -> Unit = {},
     onOpenFollowers: (username: String) -> Unit = {},
     onOpenFollowing: (username: String) -> Unit = {},
@@ -233,6 +236,7 @@ fun ProfileScreen(
                         onViewReposts = onOpenReposts,
                         onViewQuotes = onOpenQuotes,
                         onClick = onOpenComments,
+                        onQuotedPostClick = onOpenPost,
                         onAuthorClick = onAuthorClick,
                         onHashtagClick = onOpenHashtag,
                         onOpenVideoViewer = onOpenVideoViewer,

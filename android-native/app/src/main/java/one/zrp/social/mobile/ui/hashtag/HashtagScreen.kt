@@ -48,6 +48,9 @@ fun HashtagScreen(
     tag: String,
     onAuthorClick: (String) -> Unit,
     onOpenComments: (postId: String) -> Unit,
+    // A quoted post's preview opens its real detail page, not the
+    // comments-only screen onOpenComments leads to.
+    onOpenPost: (postId: String) -> Unit = onOpenComments,
     onBack: () -> Unit,
     onOpenQuotePost: (postId: String) -> Unit = {},
     onOpenReposts: (postId: String) -> Unit = {},
@@ -141,6 +144,7 @@ fun HashtagScreen(
                             onViewReposts = onOpenReposts,
                             onViewQuotes = onOpenQuotes,
                             onClick = onOpenComments,
+                            onQuotedPostClick = onOpenPost,
                             onAuthorClick = onAuthorClick,
                             onHashtagClick = onOpenHashtag,
                             onOpenVideoViewer = onOpenVideoViewer,

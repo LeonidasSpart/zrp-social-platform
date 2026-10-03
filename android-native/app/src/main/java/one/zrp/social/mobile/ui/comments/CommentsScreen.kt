@@ -6,8 +6,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -568,9 +570,23 @@ private fun CommentRow(
                 }
             }
 
+            // Like/Reply/Repost/Bookmark/Share plus (for your own comment)
+            // Edit/Delete, or (for someone else's) Report - up to 7
+            // TouchTarget.min (48dp) icons in a row, which on its own
+            // already exceeds a typical phone's available content width
+            // (comfortably over 300dp before any like/repost/bookmark
+            // counts even add to it). A plain Row doesn't wrap or shrink
+            // its children, so without horizontalScroll the trailing
+            // icons - Edit then Delete for your own comment - render past
+            // the visible edge: present and still real, but unreachable
+            // and effectively invisible on a real device. This exact gap
+            // is why a user could discover Edit (further left) but never
+            // Delete (further right) even though both exist in code.
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = Spacing.xs),
+                modifier = Modifier
+                    .padding(top = Spacing.xs)
+                    .horizontalScroll(rememberScrollState()),
             ) {
                 CommentStat(
                     icon = if (comment.liked == true) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
