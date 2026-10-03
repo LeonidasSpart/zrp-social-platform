@@ -240,7 +240,7 @@ describe.skipIf(!hasRealDatabaseUrl)(
     it("adminForceEndRoom ends a LIVE room with an active host, bypassing the host-only check", async () => {
       const host = await createUser("hostg");
       const viewer = await createUser("viewerg");
-      const room = await createRoom({ hostId: host.id, title: `Room ${runId} g`, visibility: "PRIVATE" });
+      const room = await createRoom({ hostId: host.id, title: `Room ${runId} g`, visibility: "PUBLIC" });
       roomIds.push(room.id);
       await joinRoom(room.id, viewer.id);
 
@@ -259,7 +259,15 @@ describe.skipIf(!hasRealDatabaseUrl)(
       const viewer = await createUser("viewerh");
       const room = await createRoom({ hostId: host.id, title: `Room ${runId} h`, visibility: "PRIVATE" });
       roomIds.push(room.id);
-      await joinRoom(room.id, viewer.id);
+      // A stranger can't join a PRIVATE room via joinRoom() (canViewRoom
+      // requires isParticipant OR PUBLIC/community-member visibility,
+      // which a brand-new participant never has for PRIVATE) - this
+      // models the documented "host already put them in the room" case
+      // by inserting the participant row directly, same as a real
+      // host-added PRIVATE member would look in Postgres.
+      await prisma.liveVideoParticipant.create({
+        data: { roomId: room.id, userId: viewer.id, role: "LISTENER" },
+      });
 
       const discoverable = await listDiscoverableRooms({ viewerId: null, cursor: null, limit: 20 });
       expect(discoverable.rooms.find((r) => r.id === room.id)).toBeUndefined();

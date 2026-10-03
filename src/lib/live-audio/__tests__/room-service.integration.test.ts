@@ -441,9 +441,9 @@ describe.skipIf(!hasRealDatabaseUrl)(
       // host who forgot to close the room is, by definition, not around
       // to end it themselves).
       it("adminForceEndRoom ends a LIVE room with an active host, bypassing the host-only check", async () => {
-        const host = await createUser("hostp");
-        const listener = await createUser("listenerp");
-        const room = await createRoom({ hostId: host.id, title: `Room ${runId} p`, visibility: "PRIVATE" });
+        const host = await createUser("hostt");
+        const listener = await createUser("listenert");
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} t`, visibility: "PUBLIC" });
         roomIds.push(room.id);
         await joinRoom(room.id, listener.id);
 
@@ -460,8 +460,8 @@ describe.skipIf(!hasRealDatabaseUrl)(
       });
 
       it("adminForceEndRoom rejects a room that isn't LIVE", async () => {
-        const host = await createUser("hostq");
-        const room = await createRoom({ hostId: host.id, title: `Room ${runId} q`, visibility: "PUBLIC" });
+        const host = await createUser("hostu");
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} u`, visibility: "PUBLIC" });
         roomIds.push(room.id);
         await endRoom(room.id, host.id);
 
@@ -469,11 +469,19 @@ describe.skipIf(!hasRealDatabaseUrl)(
       });
 
       it("listLiveRoomsForAdmin includes a PRIVATE live room (unlike listDiscoverableRooms) with a live listener count", async () => {
-        const host = await createUser("hostr");
-        const listener = await createUser("listenerr");
-        const room = await createRoom({ hostId: host.id, title: `Room ${runId} r`, visibility: "PRIVATE" });
+        const host = await createUser("hostv");
+        const listener = await createUser("listenerv");
+        const room = await createRoom({ hostId: host.id, title: `Room ${runId} v`, visibility: "PRIVATE" });
         roomIds.push(room.id);
-        await joinRoom(room.id, listener.id);
+        // A stranger can't join a PRIVATE room via joinRoom() (canViewRoom
+        // requires isParticipant OR PUBLIC/community-member visibility,
+        // which a brand-new participant never has for PRIVATE) - this
+        // models the documented "host already put them in the room" case
+        // by inserting the participant row directly, same as a real
+        // host-added PRIVATE member would look in Postgres.
+        await prisma.liveAudioParticipant.create({
+          data: { roomId: room.id, userId: listener.id, role: "LISTENER" },
+        });
 
         const rooms = await listLiveRoomsForAdmin();
         const found = rooms.find((r) => r.id === room.id);
