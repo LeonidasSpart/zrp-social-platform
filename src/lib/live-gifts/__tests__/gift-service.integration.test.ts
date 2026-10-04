@@ -97,6 +97,8 @@ describe.skipIf(!hasRealDatabaseUrl)("Live Gifts gift-service (integration, real
 
   afterAll(async () => {
     await prisma.liveGiftTransaction.deleteMany({ where: { OR: [{ liveAudioRoomId: { in: roomIds } }, { liveVideoRoomId: { in: videoRoomIds } }] } });
+    await prisma.coinAdjustment.deleteMany({ where: { userId: { in: userIds } } });
+    await prisma.userGiftPolicy.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.coinPurchase.deleteMany({ where: { transactionId: { in: txIds } } });
     await prisma.consumedPaymentTransaction.deleteMany({ where: { transactionId: { in: txIds } } });
     await prisma.coinWallet.deleteMany({ where: { userId: { in: userIds } } });
@@ -390,5 +392,179 @@ describe.skipIf(!hasRealDatabaseUrl)("Live Gifts gift-service (integration, real
     } catch (err) {
       expect(err).toBeInstanceOf(LiveAudioError);
     }
+  });
+
+  // ── Admin-side: UserGiftPolicy restriction is enforced inside sendGift() itself ──
+  it("a user with an admin gift restriction cannot send a gift, even with a funded wallet", async () => {
+    const { room, sender } = await liveAudioRoomWithSender("p", 500);
+    const gift = await createGift("restricted-target", 50);
+    await prisma.userGiftPolicy.create({
+      data: { userId: sender.id, canSendGifts: false, reason: "test: fraud review", updatedBy: "test-admin" },
+    });
+
+    await expect(
+      sendGift({ senderId: sender.id, roomType: "AUDIO", roomId: room.id, giftKey: gift.key, quantity: 1, idempotencyKey: randomUUID() })
+    ).rejects.toMatchObject({ code: "gift_restricted" });
+
+    // Balance and ledger are untouched - the check runs before any debit.
+    expect(await getCoinBalance(sender.id)).toBe(500);
+  });
+
+  it("a user whose restriction was lifted (no UserGiftPolicy row, or canSendGifts: true) can send normally", async () => {
+    const { room, sender, host } = await liveAudioRoomWithSender("q", 500);
+    const gift = await createGift("unrestricted-target", 50);
+    await prisma.userGiftPolicy.create({
+      data: { userId: sender.id, canSendGifts: true, reason: null, updatedBy: "test-admin" },
+    });
+
+    const result = await sendGift({
+      senderId: sender.id,
+      roomType: "AUDIO",
+      roomId: room.id,
+      giftKey: gift.key,
+      quantity: 1,
+      idempotencyKey: randomUUID(),
+    });
+    expect(result.recipientId).toBe(host.id);
+    expect(await getCoinBalance(sender.id)).toBe(450);
+  });
+
+  // ── Admin coin adjustment: dedicated audited ledger, never a silent balance write ──
+  describe("adjustCoinBalance (admin coin adjustment ledger)", () => {
+    it("credits a user, writes a before/delta/after CoinAdjustment row, and never touches LiveGiftTransaction/CoinPurchase", async () => {
+      const { adjustCoinBalance } = await import("../coin-adjustment");
+      const user = await createUser("adjcredit");
+      const admin = await createUser("adjadmin1");
+      await fundWallet(user.id, 100);
+
+      const result = await adjustCoinBalance({ adminId: admin.id, userId: user.id, delta: 50, reason: "test: goodwill credit" });
+
+      expect(result.beforeBalance).toBe(100);
+      expect(result.delta).toBe(50);
+      expect(result.afterBalance).toBe(150);
+      expect(await getCoinBalance(user.id)).toBe(150);
+
+      const row = await prisma.coinAdjustment.findUniqueOrThrow({ where: { id: result.id } });
+      expect(row.userId).toBe(user.id);
+      expect(row.adminId).toBe(admin.id);
+      expect(row.beforeBalance).toBe(100);
+      expect(row.delta).toBe(50);
+      expect(row.afterBalance).toBe(150);
+      expect(row.reason).toBe("test: goodwill credit");
+    });
+
+    it("debits a user but refuses to take the balance negative, leaving the wallet and ledger untouched", async () => {
+      const { adjustCoinBalance } = await import("../coin-adjustment");
+      const user = await createUser("adjdebit");
+      const admin = await createUser("adjadmin2");
+      await fundWallet(user.id, 10);
+
+      await expect(
+        adjustCoinBalance({ adminId: admin.id, userId: user.id, delta: -50, reason: "test: over-debit attempt" })
+      ).rejects.toMatchObject({ code: "adjustment_would_go_negative" });
+
+      expect(await getCoinBalance(user.id)).toBe(10);
+      const rows = await prisma.coinAdjustment.findMany({ where: { userId: user.id } });
+      expect(rows).toHaveLength(0);
+    });
+
+    it("rejects an adjustment with no reason", async () => {
+      const { adjustCoinBalance } = await import("../coin-adjustment");
+      const user = await createUser("adjnoreason");
+      const admin = await createUser("adjadmin3");
+      await fundWallet(user.id, 10);
+
+      await expect(
+        adjustCoinBalance({ adminId: admin.id, userId: user.id, delta: 5, reason: "" })
+      ).rejects.toMatchObject({ code: "validation_error" });
+    });
+
+    it("rejects a zero or non-integer delta", async () => {
+      const { adjustCoinBalance } = await import("../coin-adjustment");
+      const user = await createUser("adjzero");
+      const admin = await createUser("adjadmin4");
+
+      await expect(
+        adjustCoinBalance({ adminId: admin.id, userId: user.id, delta: 0, reason: "test" })
+      ).rejects.toMatchObject({ code: "validation_error" });
+      await expect(
+        adjustCoinBalance({ adminId: admin.id, userId: user.id, delta: 1.5, reason: "test" })
+      ).rejects.toMatchObject({ code: "validation_error" });
+    });
+
+    it("a concurrent gift send against the same wallet never corrupts the adjustment's before/after pair", async () => {
+      const { adjustCoinBalance } = await import("../coin-adjustment");
+      const { room, sender } = await liveAudioRoomWithSender("adjrace", 500);
+      const gift = await createGift("adjrace-gift", 200);
+      const admin = await createUser("adjadminrace");
+
+      // Fire a real coin-spending gift send and an admin credit at the
+      // sender's wallet at the same time. Whichever order Postgres
+      // actually serializes them in, the adjustment's beforeBalance must
+      // match the wallet's true value at that moment - not a stale read
+      // taken before the transaction - and beforeBalance + delta must
+      // equal the wallet's balance right after the adjustment commits.
+      const [sendResult, adjustResult] = await Promise.all([
+        sendGift({ senderId: sender.id, roomType: "AUDIO", roomId: room.id, giftKey: gift.key, quantity: 1, idempotencyKey: randomUUID() }),
+        adjustCoinBalance({ adminId: admin.id, userId: sender.id, delta: 30, reason: "test: concurrent credit" }),
+      ]);
+
+      expect(sendResult.totalCoins).toBe(200);
+      expect(adjustResult.afterBalance - adjustResult.delta).toBe(adjustResult.beforeBalance);
+
+      const finalBalance = await getCoinBalance(sender.id);
+      expect(finalBalance).toBe(500 - 200 + 30);
+      // Whichever transaction the adjustment's atomic read landed after,
+      // its recorded afterBalance must equal the wallet's balance at that
+      // same point - i.e. either before or after the gift's debit, never
+      // a value that matches neither.
+      expect([500 + 30, 500 - 200 + 30]).toContain(adjustResult.afterBalance);
+    });
+  });
+
+  // ── Admin eligibility computation: server-calculated, never a client-side permission ──
+  describe("computeGiftEligibility", () => {
+    it("reports NO_COINS as the reason for a verified, unrestricted user with an empty wallet - never a permanent restriction", async () => {
+      const { computeGiftEligibility } = await import("../eligibility");
+      const user = await createUser("elignocoins");
+      await prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } });
+
+      const result = await computeGiftEligibility(user.id);
+      expect(result.reason).toBe("NO_COINS");
+      expect(result.eligible).toBe(false);
+    });
+
+    it("reports GIFT_RESTRICTED ahead of NO_COINS when both are true", async () => {
+      const { computeGiftEligibility } = await import("../eligibility");
+      const user = await createUser("eligrestricted");
+      await prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } });
+      await prisma.userGiftPolicy.create({ data: { userId: user.id, canSendGifts: false, reason: "test" } });
+
+      const result = await computeGiftEligibility(user.id);
+      expect(result.reason).toBe("GIFT_RESTRICTED");
+      expect(result.giftRestricted).toBe(true);
+    });
+
+    it("reports ACCOUNT_SUSPENDED for a banned user ahead of every other reason", async () => {
+      const { computeGiftEligibility } = await import("../eligibility");
+      const user = await createUser("eligbanned");
+      await prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date(), banned: true } });
+      await prisma.userGiftPolicy.create({ data: { userId: user.id, canSendGifts: false, reason: "test" } });
+      await fundWallet(user.id, 100);
+
+      const result = await computeGiftEligibility(user.id);
+      expect(result.reason).toBe("ACCOUNT_SUSPENDED");
+      expect(result.accountStatus).toBe("SUSPENDED");
+    });
+
+    it("reports ELIGIBLE for a verified, unrestricted, funded user who is an active room participant", async () => {
+      const { computeGiftEligibility } = await import("../eligibility");
+      const { sender } = await liveAudioRoomWithSender("elig-ok", 100);
+      await prisma.user.update({ where: { id: sender.id }, data: { emailVerified: new Date() } });
+
+      const result = await computeGiftEligibility(sender.id);
+      expect(result.reason).toBe("ELIGIBLE");
+      expect(result.eligible).toBe(true);
+    });
   });
 });

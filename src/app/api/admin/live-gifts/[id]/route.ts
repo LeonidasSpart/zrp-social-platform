@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { logAdminAction } from "@/lib/audit-log";
+import { parseMediaUrl } from "@/lib/media-url";
+
+function validOptionalUrl(value: unknown): boolean {
+  if (value === null || value === undefined || value === "") return true;
+  return typeof value === "string" && parseMediaUrl(value) !== null;
+}
 
 /** Enable/disable, reprice, or reorder a catalog gift. Never a DELETE - GiftDefinition is onDelete:Restrict so a priced, already-sent gift can't be removed out from under its ledger; disable it instead. */
 export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -28,10 +34,23 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
     data.priceCoins = priceCoins;
   }
   if (body.enabled !== undefined) data.enabled = Boolean(body.enabled);
-  if (body.sortOrder !== undefined && Number.isInteger(body.sortOrder)) data.sortOrder = body.sortOrder;
-  if (body.iconUrl !== undefined) data.iconUrl = typeof body.iconUrl === "string" ? body.iconUrl : null;
+  if (body.sortOrder !== undefined) {
+    if (!Number.isInteger(body.sortOrder)) {
+      return NextResponse.json({ error: "sortOrder must be a whole number." }, { status: 400 });
+    }
+    data.sortOrder = body.sortOrder;
+  }
+  if (body.iconUrl !== undefined) {
+    if (!validOptionalUrl(body.iconUrl)) {
+      return NextResponse.json({ error: "iconUrl must be a valid https:// URL." }, { status: 400 });
+    }
+    data.iconUrl = typeof body.iconUrl === "string" && body.iconUrl ? body.iconUrl : null;
+  }
   if (body.animationUrl !== undefined) {
-    data.animationUrl = typeof body.animationUrl === "string" ? body.animationUrl : null;
+    if (!validOptionalUrl(body.animationUrl)) {
+      return NextResponse.json({ error: "animationUrl must be a valid https:// URL." }, { status: 400 });
+    }
+    data.animationUrl = typeof body.animationUrl === "string" && body.animationUrl ? body.animationUrl : null;
   }
 
   let gift;

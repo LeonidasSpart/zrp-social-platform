@@ -763,6 +763,9 @@ model User {
   coinPurchases   CoinPurchase[]
   liveGiftsSent     LiveGiftTransaction[] @relation("LiveGiftSender")
   liveGiftsReceived LiveGiftTransaction[] @relation("LiveGiftRecipient")
+  giftPolicy        UserGiftPolicy?
+  coinAdjustmentsReceived CoinAdjustment[] @relation("CoinAdjustmentUser")
+  coinAdjustmentsMade     CoinAdjustment[] @relation("CoinAdjustmentAdmin")
 
   // ─── ZRP Live chat / reminders ───────────────────────────────
   liveChatMessages        LiveChatMessage[] @relation("LiveChatAuthor")
@@ -5348,6 +5351,63 @@ model LiveGiftTransaction {
   @@index([liveAudioRoomId])
   @@index([liveVideoRoomId])
   @@index([creatorProfileId])
+}
+
+// One row per user, created only when a restriction is first set (absence
+// means "no restriction" - never a row with canSendGifts: true created
+// just to exist). Deliberately the ONE place gift-sending eligibility is
+// recorded - do not duplicate this flag onto User or CreatorProfile.
+// Enforced server-side inside gift-service.ts's sendGift() itself (not
+// just read for the admin eligibility display), so a restricted user is
+// actually blocked, not merely shown as restricted in a table nothing
+// enforces.
+model UserGiftPolicy {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  canSendGifts Boolean @default(true)
+  reason       String? @db.Text
+
+  // Admin who last changed this row - a userId, not a relation, so the
+  // policy row survives if that admin account is ever deleted (same
+  // reasoning as AuditLog.actorId elsewhere never being a hard FK).
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+// Admin-initiated CoinWallet.balance change, audited separately from
+// AuditLog (which only records the fact an admin acted, not the exact
+// money-shaped before/delta/after triple a financial ledger needs).
+// Written in the SAME $transaction as the wallet balance update it
+// describes (see src/lib/live-gifts/coin-adjustment.ts) - this row and the
+// balance it records can never drift apart. Never a bolt-on reuse of
+// CoinPurchase/LiveGiftTransaction - an admin adjustment is not a purchase
+// or a gift send, and conflating them would corrupt both ledgers' meaning.
+model CoinAdjustment {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation("CoinAdjustmentUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  adminId String
+  admin   User   @relation("CoinAdjustmentAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+
+  beforeBalance Int
+  // Signed - positive credits the user, negative debits them. Always
+  // beforeBalance + delta == afterBalance, enforced in application code
+  // inside the same transaction that writes both rows.
+  delta         Int
+  afterBalance  Int
+
+  reason String @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([adminId])
 }
 
 // ============================================================
