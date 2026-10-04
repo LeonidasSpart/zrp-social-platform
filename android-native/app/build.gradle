@@ -509,8 +509,15 @@ android {
         // Serbian, Bosnian, Macedonian), a global em dash cleanup, and
         // the DM composer's real camera/gallery/GIF wiring. None of
         // this changes applicationId, signing, or deep links.
-        versionCode 32
-        versionName "4.0.26"
+        // Bumps to versionCode 33 / versionName "4.0.27": versionCode 32 was
+        // already uploaded to the "Tests fermés" (Closed testing) track,
+        // so Play Console rejected the same versionCode for a Production
+        // release upload ("Le code de version 32 a déjà été utilisé") -
+        // same per-applicationId monotonically-increasing versionCode
+        // requirement as every prior collision documented above (2/7/19/
+        // 20/21/27). No feature change here - version numbers only.
+        versionCode 33
+        versionName "4.0.27"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
