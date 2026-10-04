@@ -2,6 +2,19 @@
 
 export type Plan = 'free' | 'pro' | 'business' | 'enterprise';
 
+// Ordinal ranking of plan tiers, lowest first - the ONE place a
+// "does this plan meet a required minimum plan" comparison is defined.
+// Used for ZRP Live Gifts' minTier catalog gating (see
+// src/lib/live-gifts/gift-service.ts's sendGift()) and any other
+// feature that needs a >= comparison across plans - never hardcode a
+// second ranking elsewhere.
+export const PLAN_RANK: Record<Plan, number> = {
+  free: 0,
+  pro: 1,
+  business: 2,
+  enterprise: 3,
+};
+
 export interface PlanLimits {
   postLength: number;
   imagesPerPost: number;

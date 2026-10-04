@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { isBlockedEitherWay } from "@/lib/auth-guards";
 import { checkPaymentSender } from "@/lib/payment-sender";
 import { emitToLiveAudioRoom, emitToLiveVideoRoom } from "@/lib/socket-emit";
+import { PLAN_RANK, type Plan } from "@/lib/limits";
 import { LiveGiftErrors } from "./errors";
 import {
   CHARITY_PERCENTAGE,
@@ -20,10 +21,25 @@ export type LiveRoomType = "AUDIO" | "VIDEO";
  * Catalog for the client's gift panel. Display name/description/
  * localization are resolved client-side from `key` - see schema.prisma's
  * comment on GiftDefinition.
+ *
+ * Also excludes a gift outside its availableFrom/availableTo window (a
+ * null bound is unbounded on that side) - re-validated independently
+ * inside sendGift() itself, never trusted as the only check just
+ * because this list already filtered it.
+ *
+ * Deliberately does NOT filter by the viewer's tier (minTier) - every
+ * enabled, in-window gift is returned with its minTier so the client
+ * can show a lock affordance; the tier gate itself is enforced only in
+ * sendGift().
  */
 export async function getGiftCatalog() {
+  const now = new Date();
   return prisma.giftDefinition.findMany({
-    where: { enabled: true },
+    where: {
+      enabled: true,
+      OR: [{ availableFrom: null }, { availableFrom: { lte: now } }],
+      AND: [{ OR: [{ availableTo: null }, { availableTo: { gte: now } }] }],
+    },
     orderBy: { sortOrder: "asc" },
   });
 }
@@ -52,6 +68,11 @@ export async function getCoinBalance(userId: string): Promise<number> {
 export interface PurchaseCoinsInput {
   userId: string;
   transactionId: string;
+  // Optional: buy through an admin-managed CoinPackage tier instead of
+  // the continuous floor(usdcAmount / COIN_VALUE_USDC) flow below. When
+  // omitted, behavior is byte-for-byte unchanged from the original
+  // continuous flow - existing callers never need to know this exists.
+  packageKey?: string;
 }
 
 export interface PurchaseCoinsResult {
@@ -66,12 +87,28 @@ export interface PurchaseCoinsResult {
  * shared ConsumedPaymentTransaction idempotency guard claimed inside
  * the same atomic transaction that credits the wallet) - never a
  * second, weaker verification path for a second kind of payment.
+ *
+ * With `packageKey` set, the fixed package.coinsCredited + bonusCoins
+ * total is credited regardless of exactly how much more than
+ * package.priceUsdc the verified on-chain amount was (never derived
+ * from the amount - that's the entire point of a package tier vs. the
+ * continuous flow) - the on-chain verification step itself is never
+ * skipped for a package purchase.
  */
 export async function purchaseCoins(input: PurchaseCoinsInput): Promise<PurchaseCoinsResult> {
-  const { userId, transactionId } = input;
+  const { userId, transactionId, packageKey } = input;
 
   if (!transactionId || typeof transactionId !== "string") {
     throw LiveGiftErrors.validation("Transaction ID is required.");
+  }
+
+  let coinPackage: { id: string; priceUsdc: Prisma.Decimal; coinsCredited: number; bonusCoins: number } | null = null;
+  if (packageKey) {
+    if (typeof packageKey !== "string") throw LiveGiftErrors.coinPackageNotFound();
+    const found = await prisma.coinPackage.findUnique({ where: { key: packageKey } });
+    if (!found) throw LiveGiftErrors.coinPackageNotFound();
+    if (!found.enabled) throw LiveGiftErrors.coinPackageDisabled();
+    coinPackage = found;
   }
 
   const existingClaim = await prisma.consumedPaymentTransaction.findUnique({ where: { transactionId } });
@@ -93,15 +130,28 @@ export async function purchaseCoins(input: PurchaseCoinsInput): Promise<Purchase
     throw LiveGiftErrors.invalidTransaction();
   }
 
-  if (!Number.isFinite(usdcAmount) || usdcAmount < MIN_COIN_PURCHASE_USDC || usdcAmount > MAX_COIN_PURCHASE_USDC) {
+  if (!Number.isFinite(usdcAmount) || usdcAmount <= 0) {
     throw LiveGiftErrors.validation("Invalid purchase amount.");
+  }
+
+  let coinsCredited: number;
+  if (coinPackage) {
+    // Never require an exact match - on-chain amounts can have
+    // precision/rounding. Overpaying is fine; underpaying is rejected.
+    if (usdcAmount < Number(coinPackage.priceUsdc)) {
+      throw LiveGiftErrors.insufficientPackageAmount();
+    }
+    coinsCredited = coinPackage.coinsCredited + coinPackage.bonusCoins;
+  } else {
+    if (usdcAmount < MIN_COIN_PURCHASE_USDC || usdcAmount > MAX_COIN_PURCHASE_USDC) {
+      throw LiveGiftErrors.validation("Invalid purchase amount.");
+    }
+    coinsCredited = Math.floor(usdcAmount / COIN_VALUE_USDC);
+    if (coinsCredited < 1) throw LiveGiftErrors.validation("Invalid purchase amount.");
   }
 
   const senderError = await checkPaymentSender(userId, fromAddress);
   if (senderError) throw LiveGiftErrors.validation(senderError);
-
-  const coinsCredited = Math.floor(usdcAmount / COIN_VALUE_USDC);
-  if (coinsCredited < 1) throw LiveGiftErrors.validation("Invalid purchase amount.");
 
   const wallet = await getOrCreateWallet(userId);
   const purchaseId = randomUUID();
@@ -118,6 +168,7 @@ export async function purchaseCoins(input: PurchaseCoinsInput): Promise<Purchase
           coinWalletId: wallet.id,
           usdcAmount,
           coinsCredited,
+          coinPackageId: coinPackage?.id ?? null,
           transactionId,
           status: "COMPLETED",
         },
@@ -200,6 +251,30 @@ export async function sendGift(input: SendGiftInput): Promise<SendGiftResult> {
   const giftDefinition = await prisma.giftDefinition.findUnique({ where: { key: giftKey } });
   if (!giftDefinition) throw LiveGiftErrors.giftNotFound();
   if (!giftDefinition.enabled) throw LiveGiftErrors.giftDisabled();
+
+  // ⚠️ SECURITY: re-validated here even though getGiftCatalog() already
+  // filters out an out-of-window gift - never trust that the caller
+  // actually fetched a fresh catalog before sending.
+  const now = new Date();
+  if (
+    (giftDefinition.availableFrom && giftDefinition.availableFrom > now) ||
+    (giftDefinition.availableTo && giftDefinition.availableTo < now)
+  ) {
+    throw LiveGiftErrors.giftUnavailableWindow();
+  }
+
+  // ⚠️ SECURITY: the sender's plan is read FRESH from the database, never
+  // from a JWT/session snapshot (this repo's auth model requires a
+  // DB-fresh read for anything privileged - see CLAUDE.md's Auth
+  // section) - a plan upgrade/downgrade takes effect on the very next
+  // send, not after the sender's token happens to refresh.
+  if (giftDefinition.minTier) {
+    const senderUser = await prisma.user.findUnique({ where: { id: senderId }, select: { plan: true } });
+    const senderPlan = (senderUser?.plan as Plan) || "free";
+    const requiredRank = PLAN_RANK[giftDefinition.minTier as Plan] ?? 0;
+    const senderRank = PLAN_RANK[senderPlan] ?? 0;
+    if (senderRank < requiredRank) throw LiveGiftErrors.giftRequiresHigherPlan();
+  }
 
   const room =
     roomType === "AUDIO"

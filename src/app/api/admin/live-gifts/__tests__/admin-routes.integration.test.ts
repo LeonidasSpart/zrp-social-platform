@@ -96,6 +96,92 @@ describe.skipIf(!hasRealDatabaseUrl)("Admin Live Gifts routes (integration, real
     expect(badUrl.status).toBe(400);
   });
 
+  it("validates rarity, soundUrl, category, minTier and the availability window on creation", async () => {
+    asAdmin();
+    const base = { key: `gift-${suffix}-rarity`, priceCoins: 10 };
+
+    const badRarity = await createGiftRoute(jsonReq("https://zrp.one/api/admin/live-gifts", { ...base, rarity: "MYTHIC" }));
+    expect(badRarity.status).toBe(400);
+
+    const badSoundUrl = await createGiftRoute(
+      jsonReq("https://zrp.one/api/admin/live-gifts", { ...base, soundUrl: "javascript:alert(1)" })
+    );
+    expect(badSoundUrl.status).toBe(400);
+
+    const badCategory = await createGiftRoute(
+      jsonReq("https://zrp.one/api/admin/live-gifts", { ...base, category: "x".repeat(41) })
+    );
+    expect(badCategory.status).toBe(400);
+
+    const badMinTier = await createGiftRoute(
+      jsonReq("https://zrp.one/api/admin/live-gifts", { ...base, minTier: "ultra" })
+    );
+    expect(badMinTier.status).toBe(400);
+
+    const badWindow = await createGiftRoute(
+      jsonReq("https://zrp.one/api/admin/live-gifts", {
+        ...base,
+        availableFrom: "2030-01-01T00:00:00Z",
+        availableTo: "2020-01-01T00:00:00Z",
+      })
+    );
+    expect(badWindow.status).toBe(400);
+
+    for (const rarity of ["COMMON", "RARE", "EPIC", "LEGENDARY"]) {
+      const key = `gift-${suffix}-rarity-${rarity.toLowerCase()}`;
+      giftKeys.push(key);
+      const res = await createGiftRoute(jsonReq("https://zrp.one/api/admin/live-gifts", { key, priceCoins: 10, rarity }));
+      expect(res.status).toBe(201);
+      const body = await res.json();
+      expect(body.gift.rarity).toBe(rarity);
+    }
+  });
+
+  it("validates the same new fields on PATCH, including a partial window update against the persisted other bound", async () => {
+    asAdmin();
+    const key = `gift-${suffix}-patchwindow`;
+    giftKeys.push(key);
+    const created = await createGiftRoute(
+      jsonReq("https://zrp.one/api/admin/live-gifts", {
+        key,
+        priceCoins: 10,
+        availableFrom: "2020-01-01T00:00:00Z",
+        availableTo: "2030-01-01T00:00:00Z",
+      })
+    );
+    expect(created.status).toBe(201);
+    const { gift } = await created.json();
+
+    // availableFrom alone, now AFTER the persisted availableTo - invalid against the stored other bound.
+    const badPartial = await patchGiftRoute(
+      jsonReq(`https://zrp.one/api/admin/live-gifts/${gift.id}`, { availableFrom: "2031-01-01T00:00:00Z" }, "PATCH"),
+      { params: Promise.resolve({ id: gift.id }) }
+    );
+    expect(badPartial.status).toBe(400);
+
+    const badRarity = await patchGiftRoute(
+      jsonReq(`https://zrp.one/api/admin/live-gifts/${gift.id}`, { rarity: "NOT_A_RARITY" }, "PATCH"),
+      { params: Promise.resolve({ id: gift.id }) }
+    );
+    expect(badRarity.status).toBe(400);
+
+    const badMinTier = await patchGiftRoute(
+      jsonReq(`https://zrp.one/api/admin/live-gifts/${gift.id}`, { minTier: "super" }, "PATCH"),
+      { params: Promise.resolve({ id: gift.id }) }
+    );
+    expect(badMinTier.status).toBe(400);
+
+    const ok = await patchGiftRoute(
+      jsonReq(`https://zrp.one/api/admin/live-gifts/${gift.id}`, { rarity: "EPIC", minTier: "business", category: "Luxury" }, "PATCH"),
+      { params: Promise.resolve({ id: gift.id }) }
+    );
+    expect(ok.status).toBe(200);
+    const okBody = await ok.json();
+    expect(okBody.gift.rarity).toBe("EPIC");
+    expect(okBody.gift.minTier).toBe("business");
+    expect(okBody.gift.category).toBe("Luxury");
+  });
+
   it("creates a gift, rejects a duplicate key, then disables it via PATCH (never DELETE)", async () => {
     asAdmin();
     const key = `gift-${suffix}-dup`;
