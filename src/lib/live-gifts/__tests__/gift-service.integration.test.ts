@@ -491,6 +491,35 @@ describe.skipIf(!hasRealDatabaseUrl)("Live Gifts gift-service (integration, real
         adjustCoinBalance({ adminId: admin.id, userId: user.id, delta: 1.5, reason: "test" })
       ).rejects.toMatchObject({ code: "validation_error" });
     });
+
+    it("a concurrent gift send against the same wallet never corrupts the adjustment's before/after pair", async () => {
+      const { adjustCoinBalance } = await import("../coin-adjustment");
+      const { room, sender } = await liveAudioRoomWithSender("adjrace", 500);
+      const gift = await createGift("adjrace-gift", 200);
+      const admin = await createUser("adjadminrace");
+
+      // Fire a real coin-spending gift send and an admin credit at the
+      // sender's wallet at the same time. Whichever order Postgres
+      // actually serializes them in, the adjustment's beforeBalance must
+      // match the wallet's true value at that moment - not a stale read
+      // taken before the transaction - and beforeBalance + delta must
+      // equal the wallet's balance right after the adjustment commits.
+      const [sendResult, adjustResult] = await Promise.all([
+        sendGift({ senderId: sender.id, roomType: "AUDIO", roomId: room.id, giftKey: gift.key, quantity: 1, idempotencyKey: randomUUID() }),
+        adjustCoinBalance({ adminId: admin.id, userId: sender.id, delta: 30, reason: "test: concurrent credit" }),
+      ]);
+
+      expect(sendResult.totalCoins).toBe(200);
+      expect(adjustResult.afterBalance - adjustResult.delta).toBe(adjustResult.beforeBalance);
+
+      const finalBalance = await getCoinBalance(sender.id);
+      expect(finalBalance).toBe(500 - 200 + 30);
+      // Whichever transaction the adjustment's atomic read landed after,
+      // its recorded afterBalance must equal the wallet's balance at that
+      // same point - i.e. either before or after the gift's debit, never
+      // a value that matches neither.
+      expect([500 + 30, 500 - 200 + 30]).toContain(adjustResult.afterBalance);
+    });
   });
 
   // ── Admin eligibility computation: server-calculated, never a client-side permission ──

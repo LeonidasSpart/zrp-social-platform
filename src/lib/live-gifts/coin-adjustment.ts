@@ -26,10 +26,19 @@ export interface AdjustCoinBalanceResult {
  * it describes can never drift apart (identical atomicity reasoning to
  * sendGift()'s debit + ledger insert).
  *
- * A debit (negative delta) uses the same conditional-updateMany pattern
- * as sendGift()'s debit - `balance + delta >= 0` - so a concurrent spend
- * can never be raced into a negative balance; the CoinWallet
+ * A debit (negative delta) uses the same conditional-update pattern as
+ * sendGift()'s debit - `balance + delta >= 0` - so a concurrent spend can
+ * never be raced into a negative balance; the CoinWallet
  * balance-nonnegative CHECK constraint is the final backstop either way.
+ *
+ * The before/after pair is read from the SAME atomic `UPDATE ... RETURNING`
+ * that moves the balance, not from a separate read before the transaction
+ * - a prior version read `beforeBalance` via an upsert before starting the
+ * transaction, which left a window where a concurrent sendGift()/purchase
+ * against the same wallet would make the recorded before/after wrong even
+ * though the balance itself was still updated correctly. For a financial
+ * ledger, a wrong-but-internally-consistent audit row is as bad as a wrong
+ * balance, so this reads the true pre-update value atomically instead.
  */
 export async function adjustCoinBalance(input: AdjustCoinBalanceInput): Promise<AdjustCoinBalanceResult> {
   const { adminId, userId, delta, reason } = input;
@@ -49,14 +58,18 @@ export async function adjustCoinBalance(input: AdjustCoinBalanceInput): Promise<
     create: { userId },
     update: {},
   });
-  const beforeBalance = wallet.balance;
 
   const row = await prisma.$transaction(async (tx) => {
-    const updated = await tx.coinWallet.updateMany({
-      where: { id: wallet.id, balance: { gte: -delta } }, // gte -delta == balance + delta >= 0
-      data: { balance: { increment: delta } },
-    });
-    if (updated.count !== 1) throw LiveGiftErrors.adjustmentWouldGoNegative();
+    const updated = await tx.$queryRaw<{ balance: number }[]>`
+      UPDATE "CoinWallet"
+      SET balance = balance + ${delta}
+      WHERE id = ${wallet.id} AND balance + ${delta} >= 0
+      RETURNING balance
+    `;
+    if (updated.length !== 1) throw LiveGiftErrors.adjustmentWouldGoNegative();
+
+    const afterBalance = updated[0].balance;
+    const beforeBalance = afterBalance - delta;
 
     return tx.coinAdjustment.create({
       data: {
@@ -64,7 +77,7 @@ export async function adjustCoinBalance(input: AdjustCoinBalanceInput): Promise<
         adminId,
         beforeBalance,
         delta,
-        afterBalance: beforeBalance + delta,
+        afterBalance,
         reason: reason.trim(),
       },
     });
