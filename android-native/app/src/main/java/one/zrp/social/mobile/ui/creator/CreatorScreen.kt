@@ -26,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
@@ -104,7 +105,13 @@ import one.zrp.social.mobile.util.formatCount
  * reachable per-post destination that already exists.
  */
 @Composable
-fun CreatorScreen(onBack: () -> Unit, onOpenPost: (String) -> Unit, onOpenProfile: (String) -> Unit) {
+fun CreatorScreen(
+    onBack: () -> Unit,
+    onOpenPost: (String) -> Unit,
+    onOpenProfile: (String) -> Unit,
+    // ZRP Live gift history (GET /creator/gifts) - its own screen, see LiveGiftsReceivedScreen.
+    onOpenLiveGifts: () -> Unit = {},
+) {
     val viewModel: CreatorViewModel = viewModel(
         factory = remember { CreatorViewModelFactory(CreatorRepository()) },
     )
@@ -169,7 +176,7 @@ fun CreatorScreen(onBack: () -> Unit, onOpenPost: (String) -> Unit, onOpenProfil
                 }
 
                 when (state.activeTab) {
-                    CreatorTab.OVERVIEW -> OverviewTab(state = state, viewModel = viewModel, onOpenProfile = onOpenProfile)
+                    CreatorTab.OVERVIEW -> OverviewTab(state = state, viewModel = viewModel, onOpenProfile = onOpenProfile, onOpenLiveGifts = onOpenLiveGifts)
                     CreatorTab.CONTENT -> ContentTab(state = state, onOpenPost = onOpenPost)
                     CreatorTab.AUDIENCE -> AudienceTab(state = state)
                 }
@@ -205,7 +212,7 @@ private fun IneligibleBody(message: String?) {
 }
 
 @Composable
-private fun OverviewTab(state: CreatorUiState, viewModel: CreatorViewModel, onOpenProfile: (String) -> Unit) {
+private fun OverviewTab(state: CreatorUiState, viewModel: CreatorViewModel, onOpenProfile: (String) -> Unit, onOpenLiveGifts: () -> Unit) {
     val profile = state.profile ?: return
     val stats = state.stats
 
@@ -245,6 +252,28 @@ private fun OverviewTab(state: CreatorUiState, viewModel: CreatorViewModel, onOp
             ) {
                 Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp))
                 Text(text = stringResource(R.string.creator_withdraw_button), modifier = Modifier.padding(start = Spacing.sm))
+            }
+        }
+
+        item {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                tonalElevation = 1.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onOpenLiveGifts, role = Role.Button),
+            ) {
+                Row(modifier = Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.CardGiftcard, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Column(modifier = Modifier.weight(1f).padding(start = Spacing.sm)) {
+                        Text(text = stringResource(R.string.creator_live_gifts_title), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            text = stringResource(R.string.creator_live_gifts_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
         }
 

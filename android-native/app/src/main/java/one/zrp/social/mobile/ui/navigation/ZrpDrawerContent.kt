@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Podcasts
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Settings
@@ -77,6 +78,7 @@ data class ZrpDrawerActions(
     val goMessages: () -> Unit,
     val goDiscover: () -> Unit,
     val goLiveAudio: () -> Unit,
+    val goLiveVideo: () -> Unit,
     val goCommunities: () -> Unit,
     val goPlay: () -> Unit,
     val goNews: () -> Unit,
@@ -167,6 +169,7 @@ fun ZrpDrawerContent(
                 rows = listOf(
                     DrawerRow(Icons.Filled.Bolt, R.string.nav_discover, onClick = select(actions.goDiscover)),
                     DrawerRow(Icons.Filled.Podcasts, R.string.nav_live_audio, onClick = select(actions.goLiveAudio)),
+                    DrawerRow(Icons.Filled.Videocam, R.string.nav_live_video, onClick = select(actions.goLiveVideo)),
                     DrawerRow(Icons.Filled.Groups, R.string.nav_communities, onClick = select(actions.goCommunities)),
                     DrawerRow(Icons.Filled.SportsEsports, R.string.nav_play, onClick = select(actions.goPlay)),
                     DrawerRow(Icons.Filled.Newspaper, R.string.nav_news, onClick = select(actions.goNews)),

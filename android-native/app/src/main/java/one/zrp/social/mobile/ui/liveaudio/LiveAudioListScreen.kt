@@ -1,7 +1,6 @@
 package one.zrp.social.mobile.ui.liveaudio
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,14 +23,9 @@ import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,9 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.zrp.social.mobile.R
 import one.zrp.social.mobile.data.LiveAudioRepository
-import one.zrp.social.mobile.network.CommunitySummary
 import one.zrp.social.mobile.network.LiveAudioRoomSummary
 import one.zrp.social.mobile.ui.components.Avatar
+import one.zrp.social.mobile.ui.live.LiveCreateRoomDialog
 import one.zrp.social.mobile.ui.theme.Spacing
 import one.zrp.social.mobile.ui.theme.ZrpRed
 import one.zrp.social.mobile.util.localizedError
@@ -169,7 +162,7 @@ fun LiveAudioListScreen(
 
     if (showCreate) {
         LaunchedEffect(Unit) { viewModel.loadMyCommunities() }
-        CreateLiveAudioRoomDialog(
+        LiveCreateRoomDialog(
             isSubmitting = state.isCreating,
             error = state.createError,
             myCommunities = state.myCommunities,
@@ -177,8 +170,8 @@ fun LiveAudioListScreen(
                 showCreate = false
                 viewModel.dismissCreateError()
             },
-            onSubmit = { title, description, category, visibility, communityId ->
-                viewModel.createRoom(title, description, category, visibility, communityId, scheduledAtMillis = null)
+            onSubmit = { title, description, category, visibility, communityId, scheduledAtMillis ->
+                viewModel.createRoom(title, description, category, visibility, communityId, scheduledAtMillis)
             },
         )
     }
@@ -242,158 +235,4 @@ private fun LiveAudioRoomCard(room: LiveAudioRoomSummary, onClick: () -> Unit) {
             }
         }
     }
-}
-
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-private fun CreateLiveAudioRoomDialog(
-    isSubmitting: Boolean,
-    error: String?,
-    myCommunities: List<CommunitySummary>,
-    onDismiss: () -> Unit,
-    onSubmit: (title: String, description: String?, category: String?, visibility: String, communityId: String?) -> Unit,
-) {
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-    var visibility by remember { mutableStateOf("PUBLIC") }
-    var communityId by remember { mutableStateOf<String?>(null) }
-    var communityMenuExpanded by remember { mutableStateOf(false) }
-
-    val visibilityOptions = listOf(
-        "PUBLIC" to stringResource(R.string.live_audio_visibility_public),
-        "COMMUNITY" to stringResource(R.string.live_audio_visibility_community),
-        "PRIVATE" to stringResource(R.string.live_audio_visibility_private),
-    )
-    val canSubmit = title.trim().isNotEmpty() && title.trim().length <= 200 && !isSubmitting &&
-        (visibility != "COMMUNITY" || communityId != null)
-
-    androidx.compose.material3.AlertDialog(
-        onDismissRequest = { if (!isSubmitting) onDismiss() },
-        title = { Text(stringResource(R.string.live_audio_create_title)) },
-        text = {
-            Column {
-                if (error != null) {
-                    Text(
-                        text = localizedError(error) ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(bottom = Spacing.sm),
-                    )
-                }
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { if (it.length <= 200) title = it },
-                    label = { Text(stringResource(R.string.live_audio_title_label)) },
-                    placeholder = { Text(stringResource(R.string.live_audio_title_placeholder)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { if (it.length <= 2000) description = it },
-                    label = { Text(stringResource(R.string.live_audio_description_label)) },
-                    minLines = 2,
-                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
-                )
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = { if (it.length <= 60) category = it },
-                    label = { Text(stringResource(R.string.live_audio_category_label)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
-                )
-                Text(
-                    text = stringResource(R.string.live_audio_visibility_label),
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.xs),
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                    visibilityOptions.forEach { (value, label) ->
-                        val selected = visibility == value
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .border(
-                                    width = 1.dp,
-                                    color = if (selected) ZrpRed else MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(12.dp),
-                                )
-                                .background(if (selected) ZrpRed else MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                                .clickable { visibility = value }
-                                .padding(vertical = Spacing.sm),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                    }
-                }
-                if (visibility == "COMMUNITY") {
-                    if (myCommunities.isEmpty()) {
-                        Text(
-                            text = stringResource(R.string.live_audio_no_communities_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = Spacing.sm),
-                        )
-                    } else {
-                        ExposedDropdownMenuBox(
-                            expanded = communityMenuExpanded,
-                            onExpandedChange = { communityMenuExpanded = it },
-                            modifier = Modifier.padding(top = Spacing.sm),
-                        ) {
-                            OutlinedTextField(
-                                value = myCommunities.firstOrNull { it.id == communityId }?.name
-                                    ?: stringResource(R.string.live_audio_select_community_placeholder),
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text(stringResource(R.string.live_audio_community_label)) },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = communityMenuExpanded) },
-                                modifier = Modifier.menuAnchor().fillMaxWidth(),
-                            )
-                            DropdownMenu(expanded = communityMenuExpanded, onDismissRequest = { communityMenuExpanded = false }) {
-                                myCommunities.forEach { community ->
-                                    DropdownMenuItem(
-                                        text = { Text(community.name) },
-                                        onClick = {
-                                            communityId = community.id
-                                            communityMenuExpanded = false
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            if (isSubmitting) {
-                CircularProgressIndicator(modifier = Modifier.padding(8.dp))
-            } else {
-                TextButton(
-                    onClick = {
-                        onSubmit(
-                            title,
-                            description.trim().ifEmpty { null },
-                            category.trim().ifEmpty { null },
-                            visibility,
-                            if (visibility == "COMMUNITY") communityId else null,
-                        )
-                    },
-                    enabled = canSubmit,
-                ) {
-                    Text(stringResource(R.string.live_audio_create_submit))
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isSubmitting) {
-                Text(stringResource(R.string.action_cancel))
-            }
-        },
-    )
 }

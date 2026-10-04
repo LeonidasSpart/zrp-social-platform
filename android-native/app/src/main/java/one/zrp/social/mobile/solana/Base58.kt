@@ -38,7 +38,13 @@ object Base58 {
             require(digit >= 0) { "Invalid Base58 character: $c" }
             value = value.multiply(BASE).add(BigInteger.valueOf(digit.toLong()))
         }
-        var bytes = value.toByteArray()
+        // BigInteger.ZERO.toByteArray() returns a single 0x00 byte, not
+        // an empty array - for an all-'1' input (decoded value exactly
+        // zero, e.g. the System Program address) that byte would double
+        // count against the leading-zero padding added below, producing
+        // one byte too many. Every leading zero byte is already captured
+        // by leadingZeros, so the magnitude itself is empty here.
+        var bytes = if (value.signum() == 0) ByteArray(0) else value.toByteArray()
         // BigInteger.toByteArray() may prepend a sign byte (0x00) for a
         // value whose high bit would otherwise be read as negative -
         // strip it, it is not part of the encoded data.

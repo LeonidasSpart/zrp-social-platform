@@ -109,10 +109,13 @@ class SolanaTransactionCompilerTest {
 
     @Test
     fun `compact-u16 encoding handles values requiring multiple bytes`() {
-        // A fee payer plus 200 unique writable accounts (201 total) forces
-        // the account-count compact-u16 above 127, needing 2 bytes:
-        // 201 = 0b1100_1001 -> low 7 bits 0x49 with continuation bit set
-        // (0xC9), remaining value 1 as the final byte (0x01).
+        // A fee payer plus 200 unique writable accounts plus the
+        // instruction's own program ID (added as its own account entry
+        // by compileUnsignedTransaction, since instructions reference
+        // their program by index too) is 202 total, forcing the
+        // account-count compact-u16 above 127, needing 2 bytes:
+        // 202 = 0b1100_1010 -> low 7 bits 0x4a with continuation bit set
+        // (0xCA), remaining value 1 as the final byte (0x01).
         val programId = SolanaPublicKey("11111111111111111111111111111111")
         val feePayer = SolanaPublicKey("4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R")
         val accounts = (1..200).map {
@@ -121,10 +124,10 @@ class SolanaTransactionCompilerTest {
         }
         val ix = CompiledInstruction(programId, accounts, ByteArray(0))
         val result = SolanaTransactionCompiler.compileUnsignedTransaction(feePayer, listOf(ix), blockhashBytes)
-        // 1 (sig count, 1 byte) + 64 (sig) + 3 (header) + account-count-compact-u16 + 201*32 (keys) + 32 (blockhash) + instructions...
-        // Just assert it doesn't throw and the account-count varint is 2 bytes (0xc9, 0x01 for 201 accounts: feePayer + 200).
+        // 1 (sig count, 1 byte) + 64 (sig) + 3 (header) + account-count-compact-u16 + 202*32 (keys) + 32 (blockhash) + instructions...
+        // Just assert it doesn't throw and the account-count varint is 2 bytes (0xca, 0x01 for 202 accounts: feePayer + 200 + programId).
         val accountCountOffset = 1 + 64 + 3
-        assertEquals(0xc9, result[accountCountOffset].toInt() and 0xFF)
+        assertEquals(0xca, result[accountCountOffset].toInt() and 0xFF)
         assertEquals(0x01, result[accountCountOffset + 1].toInt() and 0xFF)
     }
 }
