@@ -772,9 +772,15 @@ dependencies {
     // shipping; CI (.github/workflows/android-native-build.yml) is the
     // real verification oracle, exactly as it already is for every other
     // Android change in this repo.
+    //
+    // web3-solana/rpc-core were originally added here too, but this app's
+    // PDA derivation (SolanaPublicKey.kt/Ed25519Curve.kt) and transaction
+    // compilation (SolanaTransactionCompiler.kt) ended up hand-built and
+    // cross-verified against @solana/web3.js directly instead (see those
+    // files), so this app never calls into web3-solana/rpc-core - removed
+    // to avoid an unused, version-mismatched dependency (clientlib-ktx
+    // 2.0.6 already transitively pulls a newer web3-solana on its own).
     implementation 'com.solanamobile:mobile-wallet-adapter-clientlib-ktx:2.0.6'
-    implementation 'com.solanamobile:web3-solana:0.2.6'
-    implementation 'com.solanamobile:rpc-core:0.2.8'
 
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
