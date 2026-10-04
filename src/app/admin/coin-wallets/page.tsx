@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Coins, Loader2, Search, Wallet as WalletIcon } from "lucide-react";
+import { Coins, Loader2, Search, Wallet as WalletIcon, X, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDateLocale } from "@/lib/dateLocale";
 import AdminUserIdentity from "@/components/admin/AdminUserIdentity";
@@ -25,7 +25,22 @@ interface WalletRow {
   status: "ACTIVE" | "SUSPENDED" | "RESTRICTED";
 }
 
+interface QuickGrantUser {
+  id: string;
+  username: string;
+  name: string | null;
+  avatarUrl: string | null;
+  badgeType: string | null;
+  banned: boolean;
+  balance: number;
+}
+
 const STATUS_FILTERS = ["ALL", "ACTIVE", "SUSPENDED", "RESTRICTED", "ZERO", "POSITIVE"] as const;
+
+// Scaled down from the amounts shown in other platforms' reference UIs: ZRP's coin
+// peg is a real $0.01 USDC per coin (COIN_VALUE_USDC), so a six-figure chip there
+// would be a five-figure real-dollar click here. These represent $1 / $5 / $10 / $50.
+const QUICK_GRANT_CHIPS = [100, 500, 1000, 5000];
 
 export default function AdminCoinWalletsPage() {
   const { t, language } = useLanguage();
@@ -43,6 +58,16 @@ export default function AdminCoinWalletsPage() {
   const [adjustSaving, setAdjustSaving] = useState(false);
   const [adjustError, setAdjustError] = useState<string | null>(null);
   const limit = 25;
+
+  const [quickQuery, setQuickQuery] = useState("");
+  const [quickResults, setQuickResults] = useState<QuickGrantUser[]>([]);
+  const [quickSearching, setQuickSearching] = useState(false);
+  const [quickSelected, setQuickSelected] = useState<QuickGrantUser | null>(null);
+  const [quickAmount, setQuickAmount] = useState("");
+  const [quickReason, setQuickReason] = useState("");
+  const [quickSaving, setQuickSaving] = useState(false);
+  const [quickError, setQuickError] = useState<string | null>(null);
+  const [quickSuccess, setQuickSuccess] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -68,6 +93,86 @@ export default function AdminCoinWalletsPage() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, status, page]);
+
+  useEffect(() => {
+    const q = quickQuery.trim();
+    if (!q) {
+      setQuickResults([]);
+      setQuickSearching(false);
+      return;
+    }
+    setQuickSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/admin/live-gifts/coin-wallets/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json().catch(() => ({ results: [] }));
+        setQuickResults(res.ok ? data.results || [] : []);
+      } catch {
+        setQuickResults([]);
+      } finally {
+        setQuickSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [quickQuery]);
+
+  function selectQuickUser(u: QuickGrantUser) {
+    setQuickSelected(u);
+    setQuickResults([]);
+    setQuickQuery("");
+    setQuickAmount("");
+    setQuickReason("");
+    setQuickError(null);
+    setQuickSuccess(false);
+  }
+
+  function clearQuickSelection() {
+    setQuickSelected(null);
+    setQuickAmount("");
+    setQuickReason("");
+    setQuickError(null);
+    setQuickSuccess(false);
+  }
+
+  async function submitQuickGrant() {
+    if (!quickSelected) return;
+    const delta = Number(quickAmount);
+    if (!Number.isInteger(delta) || delta === 0) {
+      setQuickError(t("adminLiveGifts.errGeneric"));
+      return;
+    }
+    if (!quickReason.trim()) {
+      setQuickError(t("adminLiveGifts.reason"));
+      return;
+    }
+    const confirmMsg = t("adminLiveGifts.adjustConfirm")
+      .replace("{name}", quickSelected.username)
+      .replace("{delta}", String(delta));
+    if (!window.confirm(confirmMsg)) return;
+
+    setQuickSaving(true);
+    setQuickError(null);
+    setQuickSuccess(false);
+    try {
+      const res = await fetch(`/api/admin/live-gifts/coin-wallets/${quickSelected.id}/adjust`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ delta, reason: quickReason.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setQuickError(data.error || t("adminLiveGifts.errGeneric"));
+        return;
+      }
+      setQuickSelected((prev) => (prev ? { ...prev, balance: prev.balance + delta } : prev));
+      setQuickAmount("");
+      setQuickReason("");
+      setQuickSuccess(true);
+      await load();
+    } finally {
+      setQuickSaving(false);
+    }
+  }
 
   async function submitAdjustment() {
     if (!adjustTarget) return;
@@ -123,6 +228,138 @@ export default function AdminCoinWalletsPage() {
       <div className="mb-6 flex items-center gap-2">
         <WalletIcon className="h-6 w-6 text-zrp-red" />
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("adminLiveGifts.walletsTitle")}</h1>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-1 flex items-center gap-2">
+          <Zap className="h-4 w-4 text-zrp-red" />
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">{t("adminLiveGifts.quickGrantTitle")}</h2>
+        </div>
+        <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">{t("adminLiveGifts.quickGrantDescription")}</p>
+
+        {!quickSelected ? (
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={quickQuery}
+              onChange={(e) => setQuickQuery(e.target.value)}
+              placeholder={t("adminLiveGifts.quickGrantSearchPlaceholder")}
+              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+            />
+            {quickQuery.trim() && (
+              <div className="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                {quickSearching ? (
+                  <div className="flex items-center justify-center p-3">
+                    <Loader2 className="h-4 w-4 animate-spin text-zrp-red" />
+                  </div>
+                ) : quickResults.length === 0 ? (
+                  <p className="p-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                    {t("adminLiveGifts.quickGrantNoResults")}
+                  </p>
+                ) : (
+                  quickResults.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => selectQuickUser(u)}
+                      className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <AdminUserIdentity user={u} />
+                      <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <Coins className="h-3 w-3 text-yellow-500" /> {u.balance}
+                      </span>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+            <div className="flex items-start justify-between gap-2">
+              <AdminUserIdentity
+                user={quickSelected}
+                extra={
+                  <span className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                    <Coins className="h-3 w-3 text-yellow-500" /> {quickSelected.balance}
+                  </span>
+                }
+              />
+              <button
+                type="button"
+                onClick={clearQuickSelection}
+                aria-label={t("adminLiveGifts.quickGrantClearSelection")}
+                className="shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {QUICK_GRANT_CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => setQuickAmount(String(chip))}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                    quickAmount === String(chip)
+                      ? "bg-zrp-red text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  +{chip.toLocaleString()}
+                </button>
+              ))}
+            </div>
+
+            <label className="mb-1 mt-3 block text-xs font-medium text-gray-500 dark:text-gray-400">
+              {t("adminLiveGifts.delta")}
+            </label>
+            <input
+              type="number"
+              step={1}
+              value={quickAmount}
+              onChange={(e) => setQuickAmount(e.target.value)}
+              placeholder={t("adminLiveGifts.quickGrantAmountPlaceholder")}
+              className="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+            />
+
+            <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+              {t("adminLiveGifts.reason")}
+            </label>
+            <textarea
+              value={quickReason}
+              onChange={(e) => setQuickReason(e.target.value)}
+              rows={2}
+              className="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+            />
+
+            {quickError && <p className="mb-3 text-sm text-red-600 dark:text-red-400">{quickError}</p>}
+            {quickSuccess && !quickError && (
+              <p className="mb-3 text-sm text-green-600 dark:text-green-400">{t("adminLiveGifts.quickGrantSuccess")}</p>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={clearQuickSelection}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                {t("adminLiveGifts.cancel")}
+              </button>
+              <button
+                type="button"
+                disabled={quickSaving}
+                onClick={submitQuickGrant}
+                className="flex items-center gap-1.5 rounded-lg bg-zrp-red px-4 py-2 text-sm font-medium text-white hover:bg-zrp-red/90 disabled:opacity-50"
+              >
+                {quickSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                {t("adminLiveGifts.quickGrantApply")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
