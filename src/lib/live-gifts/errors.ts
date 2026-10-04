@@ -36,5 +36,14 @@ export const LiveGiftErrors = {
     new LiveAudioError("invalid_transaction", "Invalid or pending transaction.", 400),
   amountMismatch: () =>
     new LiveAudioError("amount_mismatch", "Transaction amount does not match the requested purchase.", 400),
+  giftUnavailableWindow: () =>
+    new LiveAudioError("gift_unavailable_window", "This gift isn't available right now.", 400),
+  giftRequiresHigherPlan: () =>
+    new LiveAudioError("gift_requires_higher_plan", "Upgrade your plan to send this gift.", 403),
+  coinPackageNotFound: () => new LiveAudioError("coin_package_not_found", "This coin package is not available.", 404),
+  coinPackageDisabled: () =>
+    new LiveAudioError("coin_package_disabled", "This coin package is not currently available.", 400),
+  insufficientPackageAmount: () =>
+    new LiveAudioError("insufficient_package_amount", "The amount sent doesn't cover this package's price.", 400),
   validation: (message: string) => new LiveAudioError("validation_error", message, 400),
 };

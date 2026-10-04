@@ -33,6 +33,7 @@ import {
   Receipt,
   ShoppingCart,
   LineChart,
+  PackagePlus,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -221,6 +222,11 @@ export default function AdminLayout({
             href: "/admin/coin-purchases",
             labelKey: "adminLiveGifts.purchasesTitle" as TranslationKey,
             icon: ShoppingCart,
+          },
+          {
+            href: "/admin/coin-packages",
+            labelKey: "adminCoinPackages.title" as TranslationKey,
+            icon: PackagePlus,
           },
           {
             href: "/admin/gift-analytics",

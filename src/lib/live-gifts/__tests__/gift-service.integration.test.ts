@@ -22,6 +22,7 @@ describe.skipIf(!hasRealDatabaseUrl)("Live Gifts gift-service (integration, real
   const videoRoomIds: string[] = [];
   const giftKeys: string[] = [];
   const txIds: string[] = [];
+  const packageKeys: string[] = [];
 
   // Live Audio/Video gate EVERY mutating action (createRoom, joinRoom)
   // behind requireLiveAudioAccess/requireLiveVideoAccess - an active
@@ -62,11 +63,41 @@ describe.skipIf(!hasRealDatabaseUrl)("Live Gifts gift-service (integration, real
     return host;
   }
 
-  async function createGift(label: string, priceCoins: number, opts?: { enabled?: boolean }) {
+  async function createGift(
+    label: string,
+    priceCoins: number,
+    opts?: {
+      enabled?: boolean;
+      availableFrom?: Date | null;
+      availableTo?: Date | null;
+      minTier?: string | null;
+      rarity?: string | null;
+      category?: string | null;
+      soundUrl?: string | null;
+    }
+  ) {
     const key = `${label}-${runId}`;
     giftKeys.push(key);
     return prisma.giftDefinition.create({
-      data: { key, priceCoins, enabled: opts?.enabled ?? true },
+      data: {
+        key,
+        priceCoins,
+        enabled: opts?.enabled ?? true,
+        availableFrom: opts?.availableFrom ?? null,
+        availableTo: opts?.availableTo ?? null,
+        minTier: opts?.minTier ?? null,
+        rarity: opts?.rarity ?? null,
+        category: opts?.category ?? null,
+        soundUrl: opts?.soundUrl ?? null,
+      },
+    });
+  }
+
+  async function createCoinPackage(label: string, priceUsdc: number, coinsCredited: number, opts?: { bonusCoins?: number; enabled?: boolean }) {
+    const key = `${label}-${runId}`;
+    packageKeys.push(key);
+    return prisma.coinPackage.create({
+      data: { key, priceUsdc, coinsCredited, bonusCoins: opts?.bonusCoins ?? 0, enabled: opts?.enabled ?? true },
     });
   }
 
@@ -108,6 +139,7 @@ describe.skipIf(!hasRealDatabaseUrl)("Live Gifts gift-service (integration, real
     await prisma.liveVideoRoom.deleteMany({ where: { id: { in: videoRoomIds } } });
     await prisma.creatorProfile.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.giftDefinition.deleteMany({ where: { key: { in: giftKeys } } });
+    await prisma.coinPackage.deleteMany({ where: { key: { in: packageKeys } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   });
 
@@ -565,6 +597,207 @@ describe.skipIf(!hasRealDatabaseUrl)("Live Gifts gift-service (integration, real
       const result = await computeGiftEligibility(sender.id);
       expect(result.reason).toBe("ELIGIBLE");
       expect(result.eligible).toBe(true);
+    });
+  });
+
+  // ── GiftDefinition availability window ──────────────────────────
+  describe("availability window (GiftDefinition.availableFrom/availableTo)", () => {
+    it("rejects a gift whose availableFrom is in the future", async () => {
+      const { room, sender } = await liveAudioRoomWithSender("avail-future", 500);
+      const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const gift = await createGift("avail-future-gift", 50, { availableFrom: future });
+
+      await expect(
+        sendGift({ senderId: sender.id, roomType: "AUDIO", roomId: room.id, giftKey: gift.key, quantity: 1, idempotencyKey: randomUUID() })
+      ).rejects.toMatchObject({ code: "gift_unavailable_window" });
+      expect(await getCoinBalance(sender.id)).toBe(500);
+    });
+
+    it("rejects a gift whose availableTo is in the past", async () => {
+      const { room, sender } = await liveAudioRoomWithSender("avail-past", 500);
+      const past = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const gift = await createGift("avail-past-gift", 50, { availableTo: past });
+
+      await expect(
+        sendGift({ senderId: sender.id, roomType: "AUDIO", roomId: room.id, giftKey: gift.key, quantity: 1, idempotencyKey: randomUUID() })
+      ).rejects.toMatchObject({ code: "gift_unavailable_window" });
+    });
+
+    it("sends normally when the current time is inside the availability window", async () => {
+      const { room, sender, host } = await liveAudioRoomWithSender("avail-inside", 500);
+      const past = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const gift = await createGift("avail-inside-gift", 50, { availableFrom: past, availableTo: future });
+
+      const result = await sendGift({
+        senderId: sender.id,
+        roomType: "AUDIO",
+        roomId: room.id,
+        giftKey: gift.key,
+        quantity: 1,
+        idempotencyKey: randomUUID(),
+      });
+      expect(result.recipientId).toBe(host.id);
+    });
+
+    it("the public catalog excludes a gift outside its availability window", async () => {
+      const past = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const expiredKey = `avail-catalog-expired-${runId}`;
+      giftKeys.push(expiredKey);
+      await prisma.giftDefinition.create({ data: { key: expiredKey, priceCoins: 10, availableTo: past } });
+
+      const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const notYetKey = `avail-catalog-notyet-${runId}`;
+      giftKeys.push(notYetKey);
+      await prisma.giftDefinition.create({ data: { key: notYetKey, priceCoins: 10, availableFrom: future } });
+
+      const catalog = await getGiftCatalog();
+      expect(catalog.find((g) => g.key === expiredKey)).toBeUndefined();
+      expect(catalog.find((g) => g.key === notYetKey)).toBeUndefined();
+    });
+  });
+
+  // ── GiftDefinition.minTier plan gating ───────────────────────────
+  describe("minTier plan gating", () => {
+    // Live Audio's own room-join gate (requireLiveAudioAccess) requires an
+    // active PAID plan to join at all - unrelated to the minTier check
+    // this suite is testing. Every sender here joins as "pro" (via the
+    // shared createUser() helper, which also creates the matching
+    // Subscription row that gate reads) and is downgraded to "free"
+    // AFTER joining, exactly like a real pro->free plan downgrade mid-room -
+    // sendGift() re-reads the sender's CURRENT plan fresh from the
+    // database, so this downgrade is what the minTier check actually sees.
+    async function downgradeToFree(userId: string) {
+      await prisma.user.update({ where: { id: userId }, data: { plan: "free" } });
+    }
+
+    it("rejects a free-plan sender sending a minTier: 'pro' gift", async () => {
+      const host = await createHostWithProfile("mintierhost1");
+      const sender = await createUser("mintierfree");
+      await fundWallet(sender.id, 500);
+      const room = await createAudioRoom({ hostId: host.id, title: `Gift room ${runId} mintier1`, visibility: "PUBLIC" });
+      roomIds.push(room.id);
+      await joinAudioRoom(room.id, sender.id);
+      await downgradeToFree(sender.id);
+      const gift = await createGift("mintier-pro-gift", 50, { minTier: "pro" });
+
+      await expect(
+        sendGift({ senderId: sender.id, roomType: "AUDIO", roomId: room.id, giftKey: gift.key, quantity: 1, idempotencyKey: randomUUID() })
+      ).rejects.toMatchObject({ code: "gift_requires_higher_plan" });
+      expect(await getCoinBalance(sender.id)).toBe(500);
+    });
+
+    it("allows a pro-plan sender to send a minTier: 'pro' gift", async () => {
+      const host = await createHostWithProfile("mintierhost2");
+      const sender = await createUser("mintierpro");
+      await fundWallet(sender.id, 500);
+      const room = await createAudioRoom({ hostId: host.id, title: `Gift room ${runId} mintier2`, visibility: "PUBLIC" });
+      roomIds.push(room.id);
+      await joinAudioRoom(room.id, sender.id);
+      const gift = await createGift("mintier-pro-gift2", 50, { minTier: "pro" });
+
+      const result = await sendGift({
+        senderId: sender.id,
+        roomType: "AUDIO",
+        roomId: room.id,
+        giftKey: gift.key,
+        quantity: 1,
+        idempotencyKey: randomUUID(),
+      });
+      expect(result.recipientId).toBe(host.id);
+    });
+
+    it("a gift with minTier: null has no restriction, even for a free-plan sender", async () => {
+      const host = await createHostWithProfile("mintierhost3");
+      const sender = await createUser("mintiernull");
+      await fundWallet(sender.id, 500);
+      const room = await createAudioRoom({ hostId: host.id, title: `Gift room ${runId} mintier3`, visibility: "PUBLIC" });
+      roomIds.push(room.id);
+      await joinAudioRoom(room.id, sender.id);
+      await downgradeToFree(sender.id);
+      const gift = await createGift("mintier-null-gift", 50, { minTier: null });
+
+      const result = await sendGift({
+        senderId: sender.id,
+        roomType: "AUDIO",
+        roomId: room.id,
+        giftKey: gift.key,
+        quantity: 1,
+        idempotencyKey: randomUUID(),
+      });
+      expect(result.recipientId).toBe(host.id);
+    });
+  });
+
+  // ── CoinPackage purchaseCoins() ───────────────────────────────────
+  describe("purchaseCoins with a CoinPackage", () => {
+    it("credits exactly coinsCredited + bonusCoins regardless of a higher verified amount", async () => {
+      const buyer = await createUser("pkgoverpay");
+      const pkg = await createCoinPackage("overpay-pkg", 5, 500, { bonusCoins: 50 });
+      const transactionId = newTxId("pkgoverpay");
+      // Verified amount ($10) is well above the package's $5 price.
+      verifyUsdcTransaction.mockResolvedValue({ valid: true, amount: 10, from: null, to: "platform" });
+
+      const result = await purchaseCoins({ userId: buyer.id, transactionId, packageKey: pkg.key });
+      expect(result.coinsCredited).toBe(550); // 500 + 50, never derived from the $10 verified amount
+      expect(await getCoinBalance(buyer.id)).toBe(550);
+
+      const row = await prisma.coinPurchase.findUniqueOrThrow({ where: { transactionId } });
+      expect(row.coinPackageId).toBe(pkg.id);
+    });
+
+    it("rejects a purchase whose verified amount is less than the package's priceUsdc", async () => {
+      const buyer = await createUser("pkgunderpay");
+      const pkg = await createCoinPackage("underpay-pkg", 10, 1000);
+      const transactionId = newTxId("pkgunderpay");
+      verifyUsdcTransaction.mockResolvedValue({ valid: true, amount: 5, from: null, to: "platform" });
+
+      await expect(
+        purchaseCoins({ userId: buyer.id, transactionId, packageKey: pkg.key })
+      ).rejects.toMatchObject({ code: "insufficient_package_amount" });
+      expect(await getCoinBalance(buyer.id)).toBe(0);
+    });
+
+    it("rejects an unknown packageKey", async () => {
+      const buyer = await createUser("pkgunknown");
+      const transactionId = newTxId("pkgunknown");
+      await expect(
+        purchaseCoins({ userId: buyer.id, transactionId, packageKey: `does-not-exist-${runId}` })
+      ).rejects.toMatchObject({ code: "coin_package_not_found" });
+    });
+
+    it("rejects a disabled packageKey", async () => {
+      const buyer = await createUser("pkgdisabled");
+      const pkg = await createCoinPackage("disabled-pkg", 5, 500, { enabled: false });
+      const transactionId = newTxId("pkgdisabled");
+      await expect(
+        purchaseCoins({ userId: buyer.id, transactionId, packageKey: pkg.key })
+      ).rejects.toMatchObject({ code: "coin_package_disabled" });
+    });
+
+    it("purchaseCoins with NO packageKey still behaves exactly like the original continuous flow", async () => {
+      const buyer = await createUser("pkgnone");
+      const transactionId = newTxId("pkgnone");
+      verifyUsdcTransaction.mockResolvedValue({ valid: true, amount: 2.5, from: null, to: "platform" });
+
+      const result = await purchaseCoins({ userId: buyer.id, transactionId });
+      expect(result.coinsCredited).toBe(250); // floor(2.5 / 0.01), unchanged continuous-flow math
+      const row = await prisma.coinPurchase.findUniqueOrThrow({ where: { transactionId } });
+      expect(row.coinPackageId).toBeNull();
+    });
+
+    it("the same transaction ID cannot fund two purchases, whether package-based or not", async () => {
+      const buyer = await createUser("pkgidempotent");
+      const pkg = await createCoinPackage("idempotent-pkg", 5, 500);
+      const transactionId = newTxId("pkgidempotent");
+      verifyUsdcTransaction.mockResolvedValue({ valid: true, amount: 5, from: null, to: "platform" });
+
+      const first = await purchaseCoins({ userId: buyer.id, transactionId, packageKey: pkg.key });
+      expect(first.coinsCredited).toBe(500);
+
+      // A retry with the same transaction ID, even without a packageKey this time, must still be rejected.
+      await expect(purchaseCoins({ userId: buyer.id, transactionId })).rejects.toMatchObject({ code: "duplicate_transaction" });
+      expect(await getCoinBalance(buyer.id)).toBe(500);
     });
   });
 });

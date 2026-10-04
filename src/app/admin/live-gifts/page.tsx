@@ -19,12 +19,21 @@ import { useLanguage } from "@/contexts/LanguageContext";
  * retirement path, enforced by the database itself.
  */
 
+const RARITIES = ["COMMON", "RARE", "EPIC", "LEGENDARY"] as const;
+const MIN_TIERS = ["free", "pro", "business", "enterprise"] as const;
+
 interface GiftRow {
   id: string;
   key: string;
   priceCoins: number;
   iconUrl: string | null;
   animationUrl: string | null;
+  soundUrl: string | null;
+  category: string | null;
+  rarity: string | null;
+  minTier: string | null;
+  availableFrom: string | null;
+  availableTo: string | null;
   enabled: boolean;
   sortOrder: number;
 }
@@ -35,11 +44,39 @@ interface FormState {
   priceCoins: string;
   iconUrl: string;
   animationUrl: string;
+  soundUrl: string;
+  category: string;
+  rarity: string;
+  minTier: string;
+  availableFrom: string;
+  availableTo: string;
   sortOrder: string;
   enabled: boolean;
 }
 
-const EMPTY_FORM: FormState = { key: "", priceCoins: "", iconUrl: "", animationUrl: "", sortOrder: "0", enabled: true };
+const EMPTY_FORM: FormState = {
+  key: "",
+  priceCoins: "",
+  iconUrl: "",
+  animationUrl: "",
+  soundUrl: "",
+  category: "",
+  rarity: "",
+  minTier: "",
+  availableFrom: "",
+  availableTo: "",
+  sortOrder: "0",
+  enabled: true,
+};
+
+/** <input type="datetime-local"> wants "YYYY-MM-DDTHH:mm", no timezone/seconds. */
+function toDatetimeLocal(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export default function AdminLiveGiftsPage() {
   const { t } = useLanguage();
@@ -83,6 +120,12 @@ export default function AdminLiveGiftsPage() {
       priceCoins: String(g.priceCoins),
       iconUrl: g.iconUrl || "",
       animationUrl: g.animationUrl || "",
+      soundUrl: g.soundUrl || "",
+      category: g.category || "",
+      rarity: g.rarity || "",
+      minTier: g.minTier || "",
+      availableFrom: toDatetimeLocal(g.availableFrom),
+      availableTo: toDatetimeLocal(g.availableTo),
       sortOrder: String(g.sortOrder),
       enabled: g.enabled,
     });
@@ -108,6 +151,12 @@ export default function AdminLiveGiftsPage() {
         priceCoins,
         iconUrl: form.iconUrl || null,
         animationUrl: form.animationUrl || null,
+        soundUrl: form.soundUrl || null,
+        category: form.category || null,
+        rarity: form.rarity || null,
+        minTier: form.minTier || null,
+        availableFrom: form.availableFrom || null,
+        availableTo: form.availableTo || null,
         sortOrder: Number(form.sortOrder) || 0,
         enabled: form.enabled,
       };
@@ -223,6 +272,10 @@ export default function AdminLiveGiftsPage() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {g.priceCoins} {t("adminLiveGifts.colCoins").toLowerCase()}
                       {g.animationUrl ? ` · ${t("adminLiveGifts.colAnimation")} ✓` : ""}
+                      {g.soundUrl ? ` · ${t("adminLiveGifts.colSoundUrl")} ✓` : ""}
+                      {g.category ? ` · ${g.category}` : ""}
+                      {g.rarity ? ` · ${g.rarity}` : ""}
+                      {g.minTier ? ` · ${t("adminLiveGifts.colMinTier")}: ${g.minTier}` : ""}
                     </p>
                   </div>
                 </div>
@@ -319,6 +372,83 @@ export default function AdminLiveGiftsPage() {
                   placeholder="https://..."
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{t("adminLiveGifts.colSoundUrl")}</label>
+                <input
+                  type="text"
+                  value={form.soundUrl}
+                  onChange={(e) => setForm({ ...form, soundUrl: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{t("adminLiveGifts.colCategory")}</label>
+                <input
+                  type="text"
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  maxLength={40}
+                  placeholder="Love, Luxury, Fun..."
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{t("adminLiveGifts.colRarity")}</label>
+                <select
+                  value={form.rarity}
+                  onChange={(e) => setForm({ ...form, rarity: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                >
+                  <option value="">{t("adminLiveGifts.none")}</option>
+                  {RARITIES.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{t("adminLiveGifts.colMinTier")}</label>
+                <select
+                  value={form.minTier}
+                  onChange={(e) => setForm({ ...form, minTier: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                >
+                  <option value="">{t("adminLiveGifts.noRestriction")}</option>
+                  {MIN_TIERS.map((p) => (
+                    <option key={p} value={p}>
+                      {p === "free"
+                        ? t("adminUsers.planFree")
+                        : p === "pro"
+                          ? t("adminUsers.planPro")
+                          : p === "business"
+                            ? t("adminUsers.planBusiness")
+                            : t("adminUsers.planEnterprise")}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{t("adminLiveGifts.colAvailableFrom")}</label>
+                  <input
+                    type="datetime-local"
+                    value={form.availableFrom}
+                    onChange={(e) => setForm({ ...form, availableFrom: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{t("adminLiveGifts.colAvailableTo")}</label>
+                  <input
+                    type="datetime-local"
+                    value={form.availableTo}
+                    onChange={(e) => setForm({ ...form, availableTo: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                  />
+                </div>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{t("adminLiveGifts.colSortOrder")}</label>

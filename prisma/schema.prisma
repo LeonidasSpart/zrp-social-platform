@@ -5242,6 +5242,34 @@ model GiftDefinition {
 
   iconUrl      String?
   animationUrl String?
+  // Same https-only validation as iconUrl/animationUrl (validOptionalUrl
+  // in the admin routes) - a sound effect played on the client when the
+  // gift lands.
+  soundUrl     String?
+
+  // Free-form, admin-typed catalog metadata - no fixed taxonomy. Used
+  // for catalog filtering/grouping in the client, never enforced
+  // server-side.
+  category String?
+
+  // Cosmetic/organizational tier only (never a financial multiplier) -
+  // constrained in application code (see admin routes) to one of
+  // COMMON | RARE | EPIC | LEGENDARY. Not a DB enum so the allowed set
+  // can be adjusted without a migration.
+  rarity String?
+
+  // Nullable plan gate: null means available to every plan. Checked
+  // fresh from the sender's current plan inside sendGift() itself
+  // (never trusted from a JWT/session snapshot) using PLAN_RANK in
+  // src/lib/limits.ts - never a second, separately-maintained ranking.
+  minTier String?
+
+  // Nullable availability window - a null bound is unbounded on that
+  // side. Enforced both in getGiftCatalog() (so an out-of-window gift
+  // never appears in the panel) AND re-validated inside sendGift()
+  // itself, since a stale client-fetched catalog is never trusted.
+  availableFrom DateTime?
+  availableTo   DateTime?
 
   enabled   Boolean @default(true)
   sortOrder Int     @default(0)
@@ -5250,6 +5278,33 @@ model GiftDefinition {
   updatedAt DateTime @updatedAt
 
   transactions LiveGiftTransaction[]
+
+  @@index([enabled, sortOrder])
+}
+
+// Admin-managed coin top-up tiers - an alternative/primary purchase
+// surface alongside the existing continuous purchaseCoins() flow
+// (floor(usdcAmount / COIN_VALUE_USDC)), which keeps working unchanged
+// for backward compatibility. Paid in USDC via the exact same
+// on-chain-verification mechanism purchaseCoins() already uses - web
+// only, never real Apple/Google IAP, never crypto-on-native (see
+// src/lib/native-payment-policy.ts's rejectNativePayment(), which this
+// never touches or weakens).
+model CoinPackage {
+  id  String @id @default(cuid())
+  key String @unique // display name/description resolved client-side from `key` via i18n, exact same pattern as GiftDefinition - no name/description DB columns
+
+  priceUsdc     Decimal @db.Decimal(18, 6) // exact amount the buyer must send on-chain; a verified amount >= this is accepted (never an exact-match requirement - on-chain amounts can have precision/rounding), less is rejected
+  coinsCredited Int // base coins for this package - credited as a fixed total, never derived from the verified on-chain amount
+  bonusCoins    Int     @default(0) // extra coins on top, same unit as coinsCredited
+
+  enabled   Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchases CoinPurchase[]
 
   @@index([enabled, sortOrder])
 }
@@ -5285,6 +5340,16 @@ model CoinPurchase {
   usdcAmount    Decimal @db.Decimal(18, 6)
   coinsCredited Int
 
+  // Which CoinPackage tier this purchase went through, if any - null
+  // for the original continuous flow (floor(usdcAmount / COIN_VALUE_USDC),
+  // no package concept). SetNull (not Restrict, unlike GiftDefinition):
+  // a retired package shouldn't block its historical purchase rows from
+  // existing, since this row already permanently stores usdcAmount/
+  // coinsCredited itself - nothing about the purchase's own economics
+  // depends on the package row surviving.
+  coinPackageId String?
+  coinPackage   CoinPackage? @relation(fields: [coinPackageId], references: [id], onDelete: SetNull)
+
   // Same idempotency guard as Tip/PremiumPurchase: claimed in the
   // shared ConsumedPaymentTransaction table inside the same
   // $transaction that credits the wallet, so a signature can only ever
@@ -5296,6 +5361,7 @@ model CoinPurchase {
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([coinPackageId])
 }
 
 model LiveGiftTransaction {

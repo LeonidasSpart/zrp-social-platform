@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Avatar } from "@/components/ui/avatar";
 import type { TranslationKey } from "@/lib/translations";
 import LiveSheet from "./LiveSheet";
+import BuyCoinsModal from "./BuyCoinsModal";
 import { useLiveSocketEvent } from "./useLiveSocketEvent";
 import {
   displayNameOf,
@@ -53,6 +54,8 @@ const SEND_ERROR_KEYS: Record<string, TranslationKey> = {
   insufficient_balance: "liveGifts.errInsufficientBalance",
   gift_not_found: "liveGifts.errUnavailable",
   gift_disabled: "liveGifts.errUnavailable",
+  gift_unavailable_window: "liveGifts.errNotAvailableYet",
+  gift_requires_higher_plan: "liveGifts.errRequiresHigherPlan",
   cannot_gift_self: "liveGifts.errSelf",
   duplicate_transaction: "liveGifts.errDuplicate",
 };
@@ -188,6 +191,7 @@ function SendGiftForm({
   const [quantity, setQuantity] = useState<number>(1);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [buyCoinsOpen, setBuyCoinsOpen] = useState(false);
 
   const refreshBalance = useCallback(async () => {
     const data = await liveRequest<{ balance: number }>("/api/wallet/coins/balance", tRef.current);
@@ -226,7 +230,10 @@ function SendGiftForm({
       onSent(data.gift);
     } catch (err) {
       setSendError(liveErrorMessage(err, tRef.current, SEND_ERROR_KEYS));
-      if (err instanceof LiveApiError && (err.code === "gift_not_found" || err.code === "gift_disabled")) {
+      if (
+        err instanceof LiveApiError &&
+        (err.code === "gift_not_found" || err.code === "gift_disabled" || err.code === "gift_unavailable_window")
+      ) {
         setSelectedKey(null);
         void loadCatalog().catch(() => {});
       }
@@ -266,12 +273,27 @@ function SendGiftForm({
 
   return (
     <div className="p-4 flex flex-col gap-4">
-      <p className="text-sm text-gray-600 dark:text-gray-300">
-        {t("settings.balance")}:{" "}
-        <span className="font-semibold text-gray-900 dark:text-white tabular-nums">
-          {t("liveGifts.coins", { n: balance ?? 0 })}
-        </span>
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          {t("settings.balance")}:{" "}
+          <span className="font-semibold text-gray-900 dark:text-white tabular-nums">
+            {t("liveGifts.coins", { n: balance ?? 0 })}
+          </span>
+        </p>
+        <button
+          type="button"
+          onClick={() => setBuyCoinsOpen(true)}
+          className="shrink-0 min-h-11 px-3 rounded-full border border-zrp-red/40 text-zrp-red font-semibold text-xs hover:bg-zrp-red/5 transition"
+        >
+          {t("buyCoins.title")}
+        </button>
+      </div>
+
+      <BuyCoinsModal
+        isOpen={buyCoinsOpen}
+        onClose={() => setBuyCoinsOpen(false)}
+        onPurchased={() => void refreshBalance().catch(() => {})}
+      />
 
       {catalog && catalog.length === 0 ? (
         <div className="py-8 text-center">

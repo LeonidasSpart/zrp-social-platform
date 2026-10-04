@@ -28,9 +28,10 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => null);
   const transactionId = body?.transactionId;
+  const packageKey = typeof body?.packageKey === "string" && body.packageKey ? body.packageKey : undefined;
 
   try {
-    const result = await purchaseCoins({ userId: auth.userId, transactionId });
+    const result = await purchaseCoins({ userId: auth.userId, transactionId, packageKey });
     return NextResponse.json({ success: true, ...result });
   } catch (err) {
     if (err instanceof LiveAudioError) {
