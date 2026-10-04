@@ -28,6 +28,23 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
+    <!-- Required for ZRP Launchpad's Mobile Wallet Adapter (non-custodial
+         Solana signing, see app/build.gradle's own comment on the
+         mobile-wallet-adapter-clientlib-ktx dependency): Android 11+
+         (API 30+) hides package visibility by default, so without this
+         <queries> declaration this app cannot even detect whether a
+         compatible wallet app (Phantom, Solflare, Backpack, ...) is
+         installed, let alone launch it for signing. This declares only
+         that this app can query/launch apps registering the
+         "solana-wallet://" scheme - it grants no broader visibility into
+         other installed packages. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="solana-wallet" />
+        </intent>
+    </queries>
+
     <!-- allowBackup="false": the encrypted session token in TokenStore is
          bound to this device's Android Keystore, but the (encrypted)
          preferences file itself, plus any other app data, must not be

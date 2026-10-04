@@ -177,4 +177,5 @@ object ApiClient {
     val liveAudioApi: LiveAudioApi by lazy { retrofit.create(LiveAudioApi::class.java) }
     val liveVideoApi: LiveVideoApi by lazy { retrofit.create(LiveVideoApi::class.java) }
     val liveInteractionsApi: LiveInteractionsApi by lazy { retrofit.create(LiveInteractionsApi::class.java) }
+    val launchpadApi: LaunchpadApi by lazy { retrofit.create(LaunchpadApi::class.java) }
 }

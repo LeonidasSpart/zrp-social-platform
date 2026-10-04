@@ -52,6 +52,13 @@ Other features read these when present (all fail soft/are optional at runtime):
 - `SOLANA_RPC_URL` / `NEXT_PUBLIC_SOLANA_RPC_URL`, `SOLANA_PRIVATE_KEY`,
   `NEXT_PUBLIC_SOLANA_WALLET_ADDRESS` / `NEXT_PUBLIC_PLATFORM_WALLET`, `NEXT_PUBLIC_USDC_MINT`:
   Solana/USDC tipping, premium posts, withdrawals (`src/lib/solana.ts`, `src/contexts/SolanaContext.tsx`).
+- `ZRP_LAUNCH_PROGRAM_ID` / `NEXT_PUBLIC_ZRP_LAUNCH_PROGRAM_ID`: deployed program ID for
+  ZRP's own Launchpad bonding-curve program (`programs/zrp-launchpad/`,
+  `src/lib/launchpad/zrp-launch-keys.ts`). Defaults to the committed devnet program ID
+  in development; in production (`NODE_ENV=production`) both this and
+  `NEXT_PUBLIC_SOLANA_RPC_URL`/`SOLANA_RPC_URL` (`src/lib/solana-client.ts`,
+  `src/lib/solana.ts`) fail closed instead of silently falling back to devnet -
+  required before any mainnet cutover, see `docs/zrp-launchpad-deployment.md`.
 - `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: Web Push.
 - `RESEND_API_KEY`: transactional email via Resend (`src/lib/email.ts`).
 - `GIPHY_API_KEY`: GIF search/trending endpoints.

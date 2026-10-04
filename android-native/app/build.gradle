@@ -744,6 +744,38 @@ dependencies {
     // in a real Android Studio build before shipping.
     implementation 'io.livekit:livekit-android:2.28.1'
 
+    // ZRP Launchpad (Android) - non-custodial Solana wallet connection and
+    // signing via Solana Mobile's own Mobile Wallet Adapter (MWA): this
+    // app never holds a private key or seed phrase at any point - it
+    // builds an unsigned transaction, hands it to MWA, a separate wallet
+    // app (Phantom/Solflare/Backpack) authorizes and signs it, and MWA
+    // returns the signature. This is the same non-custodial pattern real
+    // Play Store Solana dApps (Phantom itself, Jupiter Mobile, Magic
+    // Eden) ship real on-chain trading under today, and the one
+    // src/lib/launchpad/capability-matrix.ts documents as the
+    // distribution-permitted path for Android - see that file for the
+    // exact Google Play policy citation this rests on, and for why this
+    // is NOT true on iOS. mobile-wallet-adapter-clientlib-ktx is MWA's
+    // own client SDK; web3-solana/rpc-core give PublicKey.findProgramAddress
+    // (PDA derivation) and Transaction/Message compilation so this app
+    // never hand-rolls ed25519 curve-point validation or Solana's
+    // account-ordering/compact-array wire format itself - both are easy
+    // to get subtly wrong and would silently target the wrong on-chain
+    // accounts if they were.
+    //
+    // Like the LiveKit addition above, this dependency and the Kotlin
+    // written against it are NOT build-verified in this environment -
+    // no Android SDK/Google Maven access here. Confirm these versions
+    // resolve and sanity-check the exact API surface (PublicKey.findProgramAddress,
+    // Transaction/TransactionMessage compilation, MobileWalletAdapter.transact)
+    // against the current Solana Mobile Stack docs in a real build before
+    // shipping; CI (.github/workflows/android-native-build.yml) is the
+    // real verification oracle, exactly as it already is for every other
+    // Android change in this repo.
+    implementation 'com.solanamobile:mobile-wallet-adapter-clientlib-ktx:2.0.6'
+    implementation 'com.solanamobile:web3-solana:0.2.6'
+    implementation 'com.solanamobile:rpc-core:0.2.8'
+
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
