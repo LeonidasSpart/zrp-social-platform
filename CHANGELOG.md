@@ -36,8 +36,8 @@ iOS has no build shipped yet.
 
 ZRP's Solana token-creation and DeFi surface, built up over a long
 sequence of merges. **ZRP's own launch protocol is the ZRP Launch
-Program**, a native Anchor/Rust program (`programs/zrp-launchpad/`) -
-not Pump.fun, not Raydium; see [README.md](README.md#zrp-launchpad) for
+Program**, a native, fully independent Anchor/Rust program
+(`programs/zrp-launchpad/`); see [README.md](README.md#zrp-launchpad) for
 the full picture and the exact capability boundary per platform.
 
 - Server-signed SPL token creation, later replaced by an atomic,
@@ -54,12 +54,6 @@ the full picture and the exact capability boundary per platform.
 - Real Raydium CPMM liquidity: pool creation, add/remove liquidity, LP
   burn, holder/volume indexing - Raydium as the **liquidity venue**, not
   as ZRP's launch protocol (#444).
-- Trading and discovery of **existing, third-party Pump.fun tokens**
-  via Pump.fun's own official `@pump-fun/pump-sdk`/`@pump-fun/pump-swap-sdk`
-  packages: live curve reads, independent buy/sell/graduation
-  verification, post-graduation PumpSwap pool detection, plus (for a
-  time) a wallet-signed flow to create a brand-new token directly on
-  Pump.fun itself (#446).
 - The **ZRP Launch Program**: a from-scratch Anchor program
   (`initialize`/`update_config`/`create_and_buy`/`buy`/`sell`/`graduate`)
   built as ZRP's own token-creation/bonding-curve protocol, with
@@ -69,15 +63,9 @@ the full picture and the exact capability boundary per platform.
   [`docs/zrp-launchpad-deployment.md`](docs/zrp-launchpad-deployment.md).
   **Mainnet has not been deployed**; there is no mainnet program ID in
   this repository.
-- **Architecture correction**: once the ZRP Launch Program existed, the
-  Pump.fun token-*creation* flow added in #446 was deliberately deleted
-  (`client-pump-create.ts`, `/launchpad/create/pump`,
-  `/api/launchpad/pump/create(-quote)`) and replaced with
-  `/launchpad/create/zrp`, so that no path in ZRP's UI can mint a token
-  on Pump.fun. Pump.fun integration today is **trading/discovery of
-  existing third-party tokens only**; a policy-grounded cross-platform
-  capability matrix (`src/lib/launchpad/capability-matrix.ts`) tracks
-  what each platform may ship.
+- A policy-grounded cross-platform capability matrix
+  (`src/lib/launchpad/capability-matrix.ts`) tracks what each platform
+  may ship.
 - Localized all Launchpad UI into the then-current 38 supported
   languages (#441).
 - **Android**: a non-custodial Solana foundation (Base58, Ed25519/PDA

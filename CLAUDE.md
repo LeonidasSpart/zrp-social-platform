@@ -280,24 +280,19 @@ configured (`LIVEKIT_EGRESS_S3_*` env vars) - see README.md's Configuration sect
 
 ZRP's Solana token-creation/DeFi surface. **ZRP's own launch protocol is the ZRP Launch
 Program**, an Anchor/Rust program ZRP wrote (`programs/zrp-launchpad/`: `initialize`/
-`update_config`, `create_and_buy`, `buy`/`sell`, `graduate`) - not Pump.fun, not Raydium.
-Every price/curve/graduation figure is read live from that program's own on-chain
-accounts or decoded from a confirmed transaction's Anchor events
+`update_config`, `create_and_buy`, `buy`/`sell`, `graduate`) - a fully independent,
+self-contained protocol. Every price/curve/graduation figure is read live from that
+program's own on-chain accounts or decoded from a confirmed transaction's Anchor events
 (`src/lib/launchpad/zrp-launch-service.ts`); the database (`LaunchedToken`/
 `GraduationEvent`/`AnalyticsSnapshot`) indexes that on-chain state, never the reverse.
 Devnet deploys automatically from `main` via `.github/workflows/solana-program-ci.yml`;
 mainnet deploy is a separate, manual-only, confirmation-gated job and has not been run -
 see `docs/zrp-launchpad-deployment.md` before touching anything mainnet-related.
 
-Two other Solana integrations exist alongside it, for different purposes - do not
-conflate them with the ZRP Launch Program above: `src/lib/launchpad/raydium-pool-service.ts`
+A separate Solana integration exists alongside it, for a different purpose - do not
+conflate it with the ZRP Launch Program above: `src/lib/launchpad/raydium-pool-service.ts`
 et al. integrate Raydium's existing CPMM program purely as a **liquidity venue** (pool
-create/add/remove/LP-burn); `src/lib/launchpad/pump-curve-*.ts`/`pumpswap-pool-service.ts`
-read and trade **existing third-party Pump.fun tokens** via Pump.fun's own official SDK.
-A flow to *create* a token directly on Pump.fun was built once, then deliberately
-deleted in favor of the ZRP Launch Program (see git history around "replace Pump.fun
-creation UI with ZRP-native 'Launch on ZRP'") - nothing in ZRP's UI can mint a Pump.fun
-token today (see `docs/launchpad-bonding-curve-research.md`).
+create/add/remove/LP-burn).
 The broader module set (DAO governance, NFT + NFT staking, token staking/vesting/farming,
 Jupiter DEX swap, airdrops, a token scanner) follows the same rule: independently verify
 on-chain state after any signed transaction, never trust the client's report of it.
