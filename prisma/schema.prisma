@@ -758,6 +758,17 @@ model User {
   liveVideoModerationActionsPerformed LiveVideoModerationAction[] @relation("LiveVideoModerationActor")
   liveVideoModerationActionsReceived  LiveVideoModerationAction[] @relation("LiveVideoModerationTarget")
 
+  // ─── ZRP Live Gifts ──────────────────────────────────────────
+  coinWallet      CoinWallet?
+  coinPurchases   CoinPurchase[]
+  liveGiftsSent     LiveGiftTransaction[] @relation("LiveGiftSender")
+  liveGiftsReceived LiveGiftTransaction[] @relation("LiveGiftRecipient")
+
+  // ─── ZRP Live chat / reminders ───────────────────────────────
+  liveChatMessages        LiveChatMessage[] @relation("LiveChatAuthor")
+  liveChatMessagesDeleted LiveChatMessage[] @relation("LiveChatMessageDeletedBy")
+  liveReminders           LiveReminder[]
+
   // Admin Subscriptions & Billing (list/KPI queries filter and group by
   // plan directly on User, since a legacy-paid user may have no
   // Subscription row yet - see docs/subscriptions.md "Legacy users").
@@ -1611,6 +1622,18 @@ model Report {
   liveAudioRoomId String?
   liveAudioRoom   LiveAudioRoom? @relation(fields: [liveAudioRoomId], references: [id], onDelete: SetNull)
 
+  // Ninth polymorphic target - a Live Video room, same reasoning as
+  // liveAudioRoomId above. Closes the "no Report-model integration"
+  // gap Live Video shipped with (see docs/live-video-architecture.md).
+  liveVideoRoomId String?
+  liveVideoRoom   LiveVideoRoom? @relation(fields: [liveVideoRoomId], references: [id], onDelete: SetNull)
+
+  // Tenth polymorphic target - a single Live Audio/Video chat message.
+  // SetNull, same audit-trail reasoning as every target above: deleting
+  // (moderating) the message must not erase why it was reported.
+  liveChatMessageId String?
+  liveChatMessage   LiveChatMessage? @relation(fields: [liveChatMessageId], references: [id], onDelete: SetNull)
+
   appeals Appeal[]
 
   @@index([postId])
@@ -1621,6 +1644,8 @@ model Report {
   @@index([campaignId])
   @@index([reportedUserId])
   @@index([liveAudioRoomId])
+  @@index([liveVideoRoomId])
+  @@index([liveChatMessageId])
   @@index([status])
   @@index([reporterId])
   @@index([targetUserId])
@@ -2043,9 +2068,10 @@ model CreatorProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tips               Tip[]
-  premiumPosts       PremiumPost[]
-  withdrawalRequests WithdrawalRequest[]
+  tips                 Tip[]
+  premiumPosts         PremiumPost[]
+  withdrawalRequests   WithdrawalRequest[]
+  liveGiftTransactions LiveGiftTransaction[]
 }
 
 model Tip {
@@ -4763,10 +4789,24 @@ model LiveAudioRoom {
   peakSpeakerCount        Int @default(0)
   totalUniqueParticipants Int @default(0)
 
+  // Realtime reaction taps are never one DB row each (see
+  // live-reactions/reaction-service.ts) - this is the one running
+  // total, periodically flushed from Redis (or incremented directly,
+  // rate-limited, when Redis is unavailable).
+  reactionCount Int @default(0)
+
+  // Host-configurable chat cooldown in seconds; 0 = off. Enforced per
+  // participant via LiveAudioParticipant.lastChatMessageAt.
+  slowModeSeconds Int @default(0)
+
   participants      LiveAudioParticipant[]
   speakerRequests   LiveAudioSpeakerRequest[]
   moderationActions LiveAudioModerationAction[]
   reports           Report[]
+  giftTransactions  LiveGiftTransaction[]
+  chatMessages      LiveChatMessage[]
+  reminders         LiveReminder[]
+  recordings        LiveRecording[]
 
   // Discovery query: WHERE status = 'LIVE' AND visibility = 'PUBLIC'.
   @@index([visibility, status])
@@ -4799,6 +4839,12 @@ model LiveAudioParticipant {
   joinedAt DateTime  @default(now())
   leftAt   DateTime?
   isMuted  Boolean   @default(false)
+
+  // Independent of isMuted (which mutes the LiveKit audio track) - a
+  // chat-muted participant can still speak/listen, just can't post
+  // chat messages. See live-chat/chat-service.ts.
+  isChatMuted       Boolean   @default(false)
+  lastChatMessageAt DateTime?
 
   removedAt   DateTime?
   removedById String?
@@ -4911,9 +4957,20 @@ model LiveVideoRoom {
   peakViewerCount         Int @default(0)
   totalUniqueParticipants Int @default(0)
 
+  reactionCount   Int @default(0)
+  slowModeSeconds Int @default(0)
+
   participants      LiveVideoParticipant[]
   speakerRequests   LiveVideoSpeakerRequest[]
   moderationActions LiveVideoModerationAction[]
+  // Ninth polymorphic Report target (see Report model) - closes the
+  // "no Report-model integration" gap documented in
+  // docs/live-video-architecture.md when Live Video first shipped.
+  reports           Report[]
+  giftTransactions  LiveGiftTransaction[]
+  chatMessages      LiveChatMessage[]
+  reminders         LiveReminder[]
+  recordings        LiveRecording[]
 
   @@index([visibility, status])
   @@index([status])
@@ -4941,6 +4998,9 @@ model LiveVideoParticipant {
   // the one (audio) track to moderate.
   isMuted     Boolean @default(false)
   isCameraOff Boolean @default(false)
+
+  isChatMuted       Boolean   @default(false)
+  lastChatMessageAt DateTime?
 
   removedAt   DateTime?
   removedById String?
@@ -5135,4 +5195,264 @@ model DiscoverDismissal {
   @@unique([userId, postId])
   @@index([userId])
   @@index([postId])
+}
+
+// ============================================================
+// ZRP LIVE - Gifts
+//
+// Gifts are a specialized extension of the existing USDC/Solana
+// monetisation rail (CreatorProfile/Tip/ConsumedPaymentTransaction in
+// src/app/api/creator/tip/route.ts), not a second financial system.
+// Sending a single blockchain transaction per tap would make a live
+// gift panel unusable (every tap would need a signed Solana tx and a
+// multi-second RPC round trip), so the flow is split in two:
+//
+//   1. CoinPurchase - a user funds an integer-coin CoinWallet balance
+//      with ONE real on-chain USDC payment, verified exactly like Tip
+//      (verifyUsdcTransaction + the shared ConsumedPaymentTransaction
+//      idempotency guard - a signature can only ever fund one payment
+//      of any kind, ever, across Tip/PremiumPurchase/CoinPurchase).
+//   2. LiveGiftTransaction - spending a gift inside a live room debits
+//      that integer coin balance instantly (no blockchain round trip),
+//      converts the gift's fixed coin price back to USDC at
+//      COIN_VALUE_USDC (src/lib/live-gifts/constants.ts), and credits
+//      the recipient's CreatorProfile using the exact same
+//      platformFee/charityAmount/creatorAmount split Tip already uses -
+//      so gift earnings land in the one existing withdrawable balance
+//      instead of a second payout rail.
+//
+// Coins are deliberately plain integers (never Decimal/float) - see
+// src/app/api/creator/tip/route.ts's own Decimal-arithmetic comment for
+// why money math never uses binary floating point; an integer coin
+// count has no fractional-unit problem to begin with.
+// ============================================================
+
+model GiftDefinition {
+  id  String @id @default(cuid())
+  key String @unique
+
+  // Display name/description are resolved client-side from `key` via
+  // the existing i18n dictionary (src/lib/translations.ts) - the same
+  // pattern ZRP PLAY's GAME_REGISTRY uses for display metadata - never
+  // stored per-language here.
+  priceCoins Int
+
+  iconUrl      String?
+  animationUrl String?
+
+  enabled   Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions LiveGiftTransaction[]
+
+  @@index([enabled, sortOrder])
+}
+
+model CoinWallet {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Integer coin units only. Enforced non-negative at the application
+  // layer (a conditional updateMany - WHERE balance >= amount, same
+  // pattern as src/lib/ai-quota.ts's quota reservation - never a
+  // check-then-increment) AND, as defense in depth, by a CHECK
+  // constraint added in this migration's raw SQL (Prisma's schema DSL
+  // cannot express a CHECK constraint), so a bug in the application
+  // guard alone can never put a wallet negative.
+  balance Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchases CoinPurchase[]
+}
+
+model CoinPurchase {
+  id String @id @default(cuid())
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coinWalletId String
+  coinWallet   CoinWallet @relation(fields: [coinWalletId], references: [id], onDelete: Cascade)
+
+  usdcAmount    Decimal @db.Decimal(18, 6)
+  coinsCredited Int
+
+  // Same idempotency guard as Tip/PremiumPurchase: claimed in the
+  // shared ConsumedPaymentTransaction table inside the same
+  // $transaction that credits the wallet, so a signature can only ever
+  // fund one purchase of any kind, ever.
+  transactionId String @unique
+
+  status TransactionStatus @default(COMPLETED)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model LiveGiftTransaction {
+  id String @id @default(cuid())
+
+  // Client-generated UUID, required on every send - the actual
+  // double-submit guard: a retried request with the same key can only
+  // ever create one row, enforced by this column's uniqueness inside
+  // the same atomic transaction that debits the sender's wallet, not
+  // by a pre-check alone (identical reasoning to transactionId above).
+  idempotencyKey String @unique
+
+  senderId String
+  sender   User   @relation("LiveGiftSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  recipientId String
+  recipient   User   @relation("LiveGiftRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  // Restrict, not Cascade/SetNull: a priced catalog item that gifts
+  // already reference must not be deletable out from under the ledger
+  // it priced - disable it (enabled: false) instead.
+  giftDefinitionId String
+  giftDefinition   GiftDefinition @relation(fields: [giftDefinitionId], references: [id], onDelete: Restrict)
+
+  // Server-read from GiftDefinition.priceCoins at send time and frozen
+  // here - never trusts a client-supplied price. quantity is always
+  // >= 1 (validated in gift-service.ts); totalCoins is always
+  // unitPriceCoins * quantity, also server-computed.
+  unitPriceCoins Int
+  quantity       Int
+  totalCoins     Int
+
+  creatorProfileId String
+  creatorProfile   CreatorProfile @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+
+  platformFee   Decimal @default(0) @db.Decimal(18, 6)
+  charityAmount Decimal @default(0) @db.Decimal(18, 6)
+  creatorAmount Decimal @default(0) @db.Decimal(18, 6)
+
+  // Polymorphic room target, same pattern as Report's postId/commentId/
+  // .../liveVideoRoomId above - a gift can be sent in either a Live
+  // Audio or a Live Video room; exactly one of these two is set,
+  // enforced in gift-service.ts (the schema can't express an XOR).
+  liveAudioRoomId String?
+  liveAudioRoom   LiveAudioRoom? @relation(fields: [liveAudioRoomId], references: [id], onDelete: SetNull)
+  liveVideoRoomId String?
+  liveVideoRoom   LiveVideoRoom? @relation(fields: [liveVideoRoomId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([recipientId])
+  @@index([senderId])
+  @@index([liveAudioRoomId])
+  @@index([liveVideoRoomId])
+  @@index([creatorProfileId])
+}
+
+// ============================================================
+// ZRP LIVE - Chat, Reminders, Recordings
+// ============================================================
+
+// Persisted, moderated chat for a Live Audio/Video room. Reactions are
+// deliberately NOT modeled this way - see LiveAudioRoom.reactionCount's
+// comment for why a per-tap row doesn't exist.
+model LiveChatMessage {
+  id String @id @default(cuid())
+
+  authorId String
+  author   User   @relation("LiveChatAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  body String @db.Text
+
+  // Polymorphic room target, same pattern as LiveGiftTransaction above.
+  liveAudioRoomId String?
+  liveAudioRoom   LiveAudioRoom? @relation(fields: [liveAudioRoomId], references: [id], onDelete: Cascade)
+  liveVideoRoomId String?
+  liveVideoRoom   LiveVideoRoom? @relation(fields: [liveVideoRoomId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  // Soft delete (moderation) - never a hard delete, so a Report
+  // referencing this message (SetNull on the Report side) still shows
+  // what was said. "Currently visible" = deletedAt IS NULL.
+  deletedAt   DateTime?
+  deletedById String?
+  deletedBy   User?     @relation("LiveChatMessageDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  reports Report[]
+
+  @@index([liveAudioRoomId, createdAt])
+  @@index([liveVideoRoomId, createdAt])
+  @@index([authorId])
+}
+
+// A "remind me" subscription for a SCHEDULED room - notified once when
+// the host actually starts it (startScheduledRoom), not on a time-based
+// cron: starting is already an explicit, real-time event, so polling
+// for "has the scheduled time passed" would just be a slower, less
+// accurate way to detect the same thing.
+model LiveReminder {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  liveAudioRoomId String?
+  liveAudioRoom   LiveAudioRoom? @relation(fields: [liveAudioRoomId], references: [id], onDelete: Cascade)
+  liveVideoRoomId String?
+  liveVideoRoom   LiveVideoRoom? @relation(fields: [liveVideoRoomId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  // Postgres treats NULLs as distinct, so each unique constraint only
+  // ever constrains the rows of ITS room type - exactly the same
+  // reasoning as Notification.announcementId's own comment on this
+  // pattern elsewhere in this schema.
+  @@unique([userId, liveAudioRoomId])
+  @@unique([userId, liveVideoRoomId])
+  @@index([liveAudioRoomId])
+  @@index([liveVideoRoomId])
+}
+
+// A LiveKit Egress recording of a room, for post-live replay. Created
+// when a host starts recording (RoomCompositeEgress via
+// livekit-server-sdk's EgressClient - see live-replay/replay-service.ts)
+// and completed by LiveKit's own `egress_ended` webhook (extends the
+// existing src/app/api/live-audio/webhooks/livekit/route.ts handler,
+// which previously ignored egress_* events entirely).
+model LiveRecording {
+  id String @id @default(cuid())
+
+  liveAudioRoomId String?
+  liveAudioRoom   LiveAudioRoom? @relation(fields: [liveAudioRoomId], references: [id], onDelete: Cascade)
+  liveVideoRoomId String?
+  liveVideoRoom   LiveVideoRoom? @relation(fields: [liveVideoRoomId], references: [id], onDelete: Cascade)
+
+  // LiveKit's own Egress ID - the join key for the completion webhook.
+  egressId String @unique
+
+  // Mirrors LiveKit's EgressStatus names as a plain string, same
+  // "free-form status column" convention as Report.status elsewhere in
+  // this schema (not a new enum for a value this schema never branches
+  // application logic on beyond "is it done").
+  status String @default("EGRESS_STARTING")
+
+  // Populated by the completion webhook once LiveKit uploads the file -
+  // never written speculatively, so a row with mediaUrl: null and
+  // status != "EGRESS_COMPLETE" always means "ask LiveKit/wait," never
+  // "here's a broken link."
+  mediaUrl        String? @db.Text
+  durationSeconds Int?
+
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  // Creator-initiated deletion (soft - the retention/cleanup of the
+  // underlying object-storage file is a separate, infra-side concern,
+  // same division of responsibility as PremiumPost's media today).
+  deletedAt DateTime?
+
+  @@index([liveAudioRoomId])
+  @@index([liveVideoRoomId])
 }

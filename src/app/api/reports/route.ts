@@ -29,6 +29,8 @@ export async function POST(req: NextRequest) {
       opportunityId,
       campaignId,
       liveAudioRoomId,
+      liveVideoRoomId,
+      liveChatMessageId,
       userId,
       reason,
       details,
@@ -50,6 +52,8 @@ export async function POST(req: NextRequest) {
       opportunityId,
       campaignId,
       liveAudioRoomId,
+      liveVideoRoomId,
+      liveChatMessageId,
       userId,
     ]) {
       if (value !== undefined && value !== null && typeof value !== "string") {
@@ -65,6 +69,8 @@ export async function POST(req: NextRequest) {
       opportunityId,
       campaignId,
       liveAudioRoomId,
+      liveVideoRoomId,
+      liveChatMessageId,
       userId,
     ].filter(Boolean).length;
 
@@ -72,7 +78,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "One of postId, commentId, listingId, challengeId, opportunityId, campaignId, liveAudioRoomId, or userId is required",
+            "One of postId, commentId, listingId, challengeId, opportunityId, campaignId, liveAudioRoomId, liveVideoRoomId, liveChatMessageId, or userId is required",
         },
         { status: 400 }
       );
@@ -118,7 +124,11 @@ export async function POST(req: NextRequest) {
                 ? { campaignId }
                 : liveAudioRoomId
                   ? { liveAudioRoomId }
-                  : { reportedUserId: userId };
+                  : liveVideoRoomId
+                    ? { liveVideoRoomId }
+                    : liveChatMessageId
+                      ? { liveChatMessageId }
+                      : { reportedUserId: userId };
 
     const existingReport = await prisma.report.findFirst({
       where: {
@@ -145,6 +155,8 @@ export async function POST(req: NextRequest) {
         opportunityId: opportunityId || null,
         campaignId: campaignId || null,
         liveAudioRoomId: liveAudioRoomId || null,
+        liveVideoRoomId: liveVideoRoomId || null,
+        liveChatMessageId: liveChatMessageId || null,
         reportedUserId: userId || null,
         reason,
         details: details || null,

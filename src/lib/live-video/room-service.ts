@@ -4,8 +4,10 @@ import { isBlockedEitherWay } from "@/lib/auth-guards";
 import { createNotification } from "@/lib/notifications";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { emitToLiveVideoRoom, emitToUser, evictUserFromLiveVideoRoom } from "@/lib/socket-emit";
+import { notifyReminderSubscribers } from "@/lib/live-reminders/reminder-service";
 import { mintLiveKitToken, forceDisconnectParticipant, getLiveKitConfig } from "@/lib/live-audio/livekit";
 import { canViewRoom, canPromoteSpeaker, isRoomAuthority } from "@/lib/live-audio/permissions";
+import { rankAndPaginate } from "@/lib/live-audio/discovery-ranking";
 import { requireLiveVideoAccess } from "./entitlement";
 import { LiveVideoErrors } from "./errors";
 
@@ -173,6 +175,7 @@ export async function startScheduledRoom(roomId: string, actorId: string): Promi
   if (updated.visibility === "COMMUNITY" && updated.communityId) {
     await notifyCommunityRoomStarted(updated.communityId, updated);
   }
+  await notifyReminderSubscribers("VIDEO", updated);
   return updated;
 }
 
@@ -235,10 +238,14 @@ export async function listDiscoverableRooms({ viewerId, cursor, limit }: Discove
     OR: [{ visibility: "PUBLIC" }, ...(memberCommunityIds.length > 0 ? [{ visibility: "COMMUNITY" as const, communityId: { in: memberCommunityIds } }] : [])],
   };
 
+  // A larger candidate pool than one page - ranking (see
+  // discovery-ranking.ts) needs enough rooms to actually compete on
+  // score, not just the next `limit` by recency. Still bounded, never
+  // the whole table.
+  const CANDIDATE_POOL_SIZE = 200;
   const rooms = await prisma.liveVideoRoom.findMany({
     where,
-    take: limit + 1,
-    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+    take: CANDIDATE_POOL_SIZE,
     orderBy: [{ startedAt: "desc" }],
     select: {
       id: true,
@@ -267,13 +274,8 @@ export async function listDiscoverableRooms({ viewerId, cursor, limit }: Discove
     })
   );
 
-  let nextCursor: string | null = null;
-  if (withLiveCounts.length > limit) {
-    const page = withLiveCounts.slice(0, limit);
-    nextCursor = page[page.length - 1].id;
-    return { rooms: page, nextCursor };
-  }
-  return { rooms: withLiveCounts, nextCursor };
+  const { page, nextCursor } = rankAndPaginate(withLiveCounts, cursor, limit);
+  return { rooms: page, nextCursor };
 }
 
 // ─── Join / leave ────────────────────────────────────────────────────
