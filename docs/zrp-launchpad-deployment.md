@@ -1,9 +1,9 @@
 # ZRP Launchpad - build, test, and deployment
 
-This documents how `programs/zrp-launchpad/` (the ZRP-native bonding-curve
-program that replaces Pump.fun as ZRP's token-creation protocol) is built,
-tested, and deployed. The development sandbox this repo is normally edited
-in has no network path to crates.io or any Solana RPC endpoint, so none of
+This documents how `programs/zrp-launchpad/` (ZRP's own, fully independent
+bonding-curve token-creation protocol) is built, tested, and deployed.
+The development sandbox this repo is normally edited in has no network
+path to crates.io or any Solana RPC endpoint, so none of
 this can be verified locally - `.github/workflows/solana-program-ci.yml`
 is the real build/test/deploy oracle, the same role GitHub Actions already
 plays for `android-native-build.yml`.
@@ -108,12 +108,12 @@ scoped follow-up phase, not a regression - tracked here so it isn't
 mistaken for a broken graduation flow once real mainnet tokens start
 graduating.
 
-## Acceptance test: this program is not Pump.fun
+## Acceptance test: this program is fully independent
 
 Both `tests/zrp-launchpad.ts` (local-validator) and `scripts/verify-zrp-launchpad.ts`
 (real devnet) assert that every transaction produced by this program's
-`create_and_buy`/`buy`/`sell`/`graduate` instructions never invokes
-Pump.fun's mainnet program ID (`6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P`).
-The devnet script fetches the *actual* confirmed on-chain transaction and
+`create_and_buy`/`buy`/`sell`/`graduate` instructions only ever invokes
+this program's own instructions - no other, external program ID. The
+devnet script fetches the *actual* confirmed on-chain transaction and
 inspects every instruction's program ID - not a mock, not a local
 construction check alone.

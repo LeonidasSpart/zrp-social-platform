@@ -268,9 +268,9 @@ implemented on Web, Android and iOS:
 `src/app/api/launchpad/**`) is ZRP's own token-creation and DeFi
 surface on Solana. It is **ZRP-native**: the protocol ZRP uses to create
 and trade its own tokens is the **ZRP Launch Program**, a program ZRP
-wrote and controls - not Pump.fun, and not Raydium. Pump.fun and
-Raydium are separate, third-party protocols ZRP's client code also
-integrates with for specific, narrower purposes described below.
+wrote and controls. Raydium is a separate, third-party protocol ZRP's
+client code also integrates with for a specific, narrower purpose
+described below (liquidity only, never ZRP's launch protocol).
 
 ### ZRP Launch Program (the ZRP-native bonding curve)
 
@@ -295,9 +295,9 @@ confirmed transaction's own Anchor events
 are never the authority for financial state" rule applied everywhere
 else money moves in this codebase. An acceptance test
 (`tests/zrp-launchpad.ts`, `scripts/verify-zrp-launchpad.ts`) asserts
-that no transaction this program produces ever invokes Pump.fun's real
-mainnet program ID - this program is not, and does not depend on,
-Pump.fun.
+that every transaction this program produces only ever invokes this
+program's own instructions - a fully independent, self-contained
+protocol.
 
 **Known limitation**: post-graduation Raydium liquidity is **not yet
 automatic**. `graduate()` sweeps real SOL/tokens to the migration
@@ -327,26 +327,6 @@ CPMM program as the **liquidity venue** - not as ZRP's launch protocol.
 signed pool creation, add/remove liquidity and LP-token burn, each
 independently verified on-chain after signing rather than trusted from
 the client's own report.
-
-### Trading existing Pump.fun tokens (read/trade integration, not ZRP's creation protocol)
-
-Separately, ZRP can **discover and trade tokens that already exist on
-Pump.fun** - a third-party protocol ZRP does not create tokens on and
-does not depend on for its own launch flow. Built on Pump.fun's own
-official, actively-maintained `@pump-fun/pump-sdk` /
-`@pump-fun/pump-swap-sdk` packages (`src/lib/launchpad/pump-curve-*.ts`,
-`pumpswap-pool-service.ts`), this covers live bonding-curve reads,
-independent buy/sell/graduation verification, and post-graduation
-PumpSwap pool detection for **existing** classic SOL-quoted Pump.fun
-curves only (mayhem-mode, holder-reward and other curve variants are
-detected and reported as unsupported rather than mis-read). A
-wallet-signed flow to **create** a new token directly on Pump.fun was
-built at one point, then **deliberately deleted** once the ZRP Launch
-Program above existed, so that ZRP's UI could not mint a Pump.fun token
-through any path - see
-[`docs/launchpad-bonding-curve-research.md`](docs/launchpad-bonding-curve-research.md)
-for the trading integration's scope and reasoning. ZRP's own
-token-creation path is the ZRP Launch Program above, never Pump.fun.
 
 ### Broader Launchpad modules
 
@@ -707,10 +687,9 @@ independently.
 **ZRP Launchpad** (see [ZRP Launchpad](#zrp-launchpad)) adds: an
 [Anchor](https://www.anchor-lang.com/)/Rust program
 (`programs/zrp-launchpad/`, the ZRP Launch Program) for ZRP-native token
-creation and bonding-curve trading; the official `@pump-fun/pump-sdk` /
-`@pump-fun/pump-swap-sdk` for reading and trading **existing** third-party
-Pump.fun tokens; `@raydium-io/raydium-sdk-v2` for CPMM liquidity pools; and
-Jupiter's aggregator API for non-custodial DEX swaps.
+creation and bonding-curve trading; `@raydium-io/raydium-sdk-v2` for CPMM
+liquidity pools; and Jupiter's aggregator API for non-custodial DEX
+swaps.
 
 ### Native
 
@@ -1218,8 +1197,6 @@ Full terms: [LICENSE](LICENSE).
   Advanced Search categories and per-platform status
 - [`docs/zrp-launchpad-deployment.md`](docs/zrp-launchpad-deployment.md):
   ZRP Launch Program build/test/devnet/mainnet deployment procedure
-- [`docs/launchpad-bonding-curve-research.md`](docs/launchpad-bonding-curve-research.md):
-  the Pump.fun trading/discovery integration's scope and research
 - [`ios-native/README.md`](ios-native/README.md): native iOS module
 - [`ios-native/PARITY.md`](ios-native/PARITY.md): cross-platform parity
   matrix
