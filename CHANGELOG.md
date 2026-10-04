@@ -32,6 +32,99 @@ production; Android is versioned independently (see
 [README.md](README.md#android-and-ios-versioning-independent-of-web)) and
 iOS has no build shipped yet.
 
+### ZRP Launchpad
+
+ZRP's Solana token-creation and DeFi surface, built up over a long
+sequence of merges. **ZRP's own launch protocol is the ZRP Launch
+Program**, a native Anchor/Rust program (`programs/zrp-launchpad/`) -
+not Pump.fun, not Raydium; see [README.md](README.md#zrp-launchpad) for
+the full picture and the exact capability boundary per platform.
+
+- Server-signed SPL token creation, later replaced by an atomic,
+  wallet-signed fee+mint transaction matching "zrppad"'s own one-click
+  UX (#422, #435).
+- Token vesting and staking pools (#425); an affiliate/referral program
+  (#427); an admin dashboard (#428); NFT creation and NFT staking
+  (#429); liquidity farming pools (#430); DAO governance (proposals and
+  voting) (#431); IDO scaffolding (#432).
+- Non-custodial DEX swap execution via Jupiter's aggregator (#437);
+  wallet-native token airdrops with on-chain-verified recording (#440);
+  a token-creation template selector (#442); a token scanner (fixed for
+  Token-2022) plus a real price/analytics engine (#443).
+- Real Raydium CPMM liquidity: pool creation, add/remove liquidity, LP
+  burn, holder/volume indexing - Raydium as the **liquidity venue**, not
+  as ZRP's launch protocol (#444).
+- Trading and discovery of **existing, third-party Pump.fun tokens**
+  via Pump.fun's own official `@pump-fun/pump-sdk`/`@pump-fun/pump-swap-sdk`
+  packages: live curve reads, independent buy/sell/graduation
+  verification, post-graduation PumpSwap pool detection, plus (for a
+  time) a wallet-signed flow to create a brand-new token directly on
+  Pump.fun itself (#446).
+- The **ZRP Launch Program**: a from-scratch Anchor program
+  (`initialize`/`update_config`/`create_and_buy`/`buy`/`sell`/`graduate`)
+  built as ZRP's own token-creation/bonding-curve protocol, with
+  server-side verification/schema and a devnet-automatic/mainnet-manual
+  deployment pipeline (`.github/workflows/solana-program-ci.yml`). Fully
+  documented in
+  [`docs/zrp-launchpad-deployment.md`](docs/zrp-launchpad-deployment.md).
+  **Mainnet has not been deployed**; there is no mainnet program ID in
+  this repository.
+- **Architecture correction**: once the ZRP Launch Program existed, the
+  Pump.fun token-*creation* flow added in #446 was deliberately deleted
+  (`client-pump-create.ts`, `/launchpad/create/pump`,
+  `/api/launchpad/pump/create(-quote)`) and replaced with
+  `/launchpad/create/zrp`, so that no path in ZRP's UI can mint a token
+  on Pump.fun. Pump.fun integration today is **trading/discovery of
+  existing third-party tokens only**; a policy-grounded cross-platform
+  capability matrix (`src/lib/launchpad/capability-matrix.ts`) tracks
+  what each platform may ship.
+- Localized all Launchpad UI into the then-current 38 supported
+  languages (#441).
+- **Android**: a non-custodial Solana foundation (Base58, Ed25519/PDA
+  derivation, ZRP Launch Program PDA derivation, curve math, a
+  transaction compiler, a wallet connector), cross-checked against this
+  repository's own web (`@solana/web3.js`) implementation. No Launchpad
+  screens are wired up to it yet - foundation only.
+- **iOS**: no Launchpad or Solana work has started.
+- **Known limitation**: post-graduation Raydium liquidity is not yet
+  automatic - a graduated bonding curve's swept reserves still need a
+  manually created Raydium pool.
+
+### ZRP Live
+
+Real-time audio and video rooms plus a shared gifts/chat/reactions/
+reminders/replay engagement layer, implemented end-to-end on Web,
+Android and iOS. See [README.md](README.md#zrp-live) for the full
+feature list and current platform status.
+
+- **Live Audio backend**: rooms, Host/Moderator/Speaker/Listener roles,
+  moderation, LiveKit signaling, discovery, notifications (#406),
+  followed by a web client (#408) and, in a later pass, full native
+  clients on both Android and iOS built from scratch against the same
+  backend contract - the "Android and iOS have no client UI" gap
+  `docs/live-audio-architecture.md` originally shipped with no longer
+  applies.
+- **Live Video**: a parallel room type reusing Live Audio's
+  authorization/LiveKit/moderation code unchanged, adding independently
+  moderated camera tracks; shipped with a web client, an admin
+  force-close tool and a LiveKit health-check fix (#450), then full
+  Android and iOS clients in the same pass that added the engagement
+  layer below.
+- **Gifts**: a per-user coin wallet funded by real on-chain USDC, an
+  admin-defined gift catalogue, and server-authoritative, idempotent
+  gift sends that credit the recipient's existing creator-earnings rail
+  (#452), with client UI on Web, Android and iOS.
+- **Chat, reactions, scheduled-room reminders and replay**: persisted
+  moderated room chat, batched rate-limited reactions, "remind me"
+  notifications on scheduled rooms, and a real LiveKit Egress replay/
+  recording integration - fails closed with `503` because this
+  deployment has no S3/GCS/Azure bucket configured for Egress, not a
+  mock - plus client UI on Web, Android and iOS.
+- Full Android native UI for Live Video and the engagement layer above,
+  with complete translations across all 38 non-English supported
+  languages.
+- Full iOS native UI for Live Video and the engagement layer above.
+
 ### Full product audit (#400)
 
 - **Security:** paid and private content no longer leaks through the

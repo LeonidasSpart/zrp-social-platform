@@ -151,10 +151,30 @@ the real code, not a stale proposal next to it:
   resulting canonical PumpSwap pool's *existence*, but does not decode
   that pool's own reserves/liquidity (a separate `@pump-fun/pump-swap-sdk`
   integration, not built this session).
-- **Token creation through the curve itself was not built.** This session
-  covers discovering, pricing, and trading *existing* pump bonding-curve
-  tokens non-custodially. Initiating a brand-new token via pump's own
-  `createV2`/`createV2AndBuy` (new mint keypair, metadata upload, a
-  first-buy transaction) is materially higher-risk, untestable-against-
-  live-RPC code that was deliberately left out rather than rushed - see
-  that session's final delivery report for the full reasoning.
+- **Token creation through the curve itself was not built in this
+  session.** This session covers discovering, pricing, and trading
+  *existing* pump bonding-curve tokens non-custodially. Initiating a
+  brand-new token via pump's own `createV2`/`createV2AndBuy` (new mint
+  keypair, metadata upload, a first-buy transaction) is materially
+  higher-risk, untestable-against-live-RPC code that was deliberately
+  left out rather than rushed - see that session's final delivery
+  report for the full reasoning.
+
+## Update: Pump.fun token creation was later built, then deliberately removed
+
+A follow-up session did build that deferred creation flow
+(`client-pump-create.ts`, `/launchpad/create/pump`,
+`/api/launchpad/pump/create(-quote)` - a real, wallet-signed
+`create_v2`/`create_v2_and_buy` flow with server-side verification of
+the resulting on-chain `CreateEvent`). Once ZRP's own native bonding-
+curve program (`programs/zrp-launchpad/`, the "ZRP Launch Program")
+existed, a subsequent session **deleted that Pump.fun creation path
+entirely** - not hidden, removed - and replaced it with
+`/launchpad/create/zrp` against ZRP's own program, specifically so that
+no path in ZRP's UI could mint a token on Pump.fun. This document's
+scope (trading/pricing/discovering *existing* Pump.fun tokens) is
+accurate as ZRP's **permanent** Pump.fun integration; the creation flow
+described as a future "phase 2" above was real, shipped, and then
+intentionally retired - see README.md's
+[ZRP Launchpad](../README.md#zrp-launchpad) section and
+`docs/zrp-launchpad-deployment.md` for the program that replaced it.

@@ -6,9 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ZRP is a Twitter/X-style social platform built on Next.js 15 (App Router) with a custom
 Node HTTP server that layers Socket.IO on top for realtime features (DMs, typing
-indicators, presence, WebRTC call signaling). It has tiered paid plans (free/pro/business/
-enterprise), creator monetisation (tips, pay-per-view posts) settled in USDC over Solana,
-and an admin backoffice for moderation and payment approval.
+indicators, presence, WebRTC call signaling, and LiveKit-backed ZRP Live audio/video
+rooms). It has tiered paid plans (free/pro/business/enterprise), creator monetisation
+(tips, pay-per-view posts, ZRP Live gifts) settled in USDC over Solana, a Solana/Anchor
+program of its own (`programs/zrp-launchpad/`, the "ZRP Launch Program" - see "ZRP
+Launchpad" below) for ZRP-native token creation and bonding-curve trading, and an admin
+backoffice for moderation and payment approval.
 
 ## Commands
 
@@ -246,6 +249,66 @@ without a rewrite.
   (real-Postgres abuse scenarios: score spoofing, XP replay farming, duel double-submit,
   server-determined winner). Add both a scoring unit test and, for anything touching the
   submit route's trust boundary, an integration test for any new game type.
+
+### ZRP Live (`src/lib/live-audio/`, `src/lib/live-video/`, `src/lib/live-chat/`,
+`src/lib/live-reactions/`, `src/lib/live-reminders/`, `src/lib/live-gifts/`,
+`src/lib/live-replay/`)
+
+LiveKit-backed real-time audio (`LiveAudioRoom`) and video (`LiveVideoRoom`) rooms, paid-
+plan-gated (`liveAudio`/`liveVideo` in `PLANS`), implemented on Web, Android and iOS.
+Live Video is a separate Prisma model/route tree that reuses Live Audio's permissions,
+LiveKit token-minting and route-auth helpers unchanged (see `docs/live-video-architecture.md`
+§1); the one new axis is an independently moderated camera (`isCameraOff`) alongside the
+existing mic mute. Every route re-derives join/leave/role/moderation state from Postgres
+on every request and fails closed with `503` when `LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET`
+are unset - never trust LiveKit's own view of room membership, and never mint a fake
+token. `Report`'s eight polymorphic targets include `liveAudioRoomId`; Live Video rooms
+are **not** a ninth target yet (reportable only via the bare-profile flow).
+
+A shared engagement layer (chat, reactions, scheduled-room reminders, gifts, replay) sits
+behind both room types with one route body shape under both `live-audio/rooms/{id}/...`
+and `live-video/rooms/{id}/...`. Gifts spend from a per-user `CoinWallet` (coins bought
+with real on-chain USDC, verified like `Tip`) into a `LiveGiftTransaction` that credits
+the recipient's `CreatorProfile` through the same platform-fee/charity split `Tip` uses -
+server-authoritative pricing, idempotent sends, never a client-reported amount. Replay
+recording (`src/lib/live-replay/`) is a real LiveKit Egress integration, not a mock; it
+fails closed with `503 replay_not_configured` because no S3/GCS/Azure bucket is
+configured (`LIVEKIT_EGRESS_S3_*` env vars) - see README.md's Configuration section.
+
+### ZRP Launchpad (`src/lib/launchpad/`, `src/app/launchpad/`, `src/app/api/launchpad/**`,
+`programs/zrp-launchpad/`)
+
+ZRP's Solana token-creation/DeFi surface. **ZRP's own launch protocol is the ZRP Launch
+Program**, an Anchor/Rust program ZRP wrote (`programs/zrp-launchpad/`: `initialize`/
+`update_config`, `create_and_buy`, `buy`/`sell`, `graduate`) - not Pump.fun, not Raydium.
+Every price/curve/graduation figure is read live from that program's own on-chain
+accounts or decoded from a confirmed transaction's Anchor events
+(`src/lib/launchpad/zrp-launch-service.ts`); the database (`LaunchedToken`/
+`GraduationEvent`/`AnalyticsSnapshot`) indexes that on-chain state, never the reverse.
+Devnet deploys automatically from `main` via `.github/workflows/solana-program-ci.yml`;
+mainnet deploy is a separate, manual-only, confirmation-gated job and has not been run -
+see `docs/zrp-launchpad-deployment.md` before touching anything mainnet-related.
+
+Two other Solana integrations exist alongside it, for different purposes - do not
+conflate them with the ZRP Launch Program above: `src/lib/launchpad/raydium-pool-service.ts`
+et al. integrate Raydium's existing CPMM program purely as a **liquidity venue** (pool
+create/add/remove/LP-burn); `src/lib/launchpad/pump-curve-*.ts`/`pumpswap-pool-service.ts`
+read and trade **existing third-party Pump.fun tokens** via Pump.fun's own official SDK.
+A flow to *create* a token directly on Pump.fun was built once, then deliberately
+deleted in favor of the ZRP Launch Program (see git history around "replace Pump.fun
+creation UI with ZRP-native 'Launch on ZRP'") - nothing in ZRP's UI can mint a Pump.fun
+token today (see `docs/launchpad-bonding-curve-research.md`).
+The broader module set (DAO governance, NFT + NFT staking, token staking/vesting/farming,
+Jupiter DEX swap, airdrops, a token scanner) follows the same rule: independently verify
+on-chain state after any signed transaction, never trust the client's report of it.
+
+Native support is asymmetric and tracked in `src/lib/launchpad/capability-matrix.ts`:
+Android has a non-custodial Solana **foundation** only (Base58, Ed25519/PDA derivation,
+curve math, tx compiler, wallet connector under `android-native/.../solana/`,
+`.../launchpad/`) with no Launchpad screens wired to it yet; iOS has no Solana/Launchpad
+code at all. Don't describe either as "Launchpad supported" without checking that file
+first - store policy (Apple 3.1.1/3.1.5, Google's wallet policy) further constrains what
+each platform may ship a transaction-signing flow for.
 
 ### App Router layout (`src/app`)
 

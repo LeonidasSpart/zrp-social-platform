@@ -26,7 +26,8 @@ visible but **not open source**: see [Licence and intellectual property](#licenc
 - [Platforms](#platforms)
 - [Core features](#core-features)
 - [Messaging](#messaging)
-- [ZRP Live Audio](#zrp-live-audio)
+- [ZRP Live](#zrp-live)
+- [ZRP Launchpad](#zrp-launchpad)
 - [ZRP Music](#zrp-music)
 - [Creator Studio](#creator-studio)
 - [ZRP AI](#zrp-ai)
@@ -130,6 +131,16 @@ real platform data; there is no seeded or placeholder catalogue. The "For
 You" feed and Trending also carry an opt-in country signal: see
 [Geography, discovery and analytics](#geography-discovery-and-analytics).
 
+**Advanced Search** (`GET /api/search`, `src/lib/search/`) covers eight
+categories in one contract: people, posts, hashtags, communities, news,
+music, opportunities and marketplace listings, each backed by a real
+Prisma model (no fabricated entity), with filters, sort options and
+cursor pagination. Web, Android and iOS were all rebuilt against this
+same contract. See
+[`docs/advanced-search-architecture.md`](docs/advanced-search-architecture.md)
+for the category list, trigram-index approach and exact per-platform
+status.
+
 **ZRP Discover** (`/discover`, Web) is a separate, vertical swipeable
 video feed in the style of a ranked short-form feed. It reuses the same
 video `Post` rows Shorts already serves rather than a parallel content
@@ -177,34 +188,214 @@ client-supplied user id.
 
 ---
 
-## ZRP Live Audio
+## ZRP Live
 
-Scheduled and instant audio rooms (Host / Moderator / Speaker / Listener
-roles), with speak requests, promote/demote/mute/remove moderation
-actions, and room discovery filtered to public rooms plus the caller's
-own community-visibility rooms. Audio transport runs over
-[LiveKit](https://livekit.io) (a self-hostable SFU): access tokens are
-minted server-side with role-scoped grants (a listener's token never
-carries publish rights), and every state transition: join, leave,
-promotion, moderation, room end: is authorized and re-derived from
-Postgres on every request, never trusted from the client. A room ends
-through an explicit host/moderator action, a LiveKit webhook reporting
-the room emptied, or a cron sweep that reclaims an abandoned room after
-its participants have all disconnected or after a 24-hour hard cap.
-Reporting integrates with the existing polymorphic `Report`/`Appeal`
-system rather than a parallel one.
+Real-time audio and video rooms, gated to an active paid plan
+(pro/business/enterprise), implemented end-to-end on **Web, Android and
+iOS**. Audio and video transport runs over [LiveKit](https://livekit.io)
+(a self-hostable SFU): access tokens are minted server-side with
+role-scoped grants (a listener's token never carries publish rights),
+and every state transition: join, leave, promotion, moderation, room
+end: is authorized and re-derived from Postgres on every request, never
+trusted from the client. Every Live route fails closed with a `503` when
+LiveKit's credentials are not configured, rather than issuing a fake
+token.
 
-Every Live Audio route fails closed with a `503` when LiveKit's
-credentials are not configured, rather than issuing a fake token.
+### Live Audio and Live Video
 
-**Platform status**: implemented and reachable from the main navigation
-on **Web and PWA** (`/live-audio`, `/live-audio/[id]`). **Android and iOS
-currently expose no Live Audio client screens**: the backend/API
-contract exists and is what a native client would build against, but no
-native UI has shipped yet. See
-[`docs/live-audio-architecture.md`](docs/live-audio-architecture.md) for
-the full design, authorization matrix and known limitations (no
-recording, no numeric speaker cap, no plan-gating).
+Scheduled and instant rooms (Host / Moderator / Speaker-or-camera /
+Listener-or-viewer roles), with speak/join requests, promote/demote/
+mute/remove moderation actions, and room discovery filtered to public
+rooms plus the caller's own community-visibility rooms. Live Video is a
+parallel, separate room type (its own nav entry, discovery page and room
+page) reusing Live Audio's authorization, LiveKit token-minting and
+moderation code unchanged, adding one genuinely new axis: an
+independently moderated camera (`isCameraOff`) alongside the mic. A room
+ends through an explicit host/moderator action, a LiveKit webhook
+reporting the room emptied, or a cron sweep that reclaims an abandoned
+room after its participants disconnect or after a 24-hour hard cap. Live
+Audio room reports integrate with the existing polymorphic `Report`/
+`Appeal` system (one of its eight target types); Live Video does not yet
+have its own report target (a host can still be reported via the
+existing bare-profile report flow).
+
+**Platform status**: implemented on **Web/PWA** (`/live-audio`,
+`/live-video`), **Android** and **iOS**, each with the full
+create/join/moderate flow. See
+[`docs/live-audio-architecture.md`](docs/live-audio-architecture.md) and
+[`docs/live-video-architecture.md`](docs/live-video-architecture.md) for
+the full design, authorization matrix and known limitations (no numeric
+speaker cap, no scheduled-cleanup cron wired up yet).
+
+### Gifts, chat, reactions, reminders and replay
+
+A shared engagement layer behind both Live Audio and Live Video rooms,
+implemented on Web, Android and iOS:
+
+- **Gifts**: an admin-defined `GiftDefinition` catalogue, a per-user
+  coin wallet (`CoinWallet`), and server-authoritative, idempotent gift
+  sends (`LiveGiftTransaction`) that debit the sender and credit the
+  recipient's `CreatorProfile` through the same platform-fee/charity-
+  split rail `Tip` already uses. Coins are purchased with real on-chain
+  USDC (verified the same way a `Tip` is) at a fixed peg; **there is no
+  in-app coin-purchase flow on Android or iOS** (real-money top-up is
+  refused server-side for native clients, per store payment policy - see
+  [Payments in the native apps](#payments-in-the-native-apps)), so coins
+  can only be bought today through the existing Web Solana flow. Gift
+  display names are derived client-side from an admin-set `key` slug
+  (e.g. `fire_heart` → "Fire heart"); there is no admin-seeded
+  name/translation table yet, so a gift's name is not localized.
+- **Chat**: persisted, moderated room chat with delete, mute and
+  slow-mode, broadcast over the room's existing Socket.IO channel.
+- **Reactions**: rate-limited, batched tap reactions broadcast to every
+  viewer.
+- **Scheduled-room reminders**: "Remind me" on a scheduled room, pushed
+  as a notification when the room goes live.
+- **Replay/recording**: real [LiveKit Egress](https://docs.livekit.io/home/egress/overview/)
+  integration (`src/lib/live-replay/`) - not a mock - that fails closed
+  with `503 replay_not_configured` because this deployment has no S3,
+  GCS or Azure bucket configured for Egress to upload to. The
+  start/stop-recording controls and replay-list UI are fully built on
+  every client; recordings will work as soon as
+  `LIVEKIT_EGRESS_S3_BUCKET`/`_REGION`/`_ACCESS_KEY`/`_SECRET` (and
+  optionally `_ENDPOINT`) are configured, with no further code changes.
+
+---
+
+## ZRP Launchpad
+
+**ZRP Launchpad** (`/launchpad`, `src/lib/launchpad/`,
+`src/app/api/launchpad/**`) is ZRP's own token-creation and DeFi
+surface on Solana. It is **ZRP-native**: the protocol ZRP uses to create
+and trade its own tokens is the **ZRP Launch Program**, a program ZRP
+wrote and controls - not Pump.fun, and not Raydium. Pump.fun and
+Raydium are separate, third-party protocols ZRP's client code also
+integrates with for specific, narrower purposes described below.
+
+### ZRP Launch Program (the ZRP-native bonding curve)
+
+`programs/zrp-launchpad/` is an [Anchor](https://www.anchor-lang.com/)
+(Rust) program with six instructions: `initialize`/`update_config`
+(admin `GlobalConfig`: fee rates, migration authority, graduation
+target), `create_and_buy` (creates a new mint plus its `BondingCurve`
+account and an initial buy, one signature), `buy`/`sell` (virtual-
+reserve bonding-curve trades with a caller-supplied minimum-out
+slippage bound), and `graduate` (once the curve's real SOL reserves
+cross its configured graduation target, sweeps the curve's reserves to
+the migration authority). Program ID (devnet):
+`3vr1SHa9LvEvELb23NBG1J6oFRCSDs8cj8wS55zuoRxK` (from
+[`Anchor.toml`](Anchor.toml); never treat any other ID as real). There
+is **no mainnet deployment yet** - see **Deployment status** below.
+
+The server never trusts a client-reported trade or balance: every price,
+curve-progress and graduation figure is read live from the program's own
+on-chain `GlobalConfig`/`BondingCurve` accounts or decoded from a
+confirmed transaction's own Anchor events
+(`src/lib/launchpad/zrp-launch-service.ts`), the same "client interfaces
+are never the authority for financial state" rule applied everywhere
+else money moves in this codebase. An acceptance test
+(`tests/zrp-launchpad.ts`, `scripts/verify-zrp-launchpad.ts`) asserts
+that no transaction this program produces ever invokes Pump.fun's real
+mainnet program ID - this program is not, and does not depend on,
+Pump.fun.
+
+**Known limitation**: post-graduation Raydium liquidity is **not yet
+automatic**. `graduate()` sweeps real SOL/tokens to the migration
+authority, but ZRP does not yet auto-seed a Raydium pool from them;
+creating that pool today requires the existing manual pool-creation
+routes below. See
+[`docs/zrp-launchpad-deployment.md`](docs/zrp-launchpad-deployment.md#known-limitation-post-graduation-raydium-liquidity-is-not-yet-automatic).
+
+### Token creation
+
+Two paths exist. **`/launchpad/create/zrp`** creates a token through the
+ZRP Launch Program above (bonding-curve pricing from the first buy).
+**`/launchpad/create`** mints a plain SPL token (fixed supply, Metaplex
+metadata, no bonding curve) for a flat USDC fee, charged and minted in
+one atomic, wallet-signed transaction; a token-template selector
+(`src/lib/launchpad/token-templates.ts`) pre-fills common configurations.
+A token created either way can then get real, immediately tradable
+liquidity via the Raydium integration below without waiting on
+bonding-curve graduation.
+
+### Liquidity: Raydium CPMM
+
+ZRP integrates with [Raydium's](https://raydium.io) existing, audited
+CPMM program as the **liquidity venue** - not as ZRP's launch protocol.
+`src/lib/launchpad/raydium-pool-service.ts`/`cpmm-keys.ts`/
+`client-liquidity.ts`/`pool-liquidity-reader.ts` cover real, wallet-
+signed pool creation, add/remove liquidity and LP-token burn, each
+independently verified on-chain after signing rather than trusted from
+the client's own report.
+
+### Trading existing Pump.fun tokens (read/trade integration, not ZRP's creation protocol)
+
+Separately, ZRP can **discover and trade tokens that already exist on
+Pump.fun** - a third-party protocol ZRP does not create tokens on and
+does not depend on for its own launch flow. Built on Pump.fun's own
+official, actively-maintained `@pump-fun/pump-sdk` /
+`@pump-fun/pump-swap-sdk` packages (`src/lib/launchpad/pump-curve-*.ts`,
+`pumpswap-pool-service.ts`), this covers live bonding-curve reads,
+independent buy/sell/graduation verification, and post-graduation
+PumpSwap pool detection for **existing** classic SOL-quoted Pump.fun
+curves only (mayhem-mode, holder-reward and other curve variants are
+detected and reported as unsupported rather than mis-read). A
+wallet-signed flow to **create** a new token directly on Pump.fun was
+built at one point, then **deliberately deleted** once the ZRP Launch
+Program above existed, so that ZRP's UI could not mint a Pump.fun token
+through any path - see
+[`docs/launchpad-bonding-curve-research.md`](docs/launchpad-bonding-curve-research.md)
+for the trading integration's scope and reasoning. ZRP's own
+token-creation path is the ZRP Launch Program above, never Pump.fun.
+
+### Broader Launchpad modules
+
+Also implemented, server-authoritative and independently chain-verified
+where they touch real funds: a DAO governance module (proposals and
+voting), NFT creation and NFT staking, token staking pools, vesting
+schedules, liquidity farming pools, a non-custodial Jupiter DEX-
+aggregator swap, wallet-native on-chain-verified token airdrops, a
+token scanner, and discovery/analytics surfaces (price, volume,
+holders, liquidity, trending) backed by a periodic `AnalyticsSnapshot`
+indexer. An admin dashboard (`/admin/launchpad`) surfaces the same data
+for operators.
+
+### Platform capability matrix
+
+`src/lib/launchpad/capability-matrix.ts` is the single source of truth
+for what is implemented, technically feasible and store-distributable
+per platform, grounded in Apple/Google's actual current policy text
+(cited inline in that file):
+
+- **Web/PWA**: full implementation - every feature above.
+- **Android**: a non-custodial Solana **foundation** is implemented and
+  unit-tested (`android-native/.../solana/`, `.../launchpad/`): Base58,
+  Ed25519/PDA derivation, ZRP Launch Program PDA derivation, curve math,
+  a transaction compiler and a wallet connector, cross-checked against
+  this repository's own web (`@solana/web3.js`) implementation's output.
+  **No Launchpad screens are wired up to it yet** - trading would also
+  require a non-custodial Solana Mobile Wallet Adapter flow and a Play
+  Console financial-features declaration before shipping, independent
+  of code.
+- **iOS/iPadOS**: **not started** - no Solana or Launchpad code exists
+  in `ios-native/` today. Native bonding-curve trading is additionally
+  blocked outright by Apple's crypto-unlock (3.1.1) and exchange-
+  licensing (3.1.5(iii)) guidelines; a native build would deep-link
+  trading/creation out to Web/PWA rather than build in-app signing for
+  it.
+
+### Deployment status
+
+Devnet deploys automatically on every push to `main` that touches
+`programs/**`, with a real on-chain smoke test after
+(create → buy → sell → graduation). **Mainnet deployment is manual-only**
+(`workflow_dispatch` with a typed confirmation phrase) and **has not
+been run** - there is no mainnet program ID anywhere in this repository,
+and the application fails closed in production (refuses to start)
+rather than silently falling back to the devnet program ID or devnet
+RPC if `ZRP_LAUNCH_PROGRAM_ID`/`NEXT_PUBLIC_SOLANA_RPC_URL` are left
+unset. Full procedure, required secrets and the exact mainnet checklist:
+[`docs/zrp-launchpad-deployment.md`](docs/zrp-launchpad-deployment.md).
 
 ---
 
@@ -490,10 +681,11 @@ Nodemailer
 NextAuth · Google · Sign in with Apple · bcrypt · sanitize-html ·
 Redis-backed rate limiting · SSRF guard · Sentry
 
-### Realtime audio
+### Realtime audio/video
 
-LiveKit (`livekit-server-sdk`, `livekit-client`): the SFU media transport
-behind ZRP Live Audio (see [ZRP Live Audio](#zrp-live-audio)).
+LiveKit (`livekit-server-sdk`, `livekit-client`, plus LiveKit's native
+Android and iOS SDKs): the SFU media transport and recording (Egress)
+backend behind ZRP Live (see [ZRP Live](#zrp-live)).
 
 ### Media
 
@@ -506,11 +698,19 @@ DeepSeek, accessed through the OpenAI-compatible SDK
 ### Blockchain
 
 Solana (`@solana/web3.js`, `@solana/spl-token`) with USDC support, used for
-tips, premium-post purchases, Help contributions, plan upgrade requests and
-creator/campaign withdrawal approvals. On-chain transactions are verified
-independently server-side. This functionality is
+tips, premium-post purchases, Help contributions, plan upgrade requests,
+creator/campaign withdrawal approvals, and ZRP Live coin purchases. On-chain
+transactions are verified independently server-side. This functionality is
 maintained separately from the core social experience and can evolve
 independently.
+
+**ZRP Launchpad** (see [ZRP Launchpad](#zrp-launchpad)) adds: an
+[Anchor](https://www.anchor-lang.com/)/Rust program
+(`programs/zrp-launchpad/`, the ZRP Launch Program) for ZRP-native token
+creation and bonding-curve trading; the official `@pump-fun/pump-sdk` /
+`@pump-fun/pump-swap-sdk` for reading and trading **existing** third-party
+Pump.fun tokens; `@raydium-io/raydium-sdk-v2` for CPMM liquidity pools; and
+Jupiter's aggregator API for non-custodial DEX swaps.
 
 ### Native
 
@@ -624,6 +824,8 @@ npm run dev          # starts server.js (Next.js + Socket.IO)
 | `npm start` | Production server |
 | `npm run lint` | ESLint via `next lint` |
 | `npm test` | Vitest suite |
+| `npm run anchor:test` | ZRP Launch Program's Anchor test suite (`tests/zrp-launchpad.ts`), against a local validator |
+| `npm run launchpad:verify` | Real on-chain verification of a deployed ZRP Launch Program (`scripts/verify-zrp-launchpad.ts`) |
 
 ### Configuration
 
@@ -683,8 +885,17 @@ include:
   / `LIVEKIT_WEBHOOK_API_SECRET` (optional; only needed if the LiveKit
   webhook is signed with a different key/secret pair than the main one:
   defaults to `LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET` when unset). Every
-  Live Audio route fails closed with a `503` when these are unset rather
-  than faking a token; see `docs/live-audio-architecture.md`.
+  Live Audio/Live Video route fails closed with a `503` when these are
+  unset rather than faking a token; see `docs/live-audio-architecture.md`.
+- **Live replay/recording (LiveKit Egress)**: `LIVEKIT_EGRESS_S3_BUCKET`,
+  `LIVEKIT_EGRESS_S3_REGION`, `LIVEKIT_EGRESS_S3_ACCESS_KEY`,
+  `LIVEKIT_EGRESS_S3_SECRET` (optionally `LIVEKIT_EGRESS_S3_ENDPOINT` for
+  an S3-compatible provider other than AWS): the cloud bucket LiveKit's
+  Egress service uploads a room recording to. **Unset in this
+  deployment today**, so every replay/recording route answers `503
+  replay_not_configured`; the start/stop-recording and replay-list UI on
+  every client is fully built and needs no code change once these are
+  set. See [Gifts, chat, reactions, reminders and replay](#gifts-chat-reactions-reminders-and-replay).
 - **Observability and misc**: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`,
   `CRON_SECRET`, `GIPHY_API_KEY`
 - **Security tuning (optional)**: `TRUSTED_PROXY_HOPS` (number of
@@ -753,6 +964,14 @@ validates generated localizations and source conventions before
 `xcodebuild` compiles Debug and Release on macOS, and the Android modules
 build through Gradle on GitHub-hosted runners.
 
+The ZRP Launch Program (`programs/zrp-launchpad/`) has its own pipeline,
+`.github/workflows/solana-program-ci.yml`: `anchor build` plus the full
+`npm run anchor:test` suite (`tests/zrp-launchpad.ts`) against a fresh
+local validator on every PR and push to `main`, then an automatic devnet
+deploy and a real on-chain smoke test (create → buy → sell → graduation).
+Mainnet deploy is a separate, manual-only job - see
+[ZRP Launchpad](#zrp-launchpad).
+
 ---
 
 ## Native applications
@@ -766,9 +985,19 @@ represents an approved App Store or Google Play listing.
 `android-native/` is a Kotlin / Jetpack Compose application
 (`one.zrp.social`, minSdk 24, targetSdk 36) that is replacing the
 Capacitor WebView shell in `android/`. It uses AndroidX and Material 3,
-Navigation Compose, Media3, Coil, WebRTC, Firebase Cloud Messaging,
-Google Credential Manager, and EncryptedSharedPreferences for session
-storage.
+Navigation Compose, Media3, Coil, WebRTC, LiveKit's Android SDK (Live
+Audio and Live Video), Firebase Cloud Messaging, Google Credential
+Manager, and EncryptedSharedPreferences for session storage.
+
+It ships full Live Audio and Live Video client screens (rooms, roles,
+moderation, and the gifts/chat/reactions/reminders/replay engagement
+layer) against the backend contract described in
+[ZRP Live](#zrp-live). It also has a non-custodial Solana **foundation**
+(`.../solana/`, `.../launchpad/`: Base58, Ed25519/PDA derivation, the ZRP
+Launch Program's own PDA derivation, curve math, a transaction compiler
+and a wallet connector) with its own unit tests, but **no ZRP Launchpad
+screens built on top of it yet** - see
+[Platform capability matrix](#platform-capability-matrix).
 
 Its CI workflow builds a debug APK on every change and a release App
 Bundle on demand. The native module has no Play Store listing of its own
@@ -780,10 +1009,21 @@ repository secrets.
 ### iOS
 
 `ios-native/` is a Swift / SwiftUI application targeting iOS 17, built in
-Xcode 16 with no third-party dependencies. Its architecture is
-one-directional (`View → ViewModel → Repository → ApiClient → backend`);
-sessions are stored in the Keychain, and Sign in with Apple is native and
-verified server-side.
+Xcode 16. Its architecture is one-directional
+(`View → ViewModel → Repository → ApiClient → backend`); sessions are
+stored in the Keychain, and Sign in with Apple is native and verified
+server-side. It has exactly two third-party dependencies, both added for
+real-time media: LiveKit's Swift SDK (Live Audio and Live Video) and
+`stasel/WebRTC` (1:1 voice/video calling); everything else is Apple
+frameworks.
+
+It ships full Live Audio and Live Video client screens, including the
+gifts/chat/reactions/reminders/replay engagement layer - see
+[ZRP Live](#zrp-live). It has **no ZRP Launchpad implementation at
+all**: no Solana code exists in `ios-native/` today, and native
+bonding-curve trading is additionally blocked by Apple's crypto/exchange
+policy regardless - see
+[Platform capability matrix](#platform-capability-matrix).
 
 Feature-by-feature status against the backend, the web app and the Android
 app is tracked in [`ios-native/PARITY.md`](ios-native/PARITY.md), which
@@ -847,8 +1087,17 @@ Direction, not a delivery commitment. Dates are not promised.
 - Broaden ZRP Music, Creator Studio and Opportunities.
 - Continue expanding localization coverage beyond the current 39
   languages as new markets are prioritized.
-- Bring Live Audio to Android and iOS with native client screens against
-  the existing backend contract.
+- Wire the Android Launchpad Solana foundation up to real Launchpad
+  screens (a non-custodial Mobile Wallet Adapter signing flow, plus the
+  Play Console financial-features declaration that requires), and start
+  the iOS Launchpad implementation from scratch where store policy
+  allows it.
+- Configure a LiveKit Egress storage bucket (S3/GCS/Azure) so ZRP Live
+  replay/recording can complete instead of answering `503`.
+- Automatically seed a Raydium pool from a bonding curve's swept
+  reserves on graduation, closing the one manual step in that flow.
+- Deploy the ZRP Launch Program to Solana mainnet, through the existing
+  manual, confirmation-gated workflow, once that decision is made.
 - Keep tagging Web releases and publishing GitHub Releases going
   forward: see [Versioning and releases](#versioning-and-releases).
 
@@ -961,8 +1210,16 @@ Full terms: [LICENSE](LICENSE).
   geography, acquisition and professional-profile data model
 - [`docs/live-audio-architecture.md`](docs/live-audio-architecture.md):
   ZRP Live Audio architecture and platform status
+- [`docs/live-video-architecture.md`](docs/live-video-architecture.md):
+  ZRP Live Video architecture and platform status
 - [`docs/discover-backend.md`](docs/discover-backend.md): ZRP Discover
   ranking backend
+- [`docs/advanced-search-architecture.md`](docs/advanced-search-architecture.md):
+  Advanced Search categories and per-platform status
+- [`docs/zrp-launchpad-deployment.md`](docs/zrp-launchpad-deployment.md):
+  ZRP Launch Program build/test/devnet/mainnet deployment procedure
+- [`docs/launchpad-bonding-curve-research.md`](docs/launchpad-bonding-curve-research.md):
+  the Pump.fun trading/discovery integration's scope and research
 - [`ios-native/README.md`](ios-native/README.md): native iOS module
 - [`ios-native/PARITY.md`](ios-native/PARITY.md): cross-platform parity
   matrix
