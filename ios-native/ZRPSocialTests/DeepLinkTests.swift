@@ -15,6 +15,19 @@ final class DeepLinkTests: XCTestCase {
         DeepLink.target(for: URL(string: "https://zrp.one\(path)")!)
     }
 
+    /// A scheduled-live reminder push carries `/live-audio/{id}` or
+    /// `/live-video/{id}` (`notifyReminderSubscribers`); before these
+    /// cases existed both fell through to the web.
+    func testLiveRoomLinksOpenTheRoom() {
+        XCTAssertEqual(target("/live-audio/room-1"), DeepLinkTarget(.home, .liveAudioRoom(id: "room-1")))
+        XCTAssertEqual(target("/live-video/room-2"), DeepLinkTarget(.home, .liveVideoRoom(id: "room-2")))
+    }
+
+    func testBareLiveLinksOpenTheRoomLists() {
+        XCTAssertEqual(target("/live-audio"), DeepLinkTarget(.home, .liveAudio))
+        XCTAssertEqual(target("/live-video"), DeepLinkTarget(.home, .liveVideo))
+    }
+
     func testPlayDuelLinkRoutesToTheSpecificDuel() {
         let result = target("/play/duel/duel-123")
         XCTAssertEqual(result, DeepLinkTarget(.home, .playDuelDetail(id: "duel-123")))

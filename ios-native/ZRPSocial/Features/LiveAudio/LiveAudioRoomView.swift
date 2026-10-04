@@ -7,6 +7,11 @@ import SwiftUI
 /// from `.onDisappear`, which fires for every exit path - swipe-back,
 /// the toolbar button, and programmatic `navigator.pop()` alike) rather
 /// than a `deinit` hook makes the real `POST /leave` call.
+///
+/// The speaker/listener grid is the room; chat is drawn over its lower
+/// part (not a full-screen takeover) and can be hidden, gifts and
+/// reactions animate over it, and a host/moderator gets chat slow mode
+/// and recording from the toolbar menu.
 struct LiveAudioRoomView: View {
 
     let roomId: String
@@ -16,6 +21,8 @@ struct LiveAudioRoomView: View {
     @StateObject private var viewModel: LiveAudioRoomViewModel
     @State private var confirmEnd = false
     @State private var confirmRemoveUserId: String?
+    @State private var showGifts = false
+    @State private var showChat = true
 
     init(roomId: String) {
         self.roomId = roomId
@@ -29,8 +36,27 @@ struct LiveAudioRoomView: View {
                 connectingState
             case .error:
                 errorState
-            case .ended, .removed:
-                endedState
+            case .scheduled:
+                if let room = viewModel.room {
+                    LiveScheduledRoomView(
+                        kind: .audio,
+                        room: room,
+                        host: viewModel.host,
+                        isHost: viewModel.amHost,
+                        engagement: viewModel.engagement,
+                        isBusy: viewModel.isLifecycleBusy,
+                        actionError: viewModel.actionError,
+                        onStart: { viewModel.startScheduledRoom() },
+                        onCancel: { viewModel.cancelScheduledRoom() },
+                        onRefresh: { await viewModel.refreshScheduled() }
+                    )
+                }
+            case .ended:
+                LiveEndedRoomView(kind: .audio, reason: .ended, engagement: viewModel.engagement) { navigator.pop() }
+            case .cancelled:
+                LiveEndedRoomView(kind: .audio, reason: .cancelled, engagement: viewModel.engagement) { navigator.pop() }
+            case .removed:
+                LiveEndedRoomView(kind: .audio, reason: .removed, engagement: viewModel.engagement) { navigator.pop() }
             case .connected:
                 connectedContent
             }
@@ -46,13 +72,22 @@ struct LiveAudioRoomView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                     }
+                    .accessibilityLabel(Text(.liveAudioLeaveRoom))
                 }
                 ToolbarItem(placement: .principal) {
                     Text(verbatim: viewModel.room?.title ?? "")
                         .font(.headline)
                         .lineLimit(1)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    if isLiveAudioAuthority(viewModel.myRole) {
+                        Menu {
+                            LiveAuthorityMenuItems(engagement: viewModel.engagement)
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                        }
+                        .accessibilityLabel(Text(.chatContactMore))
+                    }
                     if viewModel.myRole == "HOST" {
                         Button(role: .destructive) {
                             confirmEnd = true
@@ -69,7 +104,7 @@ struct LiveAudioRoomView: View {
                 }
             }
         }
-        .task { await viewModel.connect(currentUserId: session.currentUser?.id) }
+        .task { await viewModel.start(currentUserId: session.currentUser?.id) }
         .onDisappear { Task { await viewModel.leave() } }
         .confirmationDialog(
             Text(.liveAudioEndRoomConfirmTitle),
@@ -94,6 +129,13 @@ struct LiveAudioRoomView: View {
                 Text(.liveAudioRemoveAction)
             }
         }
+        .sheet(isPresented: $showGifts) {
+            LiveGiftPanel(
+                engagement: viewModel.engagement,
+                hostName: viewModel.host?.displayName ?? "",
+                onSent: {}
+            )
+        }
     }
 
     private var connectingState: some View {
@@ -115,35 +157,28 @@ struct LiveAudioRoomView: View {
                 .font(.subheadline)
                 .foregroundStyle(ZrpColor.onSurfaceMuted)
                 .multilineTextAlignment(.center)
-            backButton
+            Button {
+                Task { await viewModel.start(currentUserId: session.currentUser?.id) }
+            } label: {
+                Text(.feedTryAgain)
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, ZrpSpacing.xl)
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
+                    .background(ZrpColor.red)
+                    .foregroundStyle(.white)
+                    .clipShape(Capsule())
+            }
+            Button {
+                navigator.pop()
+            } label: {
+                Text(.liveAudioBackToLiveAudio)
+                    .font(.subheadline.weight(.semibold))
+                    .frame(minHeight: ZrpMetrics.minTouchTarget)
+            }
+            .tint(ZrpColor.onSurface)
         }
         .padding(ZrpSpacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var endedState: some View {
-        VStack(spacing: ZrpSpacing.lg) {
-            Text(viewModel.phase == .ended ? L10nKey.liveAudioRoomEndedTitle : L10nKey.liveAudioRemovedTitle)
-                .font(.headline)
-                .multilineTextAlignment(.center)
-            backButton
-        }
-        .padding(ZrpSpacing.xl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var backButton: some View {
-        Button {
-            navigator.pop()
-        } label: {
-            Text(.liveAudioBackToLiveAudio)
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, ZrpSpacing.xl)
-                .frame(minHeight: ZrpMetrics.minTouchTarget)
-                .background(ZrpColor.red)
-                .foregroundStyle(.white)
-                .clipShape(Capsule())
-        }
     }
 
     // MARK: - Connected
@@ -161,21 +196,12 @@ struct LiveAudioRoomView: View {
     private var connectedContent: some View {
         VStack(spacing: 0) {
             if let actionError = viewModel.actionError {
-                HStack(spacing: ZrpSpacing.sm) {
-                    Text(verbatim: actionError)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Button {
-                        viewModel.dismissActionError()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.caption)
-                    }
-                }
-                .padding(.horizontal, ZrpSpacing.lg)
-                .padding(.vertical, ZrpSpacing.xs)
+                LiveNoticeBanner(text: actionError) { viewModel.dismissActionError() }
+                    .padding(.horizontal, ZrpSpacing.lg)
+                    .padding(.vertical, ZrpSpacing.xs)
             }
+            LiveReplayNotice(engagement: viewModel.engagement)
+                .padding(.horizontal, ZrpSpacing.lg)
 
             if amAuthority, !viewModel.pendingSpeakerRequestUserIds.isEmpty {
                 PendingSpeakerRequestsPanel(
@@ -187,43 +213,73 @@ struct LiveAudioRoomView: View {
                 )
             }
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
-                    VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
-                        Text(.liveAudioSpeakersHeading)
-                            .font(.subheadline.weight(.bold))
+            ZStack(alignment: .bottom) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: ZrpSpacing.lg) {
+                        HStack(spacing: ZrpSpacing.sm) {
+                            Text(.liveAudioSpeakersHeading)
+                                .font(.subheadline.weight(.bold))
+                            Spacer()
+                            LiveRecordingIndicator(engagement: viewModel.engagement)
+                        }
                         ParticipantGrid(
                             participants: speakers,
                             myUserId: viewModel.myUserId,
                             speakingUserIds: viewModel.speakingUserIds,
                             amAuthority: amAuthority,
+                            engagement: viewModel.engagement,
                             onPromote: { viewModel.promote(userId: $0) },
                             onDemote: { viewModel.demote(userId: $0) },
                             onMute: { viewModel.mute(userId: $0) },
                             onUnmute: { viewModel.unmute(userId: $0) },
                             onRequestRemove: { confirmRemoveUserId = $0 }
                         )
-                    }
 
-                    if !listeners.isEmpty {
-                        VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
-                            Text(.liveAudioListenersHeading)
-                                .font(.subheadline.weight(.bold))
-                            ParticipantGrid(
-                                participants: listeners,
-                                myUserId: viewModel.myUserId,
-                                speakingUserIds: viewModel.speakingUserIds,
-                                amAuthority: amAuthority,
-                                onPromote: { viewModel.promote(userId: $0) },
-                                onDemote: { viewModel.demote(userId: $0) },
-                                onMute: { viewModel.mute(userId: $0) },
-                                onUnmute: { viewModel.unmute(userId: $0) },
-                                onRequestRemove: { confirmRemoveUserId = $0 }
-                            )
+                        if !listeners.isEmpty {
+                            VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+                                Text(.liveAudioListenersHeading)
+                                    .font(.subheadline.weight(.bold))
+                                ParticipantGrid(
+                                    participants: listeners,
+                                    myUserId: viewModel.myUserId,
+                                    speakingUserIds: viewModel.speakingUserIds,
+                                    amAuthority: amAuthority,
+                                    engagement: viewModel.engagement,
+                                    onPromote: { viewModel.promote(userId: $0) },
+                                    onDemote: { viewModel.demote(userId: $0) },
+                                    onMute: { viewModel.mute(userId: $0) },
+                                    onUnmute: { viewModel.unmute(userId: $0) },
+                                    onRequestRemove: { confirmRemoveUserId = $0 }
+                                )
+                            }
                         }
                     }
+                    .padding(ZrpSpacing.lg)
+                    // Room to scroll the last row of the grid out from
+                    // under the chat panel.
+                    .padding(.bottom, showChat ? 300 : ZrpSpacing.xl)
                 }
-                .padding(ZrpSpacing.lg)
+
+                VStack(alignment: .leading, spacing: ZrpSpacing.sm) {
+                    LiveGiftBannerLayer(engagement: viewModel.engagement)
+                        .padding(.horizontal, ZrpSpacing.lg)
+                    if showChat {
+                        LiveChatOverlay(engagement: viewModel.engagement, style: .overSurface)
+                            .frame(maxHeight: 280, alignment: .bottom)
+                            .padding(ZrpSpacing.md)
+                            .background(
+                                ZrpColor.surface.opacity(0.96),
+                                in: UnevenRoundedRectangle(topLeadingRadius: ZrpRadius.lg, topTrailingRadius: ZrpRadius.lg, style: .continuous)
+                            )
+                            .overlay(alignment: .top) {
+                                Rectangle().fill(ZrpColor.outline).frame(height: 0.5)
+                            }
+                    }
+                }
+
+                LiveReactionLayerHost(engagement: viewModel.engagement)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing, ZrpSpacing.md)
             }
 
             LiveAudioControlBar(
@@ -231,8 +287,13 @@ struct LiveAudioRoomView: View {
                 isMicOn: viewModel.isMicOn,
                 isMicBusy: viewModel.isMicBusy,
                 speakRequestSent: viewModel.speakRequestSent,
+                isChatShown: showChat,
+                canGift: !viewModel.amHost,
+                engagement: viewModel.engagement,
                 onToggleMic: { viewModel.toggleMic() },
-                onRequestToSpeak: { viewModel.requestToSpeak() }
+                onRequestToSpeak: { viewModel.requestToSpeak() },
+                onToggleChat: { showChat.toggle() },
+                onGift: { showGifts = true }
             )
         }
     }
@@ -269,10 +330,12 @@ private struct PendingSpeakerRequestsPanel: View {
                     } else {
                         Button { onApprove(userId) } label: {
                             Image(systemName: "checkmark")
+                                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
                         }
                         .accessibilityLabel(Text(.liveAudioApprove))
                         Button { onReject(userId) } label: {
                             Image(systemName: "xmark")
+                                .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
                         }
                         .accessibilityLabel(Text(.liveAudioDecline))
                     }
@@ -290,6 +353,7 @@ private struct ParticipantGrid: View {
     let myUserId: String?
     let speakingUserIds: Set<String>
     let amAuthority: Bool
+    let engagement: LiveEngagementViewModel
     let onPromote: (String) -> Void
     let onDemote: (String) -> Void
     let onMute: (String) -> Void
@@ -306,6 +370,7 @@ private struct ParticipantGrid: View {
                     isMe: participant.user.id == myUserId,
                     isSpeaking: speakingUserIds.contains(participant.user.id) && !participant.isMuted,
                     amAuthority: amAuthority,
+                    engagement: engagement,
                     onPromote: { onPromote(participant.user.id) },
                     onDemote: { onDemote(participant.user.id) },
                     onMute: { onMute(participant.user.id) },
@@ -323,6 +388,7 @@ private struct ParticipantTile: View {
     let isMe: Bool
     let isSpeaking: Bool
     let amAuthority: Bool
+    let engagement: LiveEngagementViewModel
     let onPromote: () -> Void
     let onDemote: () -> Void
     let onMute: () -> Void
@@ -350,11 +416,16 @@ private struct ParticipantTile: View {
                     } else if participant.role == "SPEAKER" {
                         Button(action: onDemote) { Text(.liveAudioMoveToListener) }
                     }
-                    Button(action: participant.isMuted ? onUnmute : onMute) {
-                        Text(participant.isMuted ? L10nKey.liveAudioUnmuteAction : L10nKey.liveAudioMuteAction)
+                    if canPublishLiveAudio(participant.role) {
+                        Button(action: participant.isMuted ? onUnmute : onMute) {
+                            Text(participant.isMuted ? L10nKey.liveAudioUnmuteAction : L10nKey.liveAudioMuteAction)
+                        }
                     }
-                    Button(role: .destructive, action: onRequestRemove) {
-                        Text(.liveAudioRemoveAction)
+                    LiveChatMuteMenuItems(engagement: engagement, userId: participant.user.id)
+                    if participant.role != "HOST" {
+                        Button(role: .destructive, action: onRequestRemove) {
+                            Text(.liveAudioRemoveAction)
+                        }
                     }
                 } label: {
                     tileContent
@@ -405,12 +476,28 @@ private struct LiveAudioControlBar: View {
     let isMicOn: Bool
     let isMicBusy: Bool
     let speakRequestSent: Bool
+    let isChatShown: Bool
+    let canGift: Bool
+    let engagement: LiveEngagementViewModel
     let onToggleMic: () -> Void
     let onRequestToSpeak: () -> Void
+    let onToggleChat: () -> Void
+    let onGift: () -> Void
 
     var body: some View {
-        HStack {
-            Spacer()
+        HStack(alignment: .center, spacing: ZrpSpacing.md) {
+            Button(action: onToggleChat) {
+                Image(systemName: isChatShown ? "bubble.left.fill" : "bubble.left")
+                    .font(.title3)
+                    .foregroundStyle(ZrpColor.onSurface)
+                    .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                    .background(ZrpColor.surfaceElevated, in: Circle())
+            }
+            .accessibilityLabel(Text(.iosLiveChatTitle))
+            .accessibilityAddTraits(isChatShown ? .isSelected : [])
+
+            Spacer(minLength: 0)
+
             if canPublish {
                 Button(action: onToggleMic) {
                     Group {
@@ -430,17 +517,35 @@ private struct LiveAudioControlBar: View {
                 Button(action: onRequestToSpeak) {
                     Label {
                         Text(speakRequestSent ? L10nKey.liveAudioRequestSent : L10nKey.liveAudioRaiseHand)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     } icon: {
                         Image(systemName: "hand.raised")
                     }
-                    .padding(.horizontal, ZrpSpacing.lg)
+                    .padding(.horizontal, ZrpSpacing.md)
                     .frame(minHeight: ZrpMetrics.minTouchTarget)
                 }
                 .buttonStyle(.bordered)
                 .disabled(speakRequestSent)
             }
-            Spacer()
+
+            Spacer(minLength: 0)
+
+            LiveReactionButton(engagement: engagement)
+
+            if canGift {
+                Button(action: onGift) {
+                    Image(systemName: "gift.fill")
+                        .font(.title3)
+                        .foregroundStyle(ZrpColor.red)
+                        .frame(width: ZrpMetrics.minTouchTarget, height: ZrpMetrics.minTouchTarget)
+                        .background(ZrpColor.surfaceElevated, in: Circle())
+                }
+                .accessibilityLabel(Text(.iosLiveGiftTitle))
+            }
         }
-        .padding(ZrpSpacing.lg)
+        .padding(.horizontal, ZrpSpacing.lg)
+        .padding(.vertical, ZrpSpacing.md)
+        .background(ZrpColor.background)
     }
 }

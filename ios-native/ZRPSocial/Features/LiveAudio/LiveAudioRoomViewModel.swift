@@ -27,9 +27,12 @@ func removePendingSpeakerRequest(_ current: [String], _ userId: String) -> [Stri
 
 enum LiveAudioPhase: Equatable {
     case loading
+    /// SCHEDULED - not joinable yet; shows start/cancel or "Remind me".
+    case scheduled
     case connecting
     case connected
     case ended
+    case cancelled
     case removed
     case error
 }
@@ -59,6 +62,15 @@ enum LiveAudioPhase: Equatable {
 /// automatically by the LiveKit SDK's own audio engine; this class does
 /// not duplicate that.
 ///
+/// Before joining, the room is read once (`GET /live-audio/rooms/{id}`):
+/// a SCHEDULED room shows its scheduled state (start/cancel for the host,
+/// "Remind me" for everyone else) instead of a join that would fail with
+/// `room_not_live`, and an ENDED/CANCELLED room goes straight to its end
+/// state - which is what a reminder push or a shared link can land on.
+///
+/// Chat, gifts, reactions and replay live in `engagement`
+/// (`LiveEngagementViewModel`), started and stopped with the connection.
+///
 /// `NSObject` because `RoomDelegate`'s methods are `@objc optional` -
 /// only `room(_:didUpdateSpeakingParticipants:)` is implemented, for the
 /// same speaking-ring highlight the web room page draws
@@ -86,17 +98,27 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
     @Published var actionError: String?
     @Published private(set) var speakRequestSent = false
     @Published private(set) var actionBusyUserId: String?
+    @Published private(set) var isLifecycleBusy = false
+
+    let engagement: LiveEngagementViewModel
 
     private let roomId: String
     private let repository: LiveAudioRepositoryProtocol
     private let socket: ZrpSocket
     private var socketToken: UUID?
+    private var connectToken: UUID?
     private var liveKitRoom: LiveKit.Room?
-    private var joinedSuccessfully = false
+    /// `POST /join` succeeded, so the server holds an active participant
+    /// row for us - set before the LiveKit connection is attempted, so a
+    /// failed media connection still closes that row on leave instead of
+    /// leaving a ghost participant behind.
+    private var serverJoined = false
+    private var socketJoined = false
 
     init(
         roomId: String,
         repository: LiveAudioRepositoryProtocol = LiveAudioRepository(),
+        engagementRepository: LiveEngagementRepositoryProtocol = LiveEngagementRepository(),
         socket: ZrpSocket? = nil
     ) {
         self.roomId = roomId
@@ -104,19 +126,23 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
         // Not a default argument: a default is evaluated outside the
         // actor, and `ZrpSocket.shared` is main-actor isolated (see
         // `PresenceStore`'s own identical reasoning).
-        self.socket = socket ?? .shared
+        let resolvedSocket = socket ?? .shared
+        self.socket = resolvedSocket
+        self.engagement = LiveEngagementViewModel(
+            kind: .audio,
+            roomId: roomId,
+            repository: engagementRepository,
+            socket: resolvedSocket
+        )
         super.init()
     }
 
+    var amHost: Bool { myUserId != nil && myUserId == room?.hostId }
+    var host: LiveAudioHost? { participants.first { $0.role == "HOST" }?.user }
+
     private func loadDetail() async {
         do {
-            let detail = try await repository.room(id: roomId)
-            room = detail.room
-            participants = detail.participants
-            myRole = detail.myRole
-            if let myUserId {
-                pendingSpeakerRequestUserIds = removePendingSpeakerRequest(pendingSpeakerRequestUserIds, myUserId)
-            }
+            apply(try await repository.room(id: roomId))
         } catch {
             // Only a failure on the very first load is fatal to the
             // screen - a transient failure on a later re-fetch
@@ -124,38 +150,132 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
             // leaves the last-known-good list on screen, matching
             // page.tsx's own setLoadError only ever being set from the
             // initial loadDetail() call site.
-            if phase == .loading {
-                self.phase = .error
-                self.error = (error as? ApiError)?.userFacingMessage ?? L10n.string(.discoverActionFailed)
+        }
+    }
+
+    private func apply(_ detail: LiveAudioRoomDetail) {
+        room = detail.room
+        participants = detail.participants
+        myRole = detail.myRole ?? myRole
+        if let myUserId {
+            pendingSpeakerRequestUserIds = removePendingSpeakerRequest(pendingSpeakerRequestUserIds, myUserId)
+        }
+        engagement.updateContext(
+            myUserId: myUserId,
+            room: detail.room,
+            myRole: detail.myRole,
+            people: detail.participants.map {
+                LiveChatAuthor(id: $0.user.id, username: $0.user.username, name: $0.user.name, avatarUrl: $0.user.avatarUrl)
+            }
+        )
+    }
+
+    private func roomErrorMessage(_ error: Error) -> String {
+        guard let apiError = error as? ApiError else { return L10n.string(.liveAudioJoinError) }
+        switch apiError.serverCode {
+        case "not_configured": return L10n.string(.liveAudioNotConfigured)
+        case "room_not_found": return L10n.string(.liveAudioRoomNotFound)
+        case "room_not_live", "invalid_state": return L10n.string(.iosLiveErrRoomNotLive)
+        case "room_already_ended": return L10n.string(.liveAudioRoomEndedTitle)
+        case "removed_from_room": return L10n.string(.liveAudioRemovedTitle)
+        default: return apiError.userFacingMessage
+        }
+    }
+
+    /// Reads the room, then joins it if it is live. `currentUserId` is
+    /// read once by the caller from `SessionController` and handed in,
+    /// rather than this view model reaching for `SessionController`
+    /// itself - it has no other reason to depend on that type. Safe to
+    /// call again (from `.task`, or a retry) - it only acts from the
+    /// initial or error state.
+    func start(currentUserId: String?) async {
+        guard phase == .loading || phase == .error, liveKitRoom == nil else { return }
+        myUserId = currentUserId
+        phase = .loading
+        error = nil
+        do {
+            let detail = try await repository.room(id: roomId)
+            apply(detail)
+            await route(for: detail.room.status)
+        } catch {
+            phase = .error
+            self.error = roomErrorMessage(error)
+        }
+    }
+
+    private func route(for status: String) async {
+        switch status {
+        case "SCHEDULED": phase = .scheduled
+        case "ENDED": phase = .ended
+        case "CANCELLED": phase = .cancelled
+        default: await connect()
+        }
+    }
+
+    /// Pull-to-refresh on the scheduled state - joins if the host has
+    /// started meanwhile.
+    func refreshScheduled() async {
+        guard phase == .scheduled else { return }
+        do {
+            let detail = try await repository.room(id: roomId)
+            apply(detail)
+            if detail.room.status != "SCHEDULED" { await route(for: detail.room.status) }
+        } catch {
+            actionError = roomErrorMessage(error)
+        }
+    }
+
+    func startScheduledRoom() {
+        guard amHost, !isLifecycleBusy else { return }
+        isLifecycleBusy = true
+        actionError = nil
+        Task {
+            defer { self.isLifecycleBusy = false }
+            do {
+                room = try await repository.startRoom(id: roomId)
+                await connect()
+            } catch {
+                actionError = roomErrorMessage(error)
             }
         }
     }
 
-    /// `currentUserId` is read once by the caller from `SessionController`
-    /// and handed in, rather than this view model reaching for
-    /// `SessionController` itself - it has no other reason to depend on
-    /// that type.
-    func connect(currentUserId: String?) async {
-        guard liveKitRoom == nil, phase != .connecting else { return }
+    func cancelScheduledRoom() {
+        guard amHost, !isLifecycleBusy else { return }
+        isLifecycleBusy = true
+        actionError = nil
+        Task {
+            defer { self.isLifecycleBusy = false }
+            do {
+                try await repository.cancelRoom(id: roomId)
+                phase = .cancelled
+            } catch {
+                actionError = roomErrorMessage(error)
+            }
+        }
+    }
+
+    private func connect() async {
+        guard liveKitRoom == nil else { return }
         phase = .connecting
         error = nil
-        myUserId = currentUserId
 
         do {
             let join = try await repository.joinRoom(id: roomId)
+            serverJoined = true
             let liveKitRoom = LiveKit.Room(delegate: self)
             self.liveKitRoom = liveKitRoom
             try await liveKitRoom.connect(url: join.livekitUrl, token: join.token)
-            joinedSuccessfully = true
             myRole = join.participant.role
             phase = .connected
             subscribeSocket()
+            engagement.start()
             await loadDetail()
         } catch {
             if let failedRoom = liveKitRoom { Task { await failedRoom.disconnect() } }
             liveKitRoom = nil
             phase = .error
-            self.error = (error as? ApiError)?.userFacingMessage ?? L10n.string(.discoverActionFailed)
+            self.error = roomErrorMessage(error)
         }
     }
 
@@ -177,52 +297,74 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
         guard socketToken == nil else { return }
         socket.connect()
         socketToken = socket.subscribe { [weak self] event in
+            self?.handle(event)
+        }
+        // `ZrpSocket.emit` silently does nothing until the socket is
+        // connected, and a reconnect starts a fresh server-side socket
+        // that is in no room at all. Emitting the join only once, right
+        // after `connect()`, meant a socket that was still handshaking
+        // never joined the room channel - and no reconnect ever
+        // re-joined it - so every `live-audio:*` event was lost. The
+        // join is now (re)sent on every connect, and the detail re-read
+        // to catch up on anything missed while disconnected.
+        connectToken = socket.subscribeToConnect { [weak self] in
             guard let self else { return }
-            switch event.name {
-            case "live-audio:participant-joined", "live-audio:participant-left":
-                Task { await self.loadDetail() }
-
-            case "live-audio:participant-removed":
-                guard let payload = try? JSONDecoder().decode(LiveAudioParticipantRemovedPayload.self, from: event.data)
-                else { return }
-                // My own removal is handled by the dedicated
-                // you-were-removed event below, which also carries the
-                // terminal-state signal participant-removed does not.
-                if payload.userId != self.myUserId { Task { await self.loadDetail() } }
-
-            case "live-audio:role-changed":
-                guard let payload = try? JSONDecoder().decode(LiveAudioRoleChangedPayload.self, from: event.data)
-                else { return }
-                Task { await self.loadDetail() }
-                if payload.userId == self.myUserId { Task { await self.reconnectWithFreshToken() } }
-
-            case "live-audio:mute-changed":
-                guard let payload = try? JSONDecoder().decode(LiveAudioMuteChangedPayload.self, from: event.data)
-                else { return }
-                Task { await self.loadDetail() }
-                if payload.userId == self.myUserId, payload.isMuted {
-                    Task { try? await self.liveKitRoom?.localParticipant.setMicrophone(enabled: false) }
-                    self.isMicOn = false
-                }
-
-            case "live-audio:room-ended":
-                self.phase = .ended
-                if let activeRoom = self.liveKitRoom { Task { await activeRoom.disconnect() } }
-
-            case "live-audio:you-were-removed":
-                self.phase = .removed
-                if let activeRoom = self.liveKitRoom { Task { await activeRoom.disconnect() } }
-
-            case "live-audio:speaker-request":
-                guard let payload = try? JSONDecoder().decode(LiveAudioSpeakerRequestPayload.self, from: event.data)
-                else { return }
-                self.pendingSpeakerRequestUserIds = addPendingSpeakerRequest(self.pendingSpeakerRequestUserIds, payload.userId)
-
-            default:
-                break
-            }
+            self.socket.emit("join-live-audio-room", self.roomId)
+            Task { await self.loadDetail() }
         }
         socket.emit("join-live-audio-room", roomId)
+        socketJoined = true
+    }
+
+    private func handle(_ event: SocketEvent) {
+        switch event.name {
+        case "live-audio:participant-joined", "live-audio:participant-left":
+            Task { await loadDetail() }
+
+        case "live-audio:participant-removed":
+            guard let payload = try? JSONDecoder().decode(LiveAudioParticipantRemovedPayload.self, from: event.data)
+            else { return }
+            // My own removal is handled by the dedicated
+            // you-were-removed event below, which also carries the
+            // terminal-state signal participant-removed does not.
+            if payload.userId != myUserId { Task { await loadDetail() } }
+
+        case "live-audio:role-changed":
+            guard let payload = try? JSONDecoder().decode(LiveAudioRoleChangedPayload.self, from: event.data)
+            else { return }
+            Task { await loadDetail() }
+            if payload.userId == myUserId {
+                if !canPublishLiveAudio(payload.role) { isMicOn = false }
+                Task { await reconnectWithFreshToken() }
+            }
+
+        case "live-audio:mute-changed":
+            guard let payload = try? JSONDecoder().decode(LiveAudioMuteChangedPayload.self, from: event.data)
+            else { return }
+            Task { await loadDetail() }
+            if payload.userId == myUserId, payload.isMuted {
+                Task { try? await liveKitRoom?.localParticipant.setMicrophone(enabled: false) }
+                isMicOn = false
+            }
+
+        case "live-audio:room-ended":
+            phase = .ended
+            engagement.stop()
+            if let activeRoom = liveKitRoom { Task { await activeRoom.disconnect() } }
+
+        case "live-audio:you-were-removed":
+            phase = .removed
+            engagement.stop()
+            if let activeRoom = liveKitRoom { Task { await activeRoom.disconnect() } }
+
+        case "live-audio:speaker-request":
+            guard let payload = try? JSONDecoder().decode(LiveAudioSpeakerRequestPayload.self, from: event.data)
+            else { return }
+            pendingSpeakerRequestUserIds = addPendingSpeakerRequest(pendingSpeakerRequestUserIds, payload.userId)
+
+        default:
+            break
+        }
     }
 
     /// Best-effort, matching page.tsx's own `reconnectWithFreshToken`:
@@ -269,7 +411,7 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
                 try await repository.requestToSpeak(roomId: roomId)
                 self.speakRequestSent = true
             } catch {
-                self.actionError = (error as? ApiError)?.userFacingMessage ?? L10n.string(.discoverActionFailed)
+                self.actionError = roomErrorMessage(error)
             }
         }
     }
@@ -288,7 +430,7 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
                 await self.loadDetail()
             } catch {
                 self.actionBusyUserId = nil
-                self.actionError = (error as? ApiError)?.userFacingMessage ?? L10n.string(.discoverActionFailed)
+                self.actionError = roomErrorMessage(error)
             }
         }
     }
@@ -308,7 +450,7 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
                 await self.loadDetail()
             } catch {
                 self.actionBusyUserId = nil
-                self.actionError = (error as? ApiError)?.userFacingMessage ?? L10n.string(.discoverActionFailed)
+                self.actionError = roomErrorMessage(error)
             }
         }
     }
@@ -320,7 +462,7 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
             do {
                 try await self.repository.endRoom(id: self.roomId)
             } catch {
-                self.actionError = (error as? ApiError)?.userFacingMessage ?? L10n.string(.discoverActionFailed)
+                self.actionError = roomErrorMessage(error)
             }
         }
     }
@@ -332,7 +474,8 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
     /// own teardown hook is not guaranteed to still have a live task
     /// context to await a network call in.
     func leave() async {
-        if joinedSuccessfully {
+        engagement.stop()
+        if serverJoined {
             try? await repository.leaveRoom(id: roomId)
         }
         teardownLocal()
@@ -341,12 +484,17 @@ final class LiveAudioRoomViewModel: NSObject, ObservableObject {
     private func teardownLocal() {
         if let socketToken {
             socket.unsubscribe(socketToken)
-            if joinedSuccessfully { socket.emit("leave-live-audio-room", roomId) }
         }
+        if let connectToken {
+            socket.unsubscribeFromConnect(connectToken)
+        }
+        if socketJoined { socket.emit("leave-live-audio-room", roomId) }
         socketToken = nil
+        connectToken = nil
+        socketJoined = false
         if let activeRoom = liveKitRoom { Task { await activeRoom.disconnect() } }
         liveKitRoom = nil
-        joinedSuccessfully = false
+        serverJoined = false
     }
 
     deinit {

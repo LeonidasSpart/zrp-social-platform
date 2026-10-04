@@ -111,6 +111,7 @@ enum ZrpMenu {
                 MenuEntry(.navShorts, systemImage: "play.rectangle", route: .shorts(startId: nil)),
                 MenuEntry(.navDiscover, systemImage: "bolt.fill", route: .discover),
                 MenuEntry(.navLiveAudio, systemImage: "dot.radiowaves.left.and.right", route: .liveAudio),
+                MenuEntry(.navLiveVideo, systemImage: "video", route: .liveVideo),
                 MenuEntry(.navNews, systemImage: "newspaper", route: .news),
                 MenuEntry(.navMusic, systemImage: "music.note", route: .music),
                 MenuEntry(.navCommunities, systemImage: "person.3", route: .communities),
