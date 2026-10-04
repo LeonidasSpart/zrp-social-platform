@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -27,6 +28,19 @@
          controls, once the app is backgrounded. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- The livekit-android SDK dependency (ZRP Live rooms) declares its
+         own screen-share service/permission in its manifest for a
+         capability this app never wires up - no code anywhere calls into
+         screen capture/projection. Play Console's foreground-service
+         permission declaration requires either a named-category answer
+         or an "Other" answer backed by a demo video; since there is no
+         real feature to film, the honest fix is to strip both the
+         permission and its service from the merged manifest rather than
+         fabricate a declaration for something that doesn't exist. -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
+        tools:node="remove" />
 
     <!-- Required for ZRP Launchpad's Mobile Wallet Adapter (non-custodial
          Solana signing, see app/build.gradle's own comment on the
@@ -60,6 +74,13 @@
         android:theme="@style/Theme.ZrpSocial"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true">
+
+        <!-- Matches the permission removal above: this app never starts
+             LiveKit's screen-share service, so it is stripped from the
+             merged manifest rather than left declared-but-dead. -->
+        <service
+            android:name="io.livekit.android.room.track.screencapture.ScreenCaptureService"
+            tools:node="remove" />
 
         <activity
             android:name=".MainActivity"

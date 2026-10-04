@@ -516,8 +516,18 @@ android {
         // same per-applicationId monotonically-increasing versionCode
         // requirement as every prior collision documented above (2/7/19/
         // 20/21/27). No feature change here - version numbers only.
-        versionCode 33
-        versionName "4.0.27"
+        // Bumps to versionCode 34 / versionName "4.0.28": strips the
+        // unused FOREGROUND_SERVICE_MEDIA_PROJECTION permission and its
+        // backing LiveKit ScreenCaptureService from the merged manifest
+        // (see AndroidManifest.xml's own comment) - Play Console's App
+        // content > Permissions declaration flagged it and required
+        // either a named-category answer or an "Other" answer backed by
+        // a demo video; since no code anywhere calls into screen
+        // capture/projection, there is no real feature to film, so the
+        // honest fix is removing the dead permission rather than
+        // fabricating a declaration. No other feature change.
+        versionCode 34
+        versionName "4.0.28"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
