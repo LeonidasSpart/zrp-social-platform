@@ -27,11 +27,14 @@ import com.solana.mobilewalletadapter.clientlib.TransactionResult
  * native-payment-policy.ts for the broader policy this follows.
  */
 class SolanaWalletConnector(private val activityResultSender: ActivityResultSender) {
+    private val identityUri = Uri.parse("https://zrp.one")
+    private val iconUri = Uri.parse("/favicon.ico")
+    private val identityName = "ZRP Social"
     private val walletAdapter = MobileWalletAdapter(
         connectionIdentity = ConnectionIdentity(
-            identityUri = Uri.parse("https://zrp.one"),
-            iconUri = Uri.parse("/favicon.ico"),
-            identityName = "ZRP Social",
+            identityUri = identityUri,
+            iconUri = iconUri,
+            identityName = identityName,
         )
     )
 
