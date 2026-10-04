@@ -152,7 +152,42 @@ data class TokenTrade(
 
 data class CurveTradeResponse(val trade: TokenTrade)
 
+/** GET /api/launchpad/blockhash - see src/app/api/launchpad/blockhash/route.ts. */
+data class BlockhashResponse(val blockhash: String)
+
+/**
+ * GET /api/launchpad/zrp/global-config - see
+ * src/app/api/launchpad/zrp/global-config/route.ts. programId is which
+ * ZRP Launchpad program this backend is currently pointed at (devnet or
+ * mainnet) - this app never hardcodes or guesses that itself, so a
+ * cluster switch on the backend can never leave it silently targeting
+ * the wrong program. creationFeeLamports/buyFeeBps/sellFeeBps are u64/u16
+ * on-chain but ship as a decimal string/Int respectively - the string
+ * form avoids any JSON-number precision loss for the u64 value.
+ */
+data class ZrpGlobalConfigResponse(
+    val programId: String,
+    val feeRecipient: String,
+    val buyFeeBps: Int,
+    val sellFeeBps: Int,
+    val creationFeeLamports: String,
+)
+
 interface LaunchpadApi {
+    /**
+     * A recent blockhash, needed to compile an unsigned transaction locally
+     * before handing it to Mobile Wallet Adapter - proxied from the
+     * backend's own Solana RPC connection rather than this app holding its
+     * own RPC URL/API key, matching how TURN credentials are proxied via
+     * /api/turn-credentials instead of shipping METERED_API_KEY to the app.
+     */
+    @GET("launchpad/blockhash")
+    suspend fun getBlockhash(): BlockhashResponse
+
+    /** The program ID in effect plus GlobalConfig's feeRecipient/fee bps - every create/buy/sell instruction needs these accounts. */
+    @GET("launchpad/zrp/global-config")
+    suspend fun getZrpGlobalConfig(): ZrpGlobalConfigResponse
+
     @GET("launchpad/tokens")
     suspend fun getTokens(
         @Query("cursor") cursor: String?,

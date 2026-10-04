@@ -9,6 +9,7 @@ import one.zrp.social.mobile.network.LaunchedTokenDetail
 import one.zrp.social.mobile.network.LaunchedTokensPage
 import one.zrp.social.mobile.network.ZrpCreateTokenRequest
 import one.zrp.social.mobile.network.ZrpCreateTokenResponse
+import one.zrp.social.mobile.network.ZrpGlobalConfigResponse
 
 /**
  * ZRP Launchpad - real browsing/discovery plus reporting already-broadcast,
@@ -19,6 +20,14 @@ import one.zrp.social.mobile.network.ZrpCreateTokenResponse
  * (see zrp-launch-service.ts on the web repo).
  */
 class LaunchpadRepository {
+    suspend fun getRecentBlockhash(): Result<String> = runCatching {
+        ApiClient.launchpadApi.getBlockhash().blockhash
+    }
+
+    suspend fun getZrpGlobalConfig(): Result<ZrpGlobalConfigResponse> = runCatching {
+        ApiClient.launchpadApi.getZrpGlobalConfig()
+    }
+
     suspend fun getTokens(
         cursor: String? = null,
         hasPool: Boolean = false,
