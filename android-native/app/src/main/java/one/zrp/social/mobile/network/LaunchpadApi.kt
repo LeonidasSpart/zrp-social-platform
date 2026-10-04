@@ -7,7 +7,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
- * ZRP Launchpad - the same real src/app/api/launchpad/* routes the
+ * ZRP Launchpad - the same real src/app/api/launchpad routes the
  * website's Launchpad pages use. Every mutation here only ever reports an
  * already-broadcast, already-confirmed on-chain transaction signature for
  * independent server-side re-verification (see zrp-launch-service.ts on
