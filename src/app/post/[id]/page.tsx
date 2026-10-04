@@ -327,7 +327,7 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
                   {attachError}
                 </p>
               )}
-              <div className="flex gap-2 items-end">
+              <div className="flex flex-wrap gap-2 items-end">
                 <textarea
                   ref={inputRef}
                   value={commentContent}
@@ -348,7 +348,15 @@ export default function PostPage(props: { params: Promise<{ id: string }> }) {
                   // (16px) also avoids iOS Safari's auto-zoom-on-focus for
                   // any input under 16px, which was its own contributor to
                   // "hard to see what I'm typing" on mobile.
-                  className="flex-1 min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base resize-none overflow-y-auto max-h-52"
+                  //
+                  // min-w-full (not min-w-0) below sm: the three
+                  // flex-shrink-0 controls after this textarea (image
+                  // icon, GIF icon, submit button) were crushing it to
+                  // near-zero width on a narrow phone - same defect shape
+                  // as src/components/Comments.tsx's two composers, fixed
+                  // the same way: claim the full row below sm:, wrapping
+                  // those controls onto their own row instead.
+                  className="flex-1 min-w-full sm:min-w-0 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base resize-none overflow-y-auto max-h-52"
                 />
 
                 <label

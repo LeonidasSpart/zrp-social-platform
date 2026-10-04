@@ -583,7 +583,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             )}
           </div>
           {isEditing ? (
-            <div className="mt-1 flex items-end gap-2">
+            <div className="mt-1 flex flex-wrap items-end gap-2">
               <textarea
                 ref={(el) => sizeTextareaToContent(el)}
                 value={editContent}
@@ -599,7 +599,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 }}
                 aria-label={t("action.edit")}
                 rows={2}
-                className="flex-1 min-w-0 px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-y-auto max-h-52"
+                className="flex-1 min-w-full sm:min-w-0 px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zrp-red resize-none overflow-y-auto max-h-52"
                 autoFocus
                 maxLength={limits.postLength}
               />
@@ -762,7 +762,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                   {replyAttachError}
                 </p>
               )}
-              <div className="flex items-end gap-2">
+              <div className="flex flex-wrap items-end gap-2">
               <textarea
                 ref={(el) => sizeTextareaToContent(el)}
                 value={replyContent}
@@ -773,7 +773,16 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
                 placeholder={t("comment.replyToPlaceholder", { name: comment.author.name || comment.author.username })}
                 aria-label={t("comment.replyToPlaceholder", { name: comment.author.name || comment.author.username })}
                 rows={2}
-                className="flex-1 min-w-0 px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-y-auto max-h-52"
+                // min-w-full (not min-w-0) below sm: the row's other four
+                // controls (image/GIF icons, Reply, Cancel) are all
+                // flex-shrink-0, so on a narrow phone they were crushing
+                // this flex-1 textarea down to a few px wide - it rendered
+                // but wrapped text one character per line. Forcing the
+                // textarea to claim the whole row below sm: pushes those
+                // four controls onto their own second row (flex-wrap)
+                // instead; sm: and up there's room for the original
+                // single-row layout, so min-w-0 there is unchanged.
+                className="flex-1 min-w-full sm:min-w-0 px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-zrp-red focus:border-transparent resize-none overflow-y-auto max-h-52"
                 maxLength={limits.postLength}
                 autoFocus
                 onKeyDown={(e) => {
@@ -919,7 +928,7 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
               {newCommentAttachError}
             </p>
           )}
-          <div className="flex gap-2 items-end">
+          <div className="flex flex-wrap gap-2 items-end">
           <textarea
             ref={newCommentRef}
             value={newComment}
@@ -938,7 +947,14 @@ export default function Comments({ postId, onCommentAdded }: CommentsProps) {
             // a real contributor to "I can't see what I'm typing" on
             // mobile - confirmed user feedback this size increase
             // directly addresses, not a cosmetic guess.
-            className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-y-auto max-h-52"
+            //
+            // min-w-full (not min-w-0) below sm: same fix as the reply
+            // composer above - the three flex-shrink-0 controls after
+            // this textarea (image icon, GIF icon, submit button) were
+            // crushing it to near-zero width on a narrow phone. Forcing
+            // full-row width below sm: wraps those controls onto their
+            // own row instead of squeezing the textarea.
+            className="flex-1 min-w-full sm:min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-zrp-red focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none overflow-y-auto max-h-52"
             maxLength={limits.postLength}
           />
           <label
