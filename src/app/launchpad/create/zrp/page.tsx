@@ -39,6 +39,14 @@ export default function CreateZrpTokenPage() {
   const router = useRouter();
   const { t } = useLanguage();
   const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
+  // Mirrors zrp-launch-keys.ts's own fail-closed check (see its module
+  // comment): ZRP's mainnet program isn't deployed yet, so this is
+  // unset in production today. Checking it here, before the user ever
+  // submits, means they see the same friendly "unavailable" message the
+  // missing-rpcUrl case already shows below - never the raw internal
+  // "ZRP_LAUNCH_PROGRAM_ID must be configured" error that function
+  // would otherwise throw.
+  const programIdConfigured = !!process.env.NEXT_PUBLIC_ZRP_LAUNCH_PROGRAM_ID;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { startUpload, isUploading } = useUploadThing("tokenImage");
 
@@ -156,7 +164,7 @@ export default function CreateZrpTokenPage() {
       setError(t("launchpad.createToken.imageRequired"));
       return;
     }
-    if (!rpcUrl) {
+    if (!rpcUrl || !programIdConfigured) {
       setError(t("launchpad.createToken.unavailable"));
       return;
     }

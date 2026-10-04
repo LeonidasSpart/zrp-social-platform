@@ -53,8 +53,6 @@ export function getZrpLaunchProgramId(): PublicKey {
   return new PublicKey(configured);
 }
 
-export const ZRP_LAUNCH_PROGRAM_ID = getZrpLaunchProgramId();
-
 export const GLOBAL_CONFIG_SEED = Buffer.from("global");
 export const BONDING_CURVE_SEED_PREFIX = Buffer.from("bonding-curve");
 
@@ -69,8 +67,26 @@ export interface ZrpLaunchKeys {
   metadata: PublicKey;
 }
 
-/** Pure, offline PDA derivation - no RPC call, unit-testable exactly. */
-export function deriveZrpLaunchKeys(mint: PublicKey, programId = ZRP_LAUNCH_PROGRAM_ID): ZrpLaunchKeys {
+/*
+ * Pure, offline PDA derivation - no RPC call, unit-testable exactly.
+ *
+ * The default programId param is deliberately `getZrpLaunchProgramId()`
+ * (a call, not the old frozen `ZRP_LAUNCH_PROGRAM_ID` module-level
+ * constant this replaced) - default parameter expressions evaluate at
+ * CALL time in JS, not at module-load time, so the fail-closed throw
+ * inside getZrpLaunchProgramId() only fires when this function is
+ * actually invoked. The old eager constant ran the same throw at
+ * *import* time instead, which is fine for a server route (only ever
+ * imported when a request comes in) but crashed the browser outright
+ * for any "use client" module that imported it (client-zrp-launch.ts,
+ * reached from /launchpad/create/zrp's page.tsx) - the entire page blew
+ * up with a generic React error boundary before the user ever touched
+ * the form, on every production load, since NEXT_PUBLIC_ZRP_LAUNCH_PROGRAM_ID
+ * is unset until mainnet deploy (see this file's own top comment) and
+ * the NEXT_PHASE guard below only protects `next build`'s static
+ * analysis, not a running browser (NEXT_PHASE is never set client-side).
+ */
+export function deriveZrpLaunchKeys(mint: PublicKey, programId = getZrpLaunchProgramId()): ZrpLaunchKeys {
   const [globalConfig] = PublicKey.findProgramAddressSync([GLOBAL_CONFIG_SEED], programId);
   const [bondingCurve] = PublicKey.findProgramAddressSync(
     [BONDING_CURVE_SEED_PREFIX, mint.toBuffer()],

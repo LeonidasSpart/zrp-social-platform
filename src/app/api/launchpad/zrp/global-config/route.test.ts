@@ -15,7 +15,7 @@ const { getConnection, rateLimit, getZrpGlobalConfig, programId } = vi.hoisted((
 vi.mock("@/lib/solana", () => ({ getConnection }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit }));
 vi.mock("@/lib/launchpad/zrp-launch-service", () => ({ getZrpGlobalConfig }));
-vi.mock("@/lib/launchpad/zrp-launch-keys", () => ({ ZRP_LAUNCH_PROGRAM_ID: programId }));
+vi.mock("@/lib/launchpad/zrp-launch-keys", () => ({ getZrpLaunchProgramId: () => programId }));
 
 import { GET } from "./route";
 

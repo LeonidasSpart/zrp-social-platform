@@ -26,7 +26,7 @@ import {
 } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import {
-  ZRP_LAUNCH_PROGRAM_ID,
+  getZrpLaunchProgramId,
   deriveZrpLaunchKeys,
   decodeGlobalConfig,
   decodeBondingCurve,
@@ -317,7 +317,7 @@ function getStaticAccountKeys(tx: TransactionResponse | VersionedTransactionResp
  * anything else about the transaction.
  */
 function assertZrpProgramOnly(accountKeys: PublicKey[]): void {
-  const hasZrpProgram = accountKeys.some((k) => k.equals(ZRP_LAUNCH_PROGRAM_ID));
+  const hasZrpProgram = accountKeys.some((k) => k.equals(getZrpLaunchProgramId()));
   if (!hasZrpProgram) {
     throw new ZrpVerificationError("ON_CHAIN_FAILURE", "Transaction does not reference the ZRP Launchpad program.");
   }
@@ -582,7 +582,7 @@ export async function findZrpGraduateEvent(connection: Connection, mintAddress: 
 
 // Re-exported for routes that need the curve/vault addresses without
 // pulling in the rest of zrp-launch-keys.ts's surface.
-export { deriveZrpLaunchKeys, ZRP_LAUNCH_PROGRAM_ID };
+export { deriveZrpLaunchKeys, getZrpLaunchProgramId };
 export function getZrpCurveTokenVault(mintAddress: string): PublicKey {
   const mint = new PublicKey(mintAddress);
   const { bondingCurve } = deriveZrpLaunchKeys(mint);

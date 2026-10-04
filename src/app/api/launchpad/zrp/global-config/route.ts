@@ -5,7 +5,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { getConnection } from "@/lib/solana";
 import { getZrpGlobalConfig } from "@/lib/launchpad/zrp-launch-service";
-import { ZRP_LAUNCH_PROGRAM_ID } from "@/lib/launchpad/zrp-launch-keys";
+import { getZrpLaunchProgramId } from "@/lib/launchpad/zrp-launch-keys";
 
 /*
  * ZRP Launchpad's on-chain GlobalConfig plus the program ID currently in
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
   const config = await getZrpGlobalConfig(getConnection());
   return NextResponse.json({
-    programId: ZRP_LAUNCH_PROGRAM_ID.toBase58(),
+    programId: getZrpLaunchProgramId().toBase58(),
     feeRecipient: config.feeRecipient.toBase58(),
     buyFeeBps: config.buyFeeBps,
     sellFeeBps: config.sellFeeBps,

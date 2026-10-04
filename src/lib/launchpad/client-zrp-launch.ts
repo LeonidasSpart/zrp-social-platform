@@ -35,7 +35,6 @@ import {
 } from "@solana/spl-token";
 import { connectInjectedWallet, InjectedSolanaProvider } from "./injected-wallet";
 import {
-  ZRP_LAUNCH_PROGRAM_ID,
   TOKEN_METADATA_PROGRAM_ID,
   deriveZrpLaunchKeys,
   decodeGlobalConfig,
@@ -152,7 +151,7 @@ export async function createZrpTokenFromBrowser(params: CreateZrpTokenParams): P
   });
 
   const instruction = new TransactionInstruction({
-    programId: ZRP_LAUNCH_PROGRAM_ID,
+    programId: keys.programId,
     keys: [
       { pubkey: keys.globalConfig, isSigner: false, isWritable: false },
       { pubkey: keys.bondingCurve, isSigner: false, isWritable: true },
@@ -217,7 +216,7 @@ export async function buyOnZrpCurve(params: BuyOnZrpCurveParams): Promise<{ sign
 
   const data = await encodeBuyIx({ solIn: params.solLamports, minTokensOut: params.minTokensOut });
   const instruction = new TransactionInstruction({
-    programId: ZRP_LAUNCH_PROGRAM_ID,
+    programId: keys.programId,
     keys: [
       { pubkey: keys.globalConfig, isSigner: false, isWritable: false },
       { pubkey: keys.bondingCurve, isSigner: false, isWritable: true },
@@ -273,7 +272,7 @@ export async function sellOnZrpCurve(params: SellOnZrpCurveParams): Promise<{ si
 
   const data = await encodeSellIx({ tokenIn: params.tokenAmountRaw, minSolOut: params.minSolOut });
   const instruction = new TransactionInstruction({
-    programId: ZRP_LAUNCH_PROGRAM_ID,
+    programId: keys.programId,
     keys: [
       { pubkey: keys.globalConfig, isSigner: false, isWritable: false },
       { pubkey: keys.bondingCurve, isSigner: false, isWritable: true },
