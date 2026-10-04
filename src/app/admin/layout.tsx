@@ -27,6 +27,12 @@ import {
   BarChart3,
   CreditCard,
   Rocket,
+  Gift,
+  Coins,
+  ShieldCheck,
+  Receipt,
+  ShoppingCart,
+  LineChart,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/lib/translations";
@@ -185,6 +191,41 @@ export default function AdminLayout({
             href: "/admin/launchpad",
             labelKey: "adminLaunchpad.title" as TranslationKey,
             icon: Rocket,
+          },
+          // ZRP Live Gifts admin control center - gifts/coins are a real
+          // money rail (CoinWallet funded by on-chain USDC, creator
+          // payouts through the same platform-fee/charity split Tip
+          // uses), same sensitivity bar as subscriptions/withdrawals
+          // above, so this whole group is also full-admin-only.
+          {
+            href: "/admin/live-gifts",
+            labelKey: "adminLiveGifts.catalogTitle" as TranslationKey,
+            icon: Gift,
+          },
+          {
+            href: "/admin/coin-wallets",
+            labelKey: "adminLiveGifts.walletsTitle" as TranslationKey,
+            icon: Coins,
+          },
+          {
+            href: "/admin/gift-eligibility",
+            labelKey: "adminLiveGifts.eligibilityTitle" as TranslationKey,
+            icon: ShieldCheck,
+          },
+          {
+            href: "/admin/gift-transactions",
+            labelKey: "adminLiveGifts.transactionsTitle" as TranslationKey,
+            icon: Receipt,
+          },
+          {
+            href: "/admin/coin-purchases",
+            labelKey: "adminLiveGifts.purchasesTitle" as TranslationKey,
+            icon: ShoppingCart,
+          },
+          {
+            href: "/admin/gift-analytics",
+            labelKey: "adminLiveGifts.analyticsTitle" as TranslationKey,
+            icon: LineChart,
           },
           {
             href: "/admin/storage",

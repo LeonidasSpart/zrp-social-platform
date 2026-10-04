@@ -187,6 +187,16 @@ export async function sendGift(input: SendGiftInput): Promise<SendGiftResult> {
     throw LiveGiftErrors.giftNotFound();
   }
 
+  // ⚠️ SECURITY: a UserGiftPolicy row only ever EXISTS when an admin has
+  // restricted this specific user (see src/app/api/admin/live-gifts/
+  // eligibility/[userId]/route.ts) - absence means "no restriction", so
+  // this is a single extra indexed lookup for the overwhelming majority
+  // of sends, never a second table most users even have a row in. This
+  // is the actual enforcement point: the admin eligibility pages only
+  // ever DISPLAY this flag, they never gate the send by themselves.
+  const policy = await prisma.userGiftPolicy.findUnique({ where: { userId: senderId } });
+  if (policy && !policy.canSendGifts) throw LiveGiftErrors.giftRestricted();
+
   const giftDefinition = await prisma.giftDefinition.findUnique({ where: { key: giftKey } });
   if (!giftDefinition) throw LiveGiftErrors.giftNotFound();
   if (!giftDefinition.enabled) throw LiveGiftErrors.giftDisabled();

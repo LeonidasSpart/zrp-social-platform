@@ -150,6 +150,10 @@ const INTENTIONALLY_ENGLISH_VALUES = new Set<string>([
  */
 const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   fr: [
+    "adminLiveGifts.colActions", // "Actions" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.colDate", // "Date" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.colTotal", // "Total" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.colAnimation", // "Animation" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "adminAnnouncements.typeMaintenance", // "Maintenance" is a genuine French word, not an untranslated copy
     "adminAnnouncements.formBodyLabel", // "Message" is a genuine French word, not an untranslated copy
     "adminAnnouncements.formTypeLabel", // "Type" is a genuine French word, not an untranslated copy
@@ -353,6 +357,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.metricVolume", // "Volume" is a genuine cognate/established loanword in this language
   ],
   de: [
+    "adminLiveGifts.colAnimation", // "Animation" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statAudioVsVideo", // "Audio vs. Video" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "adminAnnouncements.typeUpdate", // "Update" is a genuine established German loanword, not an untranslated copy
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
@@ -511,6 +517,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   it: [
+    "adminLiveGifts.no", // "No" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.communityLabel", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
@@ -741,6 +748,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   es: [
+    "adminLiveGifts.colTotal", // "Total" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.no", // "No" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "investors.types.familyOffice",
     "investors.platform.music.title",
     "investors.platform.news.title",
@@ -1128,6 +1137,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   id: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.colTotal", // "Total" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "liveAudio.hostBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.marketplace.title",
@@ -1289,6 +1300,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.metricVolume", // "Volume" is a genuine cognate/established loanword in this language
   ],
   pt: [
+    "adminLiveGifts.colTotal", // "Total" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "investors.types.familyOffice",
     "investors.platform.music.title",
     "investors.platform.news.title",
@@ -1477,6 +1489,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   nl: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "adminAnnouncements.typeUpdate", // "Update" is a genuine established Dutch loanword, not an untranslated copy
     "adminAnnouncements.formTypeLabel", // "Type" is a genuine established Dutch loanword, not an untranslated copy
     "liveAudio.visibilityCommunity", // legitimate international/borrowed cognate, not an untranslated copy
@@ -1756,6 +1770,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.metricVolume", // "Volume" is a genuine cognate/established loanword in this language
   ],
   pl: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "hashtag.postSingular",
     "adminJournalists.portfolio",
@@ -1865,6 +1881,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   ro: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.colTotal", // "Total" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "liveAudio.visibilityPublic", // legitimate international/borrowed cognate, not an untranslated copy
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.types.familyOffice",
@@ -2139,6 +2157,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   hu: [
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "investors.types.familyOffice",
     "investors.platform.music.title",
     "investors.platform.news.title",
@@ -2234,6 +2253,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   sv: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     // "Version" is a legitimate Swedish cognate (identical spelling); this key only became a
     // byte-for-byte English copy once the frontend dash audit normalized its original en-dash
     // version range to a plain hyphen, matching English's own "1.0-8.8.2026" - not a translation gap.
@@ -2397,6 +2418,9 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   da: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.colAnimation", // "Animation" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "adminAnnouncements.formTypeLabel", // "Type" is a genuine established Danish loanword, not an untranslated copy
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.roadmap.heading",
@@ -2601,6 +2625,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   hr: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.music.title",
     "investors.platform.news.title",
@@ -2877,6 +2903,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   // Market Plus/Shorts), a short admin/nav label, or a format-only value
   // (e.g. "/ 100", "{count}/1000", "{name}: {msg}", "24/7", "CTR").
   no: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "adminAnnouncements.formTypeLabel", // "Type" is a genuine established Norwegian loanword, not an untranslated copy
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.music.title",
@@ -2964,6 +2992,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   sr: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "investors.platform.music.title",
     "investors.platform.news.title",
     "nav.admin", "settings.video", "chat.contactVideo", "group.lastMessagePrefix",
@@ -3030,6 +3060,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   bs: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "investors.platform.music.title",
     "investors.platform.news.title",
@@ -3215,6 +3247,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   sk: [
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "action.repost", "onboarding.bio", "settings.video", "settings.bio", "chat.offline",
     "chat.contactVideo", "group.lastMessagePrefix", "team.roleEditor", "adminPayments.tx",
     "analytics.platformWeb", "profile.tip", "transparency.hoursValue", "transparency.daysValue",
@@ -3269,6 +3302,8 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   sl: [
+    "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "liveAudio.moderatorBadge", // legitimate international/borrowed cognate, not an untranslated copy
     "settings.video", "chat.contactVideo", "group.lastMessagePrefix", "adminUsers.roleModerator",
     "adminUsers.colStatus", "investors.platform.music.title", "press.emailBadge",
@@ -3345,6 +3380,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
   // above, verified against already-shipped French/German precedent for
   // the identical key before being allowlisted here.
   et: [
+    "adminLiveGifts.statDailyTrend", // "Trend" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "group.lastMessagePrefix", "communityCode.version", "investors.platform.shorts.title",
     "press.emailBadge", "press.logoLabel", "press.faviconLabel",
     "faq.avatarSize.maxFileSizeVal", "faq.avatarSize.formatsVal", "faq.avatarSize.resolutionVal", "faq.avatarSize.ratioVal",

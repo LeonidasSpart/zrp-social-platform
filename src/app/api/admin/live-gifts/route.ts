@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { logAdminAction } from "@/lib/audit-log";
+import { parseMediaUrl } from "@/lib/media-url";
+
+/** https-only, well-formed URL, or null/empty (both fields are optional). */
+function validOptionalUrl(value: unknown): boolean {
+  if (value === null || value === undefined || value === "") return true;
+  return typeof value === "string" && parseMediaUrl(value) !== null;
+}
 
 /** Full catalog including disabled gifts - the public /api/live/gifts only ever returns enabled ones. */
 export async function GET() {
@@ -25,6 +32,15 @@ export async function POST(req: NextRequest) {
   }
   if (!Number.isInteger(priceCoins) || priceCoins < 1) {
     return NextResponse.json({ error: "priceCoins must be a positive whole number." }, { status: 400 });
+  }
+  if (!validOptionalUrl(body.iconUrl)) {
+    return NextResponse.json({ error: "iconUrl must be a valid https:// URL." }, { status: 400 });
+  }
+  if (!validOptionalUrl(body.animationUrl)) {
+    return NextResponse.json({ error: "animationUrl must be a valid https:// URL." }, { status: 400 });
+  }
+  if (body.sortOrder !== undefined && !Number.isInteger(body.sortOrder)) {
+    return NextResponse.json({ error: "sortOrder must be a whole number." }, { status: 400 });
   }
 
   const existing = await prisma.giftDefinition.findUnique({ where: { key } });

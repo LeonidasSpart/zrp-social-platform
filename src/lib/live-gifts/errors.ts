@@ -18,6 +18,18 @@ export const LiveGiftErrors = {
   notParticipant: () => new LiveAudioError("not_participant", "You're not in this room.", 409),
   blocked: () => new LiveAudioError("blocked", "You can't send a gift to this host.", 403),
   cannotGiftSelf: () => new LiveAudioError("cannot_gift_self", "You can't send a gift to yourself.", 400),
+  adjustmentWouldGoNegative: () =>
+    new LiveAudioError(
+      "adjustment_would_go_negative",
+      "This adjustment would take the user's balance below zero.",
+      409
+    ),
+  giftRestricted: () =>
+    new LiveAudioError(
+      "gift_restricted",
+      "Your account can't send gifts right now. Contact support if you think this is a mistake.",
+      403
+    ),
   duplicateTransaction: () =>
     new LiveAudioError("duplicate_transaction", "This payment has already been processed.", 409),
   invalidTransaction: () =>
