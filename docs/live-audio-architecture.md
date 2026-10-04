@@ -1,10 +1,16 @@
 # ZRP Live Audio: Architecture
 
-Status: backend MVP implemented (domain model, authorization, realtime
+Status: backend implemented (domain model, authorization, realtime
 signaling, moderation, notifications, discovery, cleanup, LiveKit
 integration), plus a functional web client (`/live-audio`,
-`/live-audio/[id]`) built in a follow-up pass. **Android and iOS still
-have no client UI.** See section 12 for exact platform-by-platform status.
+`/live-audio/[id]`). **Update**: Android and iOS, which had no client UI
+when this document was first written, each built a full native Live
+Audio client in a later pass (`android-native/.../ui/liveaudio/`,
+`ios-native/.../Features/LiveAudio/`) against this same backend contract,
+unchanged. See `ios-native/PARITY.md`'s "ZRP Live Audio" table for the
+current, row-by-row status on both native platforms, and section 12
+below for this document's own (now partially superseded) platform
+notes.
 
 ## 1. What already exists, and what this reuses
 
@@ -354,7 +360,9 @@ client-supplied role.
   `permissions.ts` is the existing extension point if ZRP later wants
   e.g. "Business+ only" hosting; adding it is a `canHostLiveAudio(plan)`
   helper plus one check in the create-room route, not a new system.
-- **Android/iOS native UI.** Not built: see the final report.
+- **Android/iOS native UI.** Not built when this section was written;
+  both platforms have since built a full native Live Audio client - see
+  section 12's update and `ios-native/PARITY.md`.
 
 ## 9. Discovery
 
@@ -425,13 +433,17 @@ integration" requirement.
   in this sandbox: the UI's own "Live Audio isn't set up yet" fallback
   state was what was verified instead, which is the correct, honest
   behavior for that case) or native mobile browsers specifically.
-- **Android**: backend contract only. `CallViewModel.kt`'s existing
-  native WebRTC stack is unrelated (mesh, 1:1) and is not reused or
-  touched. A native Live Audio screen would use LiveKit's Android SDK
-  against the same REST/token endpoints.
-- **iOS**: backend contract only. As noted in §1, iOS has no WebRTC
-  today; LiveKit's iOS SDK would be the actual mechanism to give it
-  audio capability, but building that screen is out of scope here.
+- **Android**: **implemented** in a later pass (`android-native/.../ui/liveaudio/`),
+  using LiveKit's Android SDK (`livekit-android`) against this same REST/
+  token contract. `CallViewModel.kt`'s existing native WebRTC stack
+  (mesh, 1:1 calling) is unrelated and was not reused or touched - see
+  `ios-native/PARITY.md`'s "ZRP Live Audio" table for the row-by-row
+  feature list.
+- **iOS**: **implemented** in a later pass (`ios-native/.../Features/LiveAudio/`),
+  using LiveKit's Swift SDK - this app's first third-party dependency
+  (everything else is Apple frameworks; `stasel/WebRTC`, added afterward
+  for 1:1 calling, is the second). See `ios-native/PARITY.md` for the
+  same row-by-row status.
 
 **A real bug found and fixed during this web UI pass**: the room page's
 cleanup effect originally called `POST /leave` unconditionally on

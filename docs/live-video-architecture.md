@@ -3,11 +3,15 @@
 Status: backend implemented (domain model, authorization, realtime
 signaling, moderation, notifications, discovery, cleanup, LiveKit
 integration) plus a functional web client (`/live-video`,
-`/live-video/[id]`). **Android and iOS have no client UI** - same
-documented gap Live Audio shipped with initially (see
-`live-audio-architecture.md` §12); this doc exists specifically to flag
-it rather than let it go unstated. No native toolchain was available to
-build or verify native UI in the environment this was built in.
+`/live-video/[id]`). **Update**: Android and iOS, which had no client UI
+when this document was first written (no native toolchain was available
+to build or verify native UI in that environment), each built a full
+native Live Video client in a later pass
+(`android-native/.../ui/livevideo/`, `ios-native/.../Features/LiveVideo/`)
+against this same backend contract, unchanged. See
+`ios-native/PARITY.md`'s "ZRP Live Video" and "ZRP Live engagement"
+tables for the current, row-by-row status on both native platforms; §4
+below is this document's own (now partially superseded) gap list.
 
 ## 1. Relationship to Live Audio
 
@@ -147,15 +151,14 @@ track off goes through the API.
   admin/appeals, which is its own follow-up with real blast radius. A
   video room's host can still be reported today via the existing
   bare-profile report flow (`reportedUserId`).
-- **No native (Android/iOS) client**: see the status line at the top.
-  Both platforms already have working Live Audio UI
+- **No native (Android/iOS) client at the time this was written**: both
+  platforms already had working Live Audio UI
   (`android-native/.../ui/liveaudio/`, `ios-native/.../Features/LiveAudio/`),
-  so native Live Video parity is a real, expected follow-up - it was
-  out of scope here because this environment has no Android SDK/
-  emulator and no macOS/Xcode to build or verify it, and shipping
-  unverified native code (especially anything touching camera
-  permissions and WebRTC video rendering) is worse than being explicit
-  about the gap.
+  so native Live Video parity was flagged here as a real, expected
+  follow-up - out of scope at the time because that environment had no
+  Android SDK/emulator and no macOS/Xcode to build or verify it. That
+  follow-up has since shipped: see the status line at the top of this
+  document and `ios-native/PARITY.md`'s "ZRP Live Video" table.
 - **No scheduled cleanup invocation**: see §1's note on
   `live-video-cleanup` inheriting `live-audio-cleanup`'s own
   missing-cron-schedule gap.

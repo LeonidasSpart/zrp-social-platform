@@ -35,7 +35,7 @@ ios-native/
     Models/                  Decodable models mirroring the real API shapes
     Data/                    Repositories - the only layer that builds Endpoints
     Features/                SwiftUI views + their ViewModels
-    Resources/               11 generated .lproj bundles
+    Resources/               39 generated .lproj bundles
     Assets.xcassets/         Official ZRP brand assets, copied byte-for-byte
 ```
 
@@ -52,7 +52,10 @@ A view never builds a request; a repository never knows about SwiftUI.
 - Xcode 16 or newer (the project uses `objectVersion = 77` synchronized
   file-system groups)
 - iOS 17.0 deployment target
-- No third-party dependencies. Everything is Apple frameworks.
+- Two third-party dependencies, both added for real-time media: LiveKit's
+  Swift SDK (`livekit-client-sdk-swift`, ZRP Live Audio/Video) and
+  `stasel/WebRTC` (1:1 voice/video calling). Everything else is Apple
+  frameworks.
 
 ## Working on it
 
@@ -67,7 +70,7 @@ no merge conflict to resolve when two people add files at once.
 ### User-facing strings
 
 Never write a literal in a view. ZRP already ships human translations for
-25 languages in `src/lib/translations.ts`; the iOS `.strings` files and
+39 languages in `src/lib/translations.ts`; the iOS `.strings` files and
 the `L10nKey` enum are generated from that exact file:
 
 ```bash
@@ -81,7 +84,7 @@ For the handful of strings with no web counterpart (VoiceOver labels,
 mostly), add the English value to `Tools/ios-extra-strings.json`'s
 `strings` block, then add a translated value for it in every language
 under `translations` (`generate-localizations.py --check` fails loudly
-if any of the 24 non-English languages is missing one, or if a
+if any of the 38 non-English languages is missing one, or if a
 translation's `{placeholder}` tokens don't match the English source
 exactly). A key that is genuinely missing a translation falls back to
 the development language rather than appearing untranslated; that is

@@ -390,8 +390,14 @@ is a structural mirror of the Live Audio state machine (same roles, same
 lifecycle, same LiveKit token minting and plan gate - `liveVideo` in
 `PLANS`) with one real addition, an independently moderated camera
 (`isCameraOff`, `POST .../camera`, `live-video:camera-changed`). iOS had
-no Live Video code at all before this; Android still has none. Vertical
-full-bleed stage: the host's tile takes the whole stage when alone and the
+no Live Video code at all before this; Android had none either at the
+time this table was written. **Update**: Android has since shipped its
+own full Live Video client (`android-native/.../ui/livevideo/`) in a
+later pass - every "Android ⬜" cell in the table below reflects this
+document's state as of the iOS pass, not Android's current state; it
+has not been re-audited row-by-row against Android's shipped behavior.
+
+Vertical full-bleed stage: the host's tile takes the whole stage when alone and the
 top ~60% otherwise, other on-camera participants share a strip beneath;
 a tile shows video only when LiveKit has a subscribed camera track for
 that identity AND the database's `isCameraOff` is false (avatar otherwise).
@@ -423,6 +429,13 @@ keyed on `LiveRoomKind`. No client (web or Android) had UI for any of
 these when iOS built it. Every typed error `code` maps to its own
 translated sentence (`LiveErrorText`) rather than the server's English
 `error` text.
+
+**Update**: both the web app and Android have since shipped this same
+engagement layer (gifts, chat, reactions, reminders, replay) in a later
+pass (`src/components/live/`, `android-native/.../ui/live/`). As with the
+Live Video table above, every "Web"/"Android" cell below reflects this
+document's state as of the iOS pass and has not been re-audited against
+what those platforms ship today.
 
 | Feature | Backend route(s) | Web | Android | iOS | Status (iOS) |
 | --- | --- | --- | --- | --- | --- |
