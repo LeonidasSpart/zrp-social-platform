@@ -198,6 +198,9 @@ export async function getRoomForViewer(roomId: string, viewerId: string) {
       select: {
         role: true,
         isMuted: true,
+        // Chat-mute is independent of mic-mute; exposed so the chat
+        // panel can show moderators each participant's real state.
+        isChatMuted: true,
         joinedAt: true,
         user: { select: { id: true, username: true, name: true, avatarUrl: true, badgeType: true } },
       },

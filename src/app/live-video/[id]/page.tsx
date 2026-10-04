@@ -13,6 +13,11 @@ import { Avatar } from "@/components/ui/avatar";
 import ConfirmModal from "@/components/ConfirmModal";
 import { localizeApiMessage } from "@/lib/api-error-i18n";
 import { getSocket } from "@/lib/socket-client";
+import LiveGiftPanel from "@/components/live/LiveGiftPanel";
+import LiveChatPanel from "@/components/live/LiveChatPanel";
+import LiveReactionButton from "@/components/live/LiveReactionButton";
+import LiveReminderButton from "@/components/live/LiveReminderButton";
+import LiveReplayControls from "@/components/live/LiveReplayControls";
 
 type ParticipantRole = "LISTENER" | "SPEAKER" | "MODERATOR" | "HOST";
 
@@ -20,6 +25,7 @@ interface ParticipantInfo {
   role: ParticipantRole;
   isMuted: boolean;
   isCameraOff: boolean;
+  isChatMuted?: boolean;
   user: { id: string; username: string; name: string | null; avatarUrl: string | null };
 }
 
@@ -30,6 +36,9 @@ interface RoomDetail {
     description: string | null;
     hostId: string;
     status: "SCHEDULED" | "LIVE" | "ENDED" | "CANCELLED";
+    scheduledAt: string | null;
+    slowModeSeconds: number;
+    reactionCount: number;
   };
   participants: ParticipantInfo[];
   pendingRequestCount: number;
@@ -50,7 +59,7 @@ const canPublish = (role: ParticipantRole | null) => role === "HOST" || role ===
 export default function LiveVideoRoomPage() {
   const params = useParams<{ id: string }>();
   const roomId = params.id;
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
   const myUserId = session?.user?.id;
@@ -230,6 +239,11 @@ export default function LiveVideoRoomPage() {
         }
         setConnection("connected");
         joinedSuccessfully = true;
+        // The initial detail fetch races POST /join, and this client
+        // never receives its own participant-joined broadcast (it joins
+        // the socket channel just below) - re-read once so myRole (which
+        // gates the gift/chat/reaction panels) reflects the new row.
+        loadDetail();
 
         const socket = getSocket(uid);
         socket.emit("join-live-video-room", roomId);
@@ -407,9 +421,46 @@ export default function LiveVideoRoomPage() {
     );
   }
 
+  if (detail.room.status === "SCHEDULED") {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-16 text-center">
+        <VideoIcon className="w-10 h-10 mx-auto text-zrp-red mb-4" aria-hidden="true" />
+        {detail.room.scheduledAt && (
+          <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">
+            {t("liveReminders.scheduledFor", {
+              time: new Intl.DateTimeFormat(language, { dateStyle: "full", timeStyle: "short" }).format(
+                new Date(detail.room.scheduledAt)
+              ),
+            })}
+          </p>
+        )}
+        <h1 className="font-orbitron text-xl font-bold text-gray-900 dark:text-white">{detail.room.title}</h1>
+        {detail.room.description && (
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{detail.room.description}</p>
+        )}
+        {myUserId && myUserId !== detail.room.hostId && (
+          <div className="mt-6">
+            <LiveReminderButton roomType="VIDEO" roomId={roomId} />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={leaveRoom}
+          className="mt-6 inline-flex items-center gap-1 min-h-11 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+        >
+          <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+          {t("liveVideo.backToLiveVideo")}
+        </button>
+      </div>
+    );
+  }
+
   const myRole = detail.myRole;
   const amAuthority = isAuthority(myRole);
   const iCanPublish = canPublish(myRole);
+  // Gifts/chat/reactions/replay controls are authorized server-side by
+  // an active participant row, which is exactly what myRole reflects.
+  const showLivePanels = detail.room.status === "LIVE" && myRole !== null;
 
   const onCamera = detail.participants.filter((p) => p.role !== "LISTENER");
   const viewers = detail.participants.filter((p) => p.role === "LISTENER");
@@ -422,7 +473,7 @@ export default function LiveVideoRoomPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 pb-28">
+    <div className={`max-w-2xl mx-auto px-4 py-6 ${showLivePanels ? "pb-44" : "pb-28"}`}>
       <div ref={audioContainerRef} className="hidden" aria-hidden="true" />
 
       <button
@@ -616,7 +667,42 @@ export default function LiveVideoRoomPage() {
         </section>
       )}
 
+      {(showLivePanels || detail.room.status === "ENDED") && (
+        <LiveReplayControls
+          roomType="VIDEO"
+          roomId={roomId}
+          myUserId={myUserId}
+          canControl={amAuthority}
+          isLive={detail.room.status === "LIVE"}
+        />
+      )}
+
       <div className="fixed bottom-0 inset-x-0 lg:left-64 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-zrp-deepBlack/95 backdrop-blur px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        {showLivePanels && (
+          <div className="max-w-2xl mx-auto flex items-center gap-2 mb-2">
+            <LiveReactionButton
+              roomType="VIDEO"
+              roomId={roomId}
+              myUserId={myUserId}
+              initialCount={detail.room.reactionCount ?? 0}
+            />
+            <LiveGiftPanel
+              roomType="VIDEO"
+              roomId={roomId}
+              myUserId={myUserId}
+              isHost={myUserId === detail.room.hostId}
+              participants={detail.participants}
+            />
+            <LiveChatPanel
+              roomType="VIDEO"
+              roomId={roomId}
+              myUserId={myUserId}
+              myRole={myRole}
+              participants={detail.participants}
+              initialSlowModeSeconds={detail.room.slowModeSeconds ?? 0}
+            />
+          </div>
+        )}
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
           {iCanPublish ? (
             <div className="flex items-center gap-2">
