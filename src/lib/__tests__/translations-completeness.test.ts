@@ -3658,6 +3658,74 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
     "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
   ],
+  te: [
+    "nav.launchpad", // "Launchpad" is the established brand-name exception
+    "launchpad.farming.apyLabel", // "{apy} APY" - "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.staking.apyLabel", // "{value} APY" - "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "group.lastMessagePrefix", // "{name}: {msg}" - pure placeholder template, no translatable words
+    "adminPayments.tx", // "Tx:" - standard crypto-UI abbreviation for "transaction", kept untranslated
+    "analytics.platformAndroid", // "Android" is a proper noun/platform name
+    "analytics.platformIos", // "iOS" is a proper noun/platform name
+    "contact.faqLabel", // "FAQ" is a universally-used acronym in Telugu tech UI
+    "footer.zrpNews", // "ZRP News" is the established brand-name exception
+    "footer.faq", // "FAQ" is a universally-used acronym in Telugu tech UI
+    "investors.platform.marketplace.title", // "Marketplace & Opportunity" contains the product sub-brand names
+    "press.emailBadge", // "press@zrp.one" email address, not translatable content
+    "support.footerNoteLink", // "My Tickets" - clickable link label that must match the actual in-app button/page text
+    "faq.cat.trustPassport", // "ZRP Trust Passport" is a named feature, kept in Latin for consistency with other ZRP sub-brands
+    "faq.howToRegister.step1Link", // "Sign Up" - clickable link label that must match the actual in-app button text
+    "faq.howToLogin.step1Link", // "Login" - clickable link label that must match the actual in-app button text
+    "faq.passwordReset.step1Link", // "Login" - clickable link label that must match the actual in-app button text
+    "faq.privacyPolicyFaq.readMoreLink", // "Privacy Policy" - clickable link label that must match the actual in-app page name
+    "faq.deleteAccountFaq.step1Link", // "Settings" - clickable link label that must match the actual in-app page name
+    "faq.deleteAccountFaq.seeMoreLink", // "Privacy Policy" - clickable link label that must match the actual in-app page name
+    "faq.whatIsTrustPassport.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustLocation.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustVerification.passportCardTitle", // "Trust Passport" is a named feature, kept in Latin per above
+    "faq.supportTickets.step1Link", // "Support" - clickable link label that must match the actual in-app button text
+    "faq.trackTickets.step1Link", // "My Tickets" - clickable link label that must match the actual in-app button text
+    "faq.termsFaq.p1Link", // "Terms of Service" - clickable link label that must match the actual in-app page name
+    "help.hero.tagTrustPassport", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.section.businessFeatures.title", // "Business & Enterprise" contains the plan-tier brand names
+    "help.section.trustPassport.title", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "help.section.aid.title", // "ZRP Help" is the established brand-name exception
+    "help.section.opportunity.title", // "ZRP Opportunity" is the established brand-name exception
+    "help.music.studioHeading", // "Music Studio" is a product sub-brand name
+    "help.section.music.title", // "ZRP Music" is the established brand-name exception
+    "help.trustPassport.whereFindBold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "marketplace.heroTitle", // "ZRP Market Plus" is a product sub-brand name
+    "faq.cat.marketPlus", // "ZRP Market Plus" is a product sub-brand name
+    "faq.whatIsMarketPlus.p1Bold", // "ZRP Market Plus" is a product sub-brand name
+    "help.section.marketplace.title", // "ZRP Market Plus" is a product sub-brand name
+    "profile.trustPassportTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "journalist.editor.slugPlaceholder", // "article-slug" is a literal URL-slug format example, not prose
+    "pricing.featureLiveAudio", // "Live Audio" is a ZRP Live sub-feature name
+    "pricing.support247", // "24/7" - numeral/symbol notation, not translatable prose
+    "ads.dashboard.ctr", // "CTR" is an acronym/industry term, kept untranslated
+    "deleteAccount.confirmWord", // "DELETE" - the UI checks the typed confirmation against this literal word
+    "creatorDash.studioTitle", // "Creator Studio" is a product feature name kept in English for consistency
+    "trust.headerTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "trust.outOf100", // "/ 100" - numeric score format, no translatable text
+    "play.vs", // "vs" is a common gaming abbreviation used even in Indian-language game UIs
+    "play.xp", // "{n} XP" template - "XP" is a universal gaming acronym, kept untranslated
+    "opportunity.heroTitle", // "ZRP OPPORTUNITY" is the established brand-name exception
+    "help.heroTitle", // "ZRP HELP" is the established brand-name exception
+    "nav.creatorStudio", // "Creator Studio" is a product feature name kept in English for consistency
+    "nav.aiAssistant", // "ZRP AI" is the established brand-name exception
+    "music.shell.studioLabel", // "Music Studio" is a product sub-brand name
+    "music.studio.explicitBadge", // "E" - the single-letter explicit-content badge, same convention as music streaming apps worldwide
+    "tipModal.charCount", // "{count}/1000" - pure placeholder/format template, no translatable words
+    "communities.create.hashtagPlaceholder", // "travel" - a literal hashtag example; hashtags are conventionally kept in Latin script for cross-language discoverability
+    "childSafety.section6.communityCodeLabel", // "Community & Leadership Code" - named legal document title, kept as a proper noun
+    "childSafety.section6.termsLabel", // "Terms of Service" - named legal document title, kept as a proper noun
+    "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
+    "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
+  ],
   mr: [
     "nav.launchpad", // "Launchpad" is the established brand-name exception
     "launchpad.dao.title", // "DAOs" is an acronym/industry term, kept untranslated
