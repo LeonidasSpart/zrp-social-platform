@@ -3658,6 +3658,97 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
     "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
   ],
+  vi: [
+    "nav.launchpad", // "Launchpad" is the established brand-name exception
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.apy", // "APY" is a genuine cognate/established loanword in this language
+    "launchpad.farmingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated
+    "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in this language
+    "launchpad.ido.pricePerToken", // "${price} / token" template - the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.nftStakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.apyLabel", // "APY" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeHeading", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.stakingDetail.stakeButton", // "Stake" is a genuine cognate/established loanword in this language
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in this language
+    "auth.email", // "Email" is a universal untranslated loanword in Vietnamese UI (same convention Facebook/Google VN use)
+    "settings.video", // "Video" is a standard accepted loanword in Vietnamese
+    "group.lastMessagePrefix", // "{name}: {msg}" - pure placeholder template, no translatable words
+    "team.colEmail", // "Email" is a universal untranslated loanword in Vietnamese UI
+    "analytics.platformWeb", // "Web" is a universal untranslated loanword
+    "analytics.platformAndroid", // "Android" is a proper noun/platform name
+    "analytics.platformIos", // "iOS" is a proper noun/platform name
+    "adminUsers.colEmail", // "Email" is a universal untranslated loanword in Vietnamese UI
+    "profile.tip", // "Tip" is a genuine cognate/established loanword in this language
+    "contact.faqLabel", // "FAQ" is a universally-used acronym in Vietnamese tech UI
+    "transparency.reasonSpam", // "Spam" is a standard loanword, no natural Vietnamese single-word equivalent in casual UI use
+    "footer.faq", // "FAQ" is a universally-used acronym in Vietnamese tech UI
+    "communityCode.e.category1", // "Spam" is a standard loanword, same as transparency.reasonSpam
+    "investors.platform.marketplace.title", // "Marketplace & Opportunity" contains the product sub-brand name
+    "investors.platform.news.title", // "ZRP News" is the established brand-name exception
+    "investors.platform.music.title", // "ZRP Music" is the established brand-name exception
+    "press.heroTitle", // "Press Kit" is a standard English business term used as-is
+    "press.emailBadge", // "press@zrp.one" email address, not translatable content
+    "press.logoLabel", // "Logo" is a universal untranslated loanword
+    "press.faviconLabel", // "Favicon" is a technical term with no Vietnamese equivalent
+    "press.emailLabel", // "Email" is a universal untranslated loanword in Vietnamese UI
+    "press.websiteLabel", // "Website" is commonly left in English on this page; see journalist.editor note below for the one spot it was localized
+    "faq.cat.trustPassport", // "ZRP Trust Passport" is a named feature, kept in Latin for consistency with other ZRP sub-brands
+    "faq.whatIsTrustPassport.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustLocation.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustVerification.passportCardTitle", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.hero.tagTrustPassport", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.section.businessFeatures.title", // "Business & Enterprise" contains the plan-tier brand names
+    "help.section.trustPassport.title", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "help.section.aid.title", // "ZRP Help" is the established brand-name exception
+    "help.section.opportunity.title", // "ZRP Opportunity" is the established brand-name exception
+    "help.music.studioHeading", // "Music Studio" is a product sub-brand name
+    "help.section.music.title", // "ZRP Music" is the established brand-name exception
+    "help.trustPassport.whereFindBold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "nav.marketplace", // "Marketplace" is a common Vietnamese tech-UI loanword (same as Facebook/Shopee usage)
+    "marketplace.heroTitle", // "ZRP Market Plus" is a product sub-brand name
+    "adminMarketplace.title", // "Marketplace" is a common Vietnamese tech-UI loanword
+    "faq.cat.marketPlus", // "ZRP Market Plus" is a product sub-brand name
+    "faq.whatIsMarketPlus.p1Bold", // "ZRP Market Plus" is a product sub-brand name
+    "help.section.marketplace.title", // "ZRP Market Plus" is a product sub-brand name
+    "profile.trustPassportTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "stories.video", // "Video" is a standard accepted loanword in Vietnamese
+    "nav.shorts", // "Shorts" is a common English loanword in Vietnamese social-app UI (as in YouTube Shorts)
+    "journalist.editor.slug", // "Slug" is used as-is in Vietnamese CMS/blog UIs, a technical CMS term
+    "journalist.editor.slugPlaceholder", // "article-slug" is a literal URL-slug format example, not prose
+    "pricing.featureLiveAudio", // "Live Audio" is a ZRP Live sub-feature name
+    "pricing.support247", // "24/7" - numeral/symbol notation, not translatable prose
+    "ads.dashboard.ctr", // "CTR" is an acronym/industry term, kept untranslated
+    "deleteAccount.confirmWord", // "DELETE" - the UI checks the typed confirmation against this literal word
+    "creatorDash.studioTitle", // "Creator Studio" is a product feature name kept in English for consistency
+    "trust.headerTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "trust.outOf100", // "/ 100" - numeric score format, no translatable text
+    "adminSupport.colTicket", // "Ticket" is common in Vietnamese support/ticketing UI
+    "adminJournalists.portfolio", // "Portfolio" is a widely-used English loanword with no established Vietnamese UI equivalent
+    "adminNews.slugLabel", // "Slug" is a technical CMS term, used as-is in Vietnamese CMS/blog UIs
+    "play.vs", // "vs" is the common informal Vietnamese usage for "versus" in gaming contexts
+    "play.xp", // "{n} XP" template - "XP" is a universal gaming acronym, kept untranslated
+    "opportunity.heroTitle", // "ZRP OPPORTUNITY" is the established brand-name exception
+    "opportunity.typeFreelance", // "Freelance" is used as-is in everyday Vietnamese tech/work contexts
+    "opportunity.typeHackathon", // "Hackathon" is used as-is in everyday Vietnamese tech/work contexts
+    "help.heroTitle", // "ZRP HELP" is the established brand-name exception
+    "nav.premium", // "Premium" is a widely-used English loanword in Vietnamese app UI
+    "nav.creatorStudio", // "Creator Studio" is a product feature name kept in English for consistency
+    "nav.aiAssistant", // "ZRP AI" is the established brand-name exception
+    "music.shell.studioLabel", // "Music Studio" is a product sub-brand name
+    "music.studio.explicitBadge", // "E" - the single-letter explicit-content badge, same convention as music streaming apps worldwide
+    "music.track.columnAlbum", // "Album" is the same word in Vietnamese music UI convention
+    "music.albumDetail.eyebrow", // "Album" is the same word in Vietnamese music UI convention
+    "tipModal.charCount", // "{count}/1000" - pure placeholder/format template, no translatable words
+    "professionalCategory.blockchain", // "Blockchain" is used untranslated in Vietnamese tech/professional contexts
+    "professionalCategory.freelancer", // "Freelancer" is commonly used as-is in Vietnamese
+    "communities.create.hashtagLabel", // "Hashtag" is a standard loanword, used untranslated in Vietnamese social apps
+    "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
+  ],
   ur: [
     "nav.launchpad", // "Launchpad" is the established brand-name exception
     "launchpad.dao.title", // "DAOs" is an acronym/industry term, kept untranslated
