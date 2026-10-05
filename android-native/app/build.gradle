@@ -605,7 +605,13 @@ android {
 }
 
 dependencies {
-    implementation platform('androidx.compose:compose-bom:2024.09.00')
+    // Bumped from 2024.09.00 (compose-foundation ~1.7): that version predates
+    // AndroidX's fix for BasicTextField not correctly reflecting IME text
+    // updates (the exact "keyboard suggestions react, typed text never
+    // renders" bug class - see androidx.compose.foundation release notes,
+    // shipped by compose-foundation 1.12.0). 2026.09.00 is the latest
+    // stable BOM and pins compose-foundation/ui 1.12.1, past that fix.
+    implementation platform('androidx.compose:compose-bom:2026.09.00')
 
     implementation 'androidx.core:core-ktx:1.13.1'
 
@@ -804,6 +810,6 @@ dependencies {
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation platform('androidx.compose:compose-bom:2024.09.00')
+    androidTestImplementation platform('androidx.compose:compose-bom:2026.09.00')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
 }
