@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Някой";
 "ios.live.startNow" = "Започни сега";
 "ios.live.switchCamera" = "Смени камерата";
+"ios.a11y.turnOnSpeaker" = "Включи високоговорителя";
+"ios.a11y.turnOffSpeaker" = "Изключи високоговорителя";
+"ios.a11y.turnOnCamera" = "Включи камерата";
+"ios.a11y.turnOffCamera" = "Изключи камерата";
+"ios.a11y.acceptCall" = "Приеми обаждането";
+"ios.a11y.declineCall" = "Отхвърли обаждането";
+"ios.a11y.endCall" = "Прекрати обаждането";
+"ios.a11y.dismiss" = "Отхвърли";
+"ios.auth.dateOfBirth" = "Дата на раждане";
+"ios.auth.ageTermsAgree" = "На поне 16 години съм и приемам Условията за ползване";
+"ios.auth.ageTooYoung" = "Трябва да сте на поне 16 години, за да създадете акаунт в ZRP.";

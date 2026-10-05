@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Keegi";
 "ios.live.startNow" = "Alusta kohe";
 "ios.live.switchCamera" = "Vaheta kaamerat";
+"ios.a11y.turnOnSpeaker" = "Lülita valjuhääldi sisse";
+"ios.a11y.turnOffSpeaker" = "Lülita valjuhääldi välja";
+"ios.a11y.turnOnCamera" = "Lülita kaamera sisse";
+"ios.a11y.turnOffCamera" = "Lülita kaamera välja";
+"ios.a11y.acceptCall" = "Vasta kõnele";
+"ios.a11y.declineCall" = "Lükka kõne tagasi";
+"ios.a11y.endCall" = "Lõpeta kõne";
+"ios.a11y.dismiss" = "Sulge";
+"ios.auth.dateOfBirth" = "Sünniaeg";
+"ios.auth.ageTermsAgree" = "Olen vähemalt 16-aastane ja nõustun teenusetingimustega";
+"ios.auth.ageTooYoung" = "ZRP konto loomiseks pead olema vähemalt 16-aastane.";

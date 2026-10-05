@@ -23,6 +23,7 @@ struct LiveAudioRoomView: View {
     @State private var confirmRemoveUserId: String?
     @State private var showGifts = false
     @State private var showChat = true
+    @State private var isReporting = false
 
     init(roomId: String) {
         self.roomId = roomId
@@ -88,6 +89,17 @@ struct LiveAudioRoomView: View {
                         }
                         .accessibilityLabel(Text(.chatContactMore))
                     }
+                    // `POST /api/reports` has accepted `liveAudioRoomId`
+                    // since Live Audio shipped (it is one of the Report
+                    // model's own polymorphic targets); this app never
+                    // built a Report entry point for the room itself.
+                    // The host reporting their own room is meaningless.
+                    if viewModel.myRole != "HOST" {
+                        Button { isReporting = true } label: {
+                            Image(systemName: "flag")
+                        }
+                        .accessibilityLabel(Text(.reportModalTitle))
+                    }
                     if viewModel.myRole == "HOST" {
                         Button(role: .destructive) {
                             confirmEnd = true
@@ -135,6 +147,9 @@ struct LiveAudioRoomView: View {
                 hostName: viewModel.host?.displayName ?? "",
                 onSent: {}
             )
+        }
+        .sheet(isPresented: $isReporting) {
+            ReportSheet(target: .liveAudioRoom(roomId))
         }
     }
 

@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Xi ħadd";
 "ios.live.startNow" = "Ibda issa";
 "ios.live.switchCamera" = "Biddel il-kamera";
+"ios.a11y.turnOnSpeaker" = "Ixgħel il-kelliem";
+"ios.a11y.turnOffSpeaker" = "Itfi l-kelliem";
+"ios.a11y.turnOnCamera" = "Ixgħel il-kamera";
+"ios.a11y.turnOffCamera" = "Itfi l-kamera";
+"ios.a11y.acceptCall" = "Aċċetta s-sejħa";
+"ios.a11y.declineCall" = "Irrifjuta s-sejħa";
+"ios.a11y.endCall" = "Temm is-sejħa";
+"ios.a11y.dismiss" = "Agħlaq";
+"ios.auth.dateOfBirth" = "Data tat-twelid";
+"ios.auth.ageTermsAgree" = "Għandi mill-inqas 16-il sena u naqbel mat-Termini tas-Servizz";
+"ios.auth.ageTooYoung" = "Trid ikollok mill-inqas 16-il sena biex toħloq kont ZRP.";

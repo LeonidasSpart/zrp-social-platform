@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "某人";
 "ios.live.startNow" = "立即开始";
 "ios.live.switchCamera" = "切换摄像头";
+"ios.a11y.turnOnSpeaker" = "打开扬声器";
+"ios.a11y.turnOffSpeaker" = "关闭扬声器";
+"ios.a11y.turnOnCamera" = "打开摄像头";
+"ios.a11y.turnOffCamera" = "关闭摄像头";
+"ios.a11y.acceptCall" = "接听";
+"ios.a11y.declineCall" = "拒接";
+"ios.a11y.endCall" = "挂断";
+"ios.a11y.dismiss" = "关闭";
+"ios.auth.dateOfBirth" = "出生日期";
+"ios.auth.ageTermsAgree" = "我已年满16岁，并同意服务条款";
+"ios.auth.ageTooYoung" = "您必须年满16岁才能创建ZRP账户。";

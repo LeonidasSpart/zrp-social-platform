@@ -47,9 +47,43 @@ function getApnsConfig(): ApnsConfig | null {
   const rawPrivateKey = process.env.APNS_PRIVATE_KEY?.trim();
   const environment = process.env.APNS_ENVIRONMENT?.trim().toLowerCase();
 
+  const presentCount = [keyId, teamId, bundleId, rawPrivateKey].filter(Boolean).length;
   if (!keyId || !teamId || !bundleId || !rawPrivateKey) {
+    // 0 of 4 set is the expected, documented state today (no Apple
+    // Developer account exists yet - see this file's header comment) and
+    // would be noise on every boot, so it stays silent. 1-3 of 4 set can
+    // only be a misconfiguration (a typo'd var name, one left off a
+    // deploy) that would otherwise fail exactly as silently as "none
+    // configured" - push just never arrives, with no signal anywhere
+    // pointing at why. That partial state is always worth a loud warning,
+    // in every environment, not production-only.
+    if (presentCount > 0) {
+      console.error(
+        `APNs: partially configured (${presentCount}/4 of APNS_KEY_ID, APNS_TEAM_ID, ` +
+          "APNS_BUNDLE_ID, APNS_PRIVATE_KEY are set). All four are required together - " +
+          "APNs push (including PushKit VoIP call signaling) will silently fail to send " +
+          "until the rest are set.",
+      );
+    }
     cachedConfig = null;
     return null;
+  }
+
+  if (process.env.NODE_ENV === "production" && environment !== "production") {
+    // Apple requires production-signed (App Store/TestFlight) builds to
+    // receive push from the production APNs host, not sandbox - a real
+    // device running a production build will simply never receive a push
+    // sent to api.sandbox.push.apple.com. Defaulting to sandbox is correct
+    // for local/dev use (see the ternary below) but silently doing the
+    // same in a production deployment would misroute every push with no
+    // error anywhere - the HTTP/2 POST to Apple still "succeeds".
+    console.error(
+      "APNs: running with NODE_ENV=production but APNS_ENVIRONMENT is not set to " +
+        "'production' (got " +
+        (environment ? `'${environment}'` : "unset") +
+        "). Falling back to the sandbox APNs host - push will silently never reach " +
+        "production-signed (App Store/TestFlight) devices. Set APNS_ENVIRONMENT=production.",
+    );
   }
 
   try {

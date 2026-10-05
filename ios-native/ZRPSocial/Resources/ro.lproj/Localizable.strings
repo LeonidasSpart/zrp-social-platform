@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Cineva";
 "ios.live.startNow" = "Începe acum";
 "ios.live.switchCamera" = "Schimbă camera";
+"ios.a11y.turnOnSpeaker" = "Activează difuzorul";
+"ios.a11y.turnOffSpeaker" = "Dezactivează difuzorul";
+"ios.a11y.turnOnCamera" = "Activează camera";
+"ios.a11y.turnOffCamera" = "Dezactivează camera";
+"ios.a11y.acceptCall" = "Acceptă apelul";
+"ios.a11y.declineCall" = "Respinge apelul";
+"ios.a11y.endCall" = "Închide apelul";
+"ios.a11y.dismiss" = "Închide";
+"ios.auth.dateOfBirth" = "Data nașterii";
+"ios.auth.ageTermsAgree" = "Am cel puțin 16 ani și sunt de acord cu Termenii de utilizare";
+"ios.auth.ageTooYoung" = "Trebuie să ai cel puțin 16 ani pentru a crea un cont ZRP.";

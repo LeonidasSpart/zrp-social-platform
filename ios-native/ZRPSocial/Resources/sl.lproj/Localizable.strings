@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Nekdo";
 "ios.live.startNow" = "Začni zdaj";
 "ios.live.switchCamera" = "Zamenjaj kamero";
+"ios.a11y.turnOnSpeaker" = "Vklopi zvočnik";
+"ios.a11y.turnOffSpeaker" = "Izklopi zvočnik";
+"ios.a11y.turnOnCamera" = "Vklopi kamero";
+"ios.a11y.turnOffCamera" = "Izklopi kamero";
+"ios.a11y.acceptCall" = "Sprejmi klic";
+"ios.a11y.declineCall" = "Zavrni klic";
+"ios.a11y.endCall" = "Končaj klic";
+"ios.a11y.dismiss" = "Zapri";
+"ios.auth.dateOfBirth" = "Datum rojstva";
+"ios.auth.ageTermsAgree" = "Star sem vsaj 16 let in se strinjam s Pogoji uporabe";
+"ios.auth.ageTooYoung" = "Za ustvarjanje računa ZRP morate biti stari vsaj 16 let.";

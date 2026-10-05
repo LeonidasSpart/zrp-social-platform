@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Biri";
 "ios.live.startNow" = "Şimdi başlat";
 "ios.live.switchCamera" = "Kamerayı değiştir";
+"ios.a11y.turnOnSpeaker" = "Hoparlörü aç";
+"ios.a11y.turnOffSpeaker" = "Hoparlörü kapat";
+"ios.a11y.turnOnCamera" = "Kamerayı aç";
+"ios.a11y.turnOffCamera" = "Kamerayı kapat";
+"ios.a11y.acceptCall" = "Aramayı yanıtla";
+"ios.a11y.declineCall" = "Aramayı reddet";
+"ios.a11y.endCall" = "Aramayı sonlandır";
+"ios.a11y.dismiss" = "Kapat";
+"ios.auth.dateOfBirth" = "Doğum tarihi";
+"ios.auth.ageTermsAgree" = "En az 16 yaşındayım ve Hizmet Şartları'nı kabul ediyorum";
+"ios.auth.ageTooYoung" = "ZRP hesabı oluşturmak için en az 16 yaşında olmalısınız.";

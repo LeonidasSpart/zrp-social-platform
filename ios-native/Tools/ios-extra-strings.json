@@ -269,7 +269,18 @@
     "ios.live.scheduledFor": "Scheduled for {date}",
     "ios.live.someone": "Someone",
     "ios.live.startNow": "Start now",
-    "ios.live.switchCamera": "Switch camera"
+    "ios.live.switchCamera": "Switch camera",
+    "ios.a11y.turnOnSpeaker": "Turn on speaker",
+    "ios.a11y.turnOffSpeaker": "Turn off speaker",
+    "ios.a11y.turnOnCamera": "Turn on camera",
+    "ios.a11y.turnOffCamera": "Turn off camera",
+    "ios.a11y.acceptCall": "Accept call",
+    "ios.a11y.declineCall": "Decline call",
+    "ios.a11y.endCall": "End call",
+    "ios.a11y.dismiss": "Dismiss",
+    "ios.auth.dateOfBirth": "Date of birth",
+    "ios.auth.ageTermsAgree": "I'm at least 16 years old and I agree to the Terms of Service",
+    "ios.auth.ageTooYoung": "You must be at least 16 years old to create a ZRP account."
   },
   "translations": {
     "fr": {
@@ -524,7 +535,18 @@
       "ios.live.scheduledFor": "Programmé pour le {date}",
       "ios.live.someone": "Quelqu'un",
       "ios.live.startNow": "Démarrer maintenant",
-      "ios.live.switchCamera": "Changer de caméra"
+      "ios.live.switchCamera": "Changer de caméra",
+      "ios.a11y.turnOnSpeaker": "Activer le haut-parleur",
+      "ios.a11y.turnOffSpeaker": "Désactiver le haut-parleur",
+      "ios.a11y.turnOnCamera": "Activer la caméra",
+      "ios.a11y.turnOffCamera": "Désactiver la caméra",
+      "ios.a11y.acceptCall": "Répondre à l'appel",
+      "ios.a11y.declineCall": "Refuser l'appel",
+      "ios.a11y.endCall": "Terminer l'appel",
+      "ios.a11y.dismiss": "Ignorer",
+      "ios.auth.dateOfBirth": "Date de naissance",
+      "ios.auth.ageTermsAgree": "J'ai au moins 16 ans et j'accepte les Conditions d'utilisation",
+      "ios.auth.ageTooYoung": "Vous devez avoir au moins 16 ans pour créer un compte ZRP."
     },
     "de": {
       "ios.a11y.bookmark": "Merken",
@@ -778,7 +800,18 @@
       "ios.live.scheduledFor": "Geplant für {date}",
       "ios.live.someone": "Jemand",
       "ios.live.startNow": "Jetzt starten",
-      "ios.live.switchCamera": "Kamera wechseln"
+      "ios.live.switchCamera": "Kamera wechseln",
+      "ios.a11y.turnOnSpeaker": "Lautsprecher aktivieren",
+      "ios.a11y.turnOffSpeaker": "Lautsprecher deaktivieren",
+      "ios.a11y.turnOnCamera": "Kamera aktivieren",
+      "ios.a11y.turnOffCamera": "Kamera deaktivieren",
+      "ios.a11y.acceptCall": "Anruf annehmen",
+      "ios.a11y.declineCall": "Anruf ablehnen",
+      "ios.a11y.endCall": "Anruf beenden",
+      "ios.a11y.dismiss": "Schließen",
+      "ios.auth.dateOfBirth": "Geburtsdatum",
+      "ios.auth.ageTermsAgree": "Ich bin mindestens 16 Jahre alt und stimme den Nutzungsbedingungen zu",
+      "ios.auth.ageTooYoung": "Du musst mindestens 16 Jahre alt sein, um ein ZRP-Konto zu erstellen."
     },
     "it": {
       "ios.a11y.bookmark": "Salva",
@@ -1032,7 +1065,18 @@
       "ios.live.scheduledFor": "Programmata per {date}",
       "ios.live.someone": "Qualcuno",
       "ios.live.startNow": "Avvia ora",
-      "ios.live.switchCamera": "Cambia fotocamera"
+      "ios.live.switchCamera": "Cambia fotocamera",
+      "ios.a11y.turnOnSpeaker": "Attiva altoparlante",
+      "ios.a11y.turnOffSpeaker": "Disattiva altoparlante",
+      "ios.a11y.turnOnCamera": "Attiva fotocamera",
+      "ios.a11y.turnOffCamera": "Disattiva fotocamera",
+      "ios.a11y.acceptCall": "Rispondi alla chiamata",
+      "ios.a11y.declineCall": "Rifiuta la chiamata",
+      "ios.a11y.endCall": "Termina la chiamata",
+      "ios.a11y.dismiss": "Ignora",
+      "ios.auth.dateOfBirth": "Data di nascita",
+      "ios.auth.ageTermsAgree": "Ho almeno 16 anni e accetto le Condizioni di utilizzo",
+      "ios.auth.ageTooYoung": "Devi avere almeno 16 anni per creare un account ZRP."
     },
     "sq": {
       "ios.a11y.bookmark": "Ruaje",
@@ -1286,7 +1330,18 @@
       "ios.live.scheduledFor": "Planifikuar për {date}",
       "ios.live.someone": "Dikush",
       "ios.live.startNow": "Fillo tani",
-      "ios.live.switchCamera": "Ndërro kamerën"
+      "ios.live.switchCamera": "Ndërro kamerën",
+      "ios.a11y.turnOnSpeaker": "Aktivizo altoparlantin",
+      "ios.a11y.turnOffSpeaker": "Çaktivizo altoparlantin",
+      "ios.a11y.turnOnCamera": "Aktivizo kamerën",
+      "ios.a11y.turnOffCamera": "Çaktivizo kamerën",
+      "ios.a11y.acceptCall": "Prano telefonatën",
+      "ios.a11y.declineCall": "Refuzo telefonatën",
+      "ios.a11y.endCall": "Mbyll telefonatën",
+      "ios.a11y.dismiss": "Hiq",
+      "ios.auth.dateOfBirth": "Data e lindjes",
+      "ios.auth.ageTermsAgree": "Jam të paktën 16 vjeç dhe pranoj Kushtet e Shërbimit",
+      "ios.auth.ageTooYoung": "Duhet të jesh të paktën 16 vjeç për të krijuar një llogari ZRP."
     },
     "es": {
       "ios.a11y.bookmark": "Guardar",
@@ -1540,7 +1595,18 @@
       "ios.live.scheduledFor": "Programada para el {date}",
       "ios.live.someone": "Alguien",
       "ios.live.startNow": "Empezar ahora",
-      "ios.live.switchCamera": "Cambiar de cámara"
+      "ios.live.switchCamera": "Cambiar de cámara",
+      "ios.a11y.turnOnSpeaker": "Activar altavoz",
+      "ios.a11y.turnOffSpeaker": "Desactivar altavoz",
+      "ios.a11y.turnOnCamera": "Activar cámara",
+      "ios.a11y.turnOffCamera": "Desactivar cámara",
+      "ios.a11y.acceptCall": "Aceptar llamada",
+      "ios.a11y.declineCall": "Rechazar llamada",
+      "ios.a11y.endCall": "Finalizar llamada",
+      "ios.a11y.dismiss": "Descartar",
+      "ios.auth.dateOfBirth": "Fecha de nacimiento",
+      "ios.auth.ageTermsAgree": "Tengo al menos 16 años y acepto las Condiciones de servicio",
+      "ios.auth.ageTooYoung": "Debes tener al menos 16 años para crear una cuenta de ZRP."
     },
     "ru": {
       "ios.a11y.bookmark": "Добавить в закладки",
@@ -1794,7 +1860,18 @@
       "ios.live.scheduledFor": "Запланировано на {date}",
       "ios.live.someone": "Кто-то",
       "ios.live.startNow": "Начать сейчас",
-      "ios.live.switchCamera": "Сменить камеру"
+      "ios.live.switchCamera": "Сменить камеру",
+      "ios.a11y.turnOnSpeaker": "Включить громкую связь",
+      "ios.a11y.turnOffSpeaker": "Выключить громкую связь",
+      "ios.a11y.turnOnCamera": "Включить камеру",
+      "ios.a11y.turnOffCamera": "Выключить камеру",
+      "ios.a11y.acceptCall": "Принять вызов",
+      "ios.a11y.declineCall": "Отклонить вызов",
+      "ios.a11y.endCall": "Завершить вызов",
+      "ios.a11y.dismiss": "Скрыть",
+      "ios.auth.dateOfBirth": "Дата рождения",
+      "ios.auth.ageTermsAgree": "Мне не менее 16 лет, и я принимаю Условия использования",
+      "ios.auth.ageTooYoung": "Чтобы создать аккаунт ZRP, вам должно быть не менее 16 лет."
     },
     "ar": {
       "ios.a11y.bookmark": "حفظ",
@@ -2048,7 +2125,18 @@
       "ios.live.scheduledFor": "مجدولة في {date}",
       "ios.live.someone": "شخص ما",
       "ios.live.startNow": "ابدأ الآن",
-      "ios.live.switchCamera": "تبديل الكاميرا"
+      "ios.live.switchCamera": "تبديل الكاميرا",
+      "ios.a11y.turnOnSpeaker": "تشغيل مكبر الصوت",
+      "ios.a11y.turnOffSpeaker": "إيقاف مكبر الصوت",
+      "ios.a11y.turnOnCamera": "تشغيل الكاميرا",
+      "ios.a11y.turnOffCamera": "إيقاف الكاميرا",
+      "ios.a11y.acceptCall": "قبول المكالمة",
+      "ios.a11y.declineCall": "رفض المكالمة",
+      "ios.a11y.endCall": "إنهاء المكالمة",
+      "ios.a11y.dismiss": "تجاهل",
+      "ios.auth.dateOfBirth": "تاريخ الميلاد",
+      "ios.auth.ageTermsAgree": "عمري 16 عامًا على الأقل وأوافق على شروط الخدمة",
+      "ios.auth.ageTooYoung": "يجب أن يكون عمرك 16 عامًا على الأقل لإنشاء حساب ZRP."
     },
     "zh": {
       "ios.a11y.bookmark": "收藏",
@@ -2302,7 +2390,18 @@
       "ios.live.scheduledFor": "预定于 {date}",
       "ios.live.someone": "某人",
       "ios.live.startNow": "立即开始",
-      "ios.live.switchCamera": "切换摄像头"
+      "ios.live.switchCamera": "切换摄像头",
+      "ios.a11y.turnOnSpeaker": "打开扬声器",
+      "ios.a11y.turnOffSpeaker": "关闭扬声器",
+      "ios.a11y.turnOnCamera": "打开摄像头",
+      "ios.a11y.turnOffCamera": "关闭摄像头",
+      "ios.a11y.acceptCall": "接听",
+      "ios.a11y.declineCall": "拒接",
+      "ios.a11y.endCall": "挂断",
+      "ios.a11y.dismiss": "关闭",
+      "ios.auth.dateOfBirth": "出生日期",
+      "ios.auth.ageTermsAgree": "我已年满16岁，并同意服务条款",
+      "ios.auth.ageTooYoung": "您必须年满16岁才能创建ZRP账户。"
     },
     "tr": {
       "ios.a11y.bookmark": "Kaydet",
@@ -2556,7 +2655,18 @@
       "ios.live.scheduledFor": "{date} için planlandı",
       "ios.live.someone": "Biri",
       "ios.live.startNow": "Şimdi başlat",
-      "ios.live.switchCamera": "Kamerayı değiştir"
+      "ios.live.switchCamera": "Kamerayı değiştir",
+      "ios.a11y.turnOnSpeaker": "Hoparlörü aç",
+      "ios.a11y.turnOffSpeaker": "Hoparlörü kapat",
+      "ios.a11y.turnOnCamera": "Kamerayı aç",
+      "ios.a11y.turnOffCamera": "Kamerayı kapat",
+      "ios.a11y.acceptCall": "Aramayı yanıtla",
+      "ios.a11y.declineCall": "Aramayı reddet",
+      "ios.a11y.endCall": "Aramayı sonlandır",
+      "ios.a11y.dismiss": "Kapat",
+      "ios.auth.dateOfBirth": "Doğum tarihi",
+      "ios.auth.ageTermsAgree": "En az 16 yaşındayım ve Hizmet Şartları'nı kabul ediyorum",
+      "ios.auth.ageTooYoung": "ZRP hesabı oluşturmak için en az 16 yaşında olmalısınız."
     },
     "id": {
       "ios.a11y.bookmark": "Simpan",
@@ -2810,7 +2920,18 @@
       "ios.live.scheduledFor": "Dijadwalkan pada {date}",
       "ios.live.someone": "Seseorang",
       "ios.live.startNow": "Mulai sekarang",
-      "ios.live.switchCamera": "Ganti kamera"
+      "ios.live.switchCamera": "Ganti kamera",
+      "ios.a11y.turnOnSpeaker": "Aktifkan speaker",
+      "ios.a11y.turnOffSpeaker": "Nonaktifkan speaker",
+      "ios.a11y.turnOnCamera": "Aktifkan kamera",
+      "ios.a11y.turnOffCamera": "Nonaktifkan kamera",
+      "ios.a11y.acceptCall": "Terima panggilan",
+      "ios.a11y.declineCall": "Tolak panggilan",
+      "ios.a11y.endCall": "Akhiri panggilan",
+      "ios.a11y.dismiss": "Tutup",
+      "ios.auth.dateOfBirth": "Tanggal lahir",
+      "ios.auth.ageTermsAgree": "Saya berusia minimal 16 tahun dan menyetujui Ketentuan Layanan",
+      "ios.auth.ageTooYoung": "Anda harus berusia minimal 16 tahun untuk membuat akun ZRP."
     },
     "pt": {
       "ios.a11y.bookmark": "Guardar",
@@ -3064,7 +3185,18 @@
       "ios.live.scheduledFor": "Agendada para {date}",
       "ios.live.someone": "Alguém",
       "ios.live.startNow": "Começar agora",
-      "ios.live.switchCamera": "Mudar de câmara"
+      "ios.live.switchCamera": "Mudar de câmara",
+      "ios.a11y.turnOnSpeaker": "Ativar altifalante",
+      "ios.a11y.turnOffSpeaker": "Desativar altifalante",
+      "ios.a11y.turnOnCamera": "Ativar câmara",
+      "ios.a11y.turnOffCamera": "Desativar câmara",
+      "ios.a11y.acceptCall": "Atender chamada",
+      "ios.a11y.declineCall": "Rejeitar chamada",
+      "ios.a11y.endCall": "Terminar chamada",
+      "ios.a11y.dismiss": "Dispensar",
+      "ios.auth.dateOfBirth": "Data de nascimento",
+      "ios.auth.ageTermsAgree": "Tenho pelo menos 16 anos e aceito os Termos de Serviço",
+      "ios.auth.ageTooYoung": "Deve ter pelo menos 16 anos para criar uma conta ZRP."
     },
     "ja": {
       "ios.a11y.bookmark": "ブックマーク",
@@ -3318,7 +3450,18 @@
       "ios.live.scheduledFor": "{date}に予定",
       "ios.live.someone": "誰か",
       "ios.live.startNow": "今すぐ開始",
-      "ios.live.switchCamera": "カメラを切り替え"
+      "ios.live.switchCamera": "カメラを切り替え",
+      "ios.a11y.turnOnSpeaker": "スピーカーをオンにする",
+      "ios.a11y.turnOffSpeaker": "スピーカーをオフにする",
+      "ios.a11y.turnOnCamera": "カメラをオンにする",
+      "ios.a11y.turnOffCamera": "カメラをオフにする",
+      "ios.a11y.acceptCall": "応答",
+      "ios.a11y.declineCall": "拒否",
+      "ios.a11y.endCall": "通話を終了",
+      "ios.a11y.dismiss": "閉じる",
+      "ios.auth.dateOfBirth": "生年月日",
+      "ios.auth.ageTermsAgree": "私は16歳以上で、利用規約に同意します",
+      "ios.auth.ageTooYoung": "ZRPアカウントを作成するには16歳以上である必要があります。"
     },
     "ko": {
       "ios.a11y.bookmark": "북마크",
@@ -3572,7 +3715,18 @@
       "ios.live.scheduledFor": "{date}에 예약됨",
       "ios.live.someone": "누군가",
       "ios.live.startNow": "지금 시작",
-      "ios.live.switchCamera": "카메라 전환"
+      "ios.live.switchCamera": "카메라 전환",
+      "ios.a11y.turnOnSpeaker": "스피커 켜기",
+      "ios.a11y.turnOffSpeaker": "스피커 끄기",
+      "ios.a11y.turnOnCamera": "카메라 켜기",
+      "ios.a11y.turnOffCamera": "카메라 끄기",
+      "ios.a11y.acceptCall": "전화 받기",
+      "ios.a11y.declineCall": "전화 거절",
+      "ios.a11y.endCall": "통화 종료",
+      "ios.a11y.dismiss": "닫기",
+      "ios.auth.dateOfBirth": "생년월일",
+      "ios.auth.ageTermsAgree": "저는 16세 이상이며 서비스 약관에 동의합니다",
+      "ios.auth.ageTooYoung": "ZRP 계정을 만들려면 16세 이상이어야 합니다."
     },
     "hi": {
       "ios.a11y.bookmark": "बुकमार्क करें",
@@ -3826,7 +3980,18 @@
       "ios.live.scheduledFor": "{date} के लिए शेड्यूल किया गया",
       "ios.live.someone": "कोई",
       "ios.live.startNow": "अभी शुरू करें",
-      "ios.live.switchCamera": "कैमरा बदलें"
+      "ios.live.switchCamera": "कैमरा बदलें",
+      "ios.a11y.turnOnSpeaker": "स्पीकर चालू करें",
+      "ios.a11y.turnOffSpeaker": "स्पीकर बंद करें",
+      "ios.a11y.turnOnCamera": "कैमरा चालू करें",
+      "ios.a11y.turnOffCamera": "कैमरा बंद करें",
+      "ios.a11y.acceptCall": "कॉल स्वीकार करें",
+      "ios.a11y.declineCall": "कॉल अस्वीकार करें",
+      "ios.a11y.endCall": "कॉल समाप्त करें",
+      "ios.a11y.dismiss": "खारिज करें",
+      "ios.auth.dateOfBirth": "जन्म तिथि",
+      "ios.auth.ageTermsAgree": "मेरी उम्र कम से कम 16 वर्ष है और मैं सेवा की शर्तों से सहमत हूं",
+      "ios.auth.ageTooYoung": "ZRP खाता बनाने के लिए आपकी उम्र कम से कम 16 वर्ष होनी चाहिए।"
     },
     "nl": {
       "ios.a11y.bookmark": "Bewaren",
@@ -4080,7 +4245,18 @@
       "ios.live.scheduledFor": "Gepland voor {date}",
       "ios.live.someone": "Iemand",
       "ios.live.startNow": "Nu starten",
-      "ios.live.switchCamera": "Camera wisselen"
+      "ios.live.switchCamera": "Camera wisselen",
+      "ios.a11y.turnOnSpeaker": "Luidspreker inschakelen",
+      "ios.a11y.turnOffSpeaker": "Luidspreker uitschakelen",
+      "ios.a11y.turnOnCamera": "Camera inschakelen",
+      "ios.a11y.turnOffCamera": "Camera uitschakelen",
+      "ios.a11y.acceptCall": "Oproep beantwoorden",
+      "ios.a11y.declineCall": "Oproep weigeren",
+      "ios.a11y.endCall": "Oproep beëindigen",
+      "ios.a11y.dismiss": "Sluiten",
+      "ios.auth.dateOfBirth": "Geboortedatum",
+      "ios.auth.ageTermsAgree": "Ik ben minstens 16 jaar oud en ga akkoord met de Servicevoorwaarden",
+      "ios.auth.ageTooYoung": "Je moet minstens 16 jaar oud zijn om een ZRP-account aan te maken."
     },
     "pl": {
       "ios.a11y.bookmark": "Zapisz",
@@ -4334,7 +4510,18 @@
       "ios.live.scheduledFor": "Zaplanowano na {date}",
       "ios.live.someone": "Ktoś",
       "ios.live.startNow": "Rozpocznij teraz",
-      "ios.live.switchCamera": "Przełącz kamerę"
+      "ios.live.switchCamera": "Przełącz kamerę",
+      "ios.a11y.turnOnSpeaker": "Włącz głośnik",
+      "ios.a11y.turnOffSpeaker": "Wyłącz głośnik",
+      "ios.a11y.turnOnCamera": "Włącz kamerę",
+      "ios.a11y.turnOffCamera": "Wyłącz kamerę",
+      "ios.a11y.acceptCall": "Odbierz połączenie",
+      "ios.a11y.declineCall": "Odrzuć połączenie",
+      "ios.a11y.endCall": "Zakończ połączenie",
+      "ios.a11y.dismiss": "Zamknij",
+      "ios.auth.dateOfBirth": "Data urodzenia",
+      "ios.auth.ageTermsAgree": "Mam co najmniej 16 lat i akceptuję Warunki korzystania z usługi",
+      "ios.auth.ageTooYoung": "Musisz mieć co najmniej 16 lat, aby założyć konto ZRP."
     },
     "ro": {
       "ios.a11y.bookmark": "Salvează",
@@ -4588,7 +4775,18 @@
       "ios.live.scheduledFor": "Programată pentru {date}",
       "ios.live.someone": "Cineva",
       "ios.live.startNow": "Începe acum",
-      "ios.live.switchCamera": "Schimbă camera"
+      "ios.live.switchCamera": "Schimbă camera",
+      "ios.a11y.turnOnSpeaker": "Activează difuzorul",
+      "ios.a11y.turnOffSpeaker": "Dezactivează difuzorul",
+      "ios.a11y.turnOnCamera": "Activează camera",
+      "ios.a11y.turnOffCamera": "Dezactivează camera",
+      "ios.a11y.acceptCall": "Acceptă apelul",
+      "ios.a11y.declineCall": "Respinge apelul",
+      "ios.a11y.endCall": "Închide apelul",
+      "ios.a11y.dismiss": "Închide",
+      "ios.auth.dateOfBirth": "Data nașterii",
+      "ios.auth.ageTermsAgree": "Am cel puțin 16 ani și sunt de acord cu Termenii de utilizare",
+      "ios.auth.ageTooYoung": "Trebuie să ai cel puțin 16 ani pentru a crea un cont ZRP."
     },
     "cs": {
       "ios.a11y.bookmark": "Uložit",
@@ -4842,7 +5040,18 @@
       "ios.live.scheduledFor": "Naplánováno na {date}",
       "ios.live.someone": "Někdo",
       "ios.live.startNow": "Začít teď",
-      "ios.live.switchCamera": "Přepnout kameru"
+      "ios.live.switchCamera": "Přepnout kameru",
+      "ios.a11y.turnOnSpeaker": "Zapnout reproduktor",
+      "ios.a11y.turnOffSpeaker": "Vypnout reproduktor",
+      "ios.a11y.turnOnCamera": "Zapnout kameru",
+      "ios.a11y.turnOffCamera": "Vypnout kameru",
+      "ios.a11y.acceptCall": "Přijmout hovor",
+      "ios.a11y.declineCall": "Odmítnout hovor",
+      "ios.a11y.endCall": "Ukončit hovor",
+      "ios.a11y.dismiss": "Zavřít",
+      "ios.auth.dateOfBirth": "Datum narození",
+      "ios.auth.ageTermsAgree": "Je mi alespoň 16 let a souhlasím s Podmínkami služby",
+      "ios.auth.ageTooYoung": "Pro vytvoření účtu ZRP musí být uživateli alespoň 16 let."
     },
     "hu": {
       "ios.a11y.bookmark": "Mentés",
@@ -5096,7 +5305,18 @@
       "ios.live.scheduledFor": "Ütemezve: {date}",
       "ios.live.someone": "Valaki",
       "ios.live.startNow": "Indítás most",
-      "ios.live.switchCamera": "Kameraváltás"
+      "ios.live.switchCamera": "Kameraváltás",
+      "ios.a11y.turnOnSpeaker": "Hangszóró bekapcsolása",
+      "ios.a11y.turnOffSpeaker": "Hangszóró kikapcsolása",
+      "ios.a11y.turnOnCamera": "Kamera bekapcsolása",
+      "ios.a11y.turnOffCamera": "Kamera kikapcsolása",
+      "ios.a11y.acceptCall": "Hívás elfogadása",
+      "ios.a11y.declineCall": "Hívás elutasítása",
+      "ios.a11y.endCall": "Hívás befejezése",
+      "ios.a11y.dismiss": "Bezárás",
+      "ios.auth.dateOfBirth": "Születési dátum",
+      "ios.auth.ageTermsAgree": "Legalább 16 éves vagyok, és elfogadom a Szolgáltatási feltételeket",
+      "ios.auth.ageTooYoung": "ZRP-fiók létrehozásához legalább 16 évesnek kell lenned."
     },
     "sv": {
       "ios.a11y.bookmark": "Spara",
@@ -5350,7 +5570,18 @@
       "ios.live.scheduledFor": "Schemalagt till {date}",
       "ios.live.someone": "Någon",
       "ios.live.startNow": "Starta nu",
-      "ios.live.switchCamera": "Byt kamera"
+      "ios.live.switchCamera": "Byt kamera",
+      "ios.a11y.turnOnSpeaker": "Slå på högtalare",
+      "ios.a11y.turnOffSpeaker": "Stäng av högtalare",
+      "ios.a11y.turnOnCamera": "Slå på kamera",
+      "ios.a11y.turnOffCamera": "Stäng av kamera",
+      "ios.a11y.acceptCall": "Besvara samtal",
+      "ios.a11y.declineCall": "Avvisa samtal",
+      "ios.a11y.endCall": "Avsluta samtal",
+      "ios.a11y.dismiss": "Stäng",
+      "ios.auth.dateOfBirth": "Födelsedatum",
+      "ios.auth.ageTermsAgree": "Jag är minst 16 år och godkänner användarvillkoren",
+      "ios.auth.ageTooYoung": "Du måste vara minst 16 år för att skapa ett ZRP-konto."
     },
     "da": {
       "ios.a11y.bookmark": "Gem",
@@ -5604,7 +5835,18 @@
       "ios.live.scheduledFor": "Planlagt til {date}",
       "ios.live.someone": "Nogen",
       "ios.live.startNow": "Start nu",
-      "ios.live.switchCamera": "Skift kamera"
+      "ios.live.switchCamera": "Skift kamera",
+      "ios.a11y.turnOnSpeaker": "Slå højttaler til",
+      "ios.a11y.turnOffSpeaker": "Slå højttaler fra",
+      "ios.a11y.turnOnCamera": "Slå kamera til",
+      "ios.a11y.turnOffCamera": "Slå kamera fra",
+      "ios.a11y.acceptCall": "Besvar opkald",
+      "ios.a11y.declineCall": "Afvis opkald",
+      "ios.a11y.endCall": "Afslut opkald",
+      "ios.a11y.dismiss": "Luk",
+      "ios.auth.dateOfBirth": "Fødselsdato",
+      "ios.auth.ageTermsAgree": "Jeg er mindst 16 år og accepterer servicevilkårene",
+      "ios.auth.ageTooYoung": "Du skal være mindst 16 år for at oprette en ZRP-konto."
     },
     "hr": {
       "ios.a11y.bookmark": "Spremi",
@@ -5858,7 +6100,18 @@
       "ios.live.scheduledFor": "Zakazano za {date}",
       "ios.live.someone": "Netko",
       "ios.live.startNow": "Počni sada",
-      "ios.live.switchCamera": "Promijeni kameru"
+      "ios.live.switchCamera": "Promijeni kameru",
+      "ios.a11y.turnOnSpeaker": "Uključi zvučnik",
+      "ios.a11y.turnOffSpeaker": "Isključi zvučnik",
+      "ios.a11y.turnOnCamera": "Uključi kameru",
+      "ios.a11y.turnOffCamera": "Isključi kameru",
+      "ios.a11y.acceptCall": "Prihvati poziv",
+      "ios.a11y.declineCall": "Odbij poziv",
+      "ios.a11y.endCall": "Završi poziv",
+      "ios.a11y.dismiss": "Odbaci",
+      "ios.auth.dateOfBirth": "Datum rođenja",
+      "ios.auth.ageTermsAgree": "Imam najmanje 16 godina i prihvaćam Uvjete korištenja",
+      "ios.auth.ageTooYoung": "Morate imati najmanje 16 godina za otvaranje ZRP računa."
     },
     "sr": {
       "ios.a11y.bookmark": "Obeleži",
@@ -6112,7 +6365,18 @@
       "ios.live.scheduledFor": "Заказано за {date}",
       "ios.live.someone": "Неко",
       "ios.live.startNow": "Почни сада",
-      "ios.live.switchCamera": "Промени камеру"
+      "ios.live.switchCamera": "Промени камеру",
+      "ios.a11y.turnOnSpeaker": "Uključi zvučnik",
+      "ios.a11y.turnOffSpeaker": "Isključi zvučnik",
+      "ios.a11y.turnOnCamera": "Uključi kameru",
+      "ios.a11y.turnOffCamera": "Isključi kameru",
+      "ios.a11y.acceptCall": "Prihvati poziv",
+      "ios.a11y.declineCall": "Odbij poziv",
+      "ios.a11y.endCall": "Završi poziv",
+      "ios.a11y.dismiss": "Odbaci",
+      "ios.auth.dateOfBirth": "Datum rođenja",
+      "ios.auth.ageTermsAgree": "Imam najmanje 16 godina i prihvatam Uslove korišćenja",
+      "ios.auth.ageTooYoung": "Morate imati najmanje 16 godina da biste napravili ZRP nalog."
     },
     "bg": {
       "ios.a11y.bookmark": "Запази",
@@ -6366,7 +6630,18 @@
       "ios.live.scheduledFor": "Насрочено за {date}",
       "ios.live.someone": "Някой",
       "ios.live.startNow": "Започни сега",
-      "ios.live.switchCamera": "Смени камерата"
+      "ios.live.switchCamera": "Смени камерата",
+      "ios.a11y.turnOnSpeaker": "Включи високоговорителя",
+      "ios.a11y.turnOffSpeaker": "Изключи високоговорителя",
+      "ios.a11y.turnOnCamera": "Включи камерата",
+      "ios.a11y.turnOffCamera": "Изключи камерата",
+      "ios.a11y.acceptCall": "Приеми обаждането",
+      "ios.a11y.declineCall": "Отхвърли обаждането",
+      "ios.a11y.endCall": "Прекрати обаждането",
+      "ios.a11y.dismiss": "Отхвърли",
+      "ios.auth.dateOfBirth": "Дата на раждане",
+      "ios.auth.ageTermsAgree": "На поне 16 години съм и приемам Условията за ползване",
+      "ios.auth.ageTooYoung": "Трябва да сте на поне 16 години, за да създадете акаунт в ZRP."
     },
     "el": {
       "ios.a11y.bookmark": "Αποθήκευση",
@@ -6620,7 +6895,18 @@
       "ios.live.scheduledFor": "Προγραμματισμένο για {date}",
       "ios.live.someone": "Κάποιος",
       "ios.live.startNow": "Έναρξη τώρα",
-      "ios.live.switchCamera": "Εναλλαγή κάμερας"
+      "ios.live.switchCamera": "Εναλλαγή κάμερας",
+      "ios.a11y.turnOnSpeaker": "Ενεργοποίηση ηχείου",
+      "ios.a11y.turnOffSpeaker": "Απενεργοποίηση ηχείου",
+      "ios.a11y.turnOnCamera": "Ενεργοποίηση κάμερας",
+      "ios.a11y.turnOffCamera": "Απενεργοποίηση κάμερας",
+      "ios.a11y.acceptCall": "Αποδοχή κλήσης",
+      "ios.a11y.declineCall": "Απόρριψη κλήσης",
+      "ios.a11y.endCall": "Τερματισμός κλήσης",
+      "ios.a11y.dismiss": "Απόρριψη",
+      "ios.auth.dateOfBirth": "Ημερομηνία γέννησης",
+      "ios.auth.ageTermsAgree": "Είμαι τουλάχιστον 16 ετών και αποδέχομαι τους Όρους Χρήσης",
+      "ios.auth.ageTooYoung": "Πρέπει να είστε τουλάχιστον 16 ετών για να δημιουργήσετε λογαριασμό ZRP."
     },
     "bs": {
       "ios.a11y.bookmark": "Zabilježi",
@@ -6874,7 +7160,18 @@
       "ios.live.scheduledFor": "Zakazano za {date}",
       "ios.live.someone": "Neko",
       "ios.live.startNow": "Počni sada",
-      "ios.live.switchCamera": "Promijeni kameru"
+      "ios.live.switchCamera": "Promijeni kameru",
+      "ios.a11y.turnOnSpeaker": "Uključi zvučnik",
+      "ios.a11y.turnOffSpeaker": "Isključi zvučnik",
+      "ios.a11y.turnOnCamera": "Uključi kameru",
+      "ios.a11y.turnOffCamera": "Isključi kameru",
+      "ios.a11y.acceptCall": "Prihvati poziv",
+      "ios.a11y.declineCall": "Odbij poziv",
+      "ios.a11y.endCall": "Završi poziv",
+      "ios.a11y.dismiss": "Odbaci",
+      "ios.auth.dateOfBirth": "Datum rođenja",
+      "ios.auth.ageTermsAgree": "Imam najmanje 16 godina i prihvatam Uslove korištenja",
+      "ios.auth.ageTooYoung": "Morate imati najmanje 16 godina da biste napravili ZRP račun."
     },
     "mk": {
       "ios.a11y.bookmark": "Обележи",
@@ -7128,7 +7425,18 @@
       "ios.live.scheduledFor": "Закажано за {date}",
       "ios.live.someone": "Некој",
       "ios.live.startNow": "Започни сега",
-      "ios.live.switchCamera": "Смени камера"
+      "ios.live.switchCamera": "Смени камера",
+      "ios.a11y.turnOnSpeaker": "Вклучи звучник",
+      "ios.a11y.turnOffSpeaker": "Исклучи звучник",
+      "ios.a11y.turnOnCamera": "Вклучи камера",
+      "ios.a11y.turnOffCamera": "Исклучи камера",
+      "ios.a11y.acceptCall": "Прифати повик",
+      "ios.a11y.declineCall": "Одбиј повик",
+      "ios.a11y.endCall": "Прекини повик",
+      "ios.a11y.dismiss": "Отфрли",
+      "ios.auth.dateOfBirth": "Датум на раѓање",
+      "ios.auth.ageTermsAgree": "Имам најмалку 16 години и се согласувам со Условите за користење",
+      "ios.auth.ageTooYoung": "Мора да имате најмалку 16 години за да креирате ZRP профил."
     },
     "no": {
       "ios.a11y.bookmark": "Bokmerk",
@@ -7382,7 +7690,18 @@
       "ios.live.scheduledFor": "Planlagt til {date}",
       "ios.live.someone": "Noen",
       "ios.live.startNow": "Start nå",
-      "ios.live.switchCamera": "Bytt kamera"
+      "ios.live.switchCamera": "Bytt kamera",
+      "ios.a11y.turnOnSpeaker": "Slå på høyttaler",
+      "ios.a11y.turnOffSpeaker": "Slå av høyttaler",
+      "ios.a11y.turnOnCamera": "Slå på kamera",
+      "ios.a11y.turnOffCamera": "Slå av kamera",
+      "ios.a11y.acceptCall": "Svar på anrop",
+      "ios.a11y.declineCall": "Avvis anrop",
+      "ios.a11y.endCall": "Avslutt anrop",
+      "ios.a11y.dismiss": "Lukk",
+      "ios.auth.dateOfBirth": "Fødselsdato",
+      "ios.auth.ageTermsAgree": "Jeg er minst 16 år og godtar bruksvilkårene",
+      "ios.auth.ageTooYoung": "Du må være minst 16 år for å opprette en ZRP-konto."
     },
     "uk": {
       "ios.a11y.bookmark": "Закладка",
@@ -7636,7 +7955,18 @@
       "ios.live.scheduledFor": "Заплановано на {date}",
       "ios.live.someone": "Хтось",
       "ios.live.startNow": "Почати зараз",
-      "ios.live.switchCamera": "Змінити камеру"
+      "ios.live.switchCamera": "Змінити камеру",
+      "ios.a11y.turnOnSpeaker": "Увімкнути гучний зв'язок",
+      "ios.a11y.turnOffSpeaker": "Вимкнути гучний зв'язок",
+      "ios.a11y.turnOnCamera": "Увімкнути камеру",
+      "ios.a11y.turnOffCamera": "Вимкнути камеру",
+      "ios.a11y.acceptCall": "Прийняти виклик",
+      "ios.a11y.declineCall": "Відхилити виклик",
+      "ios.a11y.endCall": "Завершити виклик",
+      "ios.a11y.dismiss": "Приховати",
+      "ios.auth.dateOfBirth": "Дата народження",
+      "ios.auth.ageTermsAgree": "Мені не менше 16 років, і я приймаю Умови використання",
+      "ios.auth.ageTooYoung": "Щоб створити обліковий запис ZRP, вам має бути щонайменше 16 років."
     },
     "fi": {
       "ios.a11y.bookmark": "Kirjanmerkki",
@@ -7890,7 +8220,18 @@
       "ios.live.scheduledFor": "Ajastettu: {date}",
       "ios.live.someone": "Joku",
       "ios.live.startNow": "Aloita nyt",
-      "ios.live.switchCamera": "Vaihda kameraa"
+      "ios.live.switchCamera": "Vaihda kameraa",
+      "ios.a11y.turnOnSpeaker": "Kytke kaiutin päälle",
+      "ios.a11y.turnOffSpeaker": "Kytke kaiutin pois",
+      "ios.a11y.turnOnCamera": "Kytke kamera päälle",
+      "ios.a11y.turnOffCamera": "Kytke kamera pois",
+      "ios.a11y.acceptCall": "Vastaa puheluun",
+      "ios.a11y.declineCall": "Hylkää puhelu",
+      "ios.a11y.endCall": "Lopeta puhelu",
+      "ios.a11y.dismiss": "Sulje",
+      "ios.auth.dateOfBirth": "Syntymäaika",
+      "ios.auth.ageTermsAgree": "Olen vähintään 16-vuotias ja hyväksyn käyttöehdot",
+      "ios.auth.ageTooYoung": "Sinun on oltava vähintään 16-vuotias luodaksesi ZRP-tilin."
     },
     "sk": {
       "ios.a11y.bookmark": "Záložka",
@@ -8144,7 +8485,18 @@
       "ios.live.scheduledFor": "Naplánované na {date}",
       "ios.live.someone": "Niekto",
       "ios.live.startNow": "Začať teraz",
-      "ios.live.switchCamera": "Prepnúť kameru"
+      "ios.live.switchCamera": "Prepnúť kameru",
+      "ios.a11y.turnOnSpeaker": "Zapnúť reproduktor",
+      "ios.a11y.turnOffSpeaker": "Vypnúť reproduktor",
+      "ios.a11y.turnOnCamera": "Zapnúť kameru",
+      "ios.a11y.turnOffCamera": "Vypnúť kameru",
+      "ios.a11y.acceptCall": "Prijať hovor",
+      "ios.a11y.declineCall": "Odmietnuť hovor",
+      "ios.a11y.endCall": "Ukončiť hovor",
+      "ios.a11y.dismiss": "Zavrieť",
+      "ios.auth.dateOfBirth": "Dátum narodenia",
+      "ios.auth.ageTermsAgree": "Mám aspoň 16 rokov a súhlasím s Podmienkami služby",
+      "ios.auth.ageTooYoung": "Na vytvorenie účtu ZRP musíte mať aspoň 16 rokov."
     },
     "sl": {
       "ios.a11y.bookmark": "Zaznamek",
@@ -8398,7 +8750,18 @@
       "ios.live.scheduledFor": "Načrtovano za {date}",
       "ios.live.someone": "Nekdo",
       "ios.live.startNow": "Začni zdaj",
-      "ios.live.switchCamera": "Zamenjaj kamero"
+      "ios.live.switchCamera": "Zamenjaj kamero",
+      "ios.a11y.turnOnSpeaker": "Vklopi zvočnik",
+      "ios.a11y.turnOffSpeaker": "Izklopi zvočnik",
+      "ios.a11y.turnOnCamera": "Vklopi kamero",
+      "ios.a11y.turnOffCamera": "Izklopi kamero",
+      "ios.a11y.acceptCall": "Sprejmi klic",
+      "ios.a11y.declineCall": "Zavrni klic",
+      "ios.a11y.endCall": "Končaj klic",
+      "ios.a11y.dismiss": "Zapri",
+      "ios.auth.dateOfBirth": "Datum rojstva",
+      "ios.auth.ageTermsAgree": "Star sem vsaj 16 let in se strinjam s Pogoji uporabe",
+      "ios.auth.ageTooYoung": "Za ustvarjanje računa ZRP morate biti stari vsaj 16 let."
     },
     "lt": {
       "ios.a11y.addPhoto": "Pridėti nuotrauką",
@@ -8652,7 +9015,18 @@
       "ios.live.scheduledFor": "Suplanuota {date}",
       "ios.live.someone": "Kažkas",
       "ios.live.startNow": "Pradėti dabar",
-      "ios.live.switchCamera": "Perjungti kamerą"
+      "ios.live.switchCamera": "Perjungti kamerą",
+      "ios.a11y.turnOnSpeaker": "Įjungti garsiakalbį",
+      "ios.a11y.turnOffSpeaker": "Išjungti garsiakalbį",
+      "ios.a11y.turnOnCamera": "Įjungti kamerą",
+      "ios.a11y.turnOffCamera": "Išjungti kamerą",
+      "ios.a11y.acceptCall": "Priimti skambutį",
+      "ios.a11y.declineCall": "Atmesti skambutį",
+      "ios.a11y.endCall": "Baigti skambutį",
+      "ios.a11y.dismiss": "Uždaryti",
+      "ios.auth.dateOfBirth": "Gimimo data",
+      "ios.auth.ageTermsAgree": "Man yra bent 16 metų ir sutinku su Paslaugų teikimo sąlygomis",
+      "ios.auth.ageTooYoung": "Norėdami sukurti ZRP paskyrą, turite būti bent 16 metų."
     },
     "et": {
       "ios.a11y.bookmark": "Salvesta",
@@ -8906,7 +9280,18 @@
       "ios.live.scheduledFor": "Ajastatud: {date}",
       "ios.live.someone": "Keegi",
       "ios.live.startNow": "Alusta kohe",
-      "ios.live.switchCamera": "Vaheta kaamerat"
+      "ios.live.switchCamera": "Vaheta kaamerat",
+      "ios.a11y.turnOnSpeaker": "Lülita valjuhääldi sisse",
+      "ios.a11y.turnOffSpeaker": "Lülita valjuhääldi välja",
+      "ios.a11y.turnOnCamera": "Lülita kaamera sisse",
+      "ios.a11y.turnOffCamera": "Lülita kaamera välja",
+      "ios.a11y.acceptCall": "Vasta kõnele",
+      "ios.a11y.declineCall": "Lükka kõne tagasi",
+      "ios.a11y.endCall": "Lõpeta kõne",
+      "ios.a11y.dismiss": "Sulge",
+      "ios.auth.dateOfBirth": "Sünniaeg",
+      "ios.auth.ageTermsAgree": "Olen vähemalt 16-aastane ja nõustun teenusetingimustega",
+      "ios.auth.ageTooYoung": "ZRP konto loomiseks pead olema vähemalt 16-aastane."
     },
     "ga": {
       "ios.a11y.bookmark": "Leabharmharc",
@@ -9160,7 +9545,18 @@
       "ios.live.scheduledFor": "Sceidealaithe do {date}",
       "ios.live.someone": "Duine éigin",
       "ios.live.startNow": "Tosaigh anois",
-      "ios.live.switchCamera": "Athraigh an ceamara"
+      "ios.live.switchCamera": "Athraigh an ceamara",
+      "ios.a11y.turnOnSpeaker": "Cuir an callaire ar siúl",
+      "ios.a11y.turnOffSpeaker": "Múch an callaire",
+      "ios.a11y.turnOnCamera": "Cuir an ceamara ar siúl",
+      "ios.a11y.turnOffCamera": "Múch an ceamara",
+      "ios.a11y.acceptCall": "Glac leis an nglao",
+      "ios.a11y.declineCall": "Diúltaigh don ghlao",
+      "ios.a11y.endCall": "Cuir deireadh leis an nglao",
+      "ios.a11y.dismiss": "Dún",
+      "ios.auth.dateOfBirth": "Dáta breithe",
+      "ios.auth.ageTermsAgree": "Tá mé 16 bliana d'aois ar a laghad agus aontaím le Téarmaí Seirbhíse",
+      "ios.auth.ageTooYoung": "Caithfidh tú a bheith 16 bliana d'aois ar a laghad chun cuntas ZRP a chruthú."
     },
     "lv": {
       "ios.a11y.bookmark": "Grāmatzīme",
@@ -9414,7 +9810,18 @@
       "ios.live.scheduledFor": "Ieplānots: {date}",
       "ios.live.someone": "Kāds",
       "ios.live.startNow": "Sākt tagad",
-      "ios.live.switchCamera": "Pārslēgt kameru"
+      "ios.live.switchCamera": "Pārslēgt kameru",
+      "ios.a11y.turnOnSpeaker": "Ieslēgt skaļruni",
+      "ios.a11y.turnOffSpeaker": "Izslēgt skaļruni",
+      "ios.a11y.turnOnCamera": "Ieslēgt kameru",
+      "ios.a11y.turnOffCamera": "Izslēgt kameru",
+      "ios.a11y.acceptCall": "Pieņemt zvanu",
+      "ios.a11y.declineCall": "Noraidīt zvanu",
+      "ios.a11y.endCall": "Pabeigt zvanu",
+      "ios.a11y.dismiss": "Aizvērt",
+      "ios.auth.dateOfBirth": "Dzimšanas datums",
+      "ios.auth.ageTermsAgree": "Man ir vismaz 16 gadi, un es piekrītu Pakalpojuma sniegšanas noteikumiem",
+      "ios.auth.ageTooYoung": "Lai izveidotu ZRP kontu, jums jābūt vismaz 16 gadus vecam."
     },
     "mt": {
       "ios.a11y.bookmark": "Immarka",
@@ -9668,7 +10075,18 @@
       "ios.live.scheduledFor": "Skedata għal {date}",
       "ios.live.someone": "Xi ħadd",
       "ios.live.startNow": "Ibda issa",
-      "ios.live.switchCamera": "Biddel il-kamera"
+      "ios.live.switchCamera": "Biddel il-kamera",
+      "ios.a11y.turnOnSpeaker": "Ixgħel il-kelliem",
+      "ios.a11y.turnOffSpeaker": "Itfi l-kelliem",
+      "ios.a11y.turnOnCamera": "Ixgħel il-kamera",
+      "ios.a11y.turnOffCamera": "Itfi l-kamera",
+      "ios.a11y.acceptCall": "Aċċetta s-sejħa",
+      "ios.a11y.declineCall": "Irrifjuta s-sejħa",
+      "ios.a11y.endCall": "Temm is-sejħa",
+      "ios.a11y.dismiss": "Agħlaq",
+      "ios.auth.dateOfBirth": "Data tat-twelid",
+      "ios.auth.ageTermsAgree": "Għandi mill-inqas 16-il sena u naqbel mat-Termini tas-Servizz",
+      "ios.auth.ageTooYoung": "Trid ikollok mill-inqas 16-il sena biex toħloq kont ZRP."
     },
     "rm": {
       "ios.a11y.bookmark": "Favurit",
@@ -9922,7 +10340,18 @@
       "ios.live.scheduledFor": "Planisà per {date}",
       "ios.live.someone": "Insatgi",
       "ios.live.startNow": "Cumenzar ussa",
-      "ios.live.switchCamera": "Midar la camera"
+      "ios.live.switchCamera": "Midar la camera",
+      "ios.a11y.turnOnSpeaker": "Activar l'altoparlant",
+      "ios.a11y.turnOffSpeaker": "Deactivar l'altoparlant",
+      "ios.a11y.turnOnCamera": "Activar la camera",
+      "ios.a11y.turnOffCamera": "Deactivar la camera",
+      "ios.a11y.acceptCall": "Acceptar la clamada",
+      "ios.a11y.declineCall": "Refusar la clamada",
+      "ios.a11y.endCall": "Finir la clamada",
+      "ios.a11y.dismiss": "Serrar",
+      "ios.auth.dateOfBirth": "Data da naschientscha",
+      "ios.auth.ageTermsAgree": "Jau hai almain 16 onns ed accept las cundiziuns d'utilisaziun",
+      "ios.auth.ageTooYoung": "Ti stos avair almain 16 onns per crear in conto ZRP."
     }
   }
 }

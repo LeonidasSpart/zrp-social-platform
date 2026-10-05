@@ -35,6 +35,29 @@ type SignupAttribution = {
   ambassadorProfileId: string | null;
 };
 
+// ─── Minimum-age / Terms acceptance (ZRP platform policy: 16+) ───────
+//
+// Neither field existed on this route before this change, so neither
+// can be made outright required for every caller without breaking
+// Android and web registration overnight - both still send exactly the
+// request shape they always have. Instead: validate birthdate/
+// termsAccepted with the real 16+ check whenever EITHER is present
+// (so Android/web get the identical enforcement the moment either
+// starts sending them, with zero code change here), and require them
+// outright only for `signupPlatform === "ios"` (the client this task
+// built to send them - see RegisterView.swift). Android/web requests
+// that still send neither continue exactly as before.
+const MINIMUM_AGE = 16;
+
+function ageInYearsAsOf(birthdate: Date, asOf: Date): number {
+  let age = asOf.getUTCFullYear() - birthdate.getUTCFullYear();
+  const hadBirthdayThisYear =
+    asOf.getUTCMonth() > birthdate.getUTCMonth() ||
+    (asOf.getUTCMonth() === birthdate.getUTCMonth() && asOf.getUTCDate() >= birthdate.getUTCDate());
+  if (!hadBirthdayThisYear) age -= 1;
+  return age;
+}
+
 async function classifySignupAttribution(
   ref: unknown,
   utmSource: unknown,
@@ -86,6 +109,8 @@ export async function POST(req: NextRequest) {
       ref,
       utmSource,
       utmCampaign,
+      birthdate: rawBirthdate,
+      termsAccepted,
     } = await req.json();
 
     // ─── Validation ──────────────────────────────────────────────
@@ -157,6 +182,45 @@ export async function POST(req: NextRequest) {
     const signupPlatform =
       platformHeader === "android" || platformHeader === "ios" ? platformHeader : "web";
 
+    // ─── Minimum age / Terms acceptance ──────────────────────────
+    // See the module-level comment above MINIMUM_AGE for why this is
+    // required outright only for iOS today, but validated for real the
+    // moment any platform sends it.
+    const ageGateRequired =
+      signupPlatform === "ios" || rawBirthdate !== undefined || termsAccepted !== undefined;
+    let birthdate: Date | null = null;
+    if (ageGateRequired) {
+      if (typeof rawBirthdate !== "string" || !rawBirthdate.trim()) {
+        return NextResponse.json(
+          { error: "Date of birth is required.", field: "birthdate" },
+          { status: 400 }
+        );
+      }
+      const parsedBirthdate = new Date(rawBirthdate);
+      if (Number.isNaN(parsedBirthdate.getTime())) {
+        return NextResponse.json(
+          { error: "Invalid date of birth.", field: "birthdate" },
+          { status: 400 }
+        );
+      }
+      if (ageInYearsAsOf(parsedBirthdate, new Date()) < MINIMUM_AGE) {
+        return NextResponse.json(
+          {
+            error: `You must be at least ${MINIMUM_AGE} years old to create a ZRP account.`,
+            field: "birthdate",
+          },
+          { status: 400 }
+        );
+      }
+      if (termsAccepted !== true) {
+        return NextResponse.json(
+          { error: "You must accept the Terms of Service to create an account.", field: "termsAccepted" },
+          { status: 400 }
+        );
+      }
+      birthdate = parsedBirthdate;
+    }
+
     // ─── Language (mutable going forward, best-effort at signup) ────
     // The `zrp-lang` cookie is set client-side by LanguageContext before
     // the signup form ever submits, so it's already present on this
@@ -187,6 +251,8 @@ export async function POST(req: NextRequest) {
           signupCampaign: attribution.campaign,
           signupPlatform,
           languageCode: langCookie || null,
+          birthdate,
+          termsAcceptedAt: birthdate ? new Date() : null,
         },
       });
       if (attribution.ambassadorProfileId) {

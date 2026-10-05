@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "누군가";
 "ios.live.startNow" = "지금 시작";
 "ios.live.switchCamera" = "카메라 전환";
+"ios.a11y.turnOnSpeaker" = "스피커 켜기";
+"ios.a11y.turnOffSpeaker" = "스피커 끄기";
+"ios.a11y.turnOnCamera" = "카메라 켜기";
+"ios.a11y.turnOffCamera" = "카메라 끄기";
+"ios.a11y.acceptCall" = "전화 받기";
+"ios.a11y.declineCall" = "전화 거절";
+"ios.a11y.endCall" = "통화 종료";
+"ios.a11y.dismiss" = "닫기";
+"ios.auth.dateOfBirth" = "생년월일";
+"ios.auth.ageTermsAgree" = "저는 16세 이상이며 서비스 약관에 동의합니다";
+"ios.auth.ageTooYoung" = "ZRP 계정을 만들려면 16세 이상이어야 합니다.";

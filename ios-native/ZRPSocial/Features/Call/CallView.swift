@@ -97,7 +97,12 @@ struct CallView: View {
                     .padding(.horizontal, ZrpSpacing.xl)
             }
 
-            callButton(systemImage: "xmark", background: Color(white: 0.22), action: viewModel.dismissError)
+            callButton(
+                systemImage: "xmark",
+                background: Color(white: 0.22),
+                accessibilityLabel: .iosA11yDismiss,
+                action: viewModel.dismissError
+            )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -147,12 +152,14 @@ struct CallView: View {
                     callButton(
                         systemImage: viewModel.isSpeakerOn ? "speaker.wave.2.fill" : "speaker.fill",
                         background: viewModel.isSpeakerOn ? ZrpColor.red : Color(white: 0.22),
+                        accessibilityLabel: viewModel.isSpeakerOn ? .iosA11yTurnOffSpeaker : .iosA11yTurnOnSpeaker,
                         action: viewModel.toggleSpeaker
                     )
                     if viewModel.isVideo, viewModel.isVideoEnabled {
                         callButton(
                             systemImage: "arrow.triangle.2.circlepath.camera.fill",
                             background: Color(white: 0.22),
+                            accessibilityLabel: .iosLiveSwitchCamera,
                             action: viewModel.switchCamera
                         )
                     }
@@ -164,12 +171,14 @@ struct CallView: View {
                     callButton(
                         systemImage: viewModel.isMuted ? "mic.slash.fill" : "mic.fill",
                         background: viewModel.isMuted ? ZrpColor.red : Color(white: 0.22),
+                        accessibilityLabel: viewModel.isMuted ? .iosA11yUnmute : .iosA11yMute,
                         action: viewModel.toggleMute
                     )
                     if viewModel.isVideo {
                         callButton(
                             systemImage: viewModel.isVideoEnabled ? "video.fill" : "video.slash.fill",
                             background: viewModel.isVideoEnabled ? Color(white: 0.22) : ZrpColor.red,
+                            accessibilityLabel: viewModel.isVideoEnabled ? .iosA11yTurnOffCamera : .iosA11yTurnOnCamera,
                             action: viewModel.toggleVideo
                         )
                     }
@@ -178,6 +187,7 @@ struct CallView: View {
                 callButton(
                     systemImage: viewModel.phase == .incoming ? "phone.fill" : "phone.down.fill",
                     background: viewModel.phase == .incoming ? Color(red: 0.13, green: 0.77, blue: 0.37) : ZrpColor.red,
+                    accessibilityLabel: viewModel.phase == .incoming ? .iosA11yAcceptCall : .iosA11yEndCall,
                     large: true,
                     action: {
                         if viewModel.phase == .incoming {
@@ -189,16 +199,37 @@ struct CallView: View {
                 )
 
                 if viewModel.phase == .incoming {
-                    callButton(systemImage: "xmark", background: ZrpColor.red, action: { viewModel.rejectCall() })
+                    callButton(
+                        systemImage: "xmark",
+                        background: ZrpColor.red,
+                        accessibilityLabel: .iosA11yDeclineCall,
+                        action: { viewModel.rejectCall() }
+                    )
                 }
             }
         }
         .padding(.bottom, 48)
     }
 
+    /// `accessibilityLabel` is required, never defaulted, so every call
+    /// site states the real action (Accept/Decline/End/Mute/Unmute/
+    /// Speaker/Camera/Switch camera/Dismiss) instead of a button that
+    /// VoiceOver would otherwise announce only as "Button" - these are
+    /// icon-only controls with no visible text, so the accessibility
+    /// label is the ONLY way a VoiceOver user learns what each one does.
+    /// A toggle button (mute, video, speaker) communicates its on/off
+    /// state the same way `InlineVideoView`'s own mute button already
+    /// does: the label text itself switches ("Mute" vs "Unmute", "Turn
+    /// off camera" vs "Turn on camera") rather than a separate trait/
+    /// value, so VoiceOver always announces the action the next tap
+    /// performs. No button here is ever shown in a disabled state - each
+    /// one is conditionally rendered instead (e.g. the speaker/camera row
+    /// only appears once a call is actually active), so there is no
+    /// disabled-state case to add on top of this.
     private func callButton(
         systemImage: String,
         background: Color,
+        accessibilityLabel: L10nKey,
         large: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
@@ -209,6 +240,8 @@ struct CallView: View {
                 .frame(width: large ? 72 : 56, height: large ? 72 : 56)
                 .background(background, in: Circle())
         }
+        .accessibilityLabel(Text(accessibilityLabel))
+        .accessibilityAddTraits(.isButton)
     }
 
     /// Matches `getUserMedia`'s own browser permission prompt, asked
