@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">Войти, чтобы откликнуться</string>
     <string name="opportunity_moderation_note">Каждое объявление проверяется нашей командой перед публикацией, обычно в течение 24 часов.</string>
     <string name="opportunity_edit_listing">Изменить</string>
+    <string name="opportunity_confirm_delete">Удалить эту возможность? Это действие нельзя отменить.</string>
+    <string name="opportunity_err_delete_failed">Не удалось удалить возможность.</string>
+    <string name="opportunity_delete">Удалить</string>
     <string name="opportunity_save_changes">Сохранить изменения</string>
     <string name="opportunity_saving">Сохранение...</string>
     <string name="opportunity_edit_moderation_note">Изменение названия, типа, описания или оплаты отправляет объявление на повторную проверку, прежде чем оно снова станет активным.</string>

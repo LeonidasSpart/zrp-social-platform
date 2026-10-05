@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isSessionAdmin } from "@/lib/admin";
@@ -238,6 +239,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await prisma.opportunityListing.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
+    // Prisma throws P2025 if the row was already deleted between the
+    // findUnique above and this delete (e.g. two requests racing on the
+    // same listing) - that's a 404, not a server error.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+    }
     console.error("Error deleting opportunity listing:", error);
     return NextResponse.json({ error: "Failed to delete listing" }, { status: 500 });
   }

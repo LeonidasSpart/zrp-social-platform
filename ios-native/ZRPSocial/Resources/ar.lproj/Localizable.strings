@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "لا توجد تعليقات بعد";
 "ios.comment.beFirst" = "كن أول من يرد.";
 "ios.comment.deleteConfirmTitle" = "هل تريد حذف التعليق؟";
+"ios.opportunity.deleteConfirmTitle" = "حذف هذه الفرصة؟";
 "ios.comment.editTitle" = "تعديل التعليق";
 "ios.a11y.likeComment" = "الإعجاب بالتعليق";
 "ios.a11y.unlikeComment" = "إلغاء الإعجاب بالتعليق";

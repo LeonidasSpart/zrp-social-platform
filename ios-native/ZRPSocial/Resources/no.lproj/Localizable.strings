@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Ingen kommentarer ennå";
 "ios.comment.beFirst" = "Bli den første til å svare.";
 "ios.comment.deleteConfirmTitle" = "Slette kommentaren?";
+"ios.opportunity.deleteConfirmTitle" = "Vil du slette denne opportunity?";
 "ios.comment.editTitle" = "Rediger kommentar";
 "ios.a11y.likeComment" = "Lik kommentar";
 "ios.a11y.unlikeComment" = "Fjern likerklikk på kommentaren";

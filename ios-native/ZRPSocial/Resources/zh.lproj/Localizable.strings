@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "暂无评论";
 "ios.comment.beFirst" = "抢先回复。";
 "ios.comment.deleteConfirmTitle" = "删除该评论？";
+"ios.opportunity.deleteConfirmTitle" = "删除此机会？";
 "ios.comment.editTitle" = "编辑评论";
 "ios.a11y.likeComment" = "点赞该评论";
 "ios.a11y.unlikeComment" = "取消点赞该评论";

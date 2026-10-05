@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Niciun comentariu încă";
 "ios.comment.beFirst" = "Fii primul care răspunde.";
 "ios.comment.deleteConfirmTitle" = "Ștergi comentariul?";
+"ios.opportunity.deleteConfirmTitle" = "Ștergi această oportunitate?";
 "ios.comment.editTitle" = "Editează comentariul";
 "ios.a11y.likeComment" = "Apreciază comentariul";
 "ios.a11y.unlikeComment" = "Anulează aprecierea comentariului";

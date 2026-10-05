@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">Identifikohu për të Aplikuar</string>
     <string name="opportunity_moderation_note">Çdo shpallje shqyrtohet nga ekipi ynë përpara publikimit, zakonisht brenda 24 orëve.</string>
     <string name="opportunity_edit_listing">Modifiko</string>
+    <string name="opportunity_confirm_delete">Të fshihet kjo mundësi? Ky veprim nuk mund të zhbëhet.</string>
+    <string name="opportunity_err_delete_failed">Fshirja e mundësisë dështoi.</string>
+    <string name="opportunity_delete">Fshi</string>
     <string name="opportunity_save_changes">Ruaj ndryshimet</string>
     <string name="opportunity_saving">Duke ruajtur...</string>
     <string name="opportunity_edit_moderation_note">Ndryshimi i titullit, llojit, përshkrimit ose kompensimit e dërgon këtë listim përsëri për shqyrtim para se të jetë sërish aktiv.</string>

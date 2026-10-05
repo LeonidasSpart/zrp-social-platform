@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">Inicia Sesión para Postularte</string>
     <string name="opportunity_moderation_note">Cada anuncio es revisado por nuestro equipo antes de publicarse, normalmente en 24 horas.</string>
     <string name="opportunity_edit_listing">Editar</string>
+    <string name="opportunity_confirm_delete">¿Eliminar esta oportunidad? Esta acción no se puede deshacer.</string>
+    <string name="opportunity_err_delete_failed">No se pudo eliminar la oportunidad.</string>
+    <string name="opportunity_delete">Eliminar</string>
     <string name="opportunity_save_changes">Guardar cambios</string>
     <string name="opportunity_saving">Guardando...</string>
     <string name="opportunity_edit_moderation_note">Cambiar el título, tipo, descripción o compensación envía este anuncio de nuevo a revisión antes de volver a estar activo.</string>

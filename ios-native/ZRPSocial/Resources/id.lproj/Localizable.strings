@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Belum ada komentar";
 "ios.comment.beFirst" = "Jadilah yang pertama membalas.";
 "ios.comment.deleteConfirmTitle" = "Hapus komentar?";
+"ios.opportunity.deleteConfirmTitle" = "Hapus peluang ini?";
 "ios.comment.editTitle" = "Edit komentar";
 "ios.a11y.likeComment" = "Suka komentar";
 "ios.a11y.unlikeComment" = "Batal suka komentar";

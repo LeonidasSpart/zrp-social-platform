@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Kirjaudu sisään hakeaksesi</string>
     <string name="opportunity_moderation_note">Tiimimme tarkistaa jokaisen ilmoituksen ennen sen julkaisua, yleensä 24 tunnin sisällä.</string>
     <string name="opportunity_edit_listing">Muokkaa</string>
+    <string name="opportunity_confirm_delete">Poistetaanko tämä mahdollisuus? Tätä ei voi perua.</string>
+    <string name="opportunity_err_delete_failed">Mahdollisuuden poistaminen epäonnistui.</string>
+    <string name="opportunity_delete">Poista</string>
     <string name="opportunity_save_changes">Tallenna muutokset</string>
     <string name="opportunity_saving">Tallennetaan...</string>
     <string name="opportunity_edit_moderation_note">Otsikon, tyypin, kuvauksen tai korvauksen muuttaminen lähettää tämän ilmoituksen takaisin tarkistettavaksi, ennen kuin se julkaistaan uudelleen.</string>

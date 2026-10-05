@@ -1025,6 +1025,9 @@
     <string name="opportunity_login_to_apply">Inicie Sessão para Se Candidatar</string>
     <string name="opportunity_moderation_note">Todos os anúncios são revistos pela nossa equipa antes de ficarem visíveis, normalmente dentro de 24 horas.</string>
     <string name="opportunity_edit_listing">Editar</string>
+    <string name="opportunity_confirm_delete">Eliminar esta oportunidade? Esta ação não pode ser revertida.</string>
+    <string name="opportunity_err_delete_failed">Não foi possível eliminar a oportunidade.</string>
+    <string name="opportunity_delete">Eliminar</string>
     <string name="opportunity_save_changes">Guardar Alterações</string>
     <string name="opportunity_saving">A guardar...</string>
     <string name="opportunity_edit_moderation_note">Alterar o título, tipo, descrição ou remuneração envia este anúncio novamente para revisão antes de voltar a ficar visível.</string>

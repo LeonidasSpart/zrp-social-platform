@@ -1034,6 +1034,9 @@
     <string name="opportunity_login_to_apply">Prisijunkite, kad pretenduotumėte</string>
     <string name="opportunity_moderation_note">Kiekvieną skelbimą prieš jam tampant aktyviam peržiūri mūsų komanda, dažniausiai per 24 valandas.</string>
     <string name="opportunity_edit_listing">Redaguoti</string>
+    <string name="opportunity_confirm_delete">Ištrinti šią galimybę? Šio veiksmo anuliuoti negalėsite.</string>
+    <string name="opportunity_err_delete_failed">Nepavyko ištrinti galimybės.</string>
+    <string name="opportunity_delete">Ištrinti</string>
     <string name="opportunity_save_changes">Išsaugoti pakeitimus</string>
     <string name="opportunity_saving">Išsaugoma...</string>
     <string name="opportunity_edit_moderation_note">Pakeitus pavadinimą, tipą, aprašymą ar atlygį, šis skelbimas grąžinamas peržiūrai, prieš jam vėl tampant aktyviam.</string>

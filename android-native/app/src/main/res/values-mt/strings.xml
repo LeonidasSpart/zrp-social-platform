@@ -947,6 +947,9 @@
     <string name="opportunity_login_to_apply">Idħol biex Tapplika</string>
     <string name="opportunity_moderation_note">Kull avviż jiġi rrevedut mit-tim tagħna qabel ma jidher, normalment fi żmien 24 siegħa.</string>
     <string name="opportunity_edit_listing">Editja</string>
+    <string name="opportunity_confirm_delete">Ħassar din l-opportunità? Din ma tistax titreġġa\' lura.</string>
+    <string name="opportunity_err_delete_failed">Falla t-tħassir tal-opportunità.</string>
+    <string name="opportunity_delete">Ħassar</string>
     <string name="opportunity_save_changes">Issejvja l-Bidliet</string>
     <string name="opportunity_saving">Qed jiġi ssejvjat...</string>
     <string name="opportunity_edit_moderation_note">Il-bidla tat-titlu, it-tip, id-deskrizzjoni, jew il-kumpens tibgħat dan l-avviż lura għal reviżjoni qabel ma jerġa\' jidher.</string>

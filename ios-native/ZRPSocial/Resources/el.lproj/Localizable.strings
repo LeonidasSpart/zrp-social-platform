@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Δεν υπάρχουν σχόλια ακόμα";
 "ios.comment.beFirst" = "Γίνετε ο πρώτος που θα απαντήσει.";
 "ios.comment.deleteConfirmTitle" = "Διαγραφή σχολίου;";
+"ios.opportunity.deleteConfirmTitle" = "Διαγραφή αυτής της ευκαιρίας;";
 "ios.comment.editTitle" = "Επεξεργασία σχολίου";
 "ios.a11y.likeComment" = "Μου αρέσει το σχόλιο";
 "ios.a11y.unlikeComment" = "Αναίρεση μου αρέσει στο σχόλιο";

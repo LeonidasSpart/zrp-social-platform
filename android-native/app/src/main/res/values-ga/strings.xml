@@ -951,6 +951,9 @@
     <string name="opportunity_login_to_apply">Logáil Isteach chun Iarratas a Dhéanamh</string>
     <string name="opportunity_moderation_note">Déanann ár bhfoireann athbhreithniú ar gach liosta sula dtéann sé beo, de ghnáth laistigh de 24 uair an chloig.</string>
     <string name="opportunity_edit_listing">Cuir in Eagar</string>
+    <string name="opportunity_confirm_delete">Scrios an deis seo? Ní féidir é seo a chur ar ceal.</string>
+    <string name="opportunity_err_delete_failed">Theip ar scriosadh na deise.</string>
+    <string name="opportunity_delete">Scrios</string>
     <string name="opportunity_save_changes">Sábháil Athruithe</string>
     <string name="opportunity_saving">Á Shábháil...</string>
     <string name="opportunity_edit_moderation_note">Seolann athrú an teidil, an chineáil, an chur síos, nó an chúitimh an liosta seo ar ais le haghaidh athbhreithnithe sula bhfuil sé beo arís.</string>

@@ -943,6 +943,9 @@
     <string name="opportunity_login_to_apply">Pieslēdzies, lai pieteiktos</string>
     <string name="opportunity_moderation_note">Katru sludinājumu pirms publiskošanas izskata mūsu komanda, parasti 24 stundu laikā.</string>
     <string name="opportunity_edit_listing">Rediģēt</string>
+    <string name="opportunity_confirm_delete">Dzēst šo iespēju? Šo darbību nevar atsaukt.</string>
+    <string name="opportunity_err_delete_failed">Neizdevās dzēst iespēju.</string>
+    <string name="opportunity_delete">Dzēst</string>
     <string name="opportunity_save_changes">Saglabāt izmaiņas</string>
     <string name="opportunity_saving">Saglabā...</string>
     <string name="opportunity_edit_moderation_note">Nosaukuma, veida, apraksta vai atalgojuma mainīšana nosūta šo sludinājumu atpakaļ izskatīšanai, pirms tas atkal kļūst aktīvs.</string>

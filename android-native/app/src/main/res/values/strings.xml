@@ -1051,6 +1051,9 @@
     <string name="opportunity_login_to_apply">Log In to Apply</string>
     <string name="opportunity_moderation_note">Every listing is reviewed by our team before it goes live, usually within 24 hours.</string>
     <string name="opportunity_edit_listing">Edit</string>
+    <string name="opportunity_confirm_delete">Delete this opportunity? This cannot be undone.</string>
+    <string name="opportunity_err_delete_failed">Failed to delete opportunity.</string>
+    <string name="opportunity_delete">Delete</string>
     <string name="opportunity_save_changes">Save Changes</string>
     <string name="opportunity_saving">Saving...</string>
     <string name="opportunity_edit_moderation_note">Changing the title, type, description, or compensation sends this listing back for review before it\'s live again.</string>

@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Коментарів поки немає";
 "ios.comment.beFirst" = "Станьте першим, хто відповість.";
 "ios.comment.deleteConfirmTitle" = "Видалити коментар?";
+"ios.opportunity.deleteConfirmTitle" = "Видалити цю можливість?";
 "ios.comment.editTitle" = "Редагувати коментар";
 "ios.a11y.likeComment" = "Вподобати коментар";
 "ios.a11y.unlikeComment" = "Прибрати вподобання коментаря";

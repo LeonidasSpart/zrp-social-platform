@@ -939,6 +939,9 @@
     <string name="opportunity_login_to_apply">S\'annunziar per As annunziar</string>
     <string name="opportunity_moderation_note">Mintga annunzia vegn controllada da noss team avant ch\'ella va en direct, usualmain entaifer 24 uras.</string>
     <string name="opportunity_edit_listing">Modifitgar</string>
+    <string name="opportunity_confirm_delete">Stizzar questa opportunitad? Quai na po betg vegnir revocà.</string>
+    <string name="opportunity_err_delete_failed">Impussibel da stizzar l\'opportunitad.</string>
+    <string name="opportunity_delete">Stizzar</string>
     <string name="opportunity_save_changes">Salvar las modificaziuns</string>
     <string name="opportunity_saving">Salvond…</string>
     <string name="opportunity_edit_moderation_note">Midar il titel, il tip, la descripziun u la remuneraziun trametta questa annunzia enavos per controlla avant ch\'ella saja puspè en direct.</string>

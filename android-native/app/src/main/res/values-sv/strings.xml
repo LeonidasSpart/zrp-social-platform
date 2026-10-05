@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Logga in för att ansöka</string>
     <string name="opportunity_moderation_note">Varje annons granskas av vårt team innan den går live, vanligtvis inom 24 timmar.</string>
     <string name="opportunity_edit_listing">Redigera</string>
+    <string name="opportunity_confirm_delete">Ta bort den här möjligheten? Detta kan inte ångras.</string>
+    <string name="opportunity_err_delete_failed">Det gick inte att ta bort möjligheten.</string>
+    <string name="opportunity_delete">Ta bort</string>
     <string name="opportunity_save_changes">Spara ändringar</string>
     <string name="opportunity_saving">Sparar...</string>
     <string name="opportunity_edit_moderation_note">Om du ändrar titel, typ, beskrivning eller ersättning skickas den här annonsen tillbaka för granskning innan den blir aktiv igen.</string>

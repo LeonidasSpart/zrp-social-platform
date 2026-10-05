@@ -1470,6 +1470,7 @@
 "ios.comment.noComments" = "Aucun commentaire pour l'instant";
 "ios.comment.beFirst" = "Soyez le premier à répondre.";
 "ios.comment.deleteConfirmTitle" = "Supprimer le commentaire ?";
+"ios.opportunity.deleteConfirmTitle" = "Supprimer cette opportunité ?";
 "ios.comment.editTitle" = "Modifier le commentaire";
 "ios.a11y.likeComment" = "Aimer le commentaire";
 "ios.a11y.unlikeComment" = "Ne plus aimer le commentaire";

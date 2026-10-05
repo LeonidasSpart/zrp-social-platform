@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Nog geen reacties";
 "ios.comment.beFirst" = "Wees de eerste die reageert.";
 "ios.comment.deleteConfirmTitle" = "Reactie verwijderen?";
+"ios.opportunity.deleteConfirmTitle" = "Deze vacature verwijderen?";
 "ios.comment.editTitle" = "Reactie bewerken";
 "ios.a11y.likeComment" = "Reactie leuk vinden";
 "ios.a11y.unlikeComment" = "Reactie niet meer leuk vinden";

@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Log ind for at ansøge</string>
     <string name="opportunity_moderation_note">Hvert opslag gennemgås af vores team, før det bliver offentligt, som regel inden for 24 timer.</string>
     <string name="opportunity_edit_listing">Rediger</string>
+    <string name="opportunity_confirm_delete">Slet denne mulighed? Dette kan ikke fortrydes.</string>
+    <string name="opportunity_err_delete_failed">Kunne ikke slette mulighed.</string>
+    <string name="opportunity_delete">Slet</string>
     <string name="opportunity_save_changes">Gem ændringer</string>
     <string name="opportunity_saving">Gemmer...</string>
     <string name="opportunity_edit_moderation_note">Ændring af titel, type, beskrivelse eller vederlag sender dette opslag tilbage til gennemgang, før det bliver offentligt igen.</string>

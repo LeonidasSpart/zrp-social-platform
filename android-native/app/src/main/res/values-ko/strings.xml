@@ -1025,6 +1025,9 @@
     <string name="opportunity_login_to_apply">지원하려면 로그인하세요</string>
     <string name="opportunity_moderation_note">모든 공고는 게시되기 전에 저희 팀의 검토를 거치며, 보통 24시간 이내에 처리돼요.</string>
     <string name="opportunity_edit_listing">수정</string>
+    <string name="opportunity_confirm_delete">이 기회를 삭제하시겠어요? 삭제하면 되돌릴 수 없습니다.</string>
+    <string name="opportunity_err_delete_failed">기회 삭제에 실패했습니다.</string>
+    <string name="opportunity_delete">삭제</string>
     <string name="opportunity_save_changes">변경사항 저장</string>
     <string name="opportunity_saving">저장 중...</string>
     <string name="opportunity_edit_moderation_note">제목, 유형, 설명 또는 보상을 변경하면 다시 게시되기 전에 재검토를 거쳐요.</string>

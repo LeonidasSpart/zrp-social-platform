@@ -1034,6 +1034,9 @@
     <string name="opportunity_login_to_apply">Přihlas se pro podání přihlášky</string>
     <string name="opportunity_moderation_note">Každou nabídku posoudí náš tým, než se zveřejní, obvykle do 24 hodin.</string>
     <string name="opportunity_edit_listing">Upravit</string>
+    <string name="opportunity_confirm_delete">Smazat tuto příležitost? Tuto akci nelze vrátit zpět.</string>
+    <string name="opportunity_err_delete_failed">Smazání příležitosti se nezdařilo.</string>
+    <string name="opportunity_delete">Smazat</string>
     <string name="opportunity_save_changes">Uložit změny</string>
     <string name="opportunity_saving">Ukládání...</string>
     <string name="opportunity_edit_moderation_note">Změna názvu, typu, popisu nebo odměny odešle tuto nabídku zpět k posouzení, než bude znovu zveřejněna.</string>

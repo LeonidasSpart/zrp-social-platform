@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Vēl nav komentāru";
 "ios.comment.beFirst" = "Esi pirmais, kas atbild.";
 "ios.comment.deleteConfirmTitle" = "Dzēst komentāru?";
+"ios.opportunity.deleteConfirmTitle" = "Dzēst šo iespēju?";
 "ios.comment.editTitle" = "Rediģēt komentāru";
 "ios.a11y.likeComment" = "Atzīmēt komentāru ar \"patīk\"";
 "ios.a11y.unlikeComment" = "Noņemt patīk atzīmi komentāram";

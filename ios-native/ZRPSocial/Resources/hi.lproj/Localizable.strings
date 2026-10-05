@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "अभी तक कोई कमेंट नहीं";
 "ios.comment.beFirst" = "सबसे पहले जवाब देने वाले बनें।";
 "ios.comment.deleteConfirmTitle" = "कमेंट डिलीट करें?";
+"ios.opportunity.deleteConfirmTitle" = "इस अवसर को हटाएं?";
 "ios.comment.editTitle" = "कमेंट संपादित करें";
 "ios.a11y.likeComment" = "कमेंट पसंद करें";
 "ios.a11y.unlikeComment" = "कमेंट से पसंद हटाएं";

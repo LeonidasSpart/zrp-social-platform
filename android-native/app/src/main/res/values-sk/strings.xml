@@ -1034,6 +1034,9 @@
     <string name="opportunity_login_to_apply">Prihláste sa a uchádzajte sa</string>
     <string name="opportunity_moderation_note">Každý inzerát skontroluje náš tím pred jeho zverejnením, zvyčajne do 24 hodín.</string>
     <string name="opportunity_edit_listing">Upraviť</string>
+    <string name="opportunity_confirm_delete">Vymazať túto pracovnú priležitosť? Túto akciu nemožno vrátiť späť.</string>
+    <string name="opportunity_err_delete_failed">Nepodarilo sa vymazať pracovnú priležitosť.</string>
+    <string name="opportunity_delete">Vymazať</string>
     <string name="opportunity_save_changes">Uložiť zmeny</string>
     <string name="opportunity_saving">Ukladá sa...</string>
     <string name="opportunity_edit_moderation_note">Zmena názvu, typu, popisu alebo odmeny odošle tento inzerát späť na kontrolu pred jeho opätovným zverejnením.</string>

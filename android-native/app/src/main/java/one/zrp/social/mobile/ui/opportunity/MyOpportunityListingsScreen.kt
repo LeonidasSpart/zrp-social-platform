@@ -1,10 +1,13 @@
 package one.zrp.social.mobile.ui.opportunity
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,20 +19,27 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -44,7 +54,7 @@ import one.zrp.social.mobile.ui.theme.ZrpRed
 /**
  * My Listings - ported from MyOpportunityListingsPage.tsx: a poster's
  * own listings with real status badges, rejection-reason display, and
- * View Applicants/Edit row actions.
+ * View Applicants/Edit/Delete row actions.
  */
 @Composable
 fun MyOpportunityListingsScreen(
@@ -57,6 +67,14 @@ fun MyOpportunityListingsScreen(
         factory = remember { MyOpportunityListingsViewModelFactory(OpportunityRepository()) },
     )
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    var pendingDeleteId by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(state.error) {
+        if (state.error == MyOpportunityListingsViewModel.deleteFailedError) {
+            Toast.makeText(context, context.getString(R.string.opportunity_err_delete_failed), Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -96,22 +114,51 @@ fun MyOpportunityListingsScreen(
                 items(state.listings, key = { it.id }) { listing ->
                     MyOpportunityListingRow(
                         listing = listing,
+                        isDeleting = state.deletingId == listing.id,
                         onClick = { onOpenListing(listing.id) },
                         onEdit = { onEditListing(listing.id) },
                         onOpenApplicants = { onOpenApplicants(listing.id) },
+                        onDelete = { pendingDeleteId = listing.id },
                     )
                 }
             }
         }
     }
+
+    val deleteId = pendingDeleteId
+    if (deleteId != null) {
+        AlertDialog(
+            onDismissRequest = { pendingDeleteId = null },
+            title = { Text(stringResource(R.string.opportunity_delete)) },
+            text = { Text(stringResource(R.string.opportunity_confirm_delete)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteListing(deleteId)
+                        pendingDeleteId = null
+                    },
+                ) {
+                    Text(stringResource(R.string.opportunity_delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDeleteId = null }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+        )
+    }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MyOpportunityListingRow(
     listing: OpportunitySummary,
+    isDeleting: Boolean,
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onOpenApplicants: () -> Unit,
+    onDelete: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -164,7 +211,17 @@ private fun MyOpportunityListingRow(
             )
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+        // FlowRow (not a plain Row): this now holds 3 actions (View
+        // Applicants, Edit, Delete) instead of the original 2 - on a
+        // narrow phone the combined width of real translated labels can
+        // exceed the card's width, so this wraps to a second line
+        // instead of clipping/overlapping, matching the equivalent
+        // mobile-safety fix on the web (opportunity/my-listings/page.tsx).
+        FlowRow(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(top = 8.dp),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(onClick = onOpenApplicants, role = Role.Button)) {
                 Icon(Icons.Filled.People, contentDescription = null, tint = ZrpRed, modifier = Modifier.size(16.dp))
                 Text(
@@ -177,9 +234,7 @@ private fun MyOpportunityListingRow(
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .clickable(onClick = onEdit, role = Role.Button),
+                modifier = Modifier.clickable(onClick = onEdit, role = Role.Button),
             ) {
                 Icon(Icons.Filled.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 Text(
@@ -188,6 +243,22 @@ private fun MyOpportunityListingRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = 4.dp),
                 )
+            }
+            if (isDeleting) {
+                CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable(onClick = onDelete, role = Role.Button),
+                ) {
+                    Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                    Text(
+                        text = stringResource(R.string.opportunity_delete),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                }
             }
         }
     }

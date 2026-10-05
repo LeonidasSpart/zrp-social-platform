@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">Zum Bewerben anmelden</string>
     <string name="opportunity_moderation_note">Jede Anzeige wird von unserem Team geprüft, bevor sie veröffentlicht wird - in der Regel innerhalb von 24 Stunden.</string>
     <string name="opportunity_edit_listing">Bearbeiten</string>
+    <string name="opportunity_confirm_delete">Diese Chance löschen? Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="opportunity_err_delete_failed">Chance konnte nicht gelöscht werden.</string>
+    <string name="opportunity_delete">Löschen</string>
     <string name="opportunity_save_changes">Änderungen speichern</string>
     <string name="opportunity_saving">Wird gespeichert...</string>
     <string name="opportunity_edit_moderation_note">Wenn du Titel, Typ, Beschreibung oder Vergütung änderst, wird diese Anzeige erneut zur Prüfung eingereicht, bevor sie wieder live ist.</string>

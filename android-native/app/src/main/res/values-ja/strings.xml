@@ -1025,6 +1025,9 @@
     <string name="opportunity_login_to_apply">応募するにはログイン</string>
     <string name="opportunity_moderation_note">すべての求人情報は公開前に運営チームが審査します。通常24時間以内に完了します。</string>
     <string name="opportunity_edit_listing">編集</string>
+    <string name="opportunity_confirm_delete">このオポチュニティを削除しますか?この操作は元に戻せません。</string>
+    <string name="opportunity_err_delete_failed">オポチュニティの削除に失敗しました。</string>
+    <string name="opportunity_delete">削除</string>
     <string name="opportunity_save_changes">変更を保存</string>
     <string name="opportunity_saving">保存中...</string>
     <string name="opportunity_edit_moderation_note">タイトル、種類、説明、報酬を変更すると、再度公開されるまで審査に戻されます。</string>

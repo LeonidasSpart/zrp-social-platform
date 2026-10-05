@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Jelentkezz be a jelentkezéshez</string>
     <string name="opportunity_moderation_note">Minden hirdetést csapatunk vizsgál át, mielőtt élesbe kerül, jellemzően 24 órán belül.</string>
     <string name="opportunity_edit_listing">Szerkesztés</string>
+    <string name="opportunity_confirm_delete">Törlöd ezt a lehetőséget? Ez nem vonható vissza.</string>
+    <string name="opportunity_err_delete_failed">Nem sikerült törölni a lehetőséget.</string>
+    <string name="opportunity_delete">Törlés</string>
     <string name="opportunity_save_changes">Módosítások mentése</string>
     <string name="opportunity_saving">Mentés...</string>
     <string name="opportunity_edit_moderation_note">A cím, típus, leírás vagy javadalmazás módosítása visszaküldi ezt a hirdetést elbírálásra, mielőtt ismét élesbe kerülne.</string>

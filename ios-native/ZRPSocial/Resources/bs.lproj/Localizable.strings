@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Još nema komentara";
 "ios.comment.beFirst" = "Budite prvi koji će odgovoriti.";
 "ios.comment.deleteConfirmTitle" = "Izbrisati komentar?";
+"ios.opportunity.deleteConfirmTitle" = "Izbrisati ovu priliku?";
 "ios.comment.editTitle" = "Uredi komentar";
 "ios.a11y.likeComment" = "Sviđa mi se komentar";
 "ios.a11y.unlikeComment" = "Ukloni sviđanje komentara";

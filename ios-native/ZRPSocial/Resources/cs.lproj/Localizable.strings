@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Zatím žádné komentáře";
 "ios.comment.beFirst" = "Buďte první, kdo odpoví.";
 "ios.comment.deleteConfirmTitle" = "Smazat komentář?";
+"ios.opportunity.deleteConfirmTitle" = "Smazat tuto příležitost?";
 "ios.comment.editTitle" = "Upravit komentář";
 "ios.a11y.likeComment" = "Označit komentář jako To se mi líbí";
 "ios.a11y.unlikeComment" = "Zrušit To se mi líbí u komentáře";

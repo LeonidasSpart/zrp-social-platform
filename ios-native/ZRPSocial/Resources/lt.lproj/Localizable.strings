@@ -1490,6 +1490,7 @@
 "ios.comment.beFirst" = "Būkite pirmasis, kuris atsakys.";
 "ios.comment.cancelReply" = "Atšaukti atsakymą";
 "ios.comment.deleteConfirmTitle" = "Ištrinti komentarą?";
+"ios.opportunity.deleteConfirmTitle" = "Ištrinti šią galimybę?";
 "ios.comment.editTitle" = "Redaguoti komentarą";
 "ios.comment.noComments" = "Komentarų dar nėra";
 "ios.comment.replyingTo" = "Atsakoma {name}";

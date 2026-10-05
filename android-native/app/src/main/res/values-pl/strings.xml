@@ -1034,6 +1034,9 @@
     <string name="opportunity_login_to_apply">Zaloguj się, aby aplikować</string>
     <string name="opportunity_moderation_note">Każda oferta jest sprawdzana przez nasz zespół przed publikacją, zwykle w ciągu 24 godzin.</string>
     <string name="opportunity_edit_listing">Edytuj</string>
+    <string name="opportunity_confirm_delete">Usunąć tę ofertę? Tej czynności nie można cofnąć.</string>
+    <string name="opportunity_err_delete_failed">Nie udało się usunąć oferty.</string>
+    <string name="opportunity_delete">Usuń</string>
     <string name="opportunity_save_changes">Zapisz zmiany</string>
     <string name="opportunity_saving">Zapisywanie...</string>
     <string name="opportunity_edit_moderation_note">Zmiana tytułu, typu, opisu lub wynagrodzenia wysyła tę ofertę ponownie do weryfikacji, zanim znów zostanie opublikowana.</string>

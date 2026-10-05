@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">Masuk untuk Melamar</string>
     <string name="opportunity_moderation_note">Setiap lowongan ditinjau oleh tim kami sebelum ditayangkan, biasanya dalam 24 jam.</string>
     <string name="opportunity_edit_listing">Edit</string>
+    <string name="opportunity_confirm_delete">Hapus peluang ini? Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="opportunity_err_delete_failed">Gagal menghapus peluang.</string>
+    <string name="opportunity_delete">Hapus</string>
     <string name="opportunity_save_changes">Simpan Perubahan</string>
     <string name="opportunity_saving">Menyimpan...</string>
     <string name="opportunity_edit_moderation_note">Mengubah judul, jenis, deskripsi, atau kompensasi akan mengirim listingan ini kembali untuk ditinjau sebelum aktif lagi.</string>
