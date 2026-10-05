@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Iemand";
 "ios.live.startNow" = "Nu starten";
 "ios.live.switchCamera" = "Camera wisselen";
+"ios.a11y.turnOnSpeaker" = "Luidspreker inschakelen";
+"ios.a11y.turnOffSpeaker" = "Luidspreker uitschakelen";
+"ios.a11y.turnOnCamera" = "Camera inschakelen";
+"ios.a11y.turnOffCamera" = "Camera uitschakelen";
+"ios.a11y.acceptCall" = "Oproep beantwoorden";
+"ios.a11y.declineCall" = "Oproep weigeren";
+"ios.a11y.endCall" = "Oproep beëindigen";
+"ios.a11y.dismiss" = "Sluiten";
+"ios.auth.dateOfBirth" = "Geboortedatum";
+"ios.auth.ageTermsAgree" = "Ik ben minstens 16 jaar oud en ga akkoord met de Servicevoorwaarden";
+"ios.auth.ageTooYoung" = "Je moet minstens 16 jaar oud zijn om een ZRP-account aan te maken.";

@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Kažkas";
 "ios.live.startNow" = "Pradėti dabar";
 "ios.live.switchCamera" = "Perjungti kamerą";
+"ios.a11y.turnOnSpeaker" = "Įjungti garsiakalbį";
+"ios.a11y.turnOffSpeaker" = "Išjungti garsiakalbį";
+"ios.a11y.turnOnCamera" = "Įjungti kamerą";
+"ios.a11y.turnOffCamera" = "Išjungti kamerą";
+"ios.a11y.acceptCall" = "Priimti skambutį";
+"ios.a11y.declineCall" = "Atmesti skambutį";
+"ios.a11y.endCall" = "Baigti skambutį";
+"ios.a11y.dismiss" = "Uždaryti";
+"ios.auth.dateOfBirth" = "Gimimo data";
+"ios.auth.ageTermsAgree" = "Man yra bent 16 metų ir sutinku su Paslaugų teikimo sąlygomis";
+"ios.auth.ageTooYoung" = "Norėdami sukurti ZRP paskyrą, turite būti bent 16 metų.";

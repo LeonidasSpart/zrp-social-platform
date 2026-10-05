@@ -299,8 +299,11 @@ struct PlayChallengeView: View {
 
     @EnvironmentObject private var session: SessionController
     @StateObject private var viewModel: PlayChallengeViewModel
+    @State private var isReporting = false
+    private let challengeId: String
 
     init(challengeId: String, duelId: String? = nil) {
+        self.challengeId = challengeId
         _viewModel = StateObject(
             wrappedValue: PlayChallengeViewModel(challengeId: challengeId, duelId: duelId)
         )
@@ -324,6 +327,25 @@ struct PlayChallengeView: View {
         .background(ZrpColor.background.ignoresSafeArea())
         .navigationTitle(Text(.navPlay))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // `POST /api/reports` has accepted `challengeId` since PLAY
+            // shipped; this app never built a Report entry point for it.
+            // A system-generated challenge (no creator) or one you made
+            // yourself has no one to report.
+            if case .playing(let challenge) = viewModel.phase,
+               let creatorId = challenge.creator?.id,
+               creatorId != session.currentUser?.id {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { isReporting = true } label: {
+                        Image(systemName: "flag")
+                    }
+                    .accessibilityLabel(Text(.reportModalTitle))
+                }
+            }
+        }
+        .sheet(isPresented: $isReporting) {
+            ReportSheet(target: .challenge(challengeId))
+        }
         .task {
             viewModel.ownUserId = session.currentUser?.id
             await viewModel.load()

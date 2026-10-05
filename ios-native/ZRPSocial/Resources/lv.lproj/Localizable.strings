@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Kāds";
 "ios.live.startNow" = "Sākt tagad";
 "ios.live.switchCamera" = "Pārslēgt kameru";
+"ios.a11y.turnOnSpeaker" = "Ieslēgt skaļruni";
+"ios.a11y.turnOffSpeaker" = "Izslēgt skaļruni";
+"ios.a11y.turnOnCamera" = "Ieslēgt kameru";
+"ios.a11y.turnOffCamera" = "Izslēgt kameru";
+"ios.a11y.acceptCall" = "Pieņemt zvanu";
+"ios.a11y.declineCall" = "Noraidīt zvanu";
+"ios.a11y.endCall" = "Pabeigt zvanu";
+"ios.a11y.dismiss" = "Aizvērt";
+"ios.auth.dateOfBirth" = "Dzimšanas datums";
+"ios.auth.ageTermsAgree" = "Man ir vismaz 16 gadi, un es piekrītu Pakalpojuma sniegšanas noteikumiem";
+"ios.auth.ageTooYoung" = "Lai izveidotu ZRP kontu, jums jābūt vismaz 16 gadus vecam.";

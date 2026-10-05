@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Duine éigin";
 "ios.live.startNow" = "Tosaigh anois";
 "ios.live.switchCamera" = "Athraigh an ceamara";
+"ios.a11y.turnOnSpeaker" = "Cuir an callaire ar siúl";
+"ios.a11y.turnOffSpeaker" = "Múch an callaire";
+"ios.a11y.turnOnCamera" = "Cuir an ceamara ar siúl";
+"ios.a11y.turnOffCamera" = "Múch an ceamara";
+"ios.a11y.acceptCall" = "Glac leis an nglao";
+"ios.a11y.declineCall" = "Diúltaigh don ghlao";
+"ios.a11y.endCall" = "Cuir deireadh leis an nglao";
+"ios.a11y.dismiss" = "Dún";
+"ios.auth.dateOfBirth" = "Dáta breithe";
+"ios.auth.ageTermsAgree" = "Tá mé 16 bliana d'aois ar a laghad agus aontaím le Téarmaí Seirbhíse";
+"ios.auth.ageTooYoung" = "Caithfidh tú a bheith 16 bliana d'aois ar a laghad chun cuntas ZRP a chruthú.";

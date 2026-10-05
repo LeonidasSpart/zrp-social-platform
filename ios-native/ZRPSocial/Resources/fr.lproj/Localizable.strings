@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Quelqu'un";
 "ios.live.startNow" = "Démarrer maintenant";
 "ios.live.switchCamera" = "Changer de caméra";
+"ios.a11y.turnOnSpeaker" = "Activer le haut-parleur";
+"ios.a11y.turnOffSpeaker" = "Désactiver le haut-parleur";
+"ios.a11y.turnOnCamera" = "Activer la caméra";
+"ios.a11y.turnOffCamera" = "Désactiver la caméra";
+"ios.a11y.acceptCall" = "Répondre à l'appel";
+"ios.a11y.declineCall" = "Refuser l'appel";
+"ios.a11y.endCall" = "Terminer l'appel";
+"ios.a11y.dismiss" = "Ignorer";
+"ios.auth.dateOfBirth" = "Date de naissance";
+"ios.auth.ageTermsAgree" = "J'ai au moins 16 ans et j'accepte les Conditions d'utilisation";
+"ios.auth.ageTooYoung" = "Vous devez avoir au moins 16 ans pour créer un compte ZRP.";

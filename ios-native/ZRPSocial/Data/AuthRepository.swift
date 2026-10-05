@@ -21,11 +21,23 @@ protocol AuthRepositoryProtocol: Sendable {
 /// The route validates all of this again - a 6-character minimum, a 3-20
 /// character username, a well-formed email - and answers 400 with a
 /// `field` naming which one was rejected, so the form can point at it.
+///
+/// `birthdate`/`termsAccepted` enforce the ZRP platform's minimum-age
+/// policy (16+). The route requires both outright only for a request
+/// carrying `X-Zrp-Platform: ios` (sent unconditionally on every request
+/// by `ApiClient`, see its own header note) - exactly the client this
+/// struct belongs to - so these are never optional here the way they
+/// still are for Android/web, which have not built this screen yet.
+/// `birthdate` is `yyyy-MM-dd` (date-only, no time/zone component): a
+/// birth date has no meaningful time of day, and the route itself only
+/// ever reads the calendar date.
 struct RegistrationRequest: Encodable, Equatable {
     let name: String?
     let username: String
     let email: String
     let password: String
+    let birthdate: String
+    let termsAccepted: Bool
 }
 
 /// `GET /api/auth/check-username?username=`.

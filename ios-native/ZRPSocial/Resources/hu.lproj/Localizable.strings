@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Valaki";
 "ios.live.startNow" = "Indítás most";
 "ios.live.switchCamera" = "Kameraváltás";
+"ios.a11y.turnOnSpeaker" = "Hangszóró bekapcsolása";
+"ios.a11y.turnOffSpeaker" = "Hangszóró kikapcsolása";
+"ios.a11y.turnOnCamera" = "Kamera bekapcsolása";
+"ios.a11y.turnOffCamera" = "Kamera kikapcsolása";
+"ios.a11y.acceptCall" = "Hívás elfogadása";
+"ios.a11y.declineCall" = "Hívás elutasítása";
+"ios.a11y.endCall" = "Hívás befejezése";
+"ios.a11y.dismiss" = "Bezárás";
+"ios.auth.dateOfBirth" = "Születési dátum";
+"ios.auth.ageTermsAgree" = "Legalább 16 éves vagyok, és elfogadom a Szolgáltatási feltételeket";
+"ios.auth.ageTooYoung" = "ZRP-fiók létrehozásához legalább 16 évesnek kell lenned.";

@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Κάποιος";
 "ios.live.startNow" = "Έναρξη τώρα";
 "ios.live.switchCamera" = "Εναλλαγή κάμερας";
+"ios.a11y.turnOnSpeaker" = "Ενεργοποίηση ηχείου";
+"ios.a11y.turnOffSpeaker" = "Απενεργοποίηση ηχείου";
+"ios.a11y.turnOnCamera" = "Ενεργοποίηση κάμερας";
+"ios.a11y.turnOffCamera" = "Απενεργοποίηση κάμερας";
+"ios.a11y.acceptCall" = "Αποδοχή κλήσης";
+"ios.a11y.declineCall" = "Απόρριψη κλήσης";
+"ios.a11y.endCall" = "Τερματισμός κλήσης";
+"ios.a11y.dismiss" = "Απόρριψη";
+"ios.auth.dateOfBirth" = "Ημερομηνία γέννησης";
+"ios.auth.ageTermsAgree" = "Είμαι τουλάχιστον 16 ετών και αποδέχομαι τους Όρους Χρήσης";
+"ios.auth.ageTooYoung" = "Πρέπει να είστε τουλάχιστον 16 ετών για να δημιουργήσετε λογαριασμό ZRP.";

@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Joku";
 "ios.live.startNow" = "Aloita nyt";
 "ios.live.switchCamera" = "Vaihda kameraa";
+"ios.a11y.turnOnSpeaker" = "Kytke kaiutin päälle";
+"ios.a11y.turnOffSpeaker" = "Kytke kaiutin pois";
+"ios.a11y.turnOnCamera" = "Kytke kamera päälle";
+"ios.a11y.turnOffCamera" = "Kytke kamera pois";
+"ios.a11y.acceptCall" = "Vastaa puheluun";
+"ios.a11y.declineCall" = "Hylkää puhelu";
+"ios.a11y.endCall" = "Lopeta puhelu";
+"ios.a11y.dismiss" = "Sulje";
+"ios.auth.dateOfBirth" = "Syntymäaika";
+"ios.auth.ageTermsAgree" = "Olen vähintään 16-vuotias ja hyväksyn käyttöehdot";
+"ios.auth.ageTooYoung" = "Sinun on oltava vähintään 16-vuotias luodaksesi ZRP-tilin.";

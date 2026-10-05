@@ -85,6 +85,15 @@ const PUBLIC_INFRA_PATHS = [
   "/offline.html",
   "/sitemap.xml",
   "/robots.txt",
+  // Apple's Universal Links handshake (src/app/.well-known/apple-app-site-
+  // association/route.ts). Apple's CDN fetches this unauthenticated and
+  // follows no redirect, so without this entry it fell through to the
+  // "no token -> redirect to /login" branch further down - a redirect
+  // response Apple's fetcher simply treats as a failed fetch, silently
+  // keeping Universal Links dead regardless of how correct the file's
+  // own content is. Not caught by PUBLIC_ASSET_EXTENSIONS above because
+  // this path has no file extension (deliberate, per Apple's spec).
+  "/.well-known/apple-app-site-association",
 ];
 
 function pathMatches(path: string, list: string[]) {

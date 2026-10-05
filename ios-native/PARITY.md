@@ -1505,6 +1505,67 @@ it on every push (see **Build toolchain**). What it cannot do here is
 - The manifest's declared required-reason APIs match what the code calls,
   in both directions (`validate-sources.py`).
 
+### The five stages between source and a live App Store build
+
+Spelled out explicitly, since "CI is green" on its own does not say which
+of these five it actually proves - re-verified against the current
+`.github/workflows/ios-native-build.yml` on every pass through this
+section, not assumed from an earlier version of this file:
+
+| Stage | Proven in CI today? | Evidence |
+| --- | --- | --- |
+| A. Build | **Yes** | "Build for device (iOS 26 SDK, unsigned)", "Build (Debug, Simulator)", "Build (Release, Simulator)" steps - three separate `xcodebuild build` invocations, device + both simulator configurations. |
+| B. Archive | **Yes** | "Archive (unsigned)" step (`xcodebuild archive`) plus "Inspect the archived product", which opens the produced `.xcarchive` and asserts a real `.app` bundle, `Info.plist` keys, `PrivacyInfo.xcprivacy` and an app icon are actually inside it - not just that the command exited zero. |
+| C. Signing | **No** | Every build/archive step passes `CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS=""` - signing is explicitly disabled, not attempted and failing. `Tools/validate-signing-readiness.py` (added this pass) checks every repository-side signing prerequisite it can without Xcode, but does not and cannot perform a real signed archive - that needs a real Team ID and a signed-in Xcode session on a macOS machine, neither of which exists here. **BLOCKED BY APPLE INFRASTRUCTURE.** |
+| D. Export | **No** | `xcodebuild -exportArchive` (which turns a signed `.xcarchive` into an uploadable `.ipa`) is never invoked anywhere in CI - it has no unsigned mode to fall back to, since export's entire job is applying a provisioning profile. `Signing/ExportOptions.plist` is a ready, valid export options file (see `validate-signing-readiness.py`'s own checks on it), but it has never actually been passed to `-exportArchive` against a real archive. **BLOCKED BY APPLE INFRASTRUCTURE.** |
+| E. App Store Connect upload | **No** | Nothing in this repository or its CI calls `xcrun altool`/`xcrun notarytool`/App Store Connect's API, and no API key or App Store Connect access exists in this environment. **BLOCKED BY APPLE INFRASTRUCTURE.** |
+
+A and B are re-run and re-verified on every push to `main`/every PR; C, D
+and E remain unverified by anything in this repository until a real
+Apple Developer Team ID and App Store Connect access exist - at which
+point `Tools/validate-signing-readiness.py` is the first thing to run,
+not `xcodebuild` directly (see that script's own `--help`/docstring).
+
+### TestFlight / real-device verification checklist (NOT EXECUTED)
+
+No real iPhone, TestFlight build, or Apple Developer account exists in
+this environment, so **nothing below has been run.** This is the
+checklist to execute once a signed build and a physical device exist -
+not a report of testing already performed. Every row's status is
+`NOT EXECUTED - REAL DEVICE REQUIRED` and must stay that way until
+someone actually runs it on real hardware; do not change a row to
+"PASS" from source-code inspection alone, no matter how confident the
+reasoning. Categories match the native features this app actually
+implements per the **Matrix** section above - nothing here is invented
+scope.
+
+| # | Category | Check | Status |
+| --- | --- | --- | --- |
+| 1 | Auth | Register, verify email, log in, log out, session persists across app restart | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 2 | Auth | Native Google Sign-In end to end (`POST /api/mobile/auth/google`) | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 3 | Auth | Native Sign In with Apple end to end - **cannot pass until the Apple Developer portal capability is enabled (out of scope for this mission)** | BLOCKED BY APPLE INFRASTRUCTURE |
+| 4 | Auth | Biometric/Keychain-backed re-auth, forced logout on ban/session-expiry | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 5 | Social | Follow/unfollow, block, mute, private-account follow-request flow | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 6 | Social | Profile view/edit, avatar/banner upload via UploadThing | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 7 | Content | Create a post with image/video/GIF, like/comment/repost/bookmark | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 8 | Content | Create and view a Story (24h expiry), reply to a Story as a DM | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 9 | Content | Universal Link opens a shared `/post`, `/profile`, `/hashtag` link directly in-app instead of Safari - **cannot pass until Task 5/6's AASA has a real Team ID and Apple's CDN has actually fetched it (see "Build/Archive/Sign/Export/Upload" table above)** | BLOCKED BY APPLE INFRASTRUCTURE |
+| 10 | Messaging | Send/receive a 1:1 DM in real time (Socket.IO), typing indicator, read receipt | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 11 | Messaging | Group conversation: create, send, add/remove member, leave | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 12 | Messaging | Presence (online/offline) updates live for a 1:1 contact | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 13 | Calls | Place and answer a voice call, iOS↔iOS, foreground | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 14 | Calls | Place and answer a video call, iOS↔iOS, foreground | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 15 | Calls | Incoming call while app is backgrounded raises the CallKit system UI | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 16 | Calls | Incoming call while app is terminated raises the CallKit system UI (PushKit wake) | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 17 | Calls | iOS↔Android call in both directions (signaling/WebRTC parity) | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 18 | Calls | Mute, speaker, camera toggle/switch mid-call; call ends cleanly from either side | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 19 | Push | Ordinary alert push arrives foreground/background/terminated; tapping it opens the right screen | NOT EXECUTED — REAL DEVICE REQUIRED |
+| 20 | Push | VoIP push via PushKit actually wakes the app and rings - **requires a real APNs key/cert; `src/lib/apns.ts` has never sent a real request to Apple's servers (see B3 below)** | BLOCKED BY APPLE INFRASTRUCTURE |
+
+See **Task 9** (call testing matrix) below for the fuller iOS↔iOS /
+iOS↔Android × foreground/background/terminated call-specific grid this
+summarizes rows 13-18 of.
+
 ### S1. Signing and upload - BLOCKED, needs an Apple Developer account
 
 This repository contains no distribution certificate, no provisioning
@@ -1925,6 +1986,69 @@ is CI-verified today.
 - Silent/data-only push (a payload with no `alert`, used to wake the app
   without showing a banner) is not implemented - nothing in this
   backend produces one today, so there was nothing to build against.
+
+### Task 9 (surgical mission): call path re-audit + device test matrix
+
+Re-read `CallViewModel.swift`, `VoipPushCoordinator.swift`, and
+`socket-authz.js`'s `createCallRegistry` end to end against the full
+path (iOS → `server.js`/Socket.IO signaling → `src/lib/apns.ts` VoIP
+push → CallKit → WebRTC/LiveKit audio+video) for incoming/outgoing/
+reconnect/background/terminated/duplicate-prevention/token-handling/
+socket-reconnection/CallKit-lifecycle correctness. **No new defect
+found** - every item this task was asked to check was already correct
+and already documented:
+
+- Duplicate-call / stale-signal prevention: `currentCallId` (threaded
+  through accept/reject/end) plus `socket-authz.js`'s GENERATION RACE
+  compare-and-swap on both the in-memory and Redis-backed
+  `createCallRegistry` branches - a network-delayed action from an old
+  call cannot land on a new one between the same two people.
+- Terminated-app incoming calls: `VoipPushCoordinator` reports to
+  CallKit first (Apple's hard real-time requirement, satisfied before
+  `completion()` returns), then connects the signaling socket so the
+  real `incoming-call` event (carrying the actual SDP, never put in the
+  push payload itself) can arrive via `pendingFor()`'s redelivery.
+- Socket reconnection: `CallViewModel.connectSignaling()`'s
+  subscription is a persistent event-bus registration independent of
+  any one physical connection, and `pendingFor()` server-side
+  redelivers a still-ringing call's `incoming-call` on reconnect rather
+  than assuming the client never missed it.
+- Token lifecycle: `VoipPushCoordinator`'s register/unregister mirrors
+  `PushCoordinator`'s own idempotent-upsert, pre-sign-in buffering, and
+  unregister-before-session-clear ordering.
+- CallKit lifecycle: `activeCallUUID` is the single source of truth for
+  "does CallKit know about a call right now," cleared by
+  `providerDidReset`/`CXEndCallAction`/a failed answer, so a stale UUID
+  can never answer or end a call that no longer exists.
+
+The one already-known, already-documented gap (CallKit audio-session
+activation not deferred to `didActivate`, see **Remaining limitations**
+above) stands - re-confirmed, not newly found, and out of scope to fix
+under this task's "no redesign of CallKit/WebRTC" constraint.
+
+#### Device test matrix (NOT EXECUTED — REAL DEVICE REQUIRED)
+
+No physical iPhone or Android device pair exists in this environment.
+Every cell below needs to be run once hardware is available; none of it
+has been.
+
+| Scenario | iOS caller → iOS callee | iOS caller → Android callee | Android caller → iOS callee |
+| --- | --- | --- | --- |
+| Both apps foreground | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+| Callee app backgrounded | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+| Callee app terminated (PushKit/VoIP wake) | NOT EXECUTED — REAL DEVICE REQUIRED | N/A — Android has no PushKit equivalent in this path | NOT EXECUTED — REAL DEVICE REQUIRED |
+| Callee declines | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+| Caller cancels before answer | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+| No answer (timeout) | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+| Mid-call network drop (ICE failed) | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+| Caller's socket reconnects mid-ring | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+| Video call: mute/speaker/camera-switch mid-call | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+| Two overlapping incoming calls (second must not create a phantom CallKit UI) | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED | NOT EXECUTED — REAL DEVICE REQUIRED |
+
+Every row additionally requires real APNs/VoIP push infrastructure for
+its "terminated" column, which is itself **BLOCKED BY APPLE
+INFRASTRUCTURE** (no Apple Developer account, no real `.p8` key - see
+B3 above) independent of device availability.
 
 ---
 

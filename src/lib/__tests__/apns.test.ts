@@ -140,6 +140,74 @@ describe("sendApnsAlert / sendApnsVoip - configuration", () => {
     expect(connect).not.toHaveBeenCalled();
   });
 
+  it("logs a visible error for a partial config (some but not all 4 vars set), unlike none set", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    // getApnsConfig() returns null before any DB access when 1-3 of 4 vars
+    // are set (same as 0 of 4), so this test never needs the fcmToken
+    // lookup to succeed - but mock it anyway for safety against a future
+    // change to that early-return.
+    const findManySpy = vi.spyOn(prisma.fcmToken, "findMany").mockResolvedValue([]);
+    try {
+      clearEnv();
+      const { sendApnsAlert: sendWithNoneSet } = await import("../apns");
+      await sendWithNoneSet("user-1", "Title", "Body");
+      expect(errorSpy).not.toHaveBeenCalled();
+
+      vi.resetModules();
+      setEnv({ APNS_PRIVATE_KEY: undefined });
+      const { sendApnsAlert: sendWithPartial } = await import("../apns");
+      await sendWithPartial("user-1", "Title", "Body");
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("partially configured (3/4"));
+    } finally {
+      errorSpy.mockRestore();
+      findManySpy.mockRestore();
+    }
+  });
+
+  it("warns when NODE_ENV=production but APNS_ENVIRONMENT is not 'production'", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    // The production-environment-mismatch warning fires inside
+    // getApnsConfig(), before sendApnsAlert ever reaches the DB - mocked
+    // here only so this test doesn't depend on a reachable Postgres to
+    // observe it.
+    const findManySpy = vi.spyOn(prisma.fcmToken, "findMany").mockResolvedValue([]);
+    const originalNodeEnv = process.env.NODE_ENV;
+    try {
+      // @ts-expect-error - NODE_ENV is readonly in the type declarations but writable at runtime.
+      process.env.NODE_ENV = "production";
+      setEnv({ APNS_ENVIRONMENT: "development" });
+      const { sendApnsAlert } = await import("../apns");
+      await sendApnsAlert("user-without-tokens", "T", "B");
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("NODE_ENV=production but APNS_ENVIRONMENT is not set to 'production'")
+      );
+    } finally {
+      // @ts-expect-error - see above.
+      process.env.NODE_ENV = originalNodeEnv;
+      errorSpy.mockRestore();
+      findManySpy.mockRestore();
+    }
+  });
+
+  it("does not warn when NODE_ENV=production and APNS_ENVIRONMENT=production", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const findManySpy = vi.spyOn(prisma.fcmToken, "findMany").mockResolvedValue([]);
+    const originalNodeEnv = process.env.NODE_ENV;
+    try {
+      // @ts-expect-error - see above.
+      process.env.NODE_ENV = "production";
+      setEnv({ APNS_ENVIRONMENT: "production" });
+      const { sendApnsAlert } = await import("../apns");
+      await sendApnsAlert("user-without-tokens", "T", "B");
+      expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining("APNS_ENVIRONMENT is not set to 'production'"));
+    } finally {
+      // @ts-expect-error - see above.
+      process.env.NODE_ENV = originalNodeEnv;
+      errorSpy.mockRestore();
+      findManySpy.mockRestore();
+    }
+  });
+
   it("fails safe when APNS_PRIVATE_KEY is not a valid PEM key", async () => {
     setEnv({ APNS_PRIVATE_KEY: "not-a-real-pem-key" });
     const { sendApnsAlert } = await import("../apns");

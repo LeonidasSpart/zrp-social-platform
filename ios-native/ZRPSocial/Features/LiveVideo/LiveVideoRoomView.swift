@@ -23,6 +23,7 @@ struct LiveVideoRoomView: View {
     @State private var showGifts = false
     @State private var showPeople = false
     @State private var showChat = true
+    @State private var isReporting = false
 
     init(roomId: String) {
         self.roomId = roomId
@@ -64,6 +65,9 @@ struct LiveVideoRoomView: View {
             }
             .sheet(isPresented: $showPeople) {
                 LiveVideoPeopleSheet(viewModel: viewModel, engagement: viewModel.engagement)
+            }
+            .sheet(isPresented: $isReporting) {
+                ReportSheet(target: .liveVideoRoom(roomId))
             }
     }
 
@@ -167,6 +171,17 @@ struct LiveVideoRoomView: View {
                         Image(systemName: "ellipsis.circle")
                     }
                     .accessibilityLabel(Text(.chatContactMore))
+                }
+                // `POST /api/reports` has accepted `liveVideoRoomId`
+                // since Live Video shipped (it is one of the Report
+                // model's own polymorphic targets); this app never built
+                // a Report entry point for the room itself. The host
+                // reporting their own room is meaningless.
+                if viewModel.myRole != "HOST" {
+                    Button { isReporting = true } label: {
+                        Image(systemName: "flag")
+                    }
+                    .accessibilityLabel(Text(.reportModalTitle))
                 }
                 if viewModel.myRole == "HOST" {
                     Button(role: .destructive) {

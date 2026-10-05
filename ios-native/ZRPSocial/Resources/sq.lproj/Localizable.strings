@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Dikush";
 "ios.live.startNow" = "Fillo tani";
 "ios.live.switchCamera" = "Ndërro kamerën";
+"ios.a11y.turnOnSpeaker" = "Aktivizo altoparlantin";
+"ios.a11y.turnOffSpeaker" = "Çaktivizo altoparlantin";
+"ios.a11y.turnOnCamera" = "Aktivizo kamerën";
+"ios.a11y.turnOffCamera" = "Çaktivizo kamerën";
+"ios.a11y.acceptCall" = "Prano telefonatën";
+"ios.a11y.declineCall" = "Refuzo telefonatën";
+"ios.a11y.endCall" = "Mbyll telefonatën";
+"ios.a11y.dismiss" = "Hiq";
+"ios.auth.dateOfBirth" = "Data e lindjes";
+"ios.auth.ageTermsAgree" = "Jam të paktën 16 vjeç dhe pranoj Kushtet e Shërbimit";
+"ios.auth.ageTooYoung" = "Duhet të jesh të paktën 16 vjeç për të krijuar një llogari ZRP.";
