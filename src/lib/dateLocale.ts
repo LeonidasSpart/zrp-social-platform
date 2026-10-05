@@ -62,6 +62,27 @@ const DATE_LOCALE_MAP: Record<Language, string> = {
   lv: "lv-LV",
   mt: "mt-MT",
   rm: "rm-CH",
+  bn: "bn-BD",
+  ur: "ur-PK",
+  vi: "vi-VN",
+  mr: "mr-IN",
+  te: "te-IN",
+  // ICU defaults bare "fa-IR" to the Persian/Jalali calendar (years like
+  // ۱۴۰۵), not Gregorian - every other ZRP locale renders Gregorian
+  // dates, so this would be the one locale silently showing a different
+  // era. The "-u-ca-gregory" extension forces Gregorian while keeping
+  // real Persian month/weekday names and digit shapes.
+  fa: "fa-IR-u-ca-gregory",
+  sw: "sw-KE",
+  // Same issue as fa-IR above: bare "th-TH" defaults to the Thai Buddhist
+  // calendar (year 2569 instead of 2026) in ICU.
+  th: "th-TH-u-ca-gregory",
+  // ZRP's code is the ISO 639-1 "tl" (Tagalog), matching SUPPORTED_LANGUAGES'
+  // "Filipino" label, but the standard BCP-47 tag Intl implementations
+  // recognize for that locale is "fil", not "tl" - same bare-code-vs-real-tag
+  // gap "no" already has above.
+  tl: "fil-PH",
+  am: "am-ET",
 };
 
 /** BCP-47 tag for `toLocaleDateString`/`toLocaleTimeString`/`toLocaleString`. */

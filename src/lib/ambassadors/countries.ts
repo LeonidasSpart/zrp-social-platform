@@ -37,6 +37,16 @@ import et from "i18n-iso-countries/langs/et.json";
 import ga from "i18n-iso-countries/langs/ga.json";
 import lv from "i18n-iso-countries/langs/lv.json";
 import mt from "i18n-iso-countries/langs/mt.json";
+// te (Telugu) and tl (Tagalog/Filipino) have no lang file in this
+// package - same gap "rm" already has below, same English fallback.
+import bn from "i18n-iso-countries/langs/bn.json";
+import ur from "i18n-iso-countries/langs/ur.json";
+import vi from "i18n-iso-countries/langs/vi.json";
+import mr from "i18n-iso-countries/langs/mr.json";
+import fa from "i18n-iso-countries/langs/fa.json";
+import sw from "i18n-iso-countries/langs/sw.json";
+import th from "i18n-iso-countries/langs/th.json";
+import am from "i18n-iso-countries/langs/am.json";
 import { SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
 
 /*
@@ -120,6 +130,14 @@ function ensureLocalesRegistered() {
   iso.registerLocale(ga);
   iso.registerLocale(lv);
   iso.registerLocale(mt);
+  iso.registerLocale(bn);
+  iso.registerLocale(ur);
+  iso.registerLocale(vi);
+  iso.registerLocale(mr);
+  iso.registerLocale(fa);
+  iso.registerLocale(sw);
+  iso.registerLocale(th);
+  iso.registerLocale(am);
   registered = true;
 }
 ensureLocalesRegistered();
