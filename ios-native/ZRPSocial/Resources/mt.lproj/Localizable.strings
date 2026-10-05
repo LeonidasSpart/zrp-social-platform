@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Għad m'hemm l-ebda kumment";
 "ios.comment.beFirst" = "Kun l-ewwel wieħed li twieġeb.";
 "ios.comment.deleteConfirmTitle" = "Ħassar il-kumment?";
+"ios.opportunity.deleteConfirmTitle" = "Ħassar din l-opportunità?";
 "ios.comment.editTitle" = "Editja l-kumment";
 "ios.a11y.likeComment" = "Agħti Like lill-kumment";
 "ios.a11y.unlikeComment" = "Neħħi l-Like mill-kumment";

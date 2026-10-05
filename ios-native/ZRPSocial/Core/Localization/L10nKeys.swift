@@ -2942,6 +2942,8 @@ enum L10nKey: String, CaseIterable {
     case iosCommentBeFirst = "ios.comment.beFirst"
     /// en: "Delete comment?"
     case iosCommentDeleteConfirmTitle = "ios.comment.deleteConfirmTitle"
+    /// en: "Delete this opportunity?"
+    case iosOpportunityDeleteConfirmTitle = "ios.opportunity.deleteConfirmTitle"
     /// en: "Edit comment"
     case iosCommentEditTitle = "ios.comment.editTitle"
     /// en: "Like comment"

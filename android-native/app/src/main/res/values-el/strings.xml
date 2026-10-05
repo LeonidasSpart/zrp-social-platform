@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Συνδέσου για Αίτηση</string>
     <string name="opportunity_moderation_note">Κάθε καταχώρηση εξετάζεται από την ομάδα μας πριν δημοσιευτεί, συνήθως εντός 24 ωρών.</string>
     <string name="opportunity_edit_listing">Επεξεργασία</string>
+    <string name="opportunity_confirm_delete">Διαγραφή αυτής της ευκαιρίας; Αυτό δεν μπορεί να αναιρεθεί.</string>
+    <string name="opportunity_err_delete_failed">Η διαγραφή της ευκαιρίας απέτυχε.</string>
+    <string name="opportunity_delete">Διαγραφή</string>
     <string name="opportunity_save_changes">Αποθήκευση Αλλαγών</string>
     <string name="opportunity_saving">Αποθήκευση...</string>
     <string name="opportunity_edit_moderation_note">Η αλλαγή του τίτλου, του τύπου, της περιγραφής ή της αμοιβής στέλνει αυτή την καταχώρηση ξανά για έγκριση πριν δημοσιευτεί εκ νέου.</string>

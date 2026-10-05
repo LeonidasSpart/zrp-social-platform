@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Níl aon tuairim ann fós";
 "ios.comment.beFirst" = "Bí ar an gcéad duine freagra a thabhairt.";
 "ios.comment.deleteConfirmTitle" = "Scrios an tuairim?";
+"ios.opportunity.deleteConfirmTitle" = "Scrios an deis seo?";
 "ios.comment.editTitle" = "Cuir tuairim in eagar";
 "ios.a11y.likeComment" = "Is maith liom an tuairim";
 "ios.a11y.unlikeComment" = "Bain 'is maith liom' den tuairim";

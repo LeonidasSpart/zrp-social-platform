@@ -37,6 +37,8 @@ struct MyOpportunitiesView: View {
     @State private var isPaging = false
     @State private var pendingClose: MyOpportunityListing?
     @State private var pendingWithdraw: MyOpportunityApplication?
+    @State private var pendingDelete: MyOpportunityListing?
+    @State private var deletingId: String?
 
     private let repository = OpportunityRepository()
 
@@ -113,6 +115,21 @@ struct MyOpportunitiesView: View {
                 Text(.opportunityAppStatusWithdrawn)
             }
             Button(role: .cancel) { pendingWithdraw = nil } label: { Text(.actionCancel) }
+        }
+        .confirmationDialog(
+            Text(.iosOpportunityDeleteConfirmTitle),
+            isPresented: Binding(
+                get: { pendingDelete != nil },
+                set: { if !$0 { pendingDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(role: .destructive) {
+                if let listing = pendingDelete { delete(listing) }
+            } label: {
+                Text(.actionDelete)
+            }
+            Button(role: .cancel) { pendingDelete = nil } label: { Text(.actionCancel) }
         }
     }
 
@@ -224,6 +241,20 @@ struct MyOpportunitiesView: View {
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(ZrpColor.onSurfaceMuted)
+                }
+
+                // Unconditional, unlike Close: the route places no status
+                // restriction on who may delete their own listing.
+                if deletingId == listing.id {
+                    ProgressView()
+                        .tint(ZrpColor.red)
+                } else {
+                    Button(role: .destructive) { pendingDelete = listing } label: {
+                        Text(.actionDelete)
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(ZrpColor.red)
                 }
             }
         }
@@ -472,6 +503,22 @@ struct MyOpportunitiesView: View {
                 status: .withdrawn
             )
             await loadApplications()
+        }
+    }
+
+    private func delete(_ listing: MyOpportunityListing) {
+        pendingDelete = nil
+        deletingId = listing.id
+        Task {
+            do {
+                try await repository.delete(id: listing.id)
+                listings.removeAll { $0.id == listing.id }
+            } catch {
+                // Left in place on failure (network error, already deleted
+                // by another session, etc.) rather than guessed-removed;
+                // a retry or a refresh will reconcile with the server.
+            }
+            deletingId = nil
         }
     }
 }

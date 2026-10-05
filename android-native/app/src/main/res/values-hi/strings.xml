@@ -1025,6 +1025,9 @@
     <string name="opportunity_login_to_apply">आवेदन करने के लिए लॉग इन करें</string>
     <string name="opportunity_moderation_note">लाइव होने से पहले हर लिस्टिंग की समीक्षा हमारी टीम द्वारा की जाती है, आमतौर पर 24 घंटों के भीतर।</string>
     <string name="opportunity_edit_listing">संपादित करें</string>
+    <string name="opportunity_confirm_delete">इस अवसर को हटाएं? इसे पूर्ववत नहीं किया जा सकता।</string>
+    <string name="opportunity_err_delete_failed">अवसर हटाया नहीं जा सका।</string>
+    <string name="opportunity_delete">हटाएं</string>
     <string name="opportunity_save_changes">बदलाव सेव करें</string>
     <string name="opportunity_saving">सेव किया जा रहा है...</string>
     <string name="opportunity_edit_moderation_note">शीर्षक, प्रकार, विवरण या पारिश्रमिक बदलने पर यह लिस्टिंग फिर से लाइव होने से पहले समीक्षा के लिए वापस भेज दी जाती है।</string>

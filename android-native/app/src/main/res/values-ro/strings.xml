@@ -1030,6 +1030,9 @@
     <string name="opportunity_login_to_apply">Conectează-te pentru a aplica</string>
     <string name="opportunity_moderation_note">Fiecare anunț este analizat de echipa noastră înainte de a deveni public, de obicei în 24 de ore.</string>
     <string name="opportunity_edit_listing">Editează</string>
+    <string name="opportunity_confirm_delete">Ștergi această oportunitate? Această acțiune nu poate fi anulată.</string>
+    <string name="opportunity_err_delete_failed">Ștergerea oportunității a eșuat.</string>
+    <string name="opportunity_delete">Șterge</string>
     <string name="opportunity_save_changes">Salvează modificările</string>
     <string name="opportunity_saving">Se salvează...</string>
     <string name="opportunity_edit_moderation_note">Schimbarea titlului, tipului, descrierii sau compensației trimite acest anunț înapoi spre analiză înainte de a deveni activ din nou.</string>

@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Zatiaľ žiadne komentáre";
 "ios.comment.beFirst" = "Buďte prvý, kto odpovie.";
 "ios.comment.deleteConfirmTitle" = "Vymazať komentár?";
+"ios.opportunity.deleteConfirmTitle" = "Vymazať túto pracovnú priležitosť?";
 "ios.comment.editTitle" = "Upraviť komentár";
 "ios.a11y.likeComment" = "Lajkovať komentár";
 "ios.a11y.unlikeComment" = "Zrušiť lajk komentára";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users, Pencil } from "lucide-react";
+import { ArrowLeft, Users, Pencil, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { STATUS_LABEL_KEYS, STATUS_STYLES, TYPE_META, type OpportunitySummary } from "@/lib/opportunity";
 
@@ -14,6 +14,7 @@ export default function MyOpportunityListingsPage() {
   const { t } = useLanguage();
   const [listings, setListings] = useState<MyListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/opportunity/my-listings")
@@ -22,6 +23,27 @@ export default function MyOpportunityListingsPage() {
       .catch((err) => console.error("Error loading my opportunity listings:", err))
       .finally(() => setLoading(false));
   }, []);
+
+  // Mirrors marketplace/my-listings' own handleDelete exactly (same
+  // confirm()/DELETE/optimistic-removal shape) - see
+  // src/app/marketplace/my-listings/page.tsx. The backend route
+  // (DELETE /api/opportunity/{id}) already enforced owner/admin
+  // authorization and cascade-deleted applications/saved rows; this was
+  // the only missing piece - no button anywhere called it.
+  const handleDelete = async (id: string) => {
+    if (!confirm(t("opportunity.confirmDelete"))) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/opportunity/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setListings((prev) => prev.filter((l) => l.id !== id));
+      } else {
+        alert(t("opportunity.errDeleteFailed"));
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -61,7 +83,13 @@ export default function MyOpportunityListingsPage() {
                 {listing.rejectionReason && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{listing.rejectionReason}</p>
                 )}
-                <div className="flex items-center gap-4 mt-2">
+                {/* flex-wrap: this row now holds 3 actions (View Applicants,
+                    Edit, Delete) instead of the original 2 - on a narrow
+                    phone (~320px) the combined width can exceed the
+                    viewport, so this wraps to a second line instead of
+                    overflowing/clipping, matching the mobile-safety intent
+                    of marketplace/my-listings' own responsive action row. */}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
                   <Link
                     href={`/opportunity/listing/${listing.id}/applicants`}
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-zrp-red hover:underline"
@@ -76,6 +104,15 @@ export default function MyOpportunityListingsPage() {
                     <Pencil className="w-3.5 h-3.5" />
                     {t("opportunity.editListing")}
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(listing.id)}
+                    disabled={deletingId === listing.id}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:underline disabled:opacity-50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    {t("opportunity.delete")}
+                  </button>
                 </div>
               </div>
             );

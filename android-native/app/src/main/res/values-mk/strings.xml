@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Најави се за да се пријавиш</string>
     <string name="opportunity_moderation_note">Секој оглас го разгледува нашиот тим пред да биде објавен, обично во рок од 24 часа.</string>
     <string name="opportunity_edit_listing">Уреди</string>
+    <string name="opportunity_confirm_delete">Да ја избришеме оваа можност? Ова не може да се врати.</string>
+    <string name="opportunity_err_delete_failed">Бришењето на можноста не успеа.</string>
+    <string name="opportunity_delete">Избриши</string>
     <string name="opportunity_save_changes">Зачувај промени</string>
     <string name="opportunity_saving">Се зачувува...</string>
     <string name="opportunity_edit_moderation_note">Промената на насловот, типот, описот или надоместокот го враќа овој оглас на преглед пред повторно да биде објавен.</string>

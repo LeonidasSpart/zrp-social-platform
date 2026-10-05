@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Henüz yorum yok";
 "ios.comment.beFirst" = "Yanıtlayan ilk kişi ol.";
 "ios.comment.deleteConfirmTitle" = "Yorum silinsin mi?";
+"ios.opportunity.deleteConfirmTitle" = "Bu fırsat silinsin mi?";
 "ios.comment.editTitle" = "Yorumu düzenle";
 "ios.a11y.likeComment" = "Yorumu beğen";
 "ios.a11y.unlikeComment" = "Yorumu beğenmekten vazgeç";

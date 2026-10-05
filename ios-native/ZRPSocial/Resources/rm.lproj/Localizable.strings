@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Anc nagins coments";
 "ios.comment.beFirst" = "Sajas il/la emprim/a da respunder.";
 "ios.comment.deleteConfirmTitle" = "Stizzar il coment?";
+"ios.opportunity.deleteConfirmTitle" = "Stizzar questa opportunitad?";
 "ios.comment.editTitle" = "Modifitgar il coment";
 "ios.a11y.likeComment" = "Gugent il coment";
 "ios.a11y.unlikeComment" = "Betg pli gugent il coment";

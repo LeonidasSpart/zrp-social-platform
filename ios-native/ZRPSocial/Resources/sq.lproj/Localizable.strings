@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Ende pa komente";
 "ios.comment.beFirst" = "Bëhu i pari që përgjigjet.";
 "ios.comment.deleteConfirmTitle" = "Të fshihet komenti?";
+"ios.opportunity.deleteConfirmTitle" = "Të fshihet kjo mundësi?";
 "ios.comment.editTitle" = "Redakto komentin";
 "ios.a11y.likeComment" = "Pëlqe komentin";
 "ios.a11y.unlikeComment" = "Hiq pëlqimin nga komenti";

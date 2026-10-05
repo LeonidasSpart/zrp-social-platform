@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "아직 댓글이 없습니다";
 "ios.comment.beFirst" = "가장 먼저 댓글을 남겨보세요.";
 "ios.comment.deleteConfirmTitle" = "댓글을 삭제하시겠습니까?";
+"ios.opportunity.deleteConfirmTitle" = "이 기회를 삭제하시겠어요?";
 "ios.comment.editTitle" = "댓글 수정";
 "ios.a11y.likeComment" = "댓글 좋아요";
 "ios.a11y.unlikeComment" = "댓글 좋아요 취소";

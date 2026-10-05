@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">سجّل الدخول للتقديم</string>
     <string name="opportunity_moderation_note">تتم مراجعة كل إعلان من قبل فريقنا قبل نشره، عادة خلال 24 ساعة.</string>
     <string name="opportunity_edit_listing">تعديل</string>
+    <string name="opportunity_confirm_delete">حذف هذه الفرصة؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="opportunity_err_delete_failed">فشل حذف الفرصة.</string>
+    <string name="opportunity_delete">حذف</string>
     <string name="opportunity_save_changes">حفظ التغييرات</string>
     <string name="opportunity_saving">جارٍ الحفظ...</string>
     <string name="opportunity_edit_moderation_note">تغيير العنوان أو النوع أو الوصف أو التعويض يعيد هذا الإعلان للمراجعة قبل أن يصبح نشطًا مرة أخرى.</string>

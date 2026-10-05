@@ -1034,6 +1034,9 @@
     <string name="opportunity_login_to_apply">Увійдіть, щоб подати заявку</string>
     <string name="opportunity_moderation_note">Кожне оголошення перевіряє наша команда, перш ніж воно з\'явиться, зазвичай протягом 24 годин.</string>
     <string name="opportunity_edit_listing">Редагувати</string>
+    <string name="opportunity_confirm_delete">Видалити цю можливість? Це неможливо скасувати.</string>
+    <string name="opportunity_err_delete_failed">Не вдалося видалити можливість.</string>
+    <string name="opportunity_delete">Видалити</string>
     <string name="opportunity_save_changes">Зберегти зміни</string>
     <string name="opportunity_saving">Збереження...</string>
     <string name="opportunity_edit_moderation_note">Зміна заголовка, типу, опису чи винагороди відправить це оголошення на повторний розгляд, перш ніж воно знову з\'явиться.</string>

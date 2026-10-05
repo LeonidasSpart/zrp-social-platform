@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Log in om te solliciteren</string>
     <string name="opportunity_moderation_note">Elke vacature wordt door ons team beoordeeld voordat deze live gaat, meestal binnen 24 uur.</string>
     <string name="opportunity_edit_listing">Bewerken</string>
+    <string name="opportunity_confirm_delete">Deze vacature verwijderen? Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="opportunity_err_delete_failed">Verwijderen van vacature mislukt.</string>
+    <string name="opportunity_delete">Verwijderen</string>
     <string name="opportunity_save_changes">Wijzigingen opslaan</string>
     <string name="opportunity_saving">Opslaan...</string>
     <string name="opportunity_edit_moderation_note">Het wijzigen van de titel, het type, de beschrijving of de vergoeding stuurt deze vacature terug voor beoordeling voordat deze weer live is.</string>

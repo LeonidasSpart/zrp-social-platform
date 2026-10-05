@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">Se connecter pour postuler</string>
     <string name="opportunity_moderation_note">Chaque annonce est examinée par notre équipe avant sa publication, généralement sous 24 heures.</string>
     <string name="opportunity_edit_listing">Modifier</string>
+    <string name="opportunity_confirm_delete">Supprimer cette opportunité ? Cette action est irréversible.</string>
+    <string name="opportunity_err_delete_failed">Échec de la suppression de l\'opportunité.</string>
+    <string name="opportunity_delete">Supprimer</string>
     <string name="opportunity_save_changes">Enregistrer les modifications</string>
     <string name="opportunity_saving">Enregistrement...</string>
     <string name="opportunity_edit_moderation_note">Modifier le titre, le type, la description ou la rémunération renvoie cette annonce en examen avant qu\'elle ne soit de nouveau en ligne.</string>

@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Inga kommentarer än";
 "ios.comment.beFirst" = "Bli den första att svara.";
 "ios.comment.deleteConfirmTitle" = "Ta bort kommentaren?";
+"ios.opportunity.deleteConfirmTitle" = "Ta bort den här möjligheten?";
 "ios.comment.editTitle" = "Redigera kommentar";
 "ios.a11y.likeComment" = "Gilla kommentaren";
 "ios.a11y.unlikeComment" = "Ångra gilla på kommentaren";

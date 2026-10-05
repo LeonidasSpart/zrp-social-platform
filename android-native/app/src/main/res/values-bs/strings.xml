@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Prijavite se da biste se prijavili</string>
     <string name="opportunity_moderation_note">Naš tim pregleda svaki oglas prije objavljivanja, obično u roku od 24 sata.</string>
     <string name="opportunity_edit_listing">Uredi</string>
+    <string name="opportunity_confirm_delete">Izbrisati ovu priliku? Ovo se ne može poništiti.</string>
+    <string name="opportunity_err_delete_failed">Brisanje prilike nije uspjelo.</string>
+    <string name="opportunity_delete">Izbriši</string>
     <string name="opportunity_save_changes">Sačuvaj izmjene</string>
     <string name="opportunity_saving">Čuvanje...</string>
     <string name="opportunity_edit_moderation_note">Promjena naslova, vrste, opisa ili naknade vraća ovaj oglas na pregled prije nego što ponovo postane aktivan.</string>

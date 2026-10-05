@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "No comments yet";
 "ios.comment.beFirst" = "Be the first to reply.";
 "ios.comment.deleteConfirmTitle" = "Delete comment?";
+"ios.opportunity.deleteConfirmTitle" = "Delete this opportunity?";
 "ios.comment.editTitle" = "Edit comment";
 "ios.a11y.likeComment" = "Like comment";
 "ios.a11y.unlikeComment" = "Unlike comment";

@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Сè уште нема коментари";
 "ios.comment.beFirst" = "Биди првиот што ќе одговори.";
 "ios.comment.deleteConfirmTitle" = "Да го избришеме коментарот?";
+"ios.opportunity.deleteConfirmTitle" = "Да ја избришеме оваа можност?";
 "ios.comment.editTitle" = "Уреди коментар";
 "ios.a11y.likeComment" = "Ми се допаѓа коментарот";
 "ios.a11y.unlikeComment" = "Отстрани допаѓање од коментарот";

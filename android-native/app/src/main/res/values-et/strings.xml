@@ -939,6 +939,9 @@
     <string name="opportunity_login_to_apply">Kandideerimiseks logi sisse</string>
     <string name="opportunity_moderation_note">Iga kuulutuse vaatab meie meeskond läbi enne selle avaldamist, tavaliselt 24 tunni jooksul.</string>
     <string name="opportunity_edit_listing">Muuda</string>
+    <string name="opportunity_confirm_delete">Kustutada see võimalus? Seda ei saa tagasi võtta.</string>
+    <string name="opportunity_err_delete_failed">Võimaluse kustutamine ebõnnestus.</string>
+    <string name="opportunity_delete">Kustuta</string>
     <string name="opportunity_save_changes">Salvesta muudatused</string>
     <string name="opportunity_saving">Salvestamine...</string>
     <string name="opportunity_edit_moderation_note">Pealkirja, tüübi, kirjelduse või tasu muutmine saadab selle kuulutuse enne uuesti avaldamist läbivaatamisele tagasi.</string>

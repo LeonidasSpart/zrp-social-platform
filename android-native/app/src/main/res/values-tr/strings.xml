@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">Başvurmak için Giriş Yap</string>
     <string name="opportunity_moderation_note">Her ilan yayınlanmadan önce ekibimiz tarafından incelenir, genellikle 24 saat içinde.</string>
     <string name="opportunity_edit_listing">Düzenle</string>
+    <string name="opportunity_confirm_delete">Bu fırsat silinsin mi? Bu işlem geri alınamaz.</string>
+    <string name="opportunity_err_delete_failed">Fırsat silinemedi.</string>
+    <string name="opportunity_delete">Sil</string>
     <string name="opportunity_save_changes">Değişiklikleri Kaydet</string>
     <string name="opportunity_saving">Kaydediliyor...</string>
     <string name="opportunity_edit_moderation_note">Başlığı, türü, açıklamayı veya ücreti değiştirmek bu ilanı tekrar yayına girmeden önce incelemeye gönderir.</string>

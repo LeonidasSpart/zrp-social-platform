@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Ei vielä kommentteja";
 "ios.comment.beFirst" = "Ole ensimmäinen, joka vastaa.";
 "ios.comment.deleteConfirmTitle" = "Poistetaanko kommentti?";
+"ios.opportunity.deleteConfirmTitle" = "Poistetaanko tämä mahdollisuus?";
 "ios.comment.editTitle" = "Muokkaa kommenttia";
 "ios.a11y.likeComment" = "Tykkää kommentista";
 "ios.a11y.unlikeComment" = "Poista tykkäys kommentista";

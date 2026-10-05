@@ -1026,6 +1026,9 @@
     <string name="opportunity_login_to_apply">Влез, за да кандидатстваш</string>
     <string name="opportunity_moderation_note">Всяка обява се преглежда от нашия екип, преди да стане активна, обикновено в рамките на 24 часа.</string>
     <string name="opportunity_edit_listing">Редактирай</string>
+    <string name="opportunity_confirm_delete">Да изтрия ли тази възможност? Това не може да бъде отменено.</string>
+    <string name="opportunity_err_delete_failed">Изтриването на възможността бе неуспешно.</string>
+    <string name="opportunity_delete">Изтрий</string>
     <string name="opportunity_save_changes">Запази промените</string>
     <string name="opportunity_saving">Запазване...</string>
     <string name="opportunity_edit_moderation_note">Промяната на заглавието, типа, описанието или възнаграждението изпраща тази обява обратно за преглед, преди да стане отново активна.</string>

@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Brak komentarzy";
 "ios.comment.beFirst" = "Bądź pierwszą osobą, która odpowie.";
 "ios.comment.deleteConfirmTitle" = "Usunąć komentarz?";
+"ios.opportunity.deleteConfirmTitle" = "Usunąć tę ofertę?";
 "ios.comment.editTitle" = "Edytuj komentarz";
 "ios.a11y.likeComment" = "Polub komentarz";
 "ios.a11y.unlikeComment" = "Cofnij polubienie komentarza";

@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Még nincsenek hozzászólások";
 "ios.comment.beFirst" = "Legyél te az első, aki válaszol.";
 "ios.comment.deleteConfirmTitle" = "Törlöd a hozzászólást?";
+"ios.opportunity.deleteConfirmTitle" = "Törlöd ezt a lehetőséget?";
 "ios.comment.editTitle" = "Hozzászólás szerkesztése";
 "ios.a11y.likeComment" = "Hozzászólás kedvelése";
 "ios.a11y.unlikeComment" = "Hozzászólás kedvelésének visszavonása";

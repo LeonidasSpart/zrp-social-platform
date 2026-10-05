@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Все още няма коментари";
 "ios.comment.beFirst" = "Бъдете първият, който отговаря.";
 "ios.comment.deleteConfirmTitle" = "Да се изтрие ли коментарът?";
+"ios.opportunity.deleteConfirmTitle" = "Да изтрия ли тази възможност?";
 "ios.comment.editTitle" = "Редактирай коментара";
 "ios.a11y.likeComment" = "Харесай коментара";
 "ios.a11y.unlikeComment" = "Премахни харесването на коментара";

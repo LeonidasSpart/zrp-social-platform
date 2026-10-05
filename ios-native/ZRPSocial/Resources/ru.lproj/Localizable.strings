@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "Пока нет комментариев";
 "ios.comment.beFirst" = "Будьте первым, кто ответит.";
 "ios.comment.deleteConfirmTitle" = "Удалить комментарий?";
+"ios.opportunity.deleteConfirmTitle" = "Удалить эту возможность?";
 "ios.comment.editTitle" = "Редактировать комментарий";
 "ios.a11y.likeComment" = "Отметить комментарий «Нравится»";
 "ios.a11y.unlikeComment" = "Убрать отметку «Нравится» с комментария";

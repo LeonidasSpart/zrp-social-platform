@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">Accedi per candidarti</string>
     <string name="opportunity_moderation_note">Ogni annuncio viene esaminato dal nostro team prima della pubblicazione, di solito entro 24 ore.</string>
     <string name="opportunity_edit_listing">Modifica</string>
+    <string name="opportunity_confirm_delete">Eliminare questa opportunità? L\'azione non può essere annullata.</string>
+    <string name="opportunity_err_delete_failed">Impossibile eliminare l\'opportunità.</string>
+    <string name="opportunity_delete">Elimina</string>
     <string name="opportunity_save_changes">Salva modifiche</string>
     <string name="opportunity_saving">Salvataggio in corso...</string>
     <string name="opportunity_edit_moderation_note">La modifica di titolo, tipo, descrizione o compenso rimanda questo annuncio in revisione prima che torni online.</string>

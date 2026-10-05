@@ -1448,6 +1448,7 @@
 "ios.compose.removeAttachment" = "Eemalda manus";
 "ios.post.detailTitle" = "Postitus";
 "ios.comment.deleteConfirmTitle" = "Kustutada kommentaar?";
+"ios.opportunity.deleteConfirmTitle" = "Kustutada see võimalus?";
 "ios.comment.editTitle" = "Muuda kommentaari";
 "ios.comment.cancelReply" = "Tühista vastamine";
 "ios.post.editTitle" = "Muuda postitust";

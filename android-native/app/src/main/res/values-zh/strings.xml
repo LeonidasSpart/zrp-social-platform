@@ -1040,6 +1040,9 @@
     <string name="opportunity_login_to_apply">登录以申请</string>
     <string name="opportunity_moderation_note">每个列表在上线前都会由我们的团队审核，通常在24小时内完成。</string>
     <string name="opportunity_edit_listing">编辑</string>
+    <string name="opportunity_confirm_delete">删除此机会?此操作无法撤销。</string>
+    <string name="opportunity_err_delete_failed">删除机会失败。</string>
+    <string name="opportunity_delete">删除</string>
     <string name="opportunity_save_changes">保存更改</string>
     <string name="opportunity_saving">保存中...</string>
     <string name="opportunity_edit_moderation_note">更改标题、类型、描述或薪酬会使该招聘信息重新进入审核,之后才能再次上线。</string>

@@ -1471,6 +1471,7 @@
 "ios.comment.noComments" = "まだコメントはありません";
 "ios.comment.beFirst" = "最初に返信しましょう。";
 "ios.comment.deleteConfirmTitle" = "このコメントを削除しますか？";
+"ios.opportunity.deleteConfirmTitle" = "このオポチュニティを削除しますか？";
 "ios.comment.editTitle" = "コメントを編集";
 "ios.a11y.likeComment" = "コメントにいいね";
 "ios.a11y.unlikeComment" = "コメントのいいねを取り消す";
