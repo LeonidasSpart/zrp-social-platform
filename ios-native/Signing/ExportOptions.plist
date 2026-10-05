@@ -17,11 +17,11 @@
       OTHER: pass DEVELOPMENT_TEAM=<id> to the archive step
   or add a <key>teamID</key> entry locally, uncommitted.
 
-  Before running the archive/export commands above, run
-  `python3 Tools/validate-signing-readiness.py --team <id>` (from
-  ios-native/) - it checks every signing prerequisite this repository can
-  verify without Xcode and fails with a specific, actionable reason
-  instead of a confusing signing error deep in an xcodebuild log.
+  Before running the archive/export commands above, run (from ios-native/):
+      DEVELOPMENT_TEAM=<id> python3 Tools/validate-signing-readiness.py
+  It checks every signing prerequisite this repository can verify without
+  Xcode and fails with a specific, actionable reason instead of a
+  confusing signing error deep in an xcodebuild log.
 -->
 <plist version="1.0">
 <dict>
