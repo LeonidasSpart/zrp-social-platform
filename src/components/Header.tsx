@@ -41,6 +41,8 @@ import {
   LifeBuoy,
   Scale,
   Megaphone,
+  Radio,
+  Video,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -240,10 +242,12 @@ export default function Header() {
       // separate list from the Sidebar rail (hidden md:flex, compact
       // icon-only from md to lg, full labels from lg up). Music,
       // Discover, Communities and Lists were all added to Sidebar but
-      // not here at various points, which is exactly how each went
-      // missing from navigation on every screen below the md breakpoint
-      // (a user could only reach them by switching their browser to
-      // "Desktop site" mode) - add any future nav destination to both.
+      // not here at various points (and later Live Audio, Live Video
+      // and Launchpad repeated the exact same miss), which is exactly
+      // how each went missing from navigation on every screen below the
+      // md breakpoint (a user could only reach them by switching their
+      // browser to "Desktop site" mode) - add any future nav destination
+      // to both, or better, stop maintaining two hand-written lists.
       href: "/music",
       icon: Music2,
       label: t("nav.music"),
@@ -254,6 +258,16 @@ export default function Header() {
       label: t("nav.communities"),
     },
     {
+      href: "/live-audio",
+      icon: Radio,
+      label: t("nav.liveAudio"),
+    },
+    {
+      href: "/live-video",
+      icon: Video,
+      label: t("nav.liveVideo"),
+    },
+    {
       href: "/play",
       icon: Gamepad2,
       label: t("nav.play"),
@@ -262,6 +276,11 @@ export default function Header() {
       href: "/opportunity",
       icon: Briefcase,
       label: t("nav.opportunity"),
+    },
+    {
+      href: "/launchpad",
+      icon: Rocket,
+      label: t("nav.launchpad"),
     },
     {
       href: "/aid",
