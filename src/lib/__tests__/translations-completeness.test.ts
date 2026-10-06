@@ -3658,6 +3658,55 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
     "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
   ],
+  am: [
+    "nav.launchpad", // "Launchpad" is the established brand-name exception
+    "launchpad.farming.apyLabel", // "{apy} APY" - "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated
+    "launchpad.curve.heading", // "Bonding Curve" is a specific DeFi mechanism term with no established Amharic equivalent
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.nft.title", // "ZRP NFTs" is the established brand-name exception
+    "launchpad.staking.apyLabel", // "{value} APY" - "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "analytics.platformAndroid", // "Android" is a proper noun/platform name
+    "analytics.platformIos", // "iOS" is a proper noun/platform name
+    "contact.faqLabel", // "FAQ" is a universally-used acronym in Amharic tech UI
+    "footer.faq", // "FAQ" is a universally-used acronym in Amharic tech UI
+    "press.emailBadge", // "press@zrp.one" email address, not translatable content
+    "faq.cat.trustPassport", // "ZRP Trust Passport" is a named feature, kept in Latin for consistency with other ZRP sub-brands
+    "faq.whatIsTrustPassport.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustLocation.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustVerification.passportCardTitle", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.hero.tagTrustPassport", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.section.trustPassport.title", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "help.section.aid.title", // "ZRP Help" is the established brand-name exception
+    "help.section.opportunity.title", // "ZRP Opportunity" is the established brand-name exception
+    "help.music.studioHeading", // "Music Studio" is a product sub-brand name
+    "help.section.music.title", // "ZRP Music" is the established brand-name exception
+    "help.trustPassport.whereFindBold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "marketplace.heroTitle", // "ZRP Market Plus" is a product sub-brand name
+    "faq.cat.marketPlus", // "ZRP Market Plus" is a product sub-brand name
+    "faq.whatIsMarketPlus.p1Bold", // "ZRP Market Plus" is a product sub-brand name
+    "help.section.marketplace.title", // "ZRP Market Plus" is a product sub-brand name
+    "profile.trustPassportTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "journalist.editor.slug", // "Slug" is a technical CMS term with no established Amharic equivalent
+    "journalist.editor.slugPlaceholder", // "article-slug" is a literal URL-slug format example, not prose
+    "pricing.support247", // "24/7" - numeral/symbol notation, not translatable prose
+    "ads.dashboard.ctr", // "CTR" is an acronym/industry term, kept untranslated
+    "deleteAccount.confirmWord", // "DELETE" - the UI checks the typed confirmation against this literal word
+    "trust.headerTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "trust.outOf100", // "/ 100" - numeric score format, no translatable text
+    "play.vs", // "vs" is a universally retained Latin abbreviation
+    "play.xp", // "{n} XP" template - "XP" is a universal gaming acronym, kept untranslated
+    "opportunity.heroTitle", // "ZRP OPPORTUNITY" is the established brand-name exception
+    "help.heroTitle", // "ZRP HELP" is the established brand-name exception
+    "nav.aiAssistant", // "ZRP AI" is the established brand-name exception
+    "music.studio.explicitBadge", // "E" - the single-letter explicit-content badge, same convention as music streaming apps worldwide
+    "tipModal.charCount", // "{count}/1000" - pure placeholder/format template, no translatable words
+    "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
+  ],
   tl: [
     "nav.launchpad", // "Launchpad" is the established brand-name exception
     "launchpad.daoDetail.quorumLabel", // "Quorum" is a DAO governance term with no established Tagalog equivalent
