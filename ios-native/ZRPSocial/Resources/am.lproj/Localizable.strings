@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "አንድ ሰው";
 "ios.live.startNow" = "አሁን ጀምር";
 "ios.live.switchCamera" = "ካሜራ ቀይር";
+"ios.a11y.turnOnSpeaker" = "ድምጽ ማጉያ አብራ";
+"ios.a11y.turnOffSpeaker" = "ድምጽ ማጉያ አጥፋ";
+"ios.a11y.turnOnCamera" = "ካሜራ አብራ";
+"ios.a11y.turnOffCamera" = "ካሜራ አጥፋ";
+"ios.a11y.acceptCall" = "ጥሪ ተቀበል";
+"ios.a11y.declineCall" = "ጥሪ አትቀበል";
+"ios.a11y.endCall" = "ጥሪ አቋርጥ";
+"ios.a11y.dismiss" = "ዝጋ";
+"ios.auth.dateOfBirth" = "የትውልድ ቀን";
+"ios.auth.ageTermsAgree" = "ዕድሜዬ ቢያንስ 16 ዓመት ነው እና የአገልግሎት ውሎችን እቀበላለሁ።";
+"ios.auth.ageTooYoung" = "ZRP መለያ ለመፍጠር ዕድሜዎ ቢያንስ 16 ዓመት መሆን አለበት።";

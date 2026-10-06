@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Isang tao";
 "ios.live.startNow" = "Simulan ngayon";
 "ios.live.switchCamera" = "Palitan ang camera";
+"ios.a11y.turnOnSpeaker" = "I-on ang speaker";
+"ios.a11y.turnOffSpeaker" = "I-off ang speaker";
+"ios.a11y.turnOnCamera" = "I-on ang camera";
+"ios.a11y.turnOffCamera" = "I-off ang camera";
+"ios.a11y.acceptCall" = "Sagutin ang tawag";
+"ios.a11y.declineCall" = "Tanggihan ang tawag";
+"ios.a11y.endCall" = "Tapusin ang tawag";
+"ios.a11y.dismiss" = "Isara";
+"ios.auth.dateOfBirth" = "Petsa ng kapanganakan";
+"ios.auth.ageTermsAgree" = "Ako ay hindi bababa sa 16 taong gulang at sumasang-ayon ako sa Mga Tuntunin ng Serbisyo";
+"ios.auth.ageTooYoung" = "Dapat ay hindi ka bababa sa 16 taong gulang upang gumawa ng ZRP account.";

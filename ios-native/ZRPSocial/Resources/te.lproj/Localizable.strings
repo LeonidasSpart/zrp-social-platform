@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "ఎవరో ఒకరు";
 "ios.live.startNow" = "ఇప్పుడే ప్రారంభించండి";
 "ios.live.switchCamera" = "కెమెరా మార్చండి";
+"ios.a11y.turnOnSpeaker" = "స్పీకర్‌ను ఆన్ చేయండి";
+"ios.a11y.turnOffSpeaker" = "స్పీకర్‌ను ఆఫ్ చేయండి";
+"ios.a11y.turnOnCamera" = "కెమెరాను ఆన్ చేయండి";
+"ios.a11y.turnOffCamera" = "కెమెరాను ఆఫ్ చేయండి";
+"ios.a11y.acceptCall" = "కాల్ స్వీకరించండి";
+"ios.a11y.declineCall" = "కాల్ తిరస్కరించండి";
+"ios.a11y.endCall" = "కాల్ ముగించండి";
+"ios.a11y.dismiss" = "మూసివేయండి";
+"ios.auth.dateOfBirth" = "పుట్టిన తేదీ";
+"ios.auth.ageTermsAgree" = "నాకు కనీసం 16 సంవత్సరాలు ఉన్నాయి మరియు నేను సేవా నిబంధనలకు అంగీకరిస్తున్నాను";
+"ios.auth.ageTooYoung" = "ZRP ఖాతాను సృష్టించడానికి మీకు కనీసం 16 సంవత్సరాలు ఉండాలి.";

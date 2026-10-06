@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Mtu fulani";
 "ios.live.startNow" = "Anza sasa";
 "ios.live.switchCamera" = "Badilisha kamera";
+"ios.a11y.turnOnSpeaker" = "Washa spika";
+"ios.a11y.turnOffSpeaker" = "Zima spika";
+"ios.a11y.turnOnCamera" = "Washa kamera";
+"ios.a11y.turnOffCamera" = "Zima kamera";
+"ios.a11y.acceptCall" = "Pokea simu";
+"ios.a11y.declineCall" = "Kataa simu";
+"ios.a11y.endCall" = "Maliza simu";
+"ios.a11y.dismiss" = "Funga";
+"ios.auth.dateOfBirth" = "Tarehe ya kuzaliwa";
+"ios.auth.ageTermsAgree" = "Nina umri wa angalau miaka 16 na ninakubaliana na Masharti ya Huduma";
+"ios.auth.ageTooYoung" = "Unapaswa kuwa na umri wa angalau miaka 16 ili kuunda akaunti ya ZRP.";

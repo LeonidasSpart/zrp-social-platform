@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "شخصی";
 "ios.live.startNow" = "همین حالا شروع کن";
 "ios.live.switchCamera" = "تغییر دوربین";
+"ios.a11y.turnOnSpeaker" = "روشن کردن بلندگو";
+"ios.a11y.turnOffSpeaker" = "خاموش کردن بلندگو";
+"ios.a11y.turnOnCamera" = "روشن کردن دوربین";
+"ios.a11y.turnOffCamera" = "خاموش کردن دوربین";
+"ios.a11y.acceptCall" = "پذیرفتن تماس";
+"ios.a11y.declineCall" = "رد کردن تماس";
+"ios.a11y.endCall" = "پایان تماس";
+"ios.a11y.dismiss" = "رد کردن";
+"ios.auth.dateOfBirth" = "تاریخ تولد";
+"ios.auth.ageTermsAgree" = "من حداقل 16 سال سن دارم و با شرایط استفاده از خدمات موافقم";
+"ios.auth.ageTooYoung" = "برای ایجاد حساب ZRP باید حداقل 16 سال سن داشته باشید.";

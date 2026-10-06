@@ -1502,7 +1502,6 @@
 "ios.notifications.followRequestSuffix" = "talbulek biex issegwih";
 "ios.search.minLength" = "Ikteb mill-inqas 2 karattri biex tfittex.";
 "ios.search.suggestedTitle" = "Suġġeriti għalik";
-"ios.search.noHashtags" = "Ma nstab l-ebda hashtag.";
 "ios.music.trending" = "Popolari bħalissa";
 "ios.music.newReleases" = "Ħruġ ġdid";
 "ios.music.latestAlbums" = "L-aħħar albums";
@@ -1580,13 +1579,6 @@
 "ios.a11y.unmute" = "Neħħi l-iskikkar";
 "ios.ads.sponsored" = "Sponsorjat";
 "ios.a11y.sponsoredPost" = "Post sponsorjat minn {name}";
-"ios.call.noVideo" = "Mingħajr vidjo";
-"ios.call.fallbackName" = "Sejħa";
-"ios.call.incomingVideo" = "Sejħa bil-vidjo dieħla...";
-"ios.call.incomingVoice" = "Sejħa bil-vuċi dieħla...";
-"ios.call.ringing" = "Qed iddoqq...";
-"ios.call.voiceCallCd" = "Sejħa bil-vuċi";
-"ios.call.videoCallCd" = "Sejħa bil-vidjo";
 "ios.group.untitled" = "Grupp";
 "ios.group.suggested" = "Suġġerit";
 "ios.group.removePhoto" = "Neħħi r-ritratt tal-grupp";
@@ -1599,6 +1591,14 @@
 "ios.chat.sharedPostUnavailable" = "Dan il-post m'għadux disponibbli.";
 "ios.post.repostBlocked" = "Dan il-post ma jistax jiġi ripostjat għax il-kont huwa privat.";
 "ios.media.loadFailed" = "Ma stajniex intellgħu dan ir-ritratt.";
+"ios.call.noVideo" = "Mingħajr vidjo";
+"ios.call.fallbackName" = "Sejħa";
+"ios.call.incomingVideo" = "Sejħa bil-vidjo dieħla...";
+"ios.call.incomingVoice" = "Sejħa bil-vuċi dieħla...";
+"ios.call.ringing" = "Qed iddoqq...";
+"ios.call.voiceCallCd" = "Sejħa bil-vuċi";
+"ios.call.videoCallCd" = "Sejħa bil-vidjo";
+"ios.search.noHashtags" = "Ma nstab l-ebda hashtag.";
 "ios.search.noResults" = "L-ebda riżultat ma nstab.";
 "ios.explore.peopleNearYouTitle" = "Nies fil-viċinanza tiegħek";
 "ios.explore.peopleNearYouSubtitle" = "L-istess pajjiż bħalek";

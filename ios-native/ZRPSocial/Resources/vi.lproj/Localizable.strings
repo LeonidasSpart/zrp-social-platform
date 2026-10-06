@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Ai đó";
 "ios.live.startNow" = "Bắt đầu ngay";
 "ios.live.switchCamera" = "Đổi camera";
+"ios.a11y.turnOnSpeaker" = "Bật loa";
+"ios.a11y.turnOffSpeaker" = "Tắt loa";
+"ios.a11y.turnOnCamera" = "Bật camera";
+"ios.a11y.turnOffCamera" = "Tắt camera";
+"ios.a11y.acceptCall" = "Chấp nhận cuộc gọi";
+"ios.a11y.declineCall" = "Từ chối cuộc gọi";
+"ios.a11y.endCall" = "Kết thúc cuộc gọi";
+"ios.a11y.dismiss" = "Đóng";
+"ios.auth.dateOfBirth" = "Ngày sinh";
+"ios.auth.ageTermsAgree" = "Tôi từ 16 tuổi trở lên và đồng ý với Điều khoản dịch vụ";
+"ios.auth.ageTooYoung" = "Bạn phải từ 16 tuổi trở lên để tạo tài khoản ZRP.";

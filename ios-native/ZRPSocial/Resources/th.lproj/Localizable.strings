@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "บางคน";
 "ios.live.startNow" = "เริ่มตอนนี้";
 "ios.live.switchCamera" = "สลับกล้อง";
+"ios.a11y.turnOnSpeaker" = "เปิดลำโพง";
+"ios.a11y.turnOffSpeaker" = "ปิดลำโพง";
+"ios.a11y.turnOnCamera" = "เปิดกล้อง";
+"ios.a11y.turnOffCamera" = "ปิดกล้อง";
+"ios.a11y.acceptCall" = "รับสาย";
+"ios.a11y.declineCall" = "ปฏิเสธสาย";
+"ios.a11y.endCall" = "วางสาย";
+"ios.a11y.dismiss" = "ปิด";
+"ios.auth.dateOfBirth" = "วันเกิด";
+"ios.auth.ageTermsAgree" = "ฉันมีอายุอย่างน้อย 16 ปี และยอมรับข้อกำหนดการให้บริการ";
+"ios.auth.ageTooYoung" = "คุณต้องมีอายุอย่างน้อย 16 ปีจึงจะสร้างบัญชี ZRP ได้";

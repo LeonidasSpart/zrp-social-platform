@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "کوئی شخص";
 "ios.live.startNow" = "ابھی شروع کریں";
 "ios.live.switchCamera" = "کیمرہ تبدیل کریں";
+"ios.a11y.turnOnSpeaker" = "اسپیکر آن کریں";
+"ios.a11y.turnOffSpeaker" = "اسپیکر بند کریں";
+"ios.a11y.turnOnCamera" = "کیمرہ آن کریں";
+"ios.a11y.turnOffCamera" = "کیمرہ بند کریں";
+"ios.a11y.acceptCall" = "کال قبول کریں";
+"ios.a11y.declineCall" = "کال مسترد کریں";
+"ios.a11y.endCall" = "کال ختم کریں";
+"ios.a11y.dismiss" = "بند کریں";
+"ios.auth.dateOfBirth" = "تاریخ پیدائش";
+"ios.auth.ageTermsAgree" = "میری عمر کم از کم 16 سال ہے اور میں خدمات کی شرائط سے متفق ہوں";
+"ios.auth.ageTooYoung" = "ZRP اکاؤنٹ بنانے کے لیے آپ کی عمر کم از کم 16 سال ہونی چاہیے۔";
