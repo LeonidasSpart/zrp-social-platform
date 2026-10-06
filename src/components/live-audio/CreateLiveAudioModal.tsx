@@ -26,6 +26,13 @@ interface CreateLiveAudioModalProps {
  * cover end-to-end; createRoom() already validates a future scheduledAt
  * as a documented, available extension point.
  */
+// z-[10000] (not the old z-[110]): BottomNav is a portal fixed at
+// z-[9999] on phones, so this modal was rendering visually behind it -
+// the bottom of the form (visibility options, submit button) was
+// obstructed. max-h-[100dvh] gives the panel a real bound on mobile so
+// overflow-y-auto actually engages (there was none before, so content
+// just grew past the viewport instead of scrolling); dvh keeps that
+// bound correct when the on-screen keyboard shrinks the visual viewport.
 export default function CreateLiveAudioModal({ onClose, onCreated }: CreateLiveAudioModalProps) {
   const { t } = useLanguage();
   const [title, setTitle] = useState("");
@@ -98,14 +105,14 @@ export default function CreateLiveAudioModal({ onClose, onCreated }: CreateLiveA
 
   return (
     <div
-      className="fixed inset-0 z-[110] bg-black/60 flex items-end sm:items-center sm:justify-center"
+      className="fixed inset-0 z-[10000] bg-black/60 flex items-end sm:items-center sm:justify-center"
       onClick={() => !submitting && onClose()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="create-live-audio-title"
     >
       <div
-        className="w-full sm:w-[440px] sm:max-h-[85vh] bg-white dark:bg-zrp-deepBlack rounded-t-2xl sm:rounded-2xl overflow-y-auto"
+        className="w-full sm:w-[440px] max-h-[100dvh] sm:max-h-[85vh] bg-white dark:bg-zrp-deepBlack rounded-t-2xl sm:rounded-2xl overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800">
