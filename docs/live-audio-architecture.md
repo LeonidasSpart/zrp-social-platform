@@ -423,7 +423,7 @@ integration" requirement.
   polling. ZRP has one web codebase for web and PWA/mobile-browser (see
   CLAUDE.md), so this single implementation covers both. Reachable from
   the Sidebar's primary nav (new `nav.liveAudio` entry, `Radio` icon);
-  all new user-facing strings are translated across all 34 supported
+  all new user-facing strings are translated across all 49 supported
   languages, verified by the repo's own translation-completeness CI
   gate. **Manually exercised end-to-end** with Playwright against a real
   local dev server + Postgres + Redis: login, discovery empty/loaded
@@ -527,7 +527,7 @@ convention (see `src/lib/api-error-i18n.ts`'s own doc comment) is raw,
 un-translated English passthrough for Live-Audio-specific messages, and
 the pricing page's own feature row (`pricing.featureLiveAudio` /
 `pricing.featureNoLiveAudio`) is what's actually translated, across all
-34 supported languages.
+49 supported languages.
 
 **Security properties**: `userId` is always the authenticated session's
 own id (`requireActiveUser()`, never a client-supplied `userId`/`plan`/

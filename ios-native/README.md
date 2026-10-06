@@ -35,7 +35,7 @@ ios-native/
     Models/                  Decodable models mirroring the real API shapes
     Data/                    Repositories - the only layer that builds Endpoints
     Features/                SwiftUI views + their ViewModels
-    Resources/               39 generated .lproj bundles
+    Resources/               49 generated .lproj bundles
     Assets.xcassets/         Official ZRP brand assets, copied byte-for-byte
 ```
 
@@ -70,7 +70,7 @@ no merge conflict to resolve when two people add files at once.
 ### User-facing strings
 
 Never write a literal in a view. ZRP already ships human translations for
-39 languages in `src/lib/translations.ts`; the iOS `.strings` files and
+49 languages in `src/lib/translations.ts`; the iOS `.strings` files and
 the `L10nKey` enum are generated from that exact file:
 
 ```bash
@@ -84,7 +84,7 @@ For the handful of strings with no web counterpart (VoiceOver labels,
 mostly), add the English value to `Tools/ios-extra-strings.json`'s
 `strings` block, then add a translated value for it in every language
 under `translations` (`generate-localizations.py --check` fails loudly
-if any of the 38 non-English languages is missing one, or if a
+if any of the 48 non-English languages is missing one, or if a
 translation's `{placeholder}` tokens don't match the English source
 exactly). A key that is genuinely missing a translation falls back to
 the development language rather than appearing untranslated; that is

@@ -161,7 +161,7 @@ Full sub-feature detail in the original cluster report; summary:
 | --- | --- | --- |
 | PLAY: TRIVIA/MEMORY/LOGIC (create, play, daily challenge, leaderboard, duels, XP/levels, achievements) | COMPLETE | Duels in particular verified as a full, real lifecycle (create/accept/decline/play/server-determined winner), not a stub. |
 | PLAY: REACTION/SEQUENCE player components | **MISSING** | No player UI for 2 of the 5 real game types; the existing fallback (filter from browsing, honest "unsupported" message on a direct/duel/daily link) is a real, deliberate stopgap, not a silent failure: but not full parity. Not fixed this pass (two full new player UIs is out of scope for a surgical pass). |
-| Navigation architecture, dark mode, localization (39 languages, CI-enforced completeness), rotation/config-change handling | COMPLETE | |
+| Navigation architecture, dark mode, localization (49 languages, CI-enforced completeness), rotation/config-change handling | COMPLETE | |
 | Deep links | PARTIAL | Only ~10 of ~86 destinations are deep-linkable (covers the highest-traffic share targets: home/search/notifications/messages/profile/post/hashtag). Documented as a known limitation, not fixed. |
 | Tablet/large-screen adaptive layout | PARTIAL | Only the Messages inbox has a real two-pane layout; everything else (including all of PLAY) is phone-only. A deliberate, narrow scope choice, not an oversight: the `WindowSizeClass` infrastructure exists and could be extended later. |
 | App-foreground auto-refetch | PARTIAL | No `ProcessLifecycleOwner`-driven refetch on resume anywhere; relies on per-screen pull-to-refresh (4 screens have it) or re-navigation. Architectural, not fixed this pass. |

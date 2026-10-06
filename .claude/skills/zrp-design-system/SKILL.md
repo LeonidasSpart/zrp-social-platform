@@ -157,22 +157,23 @@ is the single most common drift in the web codebase.
 
 ## 5. Copy is a design material
 
-ZRP ships **39 languages**: `en, fr, de, it, sq, es, ru, ar, zh, tr, id,
+ZRP ships **49 languages**: `en, fr, de, it, sq, es, ru, ar, zh, tr, id,
 pt, ja, ko, hi, nl, pl, ro, cs, hu, sv, da, hr, bg, el, no, sr, bs, mk,
-uk, fi, sk, sl, lt, et, ga, lv, mt, rm`.
+uk, fi, sk, sl, lt, et, ga, lv, mt, rm, bn, ur, vi, mr, te, fa, sw, th,
+tl, am`.
 
 - Web strings live in `src/lib/translations.ts`; native in
   `android-native/app/src/main/res/values*/strings.xml`.
 - **Reuse before you invent.** Web's dictionary is the source of truth and
   is already professionally translated. Most native strings in this repo
   were lifted verbatim from it, and that is the correct pattern.
-- Adding a user-facing string means adding it to **all 39** language
-  blocks (and the `TranslationKey` union on web). A new key with 38
+- Adding a user-facing string means adding it to **all 49** language
+  blocks (and the `TranslationKey` union on web). A new key with 48
   English fallbacks is not done.
 - Never machine-translate to fill a gap. If no translation exists and
   none can be reused, say so and ask.
-- Arabic is RTL (`RTL_LANGUAGES`). Prefer logical properties
-  (`ps-*`/`pe-*`, `start`/`end`) over `left`/`right`.
+- Arabic, Urdu and Persian are RTL (`RTL_LANGUAGES`). Prefer logical
+  properties (`ps-*`/`pe-*`, `start`/`end`) over `left`/`right`.
 - German and Russian run ~30% longer than English. Layouts must survive
   that.
 

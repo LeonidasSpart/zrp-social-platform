@@ -187,9 +187,10 @@ Rules:
 - **320px must not overflow horizontally.** Test it. Long usernames, long
   hashtags, long translated strings (German and Russian run ~30% longer
   than English) and unbroken URLs are the usual culprits.
-- Arabic is RTL (`RTL_LANGUAGES` in `src/lib/translations.ts`). Prefer
-  logical properties (`ps-*`/`pe-*`, `start`/`end`) over `left`/`right`
-  for anything directional.
+- Arabic, Urdu and Persian are RTL (`RTL_LANGUAGES` in
+  `src/lib/translations.ts`). Prefer logical properties
+  (`ps-*`/`pe-*`, `start`/`end`) over `left`/`right` for anything
+  directional.
 - Use `dvh`, not `vh`, for anything that should fill the mobile viewport:
   `vh` is wrong while browser chrome is showing.
 - Respect `env(safe-area-inset-*)`. The app already does this in
