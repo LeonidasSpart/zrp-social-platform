@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Неко";
 "ios.live.startNow" = "Почни сада";
 "ios.live.switchCamera" = "Промени камеру";
+"ios.a11y.turnOnSpeaker" = "Uključi zvučnik";
+"ios.a11y.turnOffSpeaker" = "Isključi zvučnik";
+"ios.a11y.turnOnCamera" = "Uključi kameru";
+"ios.a11y.turnOffCamera" = "Isključi kameru";
+"ios.a11y.acceptCall" = "Prihvati poziv";
+"ios.a11y.declineCall" = "Odbij poziv";
+"ios.a11y.endCall" = "Završi poziv";
+"ios.a11y.dismiss" = "Odbaci";
+"ios.auth.dateOfBirth" = "Datum rođenja";
+"ios.auth.ageTermsAgree" = "Imam najmanje 16 godina i prihvatam Uslove korišćenja";
+"ios.auth.ageTooYoung" = "Morate imati najmanje 16 godina da biste napravili ZRP nalog.";

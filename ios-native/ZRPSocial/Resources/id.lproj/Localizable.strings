@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Seseorang";
 "ios.live.startNow" = "Mulai sekarang";
 "ios.live.switchCamera" = "Ganti kamera";
+"ios.a11y.turnOnSpeaker" = "Aktifkan speaker";
+"ios.a11y.turnOffSpeaker" = "Nonaktifkan speaker";
+"ios.a11y.turnOnCamera" = "Aktifkan kamera";
+"ios.a11y.turnOffCamera" = "Nonaktifkan kamera";
+"ios.a11y.acceptCall" = "Terima panggilan";
+"ios.a11y.declineCall" = "Tolak panggilan";
+"ios.a11y.endCall" = "Akhiri panggilan";
+"ios.a11y.dismiss" = "Tutup";
+"ios.auth.dateOfBirth" = "Tanggal lahir";
+"ios.auth.ageTermsAgree" = "Saya berusia minimal 16 tahun dan menyetujui Ketentuan Layanan";
+"ios.auth.ageTooYoung" = "Anda harus berusia minimal 16 tahun untuk membuat akun ZRP.";

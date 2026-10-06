@@ -528,6 +528,22 @@ model User {
   // analytics and (future) language-aware ranking.
   languageCode String?
 
+  // ─── Minimum-age / Terms acceptance (ZRP platform policy: 16+) ──
+  // Both are set only by a client built to collect them at registration
+  // - iOS, as of this change (see RegisterView.swift). Null for every
+  // pre-existing account and for a registration from a platform that
+  // does not send them yet (Android, web): a known, tracked asymmetry,
+  // not an oversight - see POST /api/auth/register's own enforcement
+  // note, which validates both whenever they ARE present (so Android/
+  // web get the identical real check the moment either starts sending
+  // them) and currently requires them outright only when
+  // `signupPlatform` is "ios". The 16+ check itself runs once, at
+  // registration, against the value below; it is never re-derived or
+  // re-validated afterward, so a birthdate is immutable here the same
+  // way signupCountryCode/signupSource/signupPlatform above are.
+  birthdate       DateTime? @db.Date
+  termsAcceptedAt DateTime?
+
   // ─── Professional profile (Phase 12/14) ─────────────────────────
   // `category` (existing field, see src/lib/professionalCategories.ts)
   // already serves as the industry taxonomy - deliberately not

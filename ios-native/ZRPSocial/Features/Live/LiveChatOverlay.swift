@@ -22,6 +22,7 @@ struct LiveChatOverlay: View {
     let style: Style
 
     @State private var pendingDelete: LiveChatMessage?
+    @State private var reportingMessage: LiveChatMessage?
     @FocusState private var composerFocused: Bool
 
     var body: some View {
@@ -44,6 +45,15 @@ struct LiveChatOverlay: View {
             } label: {
                 Text(.chatDeleteMessage)
             }
+        }
+        // `POST /api/reports` has accepted `liveChatMessageId` since it
+        // shipped as one of the Report model's own polymorphic targets;
+        // this app never built a Report entry point for an individual
+        // chat message. Reporting your own message is meaningless, so
+        // the context-menu item below is gated on authorship, same as
+        // `canDelete`/`canChatMute`.
+        .sheet(item: $reportingMessage) { message in
+            ReportSheet(target: .liveChatMessage(message.id))
         }
     }
 
@@ -135,6 +145,7 @@ struct LiveChatOverlay: View {
         let canDelete = engagement.canDelete(message)
         let canMute = engagement.canChatMute(userId: message.authorId)
         let knownMuted = engagement.knownChatMutes[message.authorId]
+        let canReport = message.authorId != engagement.myUserId
 
         return HStack(alignment: .top, spacing: ZrpSpacing.sm) {
             AvatarView(url: author?.avatarUrl, displayName: author?.displayName ?? "", size: 24)
@@ -184,6 +195,13 @@ struct LiveChatOverlay: View {
                     }
                 }
             }
+            if canReport {
+                Button {
+                    reportingMessage = message
+                } label: {
+                    Label { Text(.reportModalTitle) } icon: { Image(systemName: "flag") }
+                }
+            }
         }
         .accessibilityActions {
             if canDelete {
@@ -205,6 +223,13 @@ struct LiveChatOverlay: View {
                     engagement.setChatMute(userId: message.authorId, muted: false)
                 } label: {
                     Text(.iosLiveChatUnmuteUser)
+                }
+            }
+            if canReport {
+                Button {
+                    reportingMessage = message
+                } label: {
+                    Text(.reportModalTitle)
                 }
             }
         }

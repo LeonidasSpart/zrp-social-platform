@@ -115,6 +115,18 @@ jobs:
           fi
           echo "No Android references in the iOS module."
 
+      # Smoke-test the signing-readiness validator itself (not a real
+      # signing check - there is no Apple Developer account for this app,
+      # see Signing/ExportOptions.plist). A syntactically valid but
+      # obviously fake team ID exercises every check this script can run
+      # without Xcode or real credentials, so a future edit to
+      # project.pbxproj / ExportOptions.plist / the entitlements file that
+      # silently breaks this script's own parsing is caught here instead
+      # of the first time someone actually has a real Team ID to try.
+      - name: Smoke-test the signing-readiness validator
+        working-directory: ios-native
+        run: python3 Tools/validate-signing-readiness.py --team ABCDE12345
+
   build:
     name: Build (Xcode 26 / iOS 26 SDK)
     runs-on: macos-15

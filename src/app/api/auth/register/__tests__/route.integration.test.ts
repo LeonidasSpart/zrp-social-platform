@@ -146,3 +146,153 @@ describe.skipIf(!hasRealDatabaseUrl)("POST /api/auth/register - signup attributi
     expect(user.signupPlatform).toBe("web");
   });
 });
+
+/*
+ * ZRP platform policy: minimum age 16. Required outright only for
+ * `X-Zrp-Platform: ios` (the one client built to collect it -
+ * RegisterView.swift) - see the module-level comment above MINIMUM_AGE
+ * in ../route.ts for why Android/web cannot be made to require it
+ * overnight without breaking every existing registration they send.
+ * Validated for real (rejecting under-16, requiring Terms acceptance)
+ * the moment ANY platform sends birthdate/termsAccepted, so a future
+ * Android/web client gets the identical enforcement with zero backend
+ * change.
+ */
+describe.skipIf(!hasRealDatabaseUrl)("POST /api/auth/register - minimum age (16+) and Terms acceptance", () => {
+  const runId = randomUUID().slice(0, 8);
+  const emails: string[] = [];
+
+  afterAll(async () => {
+    await prisma.user.deleteMany({ where: { email: { in: emails } } }).catch(() => {});
+  });
+
+  function isoDateYearsAgo(years: number, monthDayOffsetDays = 0): string {
+    const d = new Date();
+    d.setUTCFullYear(d.getUTCFullYear() - years);
+    d.setUTCDate(d.getUTCDate() + monthDayOffsetDays);
+    return d.toISOString().slice(0, 10);
+  }
+
+  async function attemptRegister(
+    label: string,
+    body: Record<string, unknown>,
+    opts: { ip: string; platform?: string }
+  ) {
+    const email = `register-age-${label}-${runId}@example.com`;
+    emails.push(email);
+    const res = await POST(
+      registerReq(
+        { name: "Test User", username: `reg_age_${label}_${runId}`.slice(0, 20), email, password: "password123", ...body },
+        opts
+      )
+    );
+    return { res, email };
+  }
+
+  it("rejects an iOS registration with no birthdate at all", async () => {
+    const { res } = await attemptRegister("ios_missing", {}, { ip: "203.0.114.10", platform: "ios" });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.field).toBe("birthdate");
+  });
+
+  it("rejects an iOS registration under the minimum age (15 years old)", async () => {
+    const { res } = await attemptRegister(
+      "ios_under16",
+      { birthdate: isoDateYearsAgo(15), termsAccepted: true },
+      { ip: "203.0.114.11", platform: "ios" }
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.field).toBe("birthdate");
+  });
+
+  it("rejects a birthdate one day short of the 16th birthday (boundary)", async () => {
+    const { res } = await attemptRegister(
+      "ios_almost16",
+      { birthdate: isoDateYearsAgo(16, 1), termsAccepted: true },
+      { ip: "203.0.114.12", platform: "ios" }
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("accepts a birthdate exactly on the 16th birthday (boundary)", async () => {
+    const { res, email } = await attemptRegister(
+      "ios_exactly16",
+      { birthdate: isoDateYearsAgo(16), termsAccepted: true },
+      { ip: "203.0.114.13", platform: "ios" }
+    );
+    expect(res.status).toBe(201);
+    const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(user.birthdate).not.toBeNull();
+    expect(user.termsAcceptedAt).not.toBeNull();
+  });
+
+  it("accepts a clearly adult birthdate", async () => {
+    const { res, email } = await attemptRegister(
+      "ios_adult",
+      { birthdate: isoDateYearsAgo(30), termsAccepted: true },
+      { ip: "203.0.114.14", platform: "ios" }
+    );
+    expect(res.status).toBe(201);
+    const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(user.birthdate).not.toBeNull();
+  });
+
+  it("rejects an iOS registration with a valid age but Terms not accepted", async () => {
+    const { res } = await attemptRegister(
+      "ios_noterms",
+      { birthdate: isoDateYearsAgo(30), termsAccepted: false },
+      { ip: "203.0.114.15", platform: "ios" }
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.field).toBe("termsAccepted");
+  });
+
+  it("rejects an iOS registration with Terms accepted omitted entirely", async () => {
+    const { res } = await attemptRegister(
+      "ios_noterms2",
+      { birthdate: isoDateYearsAgo(30) },
+      { ip: "203.0.114.16", platform: "ios" }
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.field).toBe("termsAccepted");
+  });
+
+  it("rejects an invalid (unparseable) birthdate string", async () => {
+    const { res } = await attemptRegister(
+      "ios_badformat",
+      { birthdate: "not-a-date", termsAccepted: true },
+      { ip: "203.0.114.17", platform: "ios" }
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.field).toBe("birthdate");
+  });
+
+  it("still registers Android/web with no birthdate at all - this gate must not break existing clients", async () => {
+    const androidAttempt = await attemptRegister("android_legacy", {}, { ip: "203.0.114.20", platform: "android" });
+    expect(androidAttempt.res.status).toBe(201);
+    const androidUser = await prisma.user.findUniqueOrThrow({ where: { email: androidAttempt.email } });
+    expect(androidUser.birthdate).toBeNull();
+    expect(androidUser.termsAcceptedAt).toBeNull();
+
+    const webAttempt = await attemptRegister("web_legacy", {}, { ip: "203.0.114.21" });
+    expect(webAttempt.res.status).toBe(201);
+    const webUser = await prisma.user.findUniqueOrThrow({ where: { email: webAttempt.email } });
+    expect(webUser.birthdate).toBeNull();
+  });
+
+  it("validates a birthdate for real on Android/web too, the moment either platform sends one", async () => {
+    const { res } = await attemptRegister(
+      "android_under16",
+      { birthdate: isoDateYearsAgo(10), termsAccepted: true },
+      { ip: "203.0.114.22", platform: "android" }
+    );
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.field).toBe("birthdate");
+  });
+});

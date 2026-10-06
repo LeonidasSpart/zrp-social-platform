@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Insatgi";
 "ios.live.startNow" = "Cumenzar ussa";
 "ios.live.switchCamera" = "Midar la camera";
+"ios.a11y.turnOnSpeaker" = "Activar l'altoparlant";
+"ios.a11y.turnOffSpeaker" = "Deactivar l'altoparlant";
+"ios.a11y.turnOnCamera" = "Activar la camera";
+"ios.a11y.turnOffCamera" = "Deactivar la camera";
+"ios.a11y.acceptCall" = "Acceptar la clamada";
+"ios.a11y.declineCall" = "Refusar la clamada";
+"ios.a11y.endCall" = "Finir la clamada";
+"ios.a11y.dismiss" = "Serrar";
+"ios.auth.dateOfBirth" = "Data da naschientscha";
+"ios.auth.ageTermsAgree" = "Jau hai almain 16 onns ed accept las cundiziuns d'utilisaziun";
+"ios.auth.ageTooYoung" = "Ti stos avair almain 16 onns per crear in conto ZRP.";

@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Nogen";
 "ios.live.startNow" = "Start nu";
 "ios.live.switchCamera" = "Skift kamera";
+"ios.a11y.turnOnSpeaker" = "Slå højttaler til";
+"ios.a11y.turnOffSpeaker" = "Slå højttaler fra";
+"ios.a11y.turnOnCamera" = "Slå kamera til";
+"ios.a11y.turnOffCamera" = "Slå kamera fra";
+"ios.a11y.acceptCall" = "Besvar opkald";
+"ios.a11y.declineCall" = "Afvis opkald";
+"ios.a11y.endCall" = "Afslut opkald";
+"ios.a11y.dismiss" = "Luk";
+"ios.auth.dateOfBirth" = "Fødselsdato";
+"ios.auth.ageTermsAgree" = "Jeg er mindst 16 år og accepterer servicevilkårene";
+"ios.auth.ageTooYoung" = "Du skal være mindst 16 år for at oprette en ZRP-konto.";

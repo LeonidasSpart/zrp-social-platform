@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "誰か";
 "ios.live.startNow" = "今すぐ開始";
 "ios.live.switchCamera" = "カメラを切り替え";
+"ios.a11y.turnOnSpeaker" = "スピーカーをオンにする";
+"ios.a11y.turnOffSpeaker" = "スピーカーをオフにする";
+"ios.a11y.turnOnCamera" = "カメラをオンにする";
+"ios.a11y.turnOffCamera" = "カメラをオフにする";
+"ios.a11y.acceptCall" = "応答";
+"ios.a11y.declineCall" = "拒否";
+"ios.a11y.endCall" = "通話を終了";
+"ios.a11y.dismiss" = "閉じる";
+"ios.auth.dateOfBirth" = "生年月日";
+"ios.auth.ageTermsAgree" = "私は16歳以上で、利用規約に同意します";
+"ios.auth.ageTooYoung" = "ZRPアカウントを作成するには16歳以上である必要があります。";

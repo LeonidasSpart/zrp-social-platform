@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Niekto";
 "ios.live.startNow" = "Začať teraz";
 "ios.live.switchCamera" = "Prepnúť kameru";
+"ios.a11y.turnOnSpeaker" = "Zapnúť reproduktor";
+"ios.a11y.turnOffSpeaker" = "Vypnúť reproduktor";
+"ios.a11y.turnOnCamera" = "Zapnúť kameru";
+"ios.a11y.turnOffCamera" = "Vypnúť kameru";
+"ios.a11y.acceptCall" = "Prijať hovor";
+"ios.a11y.declineCall" = "Odmietnuť hovor";
+"ios.a11y.endCall" = "Ukončiť hovor";
+"ios.a11y.dismiss" = "Zavrieť";
+"ios.auth.dateOfBirth" = "Dátum narodenia";
+"ios.auth.ageTermsAgree" = "Mám aspoň 16 rokov a súhlasím s Podmienkami služby";
+"ios.auth.ageTooYoung" = "Na vytvorenie účtu ZRP musíte mať aspoň 16 rokov.";

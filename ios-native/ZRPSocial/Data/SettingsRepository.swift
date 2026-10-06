@@ -233,11 +233,22 @@ struct ReportRequest: Encodable {
         // account) with no single post/comment/listing attached - see
         // the backend's reportedUserId field in prisma/schema.prisma.
         case user(String)
-        // Two more of the route's eight polymorphic targets that had a
+        // Two more of the route's ten polymorphic targets that had a
         // backend field and working web + Android UI but no case here at
         // all - an Opportunity listing and a ZRP HELP campaign.
         case opportunity(String)
         case campaign(String)
+        // The remaining four of the route's ten polymorphic targets
+        // (src/app/api/reports/route.ts): a PLAY challenge, a ZRP Live
+        // Audio room, a ZRP Live Video room, and one message inside
+        // either room's shared chat. None had a case here before this
+        // pass, even though every one of them already has a real entry
+        // point on web - see PlayChallengeView, LiveAudioRoomView,
+        // LiveVideoRoomView and LiveChatOverlay for the wiring.
+        case challenge(String)
+        case liveAudioRoom(String)
+        case liveVideoRoom(String)
+        case liveChatMessage(String)
     }
 
     let target: Target
@@ -253,13 +264,19 @@ struct ReportRequest: Encodable {
         case .user(let id): try container.encode(id, forKey: .userId)
         case .opportunity(let id): try container.encode(id, forKey: .opportunityId)
         case .campaign(let id): try container.encode(id, forKey: .campaignId)
+        case .challenge(let id): try container.encode(id, forKey: .challengeId)
+        case .liveAudioRoom(let id): try container.encode(id, forKey: .liveAudioRoomId)
+        case .liveVideoRoom(let id): try container.encode(id, forKey: .liveVideoRoomId)
+        case .liveChatMessage(let id): try container.encode(id, forKey: .liveChatMessageId)
         }
         try container.encode(reason.rawValue, forKey: .reason)
         try container.encodeIfPresent(details, forKey: .details)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case postId, commentId, listingId, userId, opportunityId, campaignId, reason, details
+        case postId, commentId, listingId, userId, opportunityId, campaignId
+        case challengeId, liveAudioRoomId, liveVideoRoomId, liveChatMessageId
+        case reason, details
     }
 }
 

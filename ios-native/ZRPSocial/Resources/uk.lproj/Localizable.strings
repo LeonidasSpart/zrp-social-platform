@@ -1680,3 +1680,14 @@
 "ios.live.someone" = "Хтось";
 "ios.live.startNow" = "Почати зараз";
 "ios.live.switchCamera" = "Змінити камеру";
+"ios.a11y.turnOnSpeaker" = "Увімкнути гучний зв'язок";
+"ios.a11y.turnOffSpeaker" = "Вимкнути гучний зв'язок";
+"ios.a11y.turnOnCamera" = "Увімкнути камеру";
+"ios.a11y.turnOffCamera" = "Вимкнути камеру";
+"ios.a11y.acceptCall" = "Прийняти виклик";
+"ios.a11y.declineCall" = "Відхилити виклик";
+"ios.a11y.endCall" = "Завершити виклик";
+"ios.a11y.dismiss" = "Приховати";
+"ios.auth.dateOfBirth" = "Дата народження";
+"ios.auth.ageTermsAgree" = "Мені не менше 16 років, і я приймаю Умови використання";
+"ios.auth.ageTooYoung" = "Щоб створити обліковий запис ZRP, вам має бути щонайменше 16 років.";
