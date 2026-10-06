@@ -2022,6 +2022,32 @@ class LocalizationCompletenessTest {
             "admin_news_network_publication_meta",
             "communities_create_hashtag_placeholder",
         ),
+        "tl" to setOf(
+            // "Email"/"Password"/"Media" are identical, widely-used
+            // Tagalog loanwords in mainstream Filipino apps (Facebook/
+            // Shopee/Lazada PH all show these untranslated), used
+            // consistently this way across the rest of this file.
+            "team_col_email",
+            "auth_email",
+            "auth_password",
+            "search_media",
+            "profile_media",
+            // "Hackathon"/"Hashtag" are accepted cognates kept untranslated
+            // in several other languages (fr/de above).
+            "opportunity_type_hackathon",
+            "communities_create_hashtag_label",
+            // "ZRP Music"/"ZRP Team" are locked sub-brand/badge names.
+            "music_title",
+            "admin_badge_team",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+        ),
     )
 
     private val englishResources by lazy { parseStringsXml(File(resDir, "values/strings.xml")) }
