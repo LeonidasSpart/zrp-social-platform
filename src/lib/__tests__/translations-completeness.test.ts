@@ -3658,6 +3658,75 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
     "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
   ],
+  sw: [
+    "nav.launchpad", // "Launchpad" is the established brand-name exception
+    "launchpad.daoDetail.quorumLabel", // "Quorum" is a DAO governance term with no established Swahili equivalent
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.swap", // "Swap" is a standard DeFi/crypto term used as a loanword, no common Swahili equivalent
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated
+    "launchpad.curve.heading", // "Bonding Curve" is a specific DeFi mechanism term with no established Swahili equivalent
+    "launchpad.curve.statusBonding", // "Bonding" is the status term for the bonding-curve mechanism above
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range15m", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range1h", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range6h", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range24h", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range7d", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range30d", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "settings.video", // "Video" is a fully naturalized Swahili loanword, identical spelling/pronunciation
+    "settings.bio", // "Bio" is the same word in Swahili
+    "chat.contactVideo", // "Video" is a fully naturalized Swahili loanword
+    "group.lastMessagePrefix", // "{name}: {msg}" - pure placeholder template, no translatable words
+    "analytics.platformAndroid", // "Android" is a proper noun/platform name
+    "analytics.platformIos", // "iOS" is a proper noun/platform name
+    "profile.tip", // "Tip" is kept as the product term used elsewhere in the app for the tipping feature
+    "contact.faqLabel", // "FAQ" is a universally-used acronym in Swahili tech UI
+    "footer.faq", // "FAQ" is a universally-used acronym in Swahili tech UI
+    "ambassadors.region.asia", // "Asia" is spelled identically in Swahili
+    "ambassadors.region.oceania", // "Oceania" is spelled identically in Swahili
+    "press.emailBadge", // "press@zrp.one" email address, not translatable content
+    "press.faviconLabel", // "Favicon" is a technical term with no Swahili equivalent
+    "faq.cat.trustPassport", // "ZRP Trust Passport" is a named feature, kept in Latin for consistency with other ZRP sub-brands
+    "faq.whatIsTrustPassport.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustLocation.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustVerification.passportCardTitle", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.hero.tagTrustPassport", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.section.trustPassport.title", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "help.section.aid.title", // "ZRP Help" is the established brand-name exception
+    "help.section.opportunity.title", // "ZRP Opportunity" is the established brand-name exception
+    "help.music.studioHeading", // "Music Studio" is a product sub-brand name
+    "help.section.music.title", // "ZRP Music" is the established brand-name exception
+    "help.trustPassport.whereFindBold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "marketplace.heroTitle", // "ZRP Market Plus" is a product sub-brand name
+    "faq.cat.marketPlus", // "ZRP Market Plus" is a product sub-brand name
+    "faq.whatIsMarketPlus.p1Bold", // "ZRP Market Plus" is a product sub-brand name
+    "help.section.marketplace.title", // "ZRP Market Plus" is a product sub-brand name
+    "profile.trustPassportTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "stories.video", // "Video" is a fully naturalized Swahili loanword
+    "journalist.editor.slug", // "Slug" is a technical CMS term with no established Swahili equivalent
+    "pricing.featureLiveAudio", // "Live Audio" is a ZRP Live sub-feature name
+    "ads.dashboard.ctr", // "CTR" is an acronym/industry term, kept untranslated
+    "deleteAccount.confirmWord", // "DELETE" - the UI checks the typed confirmation against this literal word
+    "trust.headerTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "trust.outOf100", // "/ 100" - numeric score format, no translatable text
+    "adminNews.slugLabel", // "Slug" is a technical CMS term with no established Swahili equivalent
+    "play.vs", // "vs" is a short technical/sports abbreviation used as-is in Swahili media too
+    "opportunity.heroTitle", // "ZRP OPPORTUNITY" is the established brand-name exception
+    "opportunity.typeHackathon", // "Hackathon" is widely used as-is, no natural Swahili equivalent in common usage
+    "help.heroTitle", // "ZRP HELP" is the established brand-name exception
+    "nav.premium", // "Premium" is commonly used untranslated as a plan/tier name in Swahili commercial apps
+    "nav.aiAssistant", // "ZRP AI" is the established brand-name exception
+    "music.studio.explicitBadge", // "E" - the single-letter explicit-content badge, same convention as music streaming apps worldwide
+    "tipModal.charCount", // "{count}/1000" - pure placeholder/format template, no translatable words
+    "professionalCategory.blockchain", // "Blockchain" is used untranslated in Swahili tech/professional contexts
+    "communities.create.hashtagLabel", // "Hashtag" is a standard loanword, used untranslated in Swahili social apps
+    "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
+    "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
+  ],
   fa: [
     "nav.launchpad", // "Launchpad" is the established brand-name exception
     "group.lastMessagePrefix", // "{name}: {msg}" - pure placeholder template, no translatable words
