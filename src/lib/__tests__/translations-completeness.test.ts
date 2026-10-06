@@ -3658,6 +3658,65 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
     "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
   ],
+  th: [
+    "nav.launchpad", // "Launchpad" is the established brand-name exception
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.home.swap", // "Swap" is a standard DeFi/crypto term used as a loanword, no common Thai equivalent
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated
+    "launchpad.curve.heading", // "Bonding Curve" is a specific DeFi mechanism term with no established Thai equivalent
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "group.lastMessagePrefix", // "{name}: {msg}" - pure placeholder template, no translatable words
+    "apiKeys.title", // "API Keys" is a technical term kept in Latin, consistent with "API key" used untranslated elsewhere in this surface
+    "analytics.platformAndroid", // "Android" is a proper noun/platform name
+    "analytics.platformIos", // "iOS" is a proper noun/platform name
+    "communityCode.navLabel", // "Community & Leadership Code" is treated as the proper/document name of this policy
+    "communityCode.title", // "ZRP Community & Leadership Code" is treated as the proper/document name of this policy
+    "investors.platform.news.title", // "ZRP News" is the established brand-name exception
+    "investors.platform.music.title", // "ZRP Music" is the established brand-name exception
+    "press.emailBadge", // "press@zrp.one" email address, not translatable content
+    "press.faviconLabel", // "Favicon" is a technical term with no Thai equivalent
+    "faq.cat.trustPassport", // "ZRP Trust Passport" is a named feature, kept in Latin for consistency with other ZRP sub-brands
+    "faq.whatIsTrustPassport.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustLocation.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustVerification.passportCardTitle", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.hero.tagTrustPassport", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.section.trustPassport.title", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "help.section.aid.title", // "ZRP Help" is the established brand-name exception
+    "help.section.opportunity.title", // "ZRP Opportunity" is the established brand-name exception
+    "help.music.studioHeading", // "Music Studio" is a product sub-brand name
+    "help.section.music.title", // "ZRP Music" is the established brand-name exception
+    "help.trustPassport.whereFindBold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "marketplace.heroTitle", // "ZRP Market Plus" is a product sub-brand name
+    "faq.cat.marketPlus", // "ZRP Market Plus" is a product sub-brand name
+    "faq.whatIsMarketPlus.p1Bold", // "ZRP Market Plus" is a product sub-brand name
+    "help.section.marketplace.title", // "ZRP Market Plus" is a product sub-brand name
+    "profile.trustPassportTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "journalist.editor.slug", // "Slug" is a technical CMS term with no established Thai equivalent
+    "journalist.editor.slugPlaceholder", // "article-slug" is a literal URL-slug format example, not prose
+    "pricing.featureLiveAudio", // "Live Audio" is a ZRP Live sub-feature name
+    "pricing.support247", // "24/7" - numeral/symbol notation, not translatable prose
+    "ads.dashboard.ctr", // "CTR" is an acronym/industry term, kept untranslated
+    "deleteAccount.confirmWord", // "DELETE" - the UI checks the typed confirmation against this literal word
+    "creatorDash.studioTitle", // "Creator Studio" is a product feature name kept in English for consistency
+    "trust.headerTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "trust.outOf100", // "/ 100" - numeric score format, no translatable text
+    "play.vs", // "vs" is a short technical/sports abbreviation used as-is in Thai media too
+    "play.xp", // "{n} XP" template - "XP" is a universal gaming acronym, kept untranslated
+    "opportunity.heroTitle", // "ZRP OPPORTUNITY" is the established brand-name exception
+    "help.heroTitle", // "ZRP HELP" is the established brand-name exception
+    "nav.creatorStudio", // "Creator Studio" is a product feature name kept in English for consistency
+    "nav.aiAssistant", // "ZRP AI" is the established brand-name exception
+    "music.shell.studioLabel", // "Music Studio" is a product sub-brand name
+    "music.studio.explicitBadge", // "E" - the single-letter explicit-content badge, same convention as music streaming apps worldwide
+    "tipModal.charCount", // "{count}/1000" - pure placeholder/format template, no translatable words
+    "communities.create.hashtagPlaceholder", // "travel" - a literal hashtag example; hashtags are conventionally kept in Latin script for cross-language discoverability
+    "childSafety.section6.communityCodeLabel", // "Community & Leadership Code" - named legal document title, kept as a proper noun
+    "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
+    "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
+  ],
   sw: [
     "nav.launchpad", // "Launchpad" is the established brand-name exception
     "launchpad.daoDetail.quorumLabel", // "Quorum" is a DAO governance term with no established Swahili equivalent
