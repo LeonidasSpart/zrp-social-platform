@@ -434,7 +434,7 @@
     <string name="story_reply_sent">Đã gửi!</string>
     <string name="comment_repost_cd">Chia sẻ lại</string>
     <string name="comment_undo_repost_cd">Hoàn tác chia sẻ lại</string>
-    <string name="createpost_media_count_cd">%1$d/%2$d media</string>
+    <string name="createpost_media_count_cd">%1$d/%2$d tệp media</string>
     <string name="createpost_media_unavailable_cd">Media không khả dụng cho gói này</string>
     <string name="comment_cancel_reply_cd">Hủy trả lời</string>
     <string name="comment_replying_to">Đang trả lời @%1$s</string>
@@ -1241,7 +1241,7 @@
     <string name="play_title_placeholder">Đặt một tiêu đề thật thu hút cho thử thách của bạn</string>
     <string name="play_todays_challenge">Thử thách hôm nay</string>
     <string name="play_trending">Thử thách nổi bật</string>
-    <string name="play_type_logic">Logic</string>
+    <string name="play_type_logic">Suy luận</string>
     <string name="play_type_memory">Ghi nhớ</string>
     <string name="play_type_trivia">Đố vui</string>
     <string name="play_type_reaction">Phản xạ</string>
@@ -1330,7 +1330,7 @@
     <string name="shorts_premium_locked_cta">Xem bài viết</string>
     <string name="caption_view_more">Xem thêm</string>
     <string name="caption_view_less">Ẩn bớt</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Video ngắn</string>
     <string name="creator_amount_usdc_label">Số tiền (USDC)</string>
     <string name="creator_available_balance">Số dư khả dụng: %1$s</string>
     <string name="creator_enter_amount_placeholder">Nhập số tiền</string>
@@ -2474,7 +2474,7 @@
     <string name="admin_analytics_source_unknown">Không xác định</string>
     <string name="admin_analytics_platform_android">Android</string>
     <string name="admin_analytics_platform_ios">iOS</string>
-    <string name="admin_analytics_platform_web">Web</string>
+    <string name="admin_analytics_platform_web">Trang web</string>
     <string name="admin_analytics_platform_unknown">Không xác định</string>
     <string name="admin_badge_verified">Đã xác minh</string>
     <string name="admin_badge_organization">Tổ chức</string>
@@ -2500,8 +2500,8 @@
     <string name="settings_theme_system">Dùng cài đặt thiết bị</string>
     <string name="music_player_hidden">Đã ẩn trình phát. Nhạc vẫn tiếp tục phát.</string>
     <string name="music_show_player">Hiện trình phát</string>
-    <string name="nav_live_video">Live Video</string>
-    <string name="live_video_page_title">Live Video</string>
+    <string name="nav_live_video">Video trực tiếp</string>
+    <string name="live_video_page_title">Video trực tiếp</string>
     <string name="live_video_subtitle">Tham gia một phòng video trực tiếp, hoặc bắt đầu phòng của riêng bạn.</string>
     <string name="live_video_no_rooms_desc">Hãy là người đầu tiên phát trực tiếp.</string>
     <string name="live_video_viewer_count">%1$d đang xem</string>

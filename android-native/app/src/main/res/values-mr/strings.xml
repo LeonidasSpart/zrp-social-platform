@@ -2474,7 +2474,7 @@
     <string name="admin_analytics_source_unknown">अज्ञात</string>
     <string name="admin_analytics_platform_android">Android</string>
     <string name="admin_analytics_platform_ios">iOS</string>
-    <string name="admin_analytics_platform_web">Web</string>
+    <string name="admin_analytics_platform_web">वेब</string>
     <string name="admin_analytics_platform_unknown">अज्ञात</string>
     <string name="admin_badge_verified">सत्यापित</string>
     <string name="admin_badge_organization">संस्था</string>
@@ -2500,8 +2500,8 @@
     <string name="settings_theme_system">डिव्हाइस सेटिंग वापरा</string>
     <string name="music_player_hidden">प्लेयर लपवला. प्लेबॅक सुरू आहे.</string>
     <string name="music_show_player">प्लेयर दाखवा</string>
-    <string name="nav_live_video">Live Video</string>
-    <string name="live_video_page_title">Live Video</string>
+    <string name="nav_live_video">लाइव्ह व्हिडिओ</string>
+    <string name="live_video_page_title">लाइव्ह व्हिडिओ</string>
     <string name="live_video_subtitle">एका लाईव्ह व्हिडिओ रूममध्ये सामील व्हा, किंवा स्वतःचे सुरू करा.</string>
     <string name="live_video_no_rooms_desc">लाईव्ह जाणारे पहिले व्हा.</string>
     <string name="live_video_viewer_count">%1$d पाहत आहेत</string>

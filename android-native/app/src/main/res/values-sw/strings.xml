@@ -202,7 +202,7 @@
     <string name="nav_ai">ZRP AI</string>
     <string name="nav_creator_studio">Studio ya Mbunifu</string>
     <string name="nav_admin">Msimamizi</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">Video Fupi</string>
     <string name="nav_help_center">Kituo cha Msaada</string>
     <string name="drawer_section_core">Msingi</string>
     <string name="drawer_section_discover">Gundua</string>
@@ -1330,7 +1330,7 @@
     <string name="shorts_premium_locked_cta">Tazama chapisho</string>
     <string name="caption_view_more">Tazama zaidi</string>
     <string name="caption_view_less">Tazama kidogo</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">Video Fupi</string>
     <string name="creator_amount_usdc_label">Kiasi (USDC)</string>
     <string name="creator_available_balance">Salio linalopatikana: %1$s</string>
     <string name="creator_enter_amount_placeholder">Weka kiasi</string>
@@ -2182,7 +2182,7 @@
     <string name="ambassadors_region_europe">Ulaya</string>
     <string name="ambassadors_region_north_america">Amerika Kaskazini</string>
     <string name="ambassadors_region_south_america">Amerika Kusini</string>
-    <string name="ambassadors_region_oceania">Oceania</string>
+    <string name="ambassadors_region_oceania">Oseania</string>
     <string name="ambassadors_region_antarctica">Antaktika</string>
     <string name="ambassadors_country_label_ambassadors">Mabalozi wa ZRP</string>
     <string name="ambassadors_country_label_communities">Jumuiya Hai</string>
@@ -2474,7 +2474,7 @@
     <string name="admin_analytics_source_unknown">Haijulikani</string>
     <string name="admin_analytics_platform_android">Android</string>
     <string name="admin_analytics_platform_ios">iOS</string>
-    <string name="admin_analytics_platform_web">Web</string>
+    <string name="admin_analytics_platform_web">Wavuti</string>
     <string name="admin_analytics_platform_unknown">Haijulikani</string>
     <string name="admin_badge_verified">Imethibitishwa</string>
     <string name="admin_badge_organization">Shirika</string>

@@ -192,7 +192,7 @@
     <string name="nav_search">సెర్చ్</string>
     <string name="nav_explore">ఎక్స్‌ప్లోర్</string>
     <string name="nav_communities">కమ్యూనిటీలు</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">ఆటలు</string>
     <string name="nav_news">వార్తలు</string>
     <string name="nav_music">మ్యూజిక్</string>
     <string name="nav_marketplace">మార్కెట్‌ప్లేస్</string>
@@ -1330,7 +1330,7 @@
     <string name="shorts_premium_locked_cta">పోస్ట్ చూడండి</string>
     <string name="caption_view_more">మరింత చూడండి</string>
     <string name="caption_view_less">తక్కువ చూడండి</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">షార్ట్స్</string>
     <string name="creator_amount_usdc_label">మొత్తం (USDC)</string>
     <string name="creator_available_balance">అందుబాటులో ఉన్న బ్యాలెన్స్: %1$s</string>
     <string name="creator_enter_amount_placeholder">మొత్తాన్ని నమోదు చేయండి</string>
@@ -2474,7 +2474,7 @@
     <string name="admin_analytics_source_unknown">తెలియనిది</string>
     <string name="admin_analytics_platform_android">Android</string>
     <string name="admin_analytics_platform_ios">iOS</string>
-    <string name="admin_analytics_platform_web">Web</string>
+    <string name="admin_analytics_platform_web">వెబ్</string>
     <string name="admin_analytics_platform_unknown">తెలియనిది</string>
     <string name="admin_badge_verified">వెరిఫై చేయబడింది</string>
     <string name="admin_badge_organization">ఆర్గనైజేషన్</string>

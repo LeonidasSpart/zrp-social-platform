@@ -2474,7 +2474,7 @@
     <string name="admin_analytics_source_unknown">ያልታወቀ</string>
     <string name="admin_analytics_platform_android">Android</string>
     <string name="admin_analytics_platform_ios">iOS</string>
-    <string name="admin_analytics_platform_web">Web</string>
+    <string name="admin_analytics_platform_web">ዌብ</string>
     <string name="admin_analytics_platform_unknown">ያልታወቀ</string>
     <string name="admin_badge_verified">የተረጋገጠ</string>
     <string name="admin_badge_organization">ድርጅት</string>

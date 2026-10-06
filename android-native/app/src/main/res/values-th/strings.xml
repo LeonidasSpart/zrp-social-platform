@@ -89,10 +89,10 @@
     <string name="team_adding">กำลังเพิ่ม...</string>
     <string name="team_remove_dialog_title">ลบสมาชิกทีม</string>
     <string name="team_remove_confirm">คุณแน่ใจหรือไม่ว่าต้องการลบ %1$s ออกจากทีม การดำเนินการนี้ไม่สามารถย้อนกลับได้</string>
-    <string name="nav_api_keys">API Keys</string>
+    <string name="nav_api_keys">คีย์ API</string>
     <string name="api_keys_upgrade_required">ต้องอัปเกรดแพ็กเกจ</string>
     <string name="api_keys_upgrade_desc">การเข้าถึง API ใช้ได้กับแพ็กเกจ Business และ Enterprise</string>
-    <string name="api_keys_title">API Keys</string>
+    <string name="api_keys_title">คีย์ API</string>
     <string name="api_keys_subtitle">จัดการ API Key ของคุณสำหรับการเข้าถึงแบบโปรแกรม</string>
     <string name="api_keys_generate_key">สร้างคีย์</string>
     <string name="api_keys_your_keys">API Keys ของคุณ</string>
@@ -192,7 +192,7 @@
     <string name="nav_search">ค้นหา</string>
     <string name="nav_explore">สำรวจ</string>
     <string name="nav_communities">คอมมูนิตี้</string>
-    <string name="nav_play">Play</string>
+    <string name="nav_play">เกม</string>
     <string name="nav_news">ข่าว</string>
     <string name="nav_music">เพลง</string>
     <string name="nav_marketplace">ตลาดซื้อขาย</string>
@@ -202,7 +202,7 @@
     <string name="nav_ai">ZRP AI</string>
     <string name="nav_creator_studio">สตูดิโอครีเอเตอร์</string>
     <string name="nav_admin">แอดมิน</string>
-    <string name="nav_shorts">Shorts</string>
+    <string name="nav_shorts">วิดีโอสั้น</string>
     <string name="nav_help_center">ศูนย์ช่วยเหลือ</string>
     <string name="drawer_section_core">หลัก</string>
     <string name="drawer_section_discover">ค้นพบ</string>
@@ -1330,7 +1330,7 @@
     <string name="shorts_premium_locked_cta">ดูโพสต์</string>
     <string name="caption_view_more">ดูเพิ่มเติม</string>
     <string name="caption_view_less">ย่อ</string>
-    <string name="shorts_title">Shorts</string>
+    <string name="shorts_title">วิดีโอสั้น</string>
     <string name="creator_amount_usdc_label">จำนวน (USDC)</string>
     <string name="creator_available_balance">ยอดเงินที่พร้อมใช้: %1$s</string>
     <string name="creator_enter_amount_placeholder">กรอกจำนวน</string>
@@ -1357,7 +1357,7 @@
     <string name="creator_stat_total_tips">ทิปทั้งหมด</string>
     <string name="creator_stat_withdrawn">ถอนแล้ว</string>
     <string name="creator_studio_subtitle">รายได้ ประสิทธิภาพของเนื้อหา และการเติบโตของผู้ติดตาม</string>
-    <string name="creator_studio_title">Creator Studio</string>
+    <string name="creator_studio_title">สตูดิโอครีเอเตอร์</string>
     <string name="creator_tab_audience">ผู้ติดตาม</string>
     <string name="creator_tab_content">เนื้อหา</string>
     <string name="creator_tab_overview">ภาพรวม</string>
@@ -2474,7 +2474,7 @@
     <string name="admin_analytics_source_unknown">ไม่ทราบ</string>
     <string name="admin_analytics_platform_android">Android</string>
     <string name="admin_analytics_platform_ios">iOS</string>
-    <string name="admin_analytics_platform_web">Web</string>
+    <string name="admin_analytics_platform_web">เว็บ</string>
     <string name="admin_analytics_platform_unknown">ไม่ทราบ</string>
     <string name="admin_badge_verified">ยืนยันแล้ว</string>
     <string name="admin_badge_organization">องค์กร</string>
