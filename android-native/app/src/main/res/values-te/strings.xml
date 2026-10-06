@@ -1842,8 +1842,8 @@
     <string name="admin_help_withdrawals_title">HELP విత్‌డ్రాయల్స్</string>
     <string name="admin_help_withdrawals_none">చూపించడానికి HELP క్యాంపెయిన్ విత్‌డ్రాయల్స్ లేవు.</string>
     <string name="admin_help_withdrawals_campaign">క్యాంపెయిన్: %1$s</string>
-    <string name="admin_help_withdrawals_approve_confirm">\&quot;%3$s\&quot; కోసం ఇప్పుడు @%2$s వాలెట్‌కు %1$s పంపాలా? ట్రాన్సఫర్ ఆన్-చెయిన్‌లో జరుగుతుంది మరియు దీన్ని రివర్స్ చేయలేరు.</string>
-    <string name="admin_help_withdrawals_reject_confirm">\&quot;%2$s\&quot; కోసం ఈ %1$s విత్‌డ్రాయల్‌ను తిరస్కరించాలా? మొత్తం క్యాంపెయిన్ అందుబాటులో ఉన్న బ్యాలెన్స్‌కు తిరిగి వెళ్తుంది.</string>
+    <string name="admin_help_withdrawals_approve_confirm">&quot;%3$s&quot; కోసం ఇప్పుడు @%2$s వాలెట్‌కు %1$s పంపాలా? ట్రాన్సఫర్ ఆన్-చెయిన్‌లో జరుగుతుంది మరియు దీన్ని రివర్స్ చేయలేరు.</string>
+    <string name="admin_help_withdrawals_reject_confirm">&quot;%2$s&quot; కోసం ఈ %1$s విత్‌డ్రాయల్‌ను తిరస్కరించాలా? మొత్తం క్యాంపెయిన్ అందుబాటులో ఉన్న బ్యాలెన్స్‌కు తిరిగి వెళ్తుంది.</string>
     <string name="admin_upgrade_requests_title">అప్‌గ్రేడ్ అభ్యర్థనలు</string>
     <string name="admin_upgrade_requests_none">చూపించడానికి అప్‌గ్రేడ్ అభ్యర్థనలు లేవు.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>
@@ -2153,7 +2153,7 @@
     <string name="admin_news_update_article">ఆర్టికల్ అప్‌డేట్ చేయండి</string>
     <string name="admin_news_err_content_required">కంటెంట్ అవసరం.</string>
     <string name="admin_news_err_author_id_required">రచయిత ID అవసరం.</string>
-    <string name="admin_news_confirm_delete">\&quot;%1$s\&quot;ను తీసివేయాలా?\n\nఈ చర్యను వెనక్కి తీసుకోలేరు.</string>
+    <string name="admin_news_confirm_delete">&quot;%1$s&quot;ను తీసివేయాలా?\n\nఈ చర్యను వెనక్కి తీసుకోలేరు.</string>
     <string name="admin_news_prompt_reject_feedback">జర్నలిస్ట్ కోసం ఫీడ్‌బ్యాక్ (వారికి చూపబడుతుంది, ఆప్షనల్):</string>
     <string name="admin_news_not_published">ప్రచురించలేదు</string>
     <string name="admin_news_success_created">న్యూస్ ఆర్టికల్ విజయవంతంగా సృష్టించబడింది.</string>
@@ -2448,7 +2448,7 @@
     <string name="admin_subscription_detail_interval_monthly">నెలవారీ</string>
     <string name="admin_subscription_detail_interval_yearly">వార్షిక</string>
     <string name="admin_subscription_detail_grant_extend">ఇవ్వండి / పొడిగించండి</string>
-    <string name="admin_subscription_detail_grant_extend_note">\&quot;ఇవ్వండి / పొడిగించండి\&quot; ఒక అసలైన చెల్లింపును ప్రతిబింబిస్తుంది: అదే ప్లాన్‌కు ఒక పీరియడ్ ఇంకా యాక్టివ్‌గా ఉంటే యూజర్ ఉన్న పీరియడ్‌ను పొడిగిస్తుంది, లేకపోతే ఇది ఈరోజు నుండి ఒక కొత్త పీరియడ్‌ను ప్రారంభిస్తుంది. డబ్బు కదలదు - ఇది దిగువ చెల్లింపు హిస్టరీలో admin_grantగా రికార్డ్ చేయబడుతుంది.</string>
+    <string name="admin_subscription_detail_grant_extend_note">&quot;ఇవ్వండి / పొడిగించండి&quot; ఒక అసలైన చెల్లింపును ప్రతిబింబిస్తుంది: అదే ప్లాన్‌కు ఒక పీరియడ్ ఇంకా యాక్టివ్‌గా ఉంటే యూజర్ ఉన్న పీరియడ్‌ను పొడిగిస్తుంది, లేకపోతే ఇది ఈరోజు నుండి ఒక కొత్త పీరియడ్‌ను ప్రారంభిస్తుంది. డబ్బు కదలదు - ఇది దిగువ చెల్లింపు హిస్టరీలో admin_grantగా రికార్డ్ చేయబడుతుంది.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">రద్దు చేయడానికి కారణం (ఆప్షనల్):</string>
     <string name="admin_subscription_detail_cancel_remaining">మిగిలిన సమయాన్ని రద్దు చేయండి</string>
     <string name="admin_subscription_detail_restore">పునరుద్ధరించండి</string>
@@ -2533,7 +2533,7 @@
     <string name="live_gift_send">గిఫ్ట్ పంపండి</string>
     <string name="live_gift_send_with_total">గిఫ్ట్ పంపండి · %1$s</string>
     <string name="live_gift_sent">గిఫ్ట్ పంపబడింది</string>
-    <string name="live_gift_unconfirmed">మేము మీ గిఫ్ట్‌ను నిర్ధారించలేకపోయాం. మీ కనెక్షన్‌ను చెక్ చేసి \\'గిఫ్ట్ పంపండి\\' మళ్లీ టాప్ చేయండి; మీకు రెండుసార్లు చార్జ్ చేయబడదు.</string>
+    <string name="live_gift_unconfirmed">మేము మీ గిఫ్ట్‌ను నిర్ధారించలేకపోయాం. మీ కనెక్షన్‌ను చెక్ చేసి \'గిఫ్ట్ పంపండి\' మళ్లీ టాప్ చేయండి; మీకు రెండుసార్లు చార్జ్ చేయబడదు.</string>
     <string name="live_gift_banner_sent">%1$s పంపారు</string>
     <string name="live_gift_banner_a11y">%1$s %2$d × %3$s పంపారు</string>
     <string name="live_reaction_send">ఒక హార్ట్ పంపండి</string>

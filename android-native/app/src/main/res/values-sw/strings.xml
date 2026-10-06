@@ -799,7 +799,7 @@
     <string name="music_playlist_detail_rename_aria">Badilisha jina la orodha ya nyimbo</string>
     <string name="music_playlist_detail_save_aria">Hifadhi jina</string>
     <string name="music_playlist_detail_delete">Futa</string>
-    <string name="music_playlist_detail_delete_confirm">Futa \&quot;%1$s\&quot;? Hili haliwezi kutenduliwa.</string>
+    <string name="music_playlist_detail_delete_confirm">Futa &quot;%1$s&quot;? Hili haliwezi kutenduliwa.</string>
     <string name="music_playlist_detail_empty_title">Hakuna nyimbo kwenye orodha hii bado</string>
     <string name="music_playlist_detail_empty_body">Ongeza nyimbo kutoka Gundua, msanii, au albamu.</string>
     <string name="music_playlist_detail_move_up_aria">Hamisha juu</string>
@@ -2153,7 +2153,7 @@
     <string name="admin_news_update_article">Sasisha Makala</string>
     <string name="admin_news_err_content_required">Maudhui yanahitajika.</string>
     <string name="admin_news_err_author_id_required">Kitambulisho cha mwandishi kinahitajika.</string>
-    <string name="admin_news_confirm_delete">Futa \&quot;%1$s\&quot;?\n\nHatua hii haiwezi kutenduliwa.</string>
+    <string name="admin_news_confirm_delete">Futa &quot;%1$s&quot;?\n\nHatua hii haiwezi kutenduliwa.</string>
     <string name="admin_news_prompt_reject_feedback">Maoni kwa mwandishi wa habari (yanaonyeshwa kwake, si lazima):</string>
     <string name="admin_news_not_published">Haijachapishwa</string>
     <string name="admin_news_success_created">Makala ya habari imeundwa kwa mafanikio.</string>

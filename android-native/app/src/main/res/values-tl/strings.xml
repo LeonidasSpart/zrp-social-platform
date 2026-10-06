@@ -799,7 +799,7 @@
     <string name="music_playlist_detail_rename_aria">Palitan ang pangalan ng playlist</string>
     <string name="music_playlist_detail_save_aria">I-save ang pangalan</string>
     <string name="music_playlist_detail_delete">Burahin</string>
-    <string name="music_playlist_detail_delete_confirm">Burahin ang \&quot;%1$s\&quot;? Hindi na ito maibabalik.</string>
+    <string name="music_playlist_detail_delete_confirm">Burahin ang &quot;%1$s&quot;? Hindi na ito maibabalik.</string>
     <string name="music_playlist_detail_empty_title">Walang track sa playlist na ito</string>
     <string name="music_playlist_detail_empty_body">Magdagdag ng tracks mula sa Tuklasin, isang artista, o isang album.</string>
     <string name="music_playlist_detail_move_up_aria">Ilipat Pataas</string>
@@ -1842,8 +1842,8 @@
     <string name="admin_help_withdrawals_title">Mga Pag-withdraw ng HELP</string>
     <string name="admin_help_withdrawals_none">Walang pag-withdraw ng HELP campaign na ipapakita.</string>
     <string name="admin_help_withdrawals_campaign">Kampanya: %1$s</string>
-    <string name="admin_help_withdrawals_approve_confirm">Ipadala ang %1$s sa wallet ni @%2$s ngayon para sa \&quot;%3$s\&quot;? Mapupunta ito sa blockchain at hindi na mababawi.</string>
-    <string name="admin_help_withdrawals_reject_confirm">Tanggihan ang pag-withdraw na %1$s para sa \&quot;%2$s\&quot;? Babalik ang halaga sa available balance ng kampanya.</string>
+    <string name="admin_help_withdrawals_approve_confirm">Ipadala ang %1$s sa wallet ni @%2$s ngayon para sa &quot;%3$s&quot;? Mapupunta ito sa blockchain at hindi na mababawi.</string>
+    <string name="admin_help_withdrawals_reject_confirm">Tanggihan ang pag-withdraw na %1$s para sa &quot;%2$s&quot;? Babalik ang halaga sa available balance ng kampanya.</string>
     <string name="admin_upgrade_requests_title">Mga Kahilingan ng Upgrade</string>
     <string name="admin_upgrade_requests_none">Walang kahilingan ng upgrade na ipapakita.</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>
@@ -2153,7 +2153,7 @@
     <string name="admin_news_update_article">I-update ang Artikulo</string>
     <string name="admin_news_err_content_required">Kailangan ang nilalaman.</string>
     <string name="admin_news_err_author_id_required">Kailangan ang Author ID.</string>
-    <string name="admin_news_confirm_delete">Tanggalin ang \&quot;%1$s\&quot;?\n\nHindi na ito maibabalik.</string>
+    <string name="admin_news_confirm_delete">Tanggalin ang &quot;%1$s&quot;?\n\nHindi na ito maibabalik.</string>
     <string name="admin_news_prompt_reject_feedback">Feedback para sa mamamahayag (makikita sa kanila, opsyonal):</string>
     <string name="admin_news_not_published">Hindi nailathala</string>
     <string name="admin_news_success_created">Matagumpay na nagawa ang artikulo ng news.</string>
@@ -2448,7 +2448,7 @@
     <string name="admin_subscription_detail_interval_monthly">Buwanan</string>
     <string name="admin_subscription_detail_interval_yearly">Taunan</string>
     <string name="admin_subscription_detail_grant_extend">Ibigay / palawigin</string>
-    <string name="admin_subscription_detail_grant_extend_note">Ang \&quot;Ibigay / palawigin\&quot; ay tumutularan sa aktuwal na bayad: pinapalawig nito ang kasalukuyang panahon ng user kung aktibo pa ito para sa parehong plano, kung hindi ay nagsisimula ng bagong panahon mula ngayon. Walang pumupunta pera - naitala ito bilang admin_grant sa kasaysayan ng bayad sa baba.</string>
+    <string name="admin_subscription_detail_grant_extend_note">Ang &quot;Ibigay / palawigin&quot; ay tumutularan sa aktuwal na bayad: pinapalawig nito ang kasalukuyang panahon ng user kung aktibo pa ito para sa parehong plano, kung hindi ay nagsisimula ng bagong panahon mula ngayon. Walang pumupunta pera - naitala ito bilang admin_grant sa kasaysayan ng bayad sa baba.</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">Dahilan ng pagkansela (opsyonal):</string>
     <string name="admin_subscription_detail_cancel_remaining">Kanselahin ang natitirang panahon</string>
     <string name="admin_subscription_detail_restore">Ibalik</string>

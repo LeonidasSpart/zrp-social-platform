@@ -1842,8 +1842,8 @@
     <string name="admin_help_withdrawals_title">HELP واپسیاں</string>
     <string name="admin_help_withdrawals_none">دکھانے کے لیے کوئی HELP مہم واپسی موجود نہیں۔</string>
     <string name="admin_help_withdrawals_campaign">مہم: %1$s</string>
-    <string name="admin_help_withdrawals_approve_confirm">ابھی \&quot;%3$s\&quot; کے لیے %1$s @%2$s کے والیٹ میں بھیجیں؟ یہ منتقلی آن چین ہوگی اور اسے واپس نہیں لیا جا سکتا۔</string>
-    <string name="admin_help_withdrawals_reject_confirm">\&quot;%2$s\&quot; کے لیے یہ %1$s واپسی مسترد کریں؟ رقم مہم کے دستیاب بیلنس میں واپس چلی جائے گی۔</string>
+    <string name="admin_help_withdrawals_approve_confirm">ابھی &quot;%3$s&quot; کے لیے %1$s @%2$s کے والیٹ میں بھیجیں؟ یہ منتقلی آن چین ہوگی اور اسے واپس نہیں لیا جا سکتا۔</string>
+    <string name="admin_help_withdrawals_reject_confirm">&quot;%2$s&quot; کے لیے یہ %1$s واپسی مسترد کریں؟ رقم مہم کے دستیاب بیلنس میں واپس چلی جائے گی۔</string>
     <string name="admin_upgrade_requests_title">اپ گریڈ درخواستیں</string>
     <string name="admin_upgrade_requests_none">دکھانے کے لیے کوئی اپ گریڈ درخواست موجود نہیں۔</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>
@@ -2153,7 +2153,7 @@
     <string name="admin_news_update_article">آرٹیکل اپڈیٹ کریں</string>
     <string name="admin_news_err_content_required">مواد درکار ہے۔</string>
     <string name="admin_news_err_author_id_required">مصنف کی آئی ڈی درکار ہے۔</string>
-    <string name="admin_news_confirm_delete">\&quot;%1$s\&quot; حذف کریں؟\n\nیہ عمل واپس نہیں لیا جا سکتا۔</string>
+    <string name="admin_news_confirm_delete">&quot;%1$s&quot; حذف کریں؟\n\nیہ عمل واپس نہیں لیا جا سکتا۔</string>
     <string name="admin_news_prompt_reject_feedback">صحافی کے لیے رائے (انہیں دکھائی جائے گی، اختیاری):</string>
     <string name="admin_news_not_published">شائع نہیں ہوا</string>
     <string name="admin_news_success_created">نیوز آرٹیکل کامیابی سے بن گیا۔</string>
@@ -2448,7 +2448,7 @@
     <string name="admin_subscription_detail_interval_monthly">ماہانہ</string>
     <string name="admin_subscription_detail_interval_yearly">سالانہ</string>
     <string name="admin_subscription_detail_grant_extend">دیں / توسیع کریں</string>
-    <string name="admin_subscription_detail_grant_extend_note">\&quot;دیں / توسیع کریں\&quot; ایک حقیقی ادائیگی کی طرح کام کرتا ہے: اگر اسی پلان کی موجودہ مدت ابھی فعال ہے تو یہ اسے بڑھا دیتا ہے، ورنہ آج سے نئی مدت شروع کر دیتا ہے۔ کوئی رقم منتقل نہیں ہوتی - یہ نیچے ادائیگی کی تاریخ میں admin_grant کے طور پر ریکارڈ ہوتا ہے۔</string>
+    <string name="admin_subscription_detail_grant_extend_note">&quot;دیں / توسیع کریں&quot; ایک حقیقی ادائیگی کی طرح کام کرتا ہے: اگر اسی پلان کی موجودہ مدت ابھی فعال ہے تو یہ اسے بڑھا دیتا ہے، ورنہ آج سے نئی مدت شروع کر دیتا ہے۔ کوئی رقم منتقل نہیں ہوتی - یہ نیچے ادائیگی کی تاریخ میں admin_grant کے طور پر ریکارڈ ہوتا ہے۔</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">منسوخی کی وجہ (اختیاری):</string>
     <string name="admin_subscription_detail_cancel_remaining">بقیہ وقت منسوخ کریں</string>
     <string name="admin_subscription_detail_restore">بحال کریں</string>
@@ -2533,7 +2533,7 @@
     <string name="live_gift_send">تحفہ بھیجیں</string>
     <string name="live_gift_send_with_total">تحفہ بھیجیں · %1$s</string>
     <string name="live_gift_sent">تحفہ بھیج دیا گیا</string>
-    <string name="live_gift_unconfirmed">ہم آپ کے تحفے کی تصدیق نہیں کر سکے۔ اپنا کنکشن چیک کریں اور دوبارہ \&quot;تحفہ بھیجیں\&quot; پر ٹیپ کریں؛ آپ سے دوبارہ چارج نہیں لیا جائے گا۔</string>
+    <string name="live_gift_unconfirmed">ہم آپ کے تحفے کی تصدیق نہیں کر سکے۔ اپنا کنکشن چیک کریں اور دوبارہ &quot;تحفہ بھیجیں&quot; پر ٹیپ کریں؛ آپ سے دوبارہ چارج نہیں لیا جائے گا۔</string>
     <string name="live_gift_banner_sent">نے %1$s بھیجا</string>
     <string name="live_gift_banner_a11y">%1$s نے %2$d × %3$s بھیجا</string>
     <string name="live_reaction_send">ہارٹ بھیجیں</string>

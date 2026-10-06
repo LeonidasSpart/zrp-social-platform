@@ -799,7 +799,7 @@
     <string name="music_playlist_detail_rename_aria">เปลี่ยนชื่อเพลย์ลิสต์</string>
     <string name="music_playlist_detail_save_aria">บันทึกชื่อ</string>
     <string name="music_playlist_detail_delete">ลบ</string>
-    <string name="music_playlist_detail_delete_confirm">ลบ \&quot;%1$s\&quot; หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้</string>
+    <string name="music_playlist_detail_delete_confirm">ลบ &quot;%1$s&quot; หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้</string>
     <string name="music_playlist_detail_empty_title">ยังไม่มีเพลงในเพลย์ลิสต์นี้</string>
     <string name="music_playlist_detail_empty_body">เพิ่มเพลงจากหน้าค้นพบ ศิลปิน หรืออัลบั้ม</string>
     <string name="music_playlist_detail_move_up_aria">ย้ายขึ้น</string>

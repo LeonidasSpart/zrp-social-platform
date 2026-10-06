@@ -1842,8 +1842,8 @@
     <string name="admin_help_withdrawals_title">የHELP ገንዘብ መውጠቂያዎች</string>
     <string name="admin_help_withdrawals_none">የሚታይ የHELP ዘመቻ ገንዘብ መውጠቂያ የለም።</string>
     <string name="admin_help_withdrawals_campaign">ዘመቻ፦ %1$s</string>
-    <string name="admin_help_withdrawals_approve_confirm">%1$s ን አሁን ለ@%2$s ዋሌት ለ\&quot;%3$s\&quot; ይላኩ? ዝውውሩ በቼይን ላይ ይሆናል እና መመለስ አይቻልም።</string>
-    <string name="admin_help_withdrawals_reject_confirm">ይህን %1$s ገንዘብ መውጠቂያ ለ\&quot;%2$s\&quot; ይከልክሉ? መጠኑ ወደ ዘመቻው ያለ ቀሪ ሂሳብ ይመለሳል።</string>
+    <string name="admin_help_withdrawals_approve_confirm">%1$s ን አሁን ለ@%2$s ዋሌት ለ&quot;%3$s&quot; ይላኩ? ዝውውሩ በቼይን ላይ ይሆናል እና መመለስ አይቻልም።</string>
+    <string name="admin_help_withdrawals_reject_confirm">ይህን %1$s ገንዘብ መውጠቂያ ለ&quot;%2$s&quot; ይከልክሉ? መጠኑ ወደ ዘመቻው ያለ ቀሪ ሂሳብ ይመለሳል።</string>
     <string name="admin_upgrade_requests_title">የማሻሻል ጥያቄዎች</string>
     <string name="admin_upgrade_requests_none">የሚታይ የማሻሻል ጥያቄ የለም።</string>
     <string name="admin_upgrade_requests_plan_change">%1$s → %2$s</string>
@@ -2153,7 +2153,7 @@
     <string name="admin_news_update_article">ጽሑፍ አዘምን</string>
     <string name="admin_news_err_content_required">ይዘት ያስፈልጋል።</string>
     <string name="admin_news_err_author_id_required">የደራሲ መለያ ያስፈልጋል።</string>
-    <string name="admin_news_confirm_delete">\&quot;%1$s\&quot; ን ይሰርዙ?\n\nይህ እርምጃ መመለስ አይቻልም።</string>
+    <string name="admin_news_confirm_delete">&quot;%1$s&quot; ን ይሰርዙ?\n\nይህ እርምጃ መመለስ አይቻልም።</string>
     <string name="admin_news_prompt_reject_feedback">ለጋዜጠኛው አስተያየት (ለእነሱ ይታያል፣ አማራጭ)፦</string>
     <string name="admin_news_not_published">አልታተመም</string>
     <string name="admin_news_success_created">ዜና ጽሑፍ በተሳካ ሁኔታ ተፈጥሯል።</string>
@@ -2448,7 +2448,7 @@
     <string name="admin_subscription_detail_interval_monthly">ወርሃዊ</string>
     <string name="admin_subscription_detail_interval_yearly">ዓመታዊ</string>
     <string name="admin_subscription_detail_grant_extend">ስጥ / አርዝም</string>
-    <string name="admin_subscription_detail_grant_extend_note">\&quot;ስጥ / አርዝም\&quot; ትክክለኛ ክፍያን ይመስላል፦ ለዚያ ፕላን ገባር የሆነ ጊዜ ካለ የተጠቃሚውን ያለውን ጊዜ ያራዝማል፣ ካልሆነ ግን ከዛሬ ጀምሮ አዲስ ጊዜ ይጀምራል። ገንዘብ አይንቀሳቀስም - ከታች ባለው የክፍያ ታሪክ ውስጥ እንደ admin_grant ይመዘገባል።</string>
+    <string name="admin_subscription_detail_grant_extend_note">&quot;ስጥ / አርዝም&quot; ትክክለኛ ክፍያን ይመስላል፦ ለዚያ ፕላን ገባር የሆነ ጊዜ ካለ የተጠቃሚውን ያለውን ጊዜ ያራዝማል፣ ካልሆነ ግን ከዛሬ ጀምሮ አዲስ ጊዜ ይጀምራል። ገንዘብ አይንቀሳቀስም - ከታች ባለው የክፍያ ታሪክ ውስጥ እንደ admin_grant ይመዘገባል።</string>
     <string name="admin_subscription_detail_cancel_reason_prompt">የመሰረዝ ምክንያት (አማራጭ)፦</string>
     <string name="admin_subscription_detail_cancel_remaining">የቀረውን ጊዜ ሰርዝ</string>
     <string name="admin_subscription_detail_restore">መልስ</string>
