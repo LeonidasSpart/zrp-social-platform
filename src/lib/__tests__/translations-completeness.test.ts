@@ -3658,6 +3658,112 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "adminNewsNetwork.title", // "ZRP News Network" is the established brand-name exception
     "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
   ],
+  tl: [
+    "nav.launchpad", // "Launchpad" is the established brand-name exception
+    "launchpad.daoDetail.quorumLabel", // "Quorum" is a DAO governance term with no established Tagalog equivalent
+    "launchpad.farming.apyLabel", // "{apy} APY" - "APY" is the industry-standard acronym, untranslated
+    "launchpad.farmingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.apy", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.farmingDetail.lockDaysShort", // "{days}d" template - universal chart-axis notation, not prose
+    "launchpad.home.swap", // "Swap" is a standard DeFi/crypto term used as a loanword, no common Tagalog equivalent
+    "launchpad.home.airdrop", // "Airdrop" is an international crypto-native neologism kept untranslated
+    "launchpad.pool.tokenMintLabel", // "Token" is a genuine cognate/established loanword in Filipino crypto UI
+    "launchpad.curve.heading", // "Bonding Curve" is a specific DeFi mechanism term with no established Tagalog equivalent
+    "launchpad.curve.statusBonding", // "Bonding" is the status term for the bonding-curve mechanism above
+    "launchpad.curve.poolAddressLabel", // "Pool" is a genuine cognate/established loanword in Filipino crypto UI
+    "launchpad.curve.dexLabel", // "DEX" is an acronym/industry term, kept untranslated
+    "launchpad.history.range5m", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range15m", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range1h", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range6h", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range24h", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range7d", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.history.range30d", // time-range abbreviation kept identical - universal chart-axis notation, not prose
+    "launchpad.ido.pricePerToken", // "${price} / token" template - the fixed/label portion is a genuine cognate
+    "launchpad.idoCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in Filipino crypto UI
+    "launchpad.nftStakingDetail.subtitlePoolType", // "NFT staking pool" is DeFi liquidity-pool jargon, same tier as Bonding Curve/DEX
+    "launchpad.nftStakingDetail.lockDaysValue", // "{days}d" template - universal chart-axis notation, not prose
+    "launchpad.nft.title", // "ZRP NFTs" is the established brand-name exception
+    "launchpad.staking.apyLabel", // "{value} APY" - "APY" is the industry-standard acronym, untranslated
+    "launchpad.stakingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in Filipino crypto UI
+    "launchpad.stakingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.poolSuffix", // "staking pool" is DeFi liquidity-pool jargon, same tier as Bonding Curve/DEX
+    "launchpad.stakingDetail.apyLabel", // "APY" is an acronym/industry term, kept untranslated
+    "launchpad.stakingDetail.lockDaysShort", // "{days}d" template - universal chart-axis notation, not prose
+    "launchpad.vestingCreate.tokenLabel", // "Token" is a genuine cognate/established loanword in Filipino crypto UI
+    "auth.email", // "Email" is a fully naturalized loanword GCash/Facebook/Shopee PH never localize
+    "auth.password", // "Password" is a fully naturalized loanword never localized in mainstream PH apps
+    "group.lastMessagePrefix", // "{name}: {msg}" - pure placeholder template, no translatable words
+    "team.colEmail", // "Email" is a fully naturalized loanword in Filipino tech UI
+    "hashtag.postSingular", // "post" is an internet-native coined term used as-is in Filipino social media
+    "adminPayments.tx", // "Tx:" - financial abbreviation, same tier as APY/DEX
+    "analytics.platformWeb", // "Web" is a universal untranslated loanword
+    "analytics.platformAndroid", // "Android" is a proper noun/platform name
+    "analytics.platformIos", // "iOS" is a proper noun/platform name
+    "adminUsers.badgeTeam", // "ZRP Team" is a named role/brand label, kept in Latin
+    "adminUsers.colEmail", // "Email" is a fully naturalized loanword in Filipino tech UI
+    "contact.faqLabel", // "FAQ" is a universally-used acronym in Filipino tech UI
+    "transparency.reasonSpam", // "Spam" is an internet-native coined term with no Filipino equivalent
+    "footer.faq", // "FAQ" is a universally-used acronym in Filipino tech UI
+    "communityCode.e.category1", // "Spam" is an internet-native coined term with no Filipino equivalent
+    "press.emailBadge", // "press@zrp.one" email address, not translatable content
+    "press.logoLabel", // "Logo" is a universal untranslated loanword
+    "press.faviconLabel", // "Favicon" is a technical term with no Tagalog equivalent
+    "press.emailLabel", // "Email" is a fully naturalized loanword in Filipino tech UI
+    "support.categoryBug", // "Bug" is a fully naturalized tech loanword, never localized in PH tech support UI
+    "faq.cat.trustPassport", // "ZRP Trust Passport" is a named feature, kept in Latin for consistency with other ZRP sub-brands
+    "faq.whatIsTrustPassport.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustLocation.p1Bold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "faq.trustVerification.passportCardTitle", // "Trust Passport" is a named feature, kept in Latin per above
+    "faq.verifiedBadge.teamLabel", // "ZRP Team" is a named role/brand label, kept in Latin
+    "help.hero.tagTrustPassport", // "Trust Passport" is a named feature, kept in Latin per above
+    "help.section.trustPassport.title", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "help.trustPassport.whereFindBold", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "privacy.dataCollected.cookiesTitle", // "Cookies" is an industry-standard cookie-category label kept in English across virtually all cookie policies
+    "marketplace.heroTitle", // "ZRP Market Plus" is a product sub-brand name
+    "faq.cat.marketPlus", // "ZRP Market Plus" is a product sub-brand name
+    "help.section.marketplace.title", // "ZRP Market Plus" is a product sub-brand name
+    "profile.trustPassportTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "terms.disputes.p1Bold", // "Switzerland" is a country proper noun kept as spelled in Filipino media
+    "nav.shorts", // "Shorts" is a format name Filipino apps keep in English (like "Reels")
+    "forgotPassword.emailAddress", // "Email Address" is a fixed compound GCash/Shopee/Facebook PH all keep in English
+    "journalist.editor.slug", // "Slug" is a technical CMS term with no established Tagalog equivalent
+    "journalist.editor.slugPlaceholder", // "article-slug" is a literal URL-slug format example, not prose
+    "newsCategory.switzerland", // "Switzerland" is a country proper noun kept as spelled in Filipino media
+    "newsCategory.crypto", // "Crypto" is an internet-native coined term with no Tagalog equivalent
+    "pricing.support247", // "24/7" - numeral/symbol notation, not translatable prose
+    "ads.dashboard.ctr", // "CTR" is an acronym/industry term, kept untranslated
+    "news.change24h", // "24h %" - numeral/symbol notation, not translatable prose
+    "deleteAccount.confirmWord", // "DELETE" - the UI checks the typed confirmation against this literal word
+    "creatorDash.studioTitle", // "Creator Studio" is a product feature name kept in English, same as YouTube Studio
+    "trust.headerTitle", // "ZRP Trust Passport" is a named feature, kept in Latin per above
+    "trust.outOf100", // "/ 100" - numeric score format, no translatable text
+    "trust.categoryProfile", // "Profile" kept bare per real-world Facebook PH/Shopee Tagalog UI convention
+    "adminJournalists.usernamePlaceholder", // "username" is a field-format placeholder hint, not prose
+    "adminNews.slugLabel", // "Slug" is a technical CMS term with no established Tagalog equivalent
+    "nav.play", // "Play" is the nav short form of the "ZRP PLAY" sub-brand, kept in Latin to match
+    "play.vs", // "vs" is a universally retained Latin abbreviation
+    "play.xp", // "{n} XP" template - "XP" is a universal gaming acronym, kept untranslated
+    "opportunity.typeHackathon", // "Hackathon" is a coined tech/startup portmanteau used as-is PH-wide
+    "help.heroTitle", // "ZRP HELP" is the established brand-name exception
+    "nav.premium", // "Premium" is a subscription/commerce adjective kept untranslated in PH apps (Spotify/YouTube/Globe/Smart)
+    "nav.creatorStudio", // "Creator Studio" is a product feature name kept in English, same as YouTube/TikTok
+    "nav.aiAssistant", // "ZRP AI" is the established brand-name exception
+    "music.duration.minutes", // "{count} min" - "min" is also the correct Filipino abbreviation of "minuto"
+    "music.studio.explicitBadge", // "E" - the single-letter explicit-content badge, same convention as music streaming apps worldwide
+    "music.track.columnAlbum", // "Album" is a fully naturalized Filipino loanword (same spelling in Filipino dictionaries)
+    "music.albumDetail.eyebrow", // "Album" is a fully naturalized Filipino loanword
+    "tipModal.charCount", // "{count}/1000" - pure placeholder/format template, no translatable words
+    "verifiedBadge.team", // "ZRP Team" is a named role/brand label, kept in Latin
+    "professionalCategory.blockchain", // "Blockchain" is used untranslated in Filipino tech/professional contexts
+    "time.minutesShort", // "{n}m" - universal single-letter timestamp shorthand kept identical even by Filipino-localized Facebook/Twitter
+    "time.hoursShort", // "{n}h" - universal single-letter timestamp shorthand
+    "time.daysShort", // "{n}d" - universal single-letter timestamp shorthand
+    "communities.create.hashtagLabel", // "Hashtag" is an internet-native coined term with no Filipino equivalent
+    "upgradeRequest.methodCrypto", // "Cryptocurrency" is a crypto/DeFi term with no common Tagalog equivalent
+    "adminNewsNetwork.breakingTag", // "breaking" - Philippine TV news always displays "Breaking News" in English even during Filipino broadcasts
+    "adminNewsNetwork.verificationFailedNamed", // "{name}: {error}" - pure placeholder template, no translatable words
+  ],
   th: [
     "nav.launchpad", // "Launchpad" is the established brand-name exception
     "launchpad.farmingCreate.apyLabel", // "APY (%)" is an acronym/industry term, kept untranslated
