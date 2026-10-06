@@ -19,13 +19,15 @@ interface CreateLiveVideoModalProps {
 
 /**
  * Direct structural mirror of CreateLiveAudioModal.tsx - see its own
- * doc comment for why there's no "schedule for later" UI here either.
- * Generic form labels (title/description/category/visibility/
- * community) reuse the liveAudio.* translation keys rather than
- * duplicating identical English-and-every-other-language text under a
- * new liveVideo.* key - the copy itself ("Title", "Who can join",
- * "Public"/"Community"/"Private"...) has nothing audio-specific about
- * it.
+ * doc comment for why there's no "schedule for later" UI here either,
+ * and for why the panel uses z-[10000] + max-h-[100dvh] (fixing a real
+ * mobile bug: BottomNav's z-[9999] portal was rendering over this
+ * modal's lower controls). Generic form labels (title/description/
+ * category/visibility/community) reuse the liveAudio.* translation keys
+ * rather than duplicating identical English-and-every-other-language
+ * text under a new liveVideo.* key - the copy itself ("Title", "Who can
+ * join", "Public"/"Community"/"Private"...) has nothing audio-specific
+ * about it.
  */
 export default function CreateLiveVideoModal({ onClose, onCreated }: CreateLiveVideoModalProps) {
   const { t } = useLanguage();
@@ -99,14 +101,14 @@ export default function CreateLiveVideoModal({ onClose, onCreated }: CreateLiveV
 
   return (
     <div
-      className="fixed inset-0 z-[110] bg-black/60 flex items-end sm:items-center sm:justify-center"
+      className="fixed inset-0 z-[10000] bg-black/60 flex items-end sm:items-center sm:justify-center"
       onClick={() => !submitting && onClose()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="create-live-video-title"
     >
       <div
-        className="w-full sm:w-[440px] sm:max-h-[85vh] bg-white dark:bg-zrp-deepBlack rounded-t-2xl sm:rounded-2xl overflow-y-auto"
+        className="w-full sm:w-[440px] max-h-[100dvh] sm:max-h-[85vh] bg-white dark:bg-zrp-deepBlack rounded-t-2xl sm:rounded-2xl overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800">
