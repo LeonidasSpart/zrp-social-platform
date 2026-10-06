@@ -30,7 +30,11 @@ function normalize(value: string): string {
   return value.normalize("NFD").replace(DIACRITIC_MARK_PATTERN, "").toLowerCase().trim();
 }
 
-const REGISTERED_LOCALES = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "no", "sr", "bs", "mk", "uk", "fi", "sk", "sl", "lt", "et", "ga", "lv", "mt"] as const;
+// te (Telugu) and tl (Tagalog/Filipino) are deliberately excluded - the
+// underlying i18n-iso-countries package ships no lang file for either,
+// the same documented gap rm (Romansh) already has; country names
+// resolve to English for those two rather than crashing or guessing.
+const REGISTERED_LOCALES = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "no", "sr", "bs", "mk", "uk", "fi", "sk", "sl", "lt", "et", "ga", "lv", "mt", "bn", "ur", "vi", "mr", "fa", "sw", "th", "am"] as const;
 
 // One normalized-name -> code lookup built once from every name variant
 // (official AND common short form - `select: "all"`) in all 11

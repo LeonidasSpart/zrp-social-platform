@@ -1428,6 +1428,7 @@
 /* iOS-only strings (see Tools/ios-extra-strings.json), translated for
    fr. A key with no translation yet falls back to the
    development language rather than appearing here untranslated. */
+"ios.a11y.bookmark" = "Marque-page";
 "ios.a11y.removeBookmark" = "Retirer le marque-page";
 "ios.a11y.unlike" = "Ne plus aimer";
 "ios.a11y.undoRepost" = "Annuler le repost";
@@ -1584,7 +1585,6 @@
 "ios.action.done" = "Terminé";
 "ios.chat.micDenied" = "ZRP a besoin d'accéder au microphone pour enregistrer un message vocal. Vous pouvez l'activer dans Réglages.";
 "ios.post.applyNow" = "Postuler maintenant";
-"ios.a11y.bookmark" = "Marque-page";
 "ios.chat.cameraUnavailable" = "Caméra indisponible sur cet appareil.";
 "ios.chat.addAttachment" = "Ajouter une pièce jointe";
 "ios.chat.sharedPost" = "Publication partagée";

@@ -1502,7 +1502,6 @@
 "ios.notifications.followRequestSuffix" = "pieprasīja tev sekot";
 "ios.search.minLength" = "Ieraksti vismaz 2 rakstzīmes, lai meklētu.";
 "ios.search.suggestedTitle" = "Ieteikts tev";
-"ios.search.noHashtags" = "Netika atrasti tēmturi.";
 "ios.music.trending" = "Populārākais";
 "ios.music.newReleases" = "Jaunie izdevumi";
 "ios.music.latestAlbums" = "Jaunākie albumi";
@@ -1580,13 +1579,6 @@
 "ios.a11y.unmute" = "Ieslēgt skaņu";
 "ios.ads.sponsored" = "Sponsorēts";
 "ios.a11y.sponsoredPost" = "Sponsorēts ieraksts, autors {name}";
-"ios.call.noVideo" = "Bez video";
-"ios.call.fallbackName" = "Zvans";
-"ios.call.incomingVideo" = "Ienākošs video zvans...";
-"ios.call.incomingVoice" = "Ienākošs balss zvans...";
-"ios.call.ringing" = "Zvana...";
-"ios.call.voiceCallCd" = "Balss zvans";
-"ios.call.videoCallCd" = "Video zvans";
 "ios.group.untitled" = "Grupa";
 "ios.group.suggested" = "Ieteikts";
 "ios.group.removePhoto" = "Noņemt grupas fotoattēlu";
@@ -1599,6 +1591,14 @@
 "ios.chat.sharedPostUnavailable" = "Šis ieraksts vairs nav pieejams.";
 "ios.post.repostBlocked" = "Šo ierakstu nevar repostot, jo konts ir privāts.";
 "ios.media.loadFailed" = "Neizdevās ielādēt šo attēlu.";
+"ios.call.noVideo" = "Bez video";
+"ios.call.fallbackName" = "Zvans";
+"ios.call.incomingVideo" = "Ienākošs video zvans...";
+"ios.call.incomingVoice" = "Ienākošs balss zvans...";
+"ios.call.ringing" = "Zvana...";
+"ios.call.voiceCallCd" = "Balss zvans";
+"ios.call.videoCallCd" = "Video zvans";
+"ios.search.noHashtags" = "Netika atrasti tēmturi.";
 "ios.search.noResults" = "Rezultāti nav atrasti.";
 "ios.explore.peopleNearYouTitle" = "Cilvēki tuvumā";
 "ios.explore.peopleNearYouSubtitle" = "Tā pati valsts, kas jums";

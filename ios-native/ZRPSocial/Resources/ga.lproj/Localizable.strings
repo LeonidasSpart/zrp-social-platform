@@ -1502,7 +1502,6 @@
 "ios.notifications.followRequestSuffix" = "d'iarr sé/sí thú a leanúint";
 "ios.search.minLength" = "Clóscríobh 2 charachtar ar a laghad chun cuardach a dhéanamh.";
 "ios.search.suggestedTitle" = "Molta duitse";
-"ios.search.noHashtags" = "Níor aimsíodh haischlibeanna.";
 "ios.music.trending" = "Ag Treochtáil";
 "ios.music.newReleases" = "Eisiúintí nua";
 "ios.music.latestAlbums" = "Albaim is déanaí";
@@ -1580,13 +1579,6 @@
 "ios.a11y.unmute" = "Díbhalbhaigh";
 "ios.ads.sponsored" = "Urraithe";
 "ios.a11y.sponsoredPost" = "Postáil urraithe le {name}";
-"ios.call.noVideo" = "Gan físeán";
-"ios.call.fallbackName" = "Glao";
-"ios.call.incomingVideo" = "Físghlao isteach...";
-"ios.call.incomingVoice" = "Glao gutha isteach...";
-"ios.call.ringing" = "Ag glaoch...";
-"ios.call.voiceCallCd" = "Glao gutha";
-"ios.call.videoCallCd" = "Físghlao";
 "ios.group.untitled" = "Grúpa";
 "ios.group.suggested" = "Molta";
 "ios.group.removePhoto" = "Bain grianghraf an ghrúpa";
@@ -1599,6 +1591,14 @@
 "ios.chat.sharedPostUnavailable" = "Níl an phostáil seo ar fáil a thuilleadh.";
 "ios.post.repostBlocked" = "Ní féidir an phostáil seo a athphostáil toisc go bhfuil an cuntas príobháideach.";
 "ios.media.loadFailed" = "Níorbh fhéidir an íomhá seo a lódáil.";
+"ios.call.noVideo" = "Gan físeán";
+"ios.call.fallbackName" = "Glao";
+"ios.call.incomingVideo" = "Físghlao isteach...";
+"ios.call.incomingVoice" = "Glao gutha isteach...";
+"ios.call.ringing" = "Ag glaoch...";
+"ios.call.voiceCallCd" = "Glao gutha";
+"ios.call.videoCallCd" = "Físghlao";
+"ios.search.noHashtags" = "Níor aimsíodh haischlibeanna.";
 "ios.search.noResults" = "Níor aimsíodh aon toradh.";
 "ios.explore.peopleNearYouTitle" = "Daoine in aice leat";
 "ios.explore.peopleNearYouSubtitle" = "An tír chéanna leat";

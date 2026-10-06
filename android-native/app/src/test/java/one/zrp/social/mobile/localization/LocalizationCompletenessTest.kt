@@ -105,6 +105,7 @@ class LocalizationCompletenessTest {
         "uk", "fi", "sk", "sl", "lt",
         "et", "ga", "lv", "mt",
         "rm",
+        "bn", "ur", "vi", "mr", "te", "fa", "sw", "th", "tl", "am",
     )
 
     private val placeholderRegex = Regex("""%\d+\$[sd]|\{[a-zA-Z]+\}""")
@@ -1862,6 +1863,190 @@ class LocalizationCompletenessTest {
             "admin_news_network_publication_meta",
             "communities_create_hashtag_label",
             "admin_ads_budget",
+        ),
+        "bn" to setOf(
+            // Format-only strings (numerals/symbols/emoji, no words to
+            // translate) and the "travel" hashtag-field placeholder
+            // example - same reasoning as the universal allowlist's
+            // other placeholder/format entries.
+            "play_xp",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "ur" to setOf(
+            // "GIFs" is an identical Urdu loanword - Advanced Search media
+            // filter option (same reasoning already applied to this exact
+            // key in fr/de/es/pt/mt/rm above).
+            "search_media_gif",
+            // "ZRP Music" is the locked sub-brand name.
+            "music_title",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "fa" to setOf(
+            // "ZRP Music" is the locked sub-brand name.
+            "music_title",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "sw" to setOf(
+            // "Video" is a genuine, widely-used Swahili loanword, used
+            // consistently this way across the file.
+            "chat_contact_video",
+            "stories_video",
+            // "Crypto" is an accepted loanword/cognate in Swahili tech
+            // and news contexts, matching French's identical treatment
+            // of this exact key above.
+            "news_category_crypto",
+            // "Asia" is the correct native Swahili spelling for this
+            // continent (same spelling as English, unlike e.g. Oceania
+            // which is "Oseania" and was fixed).
+            "ambassadors_region_asia",
+            // "Hackathon"/"Hashtag" are accepted cognates kept untranslated
+            // in several other languages (fr/de above).
+            "opportunity_type_hackathon",
+            "communities_create_hashtag_label",
+            // "ZRP Music" is the locked sub-brand name.
+            "music_title",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "te" to setOf(
+            // "FAQ" is an accepted cognate/acronym kept untranslated in
+            // several languages (matches fr/de's identical treatment of
+            // this exact key above).
+            "legal_faq",
+            // "ZRP Music" is the locked sub-brand name.
+            "music_title",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "mr" to setOf(
+            // "GIFs" is an identical Marathi loanword (same reasoning
+            // already applied to this exact key in fr/de/es/pt/mt/rm
+            // above).
+            "search_media_gif",
+            // "ZRP Music" is the locked sub-brand name.
+            "music_title",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "am" to setOf(
+            // "ZRP Music" is the locked sub-brand name.
+            "music_title",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "th" to setOf(
+            // "ZRP Music" is the locked sub-brand name.
+            "music_title",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "vi" to setOf(
+            // "Email"/"Media"/"Album"/"Video" are identical, widely-used
+            // Vietnamese loanwords, used consistently this way across the
+            // file (e.g. message_video_call_cd "Gọi video").
+            "team_col_email",
+            "auth_email",
+            "search_media",
+            "profile_media",
+            "music_album_detail_eyebrow",
+            "chat_contact_video",
+            "stories_video",
+            // "Hackathon"/"Hashtag" are accepted cognates kept untranslated
+            // in several other languages (fr/de above).
+            "opportunity_type_hackathon",
+            "communities_create_hashtag_label",
+            // "ZRP Music" is the locked sub-brand name.
+            "music_title",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
+            "communities_create_hashtag_placeholder",
+        ),
+        "tl" to setOf(
+            // "Email"/"Password"/"Media" are identical, widely-used
+            // Tagalog loanwords in mainstream Filipino apps (Facebook/
+            // Shopee/Lazada PH all show these untranslated), used
+            // consistently this way across the rest of this file.
+            "team_col_email",
+            "auth_email",
+            "auth_password",
+            "search_media",
+            "profile_media",
+            // "Hackathon"/"Hashtag" are accepted cognates kept untranslated
+            // in several other languages (fr/de above).
+            "opportunity_type_hackathon",
+            "communities_create_hashtag_label",
+            // "ZRP Music"/"ZRP Team" are locked sub-brand/badge names.
+            "music_title",
+            "admin_badge_team",
+            // Format-only strings/placeholder example.
+            "play_xp",
+            "trust_out_of_100",
+            "admin_upgrade_requests_plan_change",
+            "admin_analytics_daily_range",
+            "admin_analytics_post_counts",
+            "admin_news_network_verify_failed",
+            "admin_news_network_publication_meta",
         ),
     )
 

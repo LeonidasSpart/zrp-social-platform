@@ -71,8 +71,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // now renders the correct initial lang/dir from the zrp-lang cookie
   // server-side (see RootLayout), so this effect is mostly a no-op
   // confirmation on repeat visits; it still matters for a first-ever visit
-  // (no cookie yet) and for an in-session language change - Arabic is the
-  // only RTL language here, everything else stays ltr.
+  // (no cookie yet) and for an in-session language change - everything not
+  // in RTL_LANGUAGES stays ltr.
   useEffect(() => {
     if (!mounted) return;
     document.documentElement.lang = language;
