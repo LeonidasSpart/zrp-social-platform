@@ -599,7 +599,7 @@ onboarding gating and plan-gated routes.
 
 ## Internationalization
 
-The interface ships human translations for **39 languages**, verified in
+The interface ships human translations for **49 languages**, verified in
 source (`src/lib/translations.ts`) and present with full key parity
 across Web, `android-native/` (`values-*/strings.xml`) and `ios-native/`
 (`*.lproj`):
@@ -609,27 +609,29 @@ Chinese, Turkish, Bahasa Indonesia, Portuguese (European Portuguese
 usage), Japanese, Korean, Hindi, Dutch, Polish, Romanian, Czech,
 Hungarian, Swedish, Danish, Croatian, Bulgarian, Greek, Norwegian,
 Serbian (Latin script), Bosnian, Macedonian, Ukrainian, Finnish, Slovak,
-Slovenian, Lithuanian, Estonian, Irish, Latvian, Maltese and Romansh
-(Rumantsch Grischun).
+Slovenian, Lithuanian, Estonian, Irish, Latvian, Maltese, Romansh
+(Rumantsch Grischun), Bengali, Urdu, Vietnamese, Marathi, Telugu,
+Persian (Farsi), Swahili, Thai, Tagalog (Filipino) and Amharic.
 
-The most recent expansion (Romansh, `rm`) shipped on Web and Android
-with full key parity, and on iOS with full parity on every key sourced
-from the shared web dictionary (1,201 keys, verified by
+The ten most recently added languages - Bengali, Urdu, Vietnamese,
+Marathi, Telugu, Persian, Swahili, Thai, Tagalog and Amharic - shipped
+with full key parity on Web, Android and iOS: every key sourced from the
+shared web dictionary (1,421 keys, verified by
 `ios-native/Tools/generate-localizations.py --check`). iOS also has a
 small set of iOS-only strings with no web counterpart (mostly
-VoiceOver/accessibility labels, 166 keys,
+VoiceOver/accessibility labels, 263 keys,
 `ios-native/Tools/ios-extra-strings.json`); these are translated into
-all 38 non-English languages, with completeness enforced by the same
+all 48 non-English languages, with completeness enforced by the same
 `--check` step; see
-[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap-39-language-parity)
-for the verification detail. Romansh is the one exception in the
+[`ios-native/PARITY.md`](ios-native/PARITY.md#ios-localization-roadmap-49-language-parity)
+for the verification detail. Romansh remains the one exception in the
 otherwise-unrelated `i18n-iso-countries` package used for ZRP Global
 Ambassadors' country-name localization (`src/lib/ambassadors/countries.ts`):
 that third-party package has no Romansh locale data at all, so country
 names fall back to English there rather than being silently blank - see
 that file's `resolvableLocale()` for the detail.
 
-Arabic is rendered right-to-left. The web dictionary in
+Arabic, Urdu and Persian are rendered right-to-left. The web dictionary in
 `src/lib/translations.ts` is the single source of truth: the iOS
 `.strings` bundles and localization key enum are generated from it
 (`ios-native/Tools/generate-localizations.py`, checked in CI with
@@ -1064,7 +1066,7 @@ Direction, not a delivery commitment. Dates are not promised.
 - Complete the blocked backend capabilities the native clients need.
 - Extend Trust & Safety tooling and the public transparency reporting.
 - Broaden ZRP Music, Creator Studio and Opportunities.
-- Continue expanding localization coverage beyond the current 39
+- Continue expanding localization coverage beyond the current 49
   languages as new markets are prioritized.
 - Wire the Android Launchpad Solana foundation up to real Launchpad
   screens (a non-custodial Mobile Wallet Adapter signing flow, plus the

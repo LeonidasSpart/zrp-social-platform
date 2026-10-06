@@ -144,6 +144,20 @@ feature list and current platform status.
 
 ### Localization
 
+- **Localization expanded from 39 to 49 languages**: Bengali, Urdu,
+  Vietnamese, Marathi, Telugu, Persian, Swahili, Thai, Tagalog and
+  Amharic added with full key parity across Web (1,421 shared keys),
+  Android and iOS (263 additional iOS-only accessibility/UX strings,
+  `generate-localizations.py --check` reporting "localizations up to
+  date (49 languages, 1421 shared keys)") (#466). Urdu and Persian are
+  RTL, alongside the already-supported Arabic; web's `RTL_LANGUAGES`
+  and iOS's `L10nKey.rightToLeftLanguageCodes` were both extended to
+  `["ar", "ur", "fa"]`. Android's `LocalizationCompletenessTest.kt` and
+  iOS's `validate_extra_translations()` gate were both re-verified
+  clean against the full 49-language set as part of this change,
+  including fixes for an initial Tagalog under-translation and invalid
+  XML string escapes in six of the new-language Android resource files
+  caught by those same gates before merge.
 - **Localization expanded from 38 to 39 languages**: Romansh (Rumantsch
   Grischun, `rm`/`rm-CH`) added as the final language in the current
   European-coverage milestone, with full key parity across Web, Android
