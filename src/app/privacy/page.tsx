@@ -23,8 +23,9 @@ export default function PrivacyPage() {
     { id: "children", number: "12", title: t("privacy.nav.children") },
     { id: "moderation", number: "13", title: t("privacy.nav.moderation") },
     { id: "charity", number: "14", title: t("privacy.nav.charity") },
-    { id: "changes", number: "15", title: t("privacy.nav.changes") },
-    { id: "contact", number: "16", title: t("privacy.nav.contact") },
+    { id: "blockchain-data", number: "15", title: t("privacy.nav.blockchainData") },
+    { id: "changes", number: "16", title: t("privacy.nav.changes") },
+    { id: "contact", number: "17", title: t("privacy.nav.contact") },
   ];
 
   const lastUpdated = new Date().toLocaleDateString(getDateLocale(language), {
@@ -308,6 +309,12 @@ export default function PrivacyPage() {
                       icon="🍪"
                       title={t("privacy.dataCollected.cookiesTitle")}
                       text={t("privacy.dataCollected.cookiesText")}
+                    />
+
+                    <DataCard
+                      icon="🔗"
+                      title={t("privacy.dataCollected.walletTitle")}
+                      text={t("privacy.dataCollected.walletText")}
                     />
 
                   </div>
@@ -749,11 +756,34 @@ export default function PrivacyPage() {
 
                 {/* 15 */}
                 <section
-                  id="changes"
+                  id="blockchain-data"
                   className="privacy-section"
                 >
                   <SectionHeader
                     number="15"
+                    title={t("privacy.h.blockchainData")}
+                  />
+
+                  <Text>
+                    {t("privacy.blockchainData.p1")}
+                  </Text>
+
+                  <Text>
+                    {t("privacy.blockchainData.p2")}
+                  </Text>
+
+                  <Callout>
+                    {t("privacy.blockchainData.calloutText")}
+                  </Callout>
+                </section>
+
+                {/* 16 */}
+                <section
+                  id="changes"
+                  className="privacy-section"
+                >
+                  <SectionHeader
+                    number="16"
                     title={t("privacy.h.changes")}
                   />
 
@@ -777,13 +807,13 @@ export default function PrivacyPage() {
                   </Callout>
                 </section>
 
-                {/* 16 */}
+                {/* 17 */}
                 <section
                   id="contact"
                   className="privacy-section"
                 >
                   <SectionHeader
-                    number="16"
+                    number="17"
                     title={t("privacy.h.contact")}
                   />
 

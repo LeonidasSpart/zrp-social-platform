@@ -76,8 +76,9 @@ default.
 ## 4. Country normalization
 
 `src/lib/geo/country.ts`'s `normalizeCountryInput()` is the single place
-free-text country input (a raw code, an official name in any of ZRP's 11
-registered languages, or a common alias like "USA"/"UK") is resolved to a
+free-text country input (a raw code, an official name in any of the 32
+languages in that file's `REGISTERED_LOCALES` - a subset of ZRP's 49
+supported languages - or a common alias like "USA"/"UK") is resolved to a
 canonical ISO 3166-1 alpha-2 code. It reuses the exact dataset and locale
 registrations the ZRP Global Ambassadors feature already established
 (`src/lib/ambassadors/countries.ts`) rather than maintaining a second

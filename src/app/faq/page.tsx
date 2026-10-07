@@ -1362,6 +1362,53 @@ export default function FAQPage() {
       ),
     },
 
+    {
+      id: "launchpad-what",
+      category: "Web3 & Digital",
+      question: t("faq.launchpadWhat.q"),
+      icon: Wallet,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            {t("faq.launchpadWhat.p1")}
+          </p>
+
+          <p>
+            {t("faq.launchpadWhat.p2")}
+          </p>
+
+          <p className="text-sm text-zrp-charcoal/60 dark:text-white/55">
+            {t("faq.launchpadWhat.note")}
+          </p>
+        </div>
+      ),
+    },
+
+    {
+      id: "launchpad-safety",
+      category: "Web3 & Digital",
+      question: t("faq.launchpadSafety.q"),
+      icon: ShieldCheck,
+      answer: (
+        <div className="space-y-3">
+          <p>
+            {t("faq.launchpadSafety.p1")}
+          </p>
+
+          <p>
+            {t("faq.launchpadSafety.p2")}
+          </p>
+
+          <div className="p-3 rounded-lg bg-zrp-red/5 border border-zrp-red/20 text-sm">
+            <strong className="text-zrp-red">
+              {t("faq.launchpadSafety.warningBold")}
+            </strong>{" "}
+            {t("faq.launchpadSafety.warningText")}
+          </div>
+        </div>
+      ),
+    },
+
     // ============================================================
     // ADMINISTRATION
     // ============================================================

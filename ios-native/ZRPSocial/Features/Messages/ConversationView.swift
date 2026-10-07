@@ -231,7 +231,7 @@ struct ConversationView: View {
     /// says there is older history to fetch.
     ///
     /// Reuses the feed's own `feed.loadMore` / `feed.loadingMore`
-    /// wording, which is already translated into all eleven languages -
+    /// wording, which is already translated into all 49 languages -
     /// a chat-specific key would mean the same sentence in English only.
     @ViewBuilder
     private func loadOlderControl(_ proxy: ScrollViewProxy) -> some View {
