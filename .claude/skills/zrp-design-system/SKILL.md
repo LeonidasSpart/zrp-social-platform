@@ -371,7 +371,7 @@ and `dl.google.com` is unreachable, so Gradle cannot run there. The CI
 build on the PR (`.github/workflows/android-native-build.yml`) is the only
 compile check. Before pushing, verify by hand: brace/paren balance, every
 referenced symbol imported, every `R.string.*` defined, every new string
-present in all 11 `values*/strings.xml`, and each `weight()` genuinely
+present in all 49 `values*/strings.xml`, and each `weight()` genuinely
 inside a `RowScope`/`ColumnScope`.
 
 ### Honesty rule

@@ -310,6 +310,14 @@ feature list and current platform status.
   received (#365).
 - Lazy-loaded per-item images in scrollable lists: avatars, story
   previews, gallery tiles (#366).
+- **Android**: enabled R8 code shrinking and obfuscation (`minifyEnabled
+  true`) on release builds, previously off since this module's first
+  commit - Play Console's code-optimization check had flagged
+  obfuscation at ~1%. `app/proguard-rules.pro` now documents, per
+  dependency, exactly why each keep rule exists; the load-bearing one is
+  Gson, since no model class in this app uses `@SerializedName` and
+  every one is matched to its JSON by field name, which R8 would
+  otherwise silently rename.
 
 ### Accessibility
 

@@ -526,8 +526,20 @@ android {
         // capture/projection, there is no real feature to film, so the
         // honest fix is removing the dead permission rather than
         // fabricating a declaration. No other feature change.
-        versionCode 34
-        versionName "4.0.28"
+        // Bumps to versionCode 35 / versionName "4.0.29": release build
+        // minification turned on for real (see the release buildType's
+        // own comment above and app/proguard-rules.pro) - Play Console's
+        // "Protégé avec Play" code-optimization check flagged Obfuscation
+        // at ~1%. The edge-to-edge advisory Play showed alongside it
+        // needed no code change: MainActivity already calls
+        // enableEdgeToEdge(), targetSdk is already 36, and every screen
+        // that escapes ZrpNavHost's Scaffold (ImageLightbox's Dialog is
+        // the one example) already applies WindowInsets.safeDrawing
+        // itself - confirmed by reading every statusBarsPadding/
+        // navigationBarsPadding call site in app/src/main/java, not
+        // assumed. No other feature change.
+        versionCode 35
+        versionName "4.0.29"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -581,7 +593,14 @@ android {
             versionNameSuffix "-debug"
         }
         release {
-            minifyEnabled false
+            // Was false since this module's first commit: Play Console's
+            // "Protégé avec Play" > code-optimization check flagged
+            // Obfuscation at ~1%, effectively none. R8 now runs for real;
+            // proguard-rules.pro documents, per dependency, exactly why
+            // each keep rule is there - most load-bearing is Gson, since
+            // there is no @SerializedName anywhere in this codebase and
+            // every model is matched to its JSON by field name.
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (hasReleaseSigning) {
                 signingConfig signingConfigs.release
