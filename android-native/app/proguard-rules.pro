@@ -77,3 +77,17 @@
 # ---------------------------------------------------------------------------
 -keep class com.solana.** { *; }
 -dontwarn com.solana.**
+
+# The Mobile Wallet Adapter client's own buffer shim (com.funkatronics.buffer,
+# a transitive dependency, not imported directly anywhere in this app) calls
+# into com.ditchoom.buffer.BufferFactoryJvm, a Kotlin-Multiplatform JVM-target
+# class that is genuinely absent from the resolved Android classpath - not
+# a shrinking mistake, R8 itself reported it as a missing class (first real
+# CI run of this file, build 35: "R8: Missing class
+# com.ditchoom.buffer.BufferFactoryJvm (referenced from:
+# com.funkatronics.buffer.PlatformByteBuffer.order(...))"). Since the class
+# does not exist on this classpath at all, it could never be loaded at
+# runtime on Android either - -dontwarn (not -keep, which cannot keep a
+# class that isn't there) is R8's own documented remedy for exactly this.
+-dontwarn com.funkatronics.buffer.**
+-dontwarn com.ditchoom.buffer.**
