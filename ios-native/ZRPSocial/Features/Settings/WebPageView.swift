@@ -7,7 +7,7 @@ import UIKit
 /// Terms of Service, the Privacy Policy, the Community Guidelines, About,
 /// the Help Center and the Community & Leadership Code are long-form text
 /// that is already written, already reviewed, and already translated into
-/// all eleven languages on zrp.one. A native reimplementation would be a
+/// all 49 languages on zrp.one. A native reimplementation would be a
 /// second copy that drifts the next time Legal changes a paragraph -
 /// which is a compliance risk a Terms or Privacy page specifically cannot
 /// carry. Android reached the same conclusion and loads the same live

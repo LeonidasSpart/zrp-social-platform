@@ -76,16 +76,17 @@ import { SUPPORTED_LANGUAGES, type Language } from "@/lib/translations";
  * shape against this same package on every run.
  *
  * i18n-iso-countries natively ships localized official names for
- * 38 of ZRP's 39 supported languages (see SUPPORTED_LANGUAGES in
+ * 46 of ZRP's 49 supported languages (see SUPPORTED_LANGUAGES in
  * src/lib/translations.ts) - registered once, below, module-wide.
  * getName() already returns the current ISO short name (e.g.
  * "Turkiye", not the older "Turkey") in every one of those languages,
  * including the "Etats-Unis d'Amerique" / "Turquie" style local names
  * the ambassador search is required to understand - no ZRP-specific
- * translation work was needed for this. The one exception is Romansh
- * ("rm"): the package has no Romansh locale file at all, a real gap in
- * its own data. getAllCountries()/getCountryName() fall back to English
- * country names for "rm" (see resolvableLocale() below) rather than
+ * translation work was needed for this. The three exceptions are
+ * Romansh ("rm"), Telugu ("te"), and Tagalog ("tl"): the package has
+ * no locale file for any of them, a real gap in its own data.
+ * getAllCountries()/getCountryName() fall back to English country
+ * names for those three (see resolvableLocale() below) rather than
  * silently returning nothing.
  */
 

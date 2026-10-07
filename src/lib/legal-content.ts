@@ -193,7 +193,7 @@ const BULLETS = (...items: string[][]): ContentBlock => ({ type: "bullets", item
 const CARDS = (...items: CardItem[]): ContentBlock => ({ type: "cards", items });
 const card = (title: string[], text?: string[], meta?: string[]): CardItem => ({ title, text, meta });
 
-// ─── Terms of Service (src/app/terms/page.tsx SECTIONS, 01-15) ───────────
+// ─── Terms of Service (src/app/terms/page.tsx SECTIONS, 01-17) ───────────
 
 export const TERMS_CONFIG: PageConfig = {
   title: ["terms.title"],
@@ -364,8 +364,40 @@ export const TERMS_CONFIG: PageConfig = {
       body: [H("terms.charity.title"), P("terms.charity.p1"), P("terms.charity.p2")],
     },
     {
-      id: "changes",
+      id: "payments-wallets",
       number: "14",
+      title: ["terms.h.paymentsWallets"],
+      body: [
+        P("terms.paymentsWallets.p1"),
+        P("terms.paymentsWallets.p2"),
+        BULLETS(
+          ["terms.paymentsWallets.item1"],
+          ["terms.paymentsWallets.item2"],
+          ["terms.paymentsWallets.item3"]
+        ),
+      ],
+    },
+    {
+      id: "launchpad",
+      number: "15",
+      title: ["terms.h.launchpad"],
+      body: [
+        P("terms.launchpad.p1"),
+        P("terms.launchpad.p2"),
+        CALLOUT("terms.launchpad.calloutBold", "terms.launchpad.calloutText"),
+        BULLETS(
+          ["terms.launchpad.item1"],
+          ["terms.launchpad.item2"],
+          ["terms.launchpad.item3"],
+          ["terms.launchpad.item4"],
+          ["terms.launchpad.item5"]
+        ),
+        P("terms.launchpad.availabilityText"),
+      ],
+    },
+    {
+      id: "changes",
+      number: "16",
       title: ["terms.h.changes"],
       body: [
         P("terms.changes.p1"),
@@ -376,7 +408,7 @@ export const TERMS_CONFIG: PageConfig = {
     },
     {
       id: "contact",
-      number: "15",
+      number: "17",
       title: ["terms.h.contact"],
       body: [
         P("terms.contact.p1"),
@@ -390,7 +422,7 @@ export const TERMS_CONFIG: PageConfig = {
   ],
 };
 
-// ─── Privacy Policy (src/app/privacy/page.tsx SECTIONS, 01-16) ───────────
+// ─── Privacy Policy (src/app/privacy/page.tsx SECTIONS, 01-17) ───────────
 
 export const PRIVACY_CONFIG: PageConfig = {
   title: ["privacy.title"],
@@ -433,7 +465,8 @@ export const PRIVACY_CONFIG: PageConfig = {
           card(["privacy.dataCollected.contentTitle"], ["privacy.dataCollected.contentText"]),
           card(["privacy.dataCollected.interactionsTitle"], ["privacy.dataCollected.interactionsText"]),
           card(["privacy.dataCollected.deviceTitle"], ["privacy.dataCollected.deviceText"]),
-          card(["privacy.dataCollected.cookiesTitle"], ["privacy.dataCollected.cookiesText"])
+          card(["privacy.dataCollected.cookiesTitle"], ["privacy.dataCollected.cookiesText"]),
+          card(["privacy.dataCollected.walletTitle"], ["privacy.dataCollected.walletText"])
         ),
         CALLOUT("privacy.dataCollected.calloutText"),
       ],
@@ -580,8 +613,18 @@ export const PRIVACY_CONFIG: PageConfig = {
       ],
     },
     {
-      id: "changes",
+      id: "blockchain-data",
       number: "15",
+      title: ["privacy.h.blockchainData"],
+      body: [
+        P("privacy.blockchainData.p1"),
+        P("privacy.blockchainData.p2"),
+        CALLOUT("privacy.blockchainData.calloutText"),
+      ],
+    },
+    {
+      id: "changes",
+      number: "16",
       title: ["privacy.h.changes"],
       body: [
         P("privacy.changes.p1"),
@@ -591,7 +634,7 @@ export const PRIVACY_CONFIG: PageConfig = {
     },
     {
       id: "contact",
-      number: "16",
+      number: "17",
       title: ["privacy.h.contact"],
       body: [
         P("privacy.contact.p1"),

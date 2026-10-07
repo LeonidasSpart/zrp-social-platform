@@ -1300,8 +1300,58 @@ export default function HelpPage() {
     },
 
     {
-      id: "faq",
+      id: "launchpad",
       number: "17",
+      title: t("help.section.launchpad.title"),
+      subtitle: t("help.section.launchpad.subtitle"),
+      icon: Wallet,
+      content: (
+        <div className="space-y-6">
+          <p className="help-text">{t("help.launchpad.intro")}</p>
+          <p className="help-text">{t("help.launchpad.whatText")}</p>
+          <p className="help-text">{t("help.launchpad.feesText")}</p>
+          <p className="help-text">{t("help.launchpad.walletText")}</p>
+
+          <div className="rounded-xl border border-zrp-red/20 bg-zrp-red/5 p-4">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-zrp-red flex-shrink-0" />
+              <div>
+                <h3 className="font-orbitron font-bold text-sm text-zrp-charcoal dark:text-white mb-1">
+                  {t("help.launchpad.safetyTitle")}
+                </h3>
+                <p className="text-sm leading-6 text-zrp-charcoal/75 dark:text-white/70">
+                  {t("help.launchpad.safetyText")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <FaqItem
+            question={t("help.launchpad.faq.q1")}
+            answer={t("help.launchpad.faq.a1")}
+          />
+
+          <FaqItem
+            question={t("help.launchpad.faq.q2")}
+            answer={t("help.launchpad.faq.a2")}
+          />
+
+          <FaqItem
+            question={t("help.launchpad.faq.q3")}
+            answer={t("help.launchpad.faq.a3")}
+          />
+
+          <FaqItem
+            question={t("help.launchpad.faq.q4")}
+            answer={t("help.launchpad.faq.a4")}
+          />
+        </div>
+      ),
+    },
+
+    {
+      id: "faq",
+      number: "18",
       title: t("help.section.faq.title"),
       subtitle: t("help.section.faq.subtitle"),
       icon: HelpCircle,

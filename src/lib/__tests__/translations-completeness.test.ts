@@ -1881,6 +1881,7 @@ const PER_LANGUAGE_ENGLISH_COGNATES: Record<string, string[]> = {
     "launchpad.history.range30d", // time-range abbreviation (5m/1h/24h/...) kept identical - a universal unit notation, not translated prose
   ],
   ro: [
+    "terms.launchpad.calloutBold", // "Important:" - identical spelling/cognate in Romanian, not an untranslated copy
     "adminLiveGifts.colStatus", // "Status" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "adminLiveGifts.colTotal", // "Total" is a genuine cognate/established loanword in this language (adminLiveGifts admin surface)
     "liveAudio.visibilityPublic", // legitimate international/borrowed cognate, not an untranslated copy

@@ -250,7 +250,8 @@ struct DrawerContainer<Content: View>: View {
 
     /// Mirrors a horizontal measurement in a right-to-left layout, so
     /// "towards the leading edge" means the same thing in Arabic as it
-    /// does in English. ZRP ships in eleven languages, one of them RTL.
+    /// does in English. ZRP ships in 49 languages, three of them RTL
+    /// (Arabic, Urdu, Persian).
     private func leadingward(_ x: CGFloat) -> CGFloat {
         layoutDirection == .rightToLeft ? -x : x
     }

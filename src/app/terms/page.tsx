@@ -22,8 +22,10 @@ export default function TermsPage() {
     { id: "termination", number: "11", title: t("terms.nav.termination") },
     { id: "liability", number: "12", title: t("terms.nav.liability") },
     { id: "charity", number: "13", title: t("terms.nav.charity") },
-    { id: "changes", number: "14", title: t("terms.nav.changes") },
-    { id: "contact", number: "15", title: t("terms.nav.contact") },
+    { id: "payments-wallets", number: "14", title: t("terms.nav.paymentsWallets") },
+    { id: "launchpad", number: "15", title: t("terms.nav.launchpad") },
+    { id: "changes", number: "16", title: t("terms.nav.changes") },
+    { id: "contact", number: "17", title: t("terms.nav.contact") },
   ];
 
   const lastUpdated = new Date().toLocaleDateString(getDateLocale(language), {
@@ -597,11 +599,76 @@ export default function TermsPage() {
 
                 {/* 14 */}
                 <section
-                  id="changes"
+                  id="payments-wallets"
                   className="legal-section"
                 >
                   <SectionHeader
                     number="14"
+                    title={t("terms.h.paymentsWallets")}
+                  />
+
+                  <Text>
+                    {t("terms.paymentsWallets.p1")}
+                  </Text>
+
+                  <Text>
+                    {t("terms.paymentsWallets.p2")}
+                  </Text>
+
+                  <BulletList
+                    items={[
+                      <>{t("terms.paymentsWallets.item1")}</>,
+                      <>{t("terms.paymentsWallets.item2")}</>,
+                      <>{t("terms.paymentsWallets.item3")}</>,
+                    ]}
+                  />
+                </section>
+
+                {/* 15 */}
+                <section
+                  id="launchpad"
+                  className="legal-section"
+                >
+                  <SectionHeader
+                    number="15"
+                    title={t("terms.h.launchpad")}
+                  />
+
+                  <Text>
+                    {t("terms.launchpad.p1")}
+                  </Text>
+
+                  <Text>
+                    {t("terms.launchpad.p2")}
+                  </Text>
+
+                  <Callout variant="red">
+                    <strong>{t("terms.launchpad.calloutBold")}</strong>{" "}
+                    {t("terms.launchpad.calloutText")}
+                  </Callout>
+
+                  <BulletList
+                    items={[
+                      <>{t("terms.launchpad.item1")}</>,
+                      <>{t("terms.launchpad.item2")}</>,
+                      <>{t("terms.launchpad.item3")}</>,
+                      <>{t("terms.launchpad.item4")}</>,
+                      <>{t("terms.launchpad.item5")}</>,
+                    ]}
+                  />
+
+                  <Text>
+                    {t("terms.launchpad.availabilityText")}
+                  </Text>
+                </section>
+
+                {/* 16 */}
+                <section
+                  id="changes"
+                  className="legal-section"
+                >
+                  <SectionHeader
+                    number="16"
                     title={t("terms.h.changes")}
                   />
 
@@ -626,12 +693,12 @@ export default function TermsPage() {
                   </Text>
                 </section>
 
-                {/* 15 */}
+                {/* 17 */}
                 <section
                   id="contact"
                   className="legal-section"
                 >
-                  <SectionHeader number="15" title={t("terms.h.contact")} />
+                  <SectionHeader number="17" title={t("terms.h.contact")} />
 
                   <Text>
                     {t("terms.contact.p1")}

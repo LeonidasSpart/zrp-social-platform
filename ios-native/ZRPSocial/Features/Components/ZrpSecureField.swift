@@ -12,7 +12,7 @@ import UIKit
 ///
 /// The toggle is a real 44pt target, announced to VoiceOver as "Show
 /// password" / "Hide password" (the web app's own `auth.showPassword` /
-/// `auth.hidePassword` copy, in all 39 languages). Revealing swaps the
+/// `auth.hidePassword` copy, in all 49 languages). Revealing swaps the
 /// `SecureField` for a `TextField` bound to the same text, with
 /// autocorrection and capitalisation off so the keyboard does not
 /// "fix" a password while it is visible.

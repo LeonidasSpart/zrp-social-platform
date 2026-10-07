@@ -15,8 +15,10 @@ import { SEARCH_ALIASES } from "@/lib/ambassadors/countries";
 // second alias list.
 //
 // Never guesses: an input that doesn't exactly match a known code, an
-// official name in one of ZRP's 11 registered languages, or a listed
-// alias returns null rather than a best-effort partial match. A wrong
+// official name in one of the 32 languages in REGISTERED_LOCALES below
+// (a subset of ZRP's 49 supported languages - see the note above that
+// constant), or a listed alias returns null rather than a best-effort
+// partial match. A wrong
 // normalization (e.g. matching "Guinea" to the wrong one of four
 // "Guinea"-named countries) would silently corrupt analytics, ad
 // targeting and feed ranking - returning null and leaving the country
@@ -34,10 +36,21 @@ function normalize(value: string): string {
 // underlying i18n-iso-countries package ships no lang file for either,
 // the same documented gap rm (Romansh) already has; country names
 // resolve to English for those two rather than crashing or guessing.
+//
+// NOTE: this list is a 32-language subset of ZRP's 49 supported
+// languages, not the full set - pt, ja, ko, hi, nl, pl, ro, cs, hu, sv,
+// da, hr, bg, and el are registered with i18n-iso-countries in
+// src/lib/ambassadors/countries.ts (so getAllCountries()/getCountryName()
+// already localize for them) but are not yet wired into this module's
+// free-text matching index. Flagged as a gap for engineering review
+// rather than silently widened here, since adding a locale to this list
+// changes which names are treated as (possibly newly) ambiguous across
+// countries (see the candidates/codes.size check below) - a behavior
+// change this audit did not verify end-to-end.
 const REGISTERED_LOCALES = ["en", "fr", "de", "it", "sq", "es", "ru", "ar", "zh", "tr", "id", "no", "sr", "bs", "mk", "uk", "fi", "sk", "sl", "lt", "et", "ga", "lv", "mt", "bn", "ur", "vi", "mr", "fa", "sw", "th", "am"] as const;
 
 // One normalized-name -> code lookup built once from every name variant
-// (official AND common short form - `select: "all"`) in all 11
+// (official AND common short form - `select: "all"`) in all 32
 // registered languages plus SEARCH_ALIASES, keyed by the same case/
 // diacritic-insensitive `normalize()` used above - so "Turkiye" (no
 // diacritic) and "Türkiye" (the official ISO short name) resolve to the
@@ -97,9 +110,10 @@ function getNameLookup(): Map<string, string> {
 
 /**
  * Normalizes any free-text country input (a raw ISO code, an official
- * name in any of ZRP's 11 languages, or a known common alias like
- * "USA"/"UK") to its canonical ISO 3166-1 alpha-2 code, or null when it
- * cannot be resolved with confidence. Case- and diacritic-insensitive;
+ * name in any of the 32 languages in REGISTERED_LOCALES above, or a
+ * known common alias like "USA"/"UK") to its canonical ISO 3166-1
+ * alpha-2 code, or null when it cannot be resolved with confidence.
+ * Case- and diacritic-insensitive;
  * always an exact match against a known name/alias, never a partial or
  * fuzzy one.
  */
